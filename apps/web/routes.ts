@@ -48,6 +48,7 @@ export const routes: (
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
           route("dashboard", "modules/Dashboard/Home/HomeDashboard.page.tsx");
+          route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
           route("progress", "modules/Statistics/Statistics.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");

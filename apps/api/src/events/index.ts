@@ -96,3 +96,4 @@ export * from "./scorm/update-scorm.event";
 export * from "./scorm/delete-scorm.event";
 export * from "./scorm/play-scorm.event";
 export * from "./scorm/complete-scorm.event";
+export * from "./ai/ai-mentor-practice-requested.event";

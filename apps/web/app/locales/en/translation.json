@@ -38,6 +38,64 @@
       "s_placeholder_1": { "title": "Learner widget 1" },
       "s_placeholder_2": { "title": "Learner widget 2" },
       "s_placeholder_3": { "title": "Learner widget 3" },
+      "loadError": "We could not load this widget.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "All courses you have started",
+          "empty": "You have no courses in progress.",
+          "nextLesson": "Next: {{title}}",
+          "openCourse": "Open course",
+          "viewAll": "{{count}} courses in progress"
+        },
+        "requiredCourse": {
+          "description": "All mandatory courses you still need to complete",
+          "empty": "You have no required courses to complete.",
+          "overdue": "Overdue",
+          "dueSoon": "Due soon",
+          "scheduled": "Upcoming",
+          "noDeadline": "No deadline",
+          "dueDate": "Due {{date}}",
+          "noDueDate": "No due date",
+          "total": "{{count}} required courses",
+          "overdueCount": "{{count}} overdue"
+        },
+        "courseCompletion": {
+          "description": "A summary of your assigned course progress",
+          "empty": "You have no assigned courses yet.",
+          "completedOfTotal": "{{completed}} of {{total}} completed",
+          "completed": "Completed",
+          "inProgress": "In progress",
+          "notStarted": "Not started"
+        },
+        "certificates": {
+          "description": "Your active certificates and upcoming expirations",
+          "empty": "You do not have any active certificates.",
+          "active": "Active certificates",
+          "expiringSoon": "Expiring within 30 days",
+          "cta": "View certificate",
+          "viewAll": "View all certificates",
+          "dialogTitle": "Your certificates",
+          "dialogDescription": "Review all active certificates you have earned.",
+          "issued": "Issued {{date}}",
+          "expires": "Expires {{date}}",
+          "noExpiry": "No expiration date",
+          "previous": "Previous",
+          "next": "Next",
+          "page": "Page {{page}} of {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Create one focused practice scenario each day",
+          "empty": "Describe a situation and practice it with AI Mentor.",
+          "startCta": "Start practice",
+          "continueCta": "Continue practice",
+          "status": {
+            "queued": "Your practice scenario is queued.",
+            "processing": "Your practice scenario is being prepared.",
+            "ready": "Today's practice is ready.",
+            "failed": "Scenario generation failed. Open it to retry."
+          }
+        }
+      },
       "commonDescription": "Key information at a glance",
       "training_completion": { "title": "Training completion" },
       "deadline_risks": { "title": "Deadline risks" },
@@ -45,10 +103,28 @@
       "event_calendar": { "title": "Event calendar" },
       "continue_learning": { "title": "Continue learning" },
       "required_course": { "title": "Required courses" },
-      "course_completion": { "title": "Completed courses" },
+      "course_completion": { "title": "Course progress" },
       "certificates": { "title": "Certificates" },
       "ai_mentor_practice": { "title": "AI Mentor practice" }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Create today's AI Mentor practice",
+      "description": "Answer three short questions so AI Mentor can prepare a focused scenario.",
+      "challenge": "What situation do you want to practice?",
+      "counterpart": "Who will you be speaking with?",
+      "desiredOutcome": "What outcome do you want to achieve?",
+      "submit": "Generate practice"
+    },
+    "generating": "AI Mentor is preparing your scenario.",
+    "failed": "We could not generate this practice scenario.",
+    "error": "We could not load this practice.",
+    "retry": "Try generation again",
+    "conversationTitle": "AI Mentor practice",
+    "mentorName": "AI Mentor",
+    "message": "Message to AI Mentor",
+    "send": "Send"
   },
   "common": {
     "button": {

@@ -124,7 +124,7 @@ export class PromptService implements OnModuleInit {
 
     const { chunks: context } = await observe(
       async () => {
-        return this.ragService.getContext(contextInfo, lessonId);
+        return lessonId ? this.ragService.getContext(contextInfo, lessonId) : { chunks: [] };
       },
       { name: "RAG", asType: "retriever" },
     )();

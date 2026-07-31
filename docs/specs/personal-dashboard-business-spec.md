@@ -4,12 +4,12 @@
 
 The personal dashboard gives users a configurable starting point for the learning information and actions relevant to their role. Its tile layout reduces navigation effort and lets each user decide which optional widgets are visible, how they are ordered, and how much horizontal space they occupy.
 
-The current implementation provides the dashboard framework and per-user layout persistence. Users can enter edit mode, reorder widgets, switch between supported widths, manage visibility in a widget library, restore the role-aware default layout, and save or discard a draft. The six current widget bodies are placeholders: three are assigned to administrators and three to learners, ready to be replaced with production data and interactions.
+The implementation combines the dashboard framework and per-user layout persistence with five production learner widgets. Learners can resume every course they have started, review all unfinished mandatory courses, understand aggregate course progress, browse their earned certificates, and start a daily AI Mentor practice. The three administrator widgets remain placeholders.
 
 ## Who Uses It
 
 - Administrators with dashboard access arrange the three admin widgets around the operational information they will need most often.
-- Learners with dashboard access arrange the three learner widgets around their day-to-day learning workflow.
+- Learners with dashboard access arrange five learner widgets around their day-to-day learning workflow. The three course widgets are enabled by default; Certificates and AI Mentor practice are opt-in.
 - Users with another system role can access the route when they have `dashboard.read`, but the current shared catalog does not define dedicated content-creator or trainer widgets. A user with multiple roles receives the widgets allowed for any of those roles.
 
 ## Feature Functions
@@ -21,6 +21,11 @@ The current implementation provides the dashboard framework and per-user layout 
 - Restore the current role- and feature-aware default layout without saving it immediately.
 - Save or discard a draft containing the selected widget IDs, order, and width.
 - Filter obsolete or unavailable saved widgets before presenting the dashboard.
+- Resume any enrolled course currently in progress, with progress, the next incomplete lesson when available, and a direct course fallback for formats without a lesson destination.
+- Review every unfinished mandatory course, including assignments without a deadline, with overdue, due-soon, upcoming, and no-deadline states.
+- Summarize completed, in-progress, and not-started course assignments.
+- Show active certificates and the nearest certificate expiring within 30 days, then open a paginated dialog containing every active certificate.
+- Offer one standalone AI Mentor practice per learner-local day when the tenant AI runtime is configured.
 
 ## End-User Value
 
@@ -32,7 +37,13 @@ The user opens `/dashboard` and sees the widgets stored in their personal settin
 
 A widget is visible when it is present in the saved `dashboard.widgets` array. There is no separate `enabled` property. Each saved item contains a stable widget ID, a non-negative order used for sorting, and a width of `1` (single column) or `2` (double column). Adding a widget uses its configured default width and appends it to the draft; removing or dragging widgets recalculates their order.
 
-Mentingo determines the effective catalog on the server. It starts with the shared widget definitions, then filters them by the user's roles and any required tenant-level feature flags. The same filtering is applied when loading a saved layout and when producing the default layout. Unknown, obsolete, or currently unavailable IDs are therefore not rendered. Submitted settings are structurally validated, and the API additionally verifies that the chosen width is allowed for the specific widget.
+Mentingo determines the effective catalog on the server. It starts with the shared widget definitions, then filters them by the user's roles, permissions, tenant-level feature flags, and AI runtime availability. The same filtering is applied when loading a saved layout and when producing the default layout. Unknown, obsolete, or currently unavailable IDs are therefore not rendered. Submitted settings are structurally validated, and the API additionally verifies that the chosen width is allowed for the specific widget.
+
+The learner starts from the dashboard and sees every enrolled course whose progress is already underway, ordered by recent activity. Each row shows the course image, progress percentage, and next incomplete lesson when one exists. Courses without a lesson destination, including formats that manage progress differently, remain visible and open at the course level.
+
+Mandatory learning is presented as a complete action list rather than a single alert. Mentingo includes every unfinished mandatory assignment, whether its deadline is overdue, due within seven days, later, or not configured. Learners can open any row directly, while the footer summarizes the total and calls out overdue work.
+
+The certificate tile keeps its compact count and nearest-expiry summary. Selecting the count or **View all certificates** opens a responsive dialog that loads the learner's active certificates in pages. Each result shows the course, issue date, and expiration status and links to the corresponding certificate. Empty data never hides a widget; every widget owns its loading, error, retry, populated, and empty presentation.
 
 ## Key Technical Context
 
@@ -58,17 +69,23 @@ Mentingo determines the effective catalog on the server. It starts with the shar
     defaultOrder: number;
     allowedWidths: readonly (1 | 2)[];
     allowedRoles?: readonly SystemRoleSlug[];
+    requiredPermissions?: readonly PermissionKey[];
     requiredFeature?: FeatureKey;
+    requiresAiConfigured?: boolean;
   }
   ```
 
-- The current catalog contains `a_placeholder_1..3` for administrators and `s_placeholder_1..3` for learners. In each role group, widget 1 is required and double-width, widget 2 is optional and supports both widths, and widget 3 is optional and single-width. All six are default-visible; the API filters the combined default by the current user's roles.
+- The administrator catalog retains `a_placeholder_1..3`. Learner IDs are `s_continue_learning`, `s_required_course`, `s_course_completion`, `s_certificates`, and `s_ai_mentor_practice`. Continue learning is required and double-width; Required course and Certificates support one or two columns; Course completion is single-width; AI Mentor practice is double-width.
+- The course widgets require `course.read_assigned`, Certificates requires `certificate.read`, and AI Mentor practice requires `ai.use` plus a configured tenant AI runtime. Certificates and AI Mentor practice are not included in the default layout.
+- A data migration maps `s_placeholder_1..3` to the first three production IDs in existing user settings without changing array order, width, or visibility.
+- `GET /api/course/dashboard-summary` supplies arrays for all in-progress and mandatory courses plus the aggregate completion view. `POST /api/course/:courseId/open` records genuine learner access and helps order active courses by recency.
+- `GET /api/certificates/dashboard-summary` supplies the lightweight count and expiry view. The certificate dialog lazily reuses the paginated certificate API with the authenticated learner's ID, so opening the dashboard does not download the complete certificate history.
 - Frontend presentation is a separate exhaustive registry in `apps/web/app/modules/Dashboard/Home/widgetRegistry.tsx`. Each ID maps to a React component, translated title and description keys, an icon, and optional icon styles; these fields are never persisted in user settings.
 - `GET /api/settings` supplies the saved layout, `GET /api/settings/dashboard` supplies the effective list of available IDs, `GET /api/settings/dashboard/default` supplies the effective default items, and `PUT /api/settings` saves the layout. The dashboard catalog endpoints and the `/dashboard` route require `dashboard.read`.
 - The grid uses one column on phones, two on medium screens, and four on large screens. `DashboardWidgetShell` owns drag and resize controls, while each registered widget owns its card content. All visible dashboard strings exist in the six supported web locales.
 
 ## Test Evidence
 
-Frontend component tests prove that only saved widgets render, edit mode exposes widget, cancel, and save actions, allowed widths can be changed, available widgets can be added, restoring defaults calls the dedicated API, and saving sends the `dashboard.widgets` structure with `id`, `order`, and `width`.
+Frontend dashboard tests cover saved-widget rendering, editing, width changes, widget selection, restore, and persistence. The production widget components independently cover loading, error, empty, and populated states, prove that multiple in-progress and mandatory courses render together, and verify that the certificate summary opens a dialog containing every loaded certificate.
 
-Backend schema tests cover known widget IDs and the global width enum. Settings API E2E tests cover saving a valid dashboard layout and rejecting unknown IDs, unsupported width values, and widget-specific disallowed widths. Dedicated browser E2E coverage for drag-and-drop, role/feature filtering, required-widget enforcement, and real widget data is not currently present.
+Backend settings tests cover stable IDs, widths, defaults, permission filtering, and the AI configuration gate. The course contract distinguishes full course lists from completion aggregates, while certificate access remains permission-protected and tenant-scoped. Dedicated browser coverage for long learner course lists and certificate-dialog pagination is not yet present.

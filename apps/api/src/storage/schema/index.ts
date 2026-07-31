@@ -34,6 +34,8 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
+  date,
   index,
   integer,
   jsonb,
@@ -115,6 +117,7 @@ import type {
   AnnouncementAudience,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
+import type { AiMentorPracticeStatus } from "src/ai/ai-practice.types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -951,14 +954,59 @@ export const aiMentorThreads = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    aiMentorLessonId: uuid("ai_mentor_lesson_id")
-      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-      .notNull(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
     status: varchar("status", { length: 20 }).notNull().default("active"),
     userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
     tenantId,
   },
-  withTenantIdIndex("ai_mentor_threads"),
+  withTenantIdIndex("ai_mentor_threads", (table) => ({
+    practiceSessionUniqueIdx: uniqueIndex("ai_mentor_threads_practice_session_unique_idx").on(
+      table.practiceSessionId,
+    ),
+    sourceCheck: check(
+      "ai_mentor_threads_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
+);
+
+export const aiMentorPracticeSessions = pgTable(
+  "ai_mentor_practice_sessions",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    practiceDate: date("practice_date", { mode: "string" }).notNull(),
+    timezone: text("timezone").notNull(),
+    language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
+    challenge: text("challenge").notNull(),
+    counterpart: text("counterpart").notNull(),
+    desiredOutcome: text("desired_outcome").notNull(),
+    generatedTitle: text("generated_title"),
+    generatedInstructions: text("generated_instructions"),
+    status: varchar("status", { length: 20 })
+      .$type<AiMentorPracticeStatus>()
+      .notNull()
+      .default("queued"),
+    errorCode: text("error_code"),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_practice_sessions", (table) => ({
+    dailyUniqueIdx: uniqueIndex("ai_mentor_practice_sessions_daily_unique_idx").on(
+      table.tenantId,
+      table.userId,
+      table.practiceDate,
+    ),
+    statusIdx: index("ai_mentor_practice_sessions_status_idx").on(table.tenantId, table.status),
+  })),
 );
 
 export const aiMentorThreadMessages = pgTable(
@@ -1307,6 +1355,11 @@ export const studentCourses = pgTable(
     status: varchar("status").notNull().default("enrolled"), // enrolled/not_enrolled
     paymentId: varchar("payment_id", { length: 50 }),
     enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
+    lastOpenedAt: timestamp("last_opened_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
     tenantId,
   },
   withTenantIdIndex("student_courses", (table) => ({

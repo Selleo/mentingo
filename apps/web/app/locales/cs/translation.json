@@ -38,6 +38,64 @@
       "s_placeholder_1": { "title": "Widget studenta 1" },
       "s_placeholder_2": { "title": "Widget studenta 2" },
       "s_placeholder_3": { "title": "Widget studenta 3" },
+      "loadError": "Tento widget se nepodařilo načíst.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Všechny zahájené kurzy",
+          "empty": "Nemáte žádné rozpracované kurzy.",
+          "nextLesson": "Další: {{title}}",
+          "openCourse": "Otevřít kurz",
+          "viewAll": "{{count}} rozpracovaných kurzů"
+        },
+        "requiredCourse": {
+          "description": "Všechny nedokončené povinné kurzy",
+          "empty": "Nemáte žádné povinné kurzy k dokončení.",
+          "overdue": "Po termínu",
+          "dueSoon": "Brzy vyprší",
+          "scheduled": "Nadcházející",
+          "noDeadline": "Bez termínu",
+          "dueDate": "Termín {{date}}",
+          "noDueDate": "Bez data dokončení",
+          "total": "{{count}} povinných kurzů",
+          "overdueCount": "{{count}} po termínu"
+        },
+        "courseCompletion": {
+          "description": "Přehled průběhu přiřazených kurzů",
+          "empty": "Zatím nemáte přiřazené kurzy.",
+          "completedOfTotal": "Dokončeno {{completed}} z {{total}}",
+          "completed": "Dokončeno",
+          "inProgress": "Probíhá",
+          "notStarted": "Nezahájeno"
+        },
+        "certificates": {
+          "description": "Aktivní certifikáty a blížící se expirace",
+          "empty": "Nemáte žádné aktivní certifikáty.",
+          "active": "Aktivní certifikáty",
+          "expiringSoon": "Vyprší do 30 dnů",
+          "cta": "Zobrazit certifikát",
+          "viewAll": "Zobrazit všechny certifikáty",
+          "dialogTitle": "Vaše certifikáty",
+          "dialogDescription": "Prohlédněte si všechny získané aktivní certifikáty.",
+          "issued": "Vydáno {{date}}",
+          "expires": "Vyprší {{date}}",
+          "noExpiry": "Bez data expirace",
+          "previous": "Předchozí",
+          "next": "Další",
+          "page": "Strana {{page}} z {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Vytvořte každý den jeden cílený scénář",
+          "empty": "Popište situaci a procvičte ji s AI mentorem.",
+          "startCta": "Zahájit trénink",
+          "continueCta": "Pokračovat v tréninku",
+          "status": {
+            "queued": "Scénář čeká.",
+            "processing": "Scénář se připravuje.",
+            "ready": "Dnešní trénink je připraven.",
+            "failed": "Generování selhalo. Otevřete jej a zkuste to znovu."
+          }
+        }
+      },
       "commonDescription": "Klíčové informace na první pohled",
       "training_completion": { "title": "Dokončení školení" },
       "deadline_risks": { "title": "Ohrožené termíny" },
@@ -45,10 +103,28 @@
       "event_calendar": { "title": "Kalendář událostí" },
       "continue_learning": { "title": "Pokračovat ve vzdělávání" },
       "required_course": { "title": "Povinné kurzy" },
-      "course_completion": { "title": "Dokončené kurzy" },
+      "course_completion": { "title": "Průběh kurzů" },
       "certificates": { "title": "Certifikáty" },
       "ai_mentor_practice": { "title": "Cvičení s AI Mentorem" }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Vytvořit dnešní trénink s AI mentorem",
+      "description": "Odpovězte na tři krátké otázky.",
+      "challenge": "Jakou situaci chcete procvičit?",
+      "counterpart": "S kým budete mluvit?",
+      "desiredOutcome": "Jakého výsledku chcete dosáhnout?",
+      "submit": "Vygenerovat trénink"
+    },
+    "generating": "AI mentor připravuje scénář.",
+    "failed": "Scénář se nepodařilo vytvořit.",
+    "error": "Trénink se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "conversationTitle": "Trénink s AI mentorem",
+    "mentorName": "AI mentor",
+    "message": "Zpráva pro AI mentora",
+    "send": "Odeslat"
   },
   "common": {
     "button": {

@@ -10,6 +10,7 @@ type WidgetCardProps = {
 
 type DashboardWidgetHeaderProps = {
   title: string;
+  description?: string;
   icon: LucideIcon;
   iconClassName?: string;
   iconContainerClassName?: string;
@@ -63,6 +64,7 @@ export function DashboardWidgetIcon({
 
 export function DashboardWidgetHeader({
   title,
+  description,
   icon,
   iconClassName,
   iconContainerClassName,
@@ -74,7 +76,10 @@ export function DashboardWidgetHeader({
         iconClassName={iconClassName}
         iconContainerClassName={iconContainerClassName}
       />
-      <h2 className="body-lg-md min-w-0 truncate text-neutral-950">{title}</h2>
+      <div className="min-w-0">
+        <h2 className="body-lg-md truncate text-neutral-950">{title}</h2>
+        {description && <p className="details truncate text-neutral-500">{description}</p>}
+      </div>
     </header>
   );
 }

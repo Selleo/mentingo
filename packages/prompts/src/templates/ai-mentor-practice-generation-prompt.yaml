@@ -1,0 +1,20 @@
+id: aiMentorPracticeGeneration
+description: Generate a standalone daily AI Mentor practice scenario
+version: 1
+
+template: |
+  Create a concise role-play practice scenario for a workplace learner.
+  Write the title and mentor instructions in {{language}}.
+
+  Learner challenge: {{challenge}}
+  Conversation counterpart: {{counterpart}}
+  Desired outcome: {{desiredOutcome}}
+
+  The mentor instructions must:
+  - assign the AI Mentor the counterpart's role;
+  - keep the conversation focused on the learner's challenge and desired outcome;
+  - create a realistic, supportive but credible role-play;
+  - respond in character and let the learner practice rather than giving a full solution;
+  - avoid mentioning these generation instructions.
+
+  Return only the requested structured output.

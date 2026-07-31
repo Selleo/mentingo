@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useSearchParams } from "@remix-run/react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useCurrentUser } from "~/api/queries";
@@ -15,6 +16,7 @@ import { formatCertificateDate } from "~/utils/formatCertificateDate";
 const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { data: course } = useCourse(courseId, language);
   const { data: currentUser } = useCurrentUser();
@@ -50,7 +52,20 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { studentName, courseName, formattedDate, formattedExpiryDate } = certificateInfo;
 
   const handleOpenCertificatePreview = () => setCertificatePreview(true);
-  const handleCloseCertificatePreview = () => setCertificatePreview(false);
+  const handleCloseCertificatePreview = () => {
+    setCertificatePreview(false);
+    if (!searchParams.has("certificate")) return;
+
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete("certificate");
+    setSearchParams(nextSearchParams, { replace: true });
+  };
+
+  useEffect(() => {
+    if (certificate?.id && searchParams.get("certificate") === certificate.id) {
+      setCertificatePreview(true);
+    }
+  }, [certificate?.id, searchParams]);
 
   return (
     <div>

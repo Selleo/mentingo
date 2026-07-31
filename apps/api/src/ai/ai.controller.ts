@@ -4,6 +4,13 @@ import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
+import {
+  aiMentorPracticeSessionSchema,
+  createAiMentorPracticeSchema,
+  nullableAiMentorPracticeSessionSchema,
+  type CreateAiMentorPracticeBody,
+} from "src/ai/ai-practice.schema";
+import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
@@ -18,7 +25,7 @@ import {
   streamChatSchema,
 } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
-import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
+import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -28,7 +35,54 @@ export class AiController {
   constructor(
     private readonly threadService: ThreadService,
     private readonly aiService: AiService,
+    private readonly aiPracticeService: AiPracticeService,
   ) {}
+
+  @Get("practice/today")
+  @RequirePermission(PERMISSIONS.AI_USE)
+  @Validate({
+    request: [{ type: "query", name: "timezone", schema: Type.String() }],
+    response: baseResponse(nullableAiMentorPracticeSessionSchema),
+  })
+  async getTodayPractice(
+    @Query("timezone") timezone: string,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.aiPracticeService.getToday(timezone, currentUser));
+  }
+
+  @Post("practice")
+  @RequirePermission(PERMISSIONS.AI_USE)
+  @Validate({
+    request: [{ type: "body", schema: createAiMentorPracticeSchema }],
+    response: baseResponse(aiMentorPracticeSessionSchema),
+  })
+  async createPractice(
+    @Body() body: CreateAiMentorPracticeBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.aiPracticeService.create(body, currentUser));
+  }
+
+  @Get("practice/:id")
+  @RequirePermission(PERMISSIONS.AI_USE)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(aiMentorPracticeSessionSchema),
+  })
+  async getPractice(@Param("id") id: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
+    return new BaseResponse(await this.aiPracticeService.getById(id, currentUser));
+  }
+
+  @Post("practice/:id/retry")
+  @RequirePermission(PERMISSIONS.AI_USE)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(aiMentorPracticeSessionSchema),
+  })
+  async retryPractice(@Param("id") id: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
+    return new BaseResponse(await this.aiPracticeService.retry(id, currentUser));
+  }
 
   @Get("thread")
   @RequirePermission(PERMISSIONS.AI_USE)

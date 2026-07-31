@@ -18,7 +18,8 @@ export const createThreadSchema = Type.Object({
 });
 
 export const threadSchema = Type.Object({
-  aiMentorLessonId: UUIDSchema,
+  aiMentorLessonId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+  practiceSessionId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
   userId: UUIDSchema,
   status: Type.Enum(THREAD_STATUS),
@@ -27,7 +28,8 @@ export const updateThreadSchema = Type.Partial(threadSchema);
 
 export const responseThreadSchema = Type.Object({
   id: UUIDSchema,
-  aiMentorLessonId: UUIDSchema,
+  aiMentorLessonId: Type.Union([UUIDSchema, Type.Null()]),
+  practiceSessionId: Type.Union([UUIDSchema, Type.Null()]),
   userId: UUIDSchema,
   userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
   createdAt: Type.String(),

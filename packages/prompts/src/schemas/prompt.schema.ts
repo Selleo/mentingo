@@ -62,6 +62,12 @@ export const aiJudgeConfigurationValidatorSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const aiMentorPracticeGenerationSchema = Type.Object({
+  language: Type.String(),
+  challenge: Type.String(),
+  counterpart: Type.String(),
+  desiredOutcome: Type.String(),
+});
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   mentorPrompt: aiPromptSchema,
@@ -78,4 +84,5 @@ export const PROMPT_MAP = {
   aiJudgeConfigurationGeneratorImprove: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationGeneratorRepair: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationValidator: aiJudgeConfigurationValidatorSchema,
+  aiMentorPracticeGeneration: aiMentorPracticeGenerationSchema,
 } satisfies Record<promptId, TSchema>;

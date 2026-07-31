@@ -107,6 +107,9 @@ export const routeAccessConfig = createRouteConfig({
   "news/add": NEWS_EDIT_ACCESS,
   "news/:newsId/edit": NEWS_EDIT_ACCESS,
   dashboard: DASHBOARD_READ_ACCESS,
+  "ai-mentor/practice/:id": {
+    allOf: [PERMISSIONS.AI_USE],
+  },
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,

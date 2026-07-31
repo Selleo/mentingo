@@ -50,7 +50,15 @@ export class ThreadService {
 
     if (!thread) throw new NotFoundException("Thread not found");
 
+    if (thread.practiceSessionId) {
+      if (thread.userId !== userId)
+        throw new ForbiddenException("You don't have access to this thread");
+
+      return { data: thread };
+    }
+
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
+    if (!lessonId) throw new NotFoundException("Lesson not found");
 
     const author = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 

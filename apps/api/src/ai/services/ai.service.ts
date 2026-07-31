@@ -121,6 +121,34 @@ export class AiService {
     )();
   }
 
+  async getPracticeThreadWithSetup(data: {
+    practiceSessionId: UUIDType;
+    userId: UUIDType;
+    userLanguage: SupportedLanguages;
+  }) {
+    const existingThread = await this.aiRepository.findThread([
+      eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
+      eq(aiMentorThreads.userId, data.userId),
+    ]);
+
+    if (existingThread) return existingThread;
+
+    const thread = await this.aiRepository.createThread({
+      practiceSessionId: data.practiceSessionId,
+      userId: data.userId,
+      userLanguage: data.userLanguage,
+      status: THREAD_STATUS.ACTIVE,
+    });
+
+    const systemPrompt = await this.promptService.setSystemPrompt({
+      threadId: thread.id,
+      userId: thread.userId,
+    });
+    await this.sendWelcomeMessage(thread.id, systemPrompt);
+
+    return thread;
+  }
+
   async streamMessage(
     data: AiStreamMessageInput,
     model: OpenAIModels,
@@ -298,15 +326,17 @@ export class AiService {
       thread.userId,
     );
 
-    await this.markAsCompletedIfJudge(
-      lessonId,
-      thread.userId,
-      learnerPermissions,
-      currentUser,
-      judged.data,
-      thread.userLanguage,
-      true,
-    );
+    if (lessonId) {
+      await this.markAsCompletedIfJudge(
+        lessonId,
+        thread.userId,
+        learnerPermissions,
+        currentUser,
+        judged.data,
+        thread.userLanguage,
+        true,
+      );
+    }
 
     const { status: _status, ...judgeData } = judged.data;
 

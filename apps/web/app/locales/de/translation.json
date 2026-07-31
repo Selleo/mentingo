@@ -38,6 +38,64 @@
       "s_placeholder_1": { "title": "Lernenden-Widget 1" },
       "s_placeholder_2": { "title": "Lernenden-Widget 2" },
       "s_placeholder_3": { "title": "Lernenden-Widget 3" },
+      "loadError": "Dieses Widget konnte nicht geladen werden.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Alle von dir begonnenen Kurse",
+          "empty": "Du hast keine laufenden Kurse.",
+          "nextLesson": "Als Nächstes: {{title}}",
+          "openCourse": "Kurs öffnen",
+          "viewAll": "{{count}} laufende Kurse"
+        },
+        "requiredCourse": {
+          "description": "Alle noch abzuschließenden Pflichtkurse",
+          "empty": "Du hast keine offenen Pflichtkurse.",
+          "overdue": "Überfällig",
+          "dueSoon": "Bald fällig",
+          "scheduled": "Bevorstehend",
+          "noDeadline": "Keine Frist",
+          "dueDate": "Fällig am {{date}}",
+          "noDueDate": "Kein Fälligkeitsdatum",
+          "total": "{{count}} Pflichtkurse",
+          "overdueCount": "{{count}} überfällig"
+        },
+        "courseCompletion": {
+          "description": "Fortschritt deiner zugewiesenen Kurse",
+          "empty": "Dir wurden noch keine Kurse zugewiesen.",
+          "completedOfTotal": "{{completed}} von {{total}} abgeschlossen",
+          "completed": "Abgeschlossen",
+          "inProgress": "In Bearbeitung",
+          "notStarted": "Nicht begonnen"
+        },
+        "certificates": {
+          "description": "Aktive Zertifikate und bevorstehende Abläufe",
+          "empty": "Du hast keine aktiven Zertifikate.",
+          "active": "Aktive Zertifikate",
+          "expiringSoon": "Läuft innerhalb von 30 Tagen ab",
+          "cta": "Zertifikat anzeigen",
+          "viewAll": "Alle Zertifikate anzeigen",
+          "dialogTitle": "Deine Zertifikate",
+          "dialogDescription": "Alle erworbenen aktiven Zertifikate anzeigen.",
+          "issued": "Ausgestellt am {{date}}",
+          "expires": "Läuft am {{date}} ab",
+          "noExpiry": "Kein Ablaufdatum",
+          "previous": "Zurück",
+          "next": "Weiter",
+          "page": "Seite {{page}} von {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Erstelle täglich ein gezieltes Übungsszenario",
+          "empty": "Beschreibe eine Situation und übe sie mit dem KI-Mentor.",
+          "startCta": "Übung starten",
+          "continueCta": "Übung fortsetzen",
+          "status": {
+            "queued": "Dein Szenario wartet.",
+            "processing": "Dein Szenario wird vorbereitet.",
+            "ready": "Die heutige Übung ist bereit.",
+            "failed": "Die Erstellung ist fehlgeschlagen. Öffne sie zum Wiederholen."
+          }
+        }
+      },
       "commonDescription": "Wichtige Informationen auf einen Blick",
       "training_completion": { "title": "Schulungsabschluss" },
       "deadline_risks": { "title": "Gefährdete Fristen" },
@@ -45,10 +103,28 @@
       "event_calendar": { "title": "Veranstaltungskalender" },
       "continue_learning": { "title": "Weiterlernen" },
       "required_course": { "title": "Pflichtkurse" },
-      "course_completion": { "title": "Abgeschlossene Kurse" },
+      "course_completion": { "title": "Kursfortschritt" },
       "certificates": { "title": "Zertifikate" },
       "ai_mentor_practice": { "title": "KI-Mentor-Übung" }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Heutige KI-Mentor-Übung erstellen",
+      "description": "Beantworte drei kurze Fragen für ein gezieltes Szenario.",
+      "challenge": "Welche Situation möchtest du üben?",
+      "counterpart": "Mit wem wirst du sprechen?",
+      "desiredOutcome": "Welches Ergebnis möchtest du erreichen?",
+      "submit": "Übung erstellen"
+    },
+    "generating": "Der KI-Mentor bereitet dein Szenario vor.",
+    "failed": "Das Übungsszenario konnte nicht erstellt werden.",
+    "error": "Die Übung konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "conversationTitle": "KI-Mentor-Übung",
+    "mentorName": "KI-Mentor",
+    "message": "Nachricht an den KI-Mentor",
+    "send": "Senden"
   },
   "common": {
     "button": {
