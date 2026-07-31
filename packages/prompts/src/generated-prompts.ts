@@ -1,5 +1,5 @@
 /* AUTO-GENERATED FILE - DO NOT EDIT BY HAND */
-/* Generated At: 7/29/2026, 1:48:30 PM */
+/* Generated At: 7/31/2026, 9:15:16 AM */
 
 export const promptTemplates = {
   aiJudgeConfigurationGeneratorBase: {

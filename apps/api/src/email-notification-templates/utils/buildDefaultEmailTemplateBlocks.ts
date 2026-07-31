@@ -58,6 +58,12 @@ const DEFAULT_PLACEHOLDER_TEXT: Record<
     button: "Botón",
     footer: "Texto del pie de página",
   },
+  [SUPPORTED_LANGUAGES.FR]: {
+    heading: "Titre 2",
+    paragraph: "Texte du paragraphe",
+    button: "Bouton",
+    footer: "Texte du pied de page",
+  },
 };
 
 const textNode = (text: string): EmailTemplateBlocks => ({

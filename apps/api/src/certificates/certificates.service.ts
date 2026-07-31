@@ -805,6 +805,11 @@ export class CertificatesService implements OnModuleDestroy {
         pageTitle: `Certificado de finalización del curso "${context.certificate.courseTitle}"`,
         pageDescription: `${context.certificate.fullName} completó "${context.certificate.courseTitle}" y obtuvo un certificado.`,
       },
+      fr: {
+        openLabel: "Ouvrir la plateforme",
+        pageTitle: `Certificat de réussite du cours « ${context.certificate.courseTitle} »`,
+        pageDescription: `${context.certificate.fullName} a terminé le cours « ${context.certificate.courseTitle} » et obtenu un certificat.`,
+      },
     } as const satisfies Record<
       SupportedLanguages,
       { openLabel: string; pageTitle: string; pageDescription: string }

@@ -110,7 +110,7 @@ export interface RegisterBody {
    */
   lastName: string;
   password: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   formAnswers?: object;
 }
 
@@ -330,7 +330,7 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreatePasswordResponse {
@@ -497,8 +497,8 @@ export interface GetPublicRegistrationFormResponse {
       type: "checkbox";
       /** @minLength 1 */
       label: string;
-      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -511,13 +511,13 @@ export interface GetPublicRegistrationFormResponse {
 export interface GetUserSettingsResponse {
   data:
     | {
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
       }
     | {
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
@@ -529,13 +529,13 @@ export interface GetUserSettingsResponse {
 
 export type UpdateUserSettingsBody =
   | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
     }
   | {
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
@@ -547,13 +547,13 @@ export type UpdateUserSettingsBody =
 export interface UpdateUserSettingsResponse {
   data:
     | {
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
       }
     | {
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
@@ -565,7 +565,7 @@ export interface UpdateUserSettingsResponse {
 
 export interface UpdateAdminNewUserNotificationResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -974,7 +974,7 @@ export interface UpdateLearningPathsEnabledResponse {
 
 export interface UpdateAdminFinishedCourseNotificationResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -986,7 +986,7 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
 
 export interface UpdateAdminOverdueCourseNotificationResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -1071,9 +1071,11 @@ export interface GetAdminRegistrationFormResponse {
         cs?: string;
         /** @minLength 1 */
         es?: string;
+        /** @minLength 1 */
+        fr?: string;
       };
-      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -1101,9 +1103,11 @@ export interface UpdateRegistrationFormBody {
       cs?: string;
       /** @minLength 1 */
       es?: string;
+      /** @minLength 1 */
+      fr?: string;
     };
-    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     required: boolean;
     displayOrder: number;
     archived: boolean;
@@ -1129,9 +1133,11 @@ export interface UpdateRegistrationFormResponse {
         cs?: string;
         /** @minLength 1 */
         es?: string;
+        /** @minLength 1 */
+        fr?: string;
       };
-      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -1205,7 +1211,7 @@ export interface UpdateConfigWarningDismissedBody {
 
 export interface UpdateConfigWarningDismissedResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -1530,7 +1536,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   roleSlugs: string[];
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateUserResponse {
@@ -1590,8 +1596,8 @@ export interface GetAllGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     users?: {
       id: string;
       createdAt: string;
@@ -1620,8 +1626,8 @@ export interface GetGroupByIdResponse {
     id: string;
     name: string;
     characteristic: string | null;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     users?: {
       id: string;
       createdAt: string;
@@ -1644,8 +1650,8 @@ export interface GetUserGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     users?: {
       id: string;
       createdAt: string;
@@ -1671,7 +1677,7 @@ export interface GetUserGroupsResponse {
 export interface CreateGroupBody {
   name: string;
   characteristic?: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateGroupResponse {
@@ -1685,7 +1691,7 @@ export interface CreateGroupResponse {
 export interface UpdateGroupBody {
   name?: string;
   characteristic?: string;
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpdateGroupResponse {
@@ -1694,8 +1700,8 @@ export interface UpdateGroupResponse {
     id: string;
     name: string;
     characteristic?: string | null;
-    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string;
     updatedAt: string;
     isMandatory?: boolean;
@@ -1721,8 +1727,8 @@ export interface CreateLanguageResponse {
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     createdAt: string;
     updatedAt: string;
   };
@@ -1733,14 +1739,14 @@ export interface DeleteLanguageResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   };
 }
 
 export interface UpdateBaseLanguageBody {
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpdateBaseLanguageResponse {
@@ -1748,8 +1754,8 @@ export interface UpdateBaseLanguageResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   };
 }
@@ -1782,8 +1788,8 @@ export interface GetGroupsByCourseResponse {
     id: string;
     name: string;
     characteristic?: string | null;
-    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string;
     updatedAt: string;
     isMandatory?: boolean;
@@ -1942,8 +1948,8 @@ export interface GetAvailableCourseCategoriesResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   }[];
   pagination: {
@@ -2089,8 +2095,8 @@ export interface GetCourseResponse {
     slug: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     dueDate: string | null;
   };
 }
@@ -2158,10 +2164,10 @@ export interface GetBetaCourseByIdResponse {
             matchedWord?: string | null;
             scaleAnswer?: number | null;
             /** @default "en" */
-            language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+            language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
           }[];
           /** @default "en" */
-          language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+          language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -2208,8 +2214,8 @@ export interface GetBetaCourseByIdResponse {
     thumbnailS3SingedUrl?: string | null;
     trailerUrl?: string | null;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     sourceCourseId?: string | null;
     sourceTenantId?: string | null;
   };
@@ -2233,7 +2239,7 @@ export type CreateCourseBody = {
   isScorm?: boolean;
   hasCertificate?: boolean;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 } & {
   chapters?: string[];
 };
@@ -2299,7 +2305,7 @@ export interface UpdateCourseBody {
   chapters?: string[];
   archived?: boolean;
   /** @default "en" */
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpdateCourseResponse {
@@ -2842,10 +2848,10 @@ export type BetaCreateChapterBody = {
         matchedWord?: string | null;
         scaleAnswer?: number | null;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       }[];
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -2928,10 +2934,10 @@ export type UpdateChapterBody = ({
         matchedWord?: string | null;
         scaleAnswer?: number | null;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       }[];
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -2961,7 +2967,7 @@ export type UpdateChapterBody = ({
   courseId?: string;
 }) & {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 };
 
 export interface UpdateChapterResponse {
@@ -3061,7 +3067,7 @@ export interface GetLessonByIdResponse {
           questionId?: string;
         }[];
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         passQuestion: boolean | null;
       }[];
       questionCount: number;
@@ -3079,7 +3085,7 @@ export interface GetLessonByIdResponse {
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
-    userLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    userLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
@@ -3262,10 +3268,10 @@ export type BetaCreateLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -3307,7 +3313,7 @@ export interface BetaCreateLiveTrainingLessonBody {
   /** @format uuid */
   chapterId: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   displayOrder?: number;
   contextId?: string;
   liveTraining?: {
@@ -3362,7 +3368,7 @@ export interface AttachLiveTrainingLessonBody {
    */
   title: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   liveTraining?: {
     /**
      * @minLength 1
@@ -3454,10 +3460,10 @@ export type BetaCreateAiMentorLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -3558,10 +3564,10 @@ export type BetaUpdateAiMentorLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -3574,7 +3580,7 @@ export type BetaUpdateAiMentorLessonBody = ({
   customTtsReference?: string | null;
 }) & {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -3626,10 +3632,10 @@ export type BetaCreateQuizLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
 } & {
   /** @format uuid */
@@ -3688,10 +3694,10 @@ export type BetaUpdateQuizLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
 } & {
   /** @format uuid */
@@ -3699,7 +3705,7 @@ export type BetaUpdateQuizLessonBody = ({
   displayOrder?: number;
 }) & {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 };
 
 export interface BetaUpdateQuizLessonResponse {
@@ -3748,10 +3754,10 @@ export type BetaUpdateLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     }[];
     /** @default "en" */
-    language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -3775,7 +3781,7 @@ export type BetaUpdateLessonBody = ({
   contextId?: string;
 }) & {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 };
 
 export interface BetaUpdateLessonResponse {
@@ -3811,7 +3817,7 @@ export interface EvaluationQuizBody {
         }
     )[];
   }[];
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface EvaluationQuizResponse {
@@ -3863,7 +3869,7 @@ export interface UpdateEmbedLessonBody {
   /** @format uuid */
   lessonId: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpdateEmbedLessonResponse {
@@ -3923,9 +3929,9 @@ export interface GetConfigurationResponse {
       id: string;
       description: string;
     }[];
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   } | null;
 }
 
@@ -4007,9 +4013,9 @@ export interface ReplaceConfigurationResponse {
       id: string;
       description: string;
     }[];
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   };
 }
 
@@ -4078,9 +4084,9 @@ export interface UpdateTranslationsResponse {
       id: string;
       description: string;
     }[];
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   };
 }
 
@@ -5580,7 +5586,7 @@ export type GetCertificateResponse = {
 export interface DownloadCertificateBody {
   /** @format uuid */
   certificateId: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateCertificateShareLinkBody {
@@ -5663,7 +5669,7 @@ export interface GetThreadResponse {
     aiMentorLessonId: string;
     /** @format uuid */
     userId: string;
-    userLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    userLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string;
     updatedAt: string;
     status: "active" | "completed" | "archived";
@@ -5808,7 +5814,7 @@ export interface UploadAssetBody {
   /** @format uuid */
   contextId?: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
 }
@@ -5956,7 +5962,7 @@ export interface GetLiveTrainingResponse {
 
 export interface CreateLiveTrainingBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /**
    * @minLength 1
    * @maxLength 120
@@ -6008,7 +6014,7 @@ export interface GetHostCandidatesResponse {
 
 export type UpdateLiveTrainingBody = {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 } & {
   /**
    * @minLength 1
@@ -6336,8 +6342,8 @@ export interface GetAllAnnouncementsResponse {
     sourceId: string | null;
     title: string;
     content: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     deletedAt: string | null;
     isRead: boolean | null;
   }[];
@@ -6371,8 +6377,8 @@ export interface GetAnnouncementsForUserResponse {
     sourceId: string | null;
     title: string;
     content: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     deletedAt: string | null;
     isRead: boolean;
   }[];
@@ -6387,10 +6393,10 @@ export interface GetAnnouncementsForUserResponse {
 export interface CreateAnnouncementBody {
   /** @default null */
   groupId: string | null;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @minItems 1 */
   translations: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /**
      * @minLength 1
      * @maxLength 120
@@ -6420,8 +6426,8 @@ export interface CreateAnnouncementResponse {
     sourceId: string | null;
     title: string;
     content: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     deletedAt: string | null;
   };
 }
@@ -6542,7 +6548,7 @@ export interface UpsertProgressBody {
    */
   activeWatchSecondsDelta?: number;
   /** @default "en" */
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpsertProgressResponse {
@@ -6576,7 +6582,7 @@ export interface CreateCheckoutSessionBody {
   productDescription?: string;
   courseId: string;
   customerId: string;
-  locale: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  locale: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   priceId: string;
 }
 
@@ -6716,7 +6722,7 @@ export interface PrepareAiMentorStatisticsProgressBody {
   /** @format uuid */
   studentId: string;
   /** @default "en" */
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface GetAllCategoriesResponse {
@@ -6724,8 +6730,8 @@ export interface GetAllCategoriesResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   }[];
   pagination: {
@@ -6741,15 +6747,15 @@ export interface GetCategoryByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   };
 }
 
 export interface CreateCategoryBody {
   title: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateCategoryResponse {
@@ -6764,7 +6770,7 @@ export interface UpdateCategoryBody {
   /** @format uuid */
   id?: string;
   title?: string;
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface UpdateCategoryResponse {
@@ -6772,8 +6778,8 @@ export interface UpdateCategoryResponse {
     /** @format uuid */
     id: string;
     title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     createdAt: string | null;
   };
 }
@@ -7060,8 +7066,8 @@ export interface GetLearningPathsResponse {
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     createdAt: string;
     updatedAt: string;
   } & {
@@ -7115,8 +7121,8 @@ export interface GetLearningPathByIdResponse {
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     createdAt: string;
     updatedAt: string;
   } & {
@@ -7156,7 +7162,7 @@ export interface GetLearningPathByIdResponse {
 }
 
 export interface CreateLearningPathBody {
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
   thumbnailReference?: string | null;
@@ -7191,15 +7197,15 @@ export interface CreateLearningPathResponse {
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     createdAt: string;
     updatedAt: string;
   };
 }
 
 export interface UpdateLearningPathBody {
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title?: string;
   description?: string;
   thumbnailReference?: string | null;
@@ -7234,8 +7240,8 @@ export interface UpdateLearningPathResponse {
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     createdAt: string;
     updatedAt: string;
   };
@@ -7488,7 +7494,7 @@ export type InitScormImportBody =
         /** @format uuid */
         categoryId: string;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         status?: "draft" | "published" | "private";
         thumbnailS3Key?: string;
         priceInCents?: number;
@@ -7509,7 +7515,7 @@ export type InitScormImportBody =
         chapterId: string;
         title: string;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       };
     }
   | {
@@ -7525,7 +7531,7 @@ export type InitScormImportBody =
       metadata: {
         title: string;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       };
     };
 
@@ -7612,7 +7618,7 @@ export interface CommitScormAttemptBody {
   /** @format uuid */
   courseId: string;
   values: object;
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CommitScormAttemptResponse {
@@ -7637,7 +7643,7 @@ export interface FinishScormAttemptBody {
   /** @format uuid */
   courseId: string;
   values: object;
-  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface FinishScormAttemptResponse {
@@ -8159,7 +8165,7 @@ export interface CreateTenantBody {
   adminFirstName: string;
   /** @minLength 1 */
   adminLastName: string;
-  adminLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  adminLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateTenantResponse {
@@ -8274,8 +8280,8 @@ export interface GetGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     users?: {
       id: string;
       createdAt: string;
@@ -8559,8 +8565,8 @@ export interface GetQAResponse {
   id: string;
   title: string | null;
   description: string | null;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
 }
 
 export type GetAllQAResponse = {
@@ -8568,14 +8574,14 @@ export type GetAllQAResponse = {
   id: string;
   title: string | null;
   description: string | null;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
 }[];
 
 export interface CreateQABody {
   title: string;
   description: string;
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateQAResponse {
@@ -8599,10 +8605,12 @@ export interface GetDraftNewsListResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8658,7 +8666,7 @@ export interface GenerateNewsPreviewBody {
   /** @format uuid */
   newsId: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   content: string;
 }
 
@@ -8678,10 +8686,12 @@ export interface GetNewsResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8736,10 +8746,12 @@ export interface GetNewsListResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8793,7 +8805,7 @@ export interface GetNewsListResponse {
 
 export interface CreateNewsBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateNewsResponse {
@@ -8801,21 +8813,6 @@ export interface CreateNewsResponse {
     id: string;
     title: string;
   };
-}
-
-export interface UpdateNewsBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published";
-  isPublic?: boolean | "true" | "false";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
 }
 
 export interface UpdateNewsResponse {
@@ -8827,7 +8824,7 @@ export interface UpdateNewsResponse {
 
 export interface AddNewLanguageBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface AddNewLanguageResponse {
@@ -8861,7 +8858,7 @@ export interface UploadFileToNewsResponse {
 
 export interface CreateArticleSectionBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface CreateArticleSectionResponse {
@@ -8877,16 +8874,18 @@ export interface GetArticleSectionResponse {
     id: string;
     title: string;
     /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     assignedArticlesCount: number;
   };
 }
 
 export interface UpdateArticleSectionBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
+  translations: {
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title?: string;
+  }[];
 }
 
 export interface UpdateArticleSectionResponse {
@@ -8898,7 +8897,7 @@ export interface UpdateArticleSectionResponse {
 
 export interface AddNewLanguageToSectionBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
 export interface AddNewLanguageToSectionResponse {
@@ -8990,8 +8989,8 @@ export interface GetArticleResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
     /** @format uuid */
@@ -9104,7 +9103,7 @@ export type GetArticlesResponse = {
 
 export interface CreateArticleBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @format uuid */
   sectionId: string;
 }
@@ -9114,21 +9113,6 @@ export interface CreateArticleResponse {
     id: string;
     title: string;
   };
-}
-
-export interface UpdateArticleBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published" | "";
-  isPublic?: boolean | "true" | "false" | "";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
 }
 
 export interface UpdateArticleResponse {
@@ -9145,7 +9129,7 @@ export interface UploadFileToArticleBody {
    */
   file?: File;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
 }
@@ -9161,7 +9145,7 @@ export interface GenerateArticlePreviewBody {
   /** @format uuid */
   articleId: string;
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   content: string;
 }
 
@@ -10041,7 +10025,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPublicRegistrationForm: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -10713,7 +10697,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     statisticsControllerGetUserStatistics: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -10734,7 +10718,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     statisticsControllerGetStats: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -10808,7 +10792,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11170,7 +11154,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11191,7 +11175,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     groupControllerGetGroupById: (
       groupId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11251,7 +11235,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11304,7 +11288,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     groupControllerCreateLanguage: (
       groupId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11325,7 +11309,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     groupControllerDeleteLanguage: (
       groupId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11390,7 +11374,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     groupControllerGetGroupsByCourse: (
       courseId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11433,7 +11417,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11476,7 +11460,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-chapterCount"
           | "-enrolledParticipantsCount";
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11511,7 +11495,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-isEnrolledByGroup";
         groups?: string[];
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -11559,7 +11543,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         excludeCourseId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11604,7 +11588,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         excludeCourseId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11627,7 +11611,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         limit?: number;
         days?: number;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11655,7 +11639,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         title?: string;
         description?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11677,7 +11661,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11715,7 +11699,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11738,7 +11722,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -11761,7 +11745,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12154,7 +12138,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12178,7 +12162,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         groupId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12216,7 +12200,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lastActivity"
           | "-lastCompletedLessonName";
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12255,7 +12239,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-attempts"
           | "-lastAttempt";
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12294,7 +12278,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lastSession"
           | "-lastCompletedLessonName";
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12316,7 +12300,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12337,7 +12321,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12358,7 +12342,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12379,7 +12363,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12538,7 +12522,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         integrationId?: string;
         /** @minLength 1 */
         draftName?: string;
-        courseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        courseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12648,7 +12632,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12776,7 +12760,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         description?: string;
         lessonCompleted?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -12798,7 +12782,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         studentId: string;
       },
       params: RequestParams = {},
@@ -13039,7 +13023,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         lessonId?: string;
         /** @format binary */
         file: File;
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         title: string;
         description: string;
         contextId?: string;
@@ -13213,7 +13197,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     aiJudgeConfigurationControllerGetConfiguration: (
       lessonId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13253,7 +13237,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     aiJudgeConfigurationControllerUpdateTranslations: (
       lessonId: string,
-      language: "en" | "pl" | "de" | "lt" | "cs" | "es",
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr",
       data: UpdateTranslationsBody,
       params: RequestParams = {},
     ) =>
@@ -13366,7 +13350,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13389,7 +13373,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         userId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -13418,7 +13402,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         courseId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13497,7 +13481,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13524,7 +13508,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         search?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13747,7 +13731,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         type?: "image" | "video" | "pdf" | "presentation" | "document" | "other";
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13769,7 +13753,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13872,7 +13856,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         courseId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13912,7 +13896,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -13997,7 +13981,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format binary */
         file: File;
         relationshipType: "live_training_before" | "live_training_after";
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14021,7 +14005,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       resourceId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14044,7 +14028,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       resourceId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14065,7 +14049,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     liveTrainingSessionsControllerGetSessions: (
       liveTrainingId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14086,7 +14070,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     liveTrainingSessionsControllerStartSession: (
       liveTrainingId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14107,7 +14091,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     liveTrainingSessionsControllerJoinCurrentSession: (
       liveTrainingId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14128,7 +14112,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     liveTrainingSessionsControllerGetParticipantProfilePictures: (
       liveTrainingId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14150,7 +14134,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       liveTrainingId: string,
       sessionId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14172,7 +14156,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       liveTrainingId: string,
       sessionId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14205,7 +14189,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         feed?: "all" | "admin_announcements" | "system";
         status?: "scheduled" | "published";
         /** @min 1 */
@@ -14268,7 +14252,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
@@ -14722,7 +14706,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: "title" | "creationDate" | "-title" | "-creationDate";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14759,7 +14743,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     categoryControllerGetCategoryById: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14800,7 +14784,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     categoryControllerCreateLanguage: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14821,7 +14805,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     categoryControllerDeleteLanguage: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15013,7 +14997,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         searchQuery?: string;
       },
       params: RequestParams = {},
@@ -15054,7 +15038,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathControllerGetLearningPathById: (
       learningPathId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15112,7 +15096,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathControllerCreateLanguage: (
       learningPathId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15399,7 +15383,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         learningPathId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15498,7 +15482,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         searchQuery?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15519,7 +15503,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     reportControllerDownloadSummaryReport: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15721,7 +15705,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         lessonId?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @format uuid */
         scoId?: string;
       },
@@ -16287,7 +16271,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: "name" | "createdAt";
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16690,7 +16674,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16713,7 +16697,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       data: UpdateQABody,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16748,7 +16732,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     qaControllerGetAllQa: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16786,7 +16770,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16807,7 +16791,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16827,7 +16811,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     newsControllerGetDraftNewsList: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
       },
@@ -16890,7 +16874,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16908,7 +16892,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name NewsControllerUpdateNews
      * @request PATCH:/api/news/{id}
      */
-    newsControllerUpdateNews: (id: string, data: UpdateNewsBody, params: RequestParams = {}) =>
+    newsControllerUpdateNews: (
+      id: string,
+      data: {
+        translations: string;
+        status?: "draft" | "published";
+        isPublic?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<UpdateNewsResponse, any>({
         path: `/api/news/${id}`,
         method: "PATCH",
@@ -16962,7 +16954,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     newsControllerGetNewsList: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
       },
@@ -17002,7 +16994,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17025,7 +17017,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       data: {
         /** @format binary */
         file: File;
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         title: string;
         description: string;
       },
@@ -17069,7 +17061,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17145,7 +17137,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17165,7 +17157,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetDraftArticles: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17186,8 +17178,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticleToc: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -17229,8 +17221,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -17250,7 +17242,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerUpdateArticle: (
       id: string,
-      data: UpdateArticleBody,
+      data: {
+        translations: string;
+        isPublic?: boolean;
+      },
       params: RequestParams = {},
     ) =>
       this.request<UpdateArticleResponse, any>({
@@ -17284,7 +17279,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticles: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17343,7 +17338,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17419,7 +17414,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @minLength 1 */
         end?: string;
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @minLength 1 */
         timezone?: string;
       },
@@ -17443,7 +17438,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       eventId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>

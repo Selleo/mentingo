@@ -44,7 +44,8 @@
       "de": "German",
       "lt": "Lithuanian",
       "cs": "Czech",
-      "es": "Spanish"
+      "es": "Spanish",
+      "fr": "French"
     },
     "lessonTypes": {
       "content": "Content",
@@ -807,6 +808,10 @@
     "button": {
       "delete": "Delete"
     },
+    "deleteModal": {
+      "title": "Delete news",
+      "description": "Are you sure you want to delete this news? This action cannot be undone."
+    },
     "validation": {
       "titleRequired": "Title is required",
       "introRequired": "Introduction is required",
@@ -890,7 +895,8 @@
       "german": "German",
       "czech": "Czech",
       "lithuanian": "Lithuanian",
-      "spanish": "Spanish"
+      "spanish": "Spanish",
+      "french": "French"
     }
   },
   "resetOnboarding": {

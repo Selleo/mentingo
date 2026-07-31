@@ -5,6 +5,7 @@ export const SUPPORTED_LANGUAGES = {
   LT: "lt",
   CS: "cs",
   ES: "es",
+  FR: "fr",
 } as const;
 
 export type SupportedLanguages = (typeof SUPPORTED_LANGUAGES)[keyof typeof SUPPORTED_LANGUAGES];

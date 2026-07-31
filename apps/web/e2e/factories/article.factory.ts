@@ -9,7 +9,6 @@ import type {
   GetArticleResponse,
   GetArticleSectionResponse,
   GetArticleTocResponse,
-  UpdateArticleBody,
   UpdateArticleSectionBody,
 } from "~/api/generated-api";
 
@@ -24,7 +23,6 @@ export type ArticleFactoryCreateInput = {
   title?: string;
   summary?: string;
   content?: string;
-  status?: "draft" | "published";
   isPublic?: boolean;
 };
 
@@ -44,7 +42,6 @@ const createArticleDefaults = () => {
     title: `${TEST_DATA.article.titlePrefix} ${suffix}`,
     summary: `${TEST_DATA.article.summaryPrefix} ${suffix}`,
     content: `<p>${TEST_DATA.article.summaryPrefix} ${suffix}</p>`,
-    status: "published" as const,
     isPublic: true,
   };
 };
@@ -58,11 +55,17 @@ const toUpdateArticleFormData = (
 ): FormData => {
   const formData = new FormData();
 
-  formData.append("language", language);
-  if (data.title !== undefined) formData.append("title", data.title);
-  if (data.summary !== undefined) formData.append("summary", data.summary);
-  if (data.content !== undefined) formData.append("content", data.content);
-  if (data.status !== undefined) formData.append("status", data.status);
+  formData.append(
+    "translations",
+    JSON.stringify([
+      {
+        language,
+        title: data.title,
+        summary: data.summary,
+        content: data.content,
+      },
+    ]),
+  );
   if (data.isPublic !== undefined) formData.append("isPublic", String(data.isPublic));
 
   return formData;
@@ -111,7 +114,6 @@ export class ArticleFactory {
       title: input.title ?? defaults.title,
       summary: input.summary ?? defaults.summary,
       content: input.content ?? defaults.content,
-      status: input.status ?? defaults.status,
       isPublic: input.isPublic ?? defaults.isPublic,
     });
 
@@ -160,7 +162,7 @@ export class ArticleFactory {
 
     await this.apiClient.api.articlesControllerUpdateArticle(
       id,
-      toUpdateArticleFormData(language, data) as unknown as UpdateArticleBody,
+      toUpdateArticleFormData(language, data) as never,
     );
 
     return this.getById(id, language);
@@ -196,9 +198,8 @@ export class ArticleFactory {
     const language = data.language ?? "en";
 
     await this.apiClient.api.articlesControllerUpdateArticleSection(id, {
-      language,
-      title: data.title,
-    } as UpdateArticleSectionBody);
+      translations: [{ language, title: data.title }],
+    } satisfies UpdateArticleSectionBody);
 
     return this.getSectionById(id, language);
   }

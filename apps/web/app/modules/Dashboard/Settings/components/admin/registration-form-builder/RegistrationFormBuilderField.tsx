@@ -171,7 +171,7 @@ export function RegistrationFormBuilderField({
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent
-          className="max-w-5xl border-neutral-200 bg-gradient-to-b from-background to-muted/10 p-0"
+          className="max-h-[90dvh] max-w-5xl overflow-y-auto border-neutral-200 bg-gradient-to-b from-background to-muted/10 p-0"
           data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldDialog(index)}
         >
           <DialogHeader className="border-b border-border px-6 pb-4 pt-6">

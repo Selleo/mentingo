@@ -54,6 +54,14 @@ export const getUserInviteEmailTranslations = (
       ],
       buttonText: "UNIRSE AHORA",
     },
+    fr: {
+      heading: "Vous êtes invité(e)",
+      paragraphs: [
+        "Bonjour 👋",
+        `${invitedByUserName} vous a invité(e) à rejoindre la plateforme e-learning. Cliquez sur le bouton ci-dessous pour commencer à développer vos compétences.`,
+      ],
+      buttonText: "REJOINDRE MAINTENANT",
+    },
   };
 
   return emailContent[language];

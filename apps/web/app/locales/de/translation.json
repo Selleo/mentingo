@@ -44,7 +44,8 @@
       "de": "Deutsch",
       "lt": "Litauisch",
       "cs": "Tschechisch",
-      "es": "Spanisch"
+      "es": "Spanisch",
+      "fr": "Französisch"
     },
     "lessonTypes": {
       "content": "Inhalt",
@@ -805,6 +806,10 @@
     "button": {
       "delete": "Löschen"
     },
+    "deleteModal": {
+      "title": "Nachricht löschen",
+      "description": "Möchten Sie diese Nachricht wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
     "validation": {
       "titleRequired": "Titel ist erforderlich",
       "introRequired": "Eine Einführung ist erforderlich",
@@ -888,7 +893,8 @@
       "german": "Deutsch",
       "czech": "Tschechisch",
       "lithuanian": "Litauisch",
-      "spanish": "Spanisch"
+      "spanish": "Spanisch",
+      "french": "Französisch"
     }
   },
   "resetOnboarding": {
@@ -2301,7 +2307,7 @@
           "allowFullscreen": "Vollbild zulassen",
           "aiMentorInstructions": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll ...",
           "taskDescription": "Beschreiben Sie die Aufgabe, die der Teilnehmer erledigen muss ...",
-          "passThreshold": "z. B. 70 %",
+          "passThreshold": "z. B. 70 %",
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
         },

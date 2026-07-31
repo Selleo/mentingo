@@ -45,6 +45,13 @@ export const getMagicLinkEmailTranslations = (language: SupportedLanguages) => {
       ],
       buttonText: "ABRIR ENLACE DE INICIO DE SESIÓN",
     },
+    fr: {
+      heading: "Lien de connexion",
+      paragraphs: [
+        "Vous avez reçu un lien de connexion à votre compte. Cliquez sur le bouton ci-dessous pour l'ouvrir.",
+      ],
+      buttonText: "OUVRIR LE LIEN DE CONNEXION",
+    },
   };
 
   return emailContent[language];

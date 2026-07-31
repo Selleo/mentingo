@@ -1,4 +1,5 @@
 import { PERMISSIONS } from "@repo/shared";
+import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -15,6 +16,8 @@ type ArticlesTOCSectionProps = {
   isOpen: boolean;
   onToggle: () => void;
   onEdit: () => void;
+  onDelete: () => void;
+  onCreateArticle: () => void;
   activeArticleId?: string;
   onNavigate: (articleId: string) => void;
 };
@@ -24,9 +27,12 @@ export function ArticlesTOCSection({
   isOpen,
   onToggle,
   onEdit,
+  onDelete,
+  onCreateArticle,
   activeArticleId,
   onNavigate,
 }: ArticlesTOCSectionProps) {
+  const { t } = useTranslation();
   const { hasAccess: canManageArticles } = usePermissions({
     required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
   });
@@ -65,19 +71,35 @@ export function ArticlesTOCSection({
         </Button>
 
         {canManageArticles && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 shrink-0 text-neutral-500 hover:bg-white/50 hover:text-primary-700"
-            aria-label="Edit section"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          >
-            <Icon name="Edit" className="size-4" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 shrink-0 text-neutral-500 hover:bg-white/50 hover:text-primary-700"
+              aria-label="Edit section"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              <Icon name="Edit" className="size-4" />
+            </Button>
+            <Button
+              data-testid={ARTICLES_TOC_HANDLES.deleteSection(section.id)}
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 shrink-0 text-neutral-500 hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Delete section"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              <Icon name="TrashIcon" className="size-4" />
+            </Button>
+          </div>
         )}
       </div>
 
@@ -115,6 +137,18 @@ export function ArticlesTOCSection({
               </div>
             );
           })}
+          {canManageArticles && (
+            <Button
+              data-testid={ARTICLES_TOC_HANDLES.CREATE_ARTICLE_ACTION}
+              type="button"
+              variant="ghost"
+              className="h-auto w-full justify-start gap-2 rounded-md px-2 py-1.5 text-neutral-500 hover:bg-primary-50 hover:text-primary-700"
+              onClick={onCreateArticle}
+            >
+              <Icon name="Plus" className="size-4" />
+              <span className="text-sm">{t("adminArticleView.toc.actions.newArticle")}</span>
+            </Button>
+          )}
         </div>
       )}
     </div>

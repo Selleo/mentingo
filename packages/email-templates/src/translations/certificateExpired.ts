@@ -71,6 +71,16 @@ export const getCertificateExpiredEmailTranslations = (
       ],
       buttonText: "ABRIR CURSO",
     },
+    fr: {
+      heading: isManualReset ? "Certificat réinitialisé" : "Certificat expiré",
+      paragraphs: [
+        isManualReset
+          ? `Votre certificat pour le cours ${courseName} a été réinitialisé par un administrateur.`
+          : `Votre certificat pour le cours ${courseName} a expiré.`,
+        "Le certificat a été archivé et votre progression dans le cours a été réinitialisée. Terminez de nouveau le cours pour recevoir un nouveau certificat.",
+      ],
+      buttonText: "OUVRIR LE COURS",
+    },
   };
 
   return emailContent[language];

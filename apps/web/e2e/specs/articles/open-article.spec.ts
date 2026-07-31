@@ -17,7 +17,6 @@ test("admin can open article details and see it in TOC", async ({
     const { article, section } = await articleFactory.createWithSection({
       title,
       summary,
-      status: "published",
       isPublic: true,
     });
 

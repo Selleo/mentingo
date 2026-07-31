@@ -8,6 +8,7 @@ export const getLiveTrainingEmailButtonText = (language: SupportedLanguages) => 
     lt: "Atidaryti tiesioginius mokymus",
     cs: "Otevřít živé školení",
     es: "Abrir formación en vivo",
+    fr: "Ouvrir la formation en direct",
   };
 
   return translations[language];

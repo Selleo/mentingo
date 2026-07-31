@@ -8,6 +8,7 @@ export function getLocalizedUserMentionTitleAnnouncement(mentioningUserFullName:
     lt: `${mentioningUserFullName} paminėjo jus`,
     cs: `${mentioningUserFullName} vás zmínil`,
     es: `${mentioningUserFullName} te mencionó`,
+    fr: `${mentioningUserFullName} vous a mentionné(e)`,
   };
   return title;
 }

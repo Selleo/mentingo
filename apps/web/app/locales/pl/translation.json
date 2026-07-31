@@ -45,7 +45,8 @@
       "de": "Niemiecki",
       "lt": "Litewski",
       "cs": "Czeski",
-      "es": "hiszpański"
+      "es": "Hiszpański",
+      "fr": "Francuski"
     },
     "lessonTypes": {
       "content": "Treść",
@@ -1046,6 +1047,10 @@
     "button": {
       "delete": "Usuń"
     },
+    "deleteModal": {
+      "title": "Usuń aktualność",
+      "description": "Czy na pewno chcesz usunąć tę aktualność? Tej czynności nie można cofnąć."
+    },
     "validation": {
       "titleRequired": "Tytuł jest wymagany",
       "introRequired": "Wprowadzenie jest wymagane",
@@ -1129,7 +1134,8 @@
       "german": "Niemiecki",
       "czech": "Czeski",
       "lithuanian": "Litewski",
-      "spanish": "Hiszpański"
+      "spanish": "Hiszpański",
+      "french": "Francuski"
     }
   },
   "resetOnboarding": {
