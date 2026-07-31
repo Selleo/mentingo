@@ -32,25 +32,25 @@ test("admin can inline edit and delete an unlinked Live Training", async ({
     await openLiveTrainingFlow(page, liveTraining.id);
 
     await page.getByTestId(LIVE_TRAINING_HANDLES.TITLE_INPUT).fill(updatedTitle);
-    await page.getByTestId(LIVE_TRAINING_HANDLES.TITLE_INPUT).blur();
+    await page.getByTestId(LIVE_TRAINING_HANDLES.STATUS_BADGE).click();
     await expect
       .poll(async () => liveTrainingFactory.get(liveTraining.id), { timeout: 15_000 })
       .toMatchObject({ title: updatedTitle });
 
     await page.getByTestId(LIVE_TRAINING_HANDLES.DESCRIPTION_INPUT).fill(updatedDescription);
-    await page.getByTestId(LIVE_TRAINING_HANDLES.DESCRIPTION_INPUT).blur();
+    await page.getByTestId(LIVE_TRAINING_HANDLES.STATUS_BADGE).click();
     await expect
       .poll(async () => liveTrainingFactory.get(liveTraining.id), { timeout: 15_000 })
       .toMatchObject({ description: updatedDescription });
 
     await page.getByTestId(LIVE_TRAINING_HANDLES.MAX_PARTICIPANTS_INPUT).fill("42");
-    await page.getByTestId(LIVE_TRAINING_HANDLES.MAX_PARTICIPANTS_INPUT).blur();
+    await page.getByTestId(LIVE_TRAINING_HANDLES.STATUS_BADGE).click();
     await expect
       .poll(async () => liveTrainingFactory.get(liveTraining.id), { timeout: 15_000 })
       .toMatchObject({ maxParticipants: 42 });
 
     await page.getByTestId(LIVE_TRAINING_HANDLES.LOCATION_INPUT).fill(updatedLocation);
-    await page.getByTestId(LIVE_TRAINING_HANDLES.LOCATION_INPUT).blur();
+    await page.getByTestId(LIVE_TRAINING_HANDLES.STATUS_BADGE).click();
     await expect
       .poll(async () => liveTrainingFactory.get(liveTraining.id), { timeout: 15_000 })
       .toMatchObject({
