@@ -49,7 +49,7 @@ describe("WidgetAdminEventCalendar", () => {
       createLiveTrainingEvent("upcoming-event", "Upcoming training", upcomingStart.toISOString()),
     );
 
-    renderWith().render(
+    renderWith({ withQuery: true }).render(
       <MemoryRouter>
         <WidgetAdminEventCalendar />
       </MemoryRouter>,
@@ -66,13 +66,15 @@ describe("WidgetAdminEventCalendar", () => {
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
 
-    const selectedEventLink = within(selectedDaySection!).getByRole("link", {
+    const selectedEventButton = within(selectedDaySection!).getByRole("button", {
       name: /Selected day training/,
     });
-    expect(selectedEventLink).toHaveClass("bg-primary-50");
-    expect(within(upcomingSection!).getByRole("link", { name: /Upcoming training/ })).toBeVisible();
+    expect(selectedEventButton).toHaveClass("bg-primary-50");
     expect(
-      within(upcomingSection!).queryByRole("link", { name: /Selected day training/ }),
+      within(upcomingSection!).getByRole("button", { name: /Upcoming training/ }),
+    ).toBeVisible();
+    expect(
+      within(upcomingSection!).queryByRole("button", { name: /Selected day training/ }),
     ).toBeNull();
     expect(upcomingSection?.parentElement).toHaveClass(
       "overflow-y-auto",
@@ -105,7 +107,7 @@ describe("WidgetAdminEventCalendar", () => {
 
     expect(upcomingDayButton).toHaveAttribute("aria-selected", "true");
     expect(
-      within(selectedDaySection!).getByRole("link", { name: /Upcoming training/ }),
+      within(selectedDaySection!).getByRole("button", { name: /Upcoming training/ }),
     ).toBeVisible();
   });
 });

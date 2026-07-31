@@ -141,7 +141,7 @@ export function WidgetAdminTrainingCompletion() {
         )}
       </DashboardWidgetContent>
       <DashboardWidgetFooter>
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+        <div className="flex justify-between flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
           {STATUS_STYLES.map(({ key, color }) => (
             <div key={key} className="flex items-center gap-1.5">
               <span className={cn("size-2 rounded-full bg-success-500", color)} />

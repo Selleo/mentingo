@@ -1,6 +1,6 @@
 import { CALENDAR_EVENT_SOURCE_TYPES } from "@repo/shared";
 
-import { CalendarService } from "./calendar.service";
+import { CalendarService } from "./services/calendar.service";
 
 describe("CalendarService dashboard events", () => {
   it("returns only fields consumed by the dashboard calendar widget", async () => {

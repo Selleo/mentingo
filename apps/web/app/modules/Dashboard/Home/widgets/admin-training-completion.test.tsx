@@ -70,11 +70,11 @@ describe("WidgetAdminTrainingCompletion", () => {
     expect(screen.getByText("4/7")).toBeVisible();
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-inner-radius",
-      "54",
+      "50",
     );
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-outer-radius",
-      "78",
+      "90",
     );
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-stroke-width",

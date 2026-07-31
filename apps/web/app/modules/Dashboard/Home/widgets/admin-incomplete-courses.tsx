@@ -86,7 +86,7 @@ export function WidgetAdminIncompleteCourses() {
       </DashboardWidgetContent>
       {courses.length > 0 && (
         <DashboardWidgetFooter>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
+          <div className="flex justify-between flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-success-500" />
               {t("dashboardHome.widgets.training_completion.completed")}
