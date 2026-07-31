@@ -5642,10 +5642,10 @@ export interface GetAiMentorConfigurationResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "teacher";
         taskGoal: string;
         expertise: string;
@@ -5663,10 +5663,10 @@ export interface GetAiMentorConfigurationResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "roleplay";
         scenario: string;
         aiRole: string;
@@ -5719,10 +5719,10 @@ export interface ReplaceAiMentorConfigurationResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "teacher";
         taskGoal: string;
         expertise: string;
@@ -5740,10 +5740,10 @@ export interface ReplaceAiMentorConfigurationResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "roleplay";
         scenario: string;
         aiRole: string;
@@ -5794,10 +5794,10 @@ export interface UpdateAiMentorConfigurationTranslationsResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "teacher";
         taskGoal: string;
         expertise: string;
@@ -5815,10 +5815,10 @@ export interface UpdateAiMentorConfigurationTranslationsResponse {
         needsConfiguration: boolean;
         hasMissingTranslations: boolean;
         /** @default "en" */
-        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default "en" */
-        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
         type: "roleplay";
         scenario: string;
         aiRole: string;
@@ -14320,7 +14320,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       lessonId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -14360,7 +14360,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     aiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations: (
       lessonId: string,
-      language: "en" | "pl" | "de" | "lt" | "cs" | "es",
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr",
       data: UpdateAiMentorConfigurationTranslationsBody,
       params: RequestParams = {},
     ) =>
