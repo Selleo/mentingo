@@ -34,6 +34,8 @@ describe("AiMentorQualityCheckDialog", () => {
           issues: [
             {
               code: "role_mismatch",
+              severity: "error",
+              target: { field: "aiRole" },
               message: "aiRole does not match the scenario.",
               correction: "Update aiRole to identify the Mentor clearly.",
             },
