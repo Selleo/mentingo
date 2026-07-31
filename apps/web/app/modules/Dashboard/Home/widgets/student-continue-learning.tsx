@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSummary";
@@ -10,7 +10,6 @@ import { DashboardWidgetQueryState } from "../components/DashboardWidgetQuerySta
 import {
   DashboardWidgetCard,
   DashboardWidgetContent,
-  DashboardWidgetFooter,
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
@@ -66,9 +65,13 @@ export function WidgetStudentContinueLearning() {
                     }}
                   />
                   <div className="min-w-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="body-sm-md line-clamp-1 text-neutral-950">{course.title}</h3>
-                      <span className="details shrink-0 text-neutral-500">{progress}%</span>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                      <h3 className="body-sm-md min-w-0 line-clamp-1 text-neutral-950">
+                        {course.title}
+                      </h3>
+                      <span className="details-md whitespace-nowrap text-neutral-700">
+                        {progress}%
+                      </span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
                       <div
@@ -84,7 +87,7 @@ export function WidgetStudentContinueLearning() {
                         : t("dashboardHome.widgets.studentTiles.continueLearning.openCourse")}
                     </p>
                   </div>
-                  <ArrowRight
+                  <ChevronRight
                     className="size-4 text-neutral-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary-700"
                     aria-hidden="true"
                   />
@@ -94,19 +97,6 @@ export function WidgetStudentContinueLearning() {
           </div>
         )}
       </DashboardWidgetContent>
-      {courses.length > 0 && (
-        <DashboardWidgetFooter>
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-1.5 font-medium text-primary-700 hover:text-primary-800"
-          >
-            {t("dashboardHome.widgets.studentTiles.continueLearning.viewAll", {
-              count: courses.length,
-            })}
-            <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
-        </DashboardWidgetFooter>
-      )}
     </DashboardWidgetCard>
   );
 }

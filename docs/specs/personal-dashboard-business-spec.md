@@ -2,9 +2,11 @@
 
 ## Business Overview
 
-The personal dashboard gives users a configurable starting point for the learning information and actions relevant to their role. Its tile layout reduces navigation effort and lets each user decide which optional widgets are visible, how they are ordered, and how much horizontal space they occupy.
+Student dashboard tiles turn the Mentingo home page into a personalized learning action center. Learners can immediately see what to continue, which mandatory courses need attention, how much assigned learning they have completed, which certificates they hold, and whether a daily AI Mentor practice is available.
 
-The implementation combines the dashboard framework and per-user layout persistence with five production learner widgets. Learners can resume every course they have started, review all unfinished mandatory courses, understand aggregate course progress, browse their earned certificates, and start a daily AI Mentor practice. The three administrator widgets remain placeholders.
+For HR and L&D teams, this creates a clearer path from assignment to action: urgent learning is surfaced earlier, progress is easier for learners to understand, and achievements remain visible. Learners can personalize the order and size of available tiles, while permissions and tenant configuration ensure they only see relevant capabilities.
+
+This branch replaces the learner placeholders with five production widgets: Continue learning, Required courses, Course completion, Certificates, and AI Mentor practice. The three administrator widgets remain placeholders.
 
 ## Who Uses It
 
@@ -29,7 +31,9 @@ The implementation combines the dashboard framework and per-user layout persiste
 
 ## End-User Value
 
-The dashboard gives administrators and learners a predictable home screen that can be adapted to their priorities. Personal layout persistence reduces repeated setup, while role-aware widget selection prevents irrelevant tiles from cluttering the page. Responsive sizing and keyboard-enabled reordering keep the same workflow usable across devices and input methods.
+Learners spend less time searching for their next action and are more likely to resume active learning, notice mandatory deadlines, and recognize their progress and achievements. HR and L&D teams gain a more consistent learner experience that supports course completion, compliance follow-through, engagement, and self-directed development without adding operational steps for administrators.
+
+Personal layout persistence, responsive sizing, and role-aware availability keep the experience relevant and usable across devices while preventing unavailable or unauthorized tiles from creating clutter.
 
 ## How It Works
 
