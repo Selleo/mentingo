@@ -7690,8 +7690,8 @@ export interface ListTemplatesResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   }[];
@@ -7718,9 +7718,9 @@ export interface CreateTemplateBody {
    * @maxLength 200
    */
   name?: string;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @minItems 1 */
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   subject?: {
     en?: string;
     pl?: string;
@@ -7785,8 +7785,8 @@ export interface CreateTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7826,8 +7826,8 @@ export interface GetTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7839,9 +7839,9 @@ export interface UpdateTemplateBody {
    * @maxLength 200
    */
   name?: string;
-  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @minItems 1 */
-  availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   subject?: {
     en?: string;
     pl?: string;
@@ -7906,8 +7906,8 @@ export interface UpdateTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7947,8 +7947,8 @@ export interface PublishTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7988,8 +7988,8 @@ export interface MakeTemplateDraftResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8029,8 +8029,8 @@ export interface ArchiveTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8076,8 +8076,8 @@ export interface UnarchiveTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8085,7 +8085,7 @@ export interface UnarchiveTemplateResponse {
 
 export interface PreviewTemplateResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     subject: string;
     html: string;
   };
@@ -8131,8 +8131,8 @@ export interface DuplicateTemplateResponse {
       cs?: object;
       es?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -15946,7 +15946,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     emailNotificationTemplatesControllerPreviewTemplate: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15967,7 +15967,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     emailNotificationTemplatesControllerSendTestEmail: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
