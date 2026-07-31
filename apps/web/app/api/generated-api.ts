@@ -2315,7 +2315,7 @@ export interface GetCourseDuplicationJobStatusResponse {
 
 export interface UpdateCourseMediaBody {
   /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /**
    * @min 0
    * @max 100
