@@ -5,3 +5,10 @@ export const ALLOWED_NEWS_SETTINGS = {
 
 export type AllowedNewsSettings =
   (typeof ALLOWED_NEWS_SETTINGS)[keyof typeof ALLOWED_NEWS_SETTINGS];
+
+export const NEWS_STATUS = {
+  DRAFT: "draft",
+  PUBLISHED: "published",
+} as const;
+
+export type NewsStatus = (typeof NEWS_STATUS)[keyof typeof NEWS_STATUS];

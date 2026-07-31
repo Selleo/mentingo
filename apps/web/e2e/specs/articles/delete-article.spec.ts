@@ -13,7 +13,6 @@ test("admin can delete article from details page", async ({
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const articleFactory = factories.createArticleFactory();
     const { article, section } = await articleFactory.createWithSection({
-      status: "published",
       isPublic: true,
     });
 

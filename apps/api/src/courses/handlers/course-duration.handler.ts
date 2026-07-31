@@ -14,6 +14,7 @@ import {
   UpdateCourseEvent,
   UpdateLessonEvent,
 } from "src/events";
+import { DB } from "src/storage/db/db.providers";
 import { chapters, lessons } from "src/storage/schema";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -42,7 +43,7 @@ type CourseDurationEvent =
 export class CourseDurationHandler implements IEventHandler<CourseDurationEvent> {
   constructor(
     private readonly courseDurationService: CourseDurationService,
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async handle(event: CourseDurationEvent): Promise<void> {

@@ -5,9 +5,15 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ARTICLE_STATUS, ENTITY_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import {
+  ARTICLE_STATUS,
+  ENTITY_TYPES,
+  PERMISSIONS,
+  isSupportedLanguage,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
-import { isEmpty, isEqual } from "lodash";
+import { isEqual } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
@@ -40,10 +46,12 @@ import { ResourceLibraryService } from "src/resource-library/resource-library.se
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { articles, articleSections } from "src/storage/schema";
+import { getLocalizedText } from "src/utils/jsonb";
 
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
 import { ArticlesRepository } from "../repositories/articles.repository";
 
+import type { ArticleRecord } from "../articles.types";
 import type { GetArticleSectionResponse } from "../schemas/articleSection.schema";
 import type { GetArticleTocResponse } from "../schemas/articleToc.schema";
 import type {
@@ -52,7 +60,11 @@ import type {
   CreateLanguageArticle,
 } from "../schemas/createArticle.schema";
 import type { ArticleResource, ArticleResources } from "../schemas/selectArticle.schema";
-import type { UpdateArticle, UpdateArticleSection } from "../schemas/updateArticle.schema";
+import type {
+  UpdateArticle,
+  UpdateArticleSection,
+  UpdateArticleTranslation,
+} from "../schemas/updateArticle.schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { Request, Response } from "express";
 import type {
@@ -133,21 +145,34 @@ export class ArticlesService {
     updateArticleSectionBody: UpdateArticleSection,
     currentUser: CurrentUserType,
   ) {
-    const { language, title } = updateArticleSectionBody;
-
-    await this.validateArticleSectionExists(sectionId, language);
-
-    const previousSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
-
-    const [updatedSection] = await this.articlesRepository.updateArticleSectionTitle(
+    const { translations } = updateArticleSectionBody;
+    const existingSection = await this.validateArticleSectionExists(sectionId, undefined, false);
+    const previousSnapshot = await this.buildArticleSectionActivitySnapshot(
       sectionId,
-      language,
-      title ?? "",
+      existingSection.baseLanguage,
     );
+
+    this.validateBatchArticleSectionUpdate(translations);
+
+    const updateData = this.buildBatchArticleSectionUpdateData(existingSection, translations);
+    const [updatedSection] = await this.db
+      .update(articleSections)
+      .set(updateData)
+      .where(eq(articleSections.id, sectionId))
+      .returning({
+        id: articleSections.id,
+        title: this.localizationService.getFieldByLanguage(
+          articleSections.title,
+          existingSection.baseLanguage,
+        ),
+      });
 
     if (!updatedSection) throw new BadRequestException("adminArticleView.toast.updateError");
 
-    const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
+    const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(
+      sectionId,
+      existingSection.baseLanguage,
+    );
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
@@ -156,7 +181,7 @@ export class ArticlesService {
           actor: currentUser,
           previousArticleSectionData: previousSnapshot,
           updatedArticleSectionData: updatedSnapshot,
-          language,
+          language: existingSection.baseLanguage,
           action: "update",
         }),
       );
@@ -268,7 +293,8 @@ export class ArticlesService {
         actor: currentUser,
         baseLanguage: existingSection.baseLanguage,
         availableLocales: existingSection.availableLocales,
-        title: this.extractTitleByLanguage(existingSection.title, existingSection.baseLanguage),
+        title:
+          getLocalizedText(existingSection.title, existingSection.baseLanguage, false) ?? undefined,
       }),
     );
   }
@@ -310,45 +336,83 @@ export class ArticlesService {
     articleId: UUIDType,
     updateArticleBody: UpdateArticle,
     currentUser?: CurrentUserType,
-    coverFile?: Express.Multer.File,
+    coverFiles: Express.Multer.File[] = [],
   ) {
     await this.checkEditAccess(articleId, currentUser);
 
-    const { language, ...updateArticleData } = updateArticleBody;
+    const { translations, ...updateArticleData } = updateArticleBody;
 
-    const existingArticle = await this.validateArticleExists(articleId, language);
+    const existingArticle = await this.validateArticleExists(articleId, undefined, false);
+    const previousSnapshot = await this.buildArticleActivitySnapshot(
+      articleId,
+      existingArticle.baseLanguage,
+    );
+    const mappedCoverFiles = this.mapCoverFiles(coverFiles);
 
-    const previousSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+    this.validateBatchArticleUpdate(existingArticle, translations, mappedCoverFiles);
 
-    const finalUpdateData = this.buildUpdateData(existingArticle, updateArticleData, language);
+    const finalUpdateData = this.buildBatchUpdateData(
+      existingArticle,
+      translations,
+      updateArticleData,
+    );
 
-    if (coverFile) {
-      await this.uploadCoverImageToArticle(
-        articleId,
-        coverFile,
-        language,
-        coverFile.originalname,
-        "",
-        currentUser,
-      );
+    const hasArticleDataToUpdate = Object.keys(finalUpdateData).length > 0;
+
+    if (!hasArticleDataToUpdate && !Object.keys(mappedCoverFiles).length)
+      throw new BadRequestException("adminArticleView.toast.updateError");
+
+    if (hasArticleDataToUpdate) {
+      await this.db
+        .update(articles)
+        .set({ ...finalUpdateData, updatedBy: currentUser?.userId ?? null })
+        .where(eq(articles.id, articleId));
     }
 
-    const [updatedArticle] = await this.articlesRepository.updateArticle(
-      articleId,
-      language,
-      finalUpdateData,
-      currentUser?.userId ?? null,
-    );
+    const coverUploads = Object.keys(mappedCoverFiles)
+      .filter(isSupportedLanguage)
+      .flatMap((language) => {
+        const coverFile = mappedCoverFiles[language];
+
+        return coverFile
+          ? [
+              this.uploadCoverImageToArticle(
+                articleId,
+                coverFile,
+                language,
+                coverFile.originalname,
+                "",
+                currentUser,
+              ),
+            ]
+          : [];
+      });
+
+    await Promise.all(coverUploads);
+
+    const [updatedArticle] = await this.db
+      .select({
+        id: articles.id,
+        title: this.localizationService.getFieldByLanguage(
+          articles.title,
+          existingArticle.baseLanguage,
+        ),
+      })
+      .from(articles)
+      .where(eq(articles.id, articleId));
 
     if (!updatedArticle) throw new BadRequestException("adminArticleView.toast.updateError");
 
-    if ("content" in updateArticleData && updateArticleData.content !== undefined) {
+    if (translations.some(({ content }) => content !== undefined)) {
       await this.resourceLibraryService.syncArticleAssetRelations(articleId);
     }
 
     await this.searchIndexService.refreshArticle(articleId);
 
-    const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+    const updatedSnapshot = await this.buildArticleActivitySnapshot(
+      articleId,
+      existingArticle.baseLanguage,
+    );
 
     if (currentUser && !this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
@@ -357,7 +421,7 @@ export class ArticlesService {
           actor: currentUser,
           previousArticleData: previousSnapshot,
           updatedArticleData: updatedSnapshot,
-          language,
+          language: existingArticle.baseLanguage,
           action: "update",
         }),
       );
@@ -453,7 +517,9 @@ export class ArticlesService {
           actor: currentUser,
           baseLanguage: existingArticle.baseLanguage,
           availableLocales: existingArticle.availableLocales,
-          title: this.extractTitleByLanguage(existingArticle.title, existingArticle.baseLanguage),
+          title:
+            getLocalizedText(existingArticle.title, existingArticle.baseLanguage, false) ??
+            undefined,
         }),
       );
     }
@@ -482,6 +548,7 @@ export class ArticlesService {
       articleId,
       requestedLanguage,
       accessConditions,
+      isAdminLike,
     );
 
     if (!existingArticle) throw new NotFoundException("adminArticleView.toast.notFoundError");
@@ -489,7 +556,11 @@ export class ArticlesService {
     if (!isDraftMode && existingArticle.publishedAt === null)
       throw new NotFoundException("adminArticleView.toast.notFoundError");
 
-    const resources = await this.getArticleResources(articleId, requestedLanguage);
+    const resources = await this.getArticleResources(
+      articleId,
+      requestedLanguage,
+      existingArticle.baseLanguage,
+    );
     const { html: contentWithResources } = injectResourcesIntoContent(
       existingArticle.content,
       resources.flatList,
@@ -731,6 +802,7 @@ export class ArticlesService {
       ENTITY_TYPES.ARTICLES,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
+      { requireLanguage: true },
     );
 
     if (existingCover.length) {
@@ -754,7 +826,11 @@ export class ArticlesService {
     });
   }
 
-  private async getArticleResources(articleId: UUIDType, language: SupportedLanguages) {
+  private async getArticleResources(
+    articleId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage?: SupportedLanguages,
+  ) {
     const resources = await this.fileService.getResourcesForEntity(
       articleId,
       ENTITY_TYPES.ARTICLES,
@@ -794,10 +870,23 @@ export class ArticlesService {
       ENTITY_TYPES.ARTICLES,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
-      { quality: IMAGE_QUALITY.LG },
+      { quality: IMAGE_QUALITY.LG, requireLanguage: true },
     );
 
-    if (cover) groupedResources.coverImage = this.mapResourceToArticleResource(cover);
+    let resolvedCover = cover;
+
+    if (!resolvedCover && baseLanguage && baseLanguage !== language) {
+      [resolvedCover] = await this.fileService.getResourcesForEntity(
+        articleId,
+        ENTITY_TYPES.ARTICLES,
+        RESOURCE_RELATIONSHIP_TYPES.COVER,
+        baseLanguage,
+        { quality: IMAGE_QUALITY.LG, requireLanguage: true },
+      );
+    }
+
+    if (resolvedCover)
+      groupedResources.coverImage = this.mapResourceToArticleResource(resolvedCover);
 
     return { grouped: groupedResources, flatList };
   }
@@ -836,40 +925,143 @@ export class ArticlesService {
     return existingSection;
   }
 
-  private buildUpdateData(
-    existingArticle: InferSelectModel<typeof articles>,
-    updateArticleData: Partial<Omit<UpdateArticle, "language">>,
-    language: SupportedLanguages,
-  ): Record<string, unknown> {
-    const localizableFields = ["title", "content", "summary"] as const;
-    const directFields: Array<keyof Omit<UpdateArticle, "language">> = ["status", "isPublic"];
+  private validateBatchArticleSectionUpdate(translations: UpdateArticleSection["translations"]) {
+    const submittedLanguages = translations.map(({ language }) => language);
+    const hasDuplicateLanguage = new Set(submittedLanguages).size !== submittedLanguages.length;
+    const hasTitleChange = translations.some(({ title }) => title !== undefined);
 
-    if ("content" in updateArticleData && typeof updateArticleData.content === "string") {
-      updateArticleData.content =
-        annotateVideoAutoplayAndBlockIndexesInContent(updateArticleData.content) ?? undefined;
-    }
+    if (!translations.length || hasDuplicateLanguage || !hasTitleChange)
+      throw new BadRequestException("adminArticleView.toast.updateError");
+  }
 
-    const updateData: Record<string, unknown> = {
-      ...this.localizationService.updateLocalizableFields(
-        localizableFields,
-        existingArticle,
-        updateArticleData,
-        language,
-      ),
-    };
+  private buildBatchArticleSectionUpdateData(
+    existingSection: InferSelectModel<typeof articleSections>,
+    translations: UpdateArticleSection["translations"],
+  ) {
+    const updateData: Record<string, unknown> = {};
+    const localizableFields = ["title"] as const;
 
-    directFields.forEach((field) => {
-      if (field in updateArticleData && updateArticleData[field] !== undefined)
-        updateData[field] = updateArticleData[field];
-
-      if (field === "status" && !isEmpty(updateData[field])) {
-        if (updateData[field] === ARTICLE_STATUS.PUBLISHED)
-          updateData["publishedAt"] = new Date().toISOString();
-        if (updateData[field] === ARTICLE_STATUS.DRAFT) updateData["publishedAt"] = null;
-      }
+    translations.forEach((translation) => {
+      Object.assign(
+        updateData,
+        this.localizationService.updateLocalizableFields(
+          localizableFields,
+          { title: articleSections.title, ...updateData },
+          translation,
+          translation.language,
+          true,
+        ),
+      );
     });
 
+    const newLocales = translations
+      .map(({ language }) => language)
+      .filter((language) => !existingSection.availableLocales.includes(language));
+
+    if (newLocales.length)
+      updateData["availableLocales"] = [...existingSection.availableLocales, ...newLocales];
+
     return updateData;
+  }
+
+  private buildBatchUpdateData(
+    existingArticle: ArticleRecord,
+    translations: UpdateArticleTranslation[],
+    updateArticleData: Omit<UpdateArticle, "translations">,
+  ): Record<string, unknown> {
+    const updateData: Record<string, unknown> = {};
+    const localizableFields = ["title", "summary", "content"] as const;
+
+    const localizableArticleFields = {
+      title: articles.title,
+      summary: articles.summary,
+      content: articles.content,
+    };
+
+    const normalizedTranslations = translations.map((translation) => {
+      if (translation.content === undefined) return translation;
+
+      return {
+        ...translation,
+        content: annotateVideoAutoplayAndBlockIndexesInContent(translation.content) ?? "",
+      };
+    });
+
+    normalizedTranslations.forEach((translation) => {
+      Object.assign(
+        updateData,
+        this.localizationService.updateLocalizableFields(
+          localizableFields,
+          { ...localizableArticleFields, ...updateData },
+          translation,
+          translation.language,
+          true,
+        ),
+      );
+    });
+
+    const newLocales = translations
+      .map(({ language }) => language)
+      .filter((language) => !existingArticle.availableLocales.includes(language));
+
+    if (newLocales.length)
+      updateData["availableLocales"] = [...existingArticle.availableLocales, ...newLocales];
+
+    if (updateArticleData.isPublic !== undefined)
+      updateData["isPublic"] = updateArticleData.isPublic;
+
+    return updateData;
+  }
+
+  private validateBatchArticleUpdate(
+    existingArticle: ArticleRecord,
+    translations: UpdateArticleTranslation[],
+    coverFiles: Partial<Record<SupportedLanguages, Express.Multer.File>>,
+  ) {
+    const submittedLanguages = translations.map(({ language }) => language);
+    if (new Set(submittedLanguages).size !== submittedLanguages.length)
+      throw new BadRequestException("adminArticleView.toast.updateError");
+
+    const availableLocales = [
+      ...new Set([...existingArticle.availableLocales, ...submittedLanguages]),
+    ];
+    const allowedCoverLanguages = new Set(availableLocales);
+    const hasInvalidCoverLanguage = Object.keys(coverFiles).some(
+      (language) => !isSupportedLanguage(language) || !allowedCoverLanguages.has(language),
+    );
+    if (hasInvalidCoverLanguage)
+      throw new BadRequestException("adminArticleView.toast.updateError");
+
+    if (existingArticle.status !== ARTICLE_STATUS.PUBLISHED) return;
+
+    const titleByLanguage = Object.fromEntries(
+      availableLocales.map((language) => [
+        language,
+        getLocalizedText(existingArticle.title, language, false) ?? "",
+      ]),
+    );
+
+    translations.forEach(({ language, title }) => {
+      if (title !== undefined) titleByLanguage[language] = title;
+    });
+
+    if (availableLocales.some((language) => !titleByLanguage[language]?.trim()))
+      throw new BadRequestException("adminArticleView.toast.updateError");
+  }
+
+  private mapCoverFiles(files: Express.Multer.File[]) {
+    const covers: Partial<Record<SupportedLanguages, Express.Multer.File>> = {};
+
+    files.forEach((file) => {
+      const language = file.fieldname.startsWith("cover.")
+        ? file.fieldname.slice("cover.".length)
+        : "";
+      if (!isSupportedLanguage(language) || covers[language])
+        throw new BadRequestException("adminArticleView.toast.updateError");
+      covers[language] = file;
+    });
+
+    return covers;
   }
 
   private mapResourceToArticleResource(
@@ -932,7 +1124,12 @@ export class ArticlesService {
   ): Promise<string> {
     await this.validateArticleExists(articleId, language);
 
-    const resources = await this.getArticleResources(articleId, language);
+    const existingArticle = await this.validateArticleExists(articleId, language);
+    const resources = await this.getArticleResources(
+      articleId,
+      language,
+      existingArticle.baseLanguage,
+    );
 
     const { html: parsedContent } = injectResourcesIntoContent(content, resources.flatList, {
       resourceIdRegex: /articles-resource\/([0-9a-fA-F-]{36})/,
@@ -969,6 +1166,9 @@ export class ArticlesService {
         title: this.localizationService.getFieldByLanguage(articles.title, resolvedLanguage),
         summary: this.localizationService.getFieldByLanguage(articles.summary, resolvedLanguage),
         content: this.localizationService.getFieldByLanguage(articles.content, resolvedLanguage),
+        titleTranslations: articles.title,
+        summaryTranslations: articles.summary,
+        contentTranslations: articles.content,
         publishedAt: sql<string | null>`${articles.publishedAt}`,
         baseLanguage: sql<string>`${articles.baseLanguage}`,
       })
@@ -977,11 +1177,25 @@ export class ArticlesService {
 
     if (!snapshot) throw new NotFoundException("adminArticleView.toast.notFoundError");
 
+    const { titleTranslations, summaryTranslations, contentTranslations, ...snapshotData } =
+      snapshot;
+    const availableLocales = Array.isArray(snapshot.availableLocales)
+      ? snapshot.availableLocales
+      : [snapshot.availableLocales];
+
     return {
-      ...snapshot,
-      availableLocales: Array.isArray(snapshot.availableLocales)
-        ? snapshot.availableLocales
-        : [snapshot.availableLocales],
+      ...snapshotData,
+      availableLocales,
+      translations: Object.fromEntries(
+        availableLocales.map((locale) => [
+          locale,
+          {
+            title: getLocalizedText(titleTranslations, locale, false) ?? undefined,
+            summary: getLocalizedText(summaryTranslations, locale, false) ?? undefined,
+            content: getLocalizedText(contentTranslations, locale, false) ?? undefined,
+          },
+        ]),
+      ),
     };
   }
 
@@ -1009,6 +1223,7 @@ export class ArticlesService {
       .select({
         ...getTableColumns(articleSections),
         title: this.localizationService.getFieldByLanguage(articleSections.title, resolvedLanguage),
+        titleTranslations: articleSections.title,
         baseLanguage: sql<string>`${articleSections.baseLanguage}`,
       })
       .from(articleSections)
@@ -1016,11 +1231,20 @@ export class ArticlesService {
 
     if (!snapshot) throw new NotFoundException("adminArticleView.toast.notFoundError");
 
+    const { titleTranslations, ...snapshotData } = snapshot;
+    const availableLocales = Array.isArray(snapshot.availableLocales)
+      ? snapshot.availableLocales
+      : [snapshot.availableLocales];
+
     return {
-      ...snapshot,
-      availableLocales: Array.isArray(snapshot.availableLocales)
-        ? snapshot.availableLocales
-        : [snapshot.availableLocales],
+      ...snapshotData,
+      availableLocales,
+      translations: Object.fromEntries(
+        availableLocales.map((locale) => [
+          locale,
+          { title: getLocalizedText(titleTranslations, locale, false) ?? undefined },
+        ]),
+      ),
     };
   }
 
@@ -1058,18 +1282,10 @@ export class ArticlesService {
 
     return {
       title: snapshot.title ?? null,
+      translations: snapshot.translations ?? {},
       baseLanguage: snapshot.baseLanguage ?? null,
       availableLocales: snapshot.availableLocales ?? [],
     };
-  }
-
-  private extractTitleByLanguage(titleField: unknown, language: SupportedLanguages) {
-    if (!titleField || typeof titleField !== "object") return undefined;
-
-    const titleMap = titleField as Record<string, unknown>;
-    const title = titleMap[language];
-
-    return typeof title === "string" ? title : undefined;
   }
 
   private async checkAccess(currentUserId?: UUIDType) {

@@ -38,6 +38,9 @@ for (const { role, title } of ROLES) {
 
         await expect(page).toHaveURL(new RegExp(`/news/${newsId}$`));
         await expect(page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.TITLE)).toHaveText(newsTitle);
+
+        await expect(page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.EDIT_BUTTON)).toHaveCount(0);
+        await expect(page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON)).toHaveCount(0);
       });
     } finally {
       await withReadonlyPage(USER_ROLE.admin, async () => {

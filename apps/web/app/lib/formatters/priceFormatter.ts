@@ -93,6 +93,7 @@ export function getCurrencySymbol(language: string): CurrencyCode {
     pl: "PLN",
     en: "USD",
     es: "EUR",
+    fr: "EUR",
   };
 
   return languageCurrencyMap[loweCaseLanguage];

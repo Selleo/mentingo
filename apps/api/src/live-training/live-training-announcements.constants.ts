@@ -12,6 +12,7 @@ export const LIVE_TRAINING_ANNOUNCEMENT_TITLES = {
     lt: "Tiesioginiai mokymai netrukus prasidės",
     cs: "Živé školení brzy začne",
     es: "La formación en vivo comenzará pronto",
+    fr: "La formation en direct commence bientôt",
   },
   [ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED]: {
     en: "Live Training has started",
@@ -20,6 +21,7 @@ export const LIVE_TRAINING_ANNOUNCEMENT_TITLES = {
     lt: "Tiesioginiai mokymai prasidėjo",
     cs: "Živé školení začalo",
     es: "La formación en vivo ha comenzado",
+    fr: "La formation en direct a commencé",
   },
   [ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_ENDED]: {
     en: "Live Training has ended",
@@ -28,6 +30,7 @@ export const LIVE_TRAINING_ANNOUNCEMENT_TITLES = {
     lt: "Tiesioginiai mokymai baigėsi",
     cs: "Živé školení skončilo",
     es: "La formación en vivo ha finalizado",
+    fr: "La formation en direct est terminée",
   },
   [ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT]: {
     en: "Announcement",
@@ -36,5 +39,6 @@ export const LIVE_TRAINING_ANNOUNCEMENT_TITLES = {
     lt: "Pranešimas",
     cs: "Oznámení",
     es: "Anuncio",
+    fr: "Annonce",
   },
 } satisfies Record<AnnouncementEmailTemplate, Record<SupportedLanguages, string>>;

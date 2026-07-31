@@ -1,8 +1,7 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { ARTICLES_TOC_HANDLES, CREATE_ARTICLE_DIALOG_HANDLES } from "../../data/articles/handles";
+import { ARTICLES_TOC_HANDLES } from "../../data/articles/handles";
 import { openArticleDetailsPageFlow } from "../../flows/articles/open-article-details-page.flow";
-import { openCreateArticleDialogFlow } from "../../flows/articles/open-create-article-dialog.flow";
 import { clickVisibleTestIdFlow } from "../../flows/click-visible-testid.flow";
 
 import { expect, test } from "./article-test.fixture";
@@ -15,7 +14,6 @@ test("admin can create section and article from articles TOC", async ({
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const articleFactory = factories.createArticleFactory();
     const { article: seedArticle, section: seedSection } = await articleFactory.createWithSection({
-      status: "published",
       isPublic: true,
     });
 
@@ -51,7 +49,6 @@ test("admin can create section and article from articles TOC", async ({
     const beforeSections = await articleFactory.getToc("en");
     const beforeSectionIds = new Set(beforeSections.map((section) => section.id));
 
-    await clickVisibleTestIdFlow(page, ARTICLES_TOC_HANDLES.ADD_ACTION);
     await clickVisibleTestIdFlow(page, ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION);
 
     await expect
@@ -71,11 +68,10 @@ test("admin can create section and article from articles TOC", async ({
 
     createdSectionId = createdSection.id;
 
-    await openCreateArticleDialogFlow(page);
-
-    await page.getByTestId(CREATE_ARTICLE_DIALOG_HANDLES.SECTION_SELECT).click();
-    await page.getByRole("option", { name: createdSection.title }).click();
-    await page.getByTestId(CREATE_ARTICLE_DIALOG_HANDLES.CREATE_BUTTON).click();
+    await page
+      .getByTestId(ARTICLES_TOC_HANDLES.section(createdSection.id))
+      .getByTestId(ARTICLES_TOC_HANDLES.CREATE_ARTICLE_ACTION)
+      .click();
 
     await expect(page).toHaveURL(/\/articles\/[a-f0-9-]+$/);
     createdArticleId = /\/articles\/([a-f0-9-]+)$/.exec(page.url())?.[1] ?? "";

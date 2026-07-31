@@ -54,6 +54,14 @@ export const getPasswordRecoveryEmailTranslations = (
       ],
       buttonText: "RESTABLECER CONTRASEÑA",
     },
+    fr: {
+      heading: "Récupération du mot de passe",
+      paragraphs: [
+        `Bonjour ${name}, vous avez demandé à réinitialiser votre mot de passe 🔑`,
+        "Vous pouvez le réinitialiser en cliquant sur le bouton ci-dessous.",
+      ],
+      buttonText: "RÉINITIALISER LE MOT DE PASSE",
+    },
   };
 
   return emailContent[language];

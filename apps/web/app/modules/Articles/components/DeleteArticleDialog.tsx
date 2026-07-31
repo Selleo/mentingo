@@ -31,14 +31,12 @@ export function DeleteArticleDialog({
       <DialogTrigger asChild>
         <Button
           data-testid={ARTICLE_DETAILS_PAGE_HANDLES.DELETE_BUTTON}
-          variant="outline"
+          variant="destructive"
           className="gap-2"
           disabled={isDeleting}
         >
           <Icon name="TrashIcon" className="size-4" />
-          <span className="text-sm font-semibold leading-5 text-neutral-800">
-            {t("common.button.delete")}
-          </span>
+          <span className="text-sm font-semibold leading-5">{t("common.button.delete")}</span>
         </Button>
       </DialogTrigger>
 
@@ -58,11 +56,11 @@ export function DeleteArticleDialog({
           </DialogClose>
           <Button
             data-testid={ARTICLE_DETAILS_PAGE_HANDLES.DELETE_CONFIRM_BUTTON}
+            variant="destructive"
             onClick={() => {
               if (!articleId) return;
               onDelete(articleId);
             }}
-            className="bg-error-500 text-white hover:bg-error-600"
             disabled={isDeleting || !articleId}
           >
             {t("common.button.delete")}

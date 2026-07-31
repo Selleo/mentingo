@@ -1,37 +1,27 @@
 -- Custom SQL migration file, put you code below! --
-WITH "supported_languages" ("language") AS (
-  VALUES ('en'), ('pl'), ('de'), ('lt'), ('cs'), ('es')
-),
-"localized_lessons" AS (
+WITH "localized_lessons" AS (
   SELECT
     "courses"."id" AS "course_id",
-    "supported_languages"."language",
+    "course_languages"."language",
     "lessons"."id" AS "lesson_id",
     "lessons"."type" AS "lesson_type",
     COALESCE(
-      CASE
-        WHEN "courses"."available_locales" @> ARRAY["supported_languages"."language"]::text[]
-          THEN COALESCE(
-            "lessons"."description" ->> "supported_languages"."language",
-            "lessons"."description" ->> "courses"."base_language"
-          )
-        ELSE "lessons"."description" ->> "courses"."base_language"
-      END,
+      "lessons"."description" ->> "course_languages"."language",
+      "lessons"."description" ->> "courses"."base_language",
       ''
     ) AS "description_html",
     COUNT("questions"."id")::int AS "question_count"
   FROM "courses"
-  CROSS JOIN "supported_languages"
+  CROSS JOIN LATERAL UNNEST("courses"."available_locales") AS "course_languages" ("language")
   LEFT JOIN "chapters" ON "chapters"."course_id" = "courses"."id"
   LEFT JOIN "lessons" ON "lessons"."chapter_id" = "chapters"."id"
   LEFT JOIN "questions" ON "questions"."lesson_id" = "lessons"."id"
   GROUP BY
     "courses"."id",
-    "supported_languages"."language",
+    "course_languages"."language",
     "lessons"."id",
     "lessons"."type",
     "lessons"."description",
-    "courses"."available_locales",
     "courses"."base_language"
 ),
 "lesson_content_counts" AS (
@@ -137,4 +127,3 @@ UPDATE "courses"
 SET "duration_estimates" = "course_duration_estimates"."duration_estimates"
 FROM "course_duration_estimates"
 WHERE "courses"."id" = "course_duration_estimates"."course_id";
-

@@ -10,12 +10,19 @@ import { ARTICLE_QUERY_KEY } from "../queries/useArticle";
 import { ARTICLES_TOC_QUERY_KEY } from "../queries/useArticlesToc";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
 
-import type { UpdateArticleBody } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
+
+type GeneratedUpdateArticlePayload = Parameters<
+  typeof ApiClient.api.articlesControllerUpdateArticle
+>[1];
+
+export type UpdateArticlePayload = GeneratedUpdateArticlePayload &
+  Partial<Record<`cover.${SupportedLanguages}`, File>>;
 
 type UpdateArticleOptions = {
   id: string;
-  data: UpdateArticleBody;
+  data: UpdateArticlePayload;
 };
 
 export function useUpdateArticle() {
