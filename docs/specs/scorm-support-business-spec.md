@@ -34,7 +34,7 @@ SCORM Support helps HR and L&D teams preserve existing content investments while
 
 An administrator starts from SCORM course creation or from a curriculum lesson form. They upload a SCORM package, add required metadata, and submit the import. Mentingo validates the package, extracts the manifest and content, creates the course or lesson structure, and stores package/SCO metadata for runtime delivery.
 
-When a learner opens a SCORM lesson, Mentingo launches the selected SCO in the lesson player and exposes a SCORM 1.2-compatible runtime API to the package. Runtime changes are committed back to Mentingo, so the learner can resume later. When the package finishes, Mentingo updates learning progress and only treats multi-SCO content as complete when the required SCO completion rules are met.
+When a learner opens a SCORM lesson, Mentingo launches the selected SCO in the lesson player and exposes a SCORM 1.2-compatible runtime API to the package. Runtime changes are committed back to Mentingo without restarting the active SCO session, so the learner can resume later and multi-section completion remains stable. When the package finishes, Mentingo updates learning progress and only treats multi-SCO content as complete when the required SCO completion rules are met.
 
 For portability, authorized course managers can export supported Mentingo course content as a SCORM package. Unsupported lesson types require confirmation and may be skipped during export.
 

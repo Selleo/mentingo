@@ -39,15 +39,30 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   const dirtyValuesRef = useRef<ScormRuntimeValues>({});
   const apiRef = useRef<Scorm12API | null>(null);
   const pendingSavesRef = useRef(0);
+  const onSavingChangeRef = useRef(onSavingChange);
+  const tRef = useRef(t);
+  // Cache writes happen after every commit and finish. Keep the initial runtime
+  // stable until the learner changes SCOs so saving cannot recreate the API.
+  const launchRuntimeRef = useRef({
+    key: `${launch.attemptId}:${launch.scoId}`,
+    runtime: launch.runtime,
+  });
+
+  const launchKey = `${launch.attemptId}:${launch.scoId}`;
+  if (launchRuntimeRef.current.key !== launchKey) {
+    launchRuntimeRef.current = { key: launchKey, runtime: launch.runtime };
+  }
 
   useEffect(() => {
     commitRuntimeRef.current = commitRuntime;
     finishRuntimeRef.current = finishRuntime;
-  }, [commitRuntime, finishRuntime]);
+    onSavingChangeRef.current = onSavingChange;
+    tRef.current = t;
+  }, [commitRuntime, finishRuntime, onSavingChange, t]);
 
   useEffect(() => {
     const api = createScorm12Api();
-    const runtimeValues = asRuntimeValues(launch.runtime);
+    const runtimeValues = asRuntimeValues(launchRuntimeRef.current.runtime);
 
     const buildRuntimePayload = (values: ScormRuntimeValues) => ({
       attemptId: launch.attemptId,
@@ -61,14 +76,14 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
     const beginRuntimeSave = () => {
       pendingSavesRef.current += 1;
-      onSavingChange?.(true);
+      onSavingChangeRef.current?.(true);
     };
 
     const endRuntimeSave = () => {
       pendingSavesRef.current = Math.max(0, pendingSavesRef.current - 1);
 
       if (pendingSavesRef.current === 0) {
-        onSavingChange?.(false);
+        onSavingChangeRef.current?.(false);
       }
     };
 
@@ -82,7 +97,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     const showRuntimeToast = (messageKey?: string | null) => {
       if (!messageKey) return;
 
-      toast({ description: t(messageKey) });
+      toast({ description: tRef.current(messageKey) });
     };
 
     const updateLaunchRuntimeCache = (values: ScormRuntimeValues) => {
@@ -173,7 +188,9 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     exposeScormApi(api);
 
     return () => {
-      void finishRuntimeSession({ showToast: false });
+      if (api.isInitialized()) {
+        void finishRuntimeSession({ showToast: false });
+      }
       removeScormApi(api);
       apiRef.current = null;
       dirtyValuesRef.current = {};
@@ -184,10 +201,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     launch.courseId,
     launch.lessonId,
     launch.packageId,
-    launch.runtime,
     launch.scoId,
-    onSavingChange,
     queryClient,
-    t,
   ]);
 }
