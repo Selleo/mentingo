@@ -10,18 +10,16 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { ArticlesTOCPanel } from "./ArticlesTOCPanel";
-import { CreateArticleDialog } from "./CreateArticleDialog";
 
 export default function ArticlesTOC({ isMobile }: { isMobile: boolean }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isCreateArticleOpen, setIsCreateArticleOpen] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { articleId } = useParams();
   const { language } = useLanguageStore();
   const { data: sections } = useArticlesToc(language);
   const {
-    createArticle: { mutateAsync: createArticle, isPending: isArticlePending },
+    createArticle: { mutateAsync: createArticle },
     createArticleSection: { mutateAsync: createArticleSection },
   } = useCreateArticles();
 
@@ -29,9 +27,12 @@ export default function ArticlesTOC({ isMobile }: { isMobile: boolean }) {
     if (!isMobile) setIsMobileOpen(false);
   }, [isMobile]);
 
-  const openCreateArticle = () => {
-    setIsCreateArticleOpen(true);
+  const createArticleInSection = async (sectionId: string) => {
+    if (!language) return;
     if (isMobile) setIsMobileOpen(false);
+
+    const created = await createArticle({ language, sectionId });
+    navigate(`/articles/${created.id}`);
   };
 
   const handleCreateSection = async () => {
@@ -50,26 +51,8 @@ export default function ArticlesTOC({ isMobile }: { isMobile: boolean }) {
           sections={sections ?? []}
           activeArticleId={articleId}
           onCreateSection={handleCreateSection}
-          onOpenCreateArticle={openCreateArticle}
+          onOpenCreateArticle={createArticleInSection}
           onNavigate={handleNavigate}
-        />
-        <CreateArticleDialog
-          open={isCreateArticleOpen}
-          onOpenChange={setIsCreateArticleOpen}
-          sections={(sections ?? []).map((s) => ({ id: s.id, title: s.title }))}
-          isCreating={isArticlePending}
-          onCreate={async (sectionId) => {
-            if (!language) return;
-            await createArticle(
-              { language, sectionId },
-              {
-                onSuccess: (created) => {
-                  setIsCreateArticleOpen(false);
-                  navigate(`/articles/${created.id}`);
-                },
-              },
-            );
-          }}
         />
       </div>
     );
@@ -97,29 +80,11 @@ export default function ArticlesTOC({ isMobile }: { isMobile: boolean }) {
             activeArticleId={articleId}
             onRequestClose={() => setIsMobileOpen(false)}
             onCreateSection={handleCreateSection}
-            onOpenCreateArticle={openCreateArticle}
+            onOpenCreateArticle={createArticleInSection}
             onNavigate={handleNavigate}
           />
         </div>
       </SheetContent>
-      <CreateArticleDialog
-        open={isCreateArticleOpen}
-        onOpenChange={setIsCreateArticleOpen}
-        sections={(sections ?? []).map((s) => ({ id: s.id, title: s.title }))}
-        isCreating={isArticlePending}
-        onCreate={async (sectionId) => {
-          if (!language) return;
-          await createArticle(
-            { language, sectionId },
-            {
-              onSuccess: (created) => {
-                setIsCreateArticleOpen(false);
-                navigate(`/articles/${created.id}`);
-              },
-            },
-          );
-        }}
-      />
     </Sheet>
   );
 }

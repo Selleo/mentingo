@@ -151,6 +151,32 @@ describe("ArticlesController (e2e)", () => {
 
       await request(app.getHttpServer()).get(`/api/articles/${draft.id}?language=en`).expect(404);
     });
+
+    it("uses base-language fallback for admin and rejects unavailable visitor locale", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "English section" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        title: "English title",
+        summary: "English summary",
+        content: "<p>English content</p>",
+        isPublic: true,
+      });
+
+      const adminResponse = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=pl`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(adminResponse.body.data).toMatchObject({
+        title: "English title",
+        summary: "English summary",
+        plainContent: "<p>English content</p>",
+      });
+
+      await request(app.getHttpServer()).get(`/api/articles/${article.id}?language=pl`).expect(404);
+    });
   });
 
   describe("GET /api/articles/drafts", () => {
@@ -184,6 +210,72 @@ describe("ArticlesController (e2e)", () => {
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].id).toBe(draft.id);
+    });
+  });
+
+  describe("PATCH /api/articles/:id", () => {
+    it("updates multiple translations and visibility in one request", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Multilingual" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        status: "published",
+        title: "Old English title",
+      });
+      const cookie = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .patch(`/api/articles/${article.id}`)
+        .set("Cookie", cookie)
+        .field(
+          "translations",
+          JSON.stringify([
+            {
+              language: "en",
+              title: "English title",
+              summary: "English summary",
+              content: "<p>English content</p>",
+            },
+            {
+              language: "pl",
+              title: "Polski tytul",
+              summary: "Polskie podsumowanie",
+              content: "<p>Polska tresc</p>",
+            },
+          ]),
+        )
+        .field("isPublic", "false")
+        .expect(200);
+
+      const [englishResponse, polishResponse] = await Promise.all([
+        request(app.getHttpServer())
+          .get(`/api/articles/${article.id}?language=en`)
+          .set("Cookie", cookie)
+          .expect(200),
+        request(app.getHttpServer())
+          .get(`/api/articles/${article.id}?language=pl`)
+          .set("Cookie", cookie)
+          .expect(200),
+      ]);
+
+      expect(englishResponse.body.data).toMatchObject({
+        title: "English title",
+        summary: "English summary",
+        content: '<p data-block-index="0">English content</p>',
+        status: "published",
+        isPublic: false,
+      });
+      expect(polishResponse.body.data).toMatchObject({
+        title: "Polski tytul",
+        summary: "Polskie podsumowanie",
+        content: '<p data-block-index="0">Polska tresc</p>',
+        status: "published",
+        isPublic: false,
+      });
+      expect(polishResponse.body.data.availableLocales).toEqual(
+        expect.arrayContaining(["en", "pl"]),
+      );
     });
   });
 
@@ -241,18 +333,34 @@ describe("ArticlesController (e2e)", () => {
   });
 
   describe("PATCH /api/articles/section/:id", () => {
-    it("updates section title for admin", async () => {
+    it("updates multiple section translations for admin", async () => {
       const admin = await createAdmin();
       const section = await sectionFactory.create({ title: "Old title" });
+      const cookie = await cookieFor(admin, app);
 
       const response = await request(app.getHttpServer())
         .patch(`/api/articles/section/${section.id}`)
-        .set("Cookie", await cookieFor(admin, app))
-        .send({ language: "en", title: "New title" })
+        .set("Cookie", cookie)
+        .send({
+          translations: [
+            { language: "en", title: "New title" },
+            { language: "pl", title: "Nowy tytul" },
+          ],
+        })
         .expect(200);
 
       expect(response.body.data.id).toBe(section.id);
       expect(response.body.data.title).toBe("New title");
+
+      const polishResponse = await request(app.getHttpServer())
+        .get(`/api/articles/section/${section.id}?language=pl`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(polishResponse.body.data.title).toBe("Nowy tytul");
+      expect(polishResponse.body.data.availableLocales).toEqual(
+        expect.arrayContaining(["en", "pl"]),
+      );
     });
   });
 
@@ -290,6 +398,35 @@ describe("ArticlesController (e2e)", () => {
   });
 
   describe("GET /api/articles/toc", () => {
+    it("uses base-language fallback for admin and strict locale filtering for visitors", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "English section" });
+
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        title: "English entry",
+        status: "published",
+        isPublic: true,
+      });
+
+      const adminResponse = await request(app.getHttpServer())
+        .get("/api/articles/toc?language=pl")
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(adminResponse.body.data.sections[0]).toMatchObject({
+        title: "English section",
+        articles: [expect.objectContaining({ title: "English entry" })],
+      });
+
+      const visitorResponse = await request(app.getHttpServer())
+        .get("/api/articles/toc?language=pl")
+        .expect(200);
+
+      expect(visitorResponse.body.data.sections).toEqual([]);
+    });
+
     it("returns sections with article items", async () => {
       const author = await userFactory.create();
       const section = await sectionFactory.create({ title: "TOC" });

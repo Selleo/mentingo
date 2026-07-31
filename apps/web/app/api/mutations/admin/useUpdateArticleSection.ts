@@ -7,13 +7,12 @@ import { ARTICLES_TOC_QUERY_KEY } from "~/api/queries/useArticlesToc";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
+import type { UpdateArticleSectionBody } from "~/api/generated-api";
 
 type UpdateArticleSectionOptions = {
   sectionId: string;
-  language: SupportedLanguages;
-  title: string;
+  translations: UpdateArticleSectionBody["translations"];
 };
 
 export function useUpdateArticleSection() {
@@ -21,10 +20,9 @@ export function useUpdateArticleSection() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ sectionId, language, title }: UpdateArticleSectionOptions) => {
+    mutationFn: async ({ sectionId, translations }: UpdateArticleSectionOptions) => {
       const response = await ApiClient.api.articlesControllerUpdateArticleSection(sectionId, {
-        language,
-        title,
+        translations,
       });
       return response.data;
     },

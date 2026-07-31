@@ -44,7 +44,8 @@
       "de": "Vokiečių",
       "lt": "Lietuvių",
       "cs": "Čekų",
-      "es": "ispanų"
+      "es": "Ispanų",
+      "fr": "Prancūzų"
     },
     "lessonTypes": {
       "content": "Turinys",
@@ -803,6 +804,10 @@
     "button": {
       "delete": "Ištrinti"
     },
+    "deleteModal": {
+      "title": "Ištrinti naujieną",
+      "description": "Ar tikrai norite ištrinti šią naujieną? Šio veiksmo anuliuoti negalima."
+    },
     "validation": {
       "titleRequired": "Pavadinimas būtinas",
       "introRequired": "Būtinas įvadas",
@@ -886,7 +891,8 @@
       "german": "Vokiečių",
       "czech": "Čekų",
       "lithuanian": "Lietuvių",
-      "spanish": "Ispanų"
+      "spanish": "Ispanų",
+      "french": "Prancūzų"
     }
   },
   "resetOnboarding": {

@@ -8,6 +8,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Sveiki atvykę į mūsų platformą!",
     cs: "Vítejte na naší platformě!",
     es: "¡Bienvenido a nuestra plataforma!",
+    fr: "Bienvenue sur notre plateforme !",
   },
   passwordRecoveryEmail: {
     en: "Password recovery",
@@ -16,6 +17,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Slaptažodžio atkūrimas",
     cs: "Obnovení hesla",
     es: "Recuperación de contraseña",
+    fr: "Récupération du mot de passe",
   },
   passwordReminderEmail: {
     en: "Account creation reminder",
@@ -24,6 +26,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Paskyros sukūrimo priminimas",
     cs: "Připomenutí vytvoření účtu",
     es: "Recordatorio de creación de cuenta",
+    fr: "Rappel de création de compte",
   },
   userInviteEmail: {
     en: "You're invited to the platform!",
@@ -32,6 +35,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Esi pakviestas į platformą!",
     cs: "Jsi pozván(a) na platformu!",
     es: "¡Te han invitado a la plataforma!",
+    fr: "Vous êtes invité(e) à rejoindre la plateforme !",
   },
   userFirstLoginEmail: {
     en: "First login!",
@@ -40,6 +44,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Pirmasis prisijungimas!",
     cs: "První přihlášení!",
     es: "¡Primer inicio de sesión!",
+    fr: "Première connexion !",
   },
   userCourseAssignmentEmail: {
     en: "New course - {{courseName}}",
@@ -48,6 +53,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Naujas kursas - {{courseName}}",
     cs: "Nový kurz - {{courseName}}",
     es: "Nuevo curso - {{courseName}}",
+    fr: "Nouveau cours - {{courseName}}",
   },
   userShortInactivityEmail: {
     en: "Continue your course - {{courseName}}",
@@ -56,6 +62,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Tęsk savo kursą - {{courseName}}",
     cs: "Pokračuj ve svém kurzu - {{courseName}}",
     es: "Continúa tu curso - {{courseName}}",
+    fr: "Continuez votre cours - {{courseName}}",
   },
   userShortInactivityPlatformEmail: {
     en: "Continue your journey on the platform",
@@ -64,6 +71,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Tęskite mokymosi kelionę platformoje",
     cs: "Pokračuj ve své cestě na platformě",
     es: "Continúa tu aprendizaje en la plataforma",
+    fr: "Poursuivez votre parcours sur la plateforme",
   },
   userLongInactivityEmail: {
     en: "Come back to your courses",
@@ -72,6 +80,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Sugrįžk prie savo kursų",
     cs: "Vrať se ke svým kurzům",
     es: "Vuelve a tus cursos",
+    fr: "Reprenez vos cours",
   },
   userChapterFinishedEmail: {
     en: "Module completed - {{chapterName}}",
@@ -80,6 +89,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Modulis baigtas - {{chapterName}}",
     cs: "Modul dokončen - {{chapterName}}",
     es: "Módulo completado - {{chapterName}}",
+    fr: "Module terminé - {{chapterName}}",
   },
   userCourseFinishedEmail: {
     en: "Course completed - {{courseName}}",
@@ -88,6 +98,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Kursas baigtas - {{courseName}}",
     cs: "Kurz dokončen - {{courseName}}",
     es: "Curso completado - {{courseName}}",
+    fr: "Cours terminé - {{courseName}}",
   },
   certificateExpirationWarningEmail: {
     en: "Certificate expires soon - {{courseName}}",
@@ -96,6 +107,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Pažymėjimas netrukus baigs galioti - {{courseName}}",
     cs: "Certifikát brzy vyprší - {{courseName}}",
     es: "El certificado caduca pronto - {{courseName}}",
+    fr: "Le certificat expire bientôt - {{courseName}}",
   },
   certificateExpiredEmail: {
     en: "Certificate reset - {{courseName}}",
@@ -104,6 +116,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Pažymėjimas nustatytas iš naujo - {{courseName}}",
     cs: "Certifikát resetován - {{courseName}}",
     es: "Certificado restablecido - {{courseName}}",
+    fr: "Certificat réinitialisé - {{courseName}}",
   },
   adminNewUserEmail: {
     en: "A new user has registered on your platform",
@@ -112,6 +125,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Naujas naudotojas užsiregistravo tavo platformoje",
     cs: "Na tvé platformě se zaregistroval nový uživatel",
     es: "Un nuevo usuario se ha registrado en tu plataforma",
+    fr: "Un nouvel utilisateur s'est inscrit sur votre plateforme",
   },
   adminCourseFinishedEmail: {
     en: "A user has completed a course on your platform",
@@ -120,6 +134,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Naudotojas baigė kursą tavo platformoje",
     cs: "Uživatel dokončil kurz na tvé platformě",
     es: "Un usuario ha completado un curso en tu plataforma",
+    fr: "Un utilisateur a terminé un cours sur votre plateforme",
   },
   adminOverdueCoursesEmail: {
     en: "Overdue courses notification",
@@ -128,6 +143,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Pranešimas apie vėluojančius kursus",
     cs: "Upozornění na kurzy po termínu",
     es: "Notificación de cursos vencidos",
+    fr: "Notification de cours en retard",
   },
   courseDueDateReminderEmail: {
     en: "Course deadline approaching - {{courseName}}",
@@ -136,6 +152,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Artėja kurso terminas - {{courseName}}",
     cs: "Termín kurzu se blíží - {{courseName}}",
     es: "Se acerca la fecha límite del curso - {{courseName}}",
+    fr: "L'échéance du cours approche - {{courseName}}",
   },
   magicLinkEmail: {
     en: "Login link",
@@ -144,6 +161,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Prisijungimo nuoroda",
     cs: "Přihlašovací odkaz",
     es: "Enlace de inicio de sesión",
+    fr: "Lien de connexion",
   },
   courseChatMentionEmail: {
     en: "You were mentioned in {{courseName}}",
@@ -152,6 +170,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Buvote paminėti kurse {{courseName}}",
     cs: "Byl(a) jste zmíněn(a) v kurzu {{courseName}}",
     es: "Te han mencionado en {{courseName}}",
+    fr: "Vous avez été mentionné(e) dans {{courseName}}",
   },
 } as const;
 

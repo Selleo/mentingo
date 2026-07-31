@@ -94,6 +94,15 @@ export const getOverdueCoursesEmailTranslations = (
       dueDateLabel: "Fecha límite",
       studentsLabel: "Estudiantes",
     },
+    fr: {
+      heading: "Apprenants ayant des cours en retard",
+      intro: "Certains apprenants n'ont pas terminé leurs cours à temps :",
+      buttonText: "VOIR LES COURS",
+      courseLabel: "Cours",
+      groupLabel: "Groupe",
+      dueDateLabel: "Date limite",
+      studentsLabel: "Apprenants",
+    },
   };
 
   const selectedLabels = labels[language];

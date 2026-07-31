@@ -24,6 +24,9 @@ export const getUserAssignedToCourseEmailTranslations = (
   const esMandatoryCourseParagraph = formatedCourseDueDate
     ? `Este curso es obligatorio y debe completarse antes del ${formatedCourseDueDate}.`
     : undefined;
+  const frMandatoryCourseParagraph = formatedCourseDueDate
+    ? `Ce cours est obligatoire et doit être terminé avant le ${formatedCourseDueDate}.`
+    : undefined;
 
   const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
@@ -79,6 +82,15 @@ export const getUserAssignedToCourseEmailTranslations = (
         esMandatoryCourseParagraph,
       ].filter(Boolean) as string[],
       buttonText: "MIS CURSOS",
+    },
+    fr: {
+      heading: "Nouveau cours disponible",
+      paragraphs: [
+        "Vous êtes inscrit(e) 🎓",
+        `Vous avez maintenant accès au cours ${courseName}. Il est disponible dans votre compte.`,
+        frMandatoryCourseParagraph,
+      ].filter(Boolean) as string[],
+      buttonText: "MES COURS",
     },
   };
 
