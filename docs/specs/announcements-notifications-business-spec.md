@@ -36,7 +36,7 @@ Group and system targeting improve relevance: learners see updates meant for the
 
 ## How It Works
 
-A permitted user opens the notification center and creates an announcement. They write the title and content for the selected language, add more language versions when needed, choose everyone or a group, and decide whether to schedule the message or send email. Mentingo validates the base language, duplicate languages, required content, schedule step, and permissions.
+A permitted user opens the notification center and creates an announcement. They write the title and content for the selected language, add more language versions when needed, choose everyone or a group, and decide whether to schedule the message or send email. Content creators can load existing groups for this audience selector without receiving access to the Groups management area. Mentingo validates the base language, duplicate languages, required content, schedule step, and permissions.
 
 If the announcement is published immediately, Mentingo delivers it to the matching users. If it is scheduled, the scheduler later claims due announcements tenant by tenant and then delivers it. Manual announcements appear under Admin announcements; automated messages such as live-training notices appear under System; All combines both without changing audience eligibility.
 
@@ -49,6 +49,7 @@ When a learner is mentioned in a course discussion, Mentingo creates the system 
 - Frontend notification center lives at `/notifications` in `apps/web/app/modules/Notifications`.
 - API endpoints live in `apps/api/src/announcements/announcements.controller.ts`.
 - Access is controlled by `ANNOUNCEMENT_READ`, `ANNOUNCEMENT_CREATE`, and `ANNOUNCEMENT_DELETE`.
+- Content creators use read-only group access to populate announcement audiences; group management remains administrator-only and the Groups navigation tab stays hidden.
 - Scheduling and publishing are handled by `AnnouncementsSchedulerService`; delivery to user feeds is handled by `AnnouncementsDeliveryService`.
 - Announcement statuses are `scheduled` and `published`; source types include manual announcements, live training, and course due-date reminders.
 - `manual` source types identify Admin announcements; every other source type identifies System notifications. Live-training notifications use a selected-user audience resolved from qualifying course enrollment.
