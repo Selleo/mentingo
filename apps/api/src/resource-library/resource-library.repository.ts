@@ -21,7 +21,15 @@ import { addPagination } from "src/common/pagination";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
-import { articles, lessons, news, resourceEntity, resources } from "src/storage/schema";
+import {
+  articles,
+  chapters,
+  courses,
+  lessons,
+  news,
+  resourceEntity,
+  resources,
+} from "src/storage/schema";
 
 import {
   KNOWN_RICH_TEXT_ASSET_MIME_TYPES,
@@ -234,6 +242,62 @@ export class ResourceLibraryRepository {
       default:
         return false;
     }
+  }
+
+  async getEntityAuthorId(entityType: RichTextAssetEntityType, entityId: UUIDType) {
+    switch (entityType) {
+      case ENTITY_TYPES.ARTICLES: {
+        const [entity] = await this.db
+          .select({ authorId: articles.authorId })
+          .from(articles)
+          .where(eq(articles.id, entityId))
+          .limit(1);
+
+        return entity?.authorId;
+      }
+      case ENTITY_TYPES.NEWS: {
+        const [entity] = await this.db
+          .select({ authorId: news.authorId })
+          .from(news)
+          .where(eq(news.id, entityId))
+          .limit(1);
+
+        return entity?.authorId;
+      }
+      case ENTITY_TYPES.LESSON: {
+        const [entity] = await this.db
+          .select({ authorId: courses.authorId })
+          .from(lessons)
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .innerJoin(courses, eq(courses.id, chapters.courseId))
+          .where(eq(lessons.id, entityId))
+          .limit(1);
+
+        return entity?.authorId;
+      }
+      default:
+        return undefined;
+    }
+  }
+
+  async getAssetEntityReferences(resourceId: UUIDType) {
+    return this.db
+      .select({
+        entityId: resourceEntity.entityId,
+        entityType: sql<RichTextAssetEntityType>`${resourceEntity.entityType}`,
+      })
+      .from(resourceEntity)
+      .where(eq(resourceEntity.resourceId, resourceId));
+  }
+
+  async getAssetOwnerId(resourceId: UUIDType) {
+    const [asset] = await this.db
+      .select({ uploadedBy: resources.uploadedBy })
+      .from(resources)
+      .where(eq(resources.id, resourceId))
+      .limit(1);
+
+    return asset?.uploadedBy;
   }
 
   async createAssetRelation(params: {

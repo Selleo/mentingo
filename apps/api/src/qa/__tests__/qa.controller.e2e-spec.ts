@@ -49,6 +49,22 @@ describe("QAController (e2e)", () => {
     return { student, cookie: await cookieFor(student, app) };
   };
 
+  const createContentCreatorWithCookie = async () => {
+    const contentCreator = await userFactory
+      .withCredentials({ password })
+      .withContentCreatorSettings(db)
+      .create();
+    return { contentCreator, cookie: await cookieFor(contentCreator, app) };
+  };
+
+  const createTrainerWithCookie = async () => {
+    const trainer = await userFactory
+      .withCredentials({ password })
+      .withTrainerSettings(db)
+      .create();
+    return { trainer, cookie: await cookieFor(trainer, app) };
+  };
+
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
@@ -146,6 +162,30 @@ describe("QAController (e2e)", () => {
 
       await request(app.getHttpServer()).get(`/api/qa/${qa.id}?language=en`).expect(401);
     });
+
+    it("returns QA for a student with public Q&A read access", async () => {
+      await seedGlobalSettings({ QAEnabled: true, unregisteredUserQAAccessibility: false });
+      const { cookie } = await createStudentWithCookie();
+      const qa = await qaFactory.create({ baseLanguage: "en", availableLocales: ["en"] });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/qa/${qa.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(response.body.id).toBe(qa.id);
+    });
+
+    it("denies Q&A to a trainer without public Q&A read access", async () => {
+      await seedGlobalSettings({ QAEnabled: true, unregisteredUserQAAccessibility: true });
+      const { cookie } = await createTrainerWithCookie();
+      const qa = await qaFactory.create({ baseLanguage: "en", availableLocales: ["en"] });
+
+      await request(app.getHttpServer())
+        .get(`/api/qa/${qa.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(403);
+    });
   });
 
   describe("POST /api/qa", () => {
@@ -171,7 +211,7 @@ describe("QAController (e2e)", () => {
       expect(response.body.data.id).toBe(created.id);
     });
 
-    it("returns 403 for non-admin users", async () => {
+    it("returns 403 for students", async () => {
       await seedGlobalSettings({ QAEnabled: true });
       const { cookie } = await createStudentWithCookie();
 
@@ -181,6 +221,17 @@ describe("QAController (e2e)", () => {
         .post("/api/qa")
         .set("Cookie", cookie)
         .send(payload)
+        .expect(403);
+    });
+
+    it("returns 403 for content creators", async () => {
+      await seedGlobalSettings({ QAEnabled: true });
+      const { cookie } = await createContentCreatorWithCookie();
+
+      await request(app.getHttpServer())
+        .post("/api/qa")
+        .set("Cookie", cookie)
+        .send({ title: "Question", description: "Answer", language: "en" })
         .expect(403);
     });
 
