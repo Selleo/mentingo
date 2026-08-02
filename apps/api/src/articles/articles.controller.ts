@@ -220,8 +220,9 @@ export class ArticlesController {
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async getDraftArticles(
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<GetArticlesResponse> {
-    return this.articlesService.getDraftArticles(language);
+    return this.articlesService.getDraftArticles(language, currentUser);
   }
 
   @Public()
@@ -457,12 +458,14 @@ export class ArticlesController {
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async generateArticlePreview(
     @Body() body: PreviewArticleRequest,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<PreviewArticleResponse>> {
     const { articleId, language, content } = body;
     const previewContent = await this.articlesService.generateArticlePreview(
       articleId,
       language,
       content,
+      currentUser,
     );
 
     return new BaseResponse({ parsedContent: previewContent });

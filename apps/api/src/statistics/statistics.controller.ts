@@ -20,6 +20,7 @@ export class StatisticsController {
   constructor(private statisticsService: StatisticsService) {}
 
   @Get("user-stats")
+  @RequirePermission(PERMISSIONS.STATISTICS_READ_SELF)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: baseResponse(UserStatsSchema),

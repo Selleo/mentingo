@@ -52,9 +52,9 @@ export class QAController {
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<QAResponseBody> {
-    return this.qaService.getQA(qaId, language, userId);
+    return this.qaService.getQA(qaId, language, currentUser);
   }
 
   @Public()
@@ -66,9 +66,9 @@ export class QAController {
   @RequireFeature({ features: [FEATURES.QA], allowUnregisteredUser: true })
   async getAllQA(
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<AllQAResponseBody> {
-    return this.qaService.getAllQA(language, userId);
+    return this.qaService.getAllQA(language, currentUser);
   }
 
   @Post()

@@ -431,16 +431,20 @@ export class ArticlesService {
   }
 
   async getArticles(requestedLanguage: SupportedLanguages, currentUser?: CurrentUserType) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.ARTICLE_READ_PUBLIC);
+
+    const articleScope = this.getArticleScope(currentUser);
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
-      currentUser,
+      articleScope,
     );
 
     return this.articlesRepository.getArticles(requestedLanguage, conditions);
   }
 
-  async getDraftArticles(requestedLanguage: SupportedLanguages) {
-    return this.articlesRepository.getDraftArticles(requestedLanguage);
+  async getDraftArticles(requestedLanguage: SupportedLanguages, currentUser: CurrentUserType) {
+    const { authorId } = this.getArticleScope(currentUser);
+    return this.articlesRepository.getDraftArticles(requestedLanguage, authorId);
   }
 
   async deleteArticleLanguage(
@@ -531,6 +535,8 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUserType,
   ) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.ARTICLE_READ_PUBLIC);
+
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
       PERMISSIONS.ARTICLE_MANAGE,
       PERMISSIONS.ARTICLE_MANAGE_OWN,
@@ -541,7 +547,7 @@ export class ArticlesService {
 
     const accessConditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
-      currentUser,
+      { ...this.getArticleScope(currentUser), isDraftMode },
     );
 
     const [existingArticle] = await this.articlesRepository.getArticleWithAccess(
@@ -593,6 +599,8 @@ export class ArticlesService {
     currentUser?: CurrentUserType,
     preview?: FilePreviewFormat,
   ) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.ARTICLE_READ_PUBLIC);
+
     const resource = await this.articlesRepository.getResource(resourceId);
 
     if (!resource) {
@@ -661,16 +669,18 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUserType,
   ): Promise<GetArticleTocResponse> {
-    const conditions = this.articlesRepository.getVisibleArticleConditions(
-      requestedLanguage,
-      currentUser,
-      { isDraftMode },
-    );
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.ARTICLE_READ_PUBLIC);
+
+    const articleScope = this.getArticleScope(currentUser);
+    const conditions = this.articlesRepository.getVisibleArticleConditions(requestedLanguage, {
+      ...articleScope,
+      isDraftMode,
+    });
 
     const sections = await this.articlesRepository.getArticleSections(
       requestedLanguage,
       conditions,
-      currentUser,
+      articleScope.canManageArticles,
     );
 
     return { sections };
@@ -689,8 +699,11 @@ export class ArticlesService {
 
     const adjacentArticleConditions = this.articlesRepository.getVisibleArticleConditions(
       language,
-      currentUser,
-      { isDraftMode, excludedId: currentArticleId },
+      {
+        ...this.getArticleScope(currentUser),
+        isDraftMode,
+        excludedId: currentArticleId,
+      },
     );
 
     const sortColumn = isDraftMode ? articles.createdAt : articles.publishedAt;
@@ -1121,7 +1134,9 @@ export class ArticlesService {
     articleId: UUIDType,
     language: SupportedLanguages,
     content: string,
+    currentUser: CurrentUserType,
   ): Promise<string> {
+    await this.checkEditAccess(articleId, currentUser);
     await this.validateArticleExists(articleId, language);
 
     const existingArticle = await this.validateArticleExists(articleId, language);
@@ -1299,5 +1314,32 @@ export class ArticlesService {
     if (!hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });
     }
+  }
+
+  private async checkContentReadAccess(
+    currentUser: CurrentUserType | undefined,
+    readPermission: typeof PERMISSIONS.ARTICLE_READ_PUBLIC,
+  ) {
+    const { unregisteredUserArticlesAccessibility } =
+      await this.settingsService.getGlobalSettings();
+    const canManage = this.getArticleScope(currentUser).canManageArticles;
+    const canReadPublic = hasPermission(currentUser?.permissions, readPermission);
+    const hasAccess =
+      canManage || canReadPublic || (!currentUser && unregisteredUserArticlesAccessibility);
+
+    if (!hasAccess) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
+  }
+
+  private getArticleScope(currentUser?: CurrentUserType) {
+    const canManageAll = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
+    const canManageOwn = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN);
+
+    return {
+      canManageArticles: canManageAll || canManageOwn,
+      authorId: canManageAll ? undefined : currentUser?.userId,
+      isPublicOnly: !currentUser,
+    };
   }
 }

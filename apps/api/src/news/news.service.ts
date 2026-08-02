@@ -193,6 +193,8 @@ export class NewsService {
     page = 1,
     currentUser?: CurrentUserType,
   ) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.NEWS_READ_PUBLIC);
+
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
@@ -402,6 +404,8 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.NEWS_READ_PUBLIC);
+
     const isAdminLike = this.canManageNews(currentUser);
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
@@ -470,6 +474,8 @@ export class NewsService {
     currentUser?: CurrentUserType,
     preview?: FilePreviewFormat,
   ) {
+    await this.checkContentReadAccess(currentUser, PERMISSIONS.NEWS_READ_PUBLIC);
+
     const [resource] = await this.db
       .select({
         ...getTableColumns(resources),
@@ -1008,6 +1014,21 @@ export class NewsService {
       await this.settingsService.getGlobalSettings();
 
     const hasAccess = Boolean(newsEnabled && (currentUserId || unregisteredUserNewsAccessibility));
+
+    if (!hasAccess) {
+      throw new BadRequestException({ message: "common.toast.noAccess" });
+    }
+  }
+
+  private async checkContentReadAccess(
+    currentUser: CurrentUserType | undefined,
+    readPermission: typeof PERMISSIONS.NEWS_READ_PUBLIC,
+  ) {
+    const { unregisteredUserNewsAccessibility } = await this.settingsService.getGlobalSettings();
+    const canManage = this.canManageNews(currentUser);
+    const canReadPublic = hasPermission(currentUser?.permissions, readPermission);
+    const hasAccess =
+      canManage || canReadPublic || (!currentUser && unregisteredUserNewsAccessibility);
 
     if (!hasAccess) {
       throw new BadRequestException({ message: "common.toast.noAccess" });
