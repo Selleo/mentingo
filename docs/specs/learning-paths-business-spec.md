@@ -37,7 +37,7 @@ Group enrollment, sequence rules, certificates, and export support larger organi
 
 When learning paths are enabled, learners with access can open `/development-paths` and see path cards in their selected language. If they are eligible, they can enroll and start working through the path's courses.
 
-Administrators use the learning-path management experience to define localized title and description, status, thumbnail, certificate settings, course order, and sequencing. They can enroll selected learners or groups. When the path's courses, enrollment, order, or sequence setting changes, Mentingo synchronizes the course access each enrolled learner should have.
+Administrators and content creators with learning-path authoring access use the learning-path management experience to define localized title and description, status, thumbnail, certificate settings, course order, and sequencing. They can enroll selected learners or groups. When the path's courses, enrollment, order, or sequence setting changes, Mentingo synchronizes the course access each enrolled learner should have.
 
 In sequence mode, learners receive access to the next course only after prior course requirements are met. When all required courses are completed and certificates are enabled, Mentingo can create a learning-path certificate that learners can view, download, or share.
 
@@ -48,6 +48,7 @@ In sequence mode, learners receive access to the next course only after prior co
 - Backend controllers live in `apps/api/src/learning-path/controllers`.
 - Learning-path endpoints are protected by `LearningPathsEnabledGuard`.
 - Key permissions include `PERMISSIONS.LEARNING_PATH_READ`, create/update/delete, course update, enrollment, export, and certificate permissions.
+- Content creators receive read-only group access for learning-path group selectors; group management remains restricted to administrators, so the Groups management tab stays hidden.
 - Course access and sequence synchronization use learning-path sync services and background queue processing.
 
 ## Test Evidence
