@@ -1338,7 +1338,7 @@ export class ArticlesService {
 
     return {
       canManageArticles: canManageAll || canManageOwn,
-      authorId: canManageAll ? undefined : currentUser?.userId,
+      authorId: canManageOwn && !canManageAll ? currentUser?.userId : undefined,
       isPublicOnly: !currentUser,
     };
   }
