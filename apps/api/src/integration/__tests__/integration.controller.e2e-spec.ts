@@ -555,6 +555,43 @@ describe("IntegrationController (e2e)", () => {
       });
     });
 
+    it("allows managing tenant integration key to delete another tenant", async () => {
+      const { apiKey } = await createApiKey({ isManaging: true });
+
+      const [{ id: tenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Integration Deleted Tenant",
+          host: uniqueTenantHost("integration-deleted-tenant"),
+          status: TENANT_STATUSES.INACTIVE,
+        })
+        .returning({ id: tenants.id });
+
+      await request(app.getHttpServer())
+        .delete(`/api/integration/tenants/${tenantId}`)
+        .set("X-API-Key", apiKey)
+        .expect(204);
+
+      const [deletedTenant] = await dbAdmin
+        .select({ id: tenants.id })
+        .from(tenants)
+        .where(eq(tenants.id, tenantId))
+        .limit(1);
+
+      expect(deletedTenant).toBeUndefined();
+    });
+
+    it("rejects deleting the integration key's managing tenant", async () => {
+      const { admin, apiKey } = await createApiKey({ isManaging: true });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/integration/tenants/${admin.tenantId}`)
+        .set("X-API-Key", apiKey)
+        .expect(400);
+
+      expect(response.body.message).toBe("superAdminTenants.error.currentTenantDeleteNotAllowed");
+    });
+
     it("rejects tenant creation for non-managing tenant integration key", async () => {
       const { apiKey } = await createApiKey({ isManaging: false });
 
@@ -581,6 +618,25 @@ describe("IntegrationController (e2e)", () => {
         .patch(`/api/integration/tenants/${admin.tenantId}`)
         .set("X-API-Key", apiKey)
         .send({ name: "Rejected Integration Tenant Update" })
+        .expect(404);
+
+      expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
+    });
+
+    it("rejects tenant deletion for non-managing tenant integration key", async () => {
+      const { apiKey } = await createApiKey({ isManaging: false });
+
+      const [{ id: tenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Rejected Integration Tenant Deletion",
+          host: uniqueTenantHost("rejected-integration-tenant-deletion"),
+        })
+        .returning({ id: tenants.id });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/integration/tenants/${tenantId}`)
+        .set("X-API-Key", apiKey)
         .expect(404);
 
       expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
