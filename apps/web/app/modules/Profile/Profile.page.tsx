@@ -11,6 +11,7 @@ import { useUpdateUserProfile } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { useUserAchievements } from "~/api/queries/useUserAchievements";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -29,6 +30,7 @@ import { studentProfileSteps } from "../Onboarding/routes/student";
 import CertificatePreview from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
+import { AchievementsCarousel } from "./components/AchievementsCarousel";
 
 import type { UpdateUserProfileBody } from "./types";
 import type { MetaFunction } from "@remix-run/react";
@@ -101,6 +103,8 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
     { language },
     canViewExtendedProfile,
   );
+
+  const { data: achievements } = useUserAchievements(userDetails?.id, language);
 
   const toggleEditing = () => setIsEditing((prev) => !prev);
 
@@ -289,6 +293,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
           </section>
         )}
         <Certificates onOpenCertificatePreview={handleOpenCertificatePreview} />
+        <AchievementsCarousel achievements={achievements ?? []} />
       </div>
     </PageWrapper>
   );

@@ -10,6 +10,8 @@ import type {
   learningPaths,
   calendarEvents,
   announcements,
+  achievements,
+  challenges,
 } from "src/storage/schema";
 
 export const ENTITY_TYPE = {
@@ -44,4 +46,6 @@ export type BaseTable =
   | typeof learningPaths
   | typeof announcements
   | typeof learningPaths
-  | typeof calendarEvents;
+  | typeof calendarEvents
+  | typeof achievements
+  | typeof challenges;

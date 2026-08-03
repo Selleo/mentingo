@@ -8071,6 +8071,52 @@ export interface GetActivityLogsResponse {
   appliedFilters?: object;
 }
 
+export interface GetUserAchievementsResponse {
+  data: {
+    /** @format uuid */
+    achievementId: string;
+    achievementTitle: string;
+    visibility: "visible" | "hidden";
+    /** @format uuid */
+    levelId: string;
+    levelNumber: number;
+    threshold: number;
+    xpReward: number;
+    /** @format date-time */
+    earnedAt: string;
+  }[];
+}
+
+export interface CreateAchievementBody {
+  title: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  visibility: "visible" | "hidden";
+  isEnabled: boolean;
+  triggerEventType: string;
+}
+
+export interface UpdateAchievementBody {
+  title?: string;
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  visibility?: "visible" | "hidden";
+  isEnabled?: boolean;
+  triggerEventType?: string;
+}
+
+export interface CreateAchievementLevelBody {
+  threshold: number;
+  xpReward: number;
+}
+
+export interface UpdateAchievementLevelBody {
+  threshold: number;
+  xpReward: number;
+}
+
+export interface CreateTranslationBody {
+  title: string;
+}
+
 export interface GetQAResponse {
   /** @format uuid */
   id: string;
@@ -15872,6 +15918,242 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GamificationControllerGetUserProgress
+     * @request GET:/api/gamification/user-progress
+     */
+    gamificationControllerGetUserProgress: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/gamification/user-progress`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerGetAchievementsList
+     * @request GET:/api/achievements
+     */
+    achievementsControllerGetAchievementsList: (
+      query: {
+        "is-enabled": boolean;
+        visibility: string;
+        "trigger-event-type": string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerCreateAchievement
+     * @request POST:/api/achievements
+     */
+    achievementsControllerCreateAchievement: (
+      data: CreateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerGetUserAchievements
+     * @request GET:/api/achievements/user-achievements
+     */
+    achievementsControllerGetUserAchievements: (
+      query: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        userId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserAchievementsResponse, any>({
+        path: `/api/achievements/user-achievements`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerUpdateAchievement
+     * @request PATCH:/api/achievements/{id}
+     */
+    achievementsControllerUpdateAchievement: (
+      id: string,
+      data: UpdateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerDeleteAchievement
+     * @request DELETE:/api/achievements/{id}
+     */
+    achievementsControllerDeleteAchievement: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/achievements/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerGetAchievement
+     * @request GET:/api/achievements/{id}
+     */
+    achievementsControllerGetAchievement: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/${id}`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerGetAchievementAllLevels
+     * @request GET:/api/achievements/levels/{achievementId}
+     */
+    achievementsControllerGetAchievementAllLevels: (
+      achievementId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/levels/${achievementId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerCreateAchievementLevel
+     * @request POST:/api/achievements/levels/{achievementId}
+     */
+    achievementsControllerCreateAchievementLevel: (
+      achievementId: string,
+      data: CreateAchievementLevelBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/levels/${achievementId}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerDeleteAchievementLevel
+     * @request DELETE:/api/achievements/levels/{achievementId}
+     */
+    achievementsControllerDeleteAchievementLevel: (
+      achievementId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/levels/${achievementId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerGetAchievementLevel
+     * @request GET:/api/achievements/levels/{achievementId}/{levelId}
+     */
+    achievementsControllerGetAchievementLevel: (
+      achievementId: string,
+      levelId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/levels/${achievementId}/${levelId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerUpdateAchievementLevel
+     * @request PATCH:/api/achievements/levels/{achievementId}/{levelNumber}
+     */
+    achievementsControllerUpdateAchievementLevel: (
+      achievementId: string,
+      levelNumber: number,
+      data: UpdateAchievementLevelBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/levels/${achievementId}/${levelNumber}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerCreateTranslation
+     * @request POST:/api/achievements/{achievementId}/translation
+     */
+    achievementsControllerCreateTranslation: (
+      achievementId: string,
+      data: CreateTranslationBody,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/${achievementId}/translation`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

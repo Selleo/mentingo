@@ -32,7 +32,7 @@ export class ActivityLogsWorker implements OnModuleDestroy {
         }
 
         await this.tenantRunner.runWithTenant(job.data.tenantId, async () => {
-          await this.activityLogsService.persistActivityLog(job.data);
+          await this.activityLogsService.persistActivityLogAndReturn(job.data);
         });
       },
       {

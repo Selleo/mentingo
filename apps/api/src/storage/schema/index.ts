@@ -26,6 +26,7 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  CHALLENGE_STATUS,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
@@ -108,6 +109,10 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  GamificationVisibility,
+  ChallengePeriodType,
+  ChallengeStatus,
+  XpTransactionType,
   MicrosoftCalendarConnectionStatus,
   MicrosoftCalendarOutboundStatus,
   OutlookEventAvailability,
@@ -2773,4 +2778,243 @@ export const learningPathEntityMap = pgTable(
       table.sourceEntityId,
     ),
   }),
+);
+
+export const achievements = pgTable(
+  "achievements",
+  {
+    ...id,
+    ...timestamps,
+
+    tenantId,
+
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+
+    visibility: text("visibility").$type<GamificationVisibility>().notNull(),
+
+    isEnabled: boolean("is_enabled").notNull().default(true),
+
+    triggerEventType: text("trigger_event_type").notNull(),
+
+    baseLanguage,
+
+    availableLocales,
+  },
+  withTenantIdIndex("achievements", (table) => ({
+    tenantIdIdUniqueIdx: uniqueIndex("achievements_tenant_id_unique_idx").on(
+      table.tenantId,
+      table.id,
+    ),
+
+    triggerEventIdx: index("achievements_trigger_event_idx").on(table.triggerEventType),
+  })),
+);
+
+export const achievementLevels = pgTable(
+  "achievement_levels",
+  {
+    ...id,
+    ...timestamps,
+
+    tenantId,
+
+    achievementId: uuid("achievement_id").notNull(),
+
+    levelNumber: integer("level_number").notNull(),
+
+    threshold: integer("threshold").notNull(),
+
+    xpReward: integer("xp_reward").notNull(),
+  },
+  withTenantIdIndex("achievement_levels", (table) => ({
+    achievementLevelUnique: unique("achievement_levels_level_unique").on(
+      table.achievementId,
+      table.levelNumber,
+    ),
+
+    achievementIdx: index("achievement_levels_achievement_idx").on(table.achievementId),
+  })),
+);
+
+export const userAchievementLevels = pgTable(
+  "user_achievement_levels",
+  {
+    ...id,
+    ...timestamps,
+
+    tenantId,
+
+    userId: uuid("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+
+    achievementLevelId: uuid("achievement_level_id")
+      .references(() => achievementLevels.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+
+    sourceId: uuid("source_id").notNull(),
+
+    earnedAt: timestampWithTimezone({ name: "earned_at" }).defaultNow().notNull(),
+  },
+  withTenantIdIndex("user_achievement_levels", (table) => ({
+    uniqueAchievementLevelPerUser: uniqueIndex("user_achievement_levels_user_level_unique_idx").on(
+      table.userId,
+      table.achievementLevelId,
+    ),
+
+    userIdx: index("user_achievement_levels_user_idx").on(table.userId),
+
+    achievementLevelIdx: index("user_achievement_levels_level_idx").on(table.achievementLevelId),
+
+    sourceIdx: index("user_achievement_levels_source_idx").on(table.sourceId),
+  })),
+);
+
+export const challenges = pgTable(
+  "challenges",
+  {
+    ...id,
+    ...timestamps,
+
+    tenantId,
+
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+
+    visibility: text("visibility").$type<GamificationVisibility>().notNull(),
+
+    isEnabled: boolean("is_enabled").default(true).notNull(),
+
+    triggerEventType: text("trigger_event_type").notNull(),
+
+    periodType: text("period_type").$type<ChallengePeriodType>().notNull(),
+
+    targetCount: integer("target_count").notNull(),
+
+    xpReward: integer("xp_reward").notNull(),
+
+    baseLanguage,
+
+    availableLocales,
+  },
+  withTenantIdIndex("challenges", (table) => ({
+    tenantIdIdUniqueIdx: uniqueIndex("challenges_tenant_id_unique_idx").on(
+      table.tenantId,
+      table.id,
+    ),
+    triggerEventIdx: index("challenges_trigger_event_idx").on(table.triggerEventType),
+  })),
+);
+
+export const userChallengeProgress = pgTable(
+  "user_challenge_progress",
+  {
+    ...id,
+    ...timestamps,
+
+    tenantId,
+
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+
+    challengeId: uuid("challenge_id")
+      .references(() => challenges.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+
+    periodKey: text("period_key").notNull(),
+
+    currentCount: integer("current_count").notNull().default(0),
+
+    status: text("status").$type<ChallengeStatus>().notNull().default(CHALLENGE_STATUS.IN_PROGRESS),
+
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+  },
+  withTenantIdIndex("user_challenge_progress", (table) => ({
+    uniqueChallengePeriodPerUser: uniqueIndex(
+      "user_challenge_progress_user_challenge_period_unique_idx",
+    ).on(table.userId, table.challengeId, table.periodKey),
+    userChallengeIdx: index("user_challenge_progress_user_challenge_idx").on(
+      table.userId,
+      table.challengeId,
+    ),
+    statusIdx: index("user_challenge_progress_status_idx").on(table.status),
+  })),
+);
+
+export const xpTransactions = pgTable(
+  "xp_transactions",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    userId: uuid("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    lifetimeDelta: integer("lifetime_delta").notNull(),
+    spendableDelta: integer("spendable_delta").notNull(),
+    type: text("type").$type<XpTransactionType>().notNull(),
+    sourceId: uuid("source_id").notNull(),
+  },
+  withTenantIdIndex("xp_transactions", (table) => ({
+    userCreatedAtIdx: index("xp_transactions_user_created_at_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+    sourceIdx: index("xp_transactions_source_idx").on(table.sourceId),
+
+    typeIdx: index("xp_transactions_type_idx").on(table.type),
+  })),
+);
+
+export const userProgress = pgTable(
+  "user_progress",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    userId: uuid("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    lifetimeXp: integer("lifetime_xp").notNull().default(0),
+    spendableXp: integer("spendable_xp").notNull().default(0),
+    currentLevel: integer("current_level").notNull().default(1),
+  },
+  withTenantIdIndex("user_progress", (table) => ({
+    leaderboardIdx: index("user_progress_leaderboard_idx").on(table.tenantId, table.lifetimeXp),
+    userTenantUnique: uniqueIndex("user_progress_tenant_user_unique").on(
+      table.tenantId,
+      table.userId,
+    ),
+
+    tenantLevelIdx: index("user_progress_tenant_level_idx").on(table.tenantId, table.currentLevel),
+  })),
+);
+
+export const processedSourceEvents = pgTable(
+  "processed_source_events",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    sourceId: uuid("source_id").notNull(),
+    processedAt: timestampWithTimezone({ name: "processed_at" }).notNull().defaultNow(),
+  },
+  withTenantIdIndex("processed_source_events", (table) => ({
+    sourceUnique: uniqueIndex("processed_source_events_source_unique").on(
+      table.tenantId,
+      table.sourceId,
+    ),
+
+    processedAtIdx: index("processed_source_events_processed_at_idx").on(table.processedAt),
+  })),
 );

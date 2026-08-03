@@ -16,6 +16,7 @@ import { ApiClient } from "../../api/api-client";
 import { currentUserQueryOptions } from "../../api/queries";
 import { queryClient } from "../../api/queryClient";
 import { LanguageProvider } from "../Dashboard/Settings/Language/LanguageProvider";
+import { GamificationNotification } from "../Gamification/GamificationNotification";
 import { ThemeProvider } from "../Theme";
 
 import { PostHogWrapper } from "./PostHogWrapper";
@@ -127,6 +128,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <ReactQueryDevtools initialIsOpen={false} />
               )}
             </ThemeProvider>
+            <GamificationNotification />
           </TourProvider>
         </PostHogWrapper>
       </QueryClientProvider>

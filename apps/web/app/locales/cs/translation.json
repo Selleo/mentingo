@@ -4927,5 +4927,32 @@
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "Dosáhli jste nové úrovně!",
+        "level": "Vaše aktuální úroveň"
+      },
+      "achievement": {
+        "title": "Nový úspěch",
+        "level": "Nová úroveň"
+      }
+    },
+    "profile": {
+      "header": "Vaše úspěchy",
+      "zeroAchievementsHeader": "Nemáte žádné úspěchy",
+      "showHistory": "Zobrazit historii",
+      "dialog": {
+        "level": "Úroveň"
+      }
+    },
+    "errors": {
+      "achievementNotFound": "Úspěch neexistuje",
+      "wrongAchievementLevel": "Tento úspěch nemůže mít další úroveň",
+      "achievementLevelNotFound": "Úroveň úspěchu neexistuje",
+      "wrongAchievementLevelThreshold": "Prahová hodnota úrovně nemůže být nižší než předchozí ani vyšší než následující",
+      "userProgressNotFound": "Postup uživatele neexistuje"
+    }
   }
 }

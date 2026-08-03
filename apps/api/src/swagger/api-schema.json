@@ -16483,6 +16483,444 @@
         }
       }
     },
+    "/api/gamification/user-progress/{userId}": {
+      "get": {
+        "operationId": "GamificationController_getUserProgress",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements": {
+      "get": {
+        "operationId": "AchievementsController_getAchievementsList",
+        "parameters": [
+          {
+            "name": "is-enabled",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "visibility",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trigger-event-type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "AchievementsController_createAchievement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements/user-achievements": {
+      "get": {
+        "operationId": "AchievementsController_getUserAchievements",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserAchievementsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/achievements/{id}": {
+      "patch": {
+        "operationId": "AchievementsController_updateAchievement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AchievementsController_deleteAchievement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "AchievementsController_getAchievement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements/levels/{achievementId}": {
+      "get": {
+        "operationId": "AchievementsController_getAchievementAllLevels",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "AchievementsController_createAchievementLevel",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAchievementLevelBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AchievementsController_deleteAchievementLevel",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements/levels/{achievementId}/{levelId}": {
+      "get": {
+        "operationId": "AchievementsController_getAchievementLevel",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "levelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements/levels/{achievementId}/{levelNumber}": {
+      "patch": {
+        "operationId": "AchievementsController_updateAchievementLevel",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "levelNumber",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementLevelBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/achievements/{achievementId}/translation": {
+      "post": {
+        "operationId": "AchievementsController_createTranslation",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTranslationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/calendar/microsoft/connection": {
       "get": {
         "operationId": "MicrosoftCalendarController_getConnection",
@@ -17731,6 +18169,26 @@
                     },
                     {
                       "const": "activity_log.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "achievements.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "achievements.update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "achievements.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "achievements.view_hidden",
+                      "type": "string"
+                    },
+                    {
+                      "const": "achievements.manage_params",
                       "type": "string"
                     }
                   ]
@@ -59498,6 +59956,224 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetUserAchievementsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "achievementId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "achievementTitle": {
+                  "type": "string"
+                },
+                "visibility": {
+                  "anyOf": [
+                    {
+                      "const": "visible",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hidden",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "levelId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "levelNumber": {
+                  "type": "number"
+                },
+                "threshold": {
+                  "type": "number"
+                },
+                "xpReward": {
+                  "type": "number"
+                },
+                "earnedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "achievementId",
+                "achievementTitle",
+                "visibility",
+                "levelId",
+                "levelNumber",
+                "threshold",
+                "xpReward",
+                "earnedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              }
+            ]
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "visible",
+                "type": "string"
+              },
+              {
+                "const": "hidden",
+                "type": "string"
+              }
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "triggerEventType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "language",
+          "visibility",
+          "isEnabled",
+          "triggerEventType"
+        ]
+      },
+      "UpdateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              }
+            ]
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "visible",
+                "type": "string"
+              },
+              {
+                "const": "hidden",
+                "type": "string"
+              }
+            ]
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "triggerEventType": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAchievementLevelBody": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "integer"
+          },
+          "xpReward": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threshold",
+          "xpReward"
+        ]
+      },
+      "UpdateAchievementLevelBody": {
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "integer"
+          },
+          "xpReward": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threshold",
+          "xpReward"
+        ]
+      },
+      "CreateTranslationBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
         ]
       },
       "GetConnectionResponse": {

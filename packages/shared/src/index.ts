@@ -18,6 +18,7 @@ export * from "./constants/courseEnrollment";
 export * from "./constants/entityTypes";
 export * from "./constants/features";
 export * from "./constants/fileTypes";
+export * from "./constants/gamification";
 export * from "./constants/languages";
 export * from "./constants/learningPath";
 export * from "./constants/lessonTypes";

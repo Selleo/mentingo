@@ -88,3 +88,4 @@ export * from "./question-types";
 export * from "./arrows";
 export * from "./actions";
 export * from "./flags";
+export * from "./achievements";

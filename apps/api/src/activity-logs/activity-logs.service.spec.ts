@@ -7,7 +7,20 @@ import type { DatabasePg } from "src/common";
 
 describe("ActivityLogsService", () => {
   const createService = () => {
-    const values = jest.fn().mockResolvedValue(undefined);
+    const returning = jest.fn().mockResolvedValue([
+      {
+        id: "44444444-4444-4444-4444-444444444444",
+        actorId: "33333333-3333-3333-3333-333333333333",
+        actorEmail: "support-admin@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.LOGIN,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
+        resourceId: "11111111-1111-1111-1111-111111111111",
+        metadata: {},
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    const values = jest.fn().mockReturnValue({ returning });
     const db = {
       insert: jest.fn().mockReturnValue({ values }),
     };
@@ -22,6 +35,7 @@ describe("ActivityLogsService", () => {
         queue as unknown as ConstructorParameters<typeof ActivityLogsService>[1],
       ),
       values,
+      returning,
     };
   };
 

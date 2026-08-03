@@ -39,3 +39,13 @@ export type AuthenticatedSocket = Socket<
   Record<string, never>,
   { user: WsUser }
 >;
+
+export interface GamificationEventPayload {
+  tenantId: string;
+  userId: string;
+  actorRole: string;
+  actionType: string;
+  resourceType: string | null;
+  sourceId: string;
+  canViewHidden: boolean;
+}

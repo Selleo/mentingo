@@ -4987,5 +4987,32 @@
       "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
       "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "Osiągnąłeś nowy poziom!",
+        "level": "Twój aktualny poziom"
+      },
+      "achievement": {
+        "title": "Nowe osiągnięcie",
+        "level": "Nowy poziom"
+      }
+    },
+    "profile": {
+      "header": "Twoje osiągnięcia",
+      "zeroAchievementsHeader": "Nie masz żadnych osiągnięć",
+      "showHistory": "Zobacz historię",
+      "dialog": {
+        "level": "Poziom"
+      }
+    },
+    "errors": {
+      "achievementNotFound": "Osiągnięcie nie istnieje",
+      "wrongAchievementLevel": "To osiągnięcie nie może mieć kolejnego  poziomu",
+      "achievementLevelNotFound": "Poziom osiągnięcia nie istnieje",
+      "wrongAchievementLevelThreshold": "Próg poziomu nie może być niższy od poprzedniego ani wyższy od następnego",
+      "userProgressNotFound": "Postęp użytkownika nie istnieje"
+    }
   }
 }

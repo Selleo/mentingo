@@ -4948,5 +4948,32 @@
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "You achieved new level!",
+        "level": "Your actual level"
+      },
+      "achievement": {
+        "title": "New Achievement",
+        "level": "New level"
+      }
+    },
+    "profile": {
+      "header": "Your achievements",
+      "zeroAchievementsHeader": "You don't have any achievements",
+      "showHistory": "Show history",
+      "dialog": {
+        "level": "Level"
+      }
+    },
+    "errors": {
+      "achievementNotFound": "Achievement doesn't exist",
+      "wrongAchievementLevel": "This achievement couldn't have next level",
+      "achievementLevelNotFound": "Achievement's level doesn't exist",
+      "wrongAchievementLevelThreshold": "Level's threshold can't be lower than previous or bigger than next",
+      "userProgressNotFound": "User's progress doesn't exist"
+    }
   }
 }
