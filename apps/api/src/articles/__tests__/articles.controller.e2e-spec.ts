@@ -266,6 +266,26 @@ describe("ArticlesController (e2e)", () => {
         ]),
       );
     });
+
+    it("allows an admin to open a published article in draft mode for editing", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Published edit" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        title: "Published article",
+        status: "published",
+        isPublic: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en&isDraftMode=true`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.id).toBe(article.id);
+      expect(response.body.data.title).toBe("Published article");
+    });
   });
 
   describe("GET /api/articles/drafts", () => {

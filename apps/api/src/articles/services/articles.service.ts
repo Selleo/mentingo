@@ -547,7 +547,11 @@ export class ArticlesService {
 
     const accessConditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
-      { ...this.getArticleScope(currentUser, isDraftMode), isDraftMode },
+      {
+        ...this.getArticleScope(currentUser, isDraftMode),
+        isDraftMode,
+        includeUnpublished: isDraftMode,
+      },
     );
 
     const [existingArticle] = await this.articlesRepository.getArticleWithAccess(
