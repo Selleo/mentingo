@@ -443,7 +443,7 @@ export class ArticlesService {
   }
 
   async getDraftArticles(requestedLanguage: SupportedLanguages, currentUser: CurrentUserType) {
-    const { authorId } = this.getArticleScope(currentUser);
+    const { authorId } = this.getArticleScope(currentUser, true);
     return this.articlesRepository.getDraftArticles(requestedLanguage, authorId);
   }
 
@@ -547,7 +547,11 @@ export class ArticlesService {
 
     const accessConditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
-      { ...this.getArticleScope(currentUser), isDraftMode },
+      {
+        ...this.getArticleScope(currentUser, isDraftMode),
+        isDraftMode,
+        includeUnpublished: isDraftMode,
+      },
     );
 
     const [existingArticle] = await this.articlesRepository.getArticleWithAccess(
@@ -671,7 +675,7 @@ export class ArticlesService {
   ): Promise<GetArticleTocResponse> {
     await this.checkContentReadAccess(currentUser, PERMISSIONS.ARTICLE_READ_PUBLIC);
 
-    const articleScope = this.getArticleScope(currentUser);
+    const articleScope = this.getArticleScope(currentUser, isDraftMode);
     const conditions = this.articlesRepository.getVisibleArticleConditions(requestedLanguage, {
       ...articleScope,
       isDraftMode,
@@ -700,7 +704,7 @@ export class ArticlesService {
     const adjacentArticleConditions = this.articlesRepository.getVisibleArticleConditions(
       language,
       {
-        ...this.getArticleScope(currentUser),
+        ...this.getArticleScope(currentUser, isDraftMode),
         isDraftMode,
         excludedId: currentArticleId,
       },
@@ -1332,13 +1336,13 @@ export class ArticlesService {
     }
   }
 
-  private getArticleScope(currentUser?: CurrentUserType) {
+  private getArticleScope(currentUser?: CurrentUserType, isDraftMode = false) {
     const canManageAll = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
     const canManageOwn = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN);
 
     return {
       canManageArticles: canManageAll || canManageOwn,
-      authorId: canManageOwn && !canManageAll ? currentUser?.userId : undefined,
+      authorId: isDraftMode && canManageOwn && !canManageAll ? currentUser?.userId : undefined,
       isPublicOnly: !currentUser,
     };
   }

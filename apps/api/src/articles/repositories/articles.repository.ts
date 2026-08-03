@@ -401,6 +401,7 @@ export class ArticlesRepository {
     language: SupportedLanguages,
     options?: {
       isDraftMode?: boolean;
+      includeUnpublished?: boolean;
       excludedId?: UUIDType;
       authorId?: UUIDType;
       canManageArticles?: boolean;
@@ -408,11 +409,17 @@ export class ArticlesRepository {
     },
   ): SQL<unknown>[] {
     const canManageArticles = options?.canManageArticles ?? false;
+    let publicationConditions: SQL<unknown>[] = [];
+
+    if (!options?.includeUnpublished) {
+      publicationConditions = options?.isDraftMode
+        ? [isNull(articles.publishedAt)]
+        : [not(isNull(articles.publishedAt))];
+    }
+
     const conditions = [
       ne(articles.archived, true),
-      ...(options?.isDraftMode
-        ? [isNull(articles.publishedAt)]
-        : [not(isNull(articles.publishedAt))]),
+      ...publicationConditions,
       ...(options?.isPublicOnly ? [eq(articles.isPublic, true)] : []),
       ...(options?.authorId ? [eq(articles.authorId, options.authorId)] : []),
       ...(!canManageArticles ? [sql`${language} = ANY(${articles.availableLocales})`] : []),

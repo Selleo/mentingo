@@ -233,6 +233,59 @@ describe("ArticlesController (e2e)", () => {
 
       await request(app.getHttpServer()).get(`/api/articles/${article.id}?language=pl`).expect(404);
     });
+
+    it("allows a content creator to read published articles created by another user", async () => {
+      const contentCreator = await createContentCreator();
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Published access" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Published article",
+        isPublic: true,
+      });
+      const cookie = await cookieFor(contentCreator, app);
+
+      const articleResponse = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(articleResponse.body.data.id).toBe(article.id);
+
+      const tocResponse = await request(app.getHttpServer())
+        .get("/api/articles/toc?language=en")
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(tocResponse.body.data.sections).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            articles: expect.arrayContaining([expect.objectContaining({ id: article.id })]),
+          }),
+        ]),
+      );
+    });
+
+    it("allows an admin to open a published article in draft mode for editing", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Published edit" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        title: "Published article",
+        status: "published",
+        isPublic: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en&isDraftMode=true`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.id).toBe(article.id);
+      expect(response.body.data.title).toBe("Published article");
+    });
   });
 
   describe("GET /api/articles/drafts", () => {
