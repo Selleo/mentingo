@@ -15312,6 +15312,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Permanently deletes the target tenant and its tenant-owned data. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.
+     *
+     * @tags Integration
+     * @name IntegrationControllerDeleteTenant
+     * @summary Delete tenant via integration API
+     * @request DELETE:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerDeleteTenant: (tenantId: string, params: RequestParams = {}) =>
+      this.request<void, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
      * @description Marks the target tenant as inactive. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
