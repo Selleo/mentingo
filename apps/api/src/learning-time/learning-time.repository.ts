@@ -163,10 +163,19 @@ export class LearningTimeRepository {
         studentAvatarKey: users.avatarReference,
         totalSeconds: sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`,
         groups: sql<Array<{ id: string; name: string }>>`(
-          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
-          FROM ${groups} g
-          JOIN ${groupUsers} gu ON gu.group_id = g.id
-          WHERE gu.user_id = ${users.id}
+          SELECT json_agg(
+            json_build_object(
+              'id', ${groups.id},
+              'name', ${this.localizationService.getLocalizedSqlField(
+                groups.name,
+                undefined,
+                groups,
+              )}
+            )
+          )
+          FROM ${groups}
+          JOIN ${groupUsers} ON ${groupUsers.groupId} = ${groups.id}
+          WHERE ${groupUsers.userId} = ${users.id}
         )`,
       })
       .from(lessonLearningTime)
