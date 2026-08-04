@@ -135,6 +135,15 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
+  "admin/automation": {
+    anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
+  },
+  "admin/automation/logs": {
+    anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
+  },
+  "admin/automation/:id/builder": {
+    anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
+  },
   "admin/development-paths": LEARNING_PATH_ADMIN_ACCESS,
   "admin/development-paths/new": {
     allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
@@ -146,6 +155,9 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/categories/*": {
     allOf: [PERMISSIONS.CATEGORY_MANAGE],
+  },
+  "admin/email-templates/*": {
+    allOf: [PERMISSIONS.EMAIL_TEMPLATE_MANAGE],
   },
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,

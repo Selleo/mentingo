@@ -67,6 +67,7 @@ export const PERMISSIONS = {
   ANNOUNCEMENT_READ: "announcement.read",
   ANNOUNCEMENT_CREATE: "announcement.create",
   ANNOUNCEMENT_DELETE: "announcement.delete",
+  EMAIL_TEMPLATE_MANAGE: "email_template.manage",
   NEWS_READ_PUBLIC: "news.read_public",
   NEWS_MANAGE: "news.manage",
   NEWS_MANAGE_OWN: "news.manage_own",
@@ -86,6 +87,7 @@ export const PERMISSIONS = {
   TENANT_MANAGE: "tenant.manage",
   COURSE_AI_GENERATION: "course.ai_generation",
   ACTIVITY_LOG_READ: "activity_log.read",
+  AUTOMATION_MANAGE: "automation.manage",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -248,6 +250,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.ANNOUNCEMENT_READ,
     PERMISSIONS.ANNOUNCEMENT_CREATE,
     PERMISSIONS.ANNOUNCEMENT_DELETE,
+    PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
     PERMISSIONS.NEWS_MANAGE,
     PERMISSIONS.NEWS_READ_PUBLIC,
     PERMISSIONS.ARTICLE_MANAGE,
@@ -265,6 +268,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.TENANT_MANAGE,
     PERMISSIONS.COURSE_EXPORT,
     PERMISSIONS.ACTIVITY_LOG_READ,
+    PERMISSIONS.AUTOMATION_MANAGE,
   ],
 };
 

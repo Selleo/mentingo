@@ -16,7 +16,6 @@
       "clearAll": "Vymazat vše",
       "validate": "Ověřit",
       "edit": "Upravit",
-      "delete": "Smazat",
       "uploading": "Nahrávání...",
       "sending": "Odesílání..."
     },
@@ -330,6 +329,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatizace",
     "settings": "Nastavení",
     "logout": "Odhlášení",
     "panel": "panel",
@@ -354,6 +354,7 @@
     "announcements": "Oznámení",
     "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
+    "emailTemplates": "E-mailové šablony",
     "manage": "Spravovat",
     "ariaLabels": {
       "goToAvailableCourses": "Přejděte na dostupné kurzy"
@@ -4116,7 +4117,9 @@
     "activityLogs": "Log aktivit",
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
-    "adminLearningPathEditor": "Editor rozvojové cesty"
+    "adminLearningPathEditor": "Editor rozvojové cesty",
+    "emailTemplates": "E-mailové šablony",
+    "editEmailTemplate": "Upravit e-mailovou šablonu"
   },
   "masterCourse": {
     "error": {
@@ -4926,6 +4929,776 @@
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+    }
+  },
+  "list": {
+    "title": "E‑mailové šablony",
+    "createButton": "Vytvořit novou",
+    "deleteSelected": "Smazat vybrané",
+    "searchPlaceholder": "Hledat podle názvu",
+    "statusFilter": "Stav",
+    "empty": "Zatím zde nejsou žádné šablony.",
+    "loading": "Načítání šablon...",
+    "loadFailed": "E‑mailové šablony se nepodařilo načíst.",
+    "status": {
+      "all": "Vše"
+    },
+    "columns": {
+      "name": "Název",
+      "status": "Stav",
+      "languages": "Jazyky",
+      "updatedAt": "Aktualizováno",
+      "selectAll": "Vybrat vše",
+      "selectRow": "Vybrat řádek"
+    }
+  },
+  "deleteModal": {
+    "titleSingle": "Smazat e‑mailovou šablonu",
+    "titleMultiple": "Smazat e‑mailové šablony",
+    "descriptionSingle": "Opravdu chcete smazat tuto e‑mailovou šablonu? Tuto akci nelze vrátit zpět.",
+    "descriptionMultiple": "Opravdu chcete smazat {{count}} e‑mailových šablon? Tuto akci nelze vrátit zpět."
+  },
+  "status": {
+    "draft": "Koncept",
+    "published": "Publikováno",
+    "archived": "Archivováno"
+  },
+  "edit": {
+    "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst."
+  },
+  "form": {
+    "field": {
+      "name": "Název",
+      "subject": "Předmět",
+      "subjectHelp": "Doplňte předmět pro každý jazyk. Můžete použít proměnné jako {{user.first_name}}.",
+      "subjectPlaceholder": "např. Vítejte, {{user.first_name}}"
+    },
+    "errors": {
+      "nameRequired": "Název je povinný.",
+      "nameTooLong": "Název je příliš dlouhý.",
+      "localesRequired": "Vyberte alespoň jeden jazyk.",
+      "baseLanguageMissing": "Základní jazyk musí patřit mezi dostupné jazyky."
+    }
+  },
+  "toast": {
+    "createdSuccessfully": "E‑mailová šablona byla vytvořena.",
+    "createFailed": "E‑mailovou šablonu se nepodařilo vytvořit.",
+    "updatedSuccessfully": "E‑mailová šablona byla uložena.",
+    "updateFailed": "E‑mailovou šablonu se nepodařilo uložit.",
+    "publishedSuccessfully": "E‑mailová šablona byla publikována.",
+    "publishFailed": "E‑mailovou šablonu se nepodařilo publikovat.",
+    "publishBlocked": "Publikaci nelze provést — viz diagnostika níže.",
+    "archivedSuccessfully": "E‑mailová šablona byla archivována.",
+    "archiveFailed": "E‑mailovou šablonu se nepodařilo archivovat.",
+    "unarchivedSuccessfully": "E‑mailová šablona byla obnovena do stavu koncept.",
+    "unarchiveFailed": "E‑mailovou šablonu se nepodařilo obnovit z archivu.",
+    "previewFailed": "Náhled se nepodařilo vykreslit.",
+    "previewLanguageUnavailable": "Tento jazyk není pro tuto šablonu dostupný.",
+    "duplicatedSuccessfully": "E‑mailová šablona byla duplikována.",
+    "duplicateFailed": "E‑mailovou šablonu se nepodařilo duplikovat.",
+    "madeDraftSuccessfully": "E‑mailová šablona byla vrácena do konceptu.",
+    "makeDraftFailed": "E‑mailovou šablonu se nepodařilo vrátit do konceptu.",
+    "deletedSuccessfully": "E‑mailová šablona byla smazána.",
+    "deleteFailed": "E‑mailovou šablonu se nepodařilo smazat.",
+    "nameAlreadyExists": "E‑mailová šablona s tímto názvem již existuje.",
+    "testEmailSentSuccessfully": "Testovací e-mail odeslán.",
+    "testEmailSendFailed": "Nepodařilo se odeslat testovací e-mail."
+  },
+  "actions": {
+    "preview": "Náhled",
+    "duplicate": "Duplikovat",
+    "archive": "Archivovat",
+    "unarchive": "Odarchivovat",
+    "publish": "Publikovat",
+    "makeDraft": "Označit jako koncept",
+    "edit": "Upravit",
+    "rename": "Přejmenovat",
+    "sendTest": "Odeslat test"
+  },
+  "language": {
+    "label": "Jazyk",
+    "baseLanguage": "Výchozí",
+    "notAddedLanguages": "Jazyky k přidání",
+    "setBaseLanguage": "Nastavit jako výchozí",
+    "setBaseTitle": "Změnit výchozí jazyk",
+    "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto šablonu?",
+    "createTitle": "Přidat překlad",
+    "createDescription": "Přidat překlad této šablony v jazyce {{language}}?",
+    "deleteTitle": "Smazat překlad",
+    "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
+  },
+  "publishDiagnostics": {
+    "errorsTitle_one": "{{count}} chyba – před publikací je nutné opravit",
+    "errorsTitle_few": "{{count}} chyby – před publikací je nutné opravit",
+    "errorsTitle_many": "{{count}} chyb – před publikací je nutné opravit",
+    "errorsTitle_other": "{{count}} chyb – před publikací je nutné opravit",
+    "warningsTitle_one": "{{count}} upozornění – zkontrolujte před publikací",
+    "warningsTitle_few": "{{count}} upozornění – zkontrolujte před publikací",
+    "warningsTitle_many": "{{count}} upozornění – zkontrolujte před publikací",
+    "warningsTitle_other": "{{count}} upozornění – zkontrolujte před publikací",
+    "elementIndex": "Prvek {{index}}",
+    "reasons": {
+      "name_missing": "Název šablony je povinný",
+      "no_language_versions": "Přidejte alespoň jednu jazykovou verzi",
+      "subject_missing": "Předmět je pro výchozí jazyk povinný",
+      "body_missing": "Tělo e-mailu je prázdné",
+      "button_label_missing": "Popisek tlačítka je povinný",
+      "button_url_missing": "Cíl tlačítka je povinný",
+      "empty_translation": "Překlad je prázdný",
+      "invalid_url_protocol": "URL používá nepovolený protokol",
+      "unchanged_from_base": "Překlad je totožný se základním jazykem",
+      "footer_missing": "Chybí zápatí"
+    },
+    "nodeTypes": {
+      "heading": "Nadpis",
+      "paragraph": "Text",
+      "button": "Tlačítko",
+      "footer": "Zápatí",
+      "image": "Obrázek"
+    },
+    "blockedToast": {
+      "save": "Šablonu nelze uložit. Podívejte se do diagnostiky",
+      "publish": "Šablonu nelze publikovat. Podívejte se do diagnostiky"
+    }
+  },
+  "builder": {
+    "placeholder": {
+      "writeSomethingOrSlash": "Napište / pro otevření nabídky bloků",
+      "heading": "Nadpis {{level}}",
+      "htmlCode": "Kód HTML…"
+    },
+    "blocks": {
+      "groups": {
+        "text": "Text",
+        "media": "Média",
+        "structure": "Struktura",
+        "interactive": "Interaktivní",
+        "footer": "Zápatí"
+      },
+      "text": {
+        "title": "Text",
+        "description": "Odstavec prostého textu."
+      },
+      "heading1": {
+        "title": "Nadpis 1",
+        "description": "Velký nadpis sekce (H1)."
+      },
+      "heading2": {
+        "title": "Nadpis 2",
+        "description": "Střední nadpis sekce (H2)."
+      },
+      "heading3": {
+        "title": "Nadpis 3",
+        "description": "Malý nadpis sekce (H3)."
+      },
+      "image": {
+        "title": "Obrázek",
+        "description": "Obrázek na celou šířku."
+      },
+      "logoHeader": {
+        "title": "Logo",
+        "description": "Celé logo."
+      },
+      "section": {
+        "title": "Sekce",
+        "description": "Kontejner pro seskupení obsahu."
+      },
+      "columns": {
+        "title": "Sloupce",
+        "description": "Vícesloupcové rozvržení."
+      },
+      "divider": {
+        "title": "Oddělovač",
+        "description": "Vodorovná dělicí čára."
+      },
+      "spacer": {
+        "title": "Mezera",
+        "description": "Svislý odstup mezi bloky."
+      },
+      "button": {
+        "title": "Tlačítko",
+        "description": "Tlačítko výzvy k akci."
+      },
+      "footer": {
+        "title": "Zápatí",
+        "description": "Textový blok zápatí."
+      }
+    }
+  },
+  "image": {
+    "uploadFailed": "Nahrávání obrázku se nezdařilo. Zkuste to znovu.",
+    "tooLarge": "Obrázek je příliš velký. Maximální velikost je 10 MB.",
+    "invalidType": "Neplatný typ obrázku. Povoleno: JPEG, PNG, GIF, WebP, BMP, TIFF."
+  },
+  "automationView": {
+    "title": "Automatizace",
+    "description": "Spravujte automatická e-mailová oznámení odesílaná v reakci na události na platformě.",
+    "createAutomation": "Vytvořit automatizaci",
+    "filters": {
+      "searchPlaceholder": "Hledat podle názvu nebo popisu...",
+      "all": "Vše",
+      "enabled": "Povolené",
+      "disabled": "Zakázané",
+      "drafts": "Koncepty",
+      "archived": "Archivované"
+    },
+    "status": {
+      "enabled": "Povoleno",
+      "disabled": "Zakázáno",
+      "draft": "Koncept",
+      "archived": "Archivováno"
+    },
+    "table": {
+      "name": "Název automatizace",
+      "status": "Stav",
+      "trigger": "Spouštěč",
+      "actions": "Akce",
+      "lastRun": "Poslední spuštění",
+      "updatedAt": "Aktualizováno",
+      "menu": "Menu",
+      "manage": "Spravovat",
+      "empty": "Nejsou definovány žádné automatizace. Klikněte na Vytvořit automatizaci a přidejte první.",
+      "emptyFiltered": "Žádné automatizace neodpovídají aktuálním filtrům. Zkuste upravit vyhledávání nebo filtr stavu.",
+      "emailCount_one": "{{count}} e-mail",
+      "emailCount_other": "{{count}} e-mailů",
+      "noRuns": "Zatím žádná spuštění",
+      "runSuccess": "Úspěšně dokončeno",
+      "runFailed": "Došlo k chybě"
+    },
+    "drawer": {
+      "title": "Podrobnosti automatizace",
+      "description": "Upravte konfiguraci vybrané automatizace.",
+      "nameLabel": "Název automatizace",
+      "descriptionLabel": "Popis",
+      "statusLabel": "Stav",
+      "statusDraft": "Koncept",
+      "statusEnabled": "Aktivní (Povoleno)",
+      "statusDisabled": "Neaktivní (Zakázáno)",
+      "statusArchived": "Archivováno",
+      "flowManagement": "Správa toku",
+      "openBuilder": "Otevřít editor kroků",
+      "pause": "Pozastavit",
+      "activate": "Aktivovat",
+      "simulationRequiredTooltip": "Automatizace musí nejprve projít simulací",
+      "archive": "Archivovat",
+      "save": "Uložit změny",
+      "cancel": "Zrušit",
+      "delete": "Smazat"
+    },
+    "deleteDialog": {
+      "title": "Smazat automatizaci?",
+      "description": "Tato akce je nevratná. Automatizace bude trvale smazána. Místo toho ji můžete archivovat.",
+      "confirm": "Smazat",
+      "cancel": "Zrušit"
+    },
+    "actionMenu": {
+      "openMenu": "Otevřít menu",
+      "settingsAndEdit": "Nastavení a úpravy",
+      "disable": "Zakázat oznámení",
+      "enable": "Povolit oznámení",
+      "delete": "Smazat automatizaci"
+    },
+    "newAutomation": {
+      "name": "Nová automatizace (Koncept)",
+      "description": "Definujte cíl a popis této automatizace a poté přejděte do editoru toku.",
+      "triggerPlaceholder": "Ke konfiguraci..."
+    },
+    "toasts": {
+      "created": "Automatizace úspěšně vytvořena.",
+      "createError": "Nepodařilo se vytvořit automatizaci.",
+      "updated": "Automatizace úspěšně uložena.",
+      "updateError": "Nepodařilo se uložit automatizaci.",
+      "deleted": "Automatizace smazána.",
+      "deleteError": "Nepodařilo se smazat automatizaci."
+    },
+    "seedDefaults": {
+      "button": "Generovat výchozí",
+      "dialog": {
+        "title": "Generovat výchozí automatizace?",
+        "description": "Budou vytvořeny všechny standardní automatizace (např. pozvánka uživatele, přivítání, připomínka hesla atd.) s výchozími e-mailovými šablonami. Stávající automatizace nebudou přepsány.",
+        "warning": "Upozornění: Nové automatizace budou vytvořeny v aktivním stavu a začnou okamžitě fungovat. Ujistěte se, že vaše e-mailové šablony jsou správně nakonfigurovány.",
+        "confirm": "Generovat",
+        "cancel": "Zrušit"
+      },
+      "toasts": {
+        "success": "Vygenerováno {{created}} automatizací (přeskočeno {{skipped}} existujících).",
+        "error": "Nepodařilo se vygenerovat výchozí automatizace."
+      }
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Zpět na automatizace",
+      "automations": "Automatizace",
+      "save": "Uložit",
+      "simulate": "Simulovat",
+      "active": "Aktivní",
+      "draft": "Koncept",
+      "duplicate": "Duplikovat",
+      "exportJson": "Exportovat jako JSON",
+      "delete": "Smazat automatizaci",
+      "savedJustNow": "Právě uloženo",
+      "savedMinutesAgo": "Uloženo před {{count}} min",
+      "simulationRequiredTooltip": "Spusťte simulaci a ujistěte se, že proběhne úspěšně, abyste mohli aktivovat automatizaci",
+      "invalidNodesTooltip": "Opravte všechny chybné uzly před aktivací automatizace",
+      "unsavedChangesTooltip": "Uložte změny před aktivací automatizace",
+      "leaveDialog": {
+        "title": "Neuložené změny",
+        "description": "Máte neuložené změny. Chcete uložit před odchodem?",
+        "saveAndLeave": "Uložit a odejít",
+        "leaveWithoutSaving": "Odejít bez uložení",
+        "cancel": "Zrušit"
+      },
+      "deleteDialog": {
+        "title": "Smazat automatizaci",
+        "description": "Opravdu chcete smazat tuto automatizaci? Tuto akci nelze vrátit zpět.",
+        "confirm": "Smazat",
+        "cancel": "Zrušit"
+      }
+    },
+    "sidebar": {
+      "title": "Kroky",
+      "description": "Přetáhněte bloky na plátno pro vytvoření workflow.",
+      "descriptionTrigger": "Začněte výběrem triggeru pro vaši automatizaci.",
+      "descriptionActions": "Přidejte akce, které se provedou po spuštění triggeru.",
+      "triggerInstruction": "Každá automatizace začíná triggerem. Přetáhněte jeden na plátno pro zahájení tvorby workflow.",
+      "triggers": "Triggery",
+      "actions": "Akce"
+    },
+    "blocks": {
+      "courseDeadline": "Termín kurzu",
+      "overdue": "Po termínu",
+      "notCompleted": "Nedokončeno",
+      "userEnrolled": "Uživatel zapsán",
+      "certificateExpiringSoon": "Certifikát brzy vyprší",
+      "liveTransmissionStartingSoon": "Živý přenos brzy začne",
+      "sendEmail": "Odeslat e-mail",
+      "userInvited": "Uživatel pozván",
+      "usersImportedInvite": "Uživatelé importováni (pozvánka)",
+      "userPasswordReminder": "Připomínka hesla",
+      "userPasswordChanged": "Heslo změněno",
+      "userWelcome": "Uvítací zpráva",
+      "userFirstLogin": "První přihlášení",
+      "usersAssignedToCourse": "Uživatelé přiřazeni ke kurzu",
+      "usersShortInactivity": "Krátká neaktivita",
+      "usersLongInactivity": "Dlouhá neaktivita",
+      "userChapterFinished": "Kapitola dokončena",
+      "userCourseFinished": "Kurz dokončen",
+      "userRegistered": "Uživatel registrován",
+      "userPasswordCreated": "Heslo vytvořeno",
+      "courseCompleted": "Kurz splněn",
+      "certificateExpirationWarning": "Varování o vypršení certifikátu",
+      "certificateArchived": "Certifikát archivován",
+      "announcementPublished": "Oznámení zveřejněno",
+      "courseChatUserMentioned": "Uživatel zmíněn v chatu",
+      "courseDueDateReminder": "Připomínka termínu kurzu"
+    },
+    "canvas": {
+      "emptyTitle": "Vaše plátno automatizace je prázdné",
+      "emptyDescription": "Přetáhněte trigger nebo akci z postranního panelu pro začátek.",
+      "emptyDescriptionTrigger": "Přetáhněte trigger z postranního panelu pro zahájení tvorby automatizace.",
+      "removeNode": "Odstranit uzel",
+      "simulationFailed": "Simulace zjistila chyby na tomto uzlu",
+      "deleteNodeDialogTitle": "Odstranit uzel",
+      "deleteNodeDialogDescription": "Opravdu chcete odstranit tento uzel? Tuto akci nelze vrátit zpět.",
+      "deleteNodeDialogCancel": "Zrušit",
+      "deleteNodeDialogConfirm": "Odstranit",
+      "addChild": "Přidat podřízený krok",
+      "zoomIn": "Přiblížit",
+      "zoomOut": "Oddálit",
+      "zoomReset": "Resetovat přiblížení"
+    },
+    "editPanel": {
+      "editTrigger": "Upravit trigger",
+      "editAction": "Upravit akci",
+      "nodeType": "Typ uzlu",
+      "changeTriggerLabel": "Změnit trigger na",
+      "changeTriggerDialogTitle": "Změnit trigger",
+      "changeTriggerDialogDescription": "Změna typu triggeru odstraní všechny akce a podmínky z automatizace. Na plátně zůstane pouze trigger. Opravdu chcete pokračovat?",
+      "changeTriggerDialogCancel": "Zrušit",
+      "changeTriggerDialogConfirm": "Smazat vše a změnit trigger",
+      "triggerValue": "Hodnota",
+      "triggerValuePlaceholder": "Zadejte hodnotu...",
+      "operator": "Operátor",
+      "operatorEquals": "Rovná se",
+      "operatorGreaterThan": "Větší než",
+      "operatorLessThan": "Menší než",
+      "operatorContains": "Obsahuje",
+      "emailSubject": "Předmět e-mailu",
+      "emailSubjectPlaceholder": "Zadejte předmět...",
+      "emailTemplate": "Šablona e-mailu",
+      "emailTemplatePlaceholder": "Vyberte šablonu",
+      "emailBody": "Tělo e-mailu",
+      "emailBodyPlaceholder": "Napište obsah e-mailu...",
+      "emailRecipient": "Příjemce",
+      "recipientEnrolledUser": "Zapsaný uživatel",
+      "recipientAdmin": "Administrátor",
+      "recipientManager": "Manažer",
+      "removeNode": "Odstranit tento krok"
+    },
+    "config": {
+      "daysBefore": "Dní předem",
+      "daysBeforePlaceholder": "např. 7",
+      "course": "Kurz",
+      "coursePlaceholder": "Vyberte kurz",
+      "daysOverdue": "Dní po termínu",
+      "daysOverduePlaceholder": "např. 3",
+      "daysEnrolled": "Dní od zápisu",
+      "daysEnrolledPlaceholder": "např. 30",
+      "minutesBefore": "Minut předem",
+      "minutesBeforePlaceholder": "např. 60",
+      "daysInactive": "Dní neaktivity",
+      "daysInactivePlaceholder": "např. 14"
+    },
+    "editAction": {
+      "title": "Upravit akci",
+      "sendEmail": "Odeslat e-mail",
+      "emailTemplate": "Šablona e-mailu",
+      "selectTemplate": "Vyberte šablonu...",
+      "language": "Jazyk",
+      "userDefaultLanguage": "Výchozí jazyk uživatele",
+      "placeholders": "Proměnné šablony",
+      "selectTemplateFirst": "Vyberte šablonu e-mailu pro zobrazení dostupných proměnných.",
+      "noPlaceholders": "Tato šablona nemá proměnné k vyplnění.",
+      "placeholdersDescription": "Přiřaďte každou proměnnou šablony k datům poskytovaným triggerem.",
+      "selectVariable": "Vyberte proměnnou triggeru...",
+      "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných.",
+      "defaultEmailNoMapping": "Výchozí e-mailová šablona nevyžaduje žádné mapování proměnných.",
+      "systemTemplateNoMapping": "Tato systémová šablona automaticky používá data z triggeru. Ruční mapování není vyžadováno.",
+      "defaultTemplatesGroup": "Systémové šablony",
+      "customTemplatesGroup": "Vlastní šablony",
+      "noCustomTemplates": "Nejsou k dispozici žádné publikované vlastní šablony.",
+      "templates": {
+        "defaultEmail": "Výchozí e-mail",
+        "userInvite": "Pozvání uživatele",
+        "welcome": "Uvítání",
+        "userFirstLogin": "První přihlášení",
+        "userAssignedToCourse": "Uživatel přiřazen ke kurzu",
+        "userShortInactivity": "Krátká neaktivita",
+        "userLongInactivity": "Dlouhá neaktivita",
+        "userFinishedChapter": "Kapitola dokončena",
+        "userFinishedCourse": "Kurz dokončen",
+        "createPasswordReminder": "Připomenutí vytvoření hesla",
+        "certificateExpirationWarning": "Upozornění na vypršení certifikátu",
+        "certificateExpired": "Certifikát vypršel",
+        "announcement": "Oznámení",
+        "courseDueDateReminder": "Připomenutí termínu kurzu",
+        "newUser": "Nový uživatel",
+        "finishedCourse": "Dokončený kurz"
+      }
+    },
+    "variables": {
+      "userFirstName": "Jméno uživatele",
+      "userLastName": "Příjmení uživatele",
+      "userEmail": "E-mailová adresa",
+      "inviteLink": "Aktivační odkaz",
+      "inviteLinkRegistration": "Registrační odkaz",
+      "resetPasswordLink": "Odkaz pro reset hesla",
+      "platformUrl": "Odkaz na platformu",
+      "loginDate": "Datum prvního přihlášení",
+      "courseName": "Název kurzu",
+      "courseUrl": "Odkaz na kurz",
+      "dueDate": "Termín dokončení",
+      "daysInactive": "Počet dní neaktivity",
+      "chapterName": "Název kapitoly",
+      "finishedAt": "Datum dokončení",
+      "certificateUrl": "Odkaz na certifikát",
+      "registrationDate": "Datum registrace",
+      "createdAt": "Datum vytvoření",
+      "daysLeft": "Zbývající dny",
+      "daysLeftExpiration": "Dní do vypršení",
+      "certificateName": "Název certifikátu",
+      "expirationDate": "Datum vypršení",
+      "archivedAt": "Datum archivace",
+      "recipientFirstName": "Jméno příjemce",
+      "recipientLastName": "Příjmení příjemce",
+      "announcementTitle": "Název oznámení",
+      "announcementContent": "Obsah oznámení",
+      "announcementUrl": "Odkaz na oznámení",
+      "mentionedFirstName": "Jméno zmíněného uživatele",
+      "mentionedLastName": "Příjmení zmíněného uživatele",
+      "authorFullName": "Celé jméno autora",
+      "messageContent": "Obsah zprávy",
+      "chatUrl": "Odkaz na zprávu",
+      "invitedByUserName": "Pozván/a (jméno)",
+      "hasCertificate": "Má certifikát",
+      "archiveReason": "Důvod archivace",
+      "profileLink": "Odkaz na profil uživatele",
+      "progressLink": "Odkaz na průběh kurzu",
+      "userName": "Celé jméno"
+    },
+    "simulation": {
+      "title": "Výsledek simulace",
+      "statusSuccess": "Úspěch",
+      "statusFailed": "Neúspěch",
+      "errorTitle": "Chyba simulace",
+      "retry": "Opakovat simulaci",
+      "errorsTitle": "Zjištěné problémy",
+      "readyToActivate": "Automatizace je připravena k aktivaci.",
+      "tabPreview": "Náhled e-mailu",
+      "tabEventData": "Data události",
+      "tabMappings": "Mapování",
+      "from": "Od:",
+      "to": "Komu:",
+      "subject": "Předmět:",
+      "noEventData": "Žádná data události — vyberte typ triggeru.",
+      "availableVariables": "Dostupné proměnné události",
+      "variableName": "Proměnná",
+      "variableLabel": "Popis",
+      "variableType": "Typ",
+      "placeholder": "Placeholder",
+      "mappedTo": "Mapováno na",
+      "sampleValue": "Ukázková hodnota",
+      "unmapped": "Nemapováno",
+      "errors": {
+        "triggerNodeName": "Startovní událost",
+        "selectTriggerType": "Vyberte typ startovní události",
+        "addTriggerNode": "Přidejte alespoň jeden trigger uzel",
+        "actionNodeName": "Odeslat e-mail",
+        "actionLabel": "Akce",
+        "selectEmailTemplate": "Vyberte publikovanou šablonu e-mailu",
+        "selectLanguage": "Vyberte jazyk šablony e-mailu",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} není namapován — přiřaďte proměnnou události",
+        "addActionNode": "Přidejte alespoň jeden uzel akce (např. Odeslat e-mail)"
+      },
+      "preview": {
+        "subject": "Byli jste přiřazeni ke kurzu: {{courseName}}",
+        "greeting": "Ahoj {{name}}!",
+        "assignedToCourse": "Byli jste přiřazeni k novému kurzu: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Přejít na kurz",
+        "unavailable": "Náhled není k dispozici",
+        "loadFailed": "Nepodařilo se načíst náhled šablony.",
+        "label": "Náhled",
+        "systemTemplateNote": "Systémová šablona <strong>{{templateLabel}}</strong> — výchozí obsah je generován automaticky při odeslání.",
+        "emailDescription": "Tento e-mail bude odeslán s obsahem odpovídajícím vybranému triggeru a namapovaným proměnným.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Jan",
+        "lastName": "Novák",
+        "fullName": "Jan Novák",
+        "email": "jan.novak@example.com",
+        "courseName": "Školení BOZP 2025",
+        "chapterName": "Kapitola 1: Úvod",
+        "certificateName": "Certifikát BOZP",
+        "announcementTitle": "Nové školení k dispozici",
+        "announcementContent": "Zveme vás na nové školení...",
+        "authorFullName": "Eva Nováková",
+        "messageContent": "Hej, podívej se na to!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Eva Nováková"
+      }
+    }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Krok automatizace nebyl nalezen",
+      "idMismatch": "Nemůžete změnit nadřazený krok ani automatizaci",
+      "updateFailed": "Nepodařilo se aktualizovat krok automatizace",
+      "deleteFailed": "Chyba při mazání kroku automatizace",
+      "nodeDeleteFailed": "Chyba při hledání uzlu ke smazání",
+      "noRootStep": "Prázdná automatizace musí nejprve obsahovat kořenový krok",
+      "hasRootAlready": "Automatizace již obsahuje kořenový krok",
+      "cycleDetected": "Strom kroků automatizace nesmí obsahovat cykly",
+      "stepTreeBuildFailed": "Chyba při vytváření stromu kroků",
+      "wrongNumberOfRoots": "Automatizace může mít pouze jeden kořenový krok",
+      "treeNotConnected": "Ne všechny zadané kroky jsou mezi sebou propojené",
+      "bulkInsertFailed": "Nepodařilo se aktualizovat kroky automatizace"
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "E‑mailové šablony",
+      "edit": "Upravit"
+    },
+    "list": {
+      "title": "E‑mailové šablony",
+      "createButton": "Vytvořit novou",
+      "deleteSelected": "Smazat vybrané",
+      "searchPlaceholder": "Hledat podle názvu",
+      "statusFilter": "Stav",
+      "empty": "Zatím zde nejsou žádné šablony.",
+      "loading": "Načítání šablon...",
+      "loadFailed": "E‑mailové šablony se nepodařilo načíst.",
+      "status": {
+        "all": "Vše"
+      },
+      "columns": {
+        "name": "Název",
+        "status": "Stav",
+        "languages": "Jazyky",
+        "updatedAt": "Aktualizováno",
+        "selectAll": "Vybrat vše",
+        "selectRow": "Vybrat řádek"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Smazat e‑mailovou šablonu",
+      "titleMultiple": "Smazat e‑mailové šablony",
+      "descriptionSingle": "Opravdu chcete smazat tuto e‑mailovou šablonu? Tuto akci nelze vrátit zpět.",
+      "descriptionMultiple": "Opravdu chcete smazat {{count}} e‑mailových šablon? Tuto akci nelze vrátit zpět."
+    },
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "archived": "Archivováno"
+    },
+    "edit": {
+      "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst."
+    },
+    "form": {
+      "field": {
+        "name": "Název",
+        "subject": "Předmět",
+        "subjectHelp": "Doplňte předmět pro každý jazyk. Můžete použít proměnné jako {{user.first_name}}.",
+        "subjectPlaceholder": "např. Vítejte, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Název je povinný.",
+        "nameTooLong": "Název je příliš dlouhý.",
+        "localesRequired": "Vyberte alespoň jeden jazyk.",
+        "baseLanguageMissing": "Základní jazyk musí patřit mezi dostupné jazyky."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "E‑mailová šablona byla vytvořena.",
+      "createFailed": "E‑mailovou šablonu se nepodařilo vytvořit.",
+      "updatedSuccessfully": "E‑mailová šablona byla uložena.",
+      "updateFailed": "E‑mailovou šablonu se nepodařilo uložit.",
+      "publishedSuccessfully": "E‑mailová šablona byla publikována.",
+      "publishFailed": "E‑mailovou šablonu se nepodařilo publikovat.",
+      "publishBlocked": "Publikaci nelze provést — viz diagnostika níže.",
+      "archivedSuccessfully": "E‑mailová šablona byla archivována.",
+      "archiveFailed": "E‑mailovou šablonu se nepodařilo archivovat.",
+      "unarchivedSuccessfully": "E‑mailová šablona byla obnovena do stavu koncept.",
+      "unarchiveFailed": "E‑mailovou šablonu se nepodařilo obnovit z archivu.",
+      "previewFailed": "Náhled se nepodařilo vykreslit.",
+      "previewLanguageUnavailable": "Tento jazyk není pro tuto šablonu dostupný.",
+      "duplicatedSuccessfully": "E‑mailová šablona byla duplikována.",
+      "duplicateFailed": "E‑mailovou šablonu se nepodařilo duplikovat.",
+      "madeDraftSuccessfully": "E‑mailová šablona byla vrácena do konceptu.",
+      "makeDraftFailed": "E‑mailovou šablonu se nepodařilo vrátit do konceptu.",
+      "deletedSuccessfully": "E‑mailová šablona byla smazána.",
+      "deleteFailed": "E‑mailovou šablonu se nepodařilo smazat.",
+      "nameAlreadyExists": "E‑mailová šablona s tímto názvem již existuje.",
+      "testEmailSentSuccessfully": "Testovací e-mail odeslán.",
+      "testEmailSendFailed": "Nepodařilo se odeslat testovací e-mail."
+    },
+    "actions": {
+      "preview": "Náhled",
+      "duplicate": "Duplikovat",
+      "archive": "Archivovat",
+      "unarchive": "Odarchivovat",
+      "publish": "Publikovat",
+      "makeDraft": "Označit jako koncept",
+      "edit": "Upravit",
+      "rename": "Přejmenovat",
+      "sendTest": "Odeslat test"
+    },
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Změnit výchozí jazyk",
+      "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto šablonu?",
+      "createTitle": "Přidat překlad",
+      "createDescription": "Přidat překlad této šablony v jazyce {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Název šablony je povinný",
+        "no_language_versions": "Přidejte alespoň jednu jazykovou verzi",
+        "subject_missing": "Předmět je pro výchozí jazyk povinný",
+        "body_missing": "Tělo e-mailu je prázdné",
+        "button_label_missing": "Popisek tlačítka je povinný",
+        "button_url_missing": "Tlačítko nemá cíl",
+        "empty_translation": "Překlad je prázdný",
+        "invalid_url_protocol": "URL používá nepovolený protokol",
+        "unchanged_from_base": "Překlad je totožný se základním jazykem",
+        "footer_missing": "Chybí zápatí",
+        "logo_branding_missing": "Chybí logo značky"
+      },
+      "blockedToast": {
+        "save": "Šablonu nelze uložit. Podívejte se do diagnostiky",
+        "publish": "Šablonu nelze publikovat. Podívejte se do diagnostiky"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Napište / pro otevření nabídky bloků",
+        "heading": "Nadpis {{level}}",
+        "htmlCode": "Kód HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Média",
+          "structure": "Struktura",
+          "interactive": "Interaktivní",
+          "footer": "Zápatí"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Odstavec prostého textu."
+        },
+        "heading1": {
+          "title": "Nadpis 1",
+          "description": "Velký nadpis sekce (H1)."
+        },
+        "heading2": {
+          "title": "Nadpis 2",
+          "description": "Střední nadpis sekce (H2)."
+        },
+        "heading3": {
+          "title": "Nadpis 3",
+          "description": "Malý nadpis sekce (H3)."
+        },
+        "image": {
+          "title": "Obrázek",
+          "description": "Obrázek na celou šířku."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Celé logo."
+        },
+        "variable": {
+          "title": "Proměnná",
+          "description": "Vloží {{proměnnou}}, které lze později v automatizačním enginu přiřadit hodnotu."
+        },
+        "section": {
+          "title": "Sekce",
+          "description": "Kontejner pro seskupení obsahu."
+        },
+        "columns": {
+          "title": "Sloupce",
+          "description": "Vícesloupcové rozvržení."
+        },
+        "divider": {
+          "title": "Oddělovač",
+          "description": "Vodorovná dělicí čára."
+        },
+        "spacer": {
+          "title": "Mezera",
+          "description": "Svislý odstup mezi bloky."
+        },
+        "button": {
+          "title": "Tlačítko",
+          "description": "Tlačítko výzvy k akci."
+        },
+        "footer": {
+          "title": "Zápatí",
+          "description": "Textový blok zápatí."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Nahrávání obrázku se nezdařilo. Zkuste to znovu.",
+      "tooLarge": "Obrázek je příliš velký. Maximální velikost je 10 MB.",
+      "invalidType": "Neplatný typ obrázku. Povoleno: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   }
 }

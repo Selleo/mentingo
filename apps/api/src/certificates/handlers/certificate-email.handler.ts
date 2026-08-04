@@ -56,12 +56,13 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
 
       const { courseName, courseLink, expiresAt } = certificate;
 
-      const { text, html } = new CertificateExpirationWarningEmail({
+      const emailTemplate = new CertificateExpirationWarningEmail({
         courseName,
         courseLink,
         expiresAt,
         ...defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -91,12 +92,13 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
 
       const { courseName, courseLink } = certificate;
 
-      const { text, html } = new CertificateExpiredEmail({
+      const emailTemplate = new CertificateExpiredEmail({
         courseName,
         courseLink,
         reason,
         ...defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       await this.emailService.sendEmailWithLogo(
         {

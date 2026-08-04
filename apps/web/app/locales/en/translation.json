@@ -16,7 +16,6 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
-      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending..."
     },
@@ -330,6 +329,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automations",
     "settings": "Settings",
     "logout": "Logout",
     "panel": "panel",
@@ -354,6 +354,7 @@
     "announcements": "Announcements",
     "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
+    "emailTemplates": "Email templates",
     "manage": "Manage",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
@@ -4135,7 +4136,9 @@
     "tenants": "Organizations",
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
-    "adminLearningPathEditor": "Development Path Editor"
+    "adminLearningPathEditor": "Development Path Editor",
+    "emailTemplates": "Email templates",
+    "editEmailTemplate": "Edit email template"
   },
   "learningPathsView": {
     "title": "Development Paths",
@@ -4947,6 +4950,635 @@
       "liveKitNotConfigured": "LiveKit is not configured.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Email templates",
+      "edit": "Edit"
+    },
+    "list": {
+      "title": "Email templates",
+      "createButton": "Create new",
+      "deleteSelected": "Delete selected",
+      "searchPlaceholder": "Search by name",
+      "statusFilter": "Status",
+      "empty": "No email templates yet.",
+      "loading": "Loading templates...",
+      "loadFailed": "Could not load email templates.",
+      "status": {
+        "all": "All"
+      },
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "languages": "Languages",
+        "updatedAt": "Updated at",
+        "selectAll": "Select all",
+        "selectRow": "Select row"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Delete email template",
+      "titleMultiple": "Delete email templates",
+      "descriptionSingle": "Are you sure you want to delete this email template? This action cannot be undone.",
+      "descriptionMultiple": "Are you sure you want to delete {{count}} email templates? This action cannot be undone."
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "edit": {
+      "loadFailed": "Could not load this email template."
+    },
+    "form": {
+      "field": {
+        "name": "Name",
+        "subject": "Subject line",
+        "subjectHelp": "Fill in the subject for each language. Variables like {{user.first_name}} can be used.",
+        "subjectPlaceholder": "e.g. Welcome, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Name is required.",
+        "nameTooLong": "Name is too long.",
+        "localesRequired": "Choose at least one language.",
+        "baseLanguageMissing": "Base language must be one of the available languages."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Email template created.",
+      "createFailed": "Failed to create email template.",
+      "updatedSuccessfully": "Email template saved.",
+      "updateFailed": "Failed to save email template.",
+      "publishedSuccessfully": "Email template published.",
+      "publishFailed": "Failed to publish email template.",
+      "publishBlocked": "Cannot publish — see the diagnostics below.",
+      "archivedSuccessfully": "Email template archived.",
+      "archiveFailed": "Failed to archive email template.",
+      "unarchivedSuccessfully": "Email template restored to draft.",
+      "unarchiveFailed": "Failed to unarchive email template.",
+      "previewFailed": "Failed to render preview.",
+      "previewLanguageUnavailable": "This language is not available for this template.",
+      "duplicatedSuccessfully": "Email template duplicated.",
+      "duplicateFailed": "Failed to duplicate email template.",
+      "madeDraftSuccessfully": "Email template reverted to draft.",
+      "makeDraftFailed": "Failed to revert email template to draft.",
+      "deletedSuccessfully": "Email template deleted.",
+      "deleteFailed": "Failed to delete email template.",
+      "nameAlreadyExists": "An email template with this name already exists.",
+      "testEmailSentSuccessfully": "Test email sent.",
+      "testEmailSendFailed": "Failed to send test email."
+    },
+    "actions": {
+      "preview": "Preview",
+      "duplicate": "Duplicate",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "publish": "Publish",
+      "makeDraft": "Make draft",
+      "edit": "Edit",
+      "rename": "Rename",
+      "sendTest": "Send test"
+    },
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Default",
+      "notAddedLanguages": "Languages to add",
+      "setBaseLanguage": "Set as default",
+      "setBaseTitle": "Change default language",
+      "setBaseDescription": "Use {{language}} as the default language for this template?",
+      "createTitle": "Add translation",
+      "createDescription": "Add a translation for this template in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} error — must be fixed before publishing",
+      "errorsTitle_other": "{{count}} errors — must be fixed before publishing",
+      "warningsTitle_one": "{{count}} warning — review before publishing",
+      "warningsTitle_other": "{{count}} warnings — review before publishing",
+      "elementIndex": "Element {{index}}",
+      "reasons": {
+        "name_missing": "Template name is required",
+        "no_language_versions": "Add at least one language version",
+        "subject_missing": "Subject line is required for the default language",
+        "body_missing": "Email body is empty",
+        "button_label_missing": "Button label is required",
+        "button_url_missing": "Button redirect target is required",
+        "empty_translation": "Translation is empty",
+        "invalid_url_protocol": "URL uses a disallowed protocol",
+        "unchanged_from_base": "Translation is identical to the base language",
+        "footer_missing": "Footer is missing"
+      },
+      "nodeTypes": {
+        "heading": "Heading",
+        "paragraph": "Text",
+        "button": "Button",
+        "footer": "Footer",
+        "image": "Image"
+      },
+      "blockedToast": {
+        "save": "Cannot save template. See diagnostics",
+        "publish": "Cannot publish template. See diagnostics"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Type / to open the block menu",
+        "heading": "Heading {{level}}",
+        "htmlCode": "HTML code…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Media",
+          "structure": "Structure",
+          "interactive": "Interactive",
+          "footer": "Footer"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Plain text paragraph."
+        },
+        "heading1": {
+          "title": "Heading 1",
+          "description": "Large section heading (H1)."
+        },
+        "heading2": {
+          "title": "Heading 2",
+          "description": "Medium section heading (H2)."
+        },
+        "heading3": {
+          "title": "Heading 3",
+          "description": "Small section heading (H3)."
+        },
+        "image": {
+          "title": "Image",
+          "description": "Full-width image."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Full logo."
+        },
+        "section": {
+          "title": "Section",
+          "description": "Grouped content container."
+        },
+        "columns": {
+          "title": "Columns",
+          "description": "Multi-column layout."
+        },
+        "divider": {
+          "title": "Divider",
+          "description": "Horizontal divider line."
+        },
+        "spacer": {
+          "title": "Spacer",
+          "description": "Vertical spacing between blocks."
+        },
+        "button": {
+          "title": "Button",
+          "description": "Call-to-action button."
+        },
+        "footer": {
+          "title": "Footer",
+          "description": "Footer text block."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Image upload failed. Please try again.",
+      "tooLarge": "Image is too large. Maximum size is 10 MB.",
+      "invalidType": "Invalid image type. Allowed: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "automationView": {
+    "title": "Automations",
+    "description": "Manage automatic email notifications sent in response to platform events.",
+    "createAutomation": "Create Automation",
+    "openLogs": "Open logs",
+    "filters": {
+      "searchPlaceholder": "Search by name or description...",
+      "all": "All",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "drafts": "Drafts",
+      "archived": "Archived"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "table": {
+      "name": "Automation name",
+      "status": "Status",
+      "trigger": "Trigger",
+      "actions": "Actions",
+      "lastRun": "Last run",
+      "updatedAt": "Updated",
+      "menu": "Menu",
+      "manage": "Manage",
+      "empty": "No automations defined. Click Create Automation to add the first one.",
+      "emptyFiltered": "No automations match the current filters. Try adjusting your search or status filter.",
+      "emailCount_one": "{{count}} e-mail",
+      "emailCount_other": "{{count}} e-mails",
+      "noRuns": "No runs yet",
+      "runSuccess": "Completed successfully",
+      "runFailed": "An error occurred"
+    },
+    "drawer": {
+      "title": "Automation details",
+      "description": "Edit the configuration of the selected automation.",
+      "nameLabel": "Automation name",
+      "descriptionLabel": "Description",
+      "statusLabel": "Status",
+      "statusDraft": "Draft",
+      "statusEnabled": "Active (Enabled)",
+      "statusDisabled": "Inactive (Disabled)",
+      "statusArchived": "Archived",
+      "flowManagement": "Flow management",
+      "openBuilder": "Open step builder",
+      "pause": "Pause",
+      "activate": "Activate",
+      "simulationRequiredTooltip": "The automation must pass a simulation first",
+      "archive": "Archive",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "deleteDialog": {
+      "title": "Delete automation?",
+      "description": "This action is irreversible. The automation will be permanently deleted. You can archive it instead.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "actionMenu": {
+      "openMenu": "Open menu",
+      "settingsAndEdit": "Settings & edit",
+      "disable": "Disable notification",
+      "enable": "Enable notification",
+      "delete": "Delete automation"
+    },
+    "newAutomation": {
+      "name": "New automation (Draft)",
+      "description": "Define the goal and description of this automation, then proceed to the flow builder.",
+      "triggerPlaceholder": "To be configured..."
+    },
+    "toasts": {
+      "created": "Automation created successfully.",
+      "createError": "Failed to create automation.",
+      "updated": "Automation saved successfully.",
+      "updateError": "Failed to save automation.",
+      "deleted": "Automation deleted.",
+      "deleteError": "Failed to delete automation."
+    },
+    "seedDefaults": {
+      "button": "Generate defaults",
+      "dialog": {
+        "title": "Generate default automations?",
+        "description": "All standard automations (e.g. user invitation, welcome, password reminder, etc.) will be created with default email templates. Existing automations will not be overwritten.",
+        "warning": "Warning: New automations will be created in an active state and will start working immediately. Make sure your email templates are properly configured.",
+        "confirm": "Generate",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "success": "Generated {{created}} automations (skipped {{skipped}} existing).",
+        "error": "Failed to generate default automations."
+      }
+    }
+  },
+  "automationLogs": {
+    "title": "Automation Logs",
+    "description": "View the execution history of all automations. Click on an entry to see full details.",
+    "backToAutomations": "Back to automations",
+    "status": {
+      "success": "Success",
+      "sent": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, event, or recipient...",
+      "all": "All statuses",
+      "success": "Success",
+      "sent": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "table": {
+      "automation": "Automation",
+      "status": "Status",
+      "emails": "Emails",
+      "recipients": "recipients",
+      "ranAt": "Ran at",
+      "duration": "Duration",
+      "details": "Details",
+      "empty": "No log entries found."
+    },
+    "detail": {
+      "title": "Log details",
+      "description": "Full information about this automation run.",
+      "ranAt": "Ran at",
+      "triggerEvent": "Trigger event",
+      "automation": "Automation",
+      "status": "Status",
+      "error": "Error",
+      "noEmails": "No email recipients.",
+      "duration": "Duration",
+      "recipient": "Recipient",
+      "template": "Template",
+      "language": "Language",
+      "skipReason": "Reason for skipping",
+      "failReason": "Reason for failure",
+      "emailsTitle": "Emails ({{count}})"
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Back to automations",
+      "automations": "Automations",
+      "save": "Save",
+      "simulate": "Simulate",
+      "active": "Active",
+      "draft": "Draft",
+      "duplicate": "Duplicate",
+      "exportJson": "Export as JSON",
+      "delete": "Delete automation",
+      "savedJustNow": "Saved just now",
+      "savedMinutesAgo": "Saved {{count}} min ago",
+      "simulationRequiredTooltip": "Run a simulation and ensure it passes before activating the automation",
+      "invalidNodesTooltip": "Fix all invalid nodes before activating the automation",
+      "unsavedChangesTooltip": "Save changes before activating the automation",
+      "leaveDialog": {
+        "title": "Unsaved changes",
+        "description": "You have unsaved changes. Would you like to save before leaving?",
+        "saveAndLeave": "Save and leave",
+        "leaveWithoutSaving": "Leave without saving",
+        "cancel": "Cancel"
+      },
+      "deleteDialog": {
+        "title": "Delete automation",
+        "description": "Are you sure you want to delete this automation? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "sidebar": {
+      "title": "Steps",
+      "description": "Drag blocks onto the canvas to build your workflow.",
+      "descriptionTrigger": "Start by choosing a trigger for your automation.",
+      "descriptionActions": "Add actions that will execute when the trigger fires.",
+      "triggerInstruction": "Every automation starts with a trigger. Drag one onto the canvas to begin building your workflow.",
+      "triggers": "Triggers",
+      "actions": "Actions"
+    },
+    "blocks": {
+      "courseDeadline": "Course deadline",
+      "overdue": "Overdue",
+      "notCompleted": "Not completed",
+      "userEnrolled": "User enrolled",
+      "certificateExpiringSoon": "Certificate expiring soon",
+      "liveTransmissionStartingSoon": "Live transmission starting soon",
+      "sendEmail": "Send email",
+      "userInvited": "User invited",
+      "usersImportedInvite": "Users imported (invite)",
+      "userPasswordReminder": "Password reminder",
+      "userPasswordChanged": "Password changed",
+      "userWelcome": "Welcome message",
+      "userFirstLogin": "First login",
+      "usersAssignedToCourse": "Users assigned to course",
+      "usersShortInactivity": "Short inactivity",
+      "usersLongInactivity": "Long inactivity",
+      "userChapterFinished": "Chapter finished",
+      "userCourseFinished": "Course finished",
+      "userRegistered": "User registered",
+      "userPasswordCreated": "Password created",
+      "courseCompleted": "Course completed",
+      "certificateExpirationWarning": "Certificate expiration warning",
+      "certificateArchived": "Certificate archived",
+      "announcementPublished": "Announcement published",
+      "courseChatUserMentioned": "User mentioned in chat",
+      "courseDueDateReminder": "Course due date reminder"
+    },
+    "canvas": {
+      "emptyTitle": "Your automation canvas is empty",
+      "emptyDescription": "Drag a trigger or action from the sidebar to get started.",
+      "emptyDescriptionTrigger": "Drag a trigger from the sidebar to start building your automation.",
+      "removeNode": "Remove node",
+      "simulationFailed": "Simulation detected errors on this node",
+      "deleteNodeDialogTitle": "Remove node",
+      "deleteNodeDialogDescription": "Are you sure you want to remove this node? This action cannot be undone.",
+      "deleteNodeDialogCancel": "Cancel",
+      "deleteNodeDialogConfirm": "Remove",
+      "addChild": "Add child step",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomReset": "Reset zoom"
+    },
+    "editPanel": {
+      "editTrigger": "Edit Trigger",
+      "editAction": "Edit Action",
+      "nodeType": "Node type",
+      "changeTriggerLabel": "Change trigger to",
+      "changeTriggerDialogTitle": "Change trigger",
+      "changeTriggerDialogDescription": "Changing the trigger type will remove all actions and conditions from the automation. Only the trigger will remain on the canvas. Are you sure you want to continue?",
+      "changeTriggerDialogCancel": "Cancel",
+      "changeTriggerDialogConfirm": "Delete all and change trigger",
+      "triggerValue": "Value",
+      "triggerValuePlaceholder": "Enter value...",
+      "operator": "Operator",
+      "operatorEquals": "Equals",
+      "operatorGreaterThan": "Greater than",
+      "operatorLessThan": "Less than",
+      "operatorContains": "Contains",
+      "emailSubject": "Email subject",
+      "emailSubjectPlaceholder": "Enter subject...",
+      "emailTemplate": "Email template",
+      "emailTemplatePlaceholder": "Select a template",
+      "emailBody": "Email body",
+      "emailBodyPlaceholder": "Write your email content...",
+      "emailRecipient": "Recipient",
+      "recipientEnrolledUser": "Enrolled user",
+      "recipientAdmin": "Administrator",
+      "recipientManager": "Manager",
+      "removeNode": "Remove this step",
+      "deleteNodeDialogTitle": "Remove node",
+      "deleteNodeDialogDescription": "Are you sure you want to remove this node? This action cannot be undone.",
+      "deleteNodeDialogCancel": "Cancel",
+      "deleteNodeDialogConfirm": "Remove"
+    },
+    "config": {
+      "daysBefore": "Days before",
+      "daysBeforePlaceholder": "e.g. 7",
+      "course": "Course",
+      "coursePlaceholder": "Select a course",
+      "daysOverdue": "Days overdue",
+      "daysOverduePlaceholder": "e.g. 3",
+      "daysEnrolled": "Days since enrollment",
+      "daysEnrolledPlaceholder": "e.g. 30",
+      "minutesBefore": "Minutes before",
+      "minutesBeforePlaceholder": "e.g. 60",
+      "daysInactive": "Days of inactivity",
+      "daysInactivePlaceholder": "e.g. 14"
+    },
+    "editAction": {
+      "title": "Edit Action",
+      "sendEmail": "Send Email",
+      "emailTemplate": "Email template",
+      "selectTemplate": "Select a template...",
+      "language": "Language",
+      "userDefaultLanguage": "User's default language",
+      "placeholders": "Template placeholders",
+      "selectTemplateFirst": "Select an email template to see available placeholders.",
+      "noPlaceholders": "This template has no placeholders to fill.",
+      "placeholdersDescription": "Map each template placeholder to a variable provided by the trigger.",
+      "selectVariable": "Select trigger variable...",
+      "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables.",
+      "defaultEmailNoMapping": "The default email template does not require any placeholder mapping.",
+      "systemTemplateNoMapping": "This system template automatically uses data from the trigger. No manual mapping is required.",
+      "defaultTemplatesGroup": "System templates",
+      "customTemplatesGroup": "Custom templates",
+      "noCustomTemplates": "No published custom templates available.",
+      "templates": {
+        "defaultEmail": "Default Email",
+        "userInvite": "User Invite",
+        "welcome": "Welcome",
+        "userFirstLogin": "First Login",
+        "userAssignedToCourse": "User Assigned to Course",
+        "userShortInactivity": "Short Inactivity",
+        "userLongInactivity": "Long Inactivity",
+        "userFinishedChapter": "Chapter Finished",
+        "userFinishedCourse": "Course Finished",
+        "createPasswordReminder": "Create Password Reminder",
+        "certificateExpirationWarning": "Certificate Expiration Warning",
+        "certificateExpired": "Certificate Expired",
+        "announcement": "Announcement",
+        "courseDueDateReminder": "Course Due Date Reminder",
+        "newUser": "New User",
+        "finishedCourse": "Finished Course"
+      }
+    },
+    "variables": {
+      "userFirstName": "User first name",
+      "userLastName": "User last name",
+      "userEmail": "Email address",
+      "inviteLink": "Activation link",
+      "inviteLinkRegistration": "Registration link",
+      "resetPasswordLink": "Password reset link",
+      "platformUrl": "Platform link",
+      "loginDate": "First login date",
+      "courseName": "Course name",
+      "courseUrl": "Course link",
+      "dueDate": "Due date",
+      "daysInactive": "Days of inactivity",
+      "chapterName": "Chapter name",
+      "finishedAt": "Completion date",
+      "certificateUrl": "Certificate link",
+      "registrationDate": "Registration date",
+      "createdAt": "Creation date",
+      "daysLeft": "Days remaining",
+      "daysLeftExpiration": "Days until expiration",
+      "certificateName": "Certificate name",
+      "expirationDate": "Expiration date",
+      "archivedAt": "Archive date",
+      "recipientFirstName": "Recipient first name",
+      "recipientLastName": "Recipient last name",
+      "announcementTitle": "Announcement title",
+      "announcementContent": "Announcement content",
+      "announcementUrl": "Announcement link",
+      "mentionedFirstName": "Mentioned user first name",
+      "mentionedLastName": "Mentioned user last name",
+      "authorFullName": "Author full name",
+      "messageContent": "Message content",
+      "chatUrl": "Message link",
+      "invitedByUserName": "Invited by (name)",
+      "hasCertificate": "Has certificate",
+      "archiveReason": "Archive reason",
+      "profileLink": "User profile link",
+      "progressLink": "Course progress link",
+      "userName": "Full name"
+    },
+    "simulation": {
+      "title": "Simulation Result",
+      "statusSuccess": "Success",
+      "statusFailed": "Failed",
+      "errorTitle": "Simulation Error",
+      "retry": "Retry Simulation",
+      "errorsTitle": "Detected Issues",
+      "readyToActivate": "Automation is ready to activate.",
+      "tabPreview": "Email Preview",
+      "tabEventData": "Event Data",
+      "tabMappings": "Mappings",
+      "from": "From:",
+      "to": "To:",
+      "subject": "Subject:",
+      "noEventData": "No event data — select a trigger type.",
+      "availableVariables": "Available Event Variables",
+      "variableName": "Variable",
+      "variableLabel": "Label",
+      "variableType": "Type",
+      "placeholder": "Placeholder",
+      "mappedTo": "Mapped to",
+      "sampleValue": "Sample Value",
+      "unmapped": "Unmapped",
+      "errors": {
+        "triggerNodeName": "Start event",
+        "selectTriggerType": "Select a start event type",
+        "addTriggerNode": "Add at least one trigger node",
+        "actionNodeName": "Send email",
+        "actionLabel": "Action",
+        "selectEmailTemplate": "Select a published email template",
+        "selectLanguage": "Select the email template language",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} is not mapped — assign an event variable",
+        "addActionNode": "Add at least one action node (e.g. Send email)"
+      },
+      "preview": {
+        "subject": "You have been assigned to course: {{courseName}}",
+        "greeting": "Hi {{name}}!",
+        "assignedToCourse": "You have been assigned to a new course: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Go to course",
+        "unavailable": "Preview unavailable",
+        "loadFailed": "Could not load the template preview.",
+        "label": "Preview",
+        "systemTemplateNote": "System template <strong>{{templateLabel}}</strong> — default content is generated automatically during delivery.",
+        "emailDescription": "This email will be sent with content matching the selected trigger and mapped variables.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "John",
+        "lastName": "Smith",
+        "fullName": "John Smith",
+        "email": "john.smith@example.com",
+        "courseName": "Health & Safety Training 2025",
+        "chapterName": "Chapter 1: Introduction",
+        "certificateName": "H&S Certificate",
+        "announcementTitle": "New training available",
+        "announcementContent": "We invite you to a new training course...",
+        "authorFullName": "Jane Doe",
+        "messageContent": "Hey, check this out!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Jane Doe"
+      }
+    }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Automation step not found",
+      "idMismatch": "You can't change step's parent or automation",
+      "updateFailed": "Couldn't update automation step",
+      "deleteFailed": "Error while deleting automation step",
+      "nodeDeleteFailed": "Error while finding node to delete",
+      "noRootStep": "Empty automation has to have root step first",
+      "hasRootAlready": "Automation already has a root step",
+      "cycleDetected": "Automation step tree can't have cycles",
+      "stepTreeBuildFailed": "Error while building step tree",
+      "wrongNumberOfRoots": "Automation can have only 1 root",
+      "treeNotConnected": "Not all provided steps are connected with each other",
+      "bulkInsertFailed": "Could not update automation steps"
     }
   }
 }

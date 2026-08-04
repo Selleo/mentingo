@@ -16,7 +16,6 @@
       "clearAll": "Borrar todo",
       "validate": "Validar",
       "edit": "Editar",
-      "delete": "Eliminar",
       "uploading": "Subiendo...",
       "sending": "Enviando..."
     },
@@ -330,6 +329,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatizaciones",
     "settings": "Configuración",
     "logout": "Cerrar sesión",
     "panel": "Panel",
@@ -354,6 +354,7 @@
     "announcements": "Anuncios",
     "notifications": "Notificaciones",
     "promotionCodes": "Códigos de promoción",
+    "emailTemplates": "Plantillas de correo electrónico",
     "manage": "Administrar",
     "ariaLabels": {
       "goToAvailableCourses": "Ir a cursos disponibles"
@@ -4121,7 +4122,9 @@
     "tenants": "Organizaciones",
     "learningPaths": "Rutas de desarrollo",
     "adminLearningPaths": "Rutas de desarrollo",
-    "adminLearningPathEditor": "Editor de ruta de desarrollo"
+    "adminLearningPathEditor": "Editor de ruta de desarrollo",
+    "emailTemplates": "Plantillas de correo electrónico",
+    "editEmailTemplate": "Editar plantilla de correo electrónico"
   },
   "learningPathsView": {
     "title": "Rutas de desarrollo",
@@ -4933,6 +4936,582 @@
       "liveKitNotConfigured": "LiveKit no está configurado.",
       "maxParticipantsReached": "Se ha alcanzado el número máximo de participantes.",
       "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Plantillas de correo",
+      "edit": "Editar"
+    },
+    "list": {
+      "title": "Plantillas de correo",
+      "createButton": "Crear nueva",
+      "deleteSelected": "Eliminar seleccionadas",
+      "searchPlaceholder": "Buscar por nombre",
+      "statusFilter": "Estado",
+      "empty": "Aún no hay plantillas de correo.",
+      "loading": "Cargando plantillas...",
+      "loadFailed": "No se pudieron cargar las plantillas de correo.",
+      "status": {
+        "all": "Todas"
+      },
+      "columns": {
+        "name": "Nombre",
+        "status": "Estado",
+        "languages": "Idiomas",
+        "updatedAt": "Actualizada",
+        "selectAll": "Seleccionar todo",
+        "selectRow": "Seleccionar fila"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Eliminar plantilla de correo",
+      "titleMultiple": "Eliminar plantillas de correo",
+      "descriptionSingle": "¿Seguro que quieres eliminar esta plantilla de correo? Esta acción no se puede deshacer.",
+      "descriptionMultiple": "¿Seguro que quieres eliminar {{count}} plantillas de correo? Esta acción no se puede deshacer."
+    },
+    "status": {
+      "draft": "Borrador",
+      "published": "Publicada",
+      "archived": "Archivada"
+    },
+    "edit": {
+      "loadFailed": "No se pudo cargar esta plantilla de correo."
+    },
+    "form": {
+      "field": {
+        "name": "Nombre",
+        "subject": "Asunto",
+        "subjectHelp": "Rellena el asunto para cada idioma. Puedes usar variables como {{user.first_name}}.",
+        "subjectPlaceholder": "p. ej. Bienvenido, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "El nombre es obligatorio.",
+        "nameTooLong": "El nombre es demasiado largo.",
+        "localesRequired": "Elige al menos un idioma.",
+        "baseLanguageMissing": "El idioma base debe estar entre los idiomas disponibles."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Plantilla de correo creada.",
+      "createFailed": "No se pudo crear la plantilla de correo.",
+      "updatedSuccessfully": "Plantilla de correo guardada.",
+      "updateFailed": "No se pudo guardar la plantilla de correo.",
+      "publishedSuccessfully": "Plantilla de correo publicada.",
+      "publishFailed": "No se pudo publicar la plantilla de correo.",
+      "publishBlocked": "No se puede publicar — revisa la diagnóstica de abajo.",
+      "archivedSuccessfully": "Plantilla de correo archivada.",
+      "archiveFailed": "No se pudo archivar la plantilla de correo.",
+      "unarchivedSuccessfully": "Plantilla de correo restaurada como borrador.",
+      "unarchiveFailed": "No se pudo desarchivar la plantilla de correo.",
+      "previewFailed": "No se pudo generar la vista previa.",
+      "previewLanguageUnavailable": "Este idioma no está disponible para esta plantilla.",
+      "duplicatedSuccessfully": "Plantilla de correo duplicada.",
+      "duplicateFailed": "No se pudo duplicar la plantilla de correo.",
+      "madeDraftSuccessfully": "Plantilla de correo revertida a borrador.",
+      "makeDraftFailed": "No se pudo revertir la plantilla de correo a borrador.",
+      "deletedSuccessfully": "Plantilla de correo eliminada.",
+      "deleteFailed": "No se pudo eliminar la plantilla de correo.",
+      "nameAlreadyExists": "Ya existe una plantilla de correo con este nombre.",
+      "testEmailSentSuccessfully": "Correo de prueba enviado.",
+      "testEmailSendFailed": "No se pudo enviar el correo de prueba."
+    },
+    "actions": {
+      "preview": "Vista previa",
+      "duplicate": "Duplicar",
+      "archive": "Archivar",
+      "unarchive": "Desarchivar",
+      "publish": "Publicar",
+      "makeDraft": "Marcar como borrador",
+      "edit": "Editar",
+      "rename": "Renombrar",
+      "sendTest": "Enviar prueba"
+    },
+    "language": {
+      "label": "Idioma",
+      "baseLanguage": "Predeterminado",
+      "notAddedLanguages": "Idiomas para añadir",
+      "setBaseLanguage": "Establecer como predeterminado",
+      "setBaseTitle": "Cambiar idioma predeterminado",
+      "setBaseDescription": "¿Usar {{language}} como idioma predeterminado para esta plantilla?",
+      "createTitle": "Añadir traducción",
+      "createDescription": "¿Añadir una traducción de esta plantilla en {{language}}?",
+      "deleteTitle": "Eliminar traducción",
+      "deleteDescription": "¿Eliminar la traducción {{language}}? Su contenido se perderá."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} error — debe corregirse antes de publicar",
+      "errorsTitle_other": "{{count}} errores — deben corregirse antes de publicar",
+      "warningsTitle_one": "{{count}} advertencia — revísala antes de publicar",
+      "warningsTitle_other": "{{count}} advertencias — revísalas antes de publicar",
+      "elementIndex": "Elemento {{index}}",
+      "reasons": {
+        "name_missing": "El nombre de la plantilla es obligatorio",
+        "no_language_versions": "Añade al menos una versión de idioma",
+        "subject_missing": "El asunto es obligatorio para el idioma predeterminado",
+        "body_missing": "El cuerpo del correo está vacío",
+        "button_label_missing": "El texto del botón es obligatorio",
+        "button_url_missing": "El destino del botón es obligatorio",
+        "empty_translation": "La traducción está vacía",
+        "invalid_url_protocol": "La URL usa un protocolo no permitido",
+        "unchanged_from_base": "La traducción es idéntica al idioma base",
+        "footer_missing": "Falta el pie de página"
+      },
+      "nodeTypes": {
+        "heading": "Encabezado",
+        "paragraph": "Texto",
+        "button": "Botón",
+        "footer": "Pie de página",
+        "image": "Imagen"
+      },
+      "blockedToast": {
+        "save": "No se puede guardar la plantilla. Consulta el diagnóstico",
+        "publish": "No se puede publicar la plantilla. Consulta el diagnóstico"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Escribe / para abrir el menú de bloques",
+        "heading": "Encabezado {{level}}",
+        "htmlCode": "Código HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Texto",
+          "media": "Multimedia",
+          "structure": "Estructura",
+          "interactive": "Interactivo",
+          "footer": "Pie de página"
+        },
+        "text": {
+          "title": "Texto",
+          "description": "Párrafo de texto sin formato."
+        },
+        "heading1": {
+          "title": "Encabezado 1",
+          "description": "Encabezado grande de sección (H1)."
+        },
+        "heading2": {
+          "title": "Encabezado 2",
+          "description": "Encabezado mediano de sección (H2)."
+        },
+        "heading3": {
+          "title": "Encabezado 3",
+          "description": "Encabezado pequeño de sección (H3)."
+        },
+        "image": {
+          "title": "Imagen",
+          "description": "Imagen a ancho completo."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Logo completo."
+        },
+        "section": {
+          "title": "Sección",
+          "description": "Contenedor de contenido agrupado."
+        },
+        "columns": {
+          "title": "Columnas",
+          "description": "Diseño de varias columnas."
+        },
+        "divider": {
+          "title": "Divisor",
+          "description": "Línea divisoria horizontal."
+        },
+        "spacer": {
+          "title": "Espaciador",
+          "description": "Espacio vertical entre bloques."
+        },
+        "button": {
+          "title": "Botón",
+          "description": "Botón de llamada a la acción."
+        },
+        "footer": {
+          "title": "Pie de página",
+          "description": "Bloque de texto del pie de página."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Error al subir la imagen. Por favor, inténtelo de nuevo.",
+      "tooLarge": "La imagen es demasiado grande. El tamaño máximo es 10 MB.",
+      "invalidType": "Tipo de imagen no válido. Permitidos: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "automationView": {
+    "title": "Automatizaciones",
+    "description": "Gestione las notificaciones automáticas por correo electrónico enviadas en respuesta a eventos de la plataforma.",
+    "createAutomation": "Crear automatización",
+    "filters": {
+      "searchPlaceholder": "Buscar por nombre o descripción...",
+      "all": "Todas",
+      "enabled": "Habilitadas",
+      "disabled": "Deshabilitadas",
+      "drafts": "Borradores",
+      "archived": "Archivadas"
+    },
+    "status": {
+      "enabled": "Habilitada",
+      "disabled": "Deshabilitada",
+      "draft": "Borrador",
+      "archived": "Archivada"
+    },
+    "table": {
+      "name": "Nombre de la automatización",
+      "status": "Estado",
+      "trigger": "Disparador",
+      "actions": "Acciones",
+      "lastRun": "Última ejecución",
+      "updatedAt": "Actualizado",
+      "menu": "Menú",
+      "manage": "Gestionar",
+      "empty": "No hay automatizaciones definidas. Haga clic en Crear automatización para agregar la primera.",
+      "emptyFiltered": "Ninguna automatización coincide con los filtros actuales. Intente ajustar la búsqueda o el filtro de estado.",
+      "emailCount_one": "{{count}} correo",
+      "emailCount_other": "{{count}} correos",
+      "noRuns": "Sin ejecuciones aún",
+      "runSuccess": "Completado con éxito",
+      "runFailed": "Ocurrió un error"
+    },
+    "drawer": {
+      "title": "Detalles de la automatización",
+      "description": "Edite la configuración de la automatización seleccionada.",
+      "nameLabel": "Nombre de la automatización",
+      "descriptionLabel": "Descripción",
+      "statusLabel": "Estado",
+      "statusDraft": "Borrador",
+      "statusEnabled": "Activa (Habilitada)",
+      "statusDisabled": "Inactiva (Deshabilitada)",
+      "statusArchived": "Archivada",
+      "flowManagement": "Gestión del flujo",
+      "openBuilder": "Abrir editor de pasos",
+      "pause": "Pausar",
+      "activate": "Activar",
+      "simulationRequiredTooltip": "La automatización debe pasar primero una simulación",
+      "archive": "Archivar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar automatización?",
+      "description": "Esta acción es irreversible. La automatización se eliminará permanentemente. En su lugar, puede archivarla.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "actionMenu": {
+      "openMenu": "Abrir menú",
+      "settingsAndEdit": "Configuración y edición",
+      "disable": "Deshabilitar notificación",
+      "enable": "Habilitar notificación",
+      "delete": "Eliminar automatización"
+    },
+    "newAutomation": {
+      "name": "Nueva automatización (Borrador)",
+      "description": "Defina el objetivo y la descripción de esta automatización y luego proceda al constructor de flujo.",
+      "triggerPlaceholder": "Por configurar..."
+    },
+    "seedDefaults": {
+      "button": "Generar predeterminados",
+      "dialog": {
+        "title": "¿Generar automatizaciones predeterminadas?",
+        "description": "Se crearán todas las automatizaciones estándar (p. ej. invitación de usuario, bienvenida, recordatorio de contraseña, etc.) con plantillas de email predeterminadas. Las automatizaciones existentes no se sobrescribirán.",
+        "warning": "Advertencia: Las nuevas automatizaciones se crearán en estado activo y comenzarán a funcionar inmediatamente. Asegúrese de que sus plantillas de email estén configuradas correctamente.",
+        "confirm": "Generar",
+        "cancel": "Cancelar"
+      },
+      "toasts": {
+        "success": "Se generaron {{created}} automatizaciones (se omitieron {{skipped}} existentes).",
+        "error": "No se pudieron generar las automatizaciones predeterminadas."
+      }
+    }
+  },
+
+  "automationBuilder": {
+    "header": {
+      "back": "Volver a automatizaciones",
+      "automations": "Automatizaciones",
+      "save": "Guardar",
+      "simulate": "Simular",
+      "active": "Activa",
+      "draft": "Borrador",
+      "duplicate": "Duplicar",
+      "exportJson": "Exportar como JSON",
+      "delete": "Eliminar automatización",
+      "savedJustNow": "Guardado justo ahora",
+      "savedMinutesAgo": "Guardado hace {{count}} min",
+      "simulationRequiredTooltip": "Ejecute una simulación y asegúrese de que pase correctamente para activar la automatización",
+      "invalidNodesTooltip": "Corrija todos los nodos inválidos antes de activar la automatización",
+      "unsavedChangesTooltip": "Guarde los cambios antes de activar la automatización",
+      "leaveDialog": {
+        "title": "Cambios sin guardar",
+        "description": "Tiene cambios sin guardar. ¿Desea guardar antes de salir?",
+        "saveAndLeave": "Guardar y salir",
+        "leaveWithoutSaving": "Salir sin guardar",
+        "cancel": "Cancelar"
+      },
+      "deleteDialog": {
+        "title": "Eliminar automatización",
+        "description": "¿Está seguro de que desea eliminar esta automatización? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "sidebar": {
+      "title": "Pasos",
+      "description": "Arrastra bloques al lienzo para construir tu flujo de trabajo.",
+      "descriptionTrigger": "Comienza eligiendo un disparador para tu automatización.",
+      "descriptionActions": "Añade acciones que se ejecutarán cuando se active el disparador.",
+      "triggerInstruction": "Toda automatización comienza con un disparador. Arrastra uno al lienzo para empezar a construir tu flujo de trabajo.",
+      "triggers": "Disparadores",
+      "actions": "Acciones"
+    },
+    "blocks": {
+      "courseDeadline": "Plazo del curso",
+      "overdue": "Vencido",
+      "notCompleted": "No completado",
+      "userEnrolled": "Usuario inscrito",
+      "certificateExpiringSoon": "Certificado por vencer",
+      "liveTransmissionStartingSoon": "Transmisión en vivo próxima",
+      "sendEmail": "Enviar correo electrónico",
+      "userInvited": "Usuario invitado",
+      "usersImportedInvite": "Usuarios importados (invitación)",
+      "userPasswordReminder": "Recordatorio de contraseña",
+      "userPasswordChanged": "Contraseña cambiada",
+      "userWelcome": "Mensaje de bienvenida",
+      "userFirstLogin": "Primer inicio de sesión",
+      "usersAssignedToCourse": "Usuarios asignados al curso",
+      "usersShortInactivity": "Inactividad corta",
+      "usersLongInactivity": "Inactividad prolongada",
+      "userChapterFinished": "Capítulo completado",
+      "userCourseFinished": "Curso completado",
+      "userRegistered": "Usuario registrado",
+      "userPasswordCreated": "Contraseña creada",
+      "courseCompleted": "Curso aprobado",
+      "certificateExpirationWarning": "Aviso de vencimiento de certificado",
+      "certificateArchived": "Certificado archivado",
+      "announcementPublished": "Anuncio publicado",
+      "courseChatUserMentioned": "Usuario mencionado en el chat",
+      "courseDueDateReminder": "Recordatorio de plazo del curso"
+    },
+    "canvas": {
+      "emptyTitle": "El lienzo de automatización está vacío",
+      "emptyDescription": "Arrastra un disparador o acción desde el panel lateral para comenzar.",
+      "emptyDescriptionTrigger": "Arrastra un disparador desde el panel lateral para comenzar a construir tu automatización.",
+      "removeNode": "Eliminar nodo",
+      "simulationFailed": "La simulación detectó errores en este nodo",
+      "deleteNodeDialogTitle": "Eliminar nodo",
+      "deleteNodeDialogDescription": "¿Estás seguro de que deseas eliminar este nodo? Esta acción no se puede deshacer.",
+      "deleteNodeDialogCancel": "Cancelar",
+      "deleteNodeDialogConfirm": "Eliminar",
+      "addChild": "Añadir paso secundario",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "zoomReset": "Restablecer zoom"
+    },
+    "editPanel": {
+      "editTrigger": "Editar disparador",
+      "editAction": "Editar acción",
+      "nodeType": "Tipo de nodo",
+      "changeTriggerLabel": "Cambiar disparador a",
+      "changeTriggerDialogTitle": "Cambiar disparador",
+      "changeTriggerDialogDescription": "Cambiar el tipo de disparador eliminará todas las acciones y condiciones de la automatización. Solo quedará el disparador en el lienzo. ¿Deseas continuar?",
+      "changeTriggerDialogCancel": "Cancelar",
+      "changeTriggerDialogConfirm": "Eliminar todo y cambiar disparador",
+      "triggerValue": "Valor",
+      "triggerValuePlaceholder": "Introduce un valor...",
+      "operator": "Operador",
+      "operatorEquals": "Igual a",
+      "operatorGreaterThan": "Mayor que",
+      "operatorLessThan": "Menor que",
+      "operatorContains": "Contiene",
+      "emailSubject": "Asunto del correo",
+      "emailSubjectPlaceholder": "Introduce el asunto...",
+      "emailTemplate": "Plantilla de correo",
+      "emailTemplatePlaceholder": "Selecciona una plantilla",
+      "emailBody": "Cuerpo del correo",
+      "emailBodyPlaceholder": "Escribe el contenido del correo...",
+      "emailRecipient": "Destinatario",
+      "recipientEnrolledUser": "Usuario inscrito",
+      "recipientAdmin": "Administrador",
+      "recipientManager": "Gerente",
+      "removeNode": "Eliminar este paso",
+      "deleteNodeDialogTitle": "Eliminar nodo",
+      "deleteNodeDialogDescription": "¿Estás seguro de que deseas eliminar este nodo? Esta acción no se puede deshacer.",
+      "deleteNodeDialogCancel": "Cancelar",
+      "deleteNodeDialogConfirm": "Eliminar"
+    },
+    "config": {
+      "daysBefore": "Días antes",
+      "daysBeforePlaceholder": "ej. 7",
+      "course": "Curso",
+      "coursePlaceholder": "Selecciona un curso",
+      "daysOverdue": "Días de retraso",
+      "daysOverduePlaceholder": "ej. 3",
+      "daysEnrolled": "Días desde la inscripción",
+      "daysEnrolledPlaceholder": "ej. 30",
+      "minutesBefore": "Minutos antes",
+      "minutesBeforePlaceholder": "ej. 60",
+      "daysInactive": "Días de inactividad",
+      "daysInactivePlaceholder": "ej. 14"
+    },
+    "editAction": {
+      "title": "Editar acción",
+      "sendEmail": "Enviar correo electrónico",
+      "emailTemplate": "Plantilla de correo",
+      "selectTemplate": "Selecciona una plantilla...",
+      "language": "Idioma",
+      "userDefaultLanguage": "Idioma predeterminado del usuario",
+      "placeholders": "Variables de la plantilla",
+      "selectTemplateFirst": "Selecciona una plantilla de correo para ver las variables disponibles.",
+      "noPlaceholders": "Esta plantilla no tiene variables para completar.",
+      "placeholdersDescription": "Asigna cada variable de la plantilla a los datos proporcionados por el disparador.",
+      "selectVariable": "Selecciona variable del disparador...",
+      "noTriggerVariables": "No hay disparador conectado a esta acción. Añade un disparador primero para mapear variables.",
+      "defaultEmailNoMapping": "La plantilla de correo predeterminada no requiere mapeo de variables.",
+      "systemTemplateNoMapping": "Esta plantilla del sistema utiliza automáticamente los datos del disparador. No se requiere mapeo manual.",
+      "defaultTemplatesGroup": "Plantillas del sistema",
+      "customTemplatesGroup": "Plantillas personalizadas",
+      "noCustomTemplates": "No hay plantillas personalizadas publicadas disponibles.",
+      "templates": {
+        "defaultEmail": "Correo predeterminado",
+        "userInvite": "Invitación de usuario",
+        "welcome": "Bienvenida",
+        "userFirstLogin": "Primer inicio de sesión",
+        "userAssignedToCourse": "Usuario asignado al curso",
+        "userShortInactivity": "Inactividad corta",
+        "userLongInactivity": "Inactividad prolongada",
+        "userFinishedChapter": "Capítulo completado",
+        "userFinishedCourse": "Curso completado",
+        "createPasswordReminder": "Recordatorio de creación de contraseña",
+        "certificateExpirationWarning": "Advertencia de vencimiento de certificado",
+        "certificateExpired": "Certificado vencido",
+        "announcement": "Anuncio",
+        "courseDueDateReminder": "Recordatorio de fecha límite del curso",
+        "newUser": "Nuevo usuario",
+        "finishedCourse": "Curso finalizado"
+      }
+    },
+    "variables": {
+      "userFirstName": "Nombre del usuario",
+      "userLastName": "Apellido del usuario",
+      "userEmail": "Dirección de correo electrónico",
+      "inviteLink": "Enlace de activación",
+      "inviteLinkRegistration": "Enlace de registro",
+      "resetPasswordLink": "Enlace para restablecer contraseña",
+      "platformUrl": "Enlace a la plataforma",
+      "loginDate": "Fecha del primer inicio de sesión",
+      "courseName": "Nombre del curso",
+      "courseUrl": "Enlace al curso",
+      "dueDate": "Fecha límite",
+      "daysInactive": "Días de inactividad",
+      "chapterName": "Nombre del capítulo",
+      "finishedAt": "Fecha de finalización",
+      "certificateUrl": "Enlace al certificado",
+      "registrationDate": "Fecha de registro",
+      "createdAt": "Fecha de creación",
+      "daysLeft": "Días restantes",
+      "daysLeftExpiration": "Días hasta el vencimiento",
+      "certificateName": "Nombre del certificado",
+      "expirationDate": "Fecha de vencimiento",
+      "archivedAt": "Fecha de archivado",
+      "recipientFirstName": "Nombre del destinatario",
+      "recipientLastName": "Apellido del destinatario",
+      "announcementTitle": "Título del anuncio",
+      "announcementContent": "Contenido del anuncio",
+      "announcementUrl": "Enlace al anuncio",
+      "mentionedFirstName": "Nombre del usuario mencionado",
+      "mentionedLastName": "Apellido del usuario mencionado",
+      "authorFullName": "Nombre completo del autor",
+      "messageContent": "Contenido del mensaje",
+      "chatUrl": "Enlace al mensaje",
+      "invitedByUserName": "Invitado por (nombre)",
+      "hasCertificate": "Tiene certificado",
+      "archiveReason": "Motivo de archivo",
+      "profileLink": "Enlace al perfil del usuario",
+      "progressLink": "Enlace al progreso del curso",
+      "userName": "Nombre completo"
+    },
+    "simulation": {
+      "title": "Resultado de la simulación",
+      "statusSuccess": "Éxito",
+      "statusFailed": "Fallido",
+      "errorTitle": "Error de simulación",
+      "retry": "Reintentar simulación",
+      "errorsTitle": "Problemas detectados",
+      "readyToActivate": "La automatización está lista para activarse.",
+      "tabPreview": "Vista previa del correo",
+      "tabEventData": "Datos del evento",
+      "tabMappings": "Mapeos",
+      "from": "De:",
+      "to": "Para:",
+      "subject": "Asunto:",
+      "noEventData": "Sin datos del evento — selecciona un tipo de disparador.",
+      "availableVariables": "Variables de evento disponibles",
+      "variableName": "Variable",
+      "variableLabel": "Descripción",
+      "variableType": "Tipo",
+      "placeholder": "Marcador",
+      "mappedTo": "Mapeado a",
+      "sampleValue": "Valor de ejemplo",
+      "unmapped": "Sin mapear",
+      "errors": {
+        "triggerNodeName": "Evento inicial",
+        "selectTriggerType": "Seleccione un tipo de evento inicial",
+        "addTriggerNode": "Agregue al menos un nodo de trigger",
+        "actionNodeName": "Enviar correo",
+        "actionLabel": "Acción",
+        "selectEmailTemplate": "Seleccione una plantilla de correo publicada",
+        "selectLanguage": "Seleccione el idioma de la plantilla de correo",
+        "unmappedPlaceholder": "El placeholder {{placeholder}} no está mapeado — asigne una variable de evento",
+        "addActionNode": "Agregue al menos un nodo de acción (ej. Enviar correo)"
+      },
+      "preview": {
+        "subject": "Has sido asignado al curso: {{courseName}}",
+        "greeting": "¡Hola {{name}}!",
+        "assignedToCourse": "Has sido asignado a un nuevo curso: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Ir al curso",
+        "unavailable": "Vista previa no disponible",
+        "loadFailed": "No se pudo cargar la vista previa de la plantilla.",
+        "label": "Vista previa",
+        "systemTemplateNote": "Plantilla del sistema <strong>{{templateLabel}}</strong> — el contenido predeterminado se genera automáticamente durante el envío.",
+        "emailDescription": "Este correo electrónico se enviará con el contenido correspondiente al trigger seleccionado y las variables mapeadas.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Juan",
+        "lastName": "García",
+        "fullName": "Juan García",
+        "email": "juan.garcia@example.com",
+        "courseName": "Formación en Seguridad Laboral 2025",
+        "chapterName": "Capítulo 1: Introducción",
+        "certificateName": "Certificado de Seguridad",
+        "announcementTitle": "Nueva formación disponible",
+        "announcementContent": "Le invitamos a una nueva formación...",
+        "authorFullName": "María López",
+        "messageContent": "¡Oye, mira esto!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "María López"
+      }
+    }
+  },
+
+  "automationSteps": {
+    "toast": {
+      "notFound": "Paso de automatización no encontrado",
+      "idMismatch": "No puedes cambiar el paso padre ni la automatización",
+      "updateFailed": "No se pudo actualizar el paso de automatización",
+      "deleteFailed": "Error al eliminar el paso de automatización",
+      "nodeDeleteFailed": "Error al encontrar el nodo para eliminar",
+      "noRootStep": "Una automatización vacía debe tener primero un paso raíz",
+      "hasRootAlready": "La automatización ya tiene un paso raíz",
+      "cycleDetected": "El árbol de pasos de automatización no puede contener ciclos",
+      "stepTreeBuildFailed": "Error al construir el árbol de pasos",
+      "wrongNumberOfRoots": "Una automatización solo puede tener un paso raíz",
+      "treeNotConnected": "No todos los pasos proporcionados están conectados entre sí",
+      "bulkInsertFailed": "No se pudieron actualizar los pasos de automatización"
     }
   }
 }

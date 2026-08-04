@@ -16,7 +16,6 @@
       "clearAll": "Alles löschen",
       "validate": "Bestätigen",
       "edit": "Bearbeiten",
-      "delete": "Löschen",
       "uploading": "Hochladen...",
       "sending": "Senden..."
     },
@@ -330,6 +329,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatisierungen",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "panel": "Panel",
@@ -354,6 +354,7 @@
     "announcements": "Ankündigungen",
     "notifications": "Benachrichtigungen",
     "promotionCodes": "Aktionscodes",
+    "emailTemplates": "E-Mail-Vorlagen",
     "manage": "Verwalten",
     "ariaLabels": {
       "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
@@ -4114,7 +4115,9 @@
     "activityLogs": "Aktivitätsprotokoll",
     "learningPaths": "Entwicklungspfade",
     "adminLearningPaths": "Entwicklungspfade",
-    "adminLearningPathEditor": "Entwicklungspfad Editor"
+    "adminLearningPathEditor": "Entwicklungspfad Editor",
+    "emailTemplates": "E-Mail-Vorlagen",
+    "editEmailTemplate": "E-Mail-Vorlage bearbeiten"
   },
   "masterCourse": {
     "error": {
@@ -4924,6 +4927,579 @@
       "liveKitNotConfigured": "LiveKit ist nicht konfiguriert.",
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
       "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "E‑Mail‑Vorlagen",
+      "edit": "Bearbeiten"
+    },
+    "list": {
+      "title": "E‑Mail‑Vorlagen",
+      "createButton": "Neu erstellen",
+      "deleteSelected": "Ausgewählte löschen",
+      "searchPlaceholder": "Nach Name suchen",
+      "statusFilter": "Status",
+      "empty": "Noch keine E‑Mail‑Vorlagen vorhanden.",
+      "loading": "Vorlagen werden geladen...",
+      "loadFailed": "E‑Mail‑Vorlagen konnten nicht geladen werden.",
+      "status": {
+        "all": "Alle"
+      },
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "languages": "Sprachen",
+        "updatedAt": "Aktualisiert am",
+        "selectAll": "Alle auswählen",
+        "selectRow": "Zeile auswählen"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "E‑Mail‑Vorlage löschen",
+      "titleMultiple": "E‑Mail‑Vorlagen löschen",
+      "descriptionSingle": "Möchten Sie diese E‑Mail‑Vorlage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "descriptionMultiple": "Möchten Sie {{count}} E‑Mail‑Vorlagen wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "archived": "Archiviert"
+    },
+    "edit": {
+      "loadFailed": "Diese E‑Mail‑Vorlage konnte nicht geladen werden."
+    },
+    "form": {
+      "field": {
+        "name": "Name",
+        "subject": "Betreff",
+        "subjectHelp": "Geben Sie den Betreff für jede Sprache ein. Variablen wie {{user.first_name}} sind erlaubt.",
+        "subjectPlaceholder": "z. B. Willkommen, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Name ist erforderlich.",
+        "nameTooLong": "Name ist zu lang.",
+        "localesRequired": "Wählen Sie mindestens eine Sprache aus.",
+        "baseLanguageMissing": "Die Basissprache muss zu den verfügbaren Sprachen gehören."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "E‑Mail‑Vorlage erstellt.",
+      "createFailed": "E‑Mail‑Vorlage konnte nicht erstellt werden.",
+      "updatedSuccessfully": "E‑Mail‑Vorlage gespeichert.",
+      "updateFailed": "E‑Mail‑Vorlage konnte nicht gespeichert werden.",
+      "publishedSuccessfully": "E‑Mail‑Vorlage veröffentlicht.",
+      "publishFailed": "E‑Mail‑Vorlage konnte nicht veröffentlicht werden.",
+      "publishBlocked": "Veröffentlichung nicht möglich – siehe Diagnose unten.",
+      "archivedSuccessfully": "E‑Mail‑Vorlage archiviert.",
+      "archiveFailed": "E‑Mail‑Vorlage konnte nicht archiviert werden.",
+      "unarchivedSuccessfully": "E‑Mail‑Vorlage als Entwurf wiederhergestellt.",
+      "unarchiveFailed": "E‑Mail‑Vorlage konnte nicht aus dem Archiv geholt werden.",
+      "previewFailed": "Vorschau konnte nicht erzeugt werden.",
+      "previewLanguageUnavailable": "Diese Sprache ist für diese Vorlage nicht verfügbar.",
+      "duplicatedSuccessfully": "E‑Mail‑Vorlage dupliziert.",
+      "duplicateFailed": "E‑Mail‑Vorlage konnte nicht dupliziert werden.",
+      "madeDraftSuccessfully": "E‑Mail‑Vorlage in Entwurf zurückgesetzt.",
+      "makeDraftFailed": "E‑Mail‑Vorlage konnte nicht in Entwurf zurückgesetzt werden.",
+      "deletedSuccessfully": "E‑Mail‑Vorlage gelöscht.",
+      "deleteFailed": "E‑Mail‑Vorlage konnte nicht gelöscht werden.",
+      "nameAlreadyExists": "Eine E‑Mail‑Vorlage mit diesem Namen existiert bereits.",
+      "testEmailSentSuccessfully": "Test-E-Mail gesendet.",
+      "testEmailSendFailed": "Test-E-Mail konnte nicht gesendet werden."
+    },
+    "actions": {
+      "preview": "Vorschau",
+      "duplicate": "Duplizieren",
+      "archive": "Archivieren",
+      "unarchive": "Entarchivieren",
+      "publish": "Veröffentlichen",
+      "makeDraft": "Als Entwurf markieren",
+      "edit": "Bearbeiten",
+      "rename": "Umbenennen",
+      "sendTest": "Test senden"
+    },
+    "language": {
+      "label": "Sprache",
+      "baseLanguage": "Standard",
+      "notAddedLanguages": "Sprachen zum Hinzufügen",
+      "setBaseLanguage": "Als Standard festlegen",
+      "setBaseTitle": "Standardsprache ändern",
+      "setBaseDescription": "{{language}} als Standardsprache für diese Vorlage verwenden?",
+      "createTitle": "Übersetzung hinzufügen",
+      "createDescription": "Übersetzung dieser Vorlage in {{language}} hinzufügen?",
+      "deleteTitle": "Übersetzung löschen",
+      "deleteDescription": "Die Übersetzung {{language}} löschen? Ihr Inhalt geht verloren."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Vorlagenname ist erforderlich",
+        "no_language_versions": "Mindestens eine Sprachversion hinzufügen",
+        "subject_missing": "Betreff ist für die Standardsprache erforderlich",
+        "body_missing": "E-Mail-Text ist leer",
+        "button_label_missing": "Schaltflächenbeschriftung ist erforderlich",
+        "button_url_missing": "Schaltfläche hat kein Ziel",
+        "empty_translation": "Übersetzung ist leer",
+        "invalid_url_protocol": "URL verwendet ein unzulässiges Protokoll",
+        "unchanged_from_base": "Übersetzung ist identisch mit der Basissprache",
+        "footer_missing": "Footer fehlt",
+        "logo_branding_missing": "Logo-Branding fehlt"
+      },
+      "blockedToast": {
+        "save": "Vorlage kann nicht gespeichert werden. Siehe Diagnose",
+        "publish": "Vorlage kann nicht veröffentlicht werden. Siehe Diagnose"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Geben Sie / ein, um das Blockmenü zu öffnen",
+        "heading": "Überschrift {{level}}",
+        "htmlCode": "HTML-Code…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Medien",
+          "structure": "Struktur",
+          "interactive": "Interaktiv",
+          "footer": "Footer"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Absatz mit einfachem Text."
+        },
+        "heading1": {
+          "title": "Überschrift 1",
+          "description": "Große Abschnittsüberschrift (H1)."
+        },
+        "heading2": {
+          "title": "Überschrift 2",
+          "description": "Mittlere Abschnittsüberschrift (H2)."
+        },
+        "heading3": {
+          "title": "Überschrift 3",
+          "description": "Kleine Abschnittsüberschrift (H3)."
+        },
+        "image": {
+          "title": "Bild",
+          "description": "Bild in voller Breite."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Vollständiges Logo."
+        },
+        "variable": {
+          "title": "Variable",
+          "description": "Fügt eine {{Variable}} ein, der später in der Automatisierungs-Engine ein Wert zugewiesen werden kann."
+        },
+        "section": {
+          "title": "Abschnitt",
+          "description": "Container zur Gruppierung von Inhalten."
+        },
+        "columns": {
+          "title": "Spalten",
+          "description": "Mehrspaltiges Layout."
+        },
+        "divider": {
+          "title": "Trennlinie",
+          "description": "Horizontale Trennlinie."
+        },
+        "spacer": {
+          "title": "Abstand",
+          "description": "Vertikaler Abstand zwischen Blöcken."
+        },
+        "button": {
+          "title": "Schaltfläche",
+          "description": "Call-to-Action-Schaltfläche."
+        },
+        "footer": {
+          "title": "Footer",
+          "description": "Textblock für die Fußzeile."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Bild-Upload fehlgeschlagen. Bitte erneut versuchen.",
+      "tooLarge": "Bild ist zu groß. Maximale Größe beträgt 10 MB.",
+      "invalidType": "Ungültiger Bildtyp. Erlaubt: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "automationView": {
+    "title": "Automatisierungen",
+    "description": "Verwalten Sie automatische E-Mail-Benachrichtigungen, die als Reaktion auf Plattformereignisse gesendet werden.",
+    "createAutomation": "Automatisierung erstellen",
+    "filters": {
+      "searchPlaceholder": "Nach Name oder Beschreibung suchen...",
+      "all": "Alle",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "drafts": "Entwürfe",
+      "archived": "Archiviert"
+    },
+    "status": {
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "draft": "Entwurf",
+      "archived": "Archiviert"
+    },
+    "table": {
+      "name": "Name der Automatisierung",
+      "status": "Status",
+      "trigger": "Auslöser",
+      "actions": "Aktionen",
+      "lastRun": "Letzte Ausführung",
+      "updatedAt": "Aktualisiert",
+      "menu": "Menü",
+      "manage": "Verwalten",
+      "empty": "Keine Automatisierungen definiert. Klicken Sie auf Automatisierung erstellen, um die erste hinzuzufügen.",
+      "emptyFiltered": "Keine Automatisierungen entsprechen den aktuellen Filtern. Passen Sie die Suche oder den Statusfilter an.",
+      "emailCount_one": "{{count}} E-Mail",
+      "emailCount_other": "{{count}} E-Mails",
+      "noRuns": "Noch keine Ausführungen",
+      "runSuccess": "Erfolgreich abgeschlossen",
+      "runFailed": "Ein Fehler ist aufgetreten"
+    },
+    "drawer": {
+      "title": "Automatisierungsdetails",
+      "description": "Bearbeiten Sie die Konfiguration der ausgewählten Automatisierung.",
+      "nameLabel": "Name der Automatisierung",
+      "descriptionLabel": "Beschreibung",
+      "statusLabel": "Status",
+      "statusDraft": "Entwurf",
+      "statusEnabled": "Aktiv (Aktiviert)",
+      "statusDisabled": "Inaktiv (Deaktiviert)",
+      "statusArchived": "Archiviert",
+      "flowManagement": "Ablaufverwaltung",
+      "openBuilder": "Schrittersteller öffnen",
+      "pause": "Pausieren",
+      "activate": "Aktivieren",
+      "simulationRequiredTooltip": "Die Automatisierung muss zuerst eine Simulation bestehen",
+      "archive": "Archivieren",
+      "save": "Änderungen speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "deleteDialog": {
+      "title": "Automatisierung löschen?",
+      "description": "Diese Aktion ist unwiderruflich. Die Automatisierung wird dauerhaft gelöscht. Sie können sie stattdessen archivieren.",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    },
+    "actionMenu": {
+      "openMenu": "Menü öffnen",
+      "settingsAndEdit": "Einstellungen & Bearbeiten",
+      "disable": "Benachrichtigung deaktivieren",
+      "enable": "Benachrichtigung aktivieren",
+      "delete": "Automatisierung löschen"
+    },
+    "newAutomation": {
+      "name": "Neue Automatisierung (Entwurf)",
+      "description": "Definieren Sie das Ziel und die Beschreibung dieser Automatisierung und gehen Sie dann zum Ablauf-Builder.",
+      "triggerPlaceholder": "Zu konfigurieren..."
+    },
+    "toasts": {
+      "created": "Automatisierung erfolgreich erstellt.",
+      "createError": "Automatisierung konnte nicht erstellt werden.",
+      "updated": "Automatisierung erfolgreich gespeichert.",
+      "updateError": "Automatisierung konnte nicht gespeichert werden.",
+      "deleted": "Automatisierung gelöscht.",
+      "deleteError": "Automatisierung konnte nicht gelöscht werden."
+    },
+    "seedDefaults": {
+      "button": "Standards generieren",
+      "dialog": {
+        "title": "Standard-Automatisierungen generieren?",
+        "description": "Alle Standard-Automatisierungen (z.B. Benutzereinladung, Willkommen, Passworterinnerung usw.) werden mit Standard-E-Mail-Vorlagen erstellt. Bestehende Automatisierungen werden nicht überschrieben.",
+        "warning": "Achtung: Neue Automatisierungen werden im aktiven Zustand erstellt und beginnen sofort zu arbeiten. Stellen Sie sicher, dass Ihre E-Mail-Vorlagen korrekt konfiguriert sind.",
+        "confirm": "Generieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "success": "{{created}} Automatisierungen generiert ({{skipped}} vorhandene übersprungen).",
+        "error": "Standard-Automatisierungen konnten nicht generiert werden."
+      }
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Zurück zu Automatisierungen",
+      "automations": "Automatisierungen",
+      "save": "Speichern",
+      "simulate": "Simulieren",
+      "active": "Aktiv",
+      "draft": "Entwurf",
+      "duplicate": "Duplizieren",
+      "exportJson": "Als JSON exportieren",
+      "delete": "Automatisierung löschen",
+      "savedJustNow": "Gerade gespeichert",
+      "savedMinutesAgo": "Vor {{count}} Min. gespeichert",
+      "simulationRequiredTooltip": "Führen Sie eine Simulation durch und stellen Sie sicher, dass sie erfolgreich ist, um die Automatisierung zu aktivieren",
+      "invalidNodesTooltip": "Beheben Sie alle fehlerhaften Knoten, bevor Sie die Automatisierung aktivieren",
+      "unsavedChangesTooltip": "Speichern Sie Änderungen, bevor Sie die Automatisierung aktivieren",
+      "leaveDialog": {
+        "title": "Nicht gespeicherte Änderungen",
+        "description": "Sie haben nicht gespeicherte Änderungen. Möchten Sie vor dem Verlassen speichern?",
+        "saveAndLeave": "Speichern und verlassen",
+        "leaveWithoutSaving": "Ohne Speichern verlassen",
+        "cancel": "Abbrechen"
+      },
+      "deleteDialog": {
+        "title": "Automatisierung löschen",
+        "description": "Sind Sie sicher, dass Sie diese Automatisierung löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "confirm": "Löschen",
+        "cancel": "Abbrechen"
+      }
+    },
+    "sidebar": {
+      "title": "Schritte",
+      "description": "Ziehen Sie Blöcke auf die Leinwand, um Ihren Workflow zu erstellen.",
+      "descriptionTrigger": "Wählen Sie zunächst einen Trigger für Ihre Automatisierung.",
+      "descriptionActions": "Fügen Sie Aktionen hinzu, die ausgeführt werden, wenn der Trigger ausgelöst wird.",
+      "triggerInstruction": "Jede Automatisierung beginnt mit einem Trigger. Ziehen Sie einen auf die Leinwand, um mit dem Aufbau Ihres Workflows zu beginnen.",
+      "triggers": "Trigger",
+      "conditions": "Bedingungen",
+      "actions": "Aktionen"
+    },
+    "blocks": {
+      "courseDeadline": "Kursfrist",
+      "overdue": "Überfällig",
+      "notCompleted": "Nicht abgeschlossen",
+      "userEnrolled": "Benutzer eingeschrieben",
+      "certificateExpiringSoon": "Zertifikat läuft bald ab",
+      "liveTransmissionStartingSoon": "Live-Übertragung startet bald",
+      "sendEmail": "E-Mail senden",
+      "userInvited": "Benutzer eingeladen",
+      "usersImportedInvite": "Benutzer importiert (Einladung)",
+      "userPasswordReminder": "Passworterinnerung",
+      "userPasswordChanged": "Passwort geändert",
+      "userWelcome": "Willkommensnachricht",
+      "userFirstLogin": "Erste Anmeldung",
+      "usersAssignedToCourse": "Benutzer zum Kurs zugewiesen",
+      "usersShortInactivity": "Kurze Inaktivität",
+      "usersLongInactivity": "Lange Inaktivität",
+      "userChapterFinished": "Kapitel abgeschlossen",
+      "userCourseFinished": "Kurs abgeschlossen",
+      "userRegistered": "Benutzer registriert",
+      "userPasswordCreated": "Passwort erstellt",
+      "courseCompleted": "Kurs bestanden",
+      "certificateExpirationWarning": "Zertifikat-Ablaufwarnung",
+      "certificateArchived": "Zertifikat archiviert",
+      "announcementPublished": "Ankündigung veröffentlicht",
+      "courseChatUserMentioned": "Benutzer im Chat erwähnt",
+      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung"
+    },
+    "canvas": {
+      "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
+      "emptyDescription": "Ziehen Sie eine Bedingung oder Aktion von der Seitenleiste, um zu beginnen.",
+      "emptyDescriptionTrigger": "Ziehen Sie einen Trigger von der Seitenleiste, um mit dem Aufbau Ihrer Automatisierung zu beginnen.",
+      "removeNode": "Knoten entfernen",
+      "simulationFailed": "Simulation hat Fehler an diesem Knoten erkannt",
+      "deleteNodeDialogTitle": "Knoten entfernen",
+      "deleteNodeDialogDescription": "Möchten Sie diesen Knoten wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteNodeDialogCancel": "Abbrechen",
+      "deleteNodeDialogConfirm": "Entfernen",
+      "addChild": "Unterschritt hinzufügen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "zoomReset": "Zoom zurücksetzen"
+    },
+    "editPanel": {
+      "editCondition": "Bedingung bearbeiten",
+      "editTrigger": "Trigger bearbeiten",
+      "editAction": "Aktion bearbeiten",
+      "nodeType": "Knotentyp",
+      "changeTriggerLabel": "Trigger ändern zu",
+      "changeTriggerDialogTitle": "Trigger ändern",
+      "changeTriggerDialogDescription": "Das Ändern des Trigger-Typs entfernt alle Aktionen und Bedingungen aus der Automatisierung. Nur der Trigger bleibt auf der Leinwand. Möchten Sie wirklich fortfahren?",
+      "changeTriggerDialogCancel": "Abbrechen",
+      "changeTriggerDialogConfirm": "Alles löschen und Trigger ändern",
+      "conditionValue": "Wert",
+      "conditionValuePlaceholder": "Wert eingeben...",
+      "operator": "Operator",
+      "operatorEquals": "Gleich",
+      "operatorGreaterThan": "Größer als",
+      "operatorLessThan": "Kleiner als",
+      "operatorContains": "Enthält",
+      "emailSubject": "E-Mail-Betreff",
+      "emailSubjectPlaceholder": "Betreff eingeben...",
+      "emailTemplate": "E-Mail-Vorlage",
+      "emailTemplatePlaceholder": "Vorlage auswählen",
+      "emailBody": "E-Mail-Inhalt",
+      "emailBodyPlaceholder": "Schreiben Sie Ihren E-Mail-Inhalt...",
+      "emailRecipient": "Empfänger",
+      "recipientEnrolledUser": "Eingeschriebener Benutzer",
+      "recipientAdmin": "Administrator",
+      "recipientManager": "Manager",
+      "removeNode": "Diesen Schritt entfernen"
+    },
+    "config": {
+      "daysBefore": "Tage vorher",
+      "daysBeforePlaceholder": "z.B. 7",
+      "course": "Kurs",
+      "coursePlaceholder": "Kurs auswählen",
+      "daysOverdue": "Tage überfällig",
+      "daysOverduePlaceholder": "z.B. 3",
+      "daysEnrolled": "Tage seit Anmeldung",
+      "daysEnrolledPlaceholder": "z.B. 30",
+      "minutesBefore": "Minuten vorher",
+      "minutesBeforePlaceholder": "z.B. 60",
+      "daysInactive": "Tage Inaktivität",
+      "daysInactivePlaceholder": "z.B. 14"
+    },
+    "editAction": {
+      "title": "Aktion bearbeiten",
+      "sendEmail": "E-Mail senden",
+      "emailTemplate": "E-Mail-Vorlage",
+      "selectTemplate": "Vorlage auswählen...",
+      "language": "Sprache",
+      "userDefaultLanguage": "Standardsprache des Benutzers",
+      "placeholders": "Vorlagenvariablen",
+      "selectTemplateFirst": "Wählen Sie eine E-Mail-Vorlage, um verfügbare Variablen anzuzeigen.",
+      "noPlaceholders": "Diese Vorlage hat keine Variablen zum Ausfüllen.",
+      "placeholdersDescription": "Ordnen Sie jede Vorlagenvariable einer vom Trigger bereitgestellten Variable zu.",
+      "selectVariable": "Trigger-Variable auswählen...",
+      "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen.",
+      "defaultEmailNoMapping": "Die Standard-E-Mail-Vorlage erfordert keine Platzhalterzuordnung.",
+      "systemTemplateNoMapping": "Diese Systemvorlage verwendet automatisch Daten aus dem Trigger. Keine manuelle Zuordnung erforderlich.",
+      "defaultTemplatesGroup": "Systemvorlagen",
+      "customTemplatesGroup": "Benutzerdefinierte Vorlagen",
+      "noCustomTemplates": "Keine veröffentlichten benutzerdefinierten Vorlagen verfügbar.",
+      "templates": {
+        "defaultEmail": "Standard-E-Mail",
+        "userInvite": "Benutzereinladung",
+        "welcome": "Willkommen",
+        "userFirstLogin": "Erste Anmeldung",
+        "userAssignedToCourse": "Benutzer dem Kurs zugewiesen",
+        "userShortInactivity": "Kurze Inaktivität",
+        "userLongInactivity": "Lange Inaktivität",
+        "userFinishedChapter": "Kapitel abgeschlossen",
+        "userFinishedCourse": "Kurs abgeschlossen",
+        "createPasswordReminder": "Passwort-Erstellungserinnerung",
+        "certificateExpirationWarning": "Zertifikat-Ablaufwarnung",
+        "certificateExpired": "Zertifikat abgelaufen",
+        "announcement": "Ankündigung",
+        "courseDueDateReminder": "Kurs-Fälligkeitserinnerung",
+        "newUser": "Neuer Benutzer",
+        "finishedCourse": "Kurs abgeschlossen"
+      }
+    },
+    "variables": {
+      "userFirstName": "Vorname des Benutzers",
+      "userLastName": "Nachname des Benutzers",
+      "userEmail": "E-Mail-Adresse",
+      "inviteLink": "Aktivierungslink",
+      "inviteLinkRegistration": "Registrierungslink",
+      "resetPasswordLink": "Link zum Passwort-Reset",
+      "platformUrl": "Plattform-Link",
+      "loginDate": "Datum der ersten Anmeldung",
+      "courseName": "Kursname",
+      "courseUrl": "Kurs-Link",
+      "dueDate": "Fälligkeitsdatum",
+      "daysInactive": "Tage der Inaktivität",
+      "chapterName": "Kapitelname",
+      "finishedAt": "Abschlussdatum",
+      "certificateUrl": "Zertifikat-Link",
+      "registrationDate": "Registrierungsdatum",
+      "createdAt": "Erstellungsdatum",
+      "daysLeft": "Verbleibende Tage",
+      "daysLeftExpiration": "Tage bis zum Ablauf",
+      "certificateName": "Zertifikatname",
+      "expirationDate": "Ablaufdatum",
+      "archivedAt": "Archivierungsdatum",
+      "recipientFirstName": "Vorname des Empfängers",
+      "recipientLastName": "Nachname des Empfängers",
+      "announcementTitle": "Ankündigungstitel",
+      "announcementContent": "Ankündigungsinhalt",
+      "announcementUrl": "Ankündigungs-Link",
+      "mentionedFirstName": "Vorname des erwähnten Benutzers",
+      "mentionedLastName": "Nachname des erwähnten Benutzers",
+      "authorFullName": "Vollständiger Name des Autors",
+      "messageContent": "Nachrichteninhalt",
+      "chatUrl": "Nachrichtenlink",
+      "invitedByUserName": "Eingeladen von (Name)",
+      "hasCertificate": "Hat Zertifikat",
+      "archiveReason": "Archivierungsgrund",
+      "profileLink": "Benutzerprofil-Link",
+      "progressLink": "Kursfortschritt-Link",
+      "userName": "Vollständiger Name"
+    },
+    "simulation": {
+      "title": "Simulationsergebnis",
+      "statusSuccess": "Erfolg",
+      "statusFailed": "Fehlgeschlagen",
+      "errorTitle": "Simulationsfehler",
+      "retry": "Simulation wiederholen",
+      "errorsTitle": "Erkannte Probleme",
+      "readyToActivate": "Automatisierung ist bereit zur Aktivierung.",
+      "tabPreview": "E-Mail-Vorschau",
+      "tabEventData": "Ereignisdaten",
+      "tabMappings": "Zuordnungen",
+      "from": "Von:",
+      "to": "An:",
+      "subject": "Betreff:",
+      "noEventData": "Keine Ereignisdaten — wählen Sie einen Trigger-Typ.",
+      "availableVariables": "Verfügbare Ereignisvariablen",
+      "variableName": "Variable",
+      "variableLabel": "Beschreibung",
+      "variableType": "Typ",
+      "placeholder": "Platzhalter",
+      "mappedTo": "Zugeordnet zu",
+      "sampleValue": "Beispielwert",
+      "unmapped": "Nicht zugeordnet",
+      "errors": {
+        "triggerNodeName": "Startereignis",
+        "selectTriggerType": "Wählen Sie einen Startereignis-Typ",
+        "addTriggerNode": "Fügen Sie mindestens einen Trigger-Knoten hinzu",
+        "actionNodeName": "E-Mail senden",
+        "actionLabel": "Aktion",
+        "selectEmailTemplate": "Wählen Sie eine veröffentlichte E-Mail-Vorlage",
+        "selectLanguage": "Wählen Sie die Sprache der E-Mail-Vorlage",
+        "unmappedPlaceholder": "Platzhalter {{placeholder}} ist nicht zugeordnet — weisen Sie eine Ereignisvariable zu",
+        "addActionNode": "Fügen Sie mindestens einen Aktionsknoten hinzu (z.B. E-Mail senden)"
+      },
+      "preview": {
+        "subject": "Sie wurden einem Kurs zugewiesen: {{courseName}}",
+        "greeting": "Hallo {{name}}!",
+        "assignedToCourse": "Sie wurden einem neuen Kurs zugewiesen: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Zum Kurs",
+        "unavailable": "Vorschau nicht verfügbar",
+        "loadFailed": "Die Vorschau der Vorlage konnte nicht geladen werden.",
+        "label": "Vorschau",
+        "systemTemplateNote": "Systemvorlage <strong>{{templateLabel}}</strong> — der Standardinhalt wird beim Versand automatisch generiert.",
+        "emailDescription": "Diese E-Mail wird mit dem Inhalt gesendet, der zum ausgewählten Trigger und den zugeordneten Variablen passt.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Max",
+        "lastName": "Mustermann",
+        "fullName": "Max Mustermann",
+        "email": "max.mustermann@example.com",
+        "courseName": "Arbeitssicherheit Schulung 2025",
+        "chapterName": "Kapitel 1: Einführung",
+        "certificateName": "Arbeitssicherheit Zertifikat",
+        "announcementTitle": "Neue Schulung verfügbar",
+        "announcementContent": "Wir laden Sie zu einer neuen Schulung ein...",
+        "authorFullName": "Erika Musterfrau",
+        "messageContent": "Hey, schau dir das an!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Erika Musterfrau"
+      }
+    }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Automatisierungsschritt nicht gefunden",
+      "idMismatch": "Sie können den übergeordneten Schritt oder die Automatisierung nicht ändern",
+      "updateFailed": "Der Automatisierungsschritt konnte nicht aktualisiert werden",
+      "deleteFailed": "Fehler beim Löschen des Automatisierungsschritts",
+      "nodeDeleteFailed": "Fehler beim Finden des zu löschenden Knotens",
+      "noRootStep": "Eine leere Automatisierung muss zuerst einen Stammschritt besitzen",
+      "hasRootAlready": "Die Automatisierung besitzt bereits einen Stammschritt",
+      "cycleDetected": "Der Automatisierungsbaum darf keine Zyklen enthalten",
+      "stepTreeBuildFailed": "Fehler beim Erstellen des Schrittbaums",
+      "wrongNumberOfRoots": "Eine Automatisierung darf nur einen Stammschritt besitzen",
+      "treeNotConnected": "Nicht alle angegebenen Schritte sind miteinander verbunden",
+      "bulkInsertFailed": "Die Automatisierungsschritte konnten nicht aktualisiert werden"
     }
   }
 }

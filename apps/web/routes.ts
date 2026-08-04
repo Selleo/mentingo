@@ -75,9 +75,17 @@ export const routes: (
           route("categories", "modules/Admin/Categories/Categories.page.tsx");
           route("categories/:id", "modules/Admin/Categories/Category.page.tsx");
           route("categories/new", "modules/Admin/Categories/CreateNewCategory.page.tsx");
+          route("automation", "modules/Admin/Automation/Automation.page.tsx");
+          route("automation/logs", "modules/Admin/Automation/Logs/AutomationLogs.page.tsx");
+          route(
+            "automation/:id/builder",
+            "modules/Admin/Automation/Builder/AutomationBuilder.page.tsx",
+          );
           route("groups", "modules/Admin/Groups/Groups.page.tsx");
           route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
           route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");
+          route("email-templates", "modules/Admin/EmailTemplates/EmailTemplates.page.tsx");
+          route("email-templates/:id", "modules/Admin/EmailTemplates/EditEmailTemplate.page.tsx");
           route("promotion-codes", "modules/Admin/PromotionCodes/PromotionCodes.page.tsx");
           route("promotion-codes/new", "modules/Admin/PromotionCodes/CreatePromotionCode.page.tsx");
           route(

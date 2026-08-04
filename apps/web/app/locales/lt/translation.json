@@ -16,7 +16,6 @@
       "clearAll": "Išvalyti viską",
       "validate": "Patvirtinti",
       "edit": "Redaguoti",
-      "delete": "Ištrinti",
       "uploading": "Įkeliama...",
       "sending": "Siunčiama..."
     },
@@ -330,6 +329,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automazioni",
     "settings": "Nustatymai",
     "logout": "Atsijungti",
     "panel": "skydelis",
@@ -354,6 +354,7 @@
     "announcements": "Skelbimai",
     "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
+    "emailTemplates": "El. pašto šablonai",
     "manage": "Tvarkyti",
     "ariaLabels": {
       "goToAvailableCourses": "Eikite į galimus kursus"
@@ -4118,7 +4119,9 @@
     "activityLogs": "Veiklos žurnalas",
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
-    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
+    "emailTemplates": "El. pašto šablonai",
+    "editEmailTemplate": "Redaguoti el. pašto šabloną"
   },
   "masterCourse": {
     "error": {
@@ -4928,6 +4931,590 @@
       "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "El. laiškų šablonai",
+      "edit": "Redaguoti"
+    },
+    "list": {
+      "title": "El. laiškų šablonai",
+      "createButton": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus",
+      "searchPlaceholder": "Ieškoti pagal pavadinimą",
+      "statusFilter": "Būsena",
+      "empty": "Šablonų dar nėra.",
+      "loading": "Kraunami šablonai...",
+      "loadFailed": "Nepavyko įkelti el. laiškų šablonų.",
+      "status": {
+        "all": "Visi"
+      },
+      "columns": {
+        "name": "Pavadinimas",
+        "status": "Būsena",
+        "languages": "Kalbos",
+        "updatedAt": "Atnaujinta",
+        "selectAll": "Pažymėti visus",
+        "selectRow": "Pažymėti eilutę"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Ištrinti el. laiško šabloną",
+      "titleMultiple": "Ištrinti el. laiškų šablonus",
+      "descriptionSingle": "Ar tikrai norite ištrinti šį el. laiško šabloną? Šio veiksmo atšaukti nebus galima.",
+      "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} el. laiškų šablonus? Šio veiksmo atšaukti nebus galima."
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "archived": "Suarchyvuota"
+    },
+    "edit": {
+      "loadFailed": "Nepavyko įkelti šio el. laiško šablono."
+    },
+    "form": {
+      "field": {
+        "name": "Pavadinimas",
+        "subject": "Temos eilutė",
+        "subjectHelp": "Užpildykite temą kiekvienai kalbai. Galite naudoti kintamuosius, pvz., {{user.first_name}}.",
+        "subjectPlaceholder": "pvz., Sveiki, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Pavadinimas privalomas.",
+        "nameTooLong": "Pavadinimas per ilgas.",
+        "localesRequired": "Pasirinkite bent vieną kalbą.",
+        "baseLanguageMissing": "Bazinė kalba turi būti tarp galimų kalbų."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "El. laiško šablonas sukurtas.",
+      "createFailed": "Nepavyko sukurti el. laiško šablono.",
+      "updatedSuccessfully": "El. laiško šablonas išsaugotas.",
+      "updateFailed": "Nepavyko išsaugoti el. laiško šablono.",
+      "publishedSuccessfully": "El. laiško šablonas paskelbtas.",
+      "publishFailed": "Nepavyko paskelbti el. laiško šablono.",
+      "publishBlocked": "Skelbti negalima — žr. diagnostiką žemiau.",
+      "archivedSuccessfully": "El. laiško šablonas suarchyvuotas.",
+      "archiveFailed": "Nepavyko suarchyvuoti el. laiško šablono.",
+      "unarchivedSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "unarchiveFailed": "Nepavyko atkurti šablono iš archyvo.",
+      "previewFailed": "Nepavyko sugeneruoti peržiūros.",
+      "previewLanguageUnavailable": "Ši kalba šiam šablonui nepasiekiama.",
+      "duplicatedSuccessfully": "El. laiško šablonas nukopijuotas.",
+      "duplicateFailed": "Nepavyko nukopijuoti el. laiško šablono.",
+      "madeDraftSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "makeDraftFailed": "Nepavyko grąžinti el. laiško šablono į juodraštį.",
+      "deletedSuccessfully": "El. laiško šablonas ištrintas.",
+      "deleteFailed": "Nepavyko ištrinti el. laiško šablono.",
+      "nameAlreadyExists": "El. laiško šablonas tokiu pavadinimu jau egzistuoja.",
+      "testEmailSentSuccessfully": "Bandomasis el. laiškas išsiųstas.",
+      "testEmailSendFailed": "Nepavyko išsiųsti bandomojo el. laiško."
+    },
+    "actions": {
+      "preview": "Peržiūra",
+      "duplicate": "Kopijuoti",
+      "archive": "Archyvuoti",
+      "unarchive": "Išarchyvuoti",
+      "publish": "Skelbti",
+      "makeDraft": "Pažymėti kaip juodraštį",
+      "edit": "Redaguoti",
+      "rename": "Pervadinti",
+      "sendTest": "Siųsti testą"
+    },
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Kalbos, kurias galima pridėti",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Pakeisti numatytąją kalbą",
+      "setBaseDescription": "Naudoti {{language}} kaip numatytąją šio šablono kalbą?",
+      "createTitle": "Pridėti vertimą",
+      "createDescription": "Pridėti šio šablono vertimą į {{language}}?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti vertimą {{language}}? Jo turinys bus pašalintas."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} klaida — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_few": "{{count}} klaidos — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_many": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_other": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
+      "warningsTitle_one": "{{count}} įspėjimas — peržiūrėkite prieš skelbdami",
+      "warningsTitle_few": "{{count}} įspėjimai — peržiūrėkite prieš skelbdami",
+      "warningsTitle_many": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
+      "warningsTitle_other": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
+      "elementIndex": "Elementas {{index}}",
+      "reasons": {
+        "name_missing": "Šablono pavadinimas privalomas",
+        "no_language_versions": "Pridėkite bent vieną kalbos versiją",
+        "subject_missing": "Numatytosios kalbos temai reikia turinio",
+        "body_missing": "El. laiško turinys tuščias",
+        "button_label_missing": "Mygtuko etiketė privaloma",
+        "button_url_missing": "Mygtuko paskirties adresas privalomas",
+        "empty_translation": "Vertimas tuščias",
+        "invalid_url_protocol": "URL naudoja neleistiną protokolą",
+        "unchanged_from_base": "Vertimas identiškas bazinei kalbai",
+        "footer_missing": "Trūksta poraštės"
+      },
+      "nodeTypes": {
+        "heading": "Antraštė",
+        "paragraph": "Tekstas",
+        "button": "Mygtukas",
+        "footer": "Poraštė",
+        "image": "Vaizdas"
+      },
+      "blockedToast": {
+        "save": "Šablono išsaugoti nepavyko. Žiūrėkite diagnostiką",
+        "publish": "Šablono paskelbti nepavyko. Žiūrėkite diagnostiką"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Įveskite /, kad atidarytumėte blokų meniu",
+        "heading": "Antraštė {{level}}",
+        "htmlCode": "HTML kodas…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Tekstas",
+          "media": "Medija",
+          "structure": "Struktūra",
+          "interactive": "Interaktyvūs",
+          "footer": "Poraštė"
+        },
+        "text": {
+          "title": "Tekstas",
+          "description": "Paprastojo teksto pastraipa."
+        },
+        "heading1": {
+          "title": "Antraštė 1",
+          "description": "Didelė sekcijos antraštė (H1)."
+        },
+        "heading2": {
+          "title": "Antraštė 2",
+          "description": "Vidutinė sekcijos antraštė (H2)."
+        },
+        "heading3": {
+          "title": "Antraštė 3",
+          "description": "Maža sekcijos antraštė (H3)."
+        },
+        "image": {
+          "title": "Vaizdas",
+          "description": "Viso pločio vaizdas."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Visas logotipas."
+        },
+        "section": {
+          "title": "Sekcija",
+          "description": "Turinio grupavimo konteineris."
+        },
+        "columns": {
+          "title": "Stulpeliai",
+          "description": "Kelių stulpelių išdėstymas."
+        },
+        "divider": {
+          "title": "Skirtukas",
+          "description": "Horizontali skiriamoji linija."
+        },
+        "spacer": {
+          "title": "Tarpas",
+          "description": "Vertikalus tarpas tarp blokų."
+        },
+        "button": {
+          "title": "Mygtukas",
+          "description": "Raginimo veikti mygtukas."
+        },
+        "footer": {
+          "title": "Poraštė",
+          "description": "Poraštės teksto blokas."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Paveikslo įkėlimas nepavyko. Bandykite dar kartą.",
+      "tooLarge": "Paveikslas per didelis. Maksimalus dydis yra 10 MB.",
+      "invalidType": "Netinkamas paveikslo tipas. Leidžiami: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "automationView": {
+    "title": "Automatizavimai",
+    "description": "Valdykite automatinius el. pašto pranešimus, siunčiamus reaguojant į platformos įvykius.",
+    "createAutomation": "Sukurti automatizavimą",
+    "filters": {
+      "searchPlaceholder": "Ieškoti pagal pavadinimą arba aprašymą...",
+      "all": "Visi",
+      "enabled": "Įjungti",
+      "disabled": "Išjungti",
+      "drafts": "Juodraščiai",
+      "archived": "Archyvuoti"
+    },
+    "status": {
+      "enabled": "Įjungtas",
+      "disabled": "Išjungtas",
+      "draft": "Juodraštis",
+      "archived": "Archyvuotas"
+    },
+    "table": {
+      "name": "Automatizavimo pavadinimas",
+      "status": "Būsena",
+      "trigger": "Aktyviklis",
+      "actions": "Veiksmai",
+      "lastRun": "Paskutinis paleidimas",
+      "updatedAt": "Atnaujinta",
+      "menu": "Meniu",
+      "manage": "Valdyti",
+      "empty": "Nėra apibrėžtų automatizavimų. Spustelėkite Sukurti automatizavimą, kad pridėtumėte pirmąjį.",
+      "emptyFiltered": "Jokios automatizacijos neatitinka pasirinktų filtrų. Pabandykite pakeisti paiešką arba būsenos filtrą.",
+      "emailCount_one": "{{count}} el. laiškas",
+      "emailCount_other": "{{count}} el. laiškai",
+      "noRuns": "Dar nebuvo paleista",
+      "runSuccess": "Sėkmingai baigta",
+      "runFailed": "Įvyko klaida"
+    },
+    "drawer": {
+      "title": "Automatizavimo informacija",
+      "description": "Redaguokite pasirinkto automatizavimo konfigūraciją.",
+      "nameLabel": "Automatizavimo pavadinimas",
+      "descriptionLabel": "Aprašymas",
+      "statusLabel": "Būsena",
+      "statusDraft": "Juodraštis",
+      "statusEnabled": "Aktyvus (Įjungtas)",
+      "statusDisabled": "Neaktyvus (Išjungtas)",
+      "statusArchived": "Archyvuotas",
+      "flowManagement": "Srauto valdymas",
+      "openBuilder": "Atidaryti žingsnių kūrimo priemonę",
+      "pause": "Pristabdyti",
+      "activate": "Aktyvuoti",
+      "simulationRequiredTooltip": "Automatizavimas pirmiausia turi praeiti simuliaciją",
+      "archive": "Archyvuoti",
+      "save": "Išsaugoti pakeitimus",
+      "cancel": "Atšaukti",
+      "delete": "Ištrinti"
+    },
+    "deleteDialog": {
+      "title": "Ištrinti automatizavimą?",
+      "description": "Šis veiksmas yra negrįžtamas. Automatizavimas bus visam laikui ištrintas. Vietoj to galite jį archyvuoti.",
+      "confirm": "Ištrinti",
+      "cancel": "Atšaukti"
+    },
+    "actionMenu": {
+      "openMenu": "Atidaryti meniu",
+      "settingsAndEdit": "Nustatymai ir redagavimas",
+      "disable": "Išjungti pranešimą",
+      "enable": "Įjungti pranešimą",
+      "delete": "Ištrinti automatizavimą"
+    },
+    "newAutomation": {
+      "name": "Naujas automatizavimas (Juodraštis)",
+      "description": "Apibrėžkite šio automatizavimo tikslą ir aprašymą, tada pereikite prie srauto kūrimo priemonės.",
+      "triggerPlaceholder": "Reikia sukonfigūruoti..."
+    },
+    "toasts": {
+      "created": "Automatizavimas sėkmingai sukurtas.",
+      "createError": "Nepavyko sukurti automatizavimo.",
+      "updated": "Automatizavimas sėkmingai išsaugotas.",
+      "updateError": "Nepavyko išsaugoti automatizavimo.",
+      "deleted": "Automatizavimas ištrintas.",
+      "deleteError": "Nepavyko ištrinti automatizavimo."
+    },
+    "seedDefaults": {
+      "button": "Generuoti numatytuosius",
+      "dialog": {
+        "title": "Generuoti numatytąsias automatizacijas?",
+        "description": "Bus sukurti visi standartiniai automatizavimai (pvz., vartotojo pakvietimas, pasisveikinimas, slaptažodžio priminimas ir kt.) su numatytaisiais el. pašto šablonais. Esami automatizavimai nebus perrašyti.",
+        "warning": "Dėmesio: Nauji automatizavimai bus sukurti aktyvios būsenos ir iš karto pradės veikti. Įsitikinkite, kad jūsų el. pašto šablonai yra tinkamai sukonfigūruoti.",
+        "confirm": "Generuoti",
+        "cancel": "Atšaukti"
+      },
+      "toasts": {
+        "success": "Sugeneruota {{created}} automatizavimų (praleista {{skipped}} esamų).",
+        "error": "Nepavyko sugeneruoti numatytųjų automatizavimų."
+      }
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Grįžti į automatizavimus",
+      "automations": "Automatizavimai",
+      "save": "Išsaugoti",
+      "simulate": "Simuliuoti",
+      "active": "Aktyvus",
+      "draft": "Juodraštis",
+      "duplicate": "Dubliuoti",
+      "exportJson": "Eksportuoti kaip JSON",
+      "delete": "Ištrinti automatizavimą",
+      "savedJustNow": "Ką tik išsaugota",
+      "savedMinutesAgo": "Išsaugota prieš {{count}} min.",
+      "simulationRequiredTooltip": "Paleiskite simuliaciją ir įsitikinkite, kad ji sėkminga, kad galėtumėte aktyvuoti automatizavimą",
+      "invalidNodesTooltip": "Ištaisykite visus klaidingus mazgus prieš aktyvuodami automatizavimą",
+      "unsavedChangesTooltip": "Išsaugokite pakeitimus prieš aktyvuodami automatizavimą",
+      "leaveDialog": {
+        "title": "Neišsaugoti pakeitimai",
+        "description": "Turite neišsaugotų pakeitimų. Ar norite išsaugoti prieš išeidami?",
+        "saveAndLeave": "Išsaugoti ir išeiti",
+        "leaveWithoutSaving": "Išeiti be išsaugojimo",
+        "cancel": "Atšaukti"
+      },
+      "deleteDialog": {
+        "title": "Ištrinti automatizavimą",
+        "description": "Ar tikrai norite ištrinti šį automatizavimą? Šio veiksmo negalima atšaukti.",
+        "confirm": "Ištrinti",
+        "cancel": "Atšaukti"
+      }
+    },
+    "sidebar": {
+      "title": "Žingsniai",
+      "description": "Vilkite blokus ant drobės, kad sukurtumėte darbo eigą.",
+      "descriptionTrigger": "Pradėkite pasirinkdami trigerį savo automatizavimui.",
+      "descriptionActions": "Pridėkite veiksmus, kurie bus vykdomi suveikus trigeriui.",
+      "triggerInstruction": "Kiekvienas automatizavimas prasideda trigeriu. Vilkite jį ant drobės, kad pradėtumėte kurti darbo eigą.",
+      "triggers": "Trigeriai",
+      "conditions": "Sąlygos",
+      "actions": "Veiksmai"
+    },
+    "blocks": {
+      "courseDeadline": "Kurso terminas",
+      "overdue": "Vėluojantis",
+      "notCompleted": "Nebaigtas",
+      "userEnrolled": "Vartotojas užregistruotas",
+      "certificateExpiringSoon": "Sertifikatas netrukus baigsis",
+      "liveTransmissionStartingSoon": "Tiesioginė transliacija netrukus prasidės",
+      "sendEmail": "Siųsti el. laišką",
+      "userInvited": "Vartotojas pakviestas",
+      "usersImportedInvite": "Vartotojai importuoti (kvietimas)",
+      "userPasswordReminder": "Slaptažodžio priminimas",
+      "userPasswordChanged": "Slaptažodis pakeistas",
+      "userWelcome": "Pasisveikinimo žinutė",
+      "userFirstLogin": "Pirmas prisijungimas",
+      "usersAssignedToCourse": "Vartotojai priskirti kursui",
+      "usersShortInactivity": "Trumpas neaktyvumas",
+      "usersLongInactivity": "Ilgas neaktyvumas",
+      "userChapterFinished": "Skyrius baigtas",
+      "userCourseFinished": "Kursas baigtas",
+      "userRegistered": "Vartotojas užsiregistravo",
+      "userPasswordCreated": "Slaptažodis sukurtas",
+      "courseCompleted": "Kursas užbaigtas",
+      "certificateExpirationWarning": "Sertifikato galiojimo pabaigos įspėjimas",
+      "certificateArchived": "Sertifikatas archyvuotas",
+      "announcementPublished": "Skelbimas paskelbtas",
+      "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
+      "courseDueDateReminder": "Kurso termino priminimas"
+    },
+    "canvas": {
+      "emptyTitle": "Jūsų automatizavimo drobė tuščia",
+      "emptyDescription": "Vilkite sąlygą arba veiksmą iš šoninės juostos, kad pradėtumėte.",
+      "emptyDescriptionTrigger": "Vilkite trigerį iš šoninės juostos, kad pradėtumėte kurti automatizavimą.",
+      "removeNode": "Pašalinti mazgą",
+      "simulationFailed": "Simuliacija aptiko klaidų šiame mazge",
+      "deleteNodeDialogTitle": "Pašalinti mazgą",
+      "deleteNodeDialogDescription": "Ar tikrai norite pašalinti šį mazgą? Šio veiksmo negalima atšaukti.",
+      "deleteNodeDialogCancel": "Atšaukti",
+      "deleteNodeDialogConfirm": "Pašalinti",
+      "addChild": "Pridėti antrinį žingsnį",
+      "zoomIn": "Priartinti",
+      "zoomOut": "Atitolinti",
+      "zoomReset": "Atstatyti mastelį"
+    },
+    "editPanel": {
+      "editCondition": "Redaguoti sąlygą",
+      "editTrigger": "Redaguoti trigerį",
+      "editAction": "Redaguoti veiksmą",
+      "nodeType": "Mazgo tipas",
+      "changeTriggerLabel": "Pakeisti trigerį į",
+      "changeTriggerDialogTitle": "Pakeisti trigerį",
+      "changeTriggerDialogDescription": "Pakeitus trigerio tipą, visi veiksmai ir sąlygos bus pašalinti iš automatizacijos. Drobėje liks tik trigeris. Ar tikrai norite tęsti?",
+      "changeTriggerDialogCancel": "Atšaukti",
+      "changeTriggerDialogConfirm": "Ištrinti viską ir pakeisti trigerį",
+      "conditionValue": "Reikšmė",
+      "conditionValuePlaceholder": "Įveskite reikšmę...",
+      "operator": "Operatorius",
+      "operatorEquals": "Lygu",
+      "operatorGreaterThan": "Daugiau nei",
+      "operatorLessThan": "Mažiau nei",
+      "operatorContains": "Apima",
+      "emailSubject": "El. laiško tema",
+      "emailSubjectPlaceholder": "Įveskite temą...",
+      "emailTemplate": "El. laiško šablonas",
+      "emailTemplatePlaceholder": "Pasirinkite šabloną",
+      "emailBody": "El. laiško turinys",
+      "emailBodyPlaceholder": "Parašykite el. laiško turinį...",
+      "emailRecipient": "Gavėjas",
+      "recipientEnrolledUser": "Užregistruotas vartotojas",
+      "recipientAdmin": "Administratorius",
+      "recipientManager": "Vadovas",
+      "removeNode": "Pašalinti šį žingsnį"
+    },
+    "config": {
+      "daysBefore": "Dienų prieš",
+      "daysBeforePlaceholder": "pvz. 7",
+      "course": "Kursas",
+      "coursePlaceholder": "Pasirinkite kursą",
+      "daysOverdue": "Dienų vėlavimo",
+      "daysOverduePlaceholder": "pvz. 3",
+      "daysEnrolled": "Dienų nuo registracijos",
+      "daysEnrolledPlaceholder": "pvz. 30",
+      "minutesBefore": "Minučių prieš",
+      "minutesBeforePlaceholder": "pvz. 60",
+      "daysInactive": "Neaktyvumo dienų",
+      "daysInactivePlaceholder": "pvz. 14"
+    },
+    "editAction": {
+      "title": "Redaguoti veiksmą",
+      "sendEmail": "Siųsti el. laišką",
+      "emailTemplate": "El. laiško šablonas",
+      "selectTemplate": "Pasirinkite šabloną...",
+      "language": "Kalba",
+      "userDefaultLanguage": "Numatytoji vartotojo kalba",
+      "placeholders": "Šablono kintamieji",
+      "selectTemplateFirst": "Pasirinkite el. laiško šabloną, kad pamatytumėte galimus kintamuosius.",
+      "noPlaceholders": "Šis šablonas neturi kintamųjų, kuriuos reikėtų užpildyti.",
+      "placeholdersDescription": "Priskirkite kiekvieną šablono kintamąjį trigerio teikiamiems duomenims.",
+      "selectVariable": "Pasirinkite trigerio kintamąjį...",
+      "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius.",
+      "defaultEmailNoMapping": "Numatytasis el. pašto šablonas nereikalauja kintamųjų susiejimo.",
+      "systemTemplateNoMapping": "Šis sistemos šablonas automatiškai naudoja trigerio duomenis. Rankinis susiejimas nereikalingas.",
+      "defaultTemplatesGroup": "Sistemos šablonai",
+      "customTemplatesGroup": "Pasirinktiniai šablonai",
+      "noCustomTemplates": "Nėra paskelbtų pasirinktinių šablonų.",
+      "templates": {
+        "defaultEmail": "Numatytasis el. laiškas",
+        "userInvite": "Vartotojo pakvietimas",
+        "welcome": "Pasisveikinimas",
+        "userFirstLogin": "Pirmas prisijungimas",
+        "userAssignedToCourse": "Vartotojas priskirtas kursui",
+        "userShortInactivity": "Trumpas neaktyvumas",
+        "userLongInactivity": "Ilgas neaktyvumas",
+        "userFinishedChapter": "Skyrius baigtas",
+        "userFinishedCourse": "Kursas baigtas",
+        "createPasswordReminder": "Slaptažodžio sukūrimo priminimas",
+        "certificateExpirationWarning": "Sertifikato galiojimo pabaigos įspėjimas",
+        "certificateExpired": "Sertifikatas nebegalioja",
+        "announcement": "Pranešimas",
+        "courseDueDateReminder": "Kurso termino priminimas",
+        "newUser": "Naujas vartotojas",
+        "finishedCourse": "Baigtas kursas"
+      }
+    },
+    "variables": {
+      "userFirstName": "Vartotojo vardas",
+      "userLastName": "Vartotojo pavardė",
+      "userEmail": "El. pašto adresas",
+      "inviteLink": "Aktyvavimo nuoroda",
+      "inviteLinkRegistration": "Registracijos nuoroda",
+      "resetPasswordLink": "Slaptažodžio atkūrimo nuoroda",
+      "platformUrl": "Platformos nuoroda",
+      "loginDate": "Pirmo prisijungimo data",
+      "courseName": "Kurso pavadinimas",
+      "courseUrl": "Kurso nuoroda",
+      "dueDate": "Terminas",
+      "daysInactive": "Neaktyvumo dienų skaičius",
+      "chapterName": "Skyriaus pavadinimas",
+      "finishedAt": "Baigimo data",
+      "certificateUrl": "Sertifikato nuoroda",
+      "registrationDate": "Registracijos data",
+      "createdAt": "Sukūrimo data",
+      "daysLeft": "Likusios dienos",
+      "daysLeftExpiration": "Dienų iki galiojimo pabaigos",
+      "certificateName": "Sertifikato pavadinimas",
+      "expirationDate": "Galiojimo pabaigos data",
+      "archivedAt": "Archyvavimo data",
+      "recipientFirstName": "Gavėjo vardas",
+      "recipientLastName": "Gavėjo pavardė",
+      "announcementTitle": "Skelbimo pavadinimas",
+      "announcementContent": "Skelbimo turinys",
+      "announcementUrl": "Skelbimo nuoroda",
+      "mentionedFirstName": "Paminėto vartotojo vardas",
+      "mentionedLastName": "Paminėto vartotojo pavardė",
+      "authorFullName": "Autoriaus vardas ir pavardė",
+      "messageContent": "Žinutės turinys",
+      "chatUrl": "Žinutės nuoroda",
+      "invitedByUserName": "Pakvietė (vardas)",
+      "hasCertificate": "Turi sertifikatą",
+      "archiveReason": "Archyvavimo priežastis",
+      "profileLink": "Vartotojo profilio nuoroda",
+      "progressLink": "Kurso pažangos nuoroda",
+      "userName": "Vardas ir pavardė"
+    },
+    "simulation": {
+      "title": "Simuliacijos rezultatas",
+      "statusSuccess": "Sėkmė",
+      "statusFailed": "Nepavyko",
+      "errorTitle": "Simuliacijos klaida",
+      "retry": "Pakartoti simuliaciją",
+      "errorsTitle": "Aptiktos problemos",
+      "readyToActivate": "Automatizavimas paruoštas aktyvavimui.",
+      "tabPreview": "El. laiško peržiūra",
+      "tabEventData": "Įvykio duomenys",
+      "tabMappings": "Susiejimai",
+      "from": "Nuo:",
+      "to": "Kam:",
+      "subject": "Tema:",
+      "noEventData": "Nėra įvykio duomenų — pasirinkite trigerio tipą.",
+      "availableVariables": "Galimi įvykio kintamieji",
+      "variableName": "Kintamasis",
+      "variableLabel": "Aprašymas",
+      "variableType": "Tipas",
+      "placeholder": "Placeholder",
+      "mappedTo": "Susieta su",
+      "sampleValue": "Pavyzdinė reikšmė",
+      "unmapped": "Nesusieta",
+      "errors": {
+        "triggerNodeName": "Pradinis įvykis",
+        "selectTriggerType": "Pasirinkite pradinio įvykio tipą",
+        "addTriggerNode": "Pridėkite bent vieną trigerio mazgą",
+        "actionNodeName": "Siųsti el. laišką",
+        "actionLabel": "Veiksmas",
+        "selectEmailTemplate": "Pasirinkite paskelbtą el. laiško šabloną",
+        "selectLanguage": "Pasirinkite el. laiško šablono kalbą",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} nesusietas — priskirkite įvykio kintamąjį",
+        "addActionNode": "Pridėkite bent vieną veiksmo mazgą (pvz. Siųsti el. laišką)"
+      },
+      "preview": {
+        "subject": "Jums priskirtas kursas: {{courseName}}",
+        "greeting": "Sveiki {{name}}!",
+        "assignedToCourse": "Jums priskirtas naujas kursas: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Eiti į kursą",
+        "unavailable": "Peržiūra nepasiekiama",
+        "loadFailed": "Nepavyko įkelti šablono peržiūros.",
+        "label": "Peržiūra",
+        "systemTemplateNote": "Sistemos šablonas <strong>{{templateLabel}}</strong> — numatytasis turinys generuojamas automatiškai siuntimo metu.",
+        "emailDescription": "Šis el. laiškas bus išsiųstas su turiniu, atitinkančiu pasirinktą trigerį ir susietas kintamuosius.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Jonas",
+        "lastName": "Jonaitis",
+        "fullName": "Jonas Jonaitis",
+        "email": "jonas.jonaitis@example.com",
+        "courseName": "Darbo saugos mokymai 2025",
+        "chapterName": "1 skyrius: Įvadas",
+        "certificateName": "Darbo saugos sertifikatas",
+        "announcementTitle": "Nauji mokymai prieinami",
+        "announcementContent": "Kviečiame į naujus mokymus...",
+        "authorFullName": "Ona Onaitė",
+        "messageContent": "Ei, pažiūrėk!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Ona Onaitė"
+      }
+    }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Passaggio di automazione non trovato",
+      "idMismatch": "Non puoi modificare il passaggio padre o l'automazione",
+      "updateFailed": "Impossibile aggiornare il passaggio di automazione",
+      "deleteFailed": "Errore durante l'eliminazione del passaggio di automazione",
+      "nodeDeleteFailed": "Errore durante la ricerca del nodo da eliminare",
+      "noRootStep": "Un'automazione vuota deve avere prima un passaggio radice",
+      "hasRootAlready": "L'automazione ha già un passaggio radice",
+      "cycleDetected": "L'albero dei passaggi di automazione non può contenere cicli",
+      "stepTreeBuildFailed": "Errore durante la creazione dell'albero dei passaggi",
+      "wrongNumberOfRoots": "Un'automazione può avere un solo passaggio radice",
+      "treeNotConnected": "Non tutti i passaggi forniti sono collegati tra loro",
+      "bulkInsertFailed": "Impossibile aggiornare i passaggi di automazione"
     }
   }
 }

@@ -25,6 +25,7 @@ import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { SlackStrategy } from "./auth/strategy/slack.strategy";
+import { AutomationsModule } from "./automations/automations.module";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
@@ -48,6 +49,8 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
+import { PublicCourseThumbnailModule } from "./courses/public-course-thumbnail.module";
+import { EmailNotificationTemplatesModule } from "./email-notification-templates/email-templates.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
@@ -63,6 +66,7 @@ import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
+import { PublicEmailTemplateImageModule } from "./public-email-template-image/public-email-template-image.module";
 import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
@@ -168,6 +172,9 @@ import type { RedisClient } from "src/redis";
     ScormModule,
     CertificatesModule,
     AnnouncementsModule,
+    EmailNotificationTemplatesModule,
+    PublicCourseThumbnailModule,
+    PublicEmailTemplateImageModule,
     IngestionModule,
     IntegrationModule,
     LearningTimeModule,
@@ -185,6 +192,7 @@ import type { RedisClient } from "src/redis";
     LumaModule,
     LiveTrainingModule,
     CalendarModule,
+    AutomationsModule,
   ],
   controllers: [],
   providers: [

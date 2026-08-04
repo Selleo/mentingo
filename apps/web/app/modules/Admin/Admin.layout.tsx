@@ -50,9 +50,13 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
       PERMISSIONS.LEARNING_PATH_EXPORT,
     ],
   });
+  const { hasAccess: canManageAutomation } = usePermissions({
+    required: PERMISSIONS.AUTOMATION_MANAGE || PERMISSIONS.USER_MANAGE,
+  });
   const navigate = useNavigate();
 
-  const isAllowed = canManageUsers || canManageOwnCourses || canAccessLearningPathAdmin;
+  const isAllowed =
+    canManageUsers || canManageOwnCourses || canAccessLearningPathAdmin || canManageAutomation;
 
   useLayoutEffect(() => {
     if (!isAllowed) {
@@ -70,6 +74,10 @@ export const shouldHideTopbarAndSidebar = (pathname: string) =>
     .with("/admin/beta-courses/new", () => true)
     .with("/admin/beta-courses/new/standard", () => true)
     .with("/admin/courses/new-scorm", () => true)
+    .when(
+      (p) => /^\/admin\/automation\/[^/]+\/builder$/.test(p),
+      () => true,
+    )
     .otherwise(() => false);
 
 const AdminLayout = () => {

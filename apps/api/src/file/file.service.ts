@@ -199,7 +199,7 @@ export class FileService {
     file: Express.Multer.File,
     resource: string,
     tenantId?: UUIDType,
-    imageVariantOptions?: ImageVariantCreationOptions,
+    options?: ImageVariantCreationOptions & { skipVariants?: boolean },
   ): Promise<UploadFileResult> {
     if (file.size === 0) {
       throw new BadRequestException("files.toast.fileEmpty");
@@ -226,13 +226,17 @@ export class FileService {
       });
     }
 
-    const imageVariantResult = await this.imageVariantService.createVariants({
-      buffer: file.buffer,
-      resource,
-      mimeType: file.mimetype,
-      tenantId,
-      options: imageVariantOptions,
-    });
+    const { skipVariants, ...imageVariantOptions } = options ?? {};
+
+    const imageVariantResult = skipVariants
+      ? null
+      : await this.imageVariantService.createVariants({
+          buffer: file.buffer,
+          resource,
+          mimeType: file.mimetype,
+          tenantId,
+          options: imageVariantOptions,
+        });
 
     if (imageVariantResult) {
       return {

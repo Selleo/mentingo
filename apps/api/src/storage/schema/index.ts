@@ -26,6 +26,7 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  EMAIL_TEMPLATE_STATUSES,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
@@ -50,6 +51,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { AutomationStatus, automationTypes } from "src/announcements/types/automations.types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
 import {
   DEFAULT_LEARNING_PATH_SETTINGS,
@@ -100,6 +102,9 @@ import type {
   AnnouncementSourceType,
   AnnouncementStatus,
   CourseGenerationSyncStatus,
+  EmailTemplateBlocks,
+  EmailTemplateStatus,
+  EmailTemplateStrings,
   LiveTrainingDeliveryType,
   LiveTrainingLinkEntityType,
   LiveTrainingMemberRole,
@@ -116,6 +121,7 @@ import type {
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
+import type { TypeContext } from "src/announcements/types/automations-source.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
@@ -1879,6 +1885,35 @@ export const groupAnnouncements = pgTable(
   })),
 );
 
+export const emailNotificationTemplates = pgTable(
+  "email_notification_templates",
+  {
+    ...id,
+    ...timestamps,
+    name: text("name").notNull(),
+    subject: jsonb("subject").$type<LocalizedText>().default({}).notNull(),
+    status: text("status")
+      .$type<EmailTemplateStatus>()
+      .notNull()
+      .default(EMAIL_TEMPLATE_STATUSES.DRAFT),
+    blocks: jsonb("blocks")
+      .$type<EmailTemplateBlocks>()
+      .default({ type: "doc", content: [] })
+      .notNull(),
+    strings: jsonb("strings").$type<EmailTemplateStrings>().default({}).notNull(),
+    baseLanguage,
+    availableLocales,
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("email_notification_templates", (table) => ({
+    tenantNameUniqueIdx: uniqueIndex("email_notification_templates_tenant_id_name_unique_idx").on(
+      table.tenantId,
+      table.name,
+    ),
+  })),
+);
+
 export const documents = pgTable(
   "documents",
   {
@@ -2773,4 +2808,62 @@ export const learningPathEntityMap = pgTable(
       table.sourceEntityId,
     ),
   }),
+);
+export const automationStatus = pgEnum(
+  "automation_status",
+  Object.values(AutomationStatus) as [string, ...string[]],
+);
+
+export const automations = pgTable(
+  "automations",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    name: jsonb("name").notNull().$type<LocalizedText>().default({}),
+    description: jsonb("description").$type<LocalizedText>().default({}),
+    lastRun: timestamp("last_run", { mode: "date" }),
+    status: automationStatus("status").notNull(),
+  },
+  withTenantIdIndex("automation_index"),
+);
+export const automationTypeEnum = pgEnum("automation_type", automationTypes);
+
+export const automationSteps = pgTable(
+  "automation_steps",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    parentId: uuid("parent_id"),
+    type: automationTypeEnum("type").notNull(),
+    typeContext: jsonb("type_context").$type<TypeContext>().notNull(),
+  },
+  withTenantIdIndex("automation_steps_index"),
+);
+export const automationLogStatusEnum = pgEnum("automation_log_status", [
+  "success",
+  "failed",
+  "skipped",
+]);
+
+export const automationLogs = pgTable(
+  "automation_logs",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    automationName: varchar("automation_name").notNull(),
+    eventName: varchar("event_name").notNull(),
+    errorName: varchar("error_name"),
+    status: automationLogStatusEnum("status").notNull(),
+    emailAddresses: jsonb("email_addresses").$type<string[]>().notNull().default([]),
+  },
+  withTenantIdIndex("automation_logs_index"),
 );
