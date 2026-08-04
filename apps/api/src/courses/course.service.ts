@@ -28,6 +28,7 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   gte,
   getTableColumns,
   ilike,
@@ -3931,13 +3932,25 @@ export class CourseService {
       return { averageScoresPerQuiz: [] };
     }
 
+    const activeEnrollment = this.db
+      .select({ studentId: studentCourses.studentId })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.studentId, studentLessonProgress.studentId),
+          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+        ),
+      );
+
     const conditions = [
       eq(chapters.courseId, courseId),
       eq(lessons.type, LESSON_TYPES.QUIZ),
       isNotNull(studentLessonProgress.completedAt),
       isNotNull(studentLessonProgress.quizScore),
-      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-      isNull(users.deletedAt),
+      exists(activeEnrollment),
     ];
 
     if (groupStudentIds.length) {
@@ -3960,14 +3973,6 @@ export class CourseService {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
       .innerJoin(studentLessonProgress, eq(studentLessonProgress.lessonId, lessons.id))
-      .innerJoin(
-        studentCourses,
-        and(
-          eq(studentCourses.studentId, studentLessonProgress.studentId),
-          eq(studentCourses.courseId, chapters.courseId),
-        ),
-      )
-      .innerJoin(users, eq(users.id, studentCourses.studentId))
       .where(and(...conditions))
       .groupBy(
         lessons.id,
