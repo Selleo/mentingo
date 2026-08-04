@@ -203,6 +203,43 @@ describe("AnnouncementsController (e2e)", () => {
       ]);
     });
 
+    it("content creator sees own and delivered manual announcements but not historical announcements from other authors", async () => {
+      const author = await userFactory.withAdminSettings(db).create();
+      const student = await userFactory.withUserSettings(db).create();
+      const historicalAnnouncement = await announcementsFactory.withUsers([student.id]).create({
+        authorId: author.id,
+      });
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create();
+      const ownAnnouncement = await announcementsFactory.withUsers([student.id]).create({
+        authorId: contentCreator.id,
+      });
+      const deliveredAnnouncement = await announcementsFactory
+        .withUsers([contentCreator.id])
+        .create({ authorId: author.id });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements")
+        .query({ feed: ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS })
+        .set("Cookie", await cookieFor(contentCreator, app))
+        .expect(200);
+
+      expect(response.body.data.map(({ id }: { id: string }) => id)).toEqual(
+        expect.arrayContaining([ownAnnouncement.id, deliveredAnnouncement.id]),
+      );
+      expect(response.body.data.map(({ id }: { id: string }) => id)).not.toContain(
+        historicalAnnouncement.id,
+      );
+      expect(
+        response.body.data.find(({ id }: { id: string }) => id === ownAnnouncement.id).isRead,
+      ).toBeNull();
+      expect(
+        response.body.data.find(({ id }: { id: string }) => id === deliveredAnnouncement.id).isRead,
+      ).toBe(false);
+    });
+
     it("admin group members receive personal read state", async () => {
       const author = await userFactory.withAdminSettings(db).create();
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();

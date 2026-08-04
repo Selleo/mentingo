@@ -66,7 +66,7 @@ export class AnnouncementsRepository {
     language: SupportedLanguages | undefined,
     pagination: AnnouncementPagination,
     currentUser: CurrentUserType,
-    canManageAnnouncements: boolean,
+    canManageAllAnnouncements: boolean,
     feed: AnnouncementFeed,
     status?: AnnouncementStatus,
   ) {
@@ -75,12 +75,16 @@ export class AnnouncementsRepository {
       eq(announcements.status, ANNOUNCEMENT_STATUSES.PUBLISHED),
     );
 
-    const visibilityCondition = canManageAnnouncements
-      ? or(
+    // Full managers review the tenant's manual announcements; creators only manage their own.
+    // Recipient-based visibility remains the rule for announcements delivered to other users.
+    const visibleManualAnnouncements = canManageAllAnnouncements
+      ? eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.MANUAL)
+      : and(
           eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.MANUAL),
-          personalPublishedAnnouncement,
-        )
-      : personalPublishedAnnouncement;
+          eq(announcements.authorId, currentUser.userId),
+        );
+
+    const visibilityCondition = or(visibleManualAnnouncements, personalPublishedAnnouncement);
 
     const conditions: SQL<unknown>[] = [
       isNull(announcements.deletedAt),
