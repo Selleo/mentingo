@@ -75,8 +75,6 @@ export class AnnouncementsRepository {
       eq(announcements.status, ANNOUNCEMENT_STATUSES.PUBLISHED),
     );
 
-    // Full managers review the tenant's manual announcements; creators only manage their own.
-    // Recipient-based visibility remains the rule for announcements delivered to other users.
     const visibleManualAnnouncements = canManageAllAnnouncements
       ? eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.MANUAL)
       : and(
