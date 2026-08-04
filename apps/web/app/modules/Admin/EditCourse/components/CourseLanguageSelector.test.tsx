@@ -77,4 +77,28 @@ describe("CourseLanguageSelector", () => {
       expect(onChange).toHaveBeenCalledWith("en");
     });
   });
+
+  it("opens the missing translations modal from the AI action", async () => {
+    const user = userEvent.setup();
+    const setOpenGenerateTranslationModal = vi.fn();
+
+    renderWith().render(
+      <CourseLanguageSelector
+        courseLanguage="pl"
+        course={{
+          id: "course-1",
+          baseLanguage: "en",
+          availableLocales: ["en", "pl"],
+        }}
+        hasMissingTranslations
+        isAIConfigured
+        onChange={vi.fn()}
+        setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Generate missing translations" }));
+
+    expect(setOpenGenerateTranslationModal).toHaveBeenCalledWith(true);
+  });
 });

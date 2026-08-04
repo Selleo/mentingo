@@ -4,11 +4,22 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { getAuthorName } from "./author.utils";
+
+import type { GetCourseOwnershipResponse } from "~/api/generated-api";
 
 type Author = {
   description?: string | null;
@@ -30,10 +41,14 @@ type OtherCourse = {
 
 type AuthorModalProps = {
   author?: Author;
+  canEditOwner?: boolean;
+  courseOwnershipCandidates?: GetCourseOwnershipResponse["data"]["possibleCandidates"];
   isAdminExperience: boolean;
   isSaving: boolean;
+  isTransferringOwner?: boolean;
   onClose: () => void;
   onSave: () => Promise<void>;
+  onTransferOwner?: (userId: string) => Promise<void>;
   onToggleShowAuthorSection: (visible: boolean) => void;
   otherCourses: OtherCourse[];
   showAuthorSectionDraft: boolean;
@@ -41,10 +56,14 @@ type AuthorModalProps = {
 
 export default function AuthorModal({
   author,
+  canEditOwner = false,
+  courseOwnershipCandidates = [],
   isAdminExperience,
   isSaving,
+  isTransferringOwner = false,
   onClose,
   onSave,
+  onTransferOwner,
   onToggleShowAuthorSection,
   otherCourses,
   showAuthorSectionDraft,
@@ -110,7 +129,38 @@ export default function AuthorModal({
 
             <div className="mb-8">
               <DialogTitle className="mb-2 font-gothic text-3xl font-bold text-neutral-950">
-                {authorFullName}
+                {canEditOwner && onTransferOwner ? (
+                  <Select
+                    disabled={isSaving || isTransferringOwner}
+                    onValueChange={(userId) => void onTransferOwner(userId)}
+                  >
+                    <SelectTrigger
+                      data-testid={COURSE_OVERVIEW_HANDLES.AUTHOR_TRANSFER_BUTTON}
+                      title={t("adminCourseView.settings.transferOwnership.title")}
+                      className="h-auto w-full min-w-0 justify-start rounded-lg border border-dashed border-primary-300 bg-transparent px-2 py-1 font-gothic text-3xl font-bold text-neutral-950 shadow-none hover:bg-neutral-50 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-primary-200 data-[placeholder]:text-neutral-950 [&>span]:text-neutral-950 [&>svg]:hidden"
+                    >
+                      <SelectValue placeholder={authorFullName} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courseOwnershipCandidates.map((candidate) => (
+                        <SelectItem
+                          key={candidate.id}
+                          value={candidate.id}
+                          data-testid={COURSE_OVERVIEW_HANDLES.transferOwnershipOption(
+                            candidate.id,
+                          )}
+                        >
+                          <div className="flex flex-col items-start text-left">
+                            <span className="font-medium">{candidate.name}</span>
+                            <span className="text-xs text-neutral-500">{candidate.email}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  authorFullName
+                )}
               </DialogTitle>
               <p className="mb-4 text-lg text-primary-700">{author?.jobTitle}</p>
               <p className="leading-relaxed text-neutral-800">{author?.description}</p>

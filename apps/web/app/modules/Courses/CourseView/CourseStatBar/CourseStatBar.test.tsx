@@ -34,6 +34,7 @@ const mocks = vi.hoisted(() => ({
     isAdminExperience: true,
   },
   toggleLearningMode: vi.fn(),
+  transferCourseOwnership: vi.fn(),
   updateCourse: vi.fn(),
   updateGroupDeadlines: vi.fn(),
 }));
@@ -47,6 +48,13 @@ vi.mock("~/api/mutations", () => ({
 vi.mock("~/api/mutations/admin/useBulkGroupCourseEnroll", () => ({
   useBulkGroupCourseEnroll: () => ({
     mutate: mocks.updateGroupDeadlines,
+    isPending: false,
+  }),
+}));
+
+vi.mock("~/api/mutations/admin/useTransferCourseOwnership", () => ({
+  useTransferCourseOwnership: () => ({
+    mutateAsync: mocks.transferCourseOwnership,
     isPending: false,
   }),
 }));
@@ -66,6 +74,12 @@ vi.mock("~/api/queries/admin/useGroupsByCourse", () => ({
       data: courseId ? mocks.enrolledGroups : undefined,
     };
   },
+}));
+
+vi.mock("~/api/queries/admin/useCourseOwnershipCandidates", () => ({
+  useCourseOwnershipCandidates: () => ({
+    data: undefined,
+  }),
 }));
 
 vi.mock("~/api/queries", () => ({

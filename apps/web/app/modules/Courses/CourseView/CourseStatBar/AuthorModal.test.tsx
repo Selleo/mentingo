@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import AuthorModal from "./AuthorModal";
 
 describe("AuthorModal", () => {
@@ -106,5 +108,35 @@ describe("AuthorModal", () => {
 
     expect(onToggleShowAuthorSection).toHaveBeenCalledWith(false);
     expect(onSave).toHaveBeenCalledOnce();
+  });
+
+  it("lets admins transfer ownership inline from the author name", async () => {
+    const user = userEvent.setup();
+    const onTransferOwner = vi.fn().mockResolvedValue(undefined);
+
+    renderWith().render(
+      <AuthorModal
+        author={{ firstName: "Ada", lastName: "Lovelace" }}
+        canEditOwner
+        courseOwnershipCandidates={[
+          { id: "candidate-1", name: "Grace Hopper", email: "grace@example.com" },
+        ]}
+        isAdminExperience
+        isSaving={false}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        onTransferOwner={onTransferOwner}
+        onToggleShowAuthorSection={vi.fn()}
+        otherCourses={[]}
+        showAuthorSectionDraft
+      />,
+    );
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.AUTHOR_TRANSFER_BUTTON));
+    await user.click(
+      screen.getByTestId(COURSE_OVERVIEW_HANDLES.transferOwnershipOption("candidate-1")),
+    );
+
+    expect(onTransferOwner).toHaveBeenCalledWith("candidate-1");
   });
 });

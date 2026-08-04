@@ -83,6 +83,12 @@ vi.mock("~/api/queries/useAIConfigured", () => ({
   }),
 }));
 
+vi.mock("~/api/queries/admin/useHasMissingTranslations", () => ({
+  useMissingTranslations: () => ({
+    data: { data: { hasMissingTranslations: false } },
+  }),
+}));
+
 vi.mock("~/hooks/useTusVideoUpload", () => ({
   useTusVideoUpload: () => ({
     getSessionForFile: mocks.getSessionForFile,

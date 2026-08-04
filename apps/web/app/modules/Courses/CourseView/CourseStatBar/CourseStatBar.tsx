@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
+import { useTransferCourseOwnership } from "~/api/mutations/admin/useTransferCourseOwnership";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useCurrentUser } from "~/api/queries";
+import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
-import { hasAllPermissions } from "~/common/permissions/permission.utils";
+import { hasAllPermissions, hasPermission } from "~/common/permissions/permission.utils";
 import { cn } from "~/lib/utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -54,6 +56,10 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     PERMISSIONS.COURSE_ENROLLMENT,
     PERMISSIONS.GROUP_READ,
   ]);
+  const canManageCourseOwnership = hasPermission(
+    currentUser?.permissions,
+    PERMISSIONS.COURSE_UPDATE,
+  );
 
   const hasCertificate = Boolean(course.hasCertificate);
   const hasAuthor = Boolean(course.authorId);
@@ -70,6 +76,8 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const { mutate: updateGroupDeadlines, isPending: isUpdatingDeadlines } = useBulkGroupCourseEnroll(
     course.id,
   );
+  const { mutateAsync: transferCourseOwnership, isPending: isTransferringOwner } =
+    useTransferCourseOwnership();
   const { data: author } = useUserDetails(course.authorId);
   const { mutate: toggleLearningMode } = useToggleCourseStudentMode(course.id);
 
@@ -87,6 +95,10 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     canEditCourse && canManageDeadlines ? course.id : "",
     language,
   );
+  const { data: courseOwnershipCandidates } = useCourseOwnershipCandidates({
+    id: course.id,
+    enabled: canManageCourseOwnership,
+  });
   const groupDeadlineDueDate = enrolledGroups
     ?.filter((group) => group.isMandatory && group.dueDate)
     .map((group) => group.dueDate)
@@ -96,6 +108,11 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const showDeadlineCard = isAdminExperience ? canManageDeadlines : hasDeadline;
   const showCertificateCard = isAdminExperience || hasCertificate;
   const showAuthorCard = isAdminExperience || (showAuthorSection && hasAuthor);
+  const canEditOwner = Boolean(
+    isAdminExperience &&
+      canManageCourseOwnership &&
+      courseOwnershipCandidates?.possibleCandidates?.length,
+  );
 
   const resetDeadlineDraft = useCallback(() => {
     const groups = enrolledGroups ?? [];
@@ -134,6 +151,13 @@ export function CourseStatBar({ language }: CourseHeroProps) {
 
   const closeAuthorModal = () => {
     setShowAuthorSectionDraft(showAuthorSection);
+    setShowAuthorModal(false);
+  };
+
+  const transferOwner = async (userId: string) => {
+    if (userId === course.authorId) return;
+
+    await transferCourseOwnership({ courseId: course.id, userId });
     setShowAuthorModal(false);
   };
 
@@ -264,10 +288,14 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       {showAuthorModal && (
         <AuthorModal
           author={author}
+          canEditOwner={canEditOwner}
+          courseOwnershipCandidates={courseOwnershipCandidates?.possibleCandidates}
           isAdminExperience={isAdminExperience}
           isSaving={isUpdatingAuthorSection}
+          isTransferringOwner={isTransferringOwner}
           onClose={closeAuthorModal}
           onSave={saveAuthorSection}
+          onTransferOwner={transferOwner}
           onToggleShowAuthorSection={toggleShowAuthorSectionDraft}
           otherCourses={otherCourses}
           showAuthorSectionDraft={showAuthorSectionDraft}

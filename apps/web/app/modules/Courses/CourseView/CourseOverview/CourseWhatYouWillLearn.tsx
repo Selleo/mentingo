@@ -203,12 +203,18 @@ export default function CourseWhatYouWillLearn({
             {isAdminExperience && editingOutcomeIndex !== index && (
               <button
                 type="button"
-                onClick={() => removeOutcome(index)}
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  removeOutcome(index);
+                }}
                 disabled={isPending}
                 aria-label={t("modernCourseView.overview.removeLearningOutcome")}
-                className="rounded p-1 opacity-0 transition-all hover:bg-white/20 group-hover/outcome:opacity-100 disabled:opacity-50"
+                className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center self-center rounded bg-white/10 p-1 text-white opacity-0 hover:bg-white/30 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 group-hover/outcome:bg-white/20 group-hover/outcome:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Trash2 className="size-4 text-white" />
+                <Trash2 className="size-4" />
               </button>
             )}
           </div>

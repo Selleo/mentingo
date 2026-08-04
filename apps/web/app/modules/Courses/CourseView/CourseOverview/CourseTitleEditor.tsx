@@ -87,13 +87,13 @@ export default function CourseTitleEditor({
         type="button"
         data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
         onClick={onEdit}
-        className="inline-block max-w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
+        className="group/title-edit inline-block max-w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white focus-visible:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
       >
         <span className="break-words">
           {title ? title : <span className="text-neutral-200">{placeholder}</span>}
           <Pencil
             aria-hidden
-            className="relative -top-1 ml-3 inline-block size-4 align-middle text-white/80 md:size-7"
+            className="relative -top-0.5 ml-2 inline-block size-4 align-middle text-white/80 opacity-0 transition-all duration-200 group-hover/title-edit:translate-x-0.5 group-hover/title-edit:opacity-100 group-focus-visible/title-edit:translate-x-0.5 group-focus-visible/title-edit:opacity-100 md:size-5"
           />
         </span>
       </button>

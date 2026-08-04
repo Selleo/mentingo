@@ -41,6 +41,7 @@ type LanguageSelectorProps = {
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
   isAIConfigured: boolean;
+  hasMissingTranslations?: boolean;
   className?: string;
   compactOnMobile?: boolean;
   selectTriggerClassName?: string;
@@ -53,6 +54,7 @@ export const CourseLanguageSelector = ({
   onChange,
   setOpenGenerateTranslationModal,
   isAIConfigured,
+  hasMissingTranslations = false,
   className,
   compactOnMobile,
   selectTriggerClassName,
@@ -124,6 +126,20 @@ export const CourseLanguageSelector = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
+      {hasMissingTranslations && isAIConfigured && (
+        <Button
+          type="button"
+          size="icon"
+          aria-label={t("adminCourseView.common.generateMissingTranslations")}
+          title={t("adminCourseView.common.generateMissingTranslations")}
+          onClick={() => setOpenGenerateTranslationModal(true)}
+          variant="outline"
+          className="shrink-0 rounded-lg bg-white p-1 text-primary-700 hover:bg-white hover:text-primary-700 hover:opacity-100"
+        >
+          <Icon name="WandSparkles" className="size-5" />
+        </Button>
+      )}
 
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
         <SelectTrigger
@@ -203,7 +219,7 @@ export const CourseLanguageSelector = ({
           size="icon"
           type="button"
           variant="outline"
-          className="shrink-0 p-1 rounded-lg"
+          className="shrink-0 rounded-lg bg-white p-1 text-primary-700 hover:bg-white hover:text-primary-700 hover:opacity-100"
           onClick={() => {
             setLanguageToDelete(courseLanguage);
             setIsDeleteDialogOpen(true);

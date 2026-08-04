@@ -1,10 +1,16 @@
-import { Calendar, Check, X } from "lucide-react";
+import { format, isValid, parseISO } from "date-fns";
+import { CalendarDays, Check, X } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 export type GroupDeadline = {
   deadline: string;
@@ -22,6 +28,55 @@ type DeadlineModalProps = {
   onSave: () => void;
   onToggleDeadline: (enabled: boolean) => void;
 };
+
+type DeadlineDatePickerProps = {
+  deadline: string;
+  onChange: (deadline: string) => void;
+  placeholder: string;
+};
+
+function DeadlineDatePicker({ deadline, onChange, placeholder }: DeadlineDatePickerProps) {
+  const [open, setOpen] = useState(false);
+  const language = useLanguageStore((state) => state.language);
+  const calendarLocale = getDateLocale(language);
+  const parsedDate = deadline ? parseISO(deadline) : undefined;
+  const selectedDate = parsedDate && isValid(parsedDate) ? parsedDate : undefined;
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full justify-start gap-2 border-neutral-200 bg-white font-normal text-neutral-900 shadow-sm"
+        >
+          <CalendarDays className="size-4 shrink-0 text-neutral-500" />
+          <span className="truncate text-left">
+            {selectedDate ? format(selectedDate, "PPP", { locale: calendarLocale }) : placeholder}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-2">
+        <Calendar
+          variant="default"
+          mode="single"
+          captionLayout="dropdown-buttons"
+          selected={selectedDate}
+          onSelect={(date) => {
+            onChange(date ? format(date, "yyyy-MM-dd") : "");
+            setOpen(false);
+          }}
+          fromYear={2000}
+          toYear={currentYear + 15}
+          initialFocus
+          weekStartsOn={1}
+          locale={calendarLocale}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function DeadlineModal({
   deadlineEnabledDraft,
@@ -93,21 +148,17 @@ export default function DeadlineModal({
                     {t("modernCourseView.deadline.current", { deadline: group.deadline })}
                   </p>
                 </div>
-                <div className="relative w-full sm:w-48">
-                  <input
-                    type="date"
-                    value={group.deadline}
-                    onChange={(event) => {
+                <div className="w-full sm:w-48">
+                  <DeadlineDatePicker
+                    deadline={group.deadline}
+                    onChange={(deadline) => {
                       const updated = groupDeadlines.map((currentGroup) =>
-                        currentGroup.id === group.id
-                          ? { ...currentGroup, deadline: event.target.value }
-                          : currentGroup,
+                        currentGroup.id === group.id ? { ...currentGroup, deadline } : currentGroup,
                       );
                       onChangeGroupDeadlines(updated);
                     }}
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-2 pr-10 text-sm [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+                    placeholder={t("adminCourseView.selectDate")}
                   />
-                  <Calendar className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-neutral-800" />
                 </div>
               </div>
             ))}

@@ -12,6 +12,7 @@ import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
 import { useCategories, useCurrentUser } from "~/api/queries";
+import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { hasPermission } from "~/common/permissions/permission.utils";
@@ -82,6 +83,11 @@ export default function CourseOverview({
   const { mutateAsync: generateTranslations, isPending: isGeneratingTranslations } =
     useGenerateMissingTranslations();
   const { data: isAIConfigured } = useAIConfigured();
+  const { data: missingTranslationsResponse } = useMissingTranslations(
+    course.id,
+    language,
+    isAdminExperience,
+  );
   const { getSessionForFile, uploadVideo, isUploading: isUploadingTrailer } = useTusVideoUpload();
 
   const savedImagePosition = course.thumbnailPositionY ?? 50;
@@ -192,6 +198,7 @@ export default function CourseOverview({
   });
 
   const isSavingMedia = isUpdatingMedia || isInitializingTrailer || isUploadingTrailer;
+  const hasMissingTranslations = missingTranslationsResponse?.data.hasMissingTranslations ?? false;
 
   const handleToggleLearningMode = () => {
     toggleLearningMode({ enabled: !isCourseStudentModeActive });
@@ -330,6 +337,7 @@ export default function CourseOverview({
                 availableLocales: course.availableLocales,
               }}
               isAIConfigured={isAIConfigured?.enabled ?? false}
+              hasMissingTranslations={hasMissingTranslations}
               onChange={onLanguageChange}
               setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
               className="min-w-0 shrink-0 gap-1 sm:gap-2"
