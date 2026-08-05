@@ -26,6 +26,9 @@ import type { Tenant } from "~/modules/SuperAdmin/tenants.columns";
 
 type SupportUserScope = (typeof SUPPORT_USER_SCOPES)[keyof typeof SUPPORT_USER_SCOPES];
 
+const isSupportUserScope = (value: string): value is SupportUserScope =>
+  Object.values(SUPPORT_USER_SCOPES).some((scope) => scope === value);
+
 type SupportModePopoverProps = {
   tenant: Tenant;
   isSubmitting: boolean;
@@ -89,9 +92,9 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
   };
 
   const handleScopeChange = (nextScope: string) => {
-    const normalizedScope = nextScope as SupportUserScope;
+    if (!isSupportUserScope(nextScope)) return;
 
-    setScope(normalizedScope);
+    setScope(nextScope);
     setSelectedUserId("");
   };
 
