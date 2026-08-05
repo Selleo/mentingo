@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { getAuthorName } from "./author.utils";
 
 type Author = {
@@ -31,6 +33,7 @@ export default function AuthorStatCard({
   return (
     <button
       type="button"
+      data-testid={COURSE_OVERVIEW_HANDLES.AUTHOR_CARD}
       onClick={onOpen}
       className={cn(
         "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg transition-all hover:bg-neutral-50 hover:shadow-xl",
