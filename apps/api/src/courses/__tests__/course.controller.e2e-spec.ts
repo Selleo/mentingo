@@ -253,6 +253,9 @@ describe("CourseController (e2e)", () => {
         courseId: course.id,
         totalSeconds: 120,
       });
+      const group = await groupFactory.withMembers([student.id]).create({
+        name: "Learning time group",
+      });
 
       const partialFullName = `${student.firstName} ${student.lastName.slice(0, 1)}`;
 
@@ -301,6 +304,7 @@ describe("CourseController (e2e)", () => {
           expect(body.data.users).toEqual([
             expect.objectContaining({
               id: student.id,
+              groups: [{ id: group.id, name: group.name }],
             }),
           ]);
         });

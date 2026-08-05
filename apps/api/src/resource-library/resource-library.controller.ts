@@ -130,8 +130,9 @@ export class ResourceLibraryController {
   async linkAsset(
     @Param("id") id: UUIDType,
     @Body() body: LinkAssetBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<LinkAssetResponse>> {
-    const result = await this.resourceLibraryService.linkAsset(id, body);
+    const result = await this.resourceLibraryService.linkAsset(id, body, currentUser);
 
     return new BaseResponse(result);
   }
@@ -148,8 +149,9 @@ export class ResourceLibraryController {
   async unlinkAsset(
     @Param("id") id: UUIDType,
     @Body() body: UnlinkAssetBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<UnlinkAssetResponse>> {
-    const result = await this.resourceLibraryService.unlinkAsset(id, body);
+    const result = await this.resourceLibraryService.unlinkAsset(id, body, currentUser);
 
     return new BaseResponse(result);
   }
@@ -193,8 +195,11 @@ export class ResourceLibraryController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteAssetResponseSchema),
   })
-  async deleteAsset(@Param("id") id: UUIDType): Promise<BaseResponse<DeleteAssetResponse>> {
-    const result = await this.resourceLibraryService.deleteAsset(id);
+  async deleteAsset(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<DeleteAssetResponse>> {
+    const result = await this.resourceLibraryService.deleteAsset(id, currentUser);
 
     return new BaseResponse(result);
   }

@@ -1,8 +1,20 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, VIDEO_EMBED_PROVIDERS, type SupportedLanguages } from "@repo/shared";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import {
+  ENTITY_TYPES,
+  PERMISSIONS,
+  VIDEO_EMBED_PROVIDERS,
+  type SupportedLanguages,
+} from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
@@ -95,9 +107,9 @@ export class ResourceLibraryService {
     return Array.from(usageByEntity.values());
   }
 
-  async linkAsset(resourceId: UUIDType, body: LinkAssetBody) {
+  async linkAsset(resourceId: UUIDType, body: LinkAssetBody, currentUser: CurrentUserType) {
     await this.assertAssetExists(resourceId);
-    await this.assertEntityExists(body.entityType, body.entityId);
+    await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 
     const relationshipType = body.relationshipType ?? RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT;
 
@@ -114,8 +126,9 @@ export class ResourceLibraryService {
     };
   }
 
-  async unlinkAsset(resourceId: UUIDType, body: UnlinkAssetBody) {
+  async unlinkAsset(resourceId: UUIDType, body: UnlinkAssetBody, currentUser: CurrentUserType) {
     await this.assertAssetExists(resourceId);
+    await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 
     const relationshipType = body.relationshipType ?? RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT;
 
@@ -139,7 +152,7 @@ export class ResourceLibraryService {
   ) {
     if (!file) throw new BadRequestException("resourceLibrary.error.fileRequired");
 
-    if (body.entityId) await this.assertEntityExists(body.entityType, body.entityId);
+    if (body.entityId) await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 
     const result = await this.fileService.uploadResource({
       file,
@@ -160,8 +173,26 @@ export class ResourceLibraryService {
     };
   }
 
-  async deleteAsset(resourceId: UUIDType) {
+  async deleteAsset(resourceId: UUIDType, currentUser: CurrentUserType) {
     await this.assertAssetExists(resourceId);
+
+    const references = await this.resourceLibraryRepository.getAssetEntityReferences(resourceId);
+    if (references.length) {
+      for (const reference of references) {
+        await this.assertEntityAccess(reference.entityType, reference.entityId, currentUser);
+      }
+    } else {
+      const canManageAll = [
+        PERMISSIONS.COURSE_UPDATE,
+        PERMISSIONS.ARTICLE_MANAGE,
+        PERMISSIONS.NEWS_MANAGE,
+      ].some((permission) => hasPermission(currentUser.permissions, permission));
+      const assetOwnerId = await this.resourceLibraryRepository.getAssetOwnerId(resourceId);
+
+      if (!canManageAll && assetOwnerId !== currentUser.userId) {
+        throw new ForbiddenException("common.toast.noAccess");
+      }
+    }
 
     const deletedUsages = await this.db.transaction(async (trx) => {
       const relationCount = await this.resourceLibraryRepository.countAssetRelations(
@@ -222,10 +253,30 @@ export class ResourceLibraryService {
     if (!assetExists) throw new NotFoundException("resourceLibrary.error.assetNotFound");
   }
 
-  private async assertEntityExists(entityType: RichTextAssetEntityType, entityId: UUIDType) {
-    const exists = await this.resourceLibraryRepository.entityExists(entityType, entityId);
+  private async assertEntityAccess(
+    entityType: RichTextAssetEntityType,
+    entityId: UUIDType,
+    currentUser: CurrentUserType,
+  ) {
+    const authorId = await this.resourceLibraryRepository.getEntityAuthorId(entityType, entityId);
 
-    if (!exists) throw new NotFoundException("resourceLibrary.error.entityNotFound");
+    if (!authorId) throw new NotFoundException("resourceLibrary.error.entityNotFound");
+
+    const permissionsByEntity = {
+      [ENTITY_TYPES.ARTICLES]: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+      [ENTITY_TYPES.NEWS]: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
+      [ENTITY_TYPES.LESSON]: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+    } as const;
+    const [managePermission, manageOwnPermission] = permissionsByEntity[entityType];
+
+    const canManage = hasPermission(currentUser.permissions, managePermission);
+    const canManageOwn =
+      hasPermission(currentUser.permissions, manageOwnPermission) &&
+      currentUser.userId === authorId;
+
+    if (!canManage && !canManageOwn) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
   }
 
   private buildResourceUrl(resourceId: UUIDType, entityType: RichTextAssetEntityType) {

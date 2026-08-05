@@ -9106,26 +9106,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name FileControllerInitVideoUpload
      * @request POST:/api/file/videos/init
      */
@@ -15402,6 +15382,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Permanently deletes the target tenant and its tenant-owned data. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.
+     *
+     * @tags Integration
+     * @name IntegrationControllerDeleteTenant
+     * @summary Delete tenant via integration API
+     * @request DELETE:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerDeleteTenant: (tenantId: string, params: RequestParams = {}) =>
+      this.request<void, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "DELETE",
         ...params,
       }),
 

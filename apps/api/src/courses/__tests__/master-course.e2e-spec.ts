@@ -1,7 +1,7 @@
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
-import { LESSON_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { LESSON_TYPES, SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -210,7 +210,11 @@ describe("Master course export and sync (e2e)", () => {
       targetTenantId = existingTargetTenant.id;
       await baseDb
         .update(tenants)
-        .set({ isManaging: false, name: "Target Tenant" })
+        .set({
+          isManaging: false,
+          name: "Target Tenant",
+          status: TENANT_STATUSES.ACTIVE,
+        })
         .where(eq(tenants.id, targetTenantId));
     } else {
       const [createdTargetTenant] = await baseDb
@@ -545,6 +549,41 @@ describe("Master course export and sync (e2e)", () => {
     expect(response.body.data.summary.totalTenants).toBe(candidateTenants.length);
     expect(response.body.data.summary.exportedCount).toBe(1);
     expect(response.body.data.summary.remainingCount).toBe(candidateTenants.length - 1);
+  });
+
+  it("excludes inactive tenants from course sharing candidates and export", async () => {
+    const { sourceCourseId, sourceCookie } = await setupAndExport();
+
+    await baseDb
+      .update(tenants)
+      .set({ status: TENANT_STATUSES.INACTIVE })
+      .where(eq(tenants.id, targetTenantId));
+
+    try {
+      const response = await withTenantHost(
+        request(app.getHttpServer())
+          .get(`/api/course/master/${sourceCourseId}/export-candidates`)
+          .set("Cookie", sourceCookie),
+        SOURCE_HOST,
+      ).expect(200);
+
+      expect(
+        response.body.data.tenants.some((tenant: { id: string }) => tenant.id === targetTenantId),
+      ).toBe(false);
+
+      await withTenantHost(
+        request(app.getHttpServer())
+          .post(`/api/course/master/${sourceCourseId}/export`)
+          .set("Cookie", sourceCookie)
+          .send({ targetTenantIds: [targetTenantId] }),
+        SOURCE_HOST,
+      ).expect(400);
+    } finally {
+      await baseDb
+        .update(tenants)
+        .set({ status: TENANT_STATUSES.ACTIVE })
+        .where(eq(tenants.id, targetTenantId));
+    }
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
