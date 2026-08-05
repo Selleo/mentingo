@@ -1,3 +1,4 @@
+import { SUPPORT_USER_SCOPES } from "@repo/shared";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
@@ -10,6 +11,7 @@ type SupportUsersParams = {
   tenantId: string;
   perPage?: number;
   search?: string;
+  scope?: (typeof SUPPORT_USER_SCOPES)[keyof typeof SUPPORT_USER_SCOPES];
 };
 
 type QueryOptions = {
@@ -17,15 +19,16 @@ type QueryOptions = {
 };
 
 export const supportUsersQueryOptions = (
-  { tenantId, perPage = 20, search }: SupportUsersParams,
+  { tenantId, perPage = 20, search, scope = SUPPORT_USER_SCOPES.ADMINS }: SupportUsersParams,
   options: QueryOptions = { enabled: true },
 ) => ({
-  queryKey: [...SUPER_ADMIN_SUPPORT_USERS_QUERY_KEY, tenantId, { perPage, search }],
+  queryKey: [...SUPER_ADMIN_SUPPORT_USERS_QUERY_KEY, tenantId, { perPage, search, scope }],
   queryFn: async ({ pageParam }: { pageParam: number }) => {
     const response = await ApiClient.api.tenantsControllerFindSupportUsers(tenantId, {
       page: pageParam,
       perPage,
       ...(search?.trim() && { search: search.trim() }),
+      scope,
     });
 
     return response.data;

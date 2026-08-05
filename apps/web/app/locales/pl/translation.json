@@ -3692,6 +3692,7 @@
   },
   "settings": {
     "title": "Ustawienia",
+    "supportModeNoAvailable": "W trybie wsparcia dla tego użytkownika nie są dostępne żadne ustawienia.",
     "buttons": {
       "cancel": "Odrzuć",
       "save": "Zapisz"
@@ -4665,7 +4666,7 @@
     },
     "errors": {
       "generic": "Nie można uruchomić trybu wsparcia",
-      "targetAdminRequired": "Wybierz aktywnego administratora z wybranej organizacji",
+      "targetUserRequired": "Wybierz aktywnego użytkownika z wybranej organizacji",
       "invalidSession": "Sesja wsparcia jest nieprawidłowa"
     }
   },
@@ -4697,7 +4698,7 @@
       "actions": {
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
-        "impersonateAdmin": "Wejdź jako admin"
+        "impersonateUser": "Wejdź jako użytkownik"
       }
     },
     "activityTrend": {
@@ -4708,8 +4709,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
-      "loading": "Ładowanie administratorów...",
-      "empty": "Nie znaleziono aktywnych administratorów.",
+      "tabs": { "admins": "Administratorzy", "allUsers": "Wszyscy użytkownicy" },
+      "loading": "Ładowanie użytkowników...",
+      "emptyAdmins": "Nie znaleziono aktywnych administratorów.",
+      "emptyAdminsSearch": "Nie znaleziono aktywnych administratorów dla \"{{search}}\".",
+      "emptyAllUsers": "Nie znaleziono aktywnych użytkowników.",
+      "searchAllUsers": "Szukaj wśród wszystkich użytkowników",
       "loadMore": "Załaduj więcej użytkowników"
     },
     "status": {

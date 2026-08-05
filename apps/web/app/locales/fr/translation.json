@@ -3439,6 +3439,7 @@
   },
   "settings": {
     "title": "Paramètres",
+    "supportModeNoAvailable": "Aucun paramètre n'est disponible pour cet utilisateur en mode assistance.",
     "buttons": {
       "cancel": "Annuler",
       "save": "Enregistrer"
@@ -4613,7 +4614,7 @@
     },
     "errors": {
       "generic": "Impossible de démarrer le mode support",
-      "targetAdminRequired": "Choisissez un utilisateur administrateur actif de l'organisation sélectionnée",
+      "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
       "invalidSession": "La session d'assistance n'est pas valide"
     }
   },
@@ -4645,7 +4646,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Passer en mode assistance",
-        "impersonateAdmin": "Entrez en tant qu'administrateur"
+        "impersonateUser": "Agir en tant qu'utilisateur"
       }
     },
     "activityTrend": {
@@ -4656,8 +4657,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Rechercher par nom ou par email...",
-      "loading": "Chargement des utilisateurs administrateurs...",
-      "empty": "Aucun utilisateur administrateur actif trouvé.",
+      "tabs": { "admins": "Administrateurs", "allUsers": "Tous les utilisateurs" },
+      "loading": "Chargement des utilisateurs...",
+      "emptyAdmins": "Aucun administrateur actif trouvé.",
+      "emptyAdminsSearch": "Aucun administrateur actif trouvé pour \"{{search}}\".",
+      "emptyAllUsers": "Aucun utilisateur actif trouvé.",
+      "searchAllUsers": "Rechercher parmi tous les utilisateurs",
       "loadMore": "Charger plus d'utilisateurs"
     },
     "status": {

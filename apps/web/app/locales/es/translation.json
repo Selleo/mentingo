@@ -3439,6 +3439,7 @@
   },
   "settings": {
     "title": "Configuración",
+    "supportModeNoAvailable": "No hay configuraciones disponibles para este usuario en el modo de soporte.",
     "buttons": {
       "cancel": "Cancelar",
       "save": "Guardar"
@@ -4612,7 +4613,7 @@
     },
     "errors": {
       "generic": "No se pudo iniciar el modo de soporte",
-      "targetAdminRequired": "Elija un usuario administrador activo de la organización seleccionada",
+      "targetUserRequired": "Elija un usuario activo de la organización seleccionada",
       "invalidSession": "La sesión de soporte no es válida"
     }
   },
@@ -4644,7 +4645,7 @@
       "actions": {
         "title": "Acciones",
         "enterSupportMode": "Ingrese al modo de soporte",
-        "impersonateAdmin": "Entrar como administrador"
+        "impersonateUser": "Suplantar usuario"
       }
     },
     "activityTrend": {
@@ -4655,8 +4656,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
-      "loading": "Cargando usuarios administradores...",
-      "empty": "No se encontraron usuarios administradores activos.",
+      "tabs": { "admins": "Administradores", "allUsers": "Todos los usuarios" },
+      "loading": "Cargando usuarios...",
+      "emptyAdmins": "No se encontraron administradores activos.",
+      "emptyAdminsSearch": "No se encontraron administradores activos para \"{{search}}\".",
+      "emptyAllUsers": "No se encontraron usuarios activos.",
+      "searchAllUsers": "Buscar entre todos los usuarios",
       "loadMore": "Cargar más usuarios"
     },
     "status": {

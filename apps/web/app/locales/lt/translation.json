@@ -3453,6 +3453,7 @@
   },
   "settings": {
     "title": "Nustatymai",
+    "supportModeNoAvailable": "Šiam naudotojui palaikymo režimu nustatymai nepasiekiami.",
     "buttons": {
       "cancel": "Atšaukti",
       "save": "Išsaugoti"
@@ -4749,7 +4750,7 @@
     },
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
-      "targetAdminRequired": "Pasirinkite aktyvų administratorių iš pasirinktos organizacijos",
+      "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
       "invalidSession": "Palaikymo sesija netinkama"
     }
   },
@@ -4781,7 +4782,7 @@
       "actions": {
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
-        "impersonateAdmin": "Įeiti kaip administratorius"
+        "impersonateUser": "Apsimesti naudotoju"
       }
     },
     "activityTrend": {
@@ -4792,8 +4793,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
-      "loading": "Įkeliami administratoriai...",
-      "empty": "Aktyvių administratorių nerasta.",
+      "tabs": { "admins": "Administratoriai", "allUsers": "Visi naudotojai" },
+      "loading": "Įkeliami naudotojai...",
+      "emptyAdmins": "Aktyvių administratorių nerasta.",
+      "emptyAdminsSearch": "Aktyvių administratorių pagal \"{{search}}\" nerasta.",
+      "emptyAllUsers": "Aktyvių naudotojų nerasta.",
+      "searchAllUsers": "Ieškoti tarp visų naudotojų",
       "loadMore": "Įkelti daugiau naudotojų"
     },
     "status": {

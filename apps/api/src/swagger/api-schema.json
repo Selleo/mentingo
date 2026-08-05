@@ -14263,6 +14263,33 @@
         }
       }
     },
+    "/api/super-admin/tenants/{id}/support-roles": {
+      "get": {
+        "operationId": "TenantsController_findSupportRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindSupportRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/super-admin/tenants/{id}/support-users": {
       "get": {
         "operationId": "TenantsController_findSupportUsers",
@@ -14300,6 +14327,31 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "roleSlug",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "admins",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -55474,6 +55526,41 @@
           "data"
         ]
       },
+      "FindSupportRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "name",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "FindSupportUsersResponse": {
         "type": "object",
         "properties": {
@@ -55508,6 +55595,33 @@
                       "type": "null"
                     }
                   ]
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "slug": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isSystem": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "slug",
+                      "name",
+                      "isSystem"
+                    ]
+                  }
                 }
               },
               "required": [
@@ -55516,7 +55630,8 @@
                 "firstName",
                 "lastName",
                 "label",
-                "profilePictureUrl"
+                "profilePictureUrl",
+                "roles"
               ]
             }
           },

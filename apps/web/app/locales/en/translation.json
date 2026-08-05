@@ -3452,6 +3452,7 @@
   },
   "settings": {
     "title": "Settings",
+    "supportModeNoAvailable": "No settings are available for this user while in support mode.",
     "buttons": {
       "cancel": "Cancel",
       "save": "Save"
@@ -4626,7 +4627,7 @@
     },
     "errors": {
       "generic": "Could not start support mode",
-      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "targetUserRequired": "Choose an active user from the selected organization",
       "invalidSession": "Support session is invalid"
     }
   },
@@ -4658,7 +4659,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Enter as admin"
+        "impersonateUser": "Impersonate user"
       }
     },
     "activityTrend": {
@@ -4669,8 +4670,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "loading": "Loading admin users...",
-      "empty": "No active admin users found.",
+      "tabs": { "admins": "Admins", "allUsers": "All users" },
+      "loading": "Loading users...",
+      "emptyAdmins": "No active admin users found.",
+      "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
+      "emptyAllUsers": "No active users found.",
+      "searchAllUsers": "Search all users",
       "loadMore": "Load more users"
     },
     "status": {

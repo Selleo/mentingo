@@ -3450,6 +3450,7 @@
   },
   "settings": {
     "title": "Einstellungen",
+    "supportModeNoAvailable": "Für diesen Benutzer sind im Supportmodus keine Einstellungen verfügbar.",
     "buttons": {
       "cancel": "Stornieren",
       "save": "Speichern"
@@ -4745,7 +4746,7 @@
     },
     "errors": {
       "generic": "Support-Modus konnte nicht gestartet werden",
-      "targetAdminRequired": "Wählen Sie einen aktiven Administrator aus der ausgewählten Organisation",
+      "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation",
       "invalidSession": "Support-Sitzung ist ungültig"
     }
   },
@@ -4777,7 +4778,7 @@
       "actions": {
         "title": "Aktionen",
         "enterSupportMode": "Wechseln Sie in den Support-Modus",
-        "impersonateAdmin": "Als Admin betreten"
+        "impersonateUser": "Als Benutzer handeln"
       }
     },
     "activityTrend": {
@@ -4788,8 +4789,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Nach Name oder E-Mail suchen...",
-      "loading": "Administratoren werden geladen...",
-      "empty": "Keine aktiven Administratoren gefunden.",
+      "tabs": { "admins": "Administratoren", "allUsers": "Alle Benutzer" },
+      "loading": "Benutzer werden geladen...",
+      "emptyAdmins": "Keine aktiven Administratoren gefunden.",
+      "emptyAdminsSearch": "Keine aktiven Administratoren für \"{{search}}\" gefunden.",
+      "emptyAllUsers": "Keine aktiven Benutzer gefunden.",
+      "searchAllUsers": "Alle Benutzer durchsuchen",
       "loadMore": "Weitere Benutzer laden"
     },
     "status": {

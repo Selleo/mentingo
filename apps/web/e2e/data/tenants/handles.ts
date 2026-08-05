@@ -31,9 +31,14 @@ export const TENANTS_PAGE_HANDLES = {
   supportModeButton: (tenantId: string) => `tenants-page-support-mode-button-${tenantId}`,
   SUPPORT_MODE_POPOVER: "tenants-page-support-mode-popover",
   SUPPORT_MODE_SEARCH: "tenants-page-support-mode-search",
+  SUPPORT_MODE_ADMINS_TAB: "tenants-page-support-mode-admins-tab",
+  SUPPORT_MODE_ALL_USERS_TAB: "tenants-page-support-mode-all-users-tab",
+  SUPPORT_MODE_SEARCH_ALL_USERS: "tenants-page-support-mode-search-all-users",
   SUPPORT_MODE_SUBMIT: "tenants-page-support-mode-submit",
   SUPPORT_MODE_USER_OPTION_PREFIX: "tenants-page-support-mode-user-option-",
   supportModeUserOption: (userId: string) => `tenants-page-support-mode-user-option-${userId}`,
+  supportModeUserRole: (userId: string, roleSlug: string) =>
+    `tenants-page-support-mode-user-role-${userId}-${roleSlug}`,
 } as const;
 
 export const TENANT_FORM_HANDLES = {
