@@ -7,14 +7,15 @@ import type {
   createSupportSessionSchema,
   createTenantSchema,
   listTenantsQuerySchema,
-  supportAdminUsersSchema,
+  supportRolesSchema,
+  supportUsersSchema,
   tenantListSortSchema,
   tenantsListItemSchema,
   tenantResponseSchema,
   tenantsListSchema,
   updateTenantSchema,
 } from "src/super-admin/schemas/tenant.schema";
-import type { ListSupportAdminUsersQuery } from "src/support-mode/support-mode.types";
+import type { ListSupportUsersQuery } from "src/support-mode/support-mode.types";
 
 export type Tenant = InferSelectModel<typeof tenants>;
 
@@ -24,11 +25,12 @@ export type CreateSupportSessionBody = Static<typeof createSupportSessionSchema>
 export type CreateSupportSessionResponse = Static<typeof createSupportSessionResponseSchema>;
 export type ListTenantsQuery = Static<typeof listTenantsQuerySchema>;
 export type TenantListSort = Static<typeof tenantListSortSchema>;
-export type { ListSupportAdminUsersQuery };
+export type { ListSupportUsersQuery };
 export type TenantResponse = Static<typeof tenantResponseSchema>;
 export type TenantsListItemResponse = Static<typeof tenantsListItemSchema>;
 export type TenantsListResponse = Static<typeof tenantsListSchema>;
-export type SupportAdminUsersResponse = Static<typeof supportAdminUsersSchema>;
+export type SupportUsersResponse = Static<typeof supportUsersSchema>;
+export type SupportRolesResponse = Static<typeof supportRolesSchema>;
 
 export type FindAllTenantsParams = {
   page: number;

@@ -4747,7 +4747,7 @@
     },
     "errors": {
       "generic": "Režim podpory se nepodařilo spustit",
-      "targetAdminRequired": "Vyberte aktivního administrátora z vybrané organizace",
+      "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
       "invalidSession": "Relace podpory je neplatná"
     }
   },
@@ -4779,7 +4779,7 @@
       "actions": {
         "title": "Akce",
         "enterSupportMode": "Vstupte do režimu podpory",
-        "impersonateAdmin": "Vstoupit jako administrátor"
+        "impersonateUser": "Jednat jako uživatel"
       }
     },
     "activityTrend": {
@@ -4790,8 +4790,16 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
-      "loading": "Načítání administrátorů...",
-      "empty": "Nebyli nalezeni žádní aktivní administrátoři.",
+      "tabs": { "admins": "Administrátoři", "allUsers": "Všichni uživatelé" },
+      "roleFilter": "Filtrovat podle role",
+      "allRoles": "Všechny role",
+      "loadingRoles": "Načítání rolí...",
+      "loading": "Načítání uživatelů...",
+      "emptyAdmins": "Nebyli nalezeni žádní aktivní administrátoři.",
+      "emptyAdminsSearch": "Pro \"{{search}}\" nebyli nalezeni žádní aktivní administrátoři.",
+      "emptyAllUsers": "Nebyli nalezeni žádní aktivní uživatelé.",
+      "emptyRole": "Nebyli nalezeni žádní aktivní uživatelé s touto rolí.",
+      "searchAllUsers": "Hledat mezi všemi uživateli",
       "loadMore": "Načíst další uživatele"
     },
     "status": {

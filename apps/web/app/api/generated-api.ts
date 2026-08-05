@@ -233,6 +233,7 @@ export interface CurrentUserResponse {
       | "live_training.start"
       | "live_training.end"
       | "live_training.statistics"
+      | "dashboard.read"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -8047,6 +8048,16 @@ export interface UpdateTenantByIdResponse {
   };
 }
 
+export interface FindSupportRolesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    slug: string;
+    name: string;
+    isSystem: boolean;
+  }[];
+}
+
 export interface FindSupportUsersResponse {
   data: {
     /** @format uuid */
@@ -8057,6 +8068,13 @@ export interface FindSupportUsersResponse {
     lastName: string;
     label: string;
     profilePictureUrl: string | null;
+    roles: {
+      /** @format uuid */
+      id: string;
+      slug: string;
+      name: string;
+      isSystem: boolean;
+    }[];
   }[];
   pagination: {
     totalItems: number;
@@ -15821,6 +15839,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name TenantsControllerFindSupportRoles
+     * @request GET:/api/super-admin/tenants/{id}/support-roles
+     */
+    tenantsControllerFindSupportRoles: (id: string, params: RequestParams = {}) =>
+      this.request<FindSupportRolesResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-roles`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name TenantsControllerFindSupportUsers
      * @request GET:/api/super-admin/tenants/{id}/support-users
      */
@@ -15832,6 +15864,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         perPage?: number;
         search?: string;
+        roleSlug?: string;
+        scope?: "admins" | "all";
       },
       params: RequestParams = {},
     ) =>

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SUPPORT_SESSION_STATUSES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { and, count, eq, gt, ilike, isNull, lte, or, sql } from "drizzle-orm";
+import { SYSTEM_ROLE_SLUGS, SUPPORT_SESSION_STATUSES, SUPPORT_USER_SCOPES } from "@repo/shared";
+import { and, asc, count, eq, exists, gt, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -14,8 +14,10 @@ import {
 
 import type {
   CreateSupportSessionRecord,
-  FindSupportAdminUsersParams,
-  SupportAdminUserRecord,
+  FindSupportUsersParams,
+  SupportUserRecord,
+  SupportUserRole,
+  SupportUserScope,
   SupportSession,
   SupportTenant,
 } from "./support-mode.types";
@@ -34,100 +36,108 @@ export class SupportModeRepository {
     return tenant ?? null;
   }
 
-  async findSupportAdminUsers({
+  async findSupportUsers({
     tenantId,
     page,
     perPage,
     search,
-  }: FindSupportAdminUsersParams): Promise<SupportAdminUserRecord[]> {
-    return this.dbAdmin
+    scope,
+    roleSlug,
+  }: FindSupportUsersParams): Promise<SupportUserRecord[]> {
+    const records = await this.dbAdmin
       .select({
         id: users.id,
         email: users.email,
         firstName: users.firstName,
         lastName: users.lastName,
-        label: this.getSupportAdminUserLabelSql(),
+        label: this.getSupportUserLabelSql(),
         avatarReference: users.avatarReference,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
-      .where(this.buildSupportAdminUserWhereClause(tenantId, search))
-      .orderBy(users.firstName, users.lastName, users.email)
+      .where(this.buildSupportUserWhereClause({ tenantId, search, scope, roleSlug }))
+      .orderBy(asc(users.firstName), asc(users.lastName), asc(users.email), asc(users.id))
       .limit(perPage)
       .offset((page - 1) * perPage);
+
+    const rolesByUserId = await this.findRolesByUserIds(
+      tenantId,
+      records.map(({ id }) => id),
+    );
+
+    return records.map((record) => ({
+      ...record,
+      roles: rolesByUserId.get(record.id) ?? [],
+    }));
   }
 
-  async countSupportAdminUsers({
+  async countSupportUsers({
     tenantId,
     search,
-  }: Pick<FindSupportAdminUsersParams, "tenantId" | "search">): Promise<number> {
+    scope,
+    roleSlug,
+  }: Pick<FindSupportUsersParams, "tenantId" | "search" | "scope" | "roleSlug">): Promise<number> {
     const [{ totalItems }] = await this.dbAdmin
       .select({ totalItems: count() })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
-      .where(this.buildSupportAdminUserWhereClause(tenantId, search));
+      .where(this.buildSupportUserWhereClause({ tenantId, search, scope, roleSlug }));
 
     return totalItems;
   }
 
-  async findSupportAdminUserById(
+  async findSupportUserById(
     tenantId: string,
     targetUserId: string,
-  ): Promise<SupportAdminUserRecord | null> {
+  ): Promise<SupportUserRecord | null> {
     const [user] = await this.dbAdmin
       .select({
         id: users.id,
         email: users.email,
         firstName: users.firstName,
         lastName: users.lastName,
-        label: this.getSupportAdminUserLabelSql(),
+        label: this.getSupportUserLabelSql(),
         avatarReference: users.avatarReference,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
+      .where(
         and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
+          eq(users.tenantId, tenantId),
+          eq(users.id, targetUserId),
+          eq(users.archived, false),
+          isNull(users.deletedAt),
         ),
       )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
-      .where(and(this.buildSupportAdminUserWhereClause(tenantId), eq(users.id, targetUserId)))
       .limit(1);
 
-    return user ?? null;
+    if (!user) return null;
+
+    const rolesByUserId = await this.findRolesByUserIds(tenantId, [user.id]);
+
+    return {
+      ...user,
+      roles: rolesByUserId.get(user.id) ?? [],
+    };
+  }
+
+  async findSupportRoles(tenantId: string): Promise<SupportUserRole[]> {
+    return this.dbAdmin
+      .select({
+        id: permissionRoles.id,
+        slug: permissionRoles.slug,
+        name: permissionRoles.name,
+        isSystem: permissionRoles.isSystem,
+      })
+      .from(permissionRoles)
+      .where(eq(permissionRoles.tenantId, tenantId))
+      .orderBy(
+        sql<number>`CASE
+          WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.ADMIN} THEN 0
+          WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
+          WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.TRAINER} THEN 2
+          WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 3
+          ELSE 999
+        END`,
+        asc(permissionRoles.name),
+      );
   }
 
   async createSupportSession(supportSessionRecord: CreateSupportSessionRecord): Promise<void> {
@@ -240,13 +250,49 @@ export class SupportModeRepository {
     return revoked.length;
   }
 
-  private buildSupportAdminUserWhereClause(tenantId: string, search?: string) {
+  private buildSupportUserWhereClause({
+    tenantId,
+    search,
+    scope,
+    roleSlug,
+  }: {
+    tenantId: string;
+    search?: string;
+    scope: SupportUserScope;
+    roleSlug?: string;
+  }) {
     const conditions = [
       eq(users.tenantId, tenantId),
       eq(users.archived, false),
       isNull(users.deletedAt),
-      eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
     ];
+
+    const selectedRoleSlug =
+      scope === SUPPORT_USER_SCOPES.ADMINS ? SYSTEM_ROLE_SLUGS.ADMIN : roleSlug?.trim();
+
+    if (selectedRoleSlug) {
+      conditions.push(
+        exists(
+          this.dbAdmin
+            .select({ userId: permissionUserRoles.userId })
+            .from(permissionUserRoles)
+            .innerJoin(
+              permissionRoles,
+              and(
+                eq(permissionRoles.id, permissionUserRoles.roleId),
+                eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+              ),
+            )
+            .where(
+              and(
+                eq(permissionUserRoles.userId, users.id),
+                eq(permissionUserRoles.tenantId, tenantId),
+                eq(permissionRoles.slug, selectedRoleSlug),
+              ),
+            ),
+        ),
+      );
+    }
 
     const normalizedSearch = search?.trim();
 
@@ -265,7 +311,53 @@ export class SupportModeRepository {
     return and(...conditions);
   }
 
-  private getSupportAdminUserLabelSql() {
+  private async findRolesByUserIds(
+    tenantId: string,
+    userIds: string[],
+  ): Promise<Map<string, SupportUserRole[]>> {
+    if (!userIds.length) return new Map();
+
+    const rows = await this.dbAdmin
+      .select({
+        userId: permissionUserRoles.userId,
+        id: permissionRoles.id,
+        slug: permissionRoles.slug,
+        name: permissionRoles.name,
+        isSystem: permissionRoles.isSystem,
+      })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(permissionUserRoles.tenantId, tenantId),
+          inArray(permissionUserRoles.userId, userIds),
+        ),
+      )
+      .orderBy(asc(permissionRoles.name));
+
+    const rolesByUserId = new Map<string, SupportUserRole[]>();
+
+    for (const row of rows) {
+      const roles = rolesByUserId.get(row.userId) ?? [];
+      roles.push({
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        isSystem: row.isSystem,
+      });
+      rolesByUserId.set(row.userId, roles);
+    }
+
+    return rolesByUserId;
+  }
+
+  private getSupportUserLabelSql() {
     return sql<string>`concat(${users.firstName}, ' ', ${users.lastName}, ' (', ${users.email}, ')')`;
   }
 }

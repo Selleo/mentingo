@@ -1,4 +1,9 @@
-import { ACTIVITY_LOG_ACTION_TYPES, SUPPORTED_LANGUAGES, TENANT_STATUSES } from "@repo/shared";
+import {
+  ACTIVITY_LOG_ACTION_TYPES,
+  SUPPORT_USER_SCOPES,
+  SUPPORTED_LANGUAGES,
+  TENANT_STATUSES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -91,13 +96,27 @@ export const createSupportSessionResponseSchema = Type.Object({
   expiresAt: Type.String(),
 });
 
-export const supportAdminUserSchema = Type.Object({
+export const supportUserScopeSchema = Type.Union([
+  Type.Literal(SUPPORT_USER_SCOPES.ADMINS),
+  Type.Literal(SUPPORT_USER_SCOPES.ALL),
+]);
+
+export const supportUserRoleSchema = Type.Object({
+  id: UUIDSchema,
+  slug: Type.String(),
+  name: Type.String(),
+  isSystem: Type.Boolean(),
+});
+
+export const supportUserSchema = Type.Object({
   id: UUIDSchema,
   email: Type.String({ format: "email" }),
   firstName: Type.String(),
   lastName: Type.String(),
   label: Type.String(),
   profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+  roles: Type.Array(supportUserRoleSchema),
 });
 
-export const supportAdminUsersSchema = Type.Array(supportAdminUserSchema);
+export const supportUsersSchema = Type.Array(supportUserSchema);
+export const supportRolesSchema = Type.Array(supportUserRoleSchema);

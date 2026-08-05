@@ -4626,7 +4626,7 @@
     },
     "errors": {
       "generic": "Could not start support mode",
-      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "targetUserRequired": "Choose an active user from the selected organization",
       "invalidSession": "Support session is invalid"
     }
   },
@@ -4658,7 +4658,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Enter as admin"
+        "impersonateUser": "Impersonate user"
       }
     },
     "activityTrend": {
@@ -4669,8 +4669,16 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "loading": "Loading admin users...",
-      "empty": "No active admin users found.",
+      "tabs": { "admins": "Admins", "allUsers": "All users" },
+      "roleFilter": "Filter by role",
+      "allRoles": "All roles",
+      "loadingRoles": "Loading roles...",
+      "loading": "Loading users...",
+      "emptyAdmins": "No active admin users found.",
+      "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
+      "emptyAllUsers": "No active users found.",
+      "emptyRole": "No active users found for this role.",
+      "searchAllUsers": "Search all users",
       "loadMore": "Load more users"
     },
     "status": {
