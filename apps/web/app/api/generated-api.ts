@@ -233,7 +233,6 @@ export interface CurrentUserResponse {
       | "live_training.start"
       | "live_training.end"
       | "live_training.statistics"
-      | "dashboard.read"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"

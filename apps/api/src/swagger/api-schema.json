@@ -17691,10 +17691,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "dashboard.read",
-                      "type": "string"
-                    },
-                    {
                       "const": "course.read_assigned",
                       "type": "string"
                     },
