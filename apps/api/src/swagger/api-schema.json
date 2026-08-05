@@ -13151,6 +13151,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -13210,6 +13214,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -54347,6 +54355,9 @@
                     },
                     "es": {
                       "type": "string"
+                    },
+                    "fr": {
+                      "type": "string"
                     }
                   }
                 },
@@ -54722,6 +54733,60 @@
                           }
                         }
                       }
+                    },
+                    "fr": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {
+                          "type": "array",
+                          "items": {
+                            "$id": "TiptapJsonNode",
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              },
+                              "content": {
+                                "type": "array",
+                                "items": {
+                                  "$ref": "TiptapJsonNode"
+                                }
+                              },
+                              "marks": {
+                                "type": "array",
+                                "items": {
+                                  "additionalProperties": true,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "attrs": {
+                                      "type": "object",
+                                      "patternProperties": {
+                                        "^(.*)$": {}
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -54749,6 +54814,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -54779,6 +54848,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -54917,6 +54990,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -54948,6 +55025,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -54971,6 +55052,9 @@
                 "type": "string"
               },
               "es": {
+                "type": "string"
+              },
+              "fr": {
                 "type": "string"
               }
             }
@@ -55295,6 +55379,60 @@
                 }
               },
               "es": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "array",
+                    "items": {
+                      "$id": "TiptapJsonNode",
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "attrs": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {}
+                          }
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "TiptapJsonNode"
+                          }
+                        },
+                        "marks": {
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ]
+                          }
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "fr": {
                 "type": "object",
                 "patternProperties": {
                   "^(.*)$": {
@@ -55394,6 +55532,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -55769,6 +55910,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -55796,6 +55991,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -55826,6 +56025,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -55915,6 +56118,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -56290,6 +56496,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -56317,6 +56577,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -56347,6 +56611,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -56431,6 +56699,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -56462,6 +56734,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -56485,6 +56761,9 @@
                 "type": "string"
               },
               "es": {
+                "type": "string"
+              },
+              "fr": {
                 "type": "string"
               }
             }
@@ -56861,6 +57140,60 @@
                     }
                   }
                 }
+              },
+              "fr": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "array",
+                    "items": {
+                      "$id": "TiptapJsonNode",
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "attrs": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {}
+                          }
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "TiptapJsonNode"
+                          }
+                        },
+                        "marks": {
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ]
+                          }
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -56903,6 +57236,9 @@
                     "type": "string"
                   },
                   "es": {
+                    "type": "string"
+                  },
+                  "fr": {
                     "type": "string"
                   }
                 }
@@ -57279,6 +57615,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -57306,6 +57696,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -57336,6 +57730,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -57425,6 +57823,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -57800,6 +58201,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -57827,6 +58282,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -57857,6 +58316,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -57946,6 +58409,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -58321,6 +58787,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -58348,6 +58868,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -58378,6 +58902,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -58467,6 +58995,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -58842,6 +59373,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -58869,6 +59454,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -58899,6 +59488,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -59007,6 +59600,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -59382,6 +59978,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -59409,6 +60059,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -59439,6 +60093,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -59521,6 +60179,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -59598,6 +60260,9 @@
                     "type": "string"
                   },
                   "es": {
+                    "type": "string"
+                  },
+                  "fr": {
                     "type": "string"
                   }
                 }
@@ -59974,6 +60639,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -60001,6 +60720,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -60031,6 +60754,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
