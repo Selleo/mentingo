@@ -111,7 +111,7 @@ test("managing admin can impersonate a non-admin user from all users", async ({
       await page.getByTestId(TENANTS_PAGE_HANDLES.supportModeUserOption(studentId)).click();
       await page.getByTestId(TENANTS_PAGE_HANDLES.SUPPORT_MODE_SUBMIT).click();
 
-      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/dashboard$`));
+      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/courses$`));
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.BANNER)).toBeVisible();
       await expect(page.getByTestId(NAVIGATION_HANDLES.USERS_LINK)).toHaveCount(0);
 
