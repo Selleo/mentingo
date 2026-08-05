@@ -19,7 +19,7 @@ The workflow starts in Tenant Administration. A managing admin selects a tenant,
 
 - Start a support session from a tenant row in Tenant Administration.
 - Find an active target user by name or email, starting with administrators and expanding to all users when needed.
-- Filter all target users by their assigned system or custom role.
+- Show assigned system or custom roles alongside each target user.
 - Redirect the support user into the selected active tenant.
 - Show a persistent support-mode banner with remaining time.
 - Exit support mode and return to the original managing tenant.

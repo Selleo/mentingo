@@ -12,6 +12,7 @@ export const SETTINGS_PAGE_HANDLES = {
   INTEGRATIONS_CONTENT: "settings-integrations-content",
   ORGANIZATION_CONTENT: "settings-organization-content",
   PLATFORM_CUSTOMIZATION_CONTENT: "settings-platform-customization-content",
+  NO_AVAILABLE_SETTINGS: "settings-no-available-settings",
   ORGANIZATION_WARNING_INDICATOR: "settings-organization-warning-indicator",
   LANGUAGE_SELECT: "settings-language-select",
   USER_DETAILS_DESCRIPTION: "settings-user-details-description",

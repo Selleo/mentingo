@@ -6,7 +6,7 @@ Suggested branch: `jh_feat_1849_impersonate_any_user`
 
 ## Summary
 
-Allow a managing-tenant administrator to start Support Mode as any active user in another active tenant. The tenant-list action and selector must use user-oriented wording, keep administrators as the default view, provide an all-users view with target-tenant role filtering, and help operators broaden an unsuccessful administrator search without retyping it.
+Allow a managing-tenant administrator to start Support Mode as any active user in another active tenant. The tenant-list action and selector must use user-oriented wording, keep administrators as the default view, provide an all-users view, and help operators broaden an unsuccessful administrator search without retyping it.
 
 This is an extension of the existing Support Mode flow rather than a new impersonation system. Support sessions already persist a generic `targetUserId`, and authentication already resolves the selected user's real roles and permissions. The implementation must remove the remaining administrator-only restrictions without granting the source managing admin's permissions to the selected target user.
 
@@ -17,7 +17,7 @@ Estimated effort: 2-3 engineering days, including API and web changes, generated
 - Let a managing admin impersonate any active, non-deleted user in another active tenant.
 - Preserve the target user's effective roles, permissions, tenant data scope, and normal product experience.
 - Keep administrators as the default selector view for the fastest existing support workflow.
-- Make learners, content creators, trainers, and custom-role users discoverable through search and role filtering.
+- Make learners, content creators, trainers, and custom-role users discoverable through search.
 - Keep the existing Support Mode banner, expiry, revocation, activity logging, account restrictions, and exit flow.
 
 ## Non-Goals
@@ -34,15 +34,13 @@ Estimated effort: 2-3 engineering days, including API and web changes, generated
 - The tenant-row action label is **Impersonate user**, replacing the admin-specific label.
 - The popover contains two tabs:
   - **Admins**: default tab; implicitly filters to users with the admin role.
-  - **All users**: displays all eligible users and exposes a role filter.
-- The role filter defaults to **All roles** and includes both system roles and custom roles belonging to the target tenant.
-- The tab is named **All users**, not **All roles**, because the tab describes the result set and the dropdown describes the filter.
+  - **All users**: displays all eligible users.
 - Search remains server-side, debounced, and matches first name, last name, or email.
 - If a non-empty search has no results in the Admins tab, the centered empty state includes a **Search all users** CTA.
 - The CTA switches to All users and preserves the current search phrase.
 - Each result displays the user's avatar, full name, email, and assigned role labels. Multi-role users appear only once.
 - Selecting a role matches users who have that role among any of their assignments.
-- Changing the raw search value, tab, or role filter clears the selected target user. Closing the popover resets it to Admins, an empty search, All roles, and no selection.
+- Changing the raw search value or tab clears the selected target user. Closing the popover resets it to Admins, an empty search, and no selection.
 - Existing pagination and explicit **Load more users** behavior remain.
 - Visible strings must be added to every supported web locale.
 - Existing API permissions and `ManagingTenantAdminGuard` remain authoritative. Frontend visibility is not an authorization control.
@@ -77,8 +75,7 @@ Empty-state behavior:
 - Loading: show the existing centered loading treatment with scope-neutral wording.
 - Admins without a search: **No active admin users found.** Do not show the broadening CTA.
 - Admins with a search and no results: explain that no admins match, then show **Search all users**.
-- All users without a role filter result: **No active users found.**
-- All users with a role filter and no result: explain that no active users match the selected role and search.
+- All users without a result: **No active users found.**
 - The broadening CTA is not shown in All users because there is no broader selector scope.
 
 Role display rules:
@@ -92,12 +89,12 @@ No external mockup or competitor research is required. The change is a focused e
 ## Routing And Frontend Structure
 
 - Do not add or change routes. The feature remains inside `/super-admin/tenants`.
-- Extend `SupportModePopover.tsx` with controlled selector scope, role filter, and contextual empty-state state.
-- Keep user-list fetching in `useSupportUsers.ts`; include `scope`, `roleSlug`, `tenantId`, `perPage`, and debounced `search` in its query key.
+- Extend `SupportModePopover.tsx` with controlled selector scope and contextual empty-state state.
+- Keep user-list fetching in `useSupportUsers.ts`; include `scope`, `tenantId`, `perPage`, and debounced `search` in its query key.
 - Add one target-tenant support-roles query hook under `apps/web/app/api/queries/super-admin/`, using the regenerated `ApiClient.api...` method.
 - Reuse `apps/web/app/components/ui/tabs.tsx`, the existing select primitive, `UserAvatar`, buttons, and available badge components.
 - Reuse or narrow the existing `getRoleLabel` behavior rather than duplicating system-role translation mappings.
-- Add stable handles in `apps/web/e2e/data/tenants/handles.ts` for both tabs, the role filter and options, the all-users CTA, and user role labels where assertions require them.
+- Add stable handles in `apps/web/e2e/data/tenants/handles.ts` for both tabs, the all-users CTA, and user role labels where assertions require them.
 - Keep the selected ID as local UI state. Server results, roles, loading state, pagination, and errors remain TanStack Query state.
 - Do not invalidate queries after starting a support session because the mutation redirects to the target tenant and does not change selector data.
 

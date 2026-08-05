@@ -3453,6 +3453,7 @@
   },
   "settings": {
     "title": "Nustatymai",
+    "supportModeNoAvailable": "Šiam naudotojui palaikymo režimu nustatymai nepasiekiami.",
     "buttons": {
       "cancel": "Atšaukti",
       "save": "Išsaugoti"
@@ -4793,14 +4794,10 @@
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
       "tabs": { "admins": "Administratoriai", "allUsers": "Visi naudotojai" },
-      "roleFilter": "Filtruoti pagal rolę",
-      "allRoles": "Visos rolės",
-      "loadingRoles": "Įkeliamos rolės...",
       "loading": "Įkeliami naudotojai...",
       "emptyAdmins": "Aktyvių administratorių nerasta.",
       "emptyAdminsSearch": "Aktyvių administratorių pagal \"{{search}}\" nerasta.",
       "emptyAllUsers": "Aktyvių naudotojų nerasta.",
-      "emptyRole": "Aktyvių naudotojų su šia role nerasta.",
       "searchAllUsers": "Ieškoti tarp visų naudotojų",
       "loadMore": "Įkelti daugiau naudotojų"
     },

@@ -3452,6 +3452,7 @@
   },
   "settings": {
     "title": "Nastavení",
+    "supportModeNoAvailable": "V režimu podpory nejsou pro tohoto uživatele dostupná žádná nastavení.",
     "buttons": {
       "cancel": "Zrušit",
       "save": "Uložit"
@@ -4791,14 +4792,10 @@
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
       "tabs": { "admins": "Administrátoři", "allUsers": "Všichni uživatelé" },
-      "roleFilter": "Filtrovat podle role",
-      "allRoles": "Všechny role",
-      "loadingRoles": "Načítání rolí...",
       "loading": "Načítání uživatelů...",
       "emptyAdmins": "Nebyli nalezeni žádní aktivní administrátoři.",
       "emptyAdminsSearch": "Pro \"{{search}}\" nebyli nalezeni žádní aktivní administrátoři.",
       "emptyAllUsers": "Nebyli nalezeni žádní aktivní uživatelé.",
-      "emptyRole": "Nebyli nalezeni žádní aktivní uživatelé s touto rolí.",
       "searchAllUsers": "Hledat mezi všemi uživateli",
       "loadMore": "Načíst další uživatele"
     },

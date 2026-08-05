@@ -3452,6 +3452,7 @@
   },
   "settings": {
     "title": "Settings",
+    "supportModeNoAvailable": "No settings are available for this user while in support mode.",
     "buttons": {
       "cancel": "Cancel",
       "save": "Save"
@@ -4670,14 +4671,10 @@
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
       "tabs": { "admins": "Admins", "allUsers": "All users" },
-      "roleFilter": "Filter by role",
-      "allRoles": "All roles",
-      "loadingRoles": "Loading roles...",
       "loading": "Loading users...",
       "emptyAdmins": "No active admin users found.",
       "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
       "emptyAllUsers": "No active users found.",
-      "emptyRole": "No active users found for this role.",
       "searchAllUsers": "Search all users",
       "loadMore": "Load more users"
     },

@@ -12,7 +12,6 @@ type SupportUsersParams = {
   perPage?: number;
   search?: string;
   scope?: (typeof SUPPORT_USER_SCOPES)[keyof typeof SUPPORT_USER_SCOPES];
-  roleSlug?: string;
 };
 
 type QueryOptions = {
@@ -20,27 +19,16 @@ type QueryOptions = {
 };
 
 export const supportUsersQueryOptions = (
-  {
-    tenantId,
-    perPage = 20,
-    search,
-    scope = SUPPORT_USER_SCOPES.ADMINS,
-    roleSlug,
-  }: SupportUsersParams,
+  { tenantId, perPage = 20, search, scope = SUPPORT_USER_SCOPES.ADMINS }: SupportUsersParams,
   options: QueryOptions = { enabled: true },
 ) => ({
-  queryKey: [
-    ...SUPER_ADMIN_SUPPORT_USERS_QUERY_KEY,
-    tenantId,
-    { perPage, search, scope, roleSlug },
-  ],
+  queryKey: [...SUPER_ADMIN_SUPPORT_USERS_QUERY_KEY, tenantId, { perPage, search, scope }],
   queryFn: async ({ pageParam }: { pageParam: number }) => {
     const response = await ApiClient.api.tenantsControllerFindSupportUsers(tenantId, {
       page: pageParam,
       perPage,
       ...(search?.trim() && { search: search.trim() }),
       scope,
-      ...(scope === SUPPORT_USER_SCOPES.ALL && roleSlug && { roleSlug }),
     });
 
     return response.data;

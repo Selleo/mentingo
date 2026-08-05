@@ -1,6 +1,7 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
+import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { SUPPORT_MODE_HANDLES } from "../../data/support-mode/handles";
 import { TENANTS_PAGE_HANDLES } from "../../data/tenants/handles";
 import { expect, test } from "../../fixtures/test.fixture";
@@ -113,6 +114,11 @@ test("managing admin can impersonate a non-admin user from all users", async ({
       await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/dashboard$`));
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.BANNER)).toBeVisible();
       await expect(page.getByTestId(NAVIGATION_HANDLES.USERS_LINK)).toHaveCount(0);
+
+      await page.goto(`${supportOrigin}/settings`);
+      await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.NO_AVAILABLE_SETTINGS)).toHaveText(
+        "No settings are available for this user while in support mode.",
+      );
     },
     { root: true },
   );

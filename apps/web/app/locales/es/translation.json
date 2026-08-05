@@ -3439,6 +3439,7 @@
   },
   "settings": {
     "title": "Configuración",
+    "supportModeNoAvailable": "No hay configuraciones disponibles para este usuario en el modo de soporte.",
     "buttons": {
       "cancel": "Cancelar",
       "save": "Guardar"
@@ -4656,14 +4657,10 @@
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
       "tabs": { "admins": "Administradores", "allUsers": "Todos los usuarios" },
-      "roleFilter": "Filtrar por rol",
-      "allRoles": "Todos los roles",
-      "loadingRoles": "Cargando roles...",
       "loading": "Cargando usuarios...",
       "emptyAdmins": "No se encontraron administradores activos.",
       "emptyAdminsSearch": "No se encontraron administradores activos para \"{{search}}\".",
       "emptyAllUsers": "No se encontraron usuarios activos.",
-      "emptyRole": "No se encontraron usuarios activos con este rol.",
       "searchAllUsers": "Buscar entre todos los usuarios",
       "loadMore": "Cargar más usuarios"
     },

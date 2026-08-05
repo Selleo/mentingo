@@ -3692,6 +3692,7 @@
   },
   "settings": {
     "title": "Ustawienia",
+    "supportModeNoAvailable": "W trybie wsparcia dla tego użytkownika nie są dostępne żadne ustawienia.",
     "buttons": {
       "cancel": "Odrzuć",
       "save": "Zapisz"
@@ -4709,14 +4710,10 @@
     "supportModePopover": {
       "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
       "tabs": { "admins": "Administratorzy", "allUsers": "Wszyscy użytkownicy" },
-      "roleFilter": "Filtruj według roli",
-      "allRoles": "Wszystkie role",
-      "loadingRoles": "Ładowanie ról...",
       "loading": "Ładowanie użytkowników...",
       "emptyAdmins": "Nie znaleziono aktywnych administratorów.",
       "emptyAdminsSearch": "Nie znaleziono aktywnych administratorów dla \"{{search}}\".",
       "emptyAllUsers": "Nie znaleziono aktywnych użytkowników.",
-      "emptyRole": "Nie znaleziono aktywnych użytkowników z tą rolą.",
       "searchAllUsers": "Szukaj wśród wszystkich użytkowników",
       "loadMore": "Załaduj więcej użytkowników"
     },

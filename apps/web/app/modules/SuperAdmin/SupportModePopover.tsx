@@ -3,7 +3,6 @@ import { Check, HandHelping, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useSupportRoles } from "~/api/queries/super-admin/useSupportRoles";
 import { useSupportUsers } from "~/api/queries/super-admin/useSupportUsers";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -16,13 +15,6 @@ import {
   CommandList,
 } from "~/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useDebounce } from "~/hooks/useDebounce";
@@ -45,7 +37,6 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
   const [isOpen, setIsOpen] = useState(false);
   const [scope, setScope] = useState<SupportUserScope>(SUPPORT_USER_SCOPES.ADMINS);
   const [search, setSearch] = useState("");
-  const [roleSlug, setRoleSlug] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -61,13 +52,8 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
       search: debouncedSearch,
       perPage: 20,
       scope,
-      roleSlug: scope === SUPPORT_USER_SCOPES.ALL ? roleSlug : undefined,
     },
     { enabled: isOpen },
-  );
-  const { data: roles = [], isLoading: isLoadingRoles } = useSupportRoles(
-    tenant.id,
-    isOpen && scope === SUPPORT_USER_SCOPES.ALL,
   );
 
   const users = useMemo(
@@ -89,8 +75,6 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
     if (scope === SUPPORT_USER_SCOPES.ADMINS) {
       return t("superAdminTenantsView.supportModePopover.emptyAdmins");
     }
-    if (roleSlug) return t("superAdminTenantsView.supportModePopover.emptyRole");
-
     return t("superAdminTenantsView.supportModePopover.emptyAllUsers");
   };
 
@@ -100,7 +84,6 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
     if (!nextOpen) {
       setScope(SUPPORT_USER_SCOPES.ADMINS);
       setSearch("");
-      setRoleSlug("");
       setSelectedUserId("");
     }
   };
@@ -109,17 +92,11 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
     const normalizedScope = nextScope as SupportUserScope;
 
     setScope(normalizedScope);
-    setRoleSlug("");
     setSelectedUserId("");
   };
 
   const handleSearchChange = (nextSearch: string) => {
     setSearch(nextSearch);
-    setSelectedUserId("");
-  };
-
-  const handleRoleChange = (nextRoleSlug: string) => {
-    setRoleSlug(nextRoleSlug === "all" ? "" : nextRoleSlug);
     setSelectedUserId("");
   };
 
@@ -146,24 +123,14 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
         side="bottom"
         align="end"
         sideOffset={10}
-        className="w-[min(92vw,24rem)] p-0"
+        collisionPadding={8}
+        className="max-h-[var(--radix-popover-content-available-height)] w-[min(92vw,24rem)] overflow-hidden p-0"
       >
         <Tabs value={scope} onValueChange={handleScopeChange} className="w-full">
-          <TabsList className="grid h-11 w-full grid-cols-2 rounded-b-none rounded-t-lg border-b border-input bg-primary-50 p-1">
-            <TabsTrigger
-              value={SUPPORT_USER_SCOPES.ADMINS}
-              data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_ADMINS_TAB}
-            >
-              {t("superAdminTenantsView.supportModePopover.tabs.admins")}
-            </TabsTrigger>
-            <TabsTrigger
-              value={SUPPORT_USER_SCOPES.ALL}
-              data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_ALL_USERS_TAB}
-            >
-              {t("superAdminTenantsView.supportModePopover.tabs.allUsers")}
-            </TabsTrigger>
-          </TabsList>
-          <Command shouldFilter={false} className="[&_[cmdk-input]]:outline-none">
+          <Command
+            shouldFilter={false}
+            className="h-auto max-h-[calc(var(--radix-popover-content-available-height)-5rem)] [&_[cmdk-input]]:outline-none"
+          >
             <CommandInput
               value={search}
               data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_SEARCH}
@@ -171,44 +138,22 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
               placeholder={t("superAdminTenantsView.supportModePopover.searchPlaceholder")}
               onValueChange={handleSearchChange}
             />
-            {scope === SUPPORT_USER_SCOPES.ALL && (
-              <div className="border-b border-input p-3 pt-0">
-                <Select value={roleSlug || "all"} onValueChange={handleRoleChange}>
-                  <SelectTrigger
-                    data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_ROLE_FILTER}
-                    className="h-9"
-                  >
-                    <SelectValue
-                      placeholder={t("superAdminTenantsView.supportModePopover.roleFilter")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      value="all"
-                      data-testid={TENANTS_PAGE_HANDLES.supportModeRoleFilterOption("all")}
-                    >
-                      {t("superAdminTenantsView.supportModePopover.allRoles")}
-                    </SelectItem>
-                    {roles.map((role) => (
-                      <SelectItem
-                        key={role.id}
-                        value={role.slug}
-                        data-testid={TENANTS_PAGE_HANDLES.supportModeRoleFilterOption(role.slug)}
-                      >
-                        {getRoleLabel(role.slug, t, roles)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isLoadingRoles && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("superAdminTenantsView.supportModePopover.loadingRoles")}
-                  </p>
-                )}
-              </div>
-            )}
-            <CommandList className="min-h-48">
-              <CommandEmpty className="flex min-h-48 items-center justify-center p-4 text-center">
+            <TabsList className="grid h-11 w-full shrink-0 grid-cols-2 rounded-none border-b border-input bg-primary-50 p-1">
+              <TabsTrigger
+                value={SUPPORT_USER_SCOPES.ADMINS}
+                data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_ADMINS_TAB}
+              >
+                {t("superAdminTenantsView.supportModePopover.tabs.admins")}
+              </TabsTrigger>
+              <TabsTrigger
+                value={SUPPORT_USER_SCOPES.ALL}
+                data-testid={TENANTS_PAGE_HANDLES.SUPPORT_MODE_ALL_USERS_TAB}
+              >
+                {t("superAdminTenantsView.supportModePopover.tabs.allUsers")}
+              </TabsTrigger>
+            </TabsList>
+            <CommandList className="max-h-[calc(var(--radix-popover-content-available-height)-10rem)] flex-none overflow-y-auto">
+              <CommandEmpty className="flex items-center justify-center p-4 text-center">
                 {isLoading ? (
                   t("superAdminTenantsView.supportModePopover.loading")
                 ) : (
@@ -261,7 +206,7 @@ export function SupportModePopover({ tenant, isSubmitting, onProceed }: SupportM
                                 )}
                                 className="px-1.5 py-0.5 text-xs"
                               >
-                                {getRoleLabel(role.slug, t, roles)}
+                                {getRoleLabel(role.slug, t, [role])}
                               </Badge>
                             ))}
                           </div>
