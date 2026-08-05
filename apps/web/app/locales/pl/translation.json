@@ -2142,6 +2142,7 @@
     "deadline": "Termin wykonania",
     "selectDate": "Wybierz datę",
     "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
+    "deadlineNoAssignedGroups": "Przypisz co najmniej jedną grupę, aby skonfigurować terminy.",
     "common": {
       "settings": "Ustawienia",
       "curriculum": "Program nauczania",
@@ -2210,6 +2211,13 @@
         "category": "Nie znaleziono kategorii.",
         "chapter": "Nie znaleziono rozdziału.",
         "lesson": "Nie znaleziono lekcji."
+      },
+      "forbidden": {
+        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
+      },
+      "media": {
+        "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
+        "updateFailed": "Nie udało się zaktualizować multimediów kursu."
       },
       "statisticsAccessForbidden": "Nie masz uprawnień do wyświetlania statystyk tego kursu.",
       "create": {
@@ -4986,6 +4994,150 @@
       "liveKitNotConfigured": "LiveKit nie jest skonfigurowany.",
       "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
       "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Anuluj",
+      "close": "Zamknij",
+      "saveChanges": "Zapisz zmiany",
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "learningMode": {
+      "title": "Uczysz się tego kursu w trybie nauki",
+      "description": "Śledzimy Twoje postępy. Ukończone lekcje są uwzględniane w Twoim postępie i statystykach kursu.",
+      "enter": "Włącz tryb nauki",
+      "exit": "Wyjdź z trybu nauki"
+    },
+    "overview": {
+      "courseSettings": "Ustawienia kursu",
+      "manageCategories": "Zarządzaj kategoriami",
+      "settingsDescription": "Zarządzaj ustawieniami tego kursu.",
+      "titlePlaceholder": "Wprowadź tytuł kursu...",
+      "editMedia": "Edytuj multimedia",
+      "continueLearning": "Kontynuuj naukę",
+      "courseDetails": "Szczegóły kursu",
+      "closeDetails": "Zamknij szczegóły kursu",
+      "aboutCourse": "O tym kursie",
+      "description": "Opis",
+      "descriptionPlaceholder": "Wprowadź opis kursu...",
+      "whatYouWillMaster": "Co opanujesz",
+      "noLearningOutcomes": "Nie dodano jeszcze efektów nauki.",
+      "learningOutcomePlaceholder": "Dodaj efekt nauki...",
+      "addLearningOutcome": "Dodaj efekt nauki",
+      "removeLearningOutcome": "Usuń efekt nauki",
+      "closeSettings": "Zamknij ustawienia kursu",
+      "settingsComingSoon": "Ustawienia wkrótce",
+      "settingsIntro": "Tutaj możesz skonfigurować:",
+      "settingsStatus": "Status kursu (wersja robocza/opublikowany)",
+      "settingsPricing": "Ceny i opcje płatności",
+      "settingsAssignments": "Przypisani uczestnicy i grupy",
+      "settingsSequential": "Wymagaj ukończenia po kolei",
+      "settingsVisibility": "Ustawienia widoczności kursu",
+      "settingsPermissions": "Uprawnienia dostępu"
+    },
+    "media": {
+      "title": "Edytuj multimedia kursu",
+      "currentImage": "Bieżący obraz główny — dostosuj pozycję",
+      "previewAlt": "Podgląd obrazu głównego kursu",
+      "previewPosition": "Podgląd z bieżącą pozycją",
+      "verticalPosition": "Pozycja pionowa",
+      "uploadImage": "Prześlij nowy obraz główny",
+      "dropImage": "Upuść obraz główny tutaj",
+      "browse": "lub kliknij, aby wybrać plik",
+      "imageLimit": "PNG, JPG do 10 MB",
+      "imageRecommendation": "Zalecane: 1920x820 px (21:9)",
+      "trailer": "Zwiastun kursu (opcjonalnie)",
+      "dropVideo": "Upuść zwiastun tutaj",
+      "videoLimit": "MP4, MOV do 50 MB",
+      "videoRecommendation": "Zalecane: 30–90 sekund",
+      "save": "Prześlij multimedia"
+    },
+    "stats": {
+      "yourProgress": "Twój postęp",
+      "remaining": "pozostało",
+      "courseFinished": "Kurs ukończony",
+      "chapterProgress_one": "{{completed}} / {{total}} rozdział",
+      "chapterProgress_few": "{{completed}} / {{total}} rozdziały",
+      "chapterProgress_many": "{{completed}} / {{total}} rozdziałów",
+      "chapterProgress_other": "{{completed}} / {{total}} rozdziału",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} godz.",
+        "hoursAndMinutes": "{{hours}} godz. {{minutes}} min"
+      },
+      "trackProgress": "aby śledzić swoje postępy.",
+      "deadline": "Termin",
+      "daysLeft_one": "Pozostał {{count}} dzień",
+      "daysLeft_few": "Pozostały {{count}} dni",
+      "daysLeft_many": "Pozostało {{count}} dni",
+      "certificate": "Certyfikat",
+      "uponCompletion": "Po ukończeniu",
+      "aboutAuthor": "O autorze"
+    },
+    "certificate": {
+      "close": "Zamknij ustawienia certyfikatu",
+      "title": "Ustawienia certyfikatu",
+      "previewTitle": "Certyfikat ukończenia",
+      "certifies": "Niniejszym zaświadcza się, że",
+      "completed": "pomyślnie ukończył(a)",
+      "signaturePlaceholder": "Miejsce na podpis",
+      "enable": "Włącz certyfikat",
+      "enableDescription": "Uczestnicy otrzymają certyfikat po ukończeniu kursu",
+      "fontColor": "Kolor czcionki",
+      "uploadSignature": "Prześlij podpis",
+      "uploadSignatureHint": "Kliknij, aby przesłać obraz podpisu",
+      "signatureLimit": "PNG, JPG do 2 MB",
+      "save": "Zapisz certyfikat"
+    },
+    "deadline": {
+      "close": "Zamknij ustawienia terminów",
+      "title": "Ustawienia terminów",
+      "enable": "Włącz terminy",
+      "enableDescription": "Ustaw osobne terminy dla poszczególnych grup",
+      "current": "Bieżący termin: {{deadline}}"
+    },
+    "author": {
+      "close": "Zamknij ustawienia autora",
+      "pictureAlt": "Zdjęcie autora",
+      "showSection": "Pokaż sekcję autora",
+      "showSectionDescription": "Wyświetl informacje o autorze na stronie kursu",
+      "otherCourses": "Inne kursy"
+    },
+    "contents": {
+      "title": "Spis treści",
+      "statistics": "Statystyki",
+      "edit": "Edytuj treść",
+      "missingTranslationsTitle": "Brakujące tłumaczenia",
+      "missingTranslationsDescription": "Niektóre treści kursu nie mają tłumaczenia w wybranym języku.",
+      "completedChapters_one": "{{count}} ukończony rozdział",
+      "completedChapters_few": "{{count}} ukończone rozdziały",
+      "completedChapters_many": "{{count}} ukończonych rozdziałów",
+      "lessons_one": "{{count}} lekcja",
+      "lessons_few": "{{count}} lekcje",
+      "lessons_many": "{{count}} lekcji",
+      "showAllChapters": "Pokaż wszystkie rozdziały (jeszcze {{count}})",
+      "courseStatistics": "Statystyki kursu",
+      "statisticsDescription": "Przegląd postępów i zaangażowania uczestników",
+      "totalStudents": "Łączna liczba uczestników",
+      "completionRate": "Wskaźnik ukończenia",
+      "averageTime": "Śr. czas nauki",
+      "averageRating": "Śr. ocena",
+      "detailedStatisticsSoon": "Szczegółowe statystyki już wkrótce",
+      "detailedStatisticsDescription": "Ta sekcja będzie zawierać szczegółowe analizy postępów uczestników, ukończenia rozdziałów, zaangażowania i innych danych.",
+      "status": {
+        "started": "Rozpoczęto",
+        "completed": "Ukończono",
+        "inProgress": "W toku",
+        "notStarted": "Nie rozpoczęto"
+      },
+      "lessonTypes": {
+        "content": "Treść",
+        "quiz": "Quiz",
+        "aiMentor": "Mentor AI",
+        "lesson": "Lekcja"
+      }
     }
   }
 }

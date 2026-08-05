@@ -5,25 +5,25 @@ export function handleRowSelectionRange<TData>(params: {
   table: Table<TData>;
   event: React.MouseEvent<HTMLButtonElement>;
   id: string;
-  idx: number;
   value: boolean;
   lastSelectedRowIndex: number;
   setLastSelectedRowIndex: (n: number) => void;
 }): void {
-  const { table, event, id, idx, value, lastSelectedRowIndex, setLastSelectedRowIndex } = params;
+  const { table, event, id, value, lastSelectedRowIndex, setLastSelectedRowIndex } = params;
   const shiftKeyPressed = event.shiftKey;
+  const visibleRows = table.getRowModel().rows;
+  const selectedRowIndex = visibleRows.findIndex((row) => row.id === id);
+
+  if (selectedRowIndex < 0) return;
 
   if (!shiftKeyPressed) {
     table.getRow(id).toggleSelected(!value);
-    setLastSelectedRowIndex(idx);
+    setLastSelectedRowIndex(selectedRowIndex);
     return;
   }
 
-  const start = Math.min(idx, lastSelectedRowIndex);
-  const end = Math.max(idx, lastSelectedRowIndex);
+  const start = Math.min(selectedRowIndex, lastSelectedRowIndex);
+  const end = Math.max(selectedRowIndex, lastSelectedRowIndex);
 
-  table
-    .getRowModel()
-    .rows.filter((row) => row.index >= start && row.index <= end)
-    .forEach((row) => row.toggleSelected(!value));
+  visibleRows.slice(start, end + 1).forEach((row) => row.toggleSelected(!value));
 }

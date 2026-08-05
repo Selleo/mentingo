@@ -4436,6 +4436,43 @@
         }
       }
     },
+    "/api/course/{id}/media": {
+      "patch": {
+        "operationId": "CourseController_updateCourseMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCourseMediaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -25585,6 +25622,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -25793,6 +25836,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26123,6 +26172,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26488,6 +26543,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -26692,6 +26753,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26965,6 +27032,10 @@
                                 "contentType"
                               ]
                             }
+                          },
+                          "estimatedDurationSeconds": {
+                            "minimum": 0,
+                            "type": "number"
                           }
                         },
                         "required": [
@@ -27019,6 +27090,10 @@
                       "type": "number"
                     },
                     "displayOrder": {
+                      "type": "number"
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
                       "type": "number"
                     }
                   },
@@ -27108,6 +27183,22 @@
               },
               "thumbnailUrl": {
                 "type": "string"
+              },
+              "thumbnailPositionY": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "showAuthorSection": {
+                "type": "boolean"
               },
               "trailerUrl": {
                 "anyOf": [
@@ -27235,6 +27326,7 @@
               "isContentReadonly",
               "courseType",
               "priceInCents",
+              "thumbnailPositionY",
               "title",
               "slug",
               "stripeProductId",
@@ -28057,6 +28149,18 @@
               "thumbnailS3Key": {
                 "type": "string"
               },
+              "thumbnailPositionY": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "learningOutcomes": {
+                "maxItems": 5,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -28308,6 +28412,77 @@
           "data"
         ]
       },
+      "UpdateCourseMediaBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "image": {
+            "format": "binary",
+            "description": "Course thumbnail image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "thumbnailPositionY"
+        ]
+      },
+      "UpdateCourseMediaResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateCourseBody": {
         "type": "object",
         "properties": {
@@ -28319,6 +28494,21 @@
           },
           "thumbnailS3Key": {
             "type": "string"
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "learningOutcomes": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "showAuthorSection": {
+            "type": "boolean"
           },
           "status": {
             "anyOf": [
@@ -30434,6 +30624,10 @@
                           "contentType"
                         ]
                       }
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
+                      "type": "number"
                     }
                   },
                   "required": [
@@ -30488,6 +30682,10 @@
                 "type": "number"
               },
               "displayOrder": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
                 "type": "number"
               }
             },

@@ -1921,6 +1921,7 @@
     "deadline": "Lhůta",
     "selectDate": "Vyberte datum",
     "deadlineRequired": "U povinného kurzu je nutný termín",
+    "deadlineNoAssignedGroups": "Přiřaďte alespoň jednu skupinu, abyste mohli nastavit termíny.",
     "common": {
       "settings": "Nastavení",
       "curriculum": "Osnovy",
@@ -1987,6 +1988,13 @@
         "category": "Kategorie nenalezena.",
         "chapter": "Kapitola nenalezena.",
         "lesson": "Lekce nenalezena."
+      },
+      "forbidden": {
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+      },
+      "media": {
+        "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
+        "updateFailed": "Nepodařilo se aktualizovat média kurzu."
       },
       "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
@@ -4926,6 +4934,149 @@
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Zrušit",
+      "close": "Zavřít",
+      "saveChanges": "Uložit změny",
+      "enabled": "Zapnuto",
+      "disabled": "Vypnuto"
+    },
+    "learningMode": {
+      "title": "Tento kurz absolvujete ve výukovém režimu",
+      "description": "Váš pokrok je sledován. Dokončené lekce se započítávají do vašeho pokroku a statistik kurzu.",
+      "enter": "Spustit výukový režim",
+      "exit": "Ukončit výukový režim"
+    },
+    "overview": {
+      "courseSettings": "Nastavení kurzu",
+      "manageCategories": "Spravovat kategorie",
+      "settingsDescription": "Spravujte nastavení tohoto kurzu.",
+      "titlePlaceholder": "Zadejte název kurzu...",
+      "editMedia": "Upravit média",
+      "continueLearning": "Pokračovat ve studiu",
+      "courseDetails": "Podrobnosti kurzu",
+      "closeDetails": "Zavřít podrobnosti kurzu",
+      "aboutCourse": "O tomto kurzu",
+      "description": "Popis",
+      "descriptionPlaceholder": "Zadejte popis kurzu...",
+      "whatYouWillMaster": "Co si osvojíte",
+      "noLearningOutcomes": "Zatím nebyly přidány žádné výsledky učení.",
+      "learningOutcomePlaceholder": "Přidejte výsledek učení...",
+      "addLearningOutcome": "Přidat výsledek učení",
+      "removeLearningOutcome": "Odebrat výsledek učení",
+      "closeSettings": "Zavřít nastavení kurzu",
+      "settingsComingSoon": "Nastavení již brzy",
+      "settingsIntro": "Zde můžete nastavit:",
+      "settingsStatus": "Stav kurzu (Koncept/Publikováno)",
+      "settingsPricing": "Ceny a možnosti platby",
+      "settingsAssignments": "Přiřazení účastníci a skupiny",
+      "settingsSequential": "Vynutit postupné dokončení",
+      "settingsVisibility": "Viditelnost kurzu",
+      "settingsPermissions": "Přístupová oprávnění"
+    },
+    "media": {
+      "title": "Upravit média kurzu",
+      "currentImage": "Aktuální hlavní obrázek – upravte pozici",
+      "previewAlt": "Náhled hlavního obrázku kurzu",
+      "previewPosition": "Náhled s aktuální pozicí",
+      "verticalPosition": "Svislá pozice",
+      "uploadImage": "Nahrát nový hlavní obrázek",
+      "dropImage": "Přetáhněte hlavní obrázek sem",
+      "browse": "nebo klikněte a vyberte soubor",
+      "imageLimit": "PNG, JPG do 10 MB",
+      "imageRecommendation": "Doporučeno: 1920x820 px (21:9)",
+      "trailer": "Upoutávka kurzu (volitelné)",
+      "dropVideo": "Přetáhněte upoutávku sem",
+      "videoLimit": "MP4, MOV do 50 MB",
+      "videoRecommendation": "Doporučeno: 30–90 sekund",
+      "save": "Nahrát média"
+    },
+    "stats": {
+      "yourProgress": "Váš pokrok",
+      "remaining": "zbývá",
+      "courseFinished": "Kurz dokončen",
+      "chapterProgress_one": "{{completed}} / {{total}} kapitola",
+      "chapterProgress_few": "{{completed}} / {{total}} kapitoly",
+      "chapterProgress_other": "{{completed}} / {{total}} kapitol",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "pro sledování vašeho pokroku.",
+      "deadline": "Termín",
+      "daysLeft_one": "Zbývá {{count}} den",
+      "daysLeft_few": "Zbývají {{count}} dny",
+      "daysLeft_other": "Zbývá {{count}} dní",
+      "certificate": "Certifikát",
+      "uponCompletion": "Po dokončení",
+      "aboutAuthor": "O autorovi"
+    },
+    "certificate": {
+      "close": "Zavřít nastavení certifikátu",
+      "title": "Nastavení certifikátu",
+      "previewTitle": "Certifikát o dokončení",
+      "certifies": "Tímto se potvrzuje, že",
+      "completed": "úspěšně dokončil(a)",
+      "signaturePlaceholder": "Místo pro podpis",
+      "enable": "Povolit certifikát",
+      "enableDescription": "Účastníci obdrží certifikát po dokončení kurzu",
+      "fontColor": "Barva písma",
+      "uploadSignature": "Nahrát podpis",
+      "uploadSignatureHint": "Kliknutím nahrajte obrázek podpisu",
+      "signatureLimit": "PNG, JPG do 2 MB",
+      "save": "Uložit certifikát"
+    },
+    "deadline": {
+      "close": "Zavřít nastavení termínů",
+      "title": "Nastavení termínů",
+      "enable": "Povolit termíny",
+      "enableDescription": "Nastavte konkrétní termíny pro různé skupiny",
+      "current": "Aktuální termín: {{deadline}}"
+    },
+    "author": {
+      "close": "Zavřít nastavení autora",
+      "pictureAlt": "Obrázek autora",
+      "showSection": "Zobrazit sekci autora",
+      "showSectionDescription": "Zobrazit informace o autorovi na stránce kurzu",
+      "otherCourses": "Další kurzy"
+    },
+    "contents": {
+      "title": "Obsah",
+      "statistics": "Statistiky",
+      "edit": "Upravit obsah",
+      "missingTranslationsTitle": "Chybějící překlady",
+      "missingTranslationsDescription": "Část obsahu kurzu není přeložena do vybraného jazyka.",
+      "completedChapters_one": "{{count}} dokončená kapitola",
+      "completedChapters_few": "{{count}} dokončené kapitoly",
+      "completedChapters_other": "{{count}} dokončených kapitol",
+      "lessons_one": "{{count}} lekce",
+      "lessons_few": "{{count}} lekce",
+      "lessons_other": "{{count}} lekcí",
+      "showAllChapters": "Zobrazit všechny kapitoly (dalších {{count}})",
+      "courseStatistics": "Statistiky kurzu",
+      "statisticsDescription": "Přehled pokroku a zapojení účastníků",
+      "totalStudents": "Celkem účastníků",
+      "completionRate": "Míra dokončení",
+      "averageTime": "Prům. doba studia",
+      "averageRating": "Prům. hodnocení",
+      "detailedStatisticsSoon": "Podrobné statistiky již brzy",
+      "detailedStatisticsDescription": "Tato sekce zobrazí podrobnou analýzu pokroku, dokončení kapitol, zapojení a další údaje.",
+      "status": {
+        "started": "Zahájeno",
+        "completed": "Dokončeno",
+        "inProgress": "Probíhá",
+        "notStarted": "Nezahájeno"
+      },
+      "lessonTypes": {
+        "content": "Obsah",
+        "quiz": "Kvíz",
+        "aiMentor": "AI mentor",
+        "lesson": "Lekce"
+      }
     }
   }
 }

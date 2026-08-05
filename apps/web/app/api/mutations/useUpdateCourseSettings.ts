@@ -5,14 +5,13 @@ import { match } from "ts-pattern";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 
-import type { ApiErrorResponse } from "../types";
 import type { CertificateValiditySetting } from "@repo/shared";
-import type { AxiosError } from "axios";
 
 type UpdateCourseSettingsBody = {
   lessonSequenceEnabled?: boolean;
@@ -68,6 +67,9 @@ export function useUpdateCourseSettings() {
         .with(["certificateValidity"], () =>
           t("adminCourseView.toast.certificateUpdatedSuccessfully"),
         )
+        .with(["certificateFontColor"], () =>
+          t("adminCourseView.toast.certificateUpdatedSuccessfully"),
+        )
         .otherwise(() => t("lessons.settingsUpdatedSuccessfully"));
 
       toast({
@@ -75,10 +77,8 @@ export function useUpdateCourseSettings() {
         description,
       });
     },
-    onError: (error: AxiosError, { data, showToast = true }) => {
+    onError: (error, { data, showToast = true }) => {
       if (!showToast) return;
-
-      const { message } = error.response?.data as ApiErrorResponse;
 
       const changedValues = Object.keys(data).filter(
         (key) => get(data, key) !== undefined,
@@ -95,11 +95,12 @@ export function useUpdateCourseSettings() {
           t("adminCourseView.toast.certificateUpdateError"),
         )
         .with(["certificateValidity"], () => t("adminCourseView.toast.certificateUpdateError"))
+        .with(["certificateFontColor"], () => t("adminCourseView.toast.certificateUpdateError"))
         .otherwise(() => t("lessons.settingsUpdateFailed"));
 
       toast({
         variant: "destructive",
-        description: message ? t(message) : description,
+        description: getTranslatedApiErrorMessage(error, t, description),
       });
     },
   });

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { COURSE_TRANSLATIONS_QUERY_KEY } from "~/api/queries/admin/useHasMissingTranslations";
+import { COURSE_VIEW_QUERY_KEY } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -32,13 +33,17 @@ export function useDeleteCourseLanguage() {
 
       toast({ description: t("adminCourseView.toast.successfullyDeletedLanguage") });
 
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId }],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [COURSE_QUERY_KEY],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: COURSE_VIEW_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId }],
+        }),
+      ]);
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string };

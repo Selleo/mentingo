@@ -3,9 +3,15 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { expect, test } from "../../fixtures/test.fixture";
+import { transferCourseOwnershipFlow } from "../../flows/courses/transfer-course-ownership.flow";
+import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 
-test("admin can transfer course ownership", async ({ cleanup, factories, withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async () => {
+test("admin can transfer course ownership from the course overview", async ({
+  cleanup,
+  factories,
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const categoryFactory = factories.createCategoryFactory();
     const courseFactory = factories.createCourseFactory();
     const userFactory = factories.createUserFactory();
@@ -33,7 +39,8 @@ test("admin can transfer course ownership", async ({ cleanup, factories, withWor
       await categoryFactory.delete(category.id);
     });
 
-    await courseFactory.transferOwnership(course.id, candidate.id);
+    await openCourseOverviewFlow(page, course.id);
+    await transferCourseOwnershipFlow(page, candidate.id);
 
     await expect
       .poll(async () => {

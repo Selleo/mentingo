@@ -1924,6 +1924,7 @@
     "deadline": "Deadline",
     "selectDate": "Select date",
     "deadlineRequired": "Deadline is required for mandatory course",
+    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines.",
     "common": {
       "settings": "Settings",
       "curriculum": "Curriculum",
@@ -1990,6 +1991,13 @@
         "category": "Category not found.",
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
+      },
+      "forbidden": {
+        "updateCourse": "You do not have permission to update this course."
+      },
+      "media": {
+        "imageUploadFailed": "Failed to upload the course image.",
+        "updateFailed": "Failed to update course media."
       },
       "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
@@ -4947,6 +4955,145 @@
       "liveKitNotConfigured": "LiveKit is not configured.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "saveChanges": "Save changes",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "learningMode": {
+      "title": "You're taking this course in learning mode",
+      "description": "Your learning progress is being tracked. Completed lessons count toward your personal completion and course statistics.",
+      "enter": "Enter learning mode",
+      "exit": "Exit learning mode"
+    },
+    "overview": {
+      "courseSettings": "Course settings",
+      "manageCategories": "Manage categories",
+      "settingsDescription": "Manage settings for this course.",
+      "titlePlaceholder": "Enter course title...",
+      "editMedia": "Edit media",
+      "continueLearning": "Continue learning",
+      "courseDetails": "Course details",
+      "closeDetails": "Close course details",
+      "aboutCourse": "About this course",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter course description...",
+      "whatYouWillMaster": "What you'll master",
+      "noLearningOutcomes": "No learning outcomes added yet.",
+      "learningOutcomePlaceholder": "Add a learning outcome...",
+      "addLearningOutcome": "Add learning outcome",
+      "removeLearningOutcome": "Remove learning outcome",
+      "closeSettings": "Close course settings",
+      "settingsComingSoon": "Settings coming soon",
+      "settingsIntro": "Here you'll be able to configure:",
+      "settingsStatus": "Course status (Draft/Published)",
+      "settingsPricing": "Pricing & payment options",
+      "settingsAssignments": "Assigned students & groups",
+      "settingsSequential": "Enforce sequential completion",
+      "settingsVisibility": "Course visibility settings",
+      "settingsPermissions": "Access permissions"
+    },
+    "media": {
+      "title": "Edit course media",
+      "currentImage": "Current hero image - adjust position",
+      "previewAlt": "Course hero preview",
+      "previewPosition": "Preview with current position",
+      "verticalPosition": "Vertical position",
+      "uploadImage": "Upload new hero image",
+      "dropImage": "Drop hero image here",
+      "browse": "or click to browse",
+      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageRecommendation": "Recommended: 1920x820 px (21:9)",
+      "trailer": "Course trailer (optional)",
+      "dropVideo": "Drop trailer video here",
+      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoRecommendation": "Recommended: 30-90 seconds",
+      "save": "Upload media"
+    },
+    "stats": {
+      "yourProgress": "Your progress",
+      "remaining": "remaining",
+      "courseFinished": "Course finished",
+      "chapterProgress_one": "{{completed}} / {{total}} chapter",
+      "chapterProgress_other": "{{completed}} / {{total}} chapters",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "to track your progress.",
+      "deadline": "Deadline",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "certificate": "Certificate",
+      "uponCompletion": "Upon completion",
+      "aboutAuthor": "About author"
+    },
+    "certificate": {
+      "close": "Close certificate settings",
+      "title": "Certificate settings",
+      "previewTitle": "Certificate of completion",
+      "certifies": "This certifies that",
+      "completed": "has successfully completed",
+      "signaturePlaceholder": "Signature placeholder",
+      "enable": "Enable certificate",
+      "enableDescription": "Students will receive a certificate upon course completion",
+      "fontColor": "Font color",
+      "uploadSignature": "Upload signature",
+      "uploadSignatureHint": "Click to upload signature image",
+      "signatureLimit": "PNG, JPG up to 2 MB",
+      "save": "Save certificate"
+    },
+    "deadline": {
+      "close": "Close deadline settings",
+      "title": "Deadline settings",
+      "enable": "Enable deadlines",
+      "enableDescription": "Set specific deadlines for different groups",
+      "current": "Current deadline: {{deadline}}"
+    },
+    "author": {
+      "close": "Close author settings",
+      "pictureAlt": "Author picture",
+      "showSection": "Show author section",
+      "showSectionDescription": "Display author information on course page",
+      "otherCourses": "Other courses"
+    },
+    "contents": {
+      "title": "Table of contents",
+      "statistics": "Statistics",
+      "edit": "Edit content",
+      "missingTranslationsTitle": "Missing translations",
+      "missingTranslationsDescription": "Some course content is missing a translation in the selected language.",
+      "completedChapters_one": "{{count}} completed chapter",
+      "completedChapters_other": "{{count}} completed chapters",
+      "lessons_one": "{{count}} lesson",
+      "lessons_other": "{{count}} lessons",
+      "showAllChapters": "Show all chapters ({{count}} more)",
+      "courseStatistics": "Course statistics",
+      "statisticsDescription": "Overview of student progress and engagement",
+      "totalStudents": "Total students",
+      "completionRate": "Completion rate",
+      "averageTime": "Avg. time spent",
+      "averageRating": "Avg. rating",
+      "detailedStatisticsSoon": "Detailed statistics coming soon",
+      "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
+      "status": {
+        "started": "Started",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "lessonTypes": {
+        "content": "Content",
+        "quiz": "Quiz",
+        "aiMentor": "AI Mentor",
+        "lesson": "Lesson"
+      }
     }
   }
 }

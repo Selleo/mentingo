@@ -41,7 +41,6 @@ export const useEditCourseTabs = ({
     );
 
     return [
-      { label: t("adminCourseView.common.settings"), value: EDIT_COURSE_TABS.SETTINGS },
       ...(canEditCurriculum
         ? [{ label: t("adminCourseView.common.curriculum"), value: EDIT_COURSE_TABS.CURRICULUM }]
         : []),

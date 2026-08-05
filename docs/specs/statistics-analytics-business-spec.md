@@ -37,6 +37,7 @@ A learner opens Progress to see personal learning activity. Mentingo aggregates 
 
 An administrator opens Analytics to review organization-level charts and download a summary report. These charts summarize course popularity, enrollment, completion, freemium conversion, and average quiz performance.
 
+From the course overview, permitted users can open the Statistics tab beside the table of contents. Mentingo reuses the full course-admin statistics experience there, showing overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons.
 From a course management view, permitted users can open the Statistics tab. Mentingo shows course overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons. Learner search accepts a given name, family name, or a combined full name so course managers can find a specific person using the name format they see in the table.
 
 Quiz names in the average-score chart and quiz-results table follow the manager's selected interface language. If that language is unavailable for the course, Mentingo falls back to the course's base language.
@@ -45,6 +46,7 @@ Quiz names in the average-score chart and quiz-results table follow the manager'
 
 - Learner progress is routed at `/progress` and implemented in `apps/web/app/modules/Statistics/Client`.
 - Admin analytics is routed at `/admin/analytics` and implemented in `apps/web/app/modules/Statistics/Admin`.
+- Course-level reporting in the course overview reuses `apps/web/app/modules/Courses/CourseView/CourseAdminStatistics` rather than maintaining a separate simplified statistics panel.
 - Learner and admin aggregate endpoints live in `apps/api/src/statistics`; course-level statistics endpoints are in `apps/api/src/courses/course.controller.ts`.
 - `STATISTICS_READ` gates admin analytics, and `COURSE_STATISTICS` gates course-level reporting.
 - Course-level quiz statistics pass the selected interface language to the API, which resolves localized lesson titles through the shared localization rules.

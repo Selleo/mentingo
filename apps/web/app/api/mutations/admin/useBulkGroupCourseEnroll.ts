@@ -32,6 +32,7 @@ export function useBulkGroupCourseEnroll(courseId = "") {
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_BY_COURSE_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: ["course"] });
 
       await invalidateCourseStatisticsQueries();
     },

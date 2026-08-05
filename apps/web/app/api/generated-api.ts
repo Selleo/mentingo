@@ -1814,6 +1814,7 @@ export interface GetAllCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1852,6 +1853,7 @@ export interface GetStudentCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1918,6 +1920,7 @@ export interface GetAvailableCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1977,6 +1980,7 @@ export interface GetTopCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -2013,6 +2017,7 @@ export interface GetContentCreatorCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -2063,6 +2068,8 @@ export interface GetCourseResponse {
           fileName?: string;
           allowFullscreen?: boolean;
         }[];
+        /** @min 0 */
+        estimatedDurationSeconds?: number;
       }[];
       completedLessonCount?: number;
       chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2073,6 +2080,8 @@ export interface GetCourseResponse {
       updatedAt?: string;
       quizCount?: number;
       displayOrder: number;
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedChapterCount?: number;
     courseChapterCount: number;
@@ -2089,6 +2098,11 @@ export interface GetCourseResponse {
     courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
+    thumbnailPositionY: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
+    learningOutcomes?: string[];
+    showAuthorSection?: boolean;
     trailerUrl?: string | null;
     title: string;
     slug: string;
@@ -2231,6 +2245,13 @@ export type CreateCourseBody = {
   description: string;
   status?: "draft" | "published" | "private";
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
+  /** @maxItems 5 */
+  learningOutcomes?: string[];
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -2292,10 +2313,39 @@ export interface GetCourseDuplicationJobStatusResponse {
   };
 }
 
+export interface UpdateCourseMediaBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY: number;
+  /**
+   * Course thumbnail image
+   * @format binary
+   */
+  image?: File;
+}
+
+export interface UpdateCourseMediaResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
+  /** @maxItems 5 */
+  learningOutcomes?: string[];
+  showAuthorSection?: boolean;
   status?: "draft" | "published" | "private";
   priceInCents?: number;
   currency?: string;
@@ -2789,6 +2839,8 @@ export interface GetChapterWithLessonResponse {
         fileName?: string;
         allowFullscreen?: boolean;
       }[];
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedLessonCount?: number;
     chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2799,6 +2851,8 @@ export interface GetChapterWithLessonResponse {
     updatedAt?: string;
     quizCount?: number;
     displayOrder: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
   };
 }
 
@@ -11310,6 +11364,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetCourseDuplicationJobStatusResponse, any>({
         path: `/api/course/duplication-jobs/${jobId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateCourseMedia
+     * @request PATCH:/api/course/{id}/media
+     */
+    courseControllerUpdateCourseMedia: (
+      id: string,
+      data: UpdateCourseMediaBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCourseMediaResponse, any>({
+        path: `/api/course/${id}/media`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),

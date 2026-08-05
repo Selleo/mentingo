@@ -1922,6 +1922,7 @@
     "deadline": "Frist",
     "selectDate": "Datum auswählen",
     "deadlineRequired": "Für den Pflichtkurs ist eine Frist erforderlich",
+    "deadlineNoAssignedGroups": "Weise mindestens eine Gruppe zu, um Fristen zu konfigurieren.",
     "common": {
       "settings": "Einstellungen",
       "curriculum": "Lehrplan",
@@ -1988,6 +1989,13 @@
         "category": "Kategorie nicht gefunden.",
         "chapter": "Kapitel nicht gefunden.",
         "lesson": "Lektion nicht gefunden."
+      },
+      "forbidden": {
+        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren."
+      },
+      "media": {
+        "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
+        "updateFailed": "Die Kursmedien konnten nicht aktualisiert werden."
       },
       "statisticsAccessForbidden": "Sie haben keine Berechtigung, die Statistiken für diesen Kurs anzuzeigen.",
       "create": {
@@ -4924,6 +4932,145 @@
       "liveKitNotConfigured": "LiveKit ist nicht konfiguriert.",
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
       "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "saveChanges": "Änderungen speichern",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert"
+    },
+    "learningMode": {
+      "title": "Du absolvierst diesen Kurs im Lernmodus",
+      "description": "Dein Lernfortschritt wird erfasst. Abgeschlossene Lektionen zählen zu deinem Fortschritt und den Kursstatistiken.",
+      "enter": "Lernmodus starten",
+      "exit": "Lernmodus beenden"
+    },
+    "overview": {
+      "courseSettings": "Kurseinstellungen",
+      "manageCategories": "Kategorien verwalten",
+      "settingsDescription": "Verwalten Sie die Einstellungen für diesen Kurs.",
+      "titlePlaceholder": "Kurstitel eingeben...",
+      "editMedia": "Medien bearbeiten",
+      "continueLearning": "Weiterlernen",
+      "courseDetails": "Kursdetails",
+      "closeDetails": "Kursdetails schließen",
+      "aboutCourse": "Über diesen Kurs",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Kursbeschreibung eingeben...",
+      "whatYouWillMaster": "Das wirst du meistern",
+      "noLearningOutcomes": "Noch keine Lernergebnisse hinzugefügt.",
+      "learningOutcomePlaceholder": "Lernergebnis hinzufügen...",
+      "addLearningOutcome": "Lernergebnis hinzufügen",
+      "removeLearningOutcome": "Lernergebnis entfernen",
+      "closeSettings": "Kurseinstellungen schließen",
+      "settingsComingSoon": "Einstellungen bald verfügbar",
+      "settingsIntro": "Hier kannst du Folgendes konfigurieren:",
+      "settingsStatus": "Kursstatus (Entwurf/Veröffentlicht)",
+      "settingsPricing": "Preise und Zahlungsoptionen",
+      "settingsAssignments": "Zugewiesene Teilnehmer und Gruppen",
+      "settingsSequential": "Reihenfolge beim Abschluss erzwingen",
+      "settingsVisibility": "Sichtbarkeit des Kurses",
+      "settingsPermissions": "Zugriffsberechtigungen"
+    },
+    "media": {
+      "title": "Kursmedien bearbeiten",
+      "currentImage": "Aktuelles Titelbild – Position anpassen",
+      "previewAlt": "Vorschau des Kurstitelbilds",
+      "previewPosition": "Vorschau mit aktueller Position",
+      "verticalPosition": "Vertikale Position",
+      "uploadImage": "Neues Titelbild hochladen",
+      "dropImage": "Titelbild hier ablegen",
+      "browse": "oder zum Auswählen klicken",
+      "imageLimit": "PNG, JPG bis 10 MB",
+      "imageRecommendation": "Empfohlen: 1920x820 px (21:9)",
+      "trailer": "Kurstrailer (optional)",
+      "dropVideo": "Trailer hier ablegen",
+      "videoLimit": "MP4, MOV bis 50 MB",
+      "videoRecommendation": "Empfohlen: 30–90 Sekunden",
+      "save": "Medien hochladen"
+    },
+    "stats": {
+      "yourProgress": "Dein Fortschritt",
+      "remaining": "verbleibend",
+      "courseFinished": "Kurs abgeschlossen",
+      "chapterProgress_one": "{{completed}} / {{total}} Kapitel",
+      "chapterProgress_other": "{{completed}} / {{total}} Kapitel",
+      "duration": {
+        "minutes": "{{minutes}} Min.",
+        "hours": "{{hours}} Std.",
+        "hoursAndMinutes": "{{hours}} Std. {{minutes}} Min."
+      },
+      "trackProgress": "um deinen Fortschritt zu verfolgen.",
+      "deadline": "Frist",
+      "daysLeft_one": "Noch {{count}} Tag",
+      "daysLeft_other": "Noch {{count}} Tage",
+      "certificate": "Zertifikat",
+      "uponCompletion": "Nach Abschluss",
+      "aboutAuthor": "Über den Autor"
+    },
+    "certificate": {
+      "close": "Zertifikateinstellungen schließen",
+      "title": "Zertifikateinstellungen",
+      "previewTitle": "Abschlusszertifikat",
+      "certifies": "Hiermit wird bestätigt, dass",
+      "completed": "erfolgreich abgeschlossen hat",
+      "signaturePlaceholder": "Platzhalter für Unterschrift",
+      "enable": "Zertifikat aktivieren",
+      "enableDescription": "Teilnehmer erhalten nach Kursabschluss ein Zertifikat",
+      "fontColor": "Schriftfarbe",
+      "uploadSignature": "Unterschrift hochladen",
+      "uploadSignatureHint": "Zum Hochladen der Unterschrift klicken",
+      "signatureLimit": "PNG, JPG bis 2 MB",
+      "save": "Zertifikat speichern"
+    },
+    "deadline": {
+      "close": "Fristeinstellungen schließen",
+      "title": "Fristeinstellungen",
+      "enable": "Fristen aktivieren",
+      "enableDescription": "Spezifische Fristen für verschiedene Gruppen festlegen",
+      "current": "Aktuelle Frist: {{deadline}}"
+    },
+    "author": {
+      "close": "Autoreinstellungen schließen",
+      "pictureAlt": "Bild des Autors",
+      "showSection": "Autorenbereich anzeigen",
+      "showSectionDescription": "Autoreninformationen auf der Kursseite anzeigen",
+      "otherCourses": "Weitere Kurse"
+    },
+    "contents": {
+      "title": "Inhaltsverzeichnis",
+      "statistics": "Statistiken",
+      "edit": "Inhalt bearbeiten",
+      "missingTranslationsTitle": "Fehlende Übersetzungen",
+      "missingTranslationsDescription": "Einige Kursinhalte sind in der ausgewählten Sprache nicht übersetzt.",
+      "completedChapters_one": "{{count}} abgeschlossenes Kapitel",
+      "completedChapters_other": "{{count}} abgeschlossene Kapitel",
+      "lessons_one": "{{count}} Lektion",
+      "lessons_other": "{{count}} Lektionen",
+      "showAllChapters": "Alle Kapitel anzeigen ({{count}} weitere)",
+      "courseStatistics": "Kursstatistiken",
+      "statisticsDescription": "Überblick über Fortschritt und Beteiligung",
+      "totalStudents": "Teilnehmer insgesamt",
+      "completionRate": "Abschlussquote",
+      "averageTime": "Durchschn. Lernzeit",
+      "averageRating": "Durchschn. Bewertung",
+      "detailedStatisticsSoon": "Detaillierte Statistiken folgen bald",
+      "detailedStatisticsDescription": "Dieser Bereich zeigt künftig umfassende Analysen zu Fortschritt, Kapitelabschlüssen, Beteiligung und mehr.",
+      "status": {
+        "started": "Begonnen",
+        "completed": "Abgeschlossen",
+        "inProgress": "In Bearbeitung",
+        "notStarted": "Nicht begonnen"
+      },
+      "lessonTypes": {
+        "content": "Inhalt",
+        "quiz": "Quiz",
+        "aiMentor": "KI-Mentor",
+        "lesson": "Lektion"
+      }
     }
   }
 }
