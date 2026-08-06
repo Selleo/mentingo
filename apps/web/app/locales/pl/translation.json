@@ -105,7 +105,10 @@
       "required_course": { "title": "Kursy obowiązkowe" },
       "course_completion": { "title": "Postęp kursów" },
       "certificates": { "title": "Certyfikaty" },
-      "ai_mentor_practice": { "title": "Ćwiczenia z Mentorem AI" }
+      "ai_mentor_practice": {
+        "title": "Ćwiczenia z Mentorem AI",
+        "aiNotConfigured": "Mentor AI nie jest skonfigurowany dla tej organizacji."
+      }
     }
   },
   "aiMentorPractice": {

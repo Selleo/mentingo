@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { AiPracticeQueueService } from "src/ai/ai-practice.queue.service";
 import { AiPracticeWorker } from "src/ai/ai-practice.worker";
@@ -7,9 +6,9 @@ import { AiController } from "src/ai/ai.controller";
 import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service";
-import { AiPracticeRequestedHandler } from "src/ai/handlers/ai-practice-requested.handler";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { RagRepository } from "src/ai/repositories/rag.repository";
+import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
 import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
@@ -26,12 +25,13 @@ import { PermissionsModule } from "src/permissions/permissions.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
 @Module({
-  imports: [CqrsModule, StudentLessonProgressModule, LocalizationModule, PermissionsModule],
+  imports: [StudentLessonProgressModule, LocalizationModule, PermissionsModule],
   controllers: [AiController],
   providers: [
     AiJudgeConfigurationGeneratorService,
     AiJudgeConfigurationGenerationWorkflowService,
     AiJudgeConfigurationValidatorService,
+    AiPracticeJudgeConfigurationService,
     ChatService,
     AiRuntimeService,
     AiService,
@@ -47,7 +47,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiPracticeService,
     AiPracticeQueueService,
     AiPracticeWorker,
-    AiPracticeRequestedHandler,
   ],
   exports: [
     AiJudgeConfigurationGenerationWorkflowService,

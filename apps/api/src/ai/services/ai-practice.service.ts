@@ -2,32 +2,36 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
+import { AiPracticeQueueService } from "src/ai/ai-practice.queue.service";
 import {
   AI_MENTOR_PRACTICE_STATUSES,
   type AiMentorPracticeJobData,
 } from "src/ai/ai-practice.types";
+import {
+  AI_JUDGE_GENERATION_MODE,
+  AI_JUDGE_GENERATION_STATUS,
+} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
-import { DatabasePg, type UUIDType } from "src/common";
 import { EnvService } from "src/env/services/env.service";
-import { AiMentorPracticeRequestedEvent } from "src/events";
-import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { DB } from "src/storage/db/db.providers";
 
 import type {
   AiMentorPracticeSessionResponse,
   CreateAiMentorPracticeBody,
 } from "src/ai/ai-practice.schema";
+import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const practiceGenerationSchema = Type.Object({
@@ -38,20 +42,18 @@ const practiceGenerationSchema = Type.Object({
 @Injectable()
 export class AiPracticeService {
   constructor(
-    @Inject(DB) private readonly db: DatabasePg,
     private readonly aiRepository: AiRepository,
+    private readonly aiPracticeQueueService: AiPracticeQueueService,
+    private readonly aiPracticeJudgeConfigurationService: AiPracticeJudgeConfigurationService,
+    private readonly aiJudgeConfigurationGenerationWorkflowService: AiJudgeConfigurationGenerationWorkflowService,
     private readonly aiRuntimeService: AiRuntimeService,
     private readonly aiService: AiService,
     private readonly promptService: PromptService,
     private readonly envService: EnvService,
-    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async getToday(
-    timezone: string,
-    currentUser: CurrentUserType,
-  ): Promise<AiMentorPracticeSessionResponse | null> {
-    const practiceDate = this.getPracticeDate(timezone);
+  async getToday(currentUser: CurrentUserType): Promise<AiMentorPracticeSessionResponse | null> {
+    const practiceDate = this.getPracticeDate();
     const session = await this.aiRepository.findPracticeSessionByDate(
       currentUser.userId,
       practiceDate,
@@ -75,31 +77,14 @@ export class AiPracticeService {
     if (Object.values(answers).some((answer) => !answer))
       throw new BadRequestException("common.validation.required");
 
-    const practiceDate = this.getPracticeDate(body.timezone);
+    const practiceDate = this.getPracticeDate();
 
-    const session = await this.db.transaction(async (trx) => {
-      const created = await this.aiRepository.createPracticeSession(
-        {
-          userId: currentUser.userId,
-          practiceDate,
-          timezone: body.timezone,
-          language: body.language,
-          ...answers,
-        },
-        trx,
-      );
-
-      if (!created) return null;
-
-      await this.outboxPublisher.publish(
-        new AiMentorPracticeRequestedEvent({
-          tenantId: currentUser.tenantId,
-          sessionId: created.id,
-        }),
-        trx,
-      );
-
-      return created;
+    const session = await this.aiRepository.createPracticeSession({
+      userId: currentUser.userId,
+      practiceDate,
+      timezone: "UTC",
+      language: body.language,
+      ...answers,
     });
 
     if (!session) {
@@ -107,9 +92,11 @@ export class AiPracticeService {
         currentUser.userId,
         practiceDate,
       );
-      if (!existing) throw new ConflictException("AI Mentor practice already exists");
+      if (!existing) throw new ConflictException("common.toast.somethingWentWrong");
       return this.mapSession(existing);
     }
+
+    await this.enqueueGeneration(session.id, currentUser.tenantId);
 
     return this.mapSession({ ...session, threadId: null });
   }
@@ -119,9 +106,9 @@ export class AiPracticeService {
     currentUser: CurrentUserType,
   ): Promise<AiMentorPracticeSessionResponse> {
     const session = await this.aiRepository.findPracticeSessionById(sessionId);
-    if (!session) throw new NotFoundException("AI Mentor practice not found");
+    if (!session) throw new NotFoundException("common.toast.notFound");
     if (session.userId !== currentUser.userId)
-      throw new ForbiddenException("You don't have access to this AI Mentor practice");
+      throw new ForbiddenException("common.toast.noAccess");
 
     return this.mapSession(session);
   }
@@ -131,45 +118,25 @@ export class AiPracticeService {
     currentUser: CurrentUserType,
   ): Promise<AiMentorPracticeSessionResponse> {
     const session = await this.aiRepository.findPracticeSessionById(sessionId);
-    if (!session) throw new NotFoundException("AI Mentor practice not found");
+    if (!session) throw new NotFoundException("common.toast.notFound");
     if (session.userId !== currentUser.userId)
-      throw new ForbiddenException("You don't have access to this AI Mentor practice");
+      throw new ForbiddenException("common.toast.noAccess");
     if (session.status !== AI_MENTOR_PRACTICE_STATUSES.FAILED)
-      throw new ConflictException("Only a failed AI Mentor practice can be retried");
+      throw new ConflictException("common.toast.somethingWentWrong");
 
-    const updated = await this.db.transaction(async (trx) => {
-      const row = await this.aiRepository.updatePracticeSession(
-        sessionId,
-        {
-          status: AI_MENTOR_PRACTICE_STATUSES.QUEUED,
-          errorCode: null,
-        },
-        trx,
-      );
+    const updated = await this.aiRepository.queuePracticeSessionRetry(sessionId);
+    if (!updated) throw new ConflictException("common.toast.somethingWentWrong");
 
-      await this.outboxPublisher.publish(
-        new AiMentorPracticeRequestedEvent({
-          tenantId: currentUser.tenantId,
-          sessionId,
-        }),
-        trx,
-      );
-
-      return row;
-    });
+    await this.enqueueGeneration(sessionId, currentUser.tenantId);
 
     return this.mapSession({ ...updated, threadId: session.threadId });
   }
 
   async processGenerationJob(data: AiMentorPracticeJobData): Promise<void> {
     const session = await this.aiRepository.findPracticeSessionById(data.sessionId);
-    if (!session) throw new NotFoundException("AI Mentor practice not found");
-    if (session.status === AI_MENTOR_PRACTICE_STATUSES.READY) return;
-
-    await this.aiRepository.updatePracticeSession(session.id, {
-      status: AI_MENTOR_PRACTICE_STATUSES.PROCESSING,
-      errorCode: null,
-    });
+    if (!session) throw new NotFoundException("common.toast.notFound");
+    const claimed = await this.aiRepository.claimPracticeSessionForGeneration(session.id);
+    if (!claimed) return;
 
     try {
       const prompt = await this.promptService.loadPrompt("aiMentorPracticeGeneration", {
@@ -187,10 +154,35 @@ export class AiPracticeService {
       });
       const output = object as { title: string; instructions: string };
 
-      await this.aiRepository.updatePracticeSession(session.id, {
-        generatedTitle: output.title,
-        generatedInstructions: output.instructions,
+      const judgeResult = await this.aiJudgeConfigurationGenerationWorkflowService.run({
+        language: session.language,
+        lessonContext: {
+          title: output.title,
+          taskDescription: output.instructions,
+          aiMentorInstructions: output.instructions,
+          aiMentorType: AI_MENTOR_TYPE.ROLEPLAY,
+        },
+        mode: AI_JUDGE_GENERATION_MODE.CREATE,
+        brief: [
+          "Create a concise assessment for this standalone practice conversation.",
+          `Challenge: ${session.challenge}`,
+          `Conversation counterpart: ${session.counterpart}`,
+          `Desired outcome: ${session.desiredOutcome}`,
+        ].join("\n"),
       });
+      if (judgeResult.status !== AI_JUDGE_GENERATION_STATUS.COMPLETED || !judgeResult.configuration)
+        throw new Error("Practice AI Judge configuration did not pass validation");
+
+      await this.aiRepository.saveGeneratedPractice(
+        session.id,
+        output.title,
+        output.instructions,
+        this.aiPracticeJudgeConfigurationService.build(
+          session.id,
+          judgeResult.configuration,
+          session.language,
+        ),
+      );
       await this.aiService.getPracticeThreadWithSetup({
         practiceSessionId: session.id,
         userId: session.userId,
@@ -209,18 +201,19 @@ export class AiPracticeService {
     }
   }
 
-  private getPracticeDate(timezone: string): string {
+  private getPracticeDate(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private async enqueueGeneration(sessionId: UUIDType, tenantId: UUIDType) {
     try {
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).formatToParts(new Date());
-      const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-      return `${values.year}-${values.month}-${values.day}`;
-    } catch {
-      throw new BadRequestException("common.validation.invalidTimezone");
+      await this.aiPracticeQueueService.enqueue({ tenantId, sessionId });
+    } catch (error) {
+      await this.aiRepository.updatePracticeSession(sessionId, {
+        status: AI_MENTOR_PRACTICE_STATUSES.FAILED,
+        errorCode: "queue_failed",
+      });
+      throw error;
     }
   }
 

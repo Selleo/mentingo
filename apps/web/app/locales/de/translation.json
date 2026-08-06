@@ -105,7 +105,10 @@
       "required_course": { "title": "Pflichtkurse" },
       "course_completion": { "title": "Kursfortschritt" },
       "certificates": { "title": "Zertifikate" },
-      "ai_mentor_practice": { "title": "KI-Mentor-Übung" }
+      "ai_mentor_practice": {
+        "title": "KI-Mentor-Übung",
+        "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
+      }
     }
   },
   "aiMentorPractice": {

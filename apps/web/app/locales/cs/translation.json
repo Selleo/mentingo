@@ -105,7 +105,10 @@
       "required_course": { "title": "Povinné kurzy" },
       "course_completion": { "title": "Průběh kurzů" },
       "certificates": { "title": "Certifikáty" },
-      "ai_mentor_practice": { "title": "Cvičení s AI Mentorem" }
+      "ai_mentor_practice": {
+        "title": "Cvičení s AI Mentorem",
+        "aiNotConfigured": "AI Mentor není pro tohoto tenanta nakonfigurován."
+      }
     }
   },
   "aiMentorPractice": {

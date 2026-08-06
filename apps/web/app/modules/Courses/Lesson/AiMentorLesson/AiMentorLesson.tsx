@@ -44,6 +44,8 @@ import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 
+import { AI_CHAT_STATUSES } from "./aiMentorChat.constants";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 import type { AiMentorEvaluation } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
@@ -195,7 +197,8 @@ const AiMentorLesson = ({
     await retakeLesson({ lessonId: lesson.id });
   };
 
-  const isProcessing = status === "submitted" || status === "streaming";
+  const isProcessing =
+    status === AI_CHAT_STATUSES.SUBMITTED || status === AI_CHAT_STATUSES.STREAMING;
   const isThreadActive = lesson.status === "active";
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);

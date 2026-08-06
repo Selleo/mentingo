@@ -1031,15 +1031,29 @@ export const aiJudgeConfigurations = pgTable(
   {
     ...id,
     ...timestamps,
-    aiMentorLessonId: uuid("ai_mentor_lesson_id")
-      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-      .notNull()
-      .unique(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
     taskGoal: jsonb("task_goal").$type<LocalizedText>().default({}).notNull(),
     passingThresholdPercent: integer("passing_threshold_percent").notNull(),
     tenantId,
   },
-  withTenantIdIndex("ai_judge_configurations"),
+  withTenantIdIndex("ai_judge_configurations", (table) => ({
+    lessonUniqueIdx: uniqueIndex("ai_judge_configurations_lesson_unique_idx").on(
+      table.aiMentorLessonId,
+    ),
+    practiceSessionUniqueIdx: uniqueIndex("ai_judge_configurations_practice_session_unique_idx").on(
+      table.practiceSessionId,
+    ),
+    sourceCheck: check(
+      "ai_judge_configurations_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
 );
 
 export const aiJudgeCriteria = pgTable(

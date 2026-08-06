@@ -4,11 +4,13 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 
 import { ApiClient } from "../api-client";
 
-export const studentDashboardSummaryQueryOptions = (language: string) => ({
+import type { SupportedLanguages } from "@repo/shared";
+
+export const studentDashboardSummaryQueryOptions = (language: SupportedLanguages) => ({
   queryKey: ["dashboard", "studentCourseSummary", language],
   queryFn: async () => {
     const response = await ApiClient.api.courseControllerGetStudentDashboardSummary({
-      language: language as "en" | "pl" | "de" | "lt" | "cs" | "es",
+      language,
     });
     return response.data.data;
   },

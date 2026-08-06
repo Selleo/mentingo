@@ -41,14 +41,10 @@ export class AiController {
   @Get("practice/today")
   @RequirePermission(PERMISSIONS.AI_USE)
   @Validate({
-    request: [{ type: "query", name: "timezone", schema: Type.String() }],
     response: baseResponse(nullableAiMentorPracticeSessionSchema),
   })
-  async getTodayPractice(
-    @Query("timezone") timezone: string,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    return new BaseResponse(await this.aiPracticeService.getToday(timezone, currentUser));
+  async getTodayPractice(@CurrentUser() currentUser: CurrentUserType) {
+    return new BaseResponse(await this.aiPracticeService.getToday(currentUser));
   }
 
   @Post("practice")

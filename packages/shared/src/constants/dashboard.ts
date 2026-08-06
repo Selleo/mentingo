@@ -31,6 +31,21 @@ export const DASHBOARD_WIDGET_WIDTHS = {
   MEDIUM: 2,
 } as const;
 
+export const STUDENT_DASHBOARD_LIMITS = {
+  CONTINUE_COURSES: 5,
+  REQUIRED_COURSES: 5,
+} as const;
+
+export const STUDENT_COURSE_URGENCY = {
+  OVERDUE: "overdue",
+  DUE_SOON: "dueSoon",
+  SCHEDULED: "scheduled",
+  NO_DEADLINE: "noDeadline",
+} as const;
+
+export type StudentCourseUrgency =
+  (typeof STUDENT_COURSE_URGENCY)[keyof typeof STUDENT_COURSE_URGENCY];
+
 export const DASHBOARD_WIDGET_IDS = {
   ADMIN_PLACEHOLDER1: "a_placeholder_1",
   ADMIN_PLACEHOLDER2: "a_placeholder_2",

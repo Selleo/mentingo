@@ -284,14 +284,14 @@ export class CourseController {
   @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
-    response: baseResponse(Type.Object({})),
+    response: baseResponse(nullResponse()),
   })
   async markCourseOpened(
     @Param("courseId") courseId: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
     await this.courseService.markCourseOpened(courseId, currentUserId);
-    return new BaseResponse({});
+    return new BaseResponse(null);
   }
 
   @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)

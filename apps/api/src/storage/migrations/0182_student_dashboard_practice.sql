@@ -16,7 +16,10 @@ CREATE TABLE IF NOT EXISTS "ai_mentor_practice_sessions" (
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "ai_judge_configurations" DROP CONSTRAINT "ai_judge_configurations_ai_mentor_lesson_id_unique";--> statement-breakpoint
+ALTER TABLE "ai_judge_configurations" ALTER COLUMN "ai_mentor_lesson_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "ai_mentor_threads" ALTER COLUMN "ai_mentor_lesson_id" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "ai_judge_configurations" ADD COLUMN "practice_session_id" uuid;--> statement-breakpoint
 ALTER TABLE "ai_mentor_threads" ADD COLUMN "practice_session_id" uuid;--> statement-breakpoint
 ALTER TABLE "student_courses" ADD COLUMN "last_opened_at" timestamp(3) with time zone;--> statement-breakpoint
 DO $$ BEGIN
@@ -35,17 +38,17 @@ CREATE INDEX IF NOT EXISTS "ai_mentor_practice_sessions_tenant_id_idx" ON "ai_me
 CREATE UNIQUE INDEX IF NOT EXISTS "ai_mentor_practice_sessions_daily_unique_idx" ON "ai_mentor_practice_sessions" USING btree ("tenant_id","user_id","practice_date");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "ai_mentor_practice_sessions_status_idx" ON "ai_mentor_practice_sessions" USING btree ("tenant_id","status");--> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "ai_judge_configurations" ADD CONSTRAINT "ai_judge_configurations_practice_session_id_ai_mentor_practice_sessions_id_fk" FOREIGN KEY ("practice_session_id") REFERENCES "public"."ai_mentor_practice_sessions"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "ai_mentor_threads" ADD CONSTRAINT "ai_mentor_threads_practice_session_id_ai_mentor_practice_sessions_id_fk" FOREIGN KEY ("practice_session_id") REFERENCES "public"."ai_mentor_practice_sessions"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_judge_configurations_lesson_unique_idx" ON "ai_judge_configurations" USING btree ("ai_mentor_lesson_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_judge_configurations_practice_session_unique_idx" ON "ai_judge_configurations" USING btree ("practice_session_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "ai_mentor_threads_practice_session_unique_idx" ON "ai_mentor_threads" USING btree ("practice_session_id");
---> statement-breakpoint
-ALTER TABLE "ai_mentor_threads"
-ADD CONSTRAINT "ai_mentor_threads_exactly_one_source_check"
-CHECK (
-  ("ai_mentor_lesson_id" IS NOT NULL AND "practice_session_id" IS NULL)
-  OR
-  ("ai_mentor_lesson_id" IS NULL AND "practice_session_id" IS NOT NULL)
-);

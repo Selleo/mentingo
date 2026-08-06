@@ -1,3 +1,4 @@
+import { STUDENT_COURSE_URGENCY } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -25,12 +26,7 @@ export const continueLearningCourseSchema = Type.Object({
 export const requiredDashboardCourseSchema = Type.Object({
   ...dashboardCourseBaseSchema.properties,
   dueDate: Type.Union([Type.String(), Type.Null()]),
-  urgency: Type.Union([
-    Type.Literal("overdue"),
-    Type.Literal("dueSoon"),
-    Type.Literal("scheduled"),
-    Type.Literal("noDeadline"),
-  ]),
+  urgency: Type.Enum(STUDENT_COURSE_URGENCY),
 });
 
 export const studentCourseCompletionSchema = Type.Object({

@@ -1,4 +1,11 @@
 {
+  "dashboardHome": {
+    "widgets": {
+      "ai_mentor_practice": {
+        "aiNotConfigured": "L'AI Mentor n'est pas configuré pour cette organisation."
+      }
+    }
+  },
   "common": {
     "button": {
       "save": "Enregistrer",

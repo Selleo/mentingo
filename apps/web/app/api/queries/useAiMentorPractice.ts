@@ -1,3 +1,4 @@
+import { AI_MENTOR_PRACTICE_STATUSES } from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -12,7 +13,10 @@ export function useAiMentorPractice(id: string) {
     enabled: Boolean(id),
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return status === "queued" || status === "processing" ? 2000 : false;
+      return status === AI_MENTOR_PRACTICE_STATUSES.QUEUED ||
+        status === AI_MENTOR_PRACTICE_STATUSES.PROCESSING
+        ? 2000
+        : false;
     },
   });
 }

@@ -12,7 +12,7 @@ export function useRetryAiMentorPractice() {
     },
     onSuccess: (practice) => {
       queryClient.setQueryData(["aiMentorPractice", practice.id], practice);
-      queryClient.setQueryData(["aiMentorPractice", "today", practice.timezone], practice);
+      queryClient.setQueryData(["aiMentorPractice", "today"], practice);
     },
   });
 }

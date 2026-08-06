@@ -105,7 +105,10 @@
       "required_course": { "title": "Cursos obligatorios" },
       "course_completion": { "title": "Progreso de cursos" },
       "certificates": { "title": "Certificados" },
-      "ai_mentor_practice": { "title": "Práctica con Mentor IA" }
+      "ai_mentor_practice": {
+        "title": "Práctica con Mentor IA",
+        "aiNotConfigured": "Mentor IA no está configurado para esta organización."
+      }
     }
   },
   "aiMentorPractice": {

@@ -7,15 +7,10 @@ import { UUIDSchema } from "src/common";
 const practiceAnswerSchema = Type.String({ minLength: 1, maxLength: 1000 });
 
 export const createAiMentorPracticeSchema = Type.Object({
-  timezone: Type.String({ minLength: 1, maxLength: 100 }),
   language: Type.Enum(SUPPORTED_LANGUAGES),
   challenge: practiceAnswerSchema,
   counterpart: practiceAnswerSchema,
   desiredOutcome: practiceAnswerSchema,
-});
-
-export const aiMentorPracticeQuerySchema = Type.Object({
-  timezone: Type.String({ minLength: 1, maxLength: 100 }),
 });
 
 export const aiMentorPracticeSessionSchema = Type.Object({

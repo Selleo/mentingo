@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_IDS, STUDENT_COURSE_URGENCY } from "@repo/shared";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -20,7 +20,9 @@ export function WidgetStudentRequiredCourse() {
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE];
   const courses = data?.requiredCourses ?? [];
-  const overdueCount = courses.filter((course) => course.urgency === "overdue").length;
+  const overdueCount = courses.filter(
+    (course) => course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
+  ).length;
 
   return (
     <DashboardWidgetCard>
@@ -51,19 +53,20 @@ export function WidgetStudentRequiredCourse() {
                   "group flex min-h-24 items-center gap-3 rounded-lg border p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   {
                     "border-error-100 bg-error-50 hover:border-error-300 focus-visible:ring-error-300":
-                      course.urgency === "overdue",
+                      course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
                     "border-warning-100 bg-warning-50 hover:border-warning-300 focus-visible:ring-warning-300":
-                      course.urgency === "dueSoon",
+                      course.urgency === STUDENT_COURSE_URGENCY.DUE_SOON,
                     "border-neutral-100 hover:border-primary-200 hover:bg-primary-50 focus-visible:ring-primary-300":
-                      course.urgency === "scheduled" || course.urgency === "noDeadline",
+                      course.urgency === STUDENT_COURSE_URGENCY.SCHEDULED ||
+                      course.urgency === STUDENT_COURSE_URGENCY.NO_DEADLINE,
                   },
                 )}
               >
                 <div className="min-w-0 flex-1">
                   <span
                     className={cn("details font-medium text-neutral-500", {
-                      "text-error-700": course.urgency === "overdue",
-                      "text-warning-700": course.urgency === "dueSoon",
+                      "text-error-700": course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
+                      "text-warning-700": course.urgency === STUDENT_COURSE_URGENCY.DUE_SOON,
                     })}
                   >
                     {t(`dashboardHome.widgets.studentTiles.requiredCourse.${course.urgency}`)}

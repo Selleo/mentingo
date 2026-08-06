@@ -105,7 +105,10 @@
       "required_course": { "title": "Required courses" },
       "course_completion": { "title": "Course progress" },
       "certificates": { "title": "Certificates" },
-      "ai_mentor_practice": { "title": "AI Mentor practice" }
+      "ai_mentor_practice": {
+        "title": "AI Mentor practice",
+        "aiNotConfigured": "AI Mentor is not configured for this tenant."
+      }
     }
   },
   "aiMentorPractice": {

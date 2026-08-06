@@ -13,11 +13,14 @@ import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
   type SupportedLanguages,
+  STUDENT_COURSE_URGENCY,
+  STUDENT_DASHBOARD_LIMITS,
 } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
@@ -545,10 +548,11 @@ export class CourseService {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
           isNull(studentCourses.completedAt),
-          inArray(courses.status, ["published", "private"]),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt));
+      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
 
     const requiredCourses = await this.db
       .select({
@@ -571,10 +575,11 @@ export class CourseService {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(studentCourses.completedAt),
           eq(groupCourses.isMandatory, true),
-          inArray(courses.status, ["published", "private"]),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(groupCourses.dueDate, courses.title);
+      .orderBy(groupCourses.dueDate, courses.title)
+      .limit(STUDENT_DASHBOARD_LIMITS.REQUIRED_COURSES);
 
     const [completion] = await this.db
       .select({
@@ -605,7 +610,7 @@ export class CourseService {
     const nextLessons =
       continueCourseIds.length > 0
         ? await this.db
-            .select({
+            .selectDistinctOn([chapters.courseId], {
               courseId: chapters.courseId,
               id: lessons.id,
               title: this.localizationService.getLocalizedSqlField(lessons.title, language),
@@ -665,13 +670,13 @@ export class CourseService {
       continueLearningCourses,
       requiredCourses: requiredCourses.map((course) => {
         let urgency: StudentCourseDashboardSummary["requiredCourses"][number]["urgency"] =
-          "noDeadline";
+          STUDENT_COURSE_URGENCY.NO_DEADLINE;
 
         if (course.dueDate) {
           const dueDate = new Date(course.dueDate).getTime();
-          if (dueDate < Date.now()) urgency = "overdue";
-          else if (dueDate <= dueSoonBoundary) urgency = "dueSoon";
-          else urgency = "scheduled";
+          if (dueDate < Date.now()) urgency = STUDENT_COURSE_URGENCY.OVERDUE;
+          else if (dueDate <= dueSoonBoundary) urgency = STUDENT_COURSE_URGENCY.DUE_SOON;
+          else urgency = STUDENT_COURSE_URGENCY.SCHEDULED;
         }
 
         return {

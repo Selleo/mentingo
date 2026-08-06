@@ -1,8 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, not, or, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
+import {
+  AI_MENTOR_PRACTICE_STATUSES,
+  type AiPracticeJudgeConfigurationGraph,
+} from "src/ai/ai-practice.types";
 import {
   MESSAGE_ROLE,
   type MessageRole,
@@ -334,6 +338,84 @@ export class AiRepository {
     return session;
   }
 
+  async claimPracticeSessionForGeneration(sessionId: UUIDType) {
+    const [session] = await this.db
+      .update(aiMentorPracticeSessions)
+      .set({ status: AI_MENTOR_PRACTICE_STATUSES.PROCESSING, errorCode: null })
+      .where(
+        and(
+          eq(aiMentorPracticeSessions.id, sessionId),
+          eq(aiMentorPracticeSessions.status, AI_MENTOR_PRACTICE_STATUSES.QUEUED),
+        ),
+      )
+      .returning();
+
+    return session;
+  }
+
+  async queuePracticeSessionRetry(sessionId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [session] = await dbInstance
+      .update(aiMentorPracticeSessions)
+      .set({ status: AI_MENTOR_PRACTICE_STATUSES.QUEUED, errorCode: null })
+      .where(
+        and(
+          eq(aiMentorPracticeSessions.id, sessionId),
+          eq(aiMentorPracticeSessions.status, AI_MENTOR_PRACTICE_STATUSES.FAILED),
+        ),
+      )
+      .returning();
+
+    return session;
+  }
+
+  async insertPracticeJudgeConfigurationGraph(
+    graph: AiPracticeJudgeConfigurationGraph,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<UUIDType> {
+    const [configuration] = await dbInstance
+      .insert(aiJudgeConfigurations)
+      .values(graph.configuration)
+      .onConflictDoNothing({ target: aiJudgeConfigurations.practiceSessionId })
+      .returning({ id: aiJudgeConfigurations.id });
+
+    if (!configuration) {
+      const [existingConfiguration] = await dbInstance
+        .select({ id: aiJudgeConfigurations.id })
+        .from(aiJudgeConfigurations)
+        .where(eq(aiJudgeConfigurations.practiceSessionId, graph.configuration.practiceSessionId));
+
+      if (!existingConfiguration)
+        throw new Error("Practice AI Judge configuration was not created");
+
+      return existingConfiguration.id;
+    }
+
+    if (graph.criteria.length) await dbInstance.insert(aiJudgeCriteria).values(graph.criteria);
+    if (graph.scoreGuidance.length)
+      await dbInstance.insert(aiJudgeScoreGuidance).values(graph.scoreGuidance);
+    if (graph.blockingErrors.length)
+      await dbInstance.insert(aiJudgeBlockingErrors).values(graph.blockingErrors);
+
+    return configuration.id;
+  }
+
+  async saveGeneratedPractice(
+    sessionId: UUIDType,
+    generatedTitle: string,
+    generatedInstructions: string,
+    graph: AiPracticeJudgeConfigurationGraph,
+  ) {
+    return this.db.transaction(async (trx) => {
+      const session = await this.updatePracticeSession(
+        sessionId,
+        { generatedTitle, generatedInstructions },
+        trx,
+      );
+      await this.insertPracticeJudgeConfigurationGraph(graph, trx);
+      return session;
+    });
+  }
+
   async findJudgeRubricByThreadId(
     threadId: UUIDType,
     language: SupportedLanguages,
@@ -365,7 +447,11 @@ export class AiRepository {
 
     const [context] = await this.db
       .select({
-        lessonTitle: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        lessonTitle: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
+          ${aiMentorPracticeSessions.generatedTitle},
+          'AI Mentor practice'
+        )`,
         rubric: sql<AiJudgeRubricContext["rubric"]>`
           CASE
             WHEN ${aiJudgeConfigurations.id} IS NULL
@@ -425,13 +511,20 @@ export class AiRepository {
         `,
       })
       .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        aiMentorPracticeSessions,
+        eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
+      )
       .leftJoin(
         aiJudgeConfigurations,
-        eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
+        or(
+          eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
+          eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+        ),
       )
       .where(eq(aiMentorThreads.id, threadId));
 

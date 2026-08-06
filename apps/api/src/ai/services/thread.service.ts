@@ -48,17 +48,16 @@ export class ThreadService {
 
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
-    if (!thread) throw new NotFoundException("Thread not found");
+    if (!thread) throw new NotFoundException("common.toast.notFound");
 
     if (thread.practiceSessionId) {
-      if (thread.userId !== userId)
-        throw new ForbiddenException("You don't have access to this thread");
+      if (thread.userId !== userId) throw new ForbiddenException("common.toast.noAccess");
 
       return { data: thread };
     }
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
-    if (!lessonId) throw new NotFoundException("Lesson not found");
+    if (!lessonId) throw new NotFoundException("common.toast.notFound");
 
     const author = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 
@@ -66,7 +65,7 @@ export class ThreadService {
     const hasAccess = canManageUsers || author === userId;
 
     if (!(thread.userId === userId || hasAccess))
-      throw new ForbiddenException("You don't have access to this thread");
+      throw new ForbiddenException("common.toast.noAccess");
 
     return { data: thread };
   }
@@ -84,7 +83,7 @@ export class ThreadService {
 
   private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {
     const aiMentorLessonId = await this.aiRepository.findAiMentorLessonIdFromLesson(lessonId);
-    if (!aiMentorLessonId) throw new NotFoundException(`Lesson not found`);
+    if (!aiMentorLessonId) throw new NotFoundException("common.toast.notFound");
 
     return aiMentorLessonId.aiMentorLessonId;
   }
