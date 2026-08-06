@@ -6,11 +6,18 @@ import {
 } from "@repo/shared";
 
 import type { SocketEmitSpec, StreamProtocol } from "./audio-stream";
+import {
+  AUDIO_CAPTURE_MODE,
+  AUDIO_STREAM_EVENT,
+  AUDIO_STREAM_MESSAGE_TYPE,
+  type AudioCaptureMode,
+} from "./audio-stream.types";
 
 export type VoiceStartContext = {
   voiceAction: VoiceAction;
   lessonId?: string;
   metadata?: Record<string, unknown>;
+  captureMode?: AudioCaptureMode;
 };
 
 const buildVoiceStartEmit = (params: {
@@ -47,9 +54,38 @@ const buildVoiceCancelEmit = (): SocketEmitSpec => ({
   args: [],
 });
 
+const buildVoiceReconnectEmit = (params: {
+  sessionRunId: string;
+  lastSentAudioSeq: number;
+  attempt: number;
+}): SocketEmitSpec => ({
+  event: AUDIO_STREAM_EVENT.RECONNECT,
+  args: [
+    {
+      type: AUDIO_STREAM_MESSAGE_TYPE.RECONNECT,
+      sessionRunId: params.sessionRunId,
+      lastSentAudioSeq: Math.max(0, params.lastSentAudioSeq),
+      attempt: params.attempt,
+    },
+  ],
+});
+
 export const voiceSocketProtocol: StreamProtocol<VoiceStartContext, void> = {
   buildStartEmit: buildVoiceStartEmit,
   buildChunkEmit: buildVoiceChunkEmit,
   buildStopEmit: buildVoiceStopEmit,
   buildCancelEmit: buildVoiceCancelEmit,
+  resolveCaptureMode: (context) =>
+    context.captureMode ??
+    (context.voiceAction === VOICE_ACTION.VOICE_MENTOR
+      ? AUDIO_CAPTURE_MODE.CONTINUOUS
+      : AUDIO_CAPTURE_MODE.VAD_SEGMENTED),
+  buildReconnectEmit: buildVoiceReconnectEmit,
+  lifecycleEvents: {
+    startAccepted: AUDIO_STREAM_EVENT.START_ACCEPTED,
+    recovered: AUDIO_STREAM_EVENT.RECOVERED,
+    reconnectError: AUDIO_STREAM_EVENT.RECONNECT_ERROR,
+    chunkAccepted: AUDIO_STREAM_EVENT.CHUNK_ACCEPTED,
+    chunkError: AUDIO_STREAM_EVENT.CHUNK_ERROR,
+  },
 };
