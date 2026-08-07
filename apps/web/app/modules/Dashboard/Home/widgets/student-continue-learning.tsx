@@ -14,6 +14,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 export function WidgetStudentContinueLearning() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
@@ -21,7 +23,7 @@ export function WidgetStudentContinueLearning() {
   const courses = data?.continueLearningCourses ?? [];
 
   return (
-    <DashboardWidgetCard>
+    <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING}>
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
         icon={metadata.icon}

@@ -11,6 +11,8 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
+
 import { createPracticeFormSchema, type PracticeFormValues } from "./aiMentorPractice.schema";
 
 const PRACTICE_SUGGESTIONS = [
@@ -64,12 +66,14 @@ export function AiMentorPracticeForm() {
       <section className="mt-8">
         <Form {...form}>
           <form
+            data-testid={AI_MENTOR_PRACTICE_HANDLES.FORM}
             onSubmit={(event) => void form.handleSubmit(submit)(event)}
             className="rounded-xl border border-primary-100 bg-white p-4 shadow-sm"
           >
             <FormTextareaField
               control={form.control}
               name="scenario"
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT}
               label={t("aiMentorPractice.form.scenario")}
               placeholder={t("aiMentorPractice.form.scenarioPlaceholder")}
               required
@@ -106,6 +110,7 @@ export function AiMentorPracticeForm() {
               </p>
               <Button
                 type="submit"
+                data-testid={AI_MENTOR_PRACTICE_HANDLES.SUBMIT_BUTTON}
                 disabled={isPending}
                 size="lg"
                 className="shrink-0 gap-2 motion-safe:active:scale-[0.98] motion-reduce:transform-none"

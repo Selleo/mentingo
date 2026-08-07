@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
 
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../../../../../e2e/data/ai-mentor-practice/handles";
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
 import {
@@ -83,6 +84,7 @@ export function AiMentorEvaluationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         variant="mobileDrawer"
+        data-testid={isPractice ? AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG : undefined}
         className="!flex h-[85dvh] !flex-col sm:h-auto sm:!max-w-xl"
       >
         <DialogHeader className="shrink-0 border-b border-neutral-100 px-6 py-4 text-left">

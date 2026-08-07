@@ -24,6 +24,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 export function WidgetStudentCertificates() {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
@@ -54,7 +56,7 @@ export function WidgetStudentCertificates() {
 
   return (
     <>
-      <DashboardWidgetCard>
+      <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_CERTIFICATES}>
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}

@@ -15,6 +15,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 export function WidgetStudentRequiredCourse() {
   const { t, i18n } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
@@ -25,7 +27,7 @@ export function WidgetStudentRequiredCourse() {
   ).length;
 
   return (
-    <DashboardWidgetCard>
+    <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_REQUIRED_COURSE}>
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
         icon={metadata.icon}

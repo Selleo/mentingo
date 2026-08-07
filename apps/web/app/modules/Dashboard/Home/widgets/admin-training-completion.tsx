@@ -17,6 +17,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 import type { ChartConfig } from "~/components/ui/chart";
 
 const STATUS_STYLES = [
@@ -52,7 +54,7 @@ export function WidgetAdminTrainingCompletion() {
   }));
 
   return (
-    <DashboardWidgetCard>
+    <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION}>
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
         icon={metadata.icon}

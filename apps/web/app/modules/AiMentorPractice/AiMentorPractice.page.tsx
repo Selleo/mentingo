@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import Loader from "~/modules/common/Loader/Loader";
 
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
+
 import { AiMentorPracticeConversation } from "./AiMentorPracticeConversation";
 import { AiMentorPracticeForm } from "./AiMentorPracticeForm";
 
@@ -58,12 +60,20 @@ export default function AiMentorPracticePage() {
         breadcrumbs={breadcrumbs}
         className="mx-auto flex min-h-[24rem] max-w-3xl flex-col"
       >
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm">
+        <div
+          data-testid={AI_MENTOR_PRACTICE_HANDLES.PREPARING_STATE}
+          className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm"
+        >
           <p className="details-md min-w-0 flex-1 text-neutral-700">
             {t("aiMentorPractice.preparingBackgroundDescription")}
           </p>
           <Button asChild variant="outline" size="sm" className="shrink-0 bg-white">
-            <Link to="/dashboard">{t("common.button.goToDashboard")}</Link>
+            <Link
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON}
+              to="/dashboard"
+            >
+              {t("common.button.goToDashboard")}
+            </Link>
           </Button>
         </div>
         <h1 className="sr-only">{t("aiMentorPractice.conversationTitle")}</h1>

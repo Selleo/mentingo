@@ -34,6 +34,8 @@ import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatL
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
+
 import type { GetPracticeResponse } from "~/api/generated-api";
 import type { AiMentorEvaluation } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog.types";
 
@@ -231,6 +233,7 @@ export function AiMentorPracticeConversation({
               <DialogTrigger asChild>
                 <Button
                   type="button"
+                  data-testid={AI_MENTOR_PRACTICE_HANDLES.TASK_BUTTON}
                   variant="outline"
                   size="sm"
                   className="w-fit shrink-0 gap-2 rounded-md border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800"
@@ -263,6 +266,7 @@ export function AiMentorPracticeConversation({
         </header>
 
         <section
+          data-testid={AI_MENTOR_PRACTICE_HANDLES.CONVERSATION}
           aria-label={t("aiMentorPractice.conversationTitle")}
           className={cn(
             "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_16px_40px_-28px_rgba(15,23,42,0.45)]",
@@ -335,6 +339,7 @@ export function AiMentorPracticeConversation({
                   </p>
                   <Button
                     type="button"
+                    data-testid={AI_MENTOR_PRACTICE_HANDLES.CHECK_BUTTON}
                     size="sm"
                     className="shrink-0 gap-2 motion-safe:active:scale-[0.98] motion-reduce:transform-none"
                     disabled={!hasLearnerMessage || isProcessing}
@@ -352,16 +357,18 @@ export function AiMentorPracticeConversation({
                     {t("aiMentorPractice.practiceComplete")}
                   </p>
                   <div className="ml-auto flex items-center justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowEvaluationDialog(true)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-testid={AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON}
+                        onClick={() => setShowEvaluationDialog(true)}
                     >
                       {t("aiMentorPractice.viewFeedback")}
                     </Button>
-                    <Button
-                      size="sm"
-                      className="gap-2"
+                      <Button
+                        size="sm"
+                        data-testid={AI_MENTOR_PRACTICE_HANDLES.PRACTICE_AGAIN_BUTTON}
+                        className="gap-2"
                       disabled={isReplayPending}
                       onClick={() => void handleReplay()}
                     >

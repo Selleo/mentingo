@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 type WidgetCardProps = {
   children: ReactNode;
   className?: string;
+  testId?: string;
 };
 
 type DashboardWidgetHeaderProps = {
@@ -33,9 +34,10 @@ type DashboardWidgetFooterProps = {
   className?: string;
 };
 
-export function DashboardWidgetCard({ children, className }: WidgetCardProps) {
+export function DashboardWidgetCard({ children, className, testId }: WidgetCardProps) {
   return (
     <article
+      data-testid={testId}
       className={cn(
         "flex h-full sm:max-h-[27rem] flex-col overflow-hidden rounded-lg bg-white drop-shadow-card",
         className,

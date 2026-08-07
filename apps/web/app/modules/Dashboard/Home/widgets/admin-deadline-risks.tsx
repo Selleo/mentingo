@@ -30,6 +30,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 const RISK_TYPE = {
   OVERDUE: "overdue",
   DUESOON: "dueSoon",
@@ -80,7 +82,7 @@ export function WidgetAdminDeadlineRisks() {
 
   return (
     <>
-      <DashboardWidgetCard>
+      <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS}>
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}

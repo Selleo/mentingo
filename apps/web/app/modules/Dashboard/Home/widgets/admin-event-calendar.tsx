@@ -18,6 +18,8 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 import type { GetDashboardEventsResponse } from "~/api/generated-api";
 
 type CalendarEvent = GetDashboardEventsResponse["data"][number];
@@ -112,7 +114,7 @@ export function WidgetAdminEventCalendar() {
 
   return (
     <>
-      <DashboardWidgetCard>
+      <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR}>
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}
