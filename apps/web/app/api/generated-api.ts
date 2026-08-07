@@ -233,6 +233,7 @@ export interface CurrentUserResponse {
       | "live_training.start"
       | "live_training.end"
       | "live_training.statistics"
+      | "dashboard.read"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -514,12 +515,40 @@ export interface GetUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_placeholder_1"
+              | "a_placeholder_2"
+              | "a_placeholder_3"
+              | "s_placeholder_1"
+              | "s_placeholder_2"
+              | "s_placeholder_3";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_placeholder_1"
+              | "a_placeholder_2"
+              | "a_placeholder_3"
+              | "s_placeholder_1"
+              | "s_placeholder_2"
+              | "s_placeholder_3";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -532,12 +561,40 @@ export type UpdateUserSettingsBody =
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
+      dashboard?: {
+        widgets: {
+          id:
+            | "a_placeholder_1"
+            | "a_placeholder_2"
+            | "a_placeholder_3"
+            | "s_placeholder_1"
+            | "s_placeholder_2"
+            | "s_placeholder_3";
+          /** @min 0 */
+          order: number;
+          width: 1 | 2;
+        }[];
+      };
     }
   | {
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
+      dashboard?: {
+        widgets: {
+          id:
+            | "a_placeholder_1"
+            | "a_placeholder_2"
+            | "a_placeholder_3"
+            | "s_placeholder_1"
+            | "s_placeholder_2"
+            | "s_placeholder_3";
+          /** @min 0 */
+          order: number;
+          width: 1 | 2;
+        }[];
+      };
       adminNewUserNotification?: boolean;
       adminFinishedCourseNotification?: boolean;
       configWarningDismissed?: boolean;
@@ -550,16 +607,70 @@ export interface UpdateUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_placeholder_1"
+              | "a_placeholder_2"
+              | "a_placeholder_3"
+              | "s_placeholder_1"
+              | "s_placeholder_2"
+              | "s_placeholder_3";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_placeholder_1"
+              | "a_placeholder_2"
+              | "a_placeholder_3"
+              | "s_placeholder_1"
+              | "s_placeholder_2"
+              | "s_placeholder_3";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
+}
+
+export interface GetAvailableDashboardWidgetsResponse {
+  data: (
+    | "a_placeholder_1"
+    | "a_placeholder_2"
+    | "a_placeholder_3"
+    | "s_placeholder_1"
+    | "s_placeholder_2"
+    | "s_placeholder_3"
+  )[];
+}
+
+export interface GetDefaultDashboardWidgetsResponse {
+  data: {
+    id:
+      | "a_placeholder_1"
+      | "a_placeholder_2"
+      | "a_placeholder_3"
+      | "s_placeholder_1"
+      | "s_placeholder_2"
+      | "s_placeholder_3";
+    /** @min 0 */
+    order: number;
+    width: 1 | 2;
+  }[];
 }
 
 export interface UpdateAdminNewUserNotificationResponse {
@@ -568,6 +679,20 @@ export interface UpdateAdminNewUserNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_placeholder_1"
+          | "a_placeholder_2"
+          | "a_placeholder_3"
+          | "s_placeholder_1"
+          | "s_placeholder_2"
+          | "s_placeholder_3";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -977,6 +1102,20 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_placeholder_1"
+          | "a_placeholder_2"
+          | "a_placeholder_3"
+          | "s_placeholder_1"
+          | "s_placeholder_2"
+          | "s_placeholder_3";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -989,6 +1128,20 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_placeholder_1"
+          | "a_placeholder_2"
+          | "a_placeholder_3"
+          | "s_placeholder_1"
+          | "s_placeholder_2"
+          | "s_placeholder_3";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1214,6 +1367,20 @@ export interface UpdateConfigWarningDismissedResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_placeholder_1"
+          | "a_placeholder_2"
+          | "a_placeholder_3"
+          | "s_placeholder_1"
+          | "s_placeholder_2"
+          | "s_placeholder_3";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -9628,6 +9795,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetAvailableDashboardWidgets
+     * @request GET:/api/settings/dashboard
+     */
+    settingsControllerGetAvailableDashboardWidgets: (params: RequestParams = {}) =>
+      this.request<GetAvailableDashboardWidgetsResponse, any>({
+        path: `/api/settings/dashboard`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetDefaultDashboardWidgets
+     * @request GET:/api/settings/dashboard/default
+     */
+    settingsControllerGetDefaultDashboardWidgets: (params: RequestParams = {}) =>
+      this.request<GetDefaultDashboardWidgetsResponse, any>({
+        path: `/api/settings/dashboard/default`,
+        method: "GET",
         format: "json",
         ...params,
       }),

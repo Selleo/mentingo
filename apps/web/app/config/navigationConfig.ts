@@ -57,6 +57,15 @@ export const getNavigationConfig = (
       testId: NAVIGATION_HANDLES.COURSES_GROUP,
       items: [
         {
+          label: t("navigationSideBar.dashboard"),
+          path: "dashboard",
+          iconName: "Dashboard",
+          accessRequirement: {
+            anyOf: [PERMISSIONS.DASHBOARD_READ],
+          },
+          testId: NAVIGATION_HANDLES.DASHBOARD_LINK,
+        },
+        {
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",

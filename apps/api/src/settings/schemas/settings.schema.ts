@@ -1,4 +1,9 @@
-import { ALLOWED_AGE_LIMITS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  ALLOWED_AGE_LIMITS,
+  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_WIDTHS,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -56,10 +61,25 @@ export const globalSettingsJSONSchema = Type.Object({
   loginPageFiles: Type.Array(Type.String()),
 });
 
+export const dashboardWidgetsIdsJSONContentSchema = Type.Array(Type.Enum(DASHBOARD_WIDGET_IDS));
+
+export const dashboardWidgetsJSONContentSchema = Type.Array(
+  Type.Object({
+    id: Type.Enum(DASHBOARD_WIDGET_IDS),
+    order: Type.Integer({ minimum: 0 }),
+    width: Type.Enum(DASHBOARD_WIDGET_WIDTHS),
+  }),
+);
+
+export const dashboardDefaultLayoutJSONContentSchema = dashboardWidgetsJSONContentSchema;
+
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
   MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
+  dashboard: Type.Object({
+    widgets: dashboardWidgetsJSONContentSchema,
+  }),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
@@ -97,6 +117,10 @@ export type LoginPageResourceResponseBody = Static<typeof loginPageResourceRespo
 
 export type UploadFilesToLoginPageBody = Static<typeof uploadFilesToLoginPageSchema>;
 
+export type DashboardWidgetsJSONContentSchema = Static<typeof dashboardWidgetsJSONContentSchema>;
+export type DashboardWidgetsIdsJSONContentSchema = Static<
+  typeof dashboardWidgetsIdsJSONContentSchema
+>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;

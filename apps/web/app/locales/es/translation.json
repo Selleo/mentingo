@@ -1,4 +1,55 @@
 {
+  "dashboardHome": {
+    "title": "Tu panel",
+    "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
+    "customize": "Personalizar panel",
+    "edit": {
+      "badge": "Edición",
+      "widgetsButton": "Widgets",
+      "restore": "Restaurar valores",
+      "instructions": "Arrastra los widgets para cambiar su orden. También puedes cambiar su ancho y visibilidad.",
+      "changeWidth": "Cambiar el ancho de {{title}}",
+      "drag": "Mover {{title}}",
+      "widgetLibrary": "Widgets del panel",
+      "widgetLibraryDescription": "Elige los widgets visibles en tu panel.",
+      "required": "Obligatorio",
+      "toggle": "Activar o desactivar {{title}}",
+      "confirm": "Sí",
+      "cancel": "No"
+    },
+    "empty": {
+      "title": "Tu panel está vacío",
+      "description": "Personaliza el panel y añade los widgets que te interesan.",
+      "editDescription": "Activa al menos un widget de la lista superior."
+    },
+    "error": {
+      "title": "No se pudo cargar el panel",
+      "description": "Vuelve a intentarlo en unos instantes.",
+      "retry": "Intentar de nuevo",
+      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado."
+    },
+    "widgets": {
+      "placeholderDescription": "Widget del panel preparado para una vista de datos propia",
+      "placeholderContent": "Este widget está preparado para el contenido específico de su función.",
+      "placeholderFooter": "Widget de ejemplo",
+      "a_placeholder_1": { "title": "Widget de administrador 1" },
+      "a_placeholder_2": { "title": "Widget de administrador 2" },
+      "a_placeholder_3": { "title": "Widget de administrador 3" },
+      "s_placeholder_1": { "title": "Widget de estudiante 1" },
+      "s_placeholder_2": { "title": "Widget de estudiante 2" },
+      "s_placeholder_3": { "title": "Widget de estudiante 3" },
+      "commonDescription": "Información clave de un vistazo",
+      "training_completion": { "title": "Finalización de formación" },
+      "deadline_risks": { "title": "Plazos en riesgo" },
+      "incomplete_courses": { "title": "Cursos incompletos" },
+      "event_calendar": { "title": "Calendario de eventos" },
+      "continue_learning": { "title": "Continuar aprendiendo" },
+      "required_course": { "title": "Cursos obligatorios" },
+      "course_completion": { "title": "Cursos completados" },
+      "certificates": { "title": "Certificados" },
+      "ai_mentor_practice": { "title": "Práctica con Mentor IA" }
+    }
+  },
   "common": {
     "button": {
       "save": "Guardar",
@@ -18,7 +69,8 @@
       "edit": "Editar",
       "delete": "Eliminar",
       "uploading": "Subiendo...",
-      "sending": "Enviando..."
+      "sending": "Enviando...",
+      "loading": "Cargando..."
     },
     "toast": {
       "noAccess": "No tienes permiso para acceder a este recurso.",
@@ -1540,6 +1592,7 @@
         "user_manage": "Administre usuarios, incluidos roles y estado de cuenta.",
         "settings_read_self": "Ver su propio perfil y configuración de preferencias.",
         "settings_update_self": "Actualice su propio perfil y configuración de preferencias.",
+        "dashboard_read": "Ver su panel de control.",
         "settings_manage": "Administrar la configuración global de la plataforma.",
         "env_read_public": "Ver los valores de configuración del entorno público.",
         "env_manage": "Administrar los valores de configuración del entorno.",
