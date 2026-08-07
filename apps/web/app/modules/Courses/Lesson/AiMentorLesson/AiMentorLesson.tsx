@@ -1,7 +1,6 @@
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
 import { createTextUiMessage, getUiMessageText, toUiMessageRole } from "@repo/shared";
-import { DefaultChatTransport } from "ai";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +33,7 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { useOptionalCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { createAiMentorChatTransport } from "~/modules/Courses/Lesson/AiMentorLesson/aiMentorChatTransport";
 import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog";
 import { AiMentorEvaluationLoader } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationLoader";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
@@ -44,12 +44,12 @@ import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 
+import { AI_CHAT_STATUSES } from "./aiMentorChat.constants";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 import type { AiMentorEvaluation } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
 const taskDescriptionViewerClassName =
   "max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800";
 
@@ -93,22 +93,7 @@ const AiMentorLesson = ({
   const taskDialogLessonIdRef = useRef<string | null>(null);
 
   const transport = useMemo(
-    () =>
-      new DefaultChatTransport<UIMessage>({
-        api: chatUrl,
-        credentials: "include",
-        prepareSendMessagesRequest: ({ messages }) => {
-          const message = messages[messages.length - 1];
-
-          return {
-            body: {
-              threadId: lesson.threadId ?? "",
-              message,
-            },
-            credentials: "include",
-          };
-        },
-      }),
+    () => createAiMentorChatTransport(lesson.threadId ?? ""),
     [lesson.threadId],
   );
 
@@ -212,7 +197,8 @@ const AiMentorLesson = ({
     await retakeLesson({ lessonId: lesson.id });
   };
 
-  const isProcessing = status === "submitted" || status === "streaming";
+  const isProcessing =
+    status === AI_CHAT_STATUSES.SUBMITTED || status === AI_CHAT_STATUSES.STREAMING;
   const isThreadActive = lesson.status === "active";
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);

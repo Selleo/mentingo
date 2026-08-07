@@ -23,7 +23,7 @@ describe("studentSettingsJSONContentSchema dashboard validation", () => {
       Value.Check(
         studentSettingsJSONContentSchema,
         createSettings({
-          id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+          id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
           width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
         }),
       ),
@@ -43,7 +43,7 @@ describe("studentSettingsJSONContentSchema dashboard validation", () => {
     expect(
       Value.Check(
         studentSettingsJSONContentSchema,
-        createSettings({ id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1, width: 3 }),
+        createSettings({ id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING, width: 3 }),
       ),
     ).toBe(false);
   });

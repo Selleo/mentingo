@@ -40,6 +40,70 @@
       "s_placeholder_1": { "title": "Widżet uczestnika 1" },
       "s_placeholder_2": { "title": "Widżet uczestnika 2" },
       "s_placeholder_3": { "title": "Widżet uczestnika 3" },
+      "loadError": "Nie udało się wczytać tego kafelka.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Wszystkie rozpoczęte przez Ciebie kursy",
+          "empty": "Nie masz rozpoczętych kursów.",
+          "nextLesson": "Następna lekcja: {{title}}",
+          "openCourse": "Otwórz kurs",
+          "viewAll": "Kursy w trakcie: {{count}}"
+        },
+        "requiredCourse": {
+          "description": "Wszystkie nieukończone kursy obowiązkowe",
+          "empty": "Nie masz kursów obowiązkowych do ukończenia.",
+          "overdue": "Po terminie",
+          "dueSoon": "Termin wkrótce",
+          "scheduled": "Nadchodzący",
+          "noDeadline": "Bez terminu",
+          "dueDate": "Termin: {{date}}",
+          "noDueDate": "Brak terminu",
+          "total": "Kursy obowiązkowe: {{count}}",
+          "overdueCount": "Po terminie: {{count}}"
+        },
+        "courseCompletion": {
+          "description": "Podsumowanie postępu przypisanych kursów",
+          "empty": "Nie masz jeszcze przypisanych kursów.",
+          "completedOfTotal": "Ukończono {{completed}} z {{total}}",
+          "completed": "Ukończone",
+          "inProgress": "W trakcie",
+          "notStarted": "Nierozpoczęte"
+        },
+        "certificates": {
+          "description": "Aktywne certyfikaty i nadchodzące wygaśnięcia",
+          "empty": "Nie masz aktywnych certyfikatów.",
+          "active": "Aktywne certyfikaty",
+          "expiringSoon": "Wygasa w ciągu 30 dni",
+          "cta": "Zobacz certyfikat",
+          "viewAll": "Zobacz wszystkie certyfikaty",
+          "dialogTitle": "Twoje certyfikaty",
+          "dialogDescription": "Przejrzyj wszystkie zdobyte aktywne certyfikaty.",
+          "issued": "Wydano: {{date}}",
+          "expires": "Wygasa: {{date}}",
+          "noExpiry": "Bezterminowy",
+          "previous": "Poprzednia",
+          "next": "Następna",
+          "page": "Strona {{page}} z {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Codziennie utwórz jeden scenariusz treningowy",
+          "empty": "Opisz sytuację i przećwicz ją z Mentorem AI.",
+          "emptyPrompt": "Jaką rozmowę chcesz przeprowadzić z większą pewnością?",
+          "startCta": "Rozpocznij trening",
+          "continueCta": "Kontynuuj trening",
+          "feedbackCta": "Zobacz informację zwrotną",
+          "todayEyebrow": "Dzisiejsza próba",
+          "completedEyebrow": "Próba zakończona",
+          "returnHint": "Rozmowa jest zapisana",
+          "privateHint": "Prywatne miejsce na próby i poprawki",
+          "status": {
+            "queued": "Scenariusz czeka na przygotowanie.",
+            "processing": "Scenariusz jest przygotowywany.",
+            "ready": "Dzisiejszy trening jest gotowy.",
+            "failed": "Nie udało się wygenerować scenariusza. Otwórz go, aby ponowić."
+          }
+        }
+      },
       "commonDescription": "Najważniejsze informacje w jednym miejscu",
       "training_completion": {
         "title": "Realizacja szkoleń",
@@ -97,10 +161,86 @@
       },
       "continue_learning": { "title": "Kontynuuj naukę" },
       "required_course": { "title": "Kursy obowiązkowe" },
-      "course_completion": { "title": "Ukończone kursy" },
+      "course_completion": { "title": "Postęp kursów" },
       "certificates": { "title": "Certyfikaty" },
-      "ai_mentor_practice": { "title": "Ćwiczenia z Mentorem AI" }
+      "ai_mentor_practice": {
+        "title": "Ćwiczenia z Mentorem AI",
+        "aiNotConfigured": "Mentor AI nie jest skonfigurowany dla tej organizacji."
+      }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Przećwicz prawdziwą rozmowę.",
+      "promptEyebrow": "Ustaw scenę",
+      "mentorPrompt": "Opowiedz mi o rozmowie, którą chcesz przećwiczyć. Z kim rozmawiasz, co się dzieje i co chcesz zrobić lepiej?",
+      "scenario": "Co chcesz przećwiczyć?",
+      "scenarioPlaceholder": "Na przykład: Chcę przećwiczyć udzielanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał terminu.",
+      "scenarioHint": "Dodaj kontekst, który pomoże stworzyć realistyczne ćwiczenie, np. sytuację, osoby lub cel.",
+      "privateHint": "Tylko Ty widzisz ten trening.",
+      "submit": "Utwórz trening",
+      "suggestions": {
+        "title": "Zacznij od przykładu",
+        "feedback": {
+          "label": "Przekaż informację zwrotną",
+          "value": "Chcę przećwiczyć przekazanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał ważnego terminu."
+        },
+        "boundary": {
+          "label": "Postaw granicę",
+          "value": "Chcę przećwiczyć wyznaczenie jasnej granicy, gdy współpracownik prosi mnie o pilne zadanie poza ustalonymi priorytetami."
+        },
+        "explanation": {
+          "label": "Wyjaśnij decyzję",
+          "value": "Chcę przećwiczyć wyjaśnienie trudnej decyzji osobie, która się z nią nie zgadza."
+        },
+        "request": {
+          "label": "Przedstaw prośbę",
+          "value": "Chcę przećwiczyć poproszenie przełożonego o wsparcie przy zbyt dużym obciążeniu pracą."
+        }
+      },
+      "steps": {
+        "setScene": { "title": "Ustaw scenę", "description": "Opisz sytuację własnymi słowami." },
+        "rehearse": {
+          "title": "Przećwicz ją naprawdę",
+          "description": "Mów lub pisz, a Mentor AI zagra drugą osobę."
+        },
+        "reflect": {
+          "title": "Sprawdź, co zadziałało",
+          "description": "Zakończ, gdy będziesz gotowy, i otrzymaj konkretną informację zwrotną."
+        }
+      }
+    },
+    "backToDashboard": "Wróć do panelu",
+    "rehearsalEyebrow": "Dzisiejsza próba",
+    "successGoal": "Twój cel",
+    "successGoalFallback": "Poprowadź rozmowę jasno i ustal konstruktywny kolejny krok.",
+    "viewFeedback": "Zobacz informację zwrotną",
+    "practiceAgain": "Przećwicz ponownie",
+    "replayLoadingTitle": "Przygotowujemy kolejną próbę",
+    "yourRole": "Twoja rola",
+    "mentorRole": "Rola Mentora AI",
+    "feedback": {
+      "title": "Informacja zwrotna z ćwiczenia",
+      "summaryTitle": "Co warto wykorzystać dalej",
+      "summaryDescription": "Wykorzystaj te obserwacje, aby wzmocnić kolejną próbę.",
+      "scoreLabel": "Wynik ćwiczenia",
+      "criteriaTitle": "Co zauważył Sędzia AI",
+      "criterionFallback": "Kryterium {{number}}",
+      "importantFeedbackTitle": "Ważna informacja zwrotna"
+    },
+    "startHint": "Rozpocznij rozmowę, gdy będziesz gotowy.",
+    "checkHint": "Zakończ w dowolnym momencie, aby sprawdzić swoje podejście.",
+    "checkPractice": "Zakończ i podsumuj",
+    "practiceComplete": "Próba została zakończona. Możesz wrócić do informacji zwrotnej w dowolnym momencie.",
+    "generating": "Mentor AI przygotowuje Twój scenariusz.",
+    "preparingBackgroundDescription": "Twój trening jest przygotowywany w tle. Możesz wrócić do Panelu głównego i wrócić tutaj, gdy będzie gotowy.",
+    "failed": "Nie udało się wygenerować scenariusza treningowego.",
+    "error": "Nie udało się wczytać treningu.",
+    "retry": "Spróbuj wygenerować ponownie",
+    "conversationTitle": "Trening z Mentorem AI",
+    "mentorName": "Mentor AI",
+    "message": "Wiadomość do Mentora AI",
+    "send": "Wyślij"
   },
   "common": {
     "button": {

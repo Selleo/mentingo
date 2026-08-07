@@ -2,6 +2,7 @@ import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_WIDTHS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { EnvService } from "src/env/services/env.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -101,8 +102,13 @@ describe("SettingsController (e2e)", () => {
         const dashboard = {
           widgets: [
             {
-              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+              id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
               order: 0,
+              width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+            },
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
+              order: 1,
               width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
             },
           ],
@@ -125,7 +131,7 @@ describe("SettingsController (e2e)", () => {
             dashboard: {
               widgets: [
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
                   order: 0,
                   width: DASHBOARD_WIDGET_WIDTHS.SMALL,
                 },
@@ -137,7 +143,7 @@ describe("SettingsController (e2e)", () => {
 
       it("should reject duplicate dashboard widgets", async () => {
         const widget = {
-          id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+          id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
           width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
         };
 
@@ -163,7 +169,7 @@ describe("SettingsController (e2e)", () => {
             dashboard: {
               widgets: [
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
                   order: 0,
                   width: DASHBOARD_WIDGET_WIDTHS.SMALL,
                 },
@@ -181,13 +187,18 @@ describe("SettingsController (e2e)", () => {
             dashboard: {
               widgets: [
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
                   order: 10,
                   width: DASHBOARD_WIDGET_WIDTHS.SMALL,
                 },
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
                   order: 5,
+                  width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+                },
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
+                  order: 6,
                   width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
                 },
               ],
@@ -197,13 +208,18 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body.data.dashboard.widgets).toEqual([
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
             order: 0,
             width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
           },
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
             order: 1,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+            order: 2,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
         ]);
@@ -326,18 +342,23 @@ describe("SettingsController (e2e)", () => {
         expect(response.body.data.dashboard).toEqual({
           widgets: [
             {
-              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+              id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
               order: 1,
               width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
             },
             {
-              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+              id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
               order: 2,
+              width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+            },
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+              order: 3,
               width: DASHBOARD_WIDGET_WIDTHS.SMALL,
             },
             {
-              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
-              order: 3,
+              id: DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
+              order: 4,
               width: DASHBOARD_WIDGET_WIDTHS.SMALL,
             },
           ],
@@ -346,7 +367,13 @@ describe("SettingsController (e2e)", () => {
     });
 
     describe("dashboard widget catalog", () => {
+      let aiConfiguredSpy: jest.SpyInstance;
+
       beforeEach(async () => {
+        aiConfiguredSpy = jest
+          .spyOn(app.get(EnvService), "getAIConfigured")
+          .mockResolvedValue({ enabled: true });
+
         await truncateTables(baseDb, ["settings"]);
         await globalSettingsFactory.create({ userId: null });
 
@@ -358,6 +385,10 @@ describe("SettingsController (e2e)", () => {
         testCookies = await cookieFor(testUser, app);
       });
 
+      afterEach(() => {
+        aiConfiguredSpy.mockRestore();
+      });
+
       it("should return dashboard widgets available to the current user", async () => {
         const response = await request(app.getHttpServer())
           .get("/api/settings/dashboard")
@@ -365,9 +396,12 @@ describe("SettingsController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data).toEqual([
-          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
-          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
-          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
+          DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
+          DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
+          DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+          DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
+          DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES,
+          DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE,
         ]);
       });
 
@@ -379,18 +413,23 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body.data).toEqual([
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
             order: 1,
             width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
           },
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
             order: 2,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+            order: 3,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
-            order: 3,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
+            order: 4,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
         ]);

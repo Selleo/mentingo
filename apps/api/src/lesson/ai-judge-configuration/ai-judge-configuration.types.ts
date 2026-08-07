@@ -10,7 +10,13 @@ import type {
 } from "src/storage/schema";
 
 export type AiJudgeConfigurationGraph = {
-  configuration: typeof aiJudgeConfigurations.$inferSelect;
+  configuration: Omit<
+    typeof aiJudgeConfigurations.$inferSelect,
+    "aiMentorLessonId" | "practiceSessionId"
+  > & {
+    aiMentorLessonId: UUIDType;
+    practiceSessionId?: UUIDType | null;
+  };
   criteria: Array<typeof aiJudgeCriteria.$inferSelect>;
   scoreGuidance: Array<typeof aiJudgeScoreGuidance.$inferSelect>;
   blockingErrors: Array<typeof aiJudgeBlockingErrors.$inferSelect>;

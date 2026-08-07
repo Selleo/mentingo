@@ -77,4 +77,18 @@ export const certificateValidityImpactSchema = Type.Object({
 export const allCertificatesSchema = Type.Array(certificateSchema);
 export const singleCertificateSchema = Type.Union([certificateSchema, Type.Null()]);
 
+export const certificateDashboardSummarySchema = Type.Object({
+  activeCount: Type.Number(),
+  expiringSoon: Type.Union([
+    Type.Object({
+      certificateId: UUIDSchema,
+      courseId: UUIDSchema,
+      courseSlug: Type.String(),
+      courseTitle: Type.String(),
+      expiresAt: Type.String(),
+    }),
+    Type.Null(),
+  ]),
+});
+
 export const paginatedCertificatesSchema = paginatedResponse(allCertificatesSchema);

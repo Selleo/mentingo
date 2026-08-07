@@ -40,6 +40,70 @@
       "s_placeholder_1": { "title": "Besimokančiojo valdiklis 1" },
       "s_placeholder_2": { "title": "Besimokančiojo valdiklis 2" },
       "s_placeholder_3": { "title": "Besimokančiojo valdiklis 3" },
+      "loadError": "Nepavyko įkelti šio valdiklio.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Visi pradėti kursai",
+          "empty": "Neturite vykdomų kursų.",
+          "nextLesson": "Toliau: {{title}}",
+          "openCourse": "Atidaryti kursą",
+          "viewAll": "{{count}} vykdomi kursai"
+        },
+        "requiredCourse": {
+          "description": "Visi nebaigti privalomi kursai",
+          "empty": "Neturite privalomų kursų, kuriuos reikia baigti.",
+          "overdue": "Pavėluota",
+          "dueSoon": "Artėja terminas",
+          "scheduled": "Artėjantis",
+          "noDeadline": "Be termino",
+          "dueDate": "Terminas {{date}}",
+          "noDueDate": "Terminas nenustatytas",
+          "total": "{{count}} privalomi kursai",
+          "overdueCount": "{{count}} pavėluoti"
+        },
+        "courseCompletion": {
+          "description": "Priskirtų kursų pažangos suvestinė",
+          "empty": "Dar neturite priskirtų kursų.",
+          "completedOfTotal": "Baigta {{completed}} iš {{total}}",
+          "completed": "Baigta",
+          "inProgress": "Vykdoma",
+          "notStarted": "Nepradėta"
+        },
+        "certificates": {
+          "description": "Aktyvūs sertifikatai ir artėjanti galiojimo pabaiga",
+          "empty": "Neturite aktyvių sertifikatų.",
+          "active": "Aktyvūs sertifikatai",
+          "expiringSoon": "Baigs galioti per 30 dienų",
+          "cta": "Peržiūrėti sertifikatą",
+          "viewAll": "Peržiūrėti visus sertifikatus",
+          "dialogTitle": "Jūsų sertifikatai",
+          "dialogDescription": "Peržiūrėkite visus gautus aktyvius sertifikatus.",
+          "issued": "Išduota {{date}}",
+          "expires": "Galioja iki {{date}}",
+          "noExpiry": "Galiojimo laikas neribotas",
+          "previous": "Ankstesnis",
+          "next": "Kitas",
+          "page": "{{page}} puslapis iš {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Kasdien sukurkite vieną praktikos scenarijų",
+          "empty": "Aprašykite situaciją ir praktikuokitės su DI mentoriumi.",
+          "emptyPrompt": "Kokį pokalbį norėtumėte vesti užtikrinčiau?",
+          "startCta": "Pradėti praktiką",
+          "continueCta": "Tęsti praktiką",
+          "feedbackCta": "Peržiūrėti atsiliepimą",
+          "todayEyebrow": "Šiandienos repeticija",
+          "completedEyebrow": "Repeticija baigta",
+          "returnHint": "Jūsų pokalbis išsaugotas",
+          "privateHint": "Privati vieta bandyti ir tobulėti",
+          "status": {
+            "queued": "Scenarijus laukia.",
+            "processing": "Scenarijus ruošiamas.",
+            "ready": "Šiandienos praktika paruošta.",
+            "failed": "Scenarijaus sukurti nepavyko. Atidarykite ir bandykite dar kartą."
+          }
+        }
+      },
       "commonDescription": "Svarbiausia informacija vienu žvilgsniu",
       "training_completion": {
         "title": "Mokymų užbaigimas",
@@ -95,10 +159,89 @@
       },
       "continue_learning": { "title": "Tęsti mokymąsi" },
       "required_course": { "title": "Privalomi kursai" },
-      "course_completion": { "title": "Baigti kursai" },
+      "course_completion": { "title": "Kursų pažanga" },
       "certificates": { "title": "Sertifikatai" },
-      "ai_mentor_practice": { "title": "DI mentoriaus praktika" }
+      "ai_mentor_practice": {
+        "title": "DI mentoriaus praktika",
+        "aiNotConfigured": "DI mentorius nesukonfigūruotas šiai organizacijai."
+      }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Praktikuokite tikrą pokalbį.",
+      "promptEyebrow": "Nustatykite sceną",
+      "mentorPrompt": "Papasakokite apie pokalbį, kurį norite repetuoti. Su kuo kalbate, kas vyksta ir ką norėtumėte atlikti geriau?",
+      "scenario": "Ką norite praktikuoti?",
+      "scenarioPlaceholder": "Pavyzdžiui: noriu praktikuoti konstruktyvų grįžtamąjį ryšį kolegai, kuris praleido terminą.",
+      "scenarioHint": "Pridėkite kontekstą, kuris padėtų sukurti tikrovišką praktiką, pavyzdžiui, situaciją, žmones ar tikslą.",
+      "privateHint": "Šią praktiką matote tik jūs.",
+      "submit": "Sukurti praktiką",
+      "suggestions": {
+        "title": "Pradėkite nuo pavyzdžio",
+        "feedback": {
+          "label": "Pateikti atsiliepimą",
+          "value": "Noriu praktikuoti konstruktyvaus atsiliepimo pateikimą kolegai, kuris nesilaikė svarbaus termino."
+        },
+        "boundary": {
+          "label": "Nustatyti ribą",
+          "value": "Noriu praktikuoti aiškios ribos nustatymą, kai komandos narys prašo skubiai imtis darbo, neatitinkančio dabartinių prioritetų."
+        },
+        "explanation": {
+          "label": "Paaiškinti sprendimą",
+          "value": "Noriu praktikuoti sudėtingo sprendimo paaiškinimą žmogui, kuris su juo nesutinka."
+        },
+        "request": {
+          "label": "Pateikti prašymą",
+          "value": "Noriu praktikuoti prašymą vadovui padėti, kai darbo krūvis tampa per didelis."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Nustatykite sceną",
+          "description": "Aprašykite situaciją savais žodžiais."
+        },
+        "rehearse": {
+          "title": "Repetuokite realiai",
+          "description": "Kalbėkite arba rašykite, o DI mentorius vaidins kitą žmogų."
+        },
+        "reflect": {
+          "title": "Pamatykite, kas pavyko",
+          "description": "Baikite, kai būsite pasiruošę, ir gaukite tikslinį atsiliepimą."
+        }
+      }
+    },
+    "backToDashboard": "Grįžti į skydelį",
+    "rehearsalEyebrow": "Šiandienos repeticija",
+    "successGoal": "Jūsų tikslas",
+    "successGoalFallback": "Aiškiai veskite pokalbį ir sutarkite dėl konstruktyvaus kito žingsnio.",
+    "viewFeedback": "Peržiūrėti atsiliepimą",
+    "practiceAgain": "Praktikuotis dar kartą",
+    "replayLoadingTitle": "Ruošiame kitą repeticiją",
+    "yourRole": "Jūsų vaidmuo",
+    "mentorRole": "DI mentoriaus vaidmuo",
+    "feedback": {
+      "title": "Praktikos grįžtamasis ryšys",
+      "summaryTitle": "Ką verta pritaikyti toliau",
+      "summaryDescription": "Pasinaudokite šiomis įžvalgomis, kad sustiprintumėte kitą bandymą.",
+      "scoreLabel": "Praktikos rezultatas",
+      "criteriaTitle": "Ką pastebėjo DI vertintojas",
+      "criterionFallback": "Kriterijus {{number}}",
+      "importantFeedbackTitle": "Svarbus grįžtamasis ryšys"
+    },
+    "startHint": "Pradėkite pokalbį, kai būsite pasiruošę.",
+    "checkHint": "Baikite bet kada ir sužinokite, kaip pavyko jūsų požiūris.",
+    "checkPractice": "Baigti ir apmąstyti",
+    "practiceComplete": "Repeticija baigta. Prie atsiliepimo galite grįžti bet kada.",
+    "generating": "DI mentorius ruošia scenarijų.",
+    "preparingBackgroundDescription": "Jūsų praktika ruošiama fone. Galite grįžti į skydelį ir sugrįžti, kai ji bus paruošta.",
+    "failed": "Nepavyko sukurti praktikos scenarijaus.",
+    "error": "Nepavyko įkelti praktikos.",
+    "retry": "Bandyti dar kartą",
+    "conversationTitle": "DI mentoriaus praktika",
+    "mentorName": "DI mentorius",
+    "message": "Žinutė DI mentoriui",
+    "send": "Siųsti"
   },
   "common": {
     "button": {

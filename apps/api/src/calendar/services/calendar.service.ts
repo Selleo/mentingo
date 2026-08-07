@@ -34,6 +34,7 @@ import type {
   CalendarEventList,
   CalendarEventListItem,
 } from "../schemas/calendar-event-list.schema";
+import type { DashboardCalendarEventList } from "../schemas/dashboard-calendar-event-list.schema";
 import type { GetCalendarEventsQuery } from "../schemas/get-calendar-events-query.schema";
 import type {
   CalendarEventLinkedCourse,
@@ -43,7 +44,6 @@ import type {
   LiveTrainingCalendarEventPayload,
   LiveTrainingListItemPayload,
 } from "../types/calendar.types";
-import type { DashboardCalendarEventList } from "../schemas/dashboard-calendar-event-list.schema";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 

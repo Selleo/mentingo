@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
 
 const PRESETS_PREFIX = "common.loader.textSequence";
@@ -15,7 +16,7 @@ const PRESETS = {
   ],
 } as const;
 
-type Props =
+type SequenceProps =
   | {
       textsSequence: Array<{
         time: number;
@@ -27,6 +28,12 @@ type Props =
       preset: keyof typeof PRESETS;
       textsSequence?: never;
     };
+
+type Props = SequenceProps & {
+  showLoader?: boolean;
+  className?: string;
+  textClassName?: string;
+};
 
 export const LoaderWithTextSequence = (props: Props) => {
   const textsSequence = props.preset ? PRESETS[props.preset] : props.textsSequence;
@@ -66,8 +73,8 @@ export const LoaderWithTextSequence = (props: Props) => {
   const currentText = isPreset ? t(currentTextKey) : currentTextKey;
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-4">
-      <Loader />
+    <div className={cn("flex w-full flex-col items-center justify-center gap-4", props.className)}>
+      {props.showLoader !== false && <Loader />}
       <AnimatePresence mode="wait">
         {currentText && (
           <motion.p
@@ -76,7 +83,7 @@ export const LoaderWithTextSequence = (props: Props) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-base"
+            className={cn("text-base", props.textClassName)}
           >
             {currentText}
           </motion.p>

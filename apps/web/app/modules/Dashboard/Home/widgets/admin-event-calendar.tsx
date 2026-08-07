@@ -149,7 +149,7 @@ export function WidgetAdminEventCalendar() {
                 modifiers={{ hasEvents: eventDays }}
                 modifiersClassNames={{
                   hasEvents:
-                    "bg-primary-50 hover:bg-primary-100 aria-selected:bg-primary-700 aria-selected:text-contrast aria-selected:hover:bg-primary-600",
+                    "bg-primary-50 hover:bg-primary-100 aria-selected:bg-primary-700 aria-selected:!text-white aria-selected:hover:bg-primary-600",
                 }}
                 labels={{
                   labelPrevious: () => t("dashboardHome.widgets.event_calendar.previousMonth"),
@@ -161,10 +161,12 @@ export function WidgetAdminEventCalendar() {
                 classNames={{
                   months: "w-full",
                   month: "w-full space-y-4 rounded-none border-0 bg-transparent p-0 shadow-none",
-                  caption: "flex items-center justify-center gap-2 pt-1",
+                  caption: "relative flex items-center justify-center pt-1",
                   caption_dropdowns: "order-2 flex items-center justify-center gap-2",
                   dropdown_month: "order-1 w-auto max-w-[8rem]",
                   dropdown_year: "order-2 w-auto max-w-[6rem]",
+                  nav_button_previous: "absolute left-0",
+                  nav_button_next: "absolute right-0",
                 }}
               />
               <div className="max-h-52 min-h-0 overflow-y-auto border-t pt-4 lg:max-h-none lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0 lg:[contain:size]">

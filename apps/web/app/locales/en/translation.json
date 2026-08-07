@@ -40,6 +40,70 @@
       "s_placeholder_1": { "title": "Learner widget 1" },
       "s_placeholder_2": { "title": "Learner widget 2" },
       "s_placeholder_3": { "title": "Learner widget 3" },
+      "loadError": "We could not load this widget.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "All courses you have started",
+          "empty": "You have no courses in progress.",
+          "nextLesson": "Next: {{title}}",
+          "openCourse": "Open course",
+          "viewAll": "{{count}} courses in progress"
+        },
+        "requiredCourse": {
+          "description": "All mandatory courses you still need to complete",
+          "empty": "You have no required courses to complete.",
+          "overdue": "Overdue",
+          "dueSoon": "Due soon",
+          "scheduled": "Upcoming",
+          "noDeadline": "No deadline",
+          "dueDate": "Due {{date}}",
+          "noDueDate": "No due date",
+          "total": "{{count}} required courses",
+          "overdueCount": "{{count}} overdue"
+        },
+        "courseCompletion": {
+          "description": "A summary of your assigned course progress",
+          "empty": "You have no assigned courses yet.",
+          "completedOfTotal": "{{completed}} of {{total}} completed",
+          "completed": "Completed",
+          "inProgress": "In progress",
+          "notStarted": "Not started"
+        },
+        "certificates": {
+          "description": "Your active certificates and upcoming expirations",
+          "empty": "You do not have any active certificates.",
+          "active": "Active certificates",
+          "expiringSoon": "Expiring within 30 days",
+          "cta": "View certificate",
+          "viewAll": "View all certificates",
+          "dialogTitle": "Your certificates",
+          "dialogDescription": "Review all active certificates you have earned.",
+          "issued": "Issued {{date}}",
+          "expires": "Expires {{date}}",
+          "noExpiry": "No expiration date",
+          "previous": "Previous",
+          "next": "Next",
+          "page": "Page {{page}} of {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Create one focused practice scenario each day",
+          "empty": "Describe a situation and practice it with AI Mentor.",
+          "emptyPrompt": "What conversation would you like to handle with more confidence?",
+          "startCta": "Start practice",
+          "continueCta": "Continue practice",
+          "feedbackCta": "View feedback",
+          "todayEyebrow": "Today's rehearsal",
+          "completedEyebrow": "Rehearsal complete",
+          "returnHint": "Your conversation is saved",
+          "privateHint": "A private place to try, adjust, and try again",
+          "status": {
+            "queued": "Your practice scenario is queued.",
+            "processing": "Your practice scenario is being prepared.",
+            "ready": "Today's practice is ready.",
+            "failed": "Scenario generation failed. Open it to retry."
+          }
+        }
+      },
       "commonDescription": "Key information at a glance",
       "training_completion": {
         "title": "Training completion",
@@ -95,10 +159,89 @@
       },
       "continue_learning": { "title": "Continue learning" },
       "required_course": { "title": "Required courses" },
-      "course_completion": { "title": "Completed courses" },
+      "course_completion": { "title": "Course progress" },
       "certificates": { "title": "Certificates" },
-      "ai_mentor_practice": { "title": "AI Mentor practice" }
+      "ai_mentor_practice": {
+        "title": "AI Mentor practice",
+        "aiNotConfigured": "AI Mentor is not configured for this tenant."
+      }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Practice a real conversation.",
+      "promptEyebrow": "Set the scene",
+      "mentorPrompt": "Tell me about the conversation you want to rehearse. Who are you speaking with, what is happening, and what would you like to handle better?",
+      "scenario": "What would you like to practice?",
+      "scenarioPlaceholder": "For example: I want to practice giving constructive feedback to a colleague who missed a deadline.",
+      "scenarioHint": "Include any context that would help make the practice realistic, such as the situation, people involved, or your goal.",
+      "privateHint": "Only you can see this practice.",
+      "submit": "Create practice",
+      "suggestions": {
+        "title": "Start with an example",
+        "feedback": {
+          "label": "Give feedback",
+          "value": "I want to practice giving constructive feedback to a colleague whose work missed an important deadline."
+        },
+        "boundary": {
+          "label": "Set a boundary",
+          "value": "I want to practice setting a clear boundary when a teammate asks me to take on urgent work outside my current priorities."
+        },
+        "explanation": {
+          "label": "Explain a decision",
+          "value": "I want to practice explaining a difficult decision to someone who disagrees with it."
+        },
+        "request": {
+          "label": "Make a request",
+          "value": "I want to practice asking my manager for support with a workload that is becoming too heavy."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Set the scene",
+          "description": "Describe the moment in your own words."
+        },
+        "rehearse": {
+          "title": "Rehearse it for real",
+          "description": "Speak or type while AI Mentor plays the other person."
+        },
+        "reflect": {
+          "title": "See what worked",
+          "description": "Finish when you are ready and get focused feedback."
+        }
+      }
+    },
+    "backToDashboard": "Back to dashboard",
+    "rehearsalEyebrow": "Today's rehearsal",
+    "successGoal": "Your goal",
+    "successGoalFallback": "Handle the conversation clearly and reach a constructive next step.",
+    "viewFeedback": "View feedback",
+    "practiceAgain": "Practice again",
+    "replayLoadingTitle": "Setting up your next rehearsal",
+    "yourRole": "Your role",
+    "mentorRole": "AI Mentor role",
+    "feedback": {
+      "title": "Practice feedback",
+      "summaryTitle": "What to take forward",
+      "summaryDescription": "Use these observations to strengthen your next attempt.",
+      "scoreLabel": "Practice score",
+      "criteriaTitle": "What the Judge noticed",
+      "criterionFallback": "Criterion {{number}}",
+      "importantFeedbackTitle": "Important feedback"
+    },
+    "startHint": "Start the conversation when you are ready.",
+    "checkHint": "Finish whenever you want to see how your approach landed.",
+    "checkPractice": "Finish and reflect",
+    "practiceComplete": "Your rehearsal is complete. Your feedback is ready whenever you want to revisit it.",
+    "generating": "AI Mentor is preparing your scenario.",
+    "preparingBackgroundDescription": "Your practice is being prepared in the background. You can return to the dashboard and come back when it is ready.",
+    "failed": "We could not generate this practice scenario.",
+    "error": "We could not load this practice.",
+    "retry": "Try generation again",
+    "conversationTitle": "AI Mentor practice",
+    "mentorName": "AI Mentor",
+    "message": "Message to AI Mentor",
+    "send": "Send"
   },
   "common": {
     "button": {

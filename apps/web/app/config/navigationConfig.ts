@@ -90,18 +90,6 @@ export const getNavigationConfig = (
           iconName: "Calendar",
           testId: NAVIGATION_HANDLES.CALENDAR_LINK,
         },
-        {
-          label: t("navigationSideBar.analytics"),
-          path: "admin/analytics",
-          iconName: "ChartNoAxes",
-          testId: NAVIGATION_HANDLES.ANALYTICS_LINK,
-        },
-        {
-          label: t("navigationSideBar.progress"),
-          path: "progress",
-          iconName: "Target",
-          testId: NAVIGATION_HANDLES.PROGRESS_LINK,
-        },
       ],
     },
     ...(isAnyContentFeatureEnabled

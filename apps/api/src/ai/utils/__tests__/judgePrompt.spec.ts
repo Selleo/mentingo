@@ -2,6 +2,15 @@ import { promptTemplates } from "@repo/prompts";
 import Handlebars from "handlebars";
 
 describe("judgePrompt", () => {
+  it("frames the generated task goal as learner-facing practice context", () => {
+    const prompt = promptTemplates.aiJudgeConfigurationGeneratorBase.template;
+
+    expect(prompt).toContain("learner-facing task description");
+    expect(prompt).toContain("the learner's role, the counterpart's role");
+    expect(prompt).toContain("Do not mention criteria, points, scores");
+    expect(prompt).not.toContain("Prefer a short bullet list when the outcome contains");
+  });
+
   it("renders the normalized rubric and does not reference completion conditions", () => {
     const assessmentConfiguration = JSON.stringify({
       taskGoal: "Identify the client's needs.",
