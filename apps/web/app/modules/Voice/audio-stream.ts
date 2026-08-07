@@ -2,19 +2,18 @@ import { MicVAD } from "@ricky0123/vad-web";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
-import type { PcmChunkMeta, StreamInitPayload } from "@repo/shared";
-import type { Socket } from "socket.io-client";
-
 import {
   AUDIO_CAPTURE_MODE,
   AUDIO_SESSION_ERROR_CODE,
-  AUDIO_STREAM_MESSAGE_TYPE,
   TRANSCRIPTION_MODE,
   TRANSCRIPTION_PROVIDER,
   type AudioCaptureMode,
   type AudioReconnectContext,
   type AudioStreamLifecycleEvents,
 } from "./audio-stream.types";
+
+import type { PcmChunkMeta, StreamInitPayload } from "@repo/shared";
+import type { Socket } from "socket.io-client";
 
 export type SocketEmitSpec = {
   event: string;
@@ -46,6 +45,7 @@ const VAD_CONFIG = {
 } as const;
 const POST_REDEMPTION_EMPTY_AUDIO_MS = VAD_CONFIG.redemptionMs;
 const MAX_AUDIO_RECONNECT_ATTEMPTS = 8;
+const START_ACCEPT_TIMEOUT_MS = 10000;
 
 export class RealtimePCMStreamerWorklet {
   private readonly protocol: StreamProtocol<unknown, unknown>;
@@ -76,16 +76,15 @@ export class RealtimePCMStreamerWorklet {
   private isSpeaking = false;
   private hasActiveSpeechSegment = false;
   private isMuted = false;
+  private startAcceptedResolve: (() => void) | null = null;
+  private startAcceptedReject: ((reason: unknown) => void) | null = null;
   private readonly onSocketConnect = () => {
     if (!this.isSessionActive) {
       return;
     }
 
     if (this.sessionRunId && this.protocol.buildReconnectEmit) {
-      this.reconnectAttempt = Math.min(
-        this.reconnectAttempt + 1,
-        MAX_AUDIO_RECONNECT_ATTEMPTS,
-      );
+      this.reconnectAttempt = Math.min(this.reconnectAttempt + 1, MAX_AUDIO_RECONNECT_ATTEMPTS);
       const reconnectEmit = this.protocol.buildReconnectEmit({
         sessionRunId: this.sessionRunId,
         lastSentAudioSeq: this.lastSentAudioSeq,
@@ -98,6 +97,9 @@ export class RealtimePCMStreamerWorklet {
     this.emitReadyChunks();
   };
   private readonly onSessionMetadataCleared = () => {
+    this.startAcceptedReject?.(new Error("AUDIO_START_CANCELLED"));
+    this.startAcceptedResolve = null;
+    this.startAcceptedReject = null;
     this.nextAudioSeq = 1;
     this.lastSentAudioSeq = -1;
     this.sessionRunId = null;
@@ -144,103 +146,6 @@ export class RealtimePCMStreamerWorklet {
 
     this.socket.connect();
 
-    if (this.captureMode === AUDIO_CAPTURE_MODE.VAD_SEGMENTED && !this.micVad) {
-      this.micVad = await MicVAD.new({
-        model: "v5",
-        startOnLoad: false,
-        submitUserSpeechOnPause: true,
-        positiveSpeechThreshold: VAD_CONFIG.positiveSpeechThreshold,
-        negativeSpeechThreshold: VAD_CONFIG.negativeSpeechThreshold,
-        minSpeechMs: VAD_CONFIG.minSpeechMs,
-        redemptionMs: VAD_CONFIG.redemptionMs,
-        preSpeechPadMs: VAD_CONFIG.preSpeechPadMs,
-        baseAssetPath: VAD_ASSET_BASE_PATH,
-        onnxWASMBasePath: ONNX_WASM_BASE_PATH,
-        getStream: async () => {
-          return await navigator.mediaDevices.getUserMedia({
-            audio: {
-              channelCount: 1,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: false,
-            },
-            video: false,
-          });
-        },
-        onFrameProcessed: (probabilities, frame) => {
-          const level = Number(probabilities.isSpeech) || 0;
-          this.onLevelChange?.(this.isMuted ? 0 : Math.max(0, Math.min(1, level)));
-
-          if (this.isMuted) {
-            this.pendingSamples = [];
-            this.preSpeechSamples = [];
-            return;
-          }
-
-          const pcm16Frame = float32ToPcm16(frame);
-          if (pcm16Frame.length > 0) {
-            this.preSpeechSamples.push(...pcm16Frame);
-            if (this.preSpeechSamples.length > this.preSpeechMaxSamples) {
-              this.preSpeechSamples.splice(
-                0,
-                this.preSpeechSamples.length - this.preSpeechMaxSamples,
-              );
-            }
-          }
-
-          if (!this.isSpeaking) {
-            return;
-          }
-
-          if (pcm16Frame.length > 0) {
-            this.pendingSamples.push(...pcm16Frame);
-          }
-
-          this.emitReadyChunks();
-        },
-        onSpeechStart: () => undefined,
-        onSpeechRealStart: () => {
-          if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
-            return;
-          }
-
-          if (this.isMuted) {
-            return;
-          }
-
-          this.isSpeaking = true;
-          this.hasActiveSpeechSegment = true;
-          if (this.preSpeechSamples.length > 0) {
-            this.pendingSamples.push(...this.preSpeechSamples);
-            this.preSpeechSamples = [];
-            this.emitReadyChunks();
-          }
-        },
-        onSpeechEnd: () => {
-          if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
-            return;
-          }
-
-          this.isSpeaking = false;
-          this.preSpeechSamples = [];
-          if (!this.isMuted && this.socket?.connected) {
-            this.emitSpeechEndBoundary();
-          }
-          this.hasActiveSpeechSegment = false;
-        },
-        onVADMisfire: () => {
-          if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
-            return;
-          }
-
-          this.isSpeaking = false;
-          this.pendingSamples = [];
-          this.preSpeechSamples = [];
-          this.hasActiveSpeechSegment = false;
-        },
-      });
-    }
-
     const startPayload: StreamInitPayload = {
       sr: this.targetSr,
       channels: this.channels,
@@ -251,14 +156,144 @@ export class RealtimePCMStreamerWorklet {
       init: startPayload,
       context,
     });
-    this.socket.emit(startEmit.event, ...startEmit.args);
     this.isSessionActive = true;
+    const startAccepted = this.waitForStartAccepted();
+    this.socket.emit(startEmit.event, ...startEmit.args);
 
-    if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
-      await this.startContinuousCapture();
-    } else {
-      await this.micVad?.start();
+    try {
+      await startAccepted;
+      if (!this.isSessionActive) {
+        return;
+      }
+
+      if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+        await this.startContinuousCapture();
+      } else {
+        await this.ensureMicVad();
+        await this.micVad?.start();
+      }
+    } catch (error) {
+      await this.cleanup();
+      throw error;
     }
+  }
+
+  private waitForStartAccepted(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.startAcceptedResolve = resolve;
+      this.startAcceptedReject = reject;
+
+      const timeout = setTimeout(() => {
+        this.startAcceptedResolve = null;
+        this.startAcceptedReject = null;
+        reject(new Error("AUDIO_START_ACCEPT_TIMEOUT"));
+      }, START_ACCEPT_TIMEOUT_MS);
+
+      const resolveOnce = () => {
+        clearTimeout(timeout);
+        this.startAcceptedResolve = null;
+        this.startAcceptedReject = null;
+        resolve();
+      };
+      this.startAcceptedResolve = resolveOnce;
+    });
+  }
+
+  private async ensureMicVad(): Promise<void> {
+    if (this.micVad) {
+      return;
+    }
+
+    this.micVad = await MicVAD.new({
+      model: "v5",
+      startOnLoad: false,
+      submitUserSpeechOnPause: true,
+      positiveSpeechThreshold: VAD_CONFIG.positiveSpeechThreshold,
+      negativeSpeechThreshold: VAD_CONFIG.negativeSpeechThreshold,
+      minSpeechMs: VAD_CONFIG.minSpeechMs,
+      redemptionMs: VAD_CONFIG.redemptionMs,
+      preSpeechPadMs: VAD_CONFIG.preSpeechPadMs,
+      baseAssetPath: VAD_ASSET_BASE_PATH,
+      onnxWASMBasePath: ONNX_WASM_BASE_PATH,
+      getStream: async () => {
+        return await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: false,
+          },
+          video: false,
+        });
+      },
+      onFrameProcessed: (probabilities, frame) => {
+        const level = Number(probabilities.isSpeech) || 0;
+        this.onLevelChange?.(this.isMuted ? 0 : Math.max(0, Math.min(1, level)));
+
+        if (this.isMuted) {
+          this.pendingSamples = [];
+          this.preSpeechSamples = [];
+          return;
+        }
+
+        const pcm16Frame = float32ToPcm16(frame);
+        if (pcm16Frame.length > 0) {
+          this.preSpeechSamples.push(...pcm16Frame);
+          if (this.preSpeechSamples.length > this.preSpeechMaxSamples) {
+            this.preSpeechSamples.splice(
+              0,
+              this.preSpeechSamples.length - this.preSpeechMaxSamples,
+            );
+          }
+        }
+
+        if (!this.isSpeaking) {
+          return;
+        }
+
+        if (pcm16Frame.length > 0) {
+          this.pendingSamples.push(...pcm16Frame);
+        }
+
+        this.emitReadyChunks();
+      },
+      onSpeechStart: () => undefined,
+      onSpeechRealStart: () => {
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS || this.isMuted) {
+          return;
+        }
+
+        this.isSpeaking = true;
+        this.hasActiveSpeechSegment = true;
+        if (this.preSpeechSamples.length > 0) {
+          this.pendingSamples.push(...this.preSpeechSamples);
+          this.preSpeechSamples = [];
+          this.emitReadyChunks();
+        }
+      },
+      onSpeechEnd: () => {
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+          return;
+        }
+
+        this.isSpeaking = false;
+        this.preSpeechSamples = [];
+        if (!this.isMuted && this.socket?.connected) {
+          this.emitSpeechEndBoundary();
+        }
+        this.hasActiveSpeechSegment = false;
+      },
+      onVADMisfire: () => {
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+          return;
+        }
+
+        this.isSpeaking = false;
+        this.pendingSamples = [];
+        this.preSpeechSamples = [];
+        this.hasActiveSpeechSegment = false;
+      },
+    });
   }
 
   async stop<TStopContext>(context?: TStopContext): Promise<unknown | null> {
@@ -324,6 +359,9 @@ export class RealtimePCMStreamerWorklet {
   }
 
   private async cleanup() {
+    this.startAcceptedReject?.(new Error("AUDIO_START_CANCELLED"));
+    this.startAcceptedResolve = null;
+    this.startAcceptedReject = null;
     releaseSocket();
 
     this.socket?.off("connect", this.onSocketConnect);
@@ -524,6 +562,8 @@ export class RealtimePCMStreamerWorklet {
     } else if (effectiveMode === TRANSCRIPTION_MODE.PAUSE_BATCH) {
       this.captureMode = AUDIO_CAPTURE_MODE.VAD_SEGMENTED;
     }
+
+    this.startAcceptedResolve?.();
   };
 
   private readonly onRecovered = (payload: unknown) => {
@@ -584,10 +624,7 @@ export class RealtimePCMStreamerWorklet {
       return;
     }
 
-    this.reconnectAttempt = Math.min(
-      this.reconnectAttempt + 1,
-      MAX_AUDIO_RECONNECT_ATTEMPTS,
-    );
+    this.reconnectAttempt = Math.min(this.reconnectAttempt + 1, MAX_AUDIO_RECONNECT_ATTEMPTS);
     const reconnectEmit = this.protocol.buildReconnectEmit({
       sessionRunId: this.sessionRunId,
       lastSentAudioSeq: this.lastSentAudioSeq,
@@ -648,9 +685,7 @@ function readNonNegativeInteger(payload: unknown, ...path: string[]): number | n
     }
     current = current[key];
   }
-  return typeof current === "number" && Number.isInteger(current) && current >= 0
-    ? current
-    : null;
+  return typeof current === "number" && Number.isInteger(current) && current >= 0 ? current : null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
