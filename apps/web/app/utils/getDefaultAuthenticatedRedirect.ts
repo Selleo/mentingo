@@ -45,13 +45,6 @@ export const getDefaultAuthenticatedRedirect = (
   }
 
   if (
-    isAvailableRoute("/progress", excludedRoutes) &&
-    hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE)
-  ) {
-    return "/progress";
-  }
-
-  if (
     isAvailableRoute("/development-paths", excludedRoutes) &&
     globalSettings?.learningPathsEnabled !== false &&
     hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ)

@@ -1,4 +1,4 @@
-import { CheckCircle2, Info, ShieldAlert, XCircle } from "lucide-react";
+import { CheckCircle2, Info, MessageSquareText, ShieldAlert, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -14,12 +14,17 @@ import { cn } from "~/lib/utils";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
-import type { AiMentorEvaluation } from "./AiMentorEvaluationDialog.types";
+import {
+  AI_MENTOR_EVALUATION_CONTEXT,
+  type AiMentorEvaluation,
+  type AiMentorEvaluationContext,
+} from "./AiMentorEvaluationDialog.types";
 
 type AiMentorEvaluationDialogProps = {
   evaluation: AiMentorEvaluation;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  context?: AiMentorEvaluationContext;
 };
 
 const resolveRequiredScore = (evaluation: AiMentorEvaluation) => {
@@ -47,6 +52,7 @@ export function AiMentorEvaluationDialog({
   evaluation,
   open,
   onOpenChange,
+  context = AI_MENTOR_EVALUATION_CONTEXT.LESSON,
 }: AiMentorEvaluationDialogProps) {
   const { t } = useTranslation();
   const passed = Boolean(evaluation.passed);
@@ -58,12 +64,20 @@ export function AiMentorEvaluationDialog({
   const hasScore = maxScore > 0;
   const criteria = evaluation.criteria ?? [];
   const blockingErrors = evaluation.blockingErrors ?? [];
-  const statusLabel = passed
-    ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle")
-    : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle");
-  const statusDescription = passed
-    ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedDescription")
-    : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedDescription");
+  const isPractice = context === AI_MENTOR_EVALUATION_CONTEXT.PRACTICE;
+  let statusLabel = t("aiMentorPractice.feedback.summaryTitle");
+  let statusDescription = t("aiMentorPractice.feedback.summaryDescription");
+  if (!isPractice) {
+    statusLabel = passed
+      ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle")
+      : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle");
+    statusDescription = passed
+      ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedDescription")
+      : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedDescription");
+  }
+  let statusIcon = <MessageSquareText className="size-5" />;
+  if (!isPractice)
+    statusIcon = passed ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +87,9 @@ export function AiMentorEvaluationDialog({
       >
         <DialogHeader className="shrink-0 border-b border-neutral-100 px-6 py-4 text-left">
           <DialogTitle className="text-lg font-semibold text-neutral-950">
-            {t("studentCourseView.lesson.aiMentorLesson.resultButton")}
+            {isPractice
+              ? t("aiMentorPractice.feedback.title")
+              : t("studentCourseView.lesson.aiMentorLesson.resultButton")}
           </DialogTitle>
           <DialogDescription className="sr-only">{statusDescription}</DialogDescription>
         </DialogHeader>
@@ -84,8 +100,9 @@ export function AiMentorEvaluationDialog({
               className={cn(
                 "flex flex-row items-start gap-3 space-y-0 rounded-md border bg-white p-4 text-left",
                 {
-                  "border-emerald-200": passed,
-                  "border-red-200": !passed,
+                  "border-primary-200": isPractice,
+                  "border-emerald-200": !isPractice && passed,
+                  "border-red-200": !isPractice && !passed,
                 },
               )}
             >
@@ -93,12 +110,13 @@ export function AiMentorEvaluationDialog({
                 className={cn(
                   "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md",
                   {
-                    "bg-emerald-50 text-emerald-700": passed,
-                    "bg-red-50 text-red-700": !passed,
+                    "bg-primary-50 text-primary-700": isPractice,
+                    "bg-emerald-50 text-emerald-700": !isPractice && passed,
+                    "bg-red-50 text-red-700": !isPractice && !passed,
                   },
                 )}
               >
-                {passed ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />}
+                {statusIcon}
               </span>
               <div className="grid gap-1">
                 <h3 className="text-base font-semibold text-neutral-950">{statusLabel}</h3>
@@ -110,7 +128,9 @@ export function AiMentorEvaluationDialog({
               <div className="grid gap-3 rounded-md border border-neutral-200 bg-neutral-50/70 p-4 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <span className="text-xs font-medium text-neutral-500">
-                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreLabel")}
+                    {isPractice
+                      ? t("aiMentorPractice.feedback.scoreLabel")
+                      : t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreLabel")}
                   </span>
                   <span className="text-base font-semibold text-neutral-950">
                     {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreValue", {
@@ -120,7 +140,7 @@ export function AiMentorEvaluationDialog({
                     })}
                   </span>
                 </div>
-                {requiredScore !== null && thresholdPercentage !== null && (
+                {!isPractice && requiredScore !== null && thresholdPercentage !== null && (
                   <div className="grid gap-1">
                     <span className="text-xs font-medium uppercase text-neutral-500">
                       {t("studentCourseView.lesson.aiMentorLesson.evaluation.thresholdLabel")}
@@ -144,7 +164,9 @@ export function AiMentorEvaluationDialog({
                     <ShieldAlert className="size-4" />
                   </span>
                   <h3 className="text-sm font-semibold text-neutral-950">
-                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.criticalErrorsTitle")}
+                    {isPractice
+                      ? t("aiMentorPractice.feedback.importantFeedbackTitle")
+                      : t("studentCourseView.lesson.aiMentorLesson.evaluation.criticalErrorsTitle")}
                   </h3>
                 </div>
                 <div className="overflow-hidden rounded-md border border-neutral-200 bg-white">
@@ -170,16 +192,24 @@ export function AiMentorEvaluationDialog({
             {criteria.length > 0 && (
               <section className="grid gap-3">
                 <h3 className="text-sm font-semibold text-neutral-950">
-                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.criteriaTitle")}
+                  {isPractice
+                    ? t("aiMentorPractice.feedback.criteriaTitle")
+                    : t("studentCourseView.lesson.aiMentorLesson.evaluation.criteriaTitle")}
                 </h3>
                 <div className="grid gap-2">
-                  {criteria.map((criterion) => (
+                  {criteria.map((criterion, index) => (
                     <div
                       key={criterion.criterionId}
                       className="grid gap-2 rounded-md border border-neutral-200 bg-white p-3"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm font-semibold text-neutral-950">{criterion.title}</p>
+                        <p className="text-sm font-semibold text-neutral-950">
+                          {criterion.title.trim() ||
+                            t("aiMentorPractice.feedback.criterionFallback", {
+                              number: index + 1,
+                              defaultValue: `Criterion ${index + 1}`,
+                            })}
+                        </p>
                         <span className="shrink-0 rounded-full bg-neutral-100 px-2 py-1 text-xs font-semibold text-neutral-700">
                           {t("studentCourseView.lesson.aiMentorLesson.evaluation.criterionScore", {
                             score: criterion.awardedScore,

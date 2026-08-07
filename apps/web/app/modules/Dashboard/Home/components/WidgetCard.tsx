@@ -10,7 +10,9 @@ type WidgetCardProps = {
 
 type DashboardWidgetHeaderProps = {
   title: string;
+  description?: string;
   icon: LucideIcon;
+  showIcon?: boolean;
   iconClassName?: string;
   iconContainerClassName?: string;
 };
@@ -63,18 +65,25 @@ export function DashboardWidgetIcon({
 
 export function DashboardWidgetHeader({
   title,
+  description,
   icon,
+  showIcon = false,
   iconClassName,
   iconContainerClassName,
 }: DashboardWidgetHeaderProps) {
   return (
     <header className="flex min-w-0 items-center gap-3 px-5 py-5 md:px-6 md:py-6">
-      <DashboardWidgetIcon
-        icon={icon}
-        iconClassName={iconClassName}
-        iconContainerClassName={iconContainerClassName}
-      />
-      <h2 className="body-lg-md min-w-0 truncate text-neutral-950">{title}</h2>
+      {showIcon && (
+        <DashboardWidgetIcon
+          icon={icon}
+          iconClassName={iconClassName}
+          iconContainerClassName={iconContainerClassName}
+        />
+      )}
+      <div className="min-w-0">
+        <h2 className="body-lg-md truncate text-neutral-950">{title}</h2>
+        {description && <p className="details truncate text-neutral-500">{description}</p>}
+      </div>
     </header>
   );
 }

@@ -19,6 +19,11 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 
 import type {
   CourseStudentsStatsByMonth,
+  DashboardDeadlineRiskCourse,
+  DashboardDeadlineRiskSummary,
+  DashboardDeadlineRiskType,
+  DashboardIncompleteCourses,
+  DashboardTrainingCompletion,
   StatsByMonth,
   UserStats,
 } from "./schemas/userStats.schema";
@@ -98,6 +103,96 @@ export class StatisticsService {
         answerCount: avgQuizScore.correctAnswersCount + avgQuizScore.wrongAnswersCount,
       },
     };
+  }
+
+  async getDashboardTrainingCompletion(
+    currentUser: CurrentUserType,
+  ): Promise<DashboardTrainingCompletion> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const trainingCompletion =
+      await this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId);
+    const total = trainingCompletion?.total ?? 0;
+    const completed = trainingCompletion?.completed ?? 0;
+
+    return {
+      completed,
+      inProgress: trainingCompletion?.inProgress ?? 0,
+      notStarted: trainingCompletion?.notStarted ?? 0,
+      total,
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+    };
+  }
+
+  async getDashboardDeadlineRiskSummary(
+    currentUser: CurrentUserType,
+  ): Promise<DashboardDeadlineRiskSummary> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const deadlineRisks =
+      await this.statisticsRepository.getDashboardDeadlineRiskCounts(ownerUserId);
+
+    return {
+      overdueCount: deadlineRisks?.overdueCount ?? 0,
+      dueSoonCount: deadlineRisks?.dueSoonCount ?? 0,
+    };
+  }
+
+  async getDashboardIncompleteCourses(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+  ): Promise<DashboardIncompleteCourses> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const [courses, trainingCompletion] = await Promise.all([
+      this.statisticsRepository.getDashboardIncompleteCourses(ownerUserId, language),
+      this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId),
+    ]);
+
+    return {
+      hasEnrollments: (trainingCompletion?.total ?? 0) > 0,
+      courses,
+    };
+  }
+
+  async getDashboardDeadlineRisks(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+    riskType: DashboardDeadlineRiskType,
+    page: number,
+    perPage: number,
+  ) {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { rows, totalItems } = await this.statisticsRepository.getDashboardDeadlineRisks(
+      ownerUserId,
+      language,
+      riskType,
+      page,
+      perPage,
+    );
+    const courses = new Map<string, DashboardDeadlineRiskCourse>();
+
+    for (const row of rows) {
+      const course = courses.get(row.courseId) ?? {
+        id: row.courseId,
+        title: row.courseTitle,
+        students: [],
+      };
+      course.students.push({
+        id: row.studentId,
+        name: row.studentName,
+        dueDate: row.dueDate,
+      });
+      courses.set(row.courseId, course);
+    }
+
+    return {
+      data: [...courses.values()],
+      pagination: { totalItems, page, perPage },
+    };
+  }
+
+  private getDashboardOwnerUserId(currentUser: CurrentUserType): UUIDType | undefined {
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)
+      ? undefined
+      : currentUser.userId;
   }
 
   async getAdminStats() {

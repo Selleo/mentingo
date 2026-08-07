@@ -1,6 +1,7 @@
 import { PERMISSIONS, type PermissionKey } from "@repo/shared";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 
+import { useMarkCourseOpened } from "~/api/mutations/useMarkCourseOpened";
 import { useCurrentUser } from "~/api/queries";
 import { hasPermission } from "~/common/permissions/permission.utils";
 
@@ -95,6 +96,7 @@ export function CourseAccessProvider({
   children,
 }: CourseAccessProviderProps) {
   const { data: currentUser } = useCurrentUser();
+  const { mutate: markCourseOpened } = useMarkCourseOpened();
 
   const permissions = currentUser?.permissions ?? [];
   const canUseLearningMode = hasPermission(permissions, PERMISSIONS.LEARNING_MODE_USE);
@@ -127,6 +129,12 @@ export function CourseAccessProvider({
     canUpdateLearningProgress,
     canEditCourse,
   ]);
+
+  useEffect(() => {
+    if (!course.enrolled || !value.isEffectiveStudentExperience) return;
+
+    markCourseOpened(course.id);
+  }, [course.enrolled, course.id, markCourseOpened, value.isEffectiveStudentExperience]);
 
   return (
     <CourseExperienceContext.Provider value={value}>{children}</CourseExperienceContext.Provider>

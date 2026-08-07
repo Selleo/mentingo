@@ -142,7 +142,16 @@ export class LocalizationService {
   }
 
   getFirstValue(fieldColumn: AnyPgColumn) {
-    return sql<string>`(SELECT value FROM jsonb_each_text(${fieldColumn}) LIMIT 1)`;
+    return sql<string>`(
+      SELECT value
+      FROM jsonb_each_text(
+        CASE
+          WHEN jsonb_typeof(${fieldColumn}) = 'object' THEN ${fieldColumn}
+          ELSE '{}'::jsonb
+        END
+      )
+      LIMIT 1
+    )`;
   }
 
   /**

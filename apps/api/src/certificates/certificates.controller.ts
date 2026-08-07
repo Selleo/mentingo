@@ -4,7 +4,14 @@ import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDSchema,
+  UUIDType,
+} from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -19,6 +26,7 @@ import {
   certificateResetUsersSchema,
   certificateValidityImpactResponseSchema,
   certificateValidityImpactSchema,
+  certificateDashboardSummarySchema,
   certificateShareLinkResponseSchema,
   createCertificateShareLinkSchema,
   downloadCertificateSchema,
@@ -39,6 +47,7 @@ import type {
   CertificateResetOptionsResponse,
   CertificateResetUsersResponse,
   CertificateValidityImpactResponse,
+  CertificateDashboardSummary,
   CertificateShareLinkResponse,
   ResetCourseCertificatesResponse,
   SingleCertificateResponse,
@@ -76,6 +85,19 @@ export class CertificatesController {
       sort: sort as "createdAt",
     });
     return new PaginatedResponse(data);
+  }
+
+  @Get("dashboard-summary")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
+  @Validate({
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    response: baseResponse(certificateDashboardSummarySchema),
+  })
+  async getDashboardSummary(
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CertificateDashboardSummary>> {
+    return new BaseResponse(await this.certificatesService.getDashboardSummary(userId, language));
   }
 
   @Get("certificate")

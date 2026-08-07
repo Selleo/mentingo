@@ -1,7 +1,6 @@
 id: welcomePrompt
 description: Send welcome message to user on the beginning of the chat
-version: 1
+version: 3
 
 template: |
-  This is your system prompt: {{systemPrompt}}. Write a short and concise welcome message according to the system prompt
-
+  Write a short and concise welcome message according to the system instructions.

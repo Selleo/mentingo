@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
+import { cn } from "~/lib/utils";
 import { LessonComposerCenterContent } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerCenterContent";
 import { LessonComposerLeftControl } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerLeftControl";
 import { LessonComposerRightControls } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerRightControls";
@@ -34,6 +35,8 @@ interface LessonFormProps {
   taskDescription: string;
   onJudge: () => Promise<void>;
   isJudgePending: boolean;
+  allowVoiceMentor?: boolean;
+  compact?: boolean;
 }
 
 export const LessonForm = ({
@@ -53,6 +56,8 @@ export const LessonForm = ({
   taskDescription,
   onJudge,
   isJudgePending,
+  allowVoiceMentor = true,
+  compact = false,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -64,7 +69,7 @@ export const LessonForm = ({
   const [latestTranscript, setLatestTranscript] = useState("");
   const [latestResponse, setLatestResponse] = useState("");
   const { data: lumaConfigured } = useLumaConfigured();
-  const canUseVoiceMentor = Boolean(lumaConfigured?.voiceMentorEnabled);
+  const canUseVoiceMentor = allowVoiceMentor && Boolean(lumaConfigured?.voiceMentorEnabled);
   const voiceModeUI = useVoiceModeUIState();
 
   const emojiRef = useRef<HTMLDivElement | null>(null);
@@ -247,7 +252,7 @@ export const LessonForm = ({
   };
 
   return (
-    <div className="relative mt-3 w-full">
+    <div className={cn("relative mt-3 w-full", compact && "mt-1")}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -258,10 +263,16 @@ export const LessonForm = ({
           handleSubmit();
         }}
       >
-        <div className="flex w-full flex-col rounded-lg border border-[#E4E6EB] bg-[#F5F6F7] px-4 py-3">
+        <div
+          className={cn(
+            "flex w-full flex-col rounded-lg border border-[#E4E6EB] bg-[#F5F6F7] px-4 py-3",
+            compact && "px-3 py-2",
+          )}
+        >
           <div>
             <LessonComposerCenterContent
               isVoiceMode={isVoiceMode}
+              compact={compact}
               input={input}
               placeholder={t("studentCourseView.lesson.aiMentorLesson.sendMessage")}
               voiceLevel={voiceLevel}
@@ -271,7 +282,7 @@ export const LessonForm = ({
             />
           </div>
 
-          <div className="mt-2 flex items-center justify-between gap-3">
+          <div className={cn("mt-2 flex items-center justify-between gap-3", compact && "mt-1")}>
             <div className="flex items-center gap-2">
               <LessonComposerLeftControl
                 isVoiceMode={isVoiceMode}

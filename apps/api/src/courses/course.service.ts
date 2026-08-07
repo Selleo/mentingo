@@ -13,11 +13,14 @@ import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
   type SupportedLanguages,
+  STUDENT_COURSE_URGENCY,
+  STUDENT_DASHBOARD_LIMITS,
 } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
@@ -195,6 +198,7 @@ import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
+import type { StudentCourseDashboardSummary } from "./schemas/studentDashboard.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseMediaBody } from "./schemas/updateCourseMedia.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
@@ -506,6 +510,191 @@ export class CourseService {
         },
       };
     });
+  }
+
+  async markCourseOpened(courseId: UUIDType, userId: UUIDType): Promise<void> {
+    const [updatedEnrollment] = await this.db
+      .update(studentCourses)
+      .set({ lastOpenedAt: sql`CURRENT_TIMESTAMP` })
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .returning({ id: studentCourses.id });
+
+    if (!updatedEnrollment) throw new ForbiddenException("common.toast.courseAccessDenied");
+  }
+
+  async getStudentDashboardSummary(
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<StudentCourseDashboardSummary> {
+    const continueCourses = await this.db
+      .select({
+        courseId: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        thumbnailS3Key: courses.thumbnailS3Key,
+        completedChapterCount: studentCourses.finishedChapterCount,
+        courseChapterCount: courses.chapterCount,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
+          isNull(studentCourses.completedAt),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        ),
+      )
+      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
+
+    const requiredCourses = await this.db
+      .select({
+        courseId: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        dueDate: sql<string | null>`${groupCourses.dueDate}`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(studentCourses.completedAt),
+          eq(groupCourses.isMandatory, true),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        ),
+      )
+      .orderBy(groupCourses.dueDate, courses.title)
+      .limit(STUDENT_DASHBOARD_LIMITS.REQUIRED_COURSES);
+
+    const [completion] = await this.db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.completedAt} IS NOT NULL)::int`,
+        inProgress: sql<number>`COUNT(*) FILTER (
+          WHERE ${studentCourses.completedAt} IS NULL
+            AND ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS}
+        )::int`,
+        notStarted: sql<number>`COUNT(*) FILTER (
+          WHERE ${studentCourses.completedAt} IS NULL
+            AND ${studentCourses.progress} <> ${PROGRESS_STATUSES.IN_PROGRESS}
+        )::int`,
+      })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    const continueCourseIds = continueCourses.map((course) => course.courseId);
+    const requiredCourseIds = requiredCourses.map((course) => course.courseId);
+    const courseIds = [...new Set([...continueCourseIds, ...requiredCourseIds])];
+    const slugs = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+
+    const nextLessons =
+      continueCourseIds.length > 0
+        ? await this.db
+            .selectDistinctOn([chapters.courseId], {
+              courseId: chapters.courseId,
+              id: lessons.id,
+              title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+            })
+            .from(lessons)
+            .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+            .innerJoin(courses, eq(courses.id, chapters.courseId))
+            .leftJoin(
+              studentLessonProgress,
+              and(
+                eq(studentLessonProgress.lessonId, lessons.id),
+                eq(studentLessonProgress.chapterId, chapters.id),
+                eq(studentLessonProgress.studentId, userId),
+              ),
+            )
+            .where(
+              and(
+                inArray(chapters.courseId, continueCourseIds),
+                sql`NOT (
+              ${studentLessonProgress.completedAt} IS NOT NULL
+              AND (
+                ${studentLessonProgress.isQuizPassed} IS TRUE
+                OR ${studentLessonProgress.isQuizPassed} IS NULL
+              )
+            )`,
+              ),
+            )
+            .orderBy(chapters.courseId, chapters.displayOrder, lessons.displayOrder)
+        : [];
+    const nextLessonByCourse = new Map<UUIDType, { id: UUIDType; title: string | null }>();
+
+    for (const { courseId, id, title } of nextLessons) {
+      if (!nextLessonByCourse.has(courseId)) {
+        nextLessonByCourse.set(courseId, { id, title });
+      }
+    }
+
+    const continueLearningCourses = await Promise.all(
+      continueCourses.map(async (course) => ({
+        courseId: course.courseId,
+        slug: slugs.get(course.courseId) ?? course.courseId,
+        title: course.title,
+        thumbnailUrl: course.thumbnailS3Key
+          ? await this.getSignedCourseThumbnailUrl(course.thumbnailS3Key)
+          : null,
+        completedChapterCount: course.completedChapterCount,
+        courseChapterCount: course.courseChapterCount,
+        lesson: nextLessonByCourse.get(course.courseId) ?? null,
+      })),
+    );
+    const dueSoonBoundary = addDays(new Date(), 7).getTime();
+
+    const total = completion?.total ?? 0;
+    const completed = completion?.completed ?? 0;
+
+    return {
+      continueLearningCourses,
+      requiredCourses: requiredCourses.map((course) => {
+        let urgency: StudentCourseDashboardSummary["requiredCourses"][number]["urgency"] =
+          STUDENT_COURSE_URGENCY.NO_DEADLINE;
+
+        if (course.dueDate) {
+          const dueDate = new Date(course.dueDate).getTime();
+          if (dueDate < Date.now()) urgency = STUDENT_COURSE_URGENCY.OVERDUE;
+          else if (dueDate <= dueSoonBoundary) urgency = STUDENT_COURSE_URGENCY.DUE_SOON;
+          else urgency = STUDENT_COURSE_URGENCY.SCHEDULED;
+        }
+
+        return {
+          courseId: course.courseId,
+          slug: slugs.get(course.courseId) ?? course.courseId,
+          title: course.title,
+          dueDate: course.dueDate,
+          urgency,
+        };
+      }),
+      completion: {
+        total,
+        completed,
+        inProgress: completion?.inProgress ?? 0,
+        notStarted: completion?.notStarted ?? 0,
+        percentage: total ? Math.round((completed / total) * 100) : 0,
+      },
+    };
   }
 
   async getStudentsWithEnrollmentDate(query: EnrolledStudentsQuery) {

@@ -5,7 +5,11 @@ export function AiMentorEvaluationLoader() {
   const { t } = useTranslation();
 
   return (
-    <div role="status" aria-live="polite" className="my-4 w-full border-y border-neutral-200 py-4">
+    <div
+      role="status"
+      aria-live="polite"
+      className="mx-4 my-4 w-auto border-y border-neutral-200 py-4 sm:mx-6"
+    >
       <div className="flex items-start gap-3">
         <LoaderCircle className="mt-0.5 size-5 shrink-0 animate-spin text-primary-700" />
         <div className="min-w-0 flex-1">

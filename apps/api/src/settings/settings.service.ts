@@ -27,6 +27,7 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
+import { EnvService } from "src/env/services/env.service";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -145,6 +146,7 @@ export class SettingsService {
     private readonly fileService: FileService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly envService: EnvService,
   ) {}
 
   public async getCurrentUserSettings(
@@ -735,9 +737,11 @@ export class SettingsService {
     userId: UUIDType,
     widgetIds: DashboardWidgetsIdsJSONContentSchema,
   ): Promise<DashboardWidgetsIdsJSONContentSchema> {
-    const { roleSlugs } = await this.permissionsService.getUserAccess(userId);
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
     const userRoles = new Set(roleSlugs);
+    const userPermissions = new Set(permissions);
     const globalSettings = await this.getPublicGlobalSettings();
+    const aiConfigured = await this.envService.getAIConfigured();
 
     const isValidWidgetId = (id: DashboardWidgetId) =>
       Object.prototype.hasOwnProperty.call(DASHBOARD_WIDGETS, id);
@@ -746,9 +750,16 @@ export class SettingsService {
       if (!isValidWidgetId(widgetId)) return false;
 
       const widgetDefinition: DashboardWidgetDefinition = DASHBOARD_WIDGETS[widgetId];
-      const { allowedRoles, requiredFeature } = widgetDefinition;
+      const { allowedRoles, requiredFeature, requiredPermissions, requiresAiConfigured } =
+        widgetDefinition;
 
       if (requiredFeature && !globalSettings[FEATURE_SETTINGS_KEYS[requiredFeature]]) return false;
+      if (requiresAiConfigured && !aiConfigured.enabled) return false;
+      if (
+        requiredPermissions &&
+        !requiredPermissions.every((permission) => userPermissions.has(permission))
+      )
+        return false;
 
       if (!allowedRoles) return true;
 

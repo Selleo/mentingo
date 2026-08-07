@@ -38,7 +38,7 @@ template: |
 
   <ai_mentor_and_judge_rules>
   - For AI Mentor instructions, preserve the configured role, persona, tone, conversation sequence, behavioral constraints, and learner-facing intent.
-  - For AI Judge task goals, preserve the measurable outcome without weakening or expanding it.
+  - For AI Judge task goals, preserve the learner-facing practice description and intended outcome without weakening or expanding it.
   - For criterion titles and expected behaviors, preserve exactly what evidence the learner must demonstrate.
   - For score-guidance descriptions and examples, preserve the score level and evidentiary strength. Examples remain illustrative; do not turn them into mandatory exact phrases.
   - For blocking errors, preserve their unconditional fail meaning. Do not soften them into recommendations or ordinary scoring criteria.
