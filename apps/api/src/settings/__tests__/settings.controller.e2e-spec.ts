@@ -135,6 +135,80 @@ describe("SettingsController (e2e)", () => {
           .expect(400);
       });
 
+      it("should reject duplicate dashboard widgets", async () => {
+        const widget = {
+          id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+          width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+        };
+
+        await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({
+            dashboard: {
+              widgets: [
+                { ...widget, order: 0 },
+                { ...widget, order: 1 },
+              ],
+            },
+          })
+          .expect(400);
+      });
+
+      it("should reject a layout without an always-visible widget", async () => {
+        await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({
+            dashboard: {
+              widgets: [
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  order: 0,
+                  width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+                },
+              ],
+            },
+          })
+          .expect(400);
+      });
+
+      it("should normalize dashboard widget order before saving", async () => {
+        const response = await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({
+            dashboard: {
+              widgets: [
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  order: 10,
+                  width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+                },
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+                  order: 5,
+                  width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+                },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(response.body.data.dashboard.widgets).toEqual([
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+            order: 0,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+            order: 1,
+            width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+          },
+        ]);
+      });
+
       it("should return 400 if dashboard settings contain an unknown widget or width", async () => {
         await request(app.getHttpServer())
           .put("/api/settings")
