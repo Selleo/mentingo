@@ -80,6 +80,16 @@ export class AiController {
     return new BaseResponse(await this.aiPracticeService.retry(id, currentUser));
   }
 
+  @Post("practice/:id/replay")
+  @RequirePermission(PERMISSIONS.AI_USE)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(aiMentorPracticeSessionSchema),
+  })
+  async replayPractice(@Param("id") id: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
+    return new BaseResponse(await this.aiPracticeService.replay(id, currentUser));
+  }
+
   @Get("thread")
   @RequirePermission(PERMISSIONS.AI_USE)
   @Validate({

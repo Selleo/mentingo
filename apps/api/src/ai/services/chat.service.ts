@@ -12,7 +12,11 @@ import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-config
 @Injectable()
 export class ChatService {
   constructor(private readonly promptService: PromptService) {}
-  async generatePrompt(prompt: string, model: OpenAIModels = OPENAI_MODELS.BASIC): Promise<string> {
+  async generatePrompt(
+    prompt: string,
+    model: OpenAIModels = OPENAI_MODELS.BASIC,
+    systemPrompt?: string,
+  ): Promise<string> {
     return observe(
       async () => {
         await this.promptService.isNotEmpty(prompt);
@@ -22,6 +26,7 @@ export class ChatService {
           const { generateText } = await loadAiSdk();
           const { text } = await generateText({
             model: provider(model),
+            system: systemPrompt,
             prompt: prompt,
             maxOutputTokens: MAX_TOKENS,
             experimental_telemetry: { isEnabled: true },

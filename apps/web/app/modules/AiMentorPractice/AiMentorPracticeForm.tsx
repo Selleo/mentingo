@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
+import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +13,24 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 
 import { createPracticeFormSchema, type PracticeFormValues } from "./aiMentorPractice.schema";
 
-const fields = ["challenge", "counterpart", "desiredOutcome"] as const;
+const PRACTICE_SUGGESTIONS = [
+  {
+    label: "aiMentorPractice.form.suggestions.feedback.label",
+    value: "aiMentorPractice.form.suggestions.feedback.value",
+  },
+  {
+    label: "aiMentorPractice.form.suggestions.boundary.label",
+    value: "aiMentorPractice.form.suggestions.boundary.value",
+  },
+  {
+    label: "aiMentorPractice.form.suggestions.explanation.label",
+    value: "aiMentorPractice.form.suggestions.explanation.value",
+  },
+  {
+    label: "aiMentorPractice.form.suggestions.request.label",
+    value: "aiMentorPractice.form.suggestions.request.value",
+  },
+] as const;
 
 export function AiMentorPracticeForm() {
   const { t } = useTranslation();
@@ -22,9 +40,7 @@ export function AiMentorPracticeForm() {
   const form = useForm<PracticeFormValues>({
     resolver: zodResolver(createPracticeFormSchema(t("common.validation.required"))),
     defaultValues: {
-      challenge: "",
-      counterpart: "",
-      desiredOutcome: "",
+      scenario: "",
     },
   });
 
@@ -34,30 +50,76 @@ export function AiMentorPracticeForm() {
   };
 
   return (
-    <PageWrapper className="mx-auto max-w-3xl">
-      <h1 className="h4">{t("aiMentorPractice.form.title")}</h1>
-      <p className="mt-2 text-neutral-600">{t("aiMentorPractice.form.description")}</p>
-      <Form {...form}>
-        <form
-          onSubmit={(event) => void form.handleSubmit(submit)(event)}
-          className="mt-6 space-y-5"
-        >
-          {fields.map((field) => (
+    <PageWrapper
+      className="mx-auto max-w-3xl"
+      breadcrumbs={[
+        { title: t("navigationSideBar.dashboard"), href: "/dashboard" },
+        { title: t("aiMentorPractice.conversationTitle"), href: "/ai-mentor/practice/new" },
+      ]}
+    >
+      <header className="max-w-2xl">
+        <h1 className="h2 text-balance text-neutral-950">{t("aiMentorPractice.form.title")}</h1>
+      </header>
+
+      <section className="mt-8">
+        <Form {...form}>
+          <form
+            onSubmit={(event) => void form.handleSubmit(submit)(event)}
+            className="rounded-xl border border-primary-100 bg-white p-4 shadow-sm"
+          >
             <FormTextareaField
-              key={field}
               control={form.control}
-              name={field}
-              label={t(`aiMentorPractice.form.${field}`)}
+              name="scenario"
+              label={t("aiMentorPractice.form.scenario")}
+              placeholder={t("aiMentorPractice.form.scenarioPlaceholder")}
               required
-              maxLength={1000}
-              className="mt-2"
+              maxLength={3000}
+              className="mt-2 h-48 border-neutral-200 bg-white px-3 py-3 text-base leading-relaxed text-neutral-950 shadow-none placeholder:text-neutral-500"
             />
-          ))}
-          <Button type="submit" disabled={isPending}>
-            {t("aiMentorPractice.form.submit")}
-          </Button>
-        </form>
-      </Form>
+            <div className="mb-6 rounded-lg p-4">
+              <h3 className="mb-3 text-sm font-semibold text-neutral-900">
+                {t("aiMentorPractice.form.suggestions.title")}
+              </h3>
+              <div className="grid min-w-0 max-w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {PRACTICE_SUGGESTIONS.map((suggestion) => (
+                  <Button
+                    key={suggestion.label}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="box-border min-w-0 justify-center px-4 text-center"
+                    onClick={() =>
+                      form.setValue("scenario", t(suggestion.value), {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <span className="block w-full truncate">{t(suggestion.label)}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-5 border-t border-neutral-200 pt-3">
+              <p className="details max-w-sm text-neutral-500">
+                {t("aiMentorPractice.form.scenarioHint")}
+              </p>
+              <Button
+                type="submit"
+                disabled={isPending}
+                size="lg"
+                className="shrink-0 gap-2 motion-safe:active:scale-[0.98] motion-reduce:transform-none"
+              >
+                {t("aiMentorPractice.form.submit")}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
+          </form>
+        </Form>
+        <p className="details mt-3 text-center text-neutral-500">
+          {t("aiMentorPractice.form.privateHint")}
+        </p>
+      </section>
     </PageWrapper>
   );
 }

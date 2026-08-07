@@ -51,6 +51,7 @@ import type {
   AiJudgeBlockingErrorJudgementWrite,
   AiJudgeCriterionJudgementWrite,
   AiJudgeJudgementWrite,
+  AiJudgePublicResult,
   AiJudgeRubricContext,
 } from "src/ai/judge-configuration/judge-configuration.types";
 import type {
@@ -243,18 +244,19 @@ export class AiRepository {
       .select({
         title: sql<string>`COALESCE(
           ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
-          ${aiMentorPracticeSessions.generatedTitle}
+          ${aiMentorPracticeSessions.title}
         )`,
         instructions: sql<string>`COALESCE(
           ${this.localizationService.getLocalizedSqlField(
             aiMentorLessons.aiMentorInstructions,
             language,
           )},
-          ${aiMentorPracticeSessions.generatedInstructions}
+          ${aiMentorPracticeSessions.instructions}
         )`,
         type: sql<AiMentorType>`COALESCE(${aiMentorLessons.type}, 'roleplay')`,
         name: sql<string>`COALESCE(
           ${this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language)},
+          ${aiMentorPracticeSessions.aiMentorName},
           'AI Mentor'
         )`,
         learnerFirstName: users.firstName,
@@ -276,12 +278,14 @@ export class AiRepository {
 
   async findPracticeSessionByDate(userId: UUIDType, practiceDate: string) {
     const [session] = await this.db
-      .select({
-        ...getTableColumns(aiMentorPracticeSessions),
-        threadId: aiMentorThreads.id,
-      })
+      .select(this.getPracticeSessionSelection())
       .from(aiMentorPracticeSessions)
       .leftJoin(aiMentorThreads, eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id))
+      .leftJoin(
+        aiJudgeConfigurations,
+        eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+      )
+      .leftJoin(aiMentorJudgements, eq(aiMentorJudgements.threadId, aiMentorThreads.id))
       .where(
         and(
           eq(aiMentorPracticeSessions.userId, userId),
@@ -294,15 +298,134 @@ export class AiRepository {
 
   async findPracticeSessionById(sessionId: UUIDType) {
     const [session] = await this.db
-      .select({
-        ...getTableColumns(aiMentorPracticeSessions),
-        threadId: aiMentorThreads.id,
-      })
+      .select(this.getPracticeSessionSelection())
       .from(aiMentorPracticeSessions)
       .leftJoin(aiMentorThreads, eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id))
+      .leftJoin(
+        aiJudgeConfigurations,
+        eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+      )
+      .leftJoin(aiMentorJudgements, eq(aiMentorJudgements.threadId, aiMentorThreads.id))
       .where(eq(aiMentorPracticeSessions.id, sessionId));
 
     return session;
+  }
+
+  private getPracticeSessionSelection() {
+    const practiceCriterionTitle = sql<string>`COALESCE(
+      NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
+      NULLIF(
+        (
+          SELECT CASE
+            WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'object'
+              THEN ${aiJudgeCriteria.title} ->> ${aiMentorPracticeSessions.language}
+            WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'string'
+              THEN ${aiJudgeCriteria.title} #>> '{}'
+            ELSE ''
+          END
+          FROM ${aiJudgeCriteria}
+          WHERE ${aiJudgeCriteria.id} = ${aiMentorJudgementCriteria.criterionId}
+        ),
+        ''
+      ),
+      (
+        SELECT value
+        FROM jsonb_each_text(
+          CASE
+            WHEN jsonb_typeof(
+              (
+                SELECT ${aiJudgeCriteria.title}
+                FROM ${aiJudgeCriteria}
+                WHERE ${aiJudgeCriteria.id} = ${aiMentorJudgementCriteria.criterionId}
+              )
+            ) = 'object'
+              THEN (
+                SELECT ${aiJudgeCriteria.title}
+                FROM ${aiJudgeCriteria}
+                WHERE ${aiJudgeCriteria.id} = ${aiMentorJudgementCriteria.criterionId}
+              )
+            ELSE '{}'::jsonb
+          END
+        )
+        LIMIT 1
+      ),
+      ''
+    )`;
+
+    return {
+      ...getTableColumns(aiMentorPracticeSessions),
+      threadId: aiMentorThreads.id,
+      threadStatus: sql<ThreadStatus | null>`${aiMentorThreads.status}`,
+      taskGoal: sql<string | null>`
+        COALESCE(
+          NULLIF(${aiJudgeConfigurations.taskGoal} ->> ${aiMentorPracticeSessions.language}, ''),
+          (
+            SELECT value
+            FROM jsonb_each_text(
+              CASE
+                WHEN jsonb_typeof(${aiJudgeConfigurations.taskGoal}) = 'object'
+                  THEN ${aiJudgeConfigurations.taskGoal}
+                ELSE '{}'::jsonb
+              END
+            )
+            LIMIT 1
+          ),
+          ''
+        )
+      `,
+      evaluation: sql<AiJudgePublicResult | null>`
+        CASE
+          WHEN ${aiMentorJudgements.id} IS NULL THEN NULL
+          ELSE jsonb_build_object(
+            'minScore', CEIL(
+              ${aiMentorJudgements.maxScore}
+              * ${aiJudgeConfigurations.passingThresholdPercent}
+              / 100.0
+            )::integer,
+            'maxScore', ${aiMentorJudgements.maxScore},
+            'score', ${aiMentorJudgements.earnedPoints},
+            'percentage', ${aiMentorJudgements.percentage},
+            'passed', ${aiMentorJudgements.passed},
+            'criteria', COALESCE(
+              (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'criterionId', ${aiMentorJudgementCriteria.criterionId},
+                    'title', ${practiceCriterionTitle},
+                    'awardedScore', ${aiMentorJudgementCriteria.awardedPoints},
+                    'maxScore', ${aiMentorJudgementCriteria.maxScoreAtJudgement},
+                    'status', ${aiMentorJudgementCriteria.status},
+                    'learnerSafeFeedback', COALESCE(
+                      ${aiMentorJudgementCriteria.learnerSafeFeedback},
+                      ''
+                    )
+                  )
+                  ORDER BY ${aiMentorJudgementCriteria.createdAt}
+                )
+                FROM ${aiMentorJudgementCriteria}
+                WHERE ${aiMentorJudgementCriteria.judgementId} = ${aiMentorJudgements.id}
+              ),
+              '[]'::jsonb
+            ),
+            'blockingErrors', COALESCE(
+              (
+                SELECT jsonb_agg(
+                  jsonb_build_object(
+                    'blockingErrorId', ${aiMentorJudgementBlockingErrors.blockingErrorId},
+                    'description', ${aiMentorJudgementBlockingErrors.blockingErrorDescription},
+                    'learnerSafeFeedback', ${aiMentorJudgementBlockingErrors.learnerSafeFeedback}
+                  )
+                  ORDER BY ${aiMentorJudgementBlockingErrors.createdAt}
+                )
+                FROM ${aiMentorJudgementBlockingErrors}
+                WHERE ${aiMentorJudgementBlockingErrors.judgementId} = ${aiMentorJudgements.id}
+              ),
+              '[]'::jsonb
+            )
+          )
+        END
+      `,
+    };
   }
 
   async createPracticeSession(
@@ -401,17 +524,26 @@ export class AiRepository {
 
   async saveGeneratedPractice(
     sessionId: UUIDType,
-    generatedTitle: string,
-    generatedInstructions: string,
+    title: string,
+    aiMentorName: string,
+    instructions: string,
     graph: AiPracticeJudgeConfigurationGraph,
   ) {
     return this.db.transaction(async (trx) => {
-      const session = await this.updatePracticeSession(
-        sessionId,
-        { generatedTitle, generatedInstructions },
-        trx,
-      );
+      await this.updatePracticeSession(sessionId, { title, aiMentorName, instructions }, trx);
       await this.insertPracticeJudgeConfigurationGraph(graph, trx);
+    });
+  }
+
+  async resetPracticeConversation(sessionId: UUIDType) {
+    return this.db.transaction(async (trx) => {
+      await trx.delete(aiMentorThreads).where(eq(aiMentorThreads.practiceSessionId, sessionId));
+      const [session] = await trx
+        .update(aiMentorPracticeSessions)
+        .set({ status: AI_MENTOR_PRACTICE_STATUSES.READY, errorCode: null })
+        .where(eq(aiMentorPracticeSessions.id, sessionId))
+        .returning();
+
       return session;
     });
   }
@@ -445,11 +577,52 @@ export class AiRepository {
       language,
     );
 
+    const taskGoal = sql<string>`COALESCE(
+      NULLIF(${localizedTaskGoal}, ''),
+      ${this.localizationService.getFirstValue(aiJudgeConfigurations.taskGoal)},
+      ''
+    )`;
+    const criterionTitle = sql<string>`COALESCE(
+      NULLIF(${localizedCriterionTitle}, ''),
+      NULLIF(
+        CASE
+          WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'object'
+            THEN ${aiJudgeCriteria.title} ->> ${language}
+          WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'string'
+            THEN ${aiJudgeCriteria.title} #>> '{}'
+          ELSE ''
+        END,
+        ''
+      ),
+      ${this.localizationService.getFirstValue(aiJudgeCriteria.title)},
+      ''
+    )`;
+    const expectedBehavior = sql<string>`COALESCE(
+      NULLIF(${localizedExpectedBehavior}, ''),
+      ${this.localizationService.getFirstValue(aiJudgeCriteria.expectedBehavior)},
+      ''
+    )`;
+    const guidanceDescription = sql<string>`COALESCE(
+      NULLIF(${localizedGuidanceDescription}, ''),
+      ${this.localizationService.getFirstValue(aiJudgeScoreGuidance.description)},
+      ''
+    )`;
+    const guidanceExample = sql<string>`COALESCE(
+      NULLIF(${localizedGuidanceExample}, ''),
+      ${this.localizationService.getFirstValue(aiJudgeScoreGuidance.example)},
+      ''
+    )`;
+    const blockingError = sql<string>`COALESCE(
+      NULLIF(${localizedBlockingError}, ''),
+      ${this.localizationService.getFirstValue(aiJudgeBlockingErrors.description)},
+      ''
+    )`;
+
     const [context] = await this.db
       .select({
         lessonTitle: sql<string>`COALESCE(
           ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
-          ${aiMentorPracticeSessions.generatedTitle},
+          ${aiMentorPracticeSessions.title},
           'AI Mentor practice'
         )`,
         rubric: sql<AiJudgeRubricContext["rubric"]>`
@@ -459,23 +632,23 @@ export class AiRepository {
             THEN NULL
             ELSE jsonb_build_object(
               'configurationId', ${aiJudgeConfigurations.id},
-              'taskGoal', ${localizedTaskGoal},
+              'taskGoal', ${taskGoal},
               'passingThresholdPercent', ${aiJudgeConfigurations.passingThresholdPercent},
               'criteria', COALESCE(
                 (
                   SELECT jsonb_agg(
                     jsonb_build_object(
                       'id', ${aiJudgeCriteria.id},
-                      'title', ${localizedCriterionTitle},
-                      'expectedBehavior', ${localizedExpectedBehavior},
+                      'title', ${criterionTitle},
+                      'expectedBehavior', ${expectedBehavior},
                       'maxScore', ${aiJudgeCriteria.maxScore},
                       'scoreGuidance', COALESCE(
                         (
                           SELECT jsonb_agg(
                             jsonb_build_object(
                               'score', ${aiJudgeScoreGuidance.score},
-                              'description', ${localizedGuidanceDescription},
-                              'example', NULLIF(${localizedGuidanceExample}, '')
+                              'description', ${guidanceDescription},
+                              'example', NULLIF(${guidanceExample}, '')
                             )
                             ORDER BY ${aiJudgeScoreGuidance.score}, ${aiJudgeScoreGuidance.createdAt}
                           )
@@ -497,7 +670,7 @@ export class AiRepository {
                   SELECT jsonb_agg(
                     jsonb_build_object(
                       'id', ${aiJudgeBlockingErrors.id},
-                      'description', ${localizedBlockingError}
+                      'description', ${blockingError}
                     )
                     ORDER BY ${aiJudgeBlockingErrors.createdAt}
                   )

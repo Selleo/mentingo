@@ -985,13 +985,10 @@ export const aiMentorPracticeSessions = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     practiceDate: date("practice_date", { mode: "string" }).notNull(),
-    timezone: text("timezone").notNull(),
     language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
-    challenge: text("challenge").notNull(),
-    counterpart: text("counterpart").notNull(),
-    desiredOutcome: text("desired_outcome").notNull(),
-    generatedTitle: text("generated_title"),
-    generatedInstructions: text("generated_instructions"),
+    title: text("title"),
+    aiMentorName: text("ai_mentor_name"),
+    instructions: text("instructions").notNull(),
     status: varchar("status", { length: 20 })
       .$type<AiMentorPracticeStatus>()
       .notNull()

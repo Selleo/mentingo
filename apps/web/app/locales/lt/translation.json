@@ -88,8 +88,14 @@
         "aiMentorPractice": {
           "description": "Kasdien sukurkite vieną praktikos scenarijų",
           "empty": "Aprašykite situaciją ir praktikuokitės su DI mentoriumi.",
+          "emptyPrompt": "Kokį pokalbį norėtumėte vesti užtikrinčiau?",
           "startCta": "Pradėti praktiką",
           "continueCta": "Tęsti praktiką",
+          "feedbackCta": "Peržiūrėti atsiliepimą",
+          "todayEyebrow": "Šiandienos repeticija",
+          "completedEyebrow": "Repeticija baigta",
+          "returnHint": "Jūsų pokalbis išsaugotas",
+          "privateHint": "Privati vieta bandyti ir tobulėti",
           "status": {
             "queued": "Scenarijus laukia.",
             "processing": "Scenarijus ruošiamas.",
@@ -163,14 +169,72 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Sukurti šiandienos DI mentoriaus praktiką",
-      "description": "Atsakykite į tris trumpus klausimus.",
-      "challenge": "Kokią situaciją norite praktikuoti?",
-      "counterpart": "Su kuo kalbėsite?",
-      "desiredOutcome": "Kokio rezultato siekiate?",
-      "submit": "Generuoti praktiką"
+      "title": "Praktikuokite tikrą pokalbį.",
+      "promptEyebrow": "Nustatykite sceną",
+      "mentorPrompt": "Papasakokite apie pokalbį, kurį norite repetuoti. Su kuo kalbate, kas vyksta ir ką norėtumėte atlikti geriau?",
+      "scenario": "Ką norite praktikuoti?",
+      "scenarioPlaceholder": "Pavyzdžiui: noriu praktikuoti konstruktyvų grįžtamąjį ryšį kolegai, kuris praleido terminą.",
+      "scenarioHint": "Pridėkite kontekstą, kuris padėtų sukurti tikrovišką praktiką, pavyzdžiui, situaciją, žmones ar tikslą.",
+      "privateHint": "Šią praktiką matote tik jūs.",
+      "submit": "Sukurti praktiką",
+      "suggestions": {
+        "title": "Pradėkite nuo pavyzdžio",
+        "feedback": {
+          "label": "Pateikti atsiliepimą",
+          "value": "Noriu praktikuoti konstruktyvaus atsiliepimo pateikimą kolegai, kuris nesilaikė svarbaus termino."
+        },
+        "boundary": {
+          "label": "Nustatyti ribą",
+          "value": "Noriu praktikuoti aiškios ribos nustatymą, kai komandos narys prašo skubiai imtis darbo, neatitinkančio dabartinių prioritetų."
+        },
+        "explanation": {
+          "label": "Paaiškinti sprendimą",
+          "value": "Noriu praktikuoti sudėtingo sprendimo paaiškinimą žmogui, kuris su juo nesutinka."
+        },
+        "request": {
+          "label": "Pateikti prašymą",
+          "value": "Noriu praktikuoti prašymą vadovui padėti, kai darbo krūvis tampa per didelis."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Nustatykite sceną",
+          "description": "Aprašykite situaciją savais žodžiais."
+        },
+        "rehearse": {
+          "title": "Repetuokite realiai",
+          "description": "Kalbėkite arba rašykite, o DI mentorius vaidins kitą žmogų."
+        },
+        "reflect": {
+          "title": "Pamatykite, kas pavyko",
+          "description": "Baikite, kai būsite pasiruošę, ir gaukite tikslinį atsiliepimą."
+        }
+      }
     },
+    "backToDashboard": "Grįžti į skydelį",
+    "rehearsalEyebrow": "Šiandienos repeticija",
+    "successGoal": "Jūsų tikslas",
+    "successGoalFallback": "Aiškiai veskite pokalbį ir sutarkite dėl konstruktyvaus kito žingsnio.",
+    "viewFeedback": "Peržiūrėti atsiliepimą",
+    "practiceAgain": "Praktikuotis dar kartą",
+    "replayLoadingTitle": "Ruošiame kitą repeticiją",
+    "yourRole": "Jūsų vaidmuo",
+    "mentorRole": "DI mentoriaus vaidmuo",
+    "feedback": {
+      "title": "Praktikos grįžtamasis ryšys",
+      "summaryTitle": "Ką verta pritaikyti toliau",
+      "summaryDescription": "Pasinaudokite šiomis įžvalgomis, kad sustiprintumėte kitą bandymą.",
+      "scoreLabel": "Praktikos rezultatas",
+      "criteriaTitle": "Ką pastebėjo DI vertintojas",
+      "criterionFallback": "Kriterijus {{number}}",
+      "importantFeedbackTitle": "Svarbus grįžtamasis ryšys"
+    },
+    "startHint": "Pradėkite pokalbį, kai būsite pasiruošę.",
+    "checkHint": "Baikite bet kada ir sužinokite, kaip pavyko jūsų požiūris.",
+    "checkPractice": "Baigti ir apmąstyti",
+    "practiceComplete": "Repeticija baigta. Prie atsiliepimo galite grįžti bet kada.",
     "generating": "DI mentorius ruošia scenarijų.",
+    "preparingBackgroundDescription": "Jūsų praktika ruošiama fone. Galite grįžti į skydelį ir sugrįžti, kai ji bus paruošta.",
     "failed": "Nepavyko sukurti praktikos scenarijaus.",
     "error": "Nepavyko įkelti praktikos.",
     "retry": "Bandyti dar kartą",

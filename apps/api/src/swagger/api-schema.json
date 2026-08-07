@@ -2355,16 +2355,7 @@
     "/api/user/onboarding-status/{page}": {
       "patch": {
         "operationId": "UserController_markOnboardingComplete",
-        "parameters": [
-          {
-            "name": "page",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
@@ -3366,6 +3357,89 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetStudentCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/dashboard-summary": {
+      "get": {
+        "operationId": "CourseController_getStudentDashboardSummary",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStudentDashboardSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/{courseId}/open": {
+      "post": {
+        "operationId": "CourseController_markCourseOpened",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkCourseOpenedResponse"
                 }
               }
             }
@@ -6662,6 +6736,14 @@
             }
           },
           {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6697,14 +6779,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -7821,6 +7895,62 @@
         }
       }
     },
+    "/api/certificates/dashboard-summary": {
+      "get": {
+        "operationId": "CertificatesController_getDashboardSummary",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/certificates/certificate": {
       "get": {
         "operationId": "CertificatesController_getCertificate",
@@ -8225,6 +8355,104 @@
         "responses": {
           "200": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/ai/practice/today": {
+      "get": {
+        "operationId": "AiController_getTodayPractice",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTodayPracticeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/practice": {
+      "post": {
+        "operationId": "AiController_createPractice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePracticeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePracticeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/practice/{id}": {
+      "get": {
+        "operationId": "AiController_getPractice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPracticeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/practice/{id}/retry": {
+      "post": {
+        "operationId": "AiController_retryPractice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryPracticeResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -9721,6 +9949,24 @@
         "operationId": "AnnouncementsController_getAllAnnouncements",
         "parameters": [
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -9793,24 +10039,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
             }
           }
         ],
@@ -9906,6 +10134,24 @@
             }
           },
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -9940,24 +10186,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
             }
           }
         ],
@@ -12240,14 +12468,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "lang",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -12263,14 +12483,6 @@
         "parameters": [
           {
             "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
             "required": true,
             "in": "query",
             "schema": {
@@ -12714,6 +12926,15 @@
             }
           },
           {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -12749,15 +12970,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "scoId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
             }
           }
         ],
@@ -14297,6 +14509,33 @@
         }
       }
     },
+    "/api/super-admin/tenants/{id}/support-roles": {
+      "get": {
+        "operationId": "TenantsController_findSupportRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindSupportRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/super-admin/tenants/{id}/support-users": {
       "get": {
         "operationId": "TenantsController_findSupportUsers",
@@ -14334,6 +14573,31 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "roleSlug",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "admins",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -14423,79 +14687,6 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "resourceType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "user",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                },
-                {
-                  "const": "chapter",
-                  "type": "string"
-                },
-                {
-                  "const": "lesson",
-                  "type": "string"
-                },
-                {
-                  "const": "announcement",
-                  "type": "string"
-                },
-                {
-                  "const": "group",
-                  "type": "string"
-                },
-                {
-                  "const": "settings",
-                  "type": "string"
-                },
-                {
-                  "const": "integration",
-                  "type": "string"
-                },
-                {
-                  "const": "category",
-                  "type": "string"
-                },
-                {
-                  "const": "qa",
-                  "type": "string"
-                },
-                {
-                  "const": "news",
-                  "type": "string"
-                },
-                {
-                  "const": "article",
-                  "type": "string"
-                },
-                {
-                  "const": "articleSection",
-                  "type": "string"
-                },
-                {
-                  "const": "live_training",
-                  "type": "string"
-                },
-                {
-                  "const": "learning_path",
-                  "type": "string"
-                },
-                {
-                  "const": "scorm",
-                  "type": "string"
-                }
-              ]
             }
           },
           {
@@ -14738,6 +14929,79 @@
                       }
                     ]
                   }
+                }
+              ]
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
                 }
               ]
             }
@@ -19012,10 +19276,6 @@
                                   "type": "string"
                                 },
                                 {
-                                  "const": "s_event_calendar",
-                                  "type": "string"
-                                },
-                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -19148,10 +19408,6 @@
                                 },
                                 {
                                   "const": "s_continue_learning",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "s_event_calendar",
                                   "type": "string"
                                 },
                                 {
@@ -19311,10 +19567,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "s_event_calendar",
-                              "type": "string"
-                            },
-                            {
                               "const": "s_required_course",
                               "type": "string"
                             },
@@ -19441,10 +19693,6 @@
                             },
                             {
                               "const": "s_continue_learning",
-                              "type": "string"
-                            },
-                            {
-                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -19593,10 +19841,6 @@
                                   "type": "string"
                                 },
                                 {
-                                  "const": "s_event_calendar",
-                                  "type": "string"
-                                },
-                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -19732,10 +19976,6 @@
                                   "type": "string"
                                 },
                                 {
-                                  "const": "s_event_calendar",
-                                  "type": "string"
-                                },
-                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -19837,10 +20077,6 @@
                   "type": "string"
                 },
                 {
-                  "const": "s_event_calendar",
-                  "type": "string"
-                },
-                {
                   "const": "s_required_course",
                   "type": "string"
                 },
@@ -19892,10 +20128,6 @@
                     },
                     {
                       "const": "s_continue_learning",
-                      "type": "string"
-                    },
-                    {
-                      "const": "s_event_calendar",
                       "type": "string"
                     },
                     {
@@ -20026,10 +20258,6 @@
                             },
                             {
                               "const": "s_continue_learning",
-                              "type": "string"
-                            },
-                            {
-                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -22216,10 +22444,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "s_event_calendar",
-                              "type": "string"
-                            },
-                            {
                               "const": "s_required_course",
                               "type": "string"
                             },
@@ -22372,10 +22596,6 @@
                             },
                             {
                               "const": "s_continue_learning",
-                              "type": "string"
-                            },
-                            {
-                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -23474,10 +23694,6 @@
                             },
                             {
                               "const": "s_continue_learning",
-                              "type": "string"
-                            },
-                            {
-                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -26984,6 +27200,190 @@
         "required": [
           "data",
           "pagination"
+        ]
+      },
+      "GetStudentDashboardSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "continueLearningCourses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "thumbnailUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "completedChapterCount": {
+                      "type": "number"
+                    },
+                    "courseChapterCount": {
+                      "type": "number"
+                    },
+                    "lesson": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "title"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "courseId",
+                    "slug",
+                    "title",
+                    "thumbnailUrl",
+                    "completedChapterCount",
+                    "courseChapterCount",
+                    "lesson"
+                  ]
+                }
+              },
+              "requiredCourses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "dueDate": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "urgency": {
+                      "anyOf": [
+                        {
+                          "const": "overdue",
+                          "type": "string"
+                        },
+                        {
+                          "const": "dueSoon",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scheduled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "noDeadline",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "courseId",
+                    "slug",
+                    "title",
+                    "dueDate",
+                    "urgency"
+                  ]
+                }
+              },
+              "completion": {
+                "type": "object",
+                "properties": {
+                  "total": {
+                    "type": "number"
+                  },
+                  "completed": {
+                    "type": "number"
+                  },
+                  "inProgress": {
+                    "type": "number"
+                  },
+                  "notStarted": {
+                    "type": "number"
+                  },
+                  "percentage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "total",
+                  "completed",
+                  "inProgress",
+                  "notStarted",
+                  "percentage"
+                ]
+              }
+            },
+            "required": [
+              "continueLearningCourses",
+              "requiredCourses",
+              "completion"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MarkCourseOpenedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetStudentsWithEnrollmentDateResponse": {
@@ -44022,6 +44422,62 @@
           "pagination"
         ]
       },
+      "GetDashboardSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "activeCount": {
+                "type": "number"
+              },
+              "expiringSoon": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "certificateId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "courseId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "courseSlug": {
+                        "type": "string"
+                      },
+                      "courseTitle": {
+                        "type": "string"
+                      },
+                      "expiresAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "certificateId",
+                      "courseId",
+                      "courseSlug",
+                      "courseTitle",
+                      "expiresAt"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "activeCount",
+              "expiringSoon"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetCertificateResponse": {
         "anyOf": [
           {
@@ -44419,6 +44875,627 @@
           "affectedUserCount"
         ]
       },
+      "GetTodayPracticeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "practiceDate": {
+                    "type": "string"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "challenge": {
+                    "type": "string"
+                  },
+                  "counterpart": {
+                    "type": "string"
+                  },
+                  "desiredOutcome": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "instructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "threadId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "queued",
+                        "type": "string"
+                      },
+                      {
+                        "const": "processing",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ready",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failed",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "errorCode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "practiceDate",
+                  "timezone",
+                  "language",
+                  "challenge",
+                  "counterpart",
+                  "desiredOutcome",
+                  "title",
+                  "instructions",
+                  "threadId",
+                  "status",
+                  "errorCode"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePracticeBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "challenge": {
+            "minLength": 1,
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "counterpart": {
+            "minLength": 1,
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "desiredOutcome": {
+            "minLength": 1,
+            "maxLength": 1000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "challenge",
+          "counterpart",
+          "desiredOutcome"
+        ]
+      },
+      "CreatePracticeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "practiceDate": {
+                "type": "string"
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "challenge": {
+                "type": "string"
+              },
+              "counterpart": {
+                "type": "string"
+              },
+              "desiredOutcome": {
+                "type": "string"
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "instructions": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ready",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "practiceDate",
+              "timezone",
+              "language",
+              "challenge",
+              "counterpart",
+              "desiredOutcome",
+              "title",
+              "instructions",
+              "threadId",
+              "status",
+              "errorCode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPracticeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "practiceDate": {
+                "type": "string"
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "challenge": {
+                "type": "string"
+              },
+              "counterpart": {
+                "type": "string"
+              },
+              "desiredOutcome": {
+                "type": "string"
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "instructions": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ready",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "practiceDate",
+              "timezone",
+              "language",
+              "challenge",
+              "counterpart",
+              "desiredOutcome",
+              "title",
+              "instructions",
+              "threadId",
+              "status",
+              "errorCode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RetryPracticeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "practiceDate": {
+                "type": "string"
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "challenge": {
+                "type": "string"
+              },
+              "counterpart": {
+                "type": "string"
+              },
+              "desiredOutcome": {
+                "type": "string"
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "instructions": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ready",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "practiceDate",
+              "timezone",
+              "language",
+              "challenge",
+              "counterpart",
+              "desiredOutcome",
+              "title",
+              "instructions",
+              "threadId",
+              "status",
+              "errorCode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -44430,8 +45507,26 @@
                 "type": "string"
               },
               "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "practiceSessionId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "userId": {
                 "format": "uuid",
@@ -44495,6 +45590,7 @@
             "required": [
               "id",
               "aiMentorLessonId",
+              "practiceSessionId",
               "userId",
               "userLanguage",
               "createdAt",
@@ -56466,6 +57562,41 @@
           "data"
         ]
       },
+      "FindSupportRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "name",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "FindSupportUsersResponse": {
         "type": "object",
         "properties": {
@@ -56500,6 +57631,33 @@
                       "type": "null"
                     }
                   ]
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "slug": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isSystem": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "slug",
+                      "name",
+                      "isSystem"
+                    ]
+                  }
                 }
               },
               "required": [
@@ -56508,7 +57666,8 @@
                 "firstName",
                 "lastName",
                 "label",
-                "profilePictureUrl"
+                "profilePictureUrl",
+                "roles"
               ]
             }
           },

@@ -71,7 +71,7 @@ export class CalendarController {
   }
 
   @Get("dashboard/events")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.CALENDAR_READ)
   @Validate({
     request: [
       { type: "query", name: "start", schema: getCalendarEventsQuerySchema.properties.start },

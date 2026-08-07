@@ -6,25 +6,19 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { AI_MENTOR_TYPE } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
 
 import { AiPracticeQueueService } from "src/ai/ai-practice.queue.service";
 import {
   AI_MENTOR_PRACTICE_STATUSES,
   type AiMentorPracticeJobData,
 } from "src/ai/ai-practice.types";
-import {
-  AI_JUDGE_GENERATION_MODE,
-  AI_JUDGE_GENERATION_STATUS,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
-import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
+import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
-import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
-import { PromptService } from "src/ai/services/prompt.service";
-import { loadAiSdk } from "src/ai/utils/ai-esm";
-import { OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { EnvService } from "src/env/services/env.service";
 
 import type {
@@ -34,21 +28,15 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-const practiceGenerationSchema = Type.Object({
-  title: Type.String({ minLength: 1, maxLength: 160 }),
-  instructions: Type.String({ minLength: 1, maxLength: 6000 }),
-});
-
 @Injectable()
 export class AiPracticeService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly aiPracticeQueueService: AiPracticeQueueService,
     private readonly aiPracticeJudgeConfigurationService: AiPracticeJudgeConfigurationService,
-    private readonly aiJudgeConfigurationGenerationWorkflowService: AiJudgeConfigurationGenerationWorkflowService,
-    private readonly aiRuntimeService: AiRuntimeService,
+    private readonly aiPracticeContentGeneratorService: AiPracticeContentGeneratorService,
+    private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiService: AiService,
-    private readonly promptService: PromptService,
     private readonly envService: EnvService,
   ) {}
 
@@ -69,22 +57,16 @@ export class AiPracticeService {
     if (!(await this.envService.getAIConfigured()).enabled)
       throw new ForbiddenException("dashboardHome.widgets.ai_mentor_practice.aiNotConfigured");
 
-    const answers = {
-      challenge: body.challenge.trim(),
-      counterpart: body.counterpart.trim(),
-      desiredOutcome: body.desiredOutcome.trim(),
-    };
-    if (Object.values(answers).some((answer) => !answer))
-      throw new BadRequestException("common.validation.required");
+    const scenario = body.scenario.trim();
+    if (!scenario) throw new BadRequestException("common.validation.required");
 
     const practiceDate = this.getPracticeDate();
 
     const session = await this.aiRepository.createPracticeSession({
       userId: currentUser.userId,
       practiceDate,
-      timezone: "UTC",
       language: body.language,
-      ...answers,
+      instructions: scenario,
     });
 
     if (!session) {
@@ -132,6 +114,33 @@ export class AiPracticeService {
     return this.mapSession({ ...updated, threadId: session.threadId });
   }
 
+  async replay(
+    sessionId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<AiMentorPracticeSessionResponse> {
+    const session = await this.aiRepository.findPracticeSessionById(sessionId);
+    if (!session) throw new NotFoundException("common.toast.notFound");
+    if (session.userId !== currentUser.userId)
+      throw new ForbiddenException("common.toast.noAccess");
+    if (
+      session.status !== AI_MENTOR_PRACTICE_STATUSES.READY ||
+      session.threadStatus !== THREAD_STATUS.COMPLETED
+    )
+      throw new ConflictException("common.toast.somethingWentWrong");
+
+    await this.aiRepository.resetPracticeConversation(session.id);
+    await this.aiService.getPracticeThreadWithSetup({
+      practiceSessionId: session.id,
+      userId: session.userId,
+      userLanguage: session.language,
+      practiceInstructions: session.instructions,
+    });
+
+    const replayed = await this.aiRepository.findPracticeSessionById(session.id);
+    if (!replayed) throw new NotFoundException("common.toast.notFound");
+    return this.mapSession(replayed);
+  }
+
   async processGenerationJob(data: AiMentorPracticeJobData): Promise<void> {
     const session = await this.aiRepository.findPracticeSessionById(data.sessionId);
     if (!session) throw new NotFoundException("common.toast.notFound");
@@ -139,47 +148,30 @@ export class AiPracticeService {
     if (!claimed) return;
 
     try {
-      const prompt = await this.promptService.loadPrompt("aiMentorPracticeGeneration", {
+      const content = await this.aiPracticeContentGeneratorService.generate({
         language: session.language,
-        challenge: session.challenge,
-        counterpart: session.counterpart,
-        desiredOutcome: session.desiredOutcome,
+        learnerRequest: session.instructions,
       });
-      const { generateObject, jsonSchema } = await loadAiSdk();
-      const openai = await this.aiRuntimeService.getAISdkOpenAI();
-      const { object } = await generateObject({
-        model: openai(OPENAI_MODELS.BASIC),
-        schema: jsonSchema(() => practiceGenerationSchema),
-        prompt,
-      });
-      const output = object as { title: string; instructions: string };
-
-      const judgeResult = await this.aiJudgeConfigurationGenerationWorkflowService.run({
+      const judgeConfiguration = await this.aiJudgeConfigurationGeneratorService.generate({
         language: session.language,
         lessonContext: {
-          title: output.title,
-          taskDescription: output.instructions,
-          aiMentorInstructions: output.instructions,
+          title: content.title,
+          taskDescription: content.instructions,
+          aiMentorInstructions: content.instructions,
           aiMentorType: AI_MENTOR_TYPE.ROLEPLAY,
         },
         mode: AI_JUDGE_GENERATION_MODE.CREATE,
-        brief: [
-          "Create a concise assessment for this standalone practice conversation.",
-          `Challenge: ${session.challenge}`,
-          `Conversation counterpart: ${session.counterpart}`,
-          `Desired outcome: ${session.desiredOutcome}`,
-        ].join("\n"),
+        brief: content.instructions,
       });
-      if (judgeResult.status !== AI_JUDGE_GENERATION_STATUS.COMPLETED || !judgeResult.configuration)
-        throw new Error("Practice AI Judge configuration did not pass validation");
 
       await this.aiRepository.saveGeneratedPractice(
         session.id,
-        output.title,
-        output.instructions,
+        content.title,
+        content.aiMentorName,
+        content.instructions,
         this.aiPracticeJudgeConfigurationService.build(
           session.id,
-          judgeResult.configuration,
+          judgeConfiguration,
           session.language,
         ),
       );
@@ -187,6 +179,7 @@ export class AiPracticeService {
         practiceSessionId: session.id,
         userId: session.userId,
         userLanguage: session.language,
+        practiceInstructions: content.instructions,
       });
       await this.aiRepository.updatePracticeSession(session.id, {
         status: AI_MENTOR_PRACTICE_STATUSES.READY,
@@ -220,28 +213,26 @@ export class AiPracticeService {
   private mapSession(session: {
     id: string;
     practiceDate: string;
-    timezone: string;
-    language: string;
-    challenge: string;
-    counterpart: string;
-    desiredOutcome: string;
-    generatedTitle: string | null;
-    generatedInstructions: string | null;
+    language: AiMentorPracticeSessionResponse["language"];
+    title: string | null;
+    aiMentorName: string | null;
     status: AiMentorPracticeSessionResponse["status"];
     errorCode: string | null;
     threadId?: string | null;
+    threadStatus?: AiMentorPracticeSessionResponse["threadStatus"];
+    taskGoal?: string | null;
+    evaluation?: AiMentorPracticeSessionResponse["evaluation"];
   }): AiMentorPracticeSessionResponse {
     return {
       id: session.id,
       practiceDate: session.practiceDate,
-      timezone: session.timezone,
-      language: session.language as AiMentorPracticeSessionResponse["language"],
-      challenge: session.challenge,
-      counterpart: session.counterpart,
-      desiredOutcome: session.desiredOutcome,
-      title: session.generatedTitle,
-      instructions: session.generatedInstructions,
+      language: session.language,
+      title: session.title,
+      aiMentorName: session.aiMentorName ?? null,
       threadId: session.threadId ?? null,
+      threadStatus: session.threadStatus ?? null,
+      taskGoal: session.taskGoal ?? null,
+      evaluation: session.evaluation ?? null,
       status: session.status,
       errorCode: session.errorCode,
     };

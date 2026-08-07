@@ -1,4 +1,5 @@
-import type { SupportedLanguages } from "@repo/shared";
+import type { LocalizedText, SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type {
   aiJudgeBlockingErrors,
@@ -16,21 +17,34 @@ export type AiMentorPracticeJobData = {
 };
 
 export type AiMentorPracticeGenerationInput = {
-  challenge: string;
-  counterpart: string;
-  desiredOutcome: string;
+  scenario: string;
   language: SupportedLanguages;
 };
 
 export type AiPracticeJudgeConfigurationGraph = {
   configuration: Omit<
     typeof aiJudgeConfigurations.$inferInsert,
-    "id" | "tenantId" | "practiceSessionId"
+    "id" | "tenantId" | "practiceSessionId" | "taskGoal"
   > & {
     id: UUIDType;
     practiceSessionId: UUIDType;
+    taskGoal: LocalizedText | SQL<unknown>;
   };
-  criteria: (typeof aiJudgeCriteria.$inferInsert)[];
-  scoreGuidance: (typeof aiJudgeScoreGuidance.$inferInsert)[];
-  blockingErrors: (typeof aiJudgeBlockingErrors.$inferInsert)[];
+  criteria: Array<
+    Omit<typeof aiJudgeCriteria.$inferInsert, "title" | "expectedBehavior"> & {
+      title?: LocalizedText | SQL<unknown>;
+      expectedBehavior?: LocalizedText | SQL<unknown>;
+    }
+  >;
+  scoreGuidance: Array<
+    Omit<typeof aiJudgeScoreGuidance.$inferInsert, "description" | "example"> & {
+      description?: LocalizedText | SQL<unknown>;
+      example?: LocalizedText | SQL<unknown> | null;
+    }
+  >;
+  blockingErrors: Array<
+    Omit<typeof aiJudgeBlockingErrors.$inferInsert, "description"> & {
+      description?: LocalizedText | SQL<unknown>;
+    }
+  >;
 };

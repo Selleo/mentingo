@@ -2,7 +2,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
-import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+import { DEFAULT_AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
@@ -137,7 +137,7 @@ export class PromptService implements OnModuleInit {
     return history;
   }
 
-  async setSystemPrompt(data: ThreadOwnershipBody) {
+  async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {
     const { userLanguage } = await this.aiRepository.findThread([
       eq(aiMentorThreads.id, data.threadId),
     ]);
@@ -146,7 +146,7 @@ export class PromptService implements OnModuleInit {
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
 
-    const mode = (lesson.type ?? DEFAULT_AI_MENTOR_TYPE).toLowerCase();
+    const mode = (mentorType ?? lesson.type ?? DEFAULT_AI_MENTOR_TYPE).toLowerCase();
 
     const securityAndRagBlock = await this.loadPrompt("securityAndRagBlock", {
       language: userLanguage,

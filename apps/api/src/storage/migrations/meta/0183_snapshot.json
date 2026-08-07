@@ -1,6 +1,6 @@
 {
-  "id": "567ee3df-30cf-48d9-9ed5-3751ff8ac8bd",
-  "prevId": "dfa6fee4-0c32-4239-af4d-abc03d70d794",
+  "id": "53c5bf7a-e354-4d2b-82cb-ae357d933908",
+  "prevId": "2e4bf070-c77d-4944-bad2-25d4e4eb751b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1358,47 +1358,29 @@
           "primaryKey": false,
           "notNull": true
         },
-        "timezone": {
-          "name": "timezone",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "language": {
           "name": "language",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true
         },
-        "challenge": {
-          "name": "challenge",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "counterpart": {
-          "name": "counterpart",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "desired_outcome": {
-          "name": "desired_outcome",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "generated_title": {
-          "name": "generated_title",
+        "title": {
+          "name": "title",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "generated_instructions": {
-          "name": "generated_instructions",
+        "ai_mentor_name": {
+          "name": "ai_mentor_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "instructions": {
+          "name": "instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "status": {
           "name": "status",

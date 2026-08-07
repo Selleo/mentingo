@@ -140,7 +140,7 @@ export function WidgetAdminDeadlineRisks() {
               isLoading={areRiskDetailsLoading}
               isError={areRiskDetailsError}
               onRetry={() => void refetchRiskDetails()}
-              errorClassName="p-5"
+              className="p-5"
             />
           ) : (
             <>

@@ -88,8 +88,14 @@
         "aiMentorPractice": {
           "description": "Codziennie utwórz jeden scenariusz treningowy",
           "empty": "Opisz sytuację i przećwicz ją z Mentorem AI.",
+          "emptyPrompt": "Jaką rozmowę chcesz przeprowadzić z większą pewnością?",
           "startCta": "Rozpocznij trening",
           "continueCta": "Kontynuuj trening",
+          "feedbackCta": "Zobacz informację zwrotną",
+          "todayEyebrow": "Dzisiejsza próba",
+          "completedEyebrow": "Próba zakończona",
+          "returnHint": "Rozmowa jest zapisana",
+          "privateHint": "Prywatne miejsce na próby i poprawki",
           "status": {
             "queued": "Scenariusz czeka na przygotowanie.",
             "processing": "Scenariusz jest przygotowywany.",
@@ -165,14 +171,69 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Utwórz dzisiejszy trening z Mentorem AI",
-      "description": "Odpowiedz na trzy krótkie pytania, aby przygotować dopasowany scenariusz.",
-      "challenge": "Jaką sytuację chcesz przećwiczyć?",
-      "counterpart": "Z kim będziesz rozmawiać?",
-      "desiredOutcome": "Jaki rezultat chcesz osiągnąć?",
-      "submit": "Wygeneruj trening"
+      "title": "Przećwicz prawdziwą rozmowę.",
+      "promptEyebrow": "Ustaw scenę",
+      "mentorPrompt": "Opowiedz mi o rozmowie, którą chcesz przećwiczyć. Z kim rozmawiasz, co się dzieje i co chcesz zrobić lepiej?",
+      "scenario": "Co chcesz przećwiczyć?",
+      "scenarioPlaceholder": "Na przykład: Chcę przećwiczyć udzielanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał terminu.",
+      "scenarioHint": "Dodaj kontekst, który pomoże stworzyć realistyczne ćwiczenie, np. sytuację, osoby lub cel.",
+      "privateHint": "Tylko Ty widzisz ten trening.",
+      "submit": "Utwórz trening",
+      "suggestions": {
+        "title": "Zacznij od przykładu",
+        "feedback": {
+          "label": "Przekaż informację zwrotną",
+          "value": "Chcę przećwiczyć przekazanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał ważnego terminu."
+        },
+        "boundary": {
+          "label": "Postaw granicę",
+          "value": "Chcę przećwiczyć wyznaczenie jasnej granicy, gdy współpracownik prosi mnie o pilne zadanie poza ustalonymi priorytetami."
+        },
+        "explanation": {
+          "label": "Wyjaśnij decyzję",
+          "value": "Chcę przećwiczyć wyjaśnienie trudnej decyzji osobie, która się z nią nie zgadza."
+        },
+        "request": {
+          "label": "Przedstaw prośbę",
+          "value": "Chcę przećwiczyć poproszenie przełożonego o wsparcie przy zbyt dużym obciążeniu pracą."
+        }
+      },
+      "steps": {
+        "setScene": { "title": "Ustaw scenę", "description": "Opisz sytuację własnymi słowami." },
+        "rehearse": {
+          "title": "Przećwicz ją naprawdę",
+          "description": "Mów lub pisz, a Mentor AI zagra drugą osobę."
+        },
+        "reflect": {
+          "title": "Sprawdź, co zadziałało",
+          "description": "Zakończ, gdy będziesz gotowy, i otrzymaj konkretną informację zwrotną."
+        }
+      }
     },
+    "backToDashboard": "Wróć do panelu",
+    "rehearsalEyebrow": "Dzisiejsza próba",
+    "successGoal": "Twój cel",
+    "successGoalFallback": "Poprowadź rozmowę jasno i ustal konstruktywny kolejny krok.",
+    "viewFeedback": "Zobacz informację zwrotną",
+    "practiceAgain": "Przećwicz ponownie",
+    "replayLoadingTitle": "Przygotowujemy kolejną próbę",
+    "yourRole": "Twoja rola",
+    "mentorRole": "Rola Mentora AI",
+    "feedback": {
+      "title": "Informacja zwrotna z ćwiczenia",
+      "summaryTitle": "Co warto wykorzystać dalej",
+      "summaryDescription": "Wykorzystaj te obserwacje, aby wzmocnić kolejną próbę.",
+      "scoreLabel": "Wynik ćwiczenia",
+      "criteriaTitle": "Co zauważył Sędzia AI",
+      "criterionFallback": "Kryterium {{number}}",
+      "importantFeedbackTitle": "Ważna informacja zwrotna"
+    },
+    "startHint": "Rozpocznij rozmowę, gdy będziesz gotowy.",
+    "checkHint": "Zakończ w dowolnym momencie, aby sprawdzić swoje podejście.",
+    "checkPractice": "Zakończ i podsumuj",
+    "practiceComplete": "Próba została zakończona. Możesz wrócić do informacji zwrotnej w dowolnym momencie.",
     "generating": "Mentor AI przygotowuje Twój scenariusz.",
+    "preparingBackgroundDescription": "Twój trening jest przygotowywany w tle. Możesz wrócić do Panelu głównego i wrócić tutaj, gdy będzie gotowy.",
     "failed": "Nie udało się wygenerować scenariusza treningowego.",
     "error": "Nie udało się wczytać treningu.",
     "retry": "Spróbuj wygenerować ponownie",

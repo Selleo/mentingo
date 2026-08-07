@@ -59,6 +59,14 @@ export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetRegistry = {
     iconContainerClassName: "bg-blue-50",
     component: WidgetAdminEventCalendar,
   },
+  [DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR]: {
+    titleKey: "dashboardHome.widgets.event_calendar.title",
+    descriptionKey: "dashboardHome.widgets.event_calendar.description",
+    icon: CalendarDays,
+    iconClassName: "text-blue-700",
+    iconContainerClassName: "bg-blue-50",
+    component: WidgetAdminEventCalendar,
+  },
   [DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING]: {
     titleKey: "dashboardHome.widgets.continue_learning.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.continueLearning.description",

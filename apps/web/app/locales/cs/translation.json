@@ -93,8 +93,14 @@
         "aiMentorPractice": {
           "description": "Vytvořte každý den jeden cílený scénář",
           "empty": "Popište situaci a procvičte ji s AI mentorem.",
+          "emptyPrompt": "Který rozhovor chcete zvládnout s větší jistotou?",
           "startCta": "Zahájit trénink",
           "continueCta": "Pokračovat v tréninku",
+          "feedbackCta": "Zobrazit zpětnou vazbu",
+          "todayEyebrow": "Dnešní nácvik",
+          "completedEyebrow": "Nácvik dokončen",
+          "returnHint": "Váš rozhovor je uložen",
+          "privateHint": "Soukromé místo pro zkoušení a zlepšování",
           "status": {
             "queued": "Scénář čeká.",
             "processing": "Scénář se připravuje.",
@@ -169,14 +175,72 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Vytvořit dnešní trénink s AI mentorem",
-      "description": "Odpovězte na tři krátké otázky.",
-      "challenge": "Jakou situaci chcete procvičit?",
-      "counterpart": "S kým budete mluvit?",
-      "desiredOutcome": "Jakého výsledku chcete dosáhnout?",
-      "submit": "Vygenerovat trénink"
+      "title": "Procvičte si skutečný rozhovor.",
+      "promptEyebrow": "Nastavte scénu",
+      "mentorPrompt": "Řekněte mi o rozhovoru, který si chcete nacvičit. S kým mluvíte, co se děje a co chcete zvládnout lépe?",
+      "scenario": "Co chcete procvičit?",
+      "scenarioPlaceholder": "Například: Chci si procvičit konstruktivní zpětnou vazbu kolegovi, který nedodržel termín.",
+      "scenarioHint": "Přidejte kontext pro realistické cvičení, například situaci, zapojené osoby nebo cíl.",
+      "privateHint": "Tento trénink vidíte pouze vy.",
+      "submit": "Vytvořit trénink",
+      "suggestions": {
+        "title": "Začněte příkladem",
+        "feedback": {
+          "label": "Poskytnout zpětnou vazbu",
+          "value": "Chci si procvičit poskytnutí konstruktivní zpětné vazby kolegovi, který nedodržel důležitý termín."
+        },
+        "boundary": {
+          "label": "Nastavit hranici",
+          "value": "Chci si procvičit nastavení jasné hranice, když mě kolega žádá o naléhavou práci mimo mé současné priority."
+        },
+        "explanation": {
+          "label": "Vysvětlit rozhodnutí",
+          "value": "Chci si procvičit vysvětlení obtížného rozhodnutí člověku, který s ním nesouhlasí."
+        },
+        "request": {
+          "label": "Přednést žádost",
+          "value": "Chci si procvičit požádání manažera o podporu při příliš vysokém pracovním vytížení."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Nastavte scénu",
+          "description": "Popište situaci vlastními slovy."
+        },
+        "rehearse": {
+          "title": "Nacvičte ji doopravdy",
+          "description": "Mluvte nebo pište, zatímco AI mentor hraje druhou osobu."
+        },
+        "reflect": {
+          "title": "Zjistěte, co fungovalo",
+          "description": "Ukončete nácvik, až budete připraveni, a získejte cílenou zpětnou vazbu."
+        }
+      }
     },
+    "backToDashboard": "Zpět na nástěnku",
+    "rehearsalEyebrow": "Dnešní nácvik",
+    "successGoal": "Váš cíl",
+    "successGoalFallback": "Veďte rozhovor jasně a dohodněte konstruktivní další krok.",
+    "viewFeedback": "Zobrazit zpětnou vazbu",
+    "practiceAgain": "Procvičit znovu",
+    "replayLoadingTitle": "Připravujeme váš další nácvik",
+    "yourRole": "Vaše role",
+    "mentorRole": "Role AI mentora",
+    "feedback": {
+      "title": "Zpětná vazba k procvičení",
+      "summaryTitle": "Co si odnést dál",
+      "summaryDescription": "Využijte tyto postřehy k posílení dalšího pokusu.",
+      "scoreLabel": "Výsledek procvičení",
+      "criteriaTitle": "Čeho si všiml AI hodnotitel",
+      "criterionFallback": "Kritérium {{number}}",
+      "importantFeedbackTitle": "Důležitá zpětná vazba"
+    },
+    "startHint": "Začněte rozhovor, až budete připraveni.",
+    "checkHint": "Kdykoli skončete a zjistěte, jak váš přístup zapůsobil.",
+    "checkPractice": "Dokončit a zamyslet se",
+    "practiceComplete": "Nácvik je dokončen. Ke zpětné vazbě se můžete kdykoli vrátit.",
     "generating": "AI mentor připravuje scénář.",
+    "preparingBackgroundDescription": "Vaše procvičování se připravuje na pozadí. Můžete se vrátit na hlavní panel a přijít zpět, až bude připravené.",
     "failed": "Scénář se nepodařilo vytvořit.",
     "error": "Trénink se nepodařilo načíst.",
     "retry": "Zkusit znovu",

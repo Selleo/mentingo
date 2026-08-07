@@ -22,9 +22,26 @@ export const summaryPromptSchema = Type.Object({
   content: Type.String(),
 });
 
-export const welcomePromptSchema = Type.Object({
-  systemPrompt: Type.String(),
-});
+export const welcomePromptSchema = Type.Object(
+  {
+    systemPrompt: Type.String(),
+  },
+  { additionalProperties: false },
+);
+
+export const aiMentorPracticeOpeningPromptSchema = Type.Object(
+  {
+    practiceInstructions: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export const aiMentorPracticeContentGeneratorSchema = Type.Object(
+  {
+    language: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
 
 export const securityAndRagBlockSchema = Type.Object({
   language: Type.String(),
@@ -62,12 +79,6 @@ export const aiJudgeConfigurationValidatorSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const aiMentorPracticeGenerationSchema = Type.Object({
-  language: Type.String(),
-  challenge: Type.String(),
-  counterpart: Type.String(),
-  desiredOutcome: Type.String(),
-});
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   mentorPrompt: aiPromptSchema,
@@ -75,6 +86,8 @@ export const PROMPT_MAP = {
   teacherPrompt: aiPromptSchema,
   summaryPrompt: summaryPromptSchema,
   welcomePrompt: welcomePromptSchema,
+  aiMentorPracticeOpeningPrompt: aiMentorPracticeOpeningPromptSchema,
+  aiMentorPracticeContentGenerator: aiMentorPracticeContentGeneratorSchema,
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,
@@ -84,5 +97,4 @@ export const PROMPT_MAP = {
   aiJudgeConfigurationGeneratorImprove: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationGeneratorRepair: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationValidator: aiJudgeConfigurationValidatorSchema,
-  aiMentorPracticeGeneration: aiMentorPracticeGenerationSchema,
 } satisfies Record<promptId, TSchema>;

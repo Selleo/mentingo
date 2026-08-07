@@ -88,8 +88,14 @@
         "aiMentorPractice": {
           "description": "Erstelle täglich ein gezieltes Übungsszenario",
           "empty": "Beschreibe eine Situation und übe sie mit dem KI-Mentor.",
+          "emptyPrompt": "Welches Gespräch möchtest du souveräner führen?",
           "startCta": "Übung starten",
           "continueCta": "Übung fortsetzen",
+          "feedbackCta": "Feedback ansehen",
+          "todayEyebrow": "Heutige Probe",
+          "completedEyebrow": "Probe abgeschlossen",
+          "returnHint": "Dein Gespräch ist gespeichert",
+          "privateHint": "Ein privater Ort zum Ausprobieren und Verbessern",
           "status": {
             "queued": "Dein Szenario wartet.",
             "processing": "Dein Szenario wird vorbereitet.",
@@ -163,14 +169,72 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Heutige KI-Mentor-Übung erstellen",
-      "description": "Beantworte drei kurze Fragen für ein gezieltes Szenario.",
-      "challenge": "Welche Situation möchtest du üben?",
-      "counterpart": "Mit wem wirst du sprechen?",
-      "desiredOutcome": "Welches Ergebnis möchtest du erreichen?",
-      "submit": "Übung erstellen"
+      "title": "Ein echtes Gespräch üben.",
+      "promptEyebrow": "Szene festlegen",
+      "mentorPrompt": "Erzähl mir von dem Gespräch, das du proben möchtest. Mit wem sprichst du, was passiert und was möchtest du besser bewältigen?",
+      "scenario": "Was möchtest du üben?",
+      "scenarioPlaceholder": "Zum Beispiel: Ich möchte üben, einem Kollegen konstruktives Feedback zu einer verpassten Frist zu geben.",
+      "scenarioHint": "Ergänze hilfreichen Kontext, zum Beispiel die Situation, beteiligte Personen oder dein Ziel.",
+      "privateHint": "Nur du kannst diese Übung sehen.",
+      "submit": "Übung erstellen",
+      "suggestions": {
+        "title": "Mit einem Beispiel starten",
+        "feedback": {
+          "label": "Feedback geben",
+          "value": "Ich möchte üben, einem Kollegen konstruktives Feedback zu einer wichtigen verpassten Frist zu geben."
+        },
+        "boundary": {
+          "label": "Eine Grenze setzen",
+          "value": "Ich möchte üben, eine klare Grenze zu setzen, wenn ein Teammitglied mich um dringende Arbeit außerhalb meiner aktuellen Prioritäten bittet."
+        },
+        "explanation": {
+          "label": "Eine Entscheidung erklären",
+          "value": "Ich möchte üben, jemandem, der anderer Meinung ist, eine schwierige Entscheidung zu erklären."
+        },
+        "request": {
+          "label": "Eine Bitte äußern",
+          "value": "Ich möchte üben, meine Führungskraft bei einer zu hohen Arbeitsbelastung um Unterstützung zu bitten."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Szene festlegen",
+          "description": "Beschreibe den Moment mit deinen eigenen Worten."
+        },
+        "rehearse": {
+          "title": "Realistisch proben",
+          "description": "Sprich oder schreibe, während der KI-Mentor die andere Person spielt."
+        },
+        "reflect": {
+          "title": "Erkennen, was wirkt",
+          "description": "Beende die Probe, wenn du bereit bist, und erhalte gezieltes Feedback."
+        }
+      }
     },
+    "backToDashboard": "Zurück zum Dashboard",
+    "rehearsalEyebrow": "Heutige Probe",
+    "successGoal": "Dein Ziel",
+    "successGoalFallback": "Führe das Gespräch klar und erreiche einen konstruktiven nächsten Schritt.",
+    "viewFeedback": "Feedback ansehen",
+    "practiceAgain": "Erneut üben",
+    "replayLoadingTitle": "Deine nächste Probe wird vorbereitet",
+    "yourRole": "Deine Rolle",
+    "mentorRole": "Rolle des KI-Mentors",
+    "feedback": {
+      "title": "Feedback zur Übung",
+      "summaryTitle": "Was du mitnehmen kannst",
+      "summaryDescription": "Nutze diese Beobachtungen, um deinen nächsten Versuch zu verbessern.",
+      "scoreLabel": "Übungsergebnis",
+      "criteriaTitle": "Was der KI-Judge bemerkt hat",
+      "criterionFallback": "Kriterium {{number}}",
+      "importantFeedbackTitle": "Wichtiges Feedback"
+    },
+    "startHint": "Beginne das Gespräch, wenn du bereit bist.",
+    "checkHint": "Beende jederzeit, um zu sehen, wie dein Ansatz angekommen ist.",
+    "checkPractice": "Beenden und reflektieren",
+    "practiceComplete": "Deine Probe ist abgeschlossen. Dein Feedback kannst du jederzeit erneut ansehen.",
     "generating": "Der KI-Mentor bereitet dein Szenario vor.",
+    "preparingBackgroundDescription": "Deine Übung wird im Hintergrund vorbereitet. Du kannst zum Dashboard zurückkehren und später wiederkommen.",
     "failed": "Das Übungsszenario konnte nicht erstellt werden.",
     "error": "Die Übung konnte nicht geladen werden.",
     "retry": "Erneut versuchen",

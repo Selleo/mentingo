@@ -105,6 +105,11 @@ describe("SettingsController (e2e)", () => {
               order: 0,
               width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
             },
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
+              order: 1,
+              width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+            },
           ],
         };
 
@@ -137,7 +142,7 @@ describe("SettingsController (e2e)", () => {
 
       it("should reject duplicate dashboard widgets", async () => {
         const widget = {
-          id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+          id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
           width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
         };
 
@@ -163,7 +168,7 @@ describe("SettingsController (e2e)", () => {
             dashboard: {
               widgets: [
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
                   order: 0,
                   width: DASHBOARD_WIDGET_WIDTHS.SMALL,
                 },
@@ -181,13 +186,18 @@ describe("SettingsController (e2e)", () => {
             dashboard: {
               widgets: [
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
                   order: 10,
                   width: DASHBOARD_WIDGET_WIDTHS.SMALL,
                 },
                 {
-                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
                   order: 5,
+                  width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+                },
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
+                  order: 6,
                   width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
                 },
               ],
@@ -197,13 +207,18 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body.data.dashboard.widgets).toEqual([
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
             order: 0,
             width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
           },
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
             order: 1,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+            order: 2,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
         ]);
@@ -366,6 +381,7 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body.data).toEqual([
           DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
+          DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
           DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
           DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
           DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES,
@@ -385,13 +401,18 @@ describe("SettingsController (e2e)", () => {
             width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
           },
           {
-            id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+            id: DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
             order: 2,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
+            order: 3,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
           {
             id: DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
-            order: 3,
+            order: 4,
             width: DASHBOARD_WIDGET_WIDTHS.SMALL,
           },
         ]);

@@ -27,21 +27,35 @@ describe("AiPracticeJudgeConfigurationService", () => {
     expect(graph.configuration).toEqual(
       expect.objectContaining({
         practiceSessionId: "00000000-0000-0000-0000-000000000001",
-        taskGoal: { en: configuration.taskGoal },
         passingThresholdPercent: configuration.passingThresholdPercent,
       }),
     );
+    expect(graph.configuration.taskGoal).toMatchObject({ queryChunks: expect.any(Array) });
     expect(graph.criteria).toHaveLength(1);
+    expect(graph.criteria[0]).toEqual(
+      expect.objectContaining({
+        maxScore: configuration.criteria[0].maxScore,
+        title: expect.objectContaining({ queryChunks: expect.any(Array) }),
+        expectedBehavior: expect.objectContaining({ queryChunks: expect.any(Array) }),
+      }),
+    );
     expect(graph.scoreGuidance).toEqual([
-      expect.objectContaining({ score: 0, criterionId: graph.criteria[0].id }),
+      expect.objectContaining({
+        score: 0,
+        criterionId: graph.criteria[0].id,
+        description: expect.objectContaining({ queryChunks: expect.any(Array) }),
+      }),
       expect.objectContaining({
         score: 2,
         criterionId: graph.criteria[0].id,
-        example: { en: "I need..." },
+        description: expect.objectContaining({ queryChunks: expect.any(Array) }),
+        example: expect.objectContaining({ queryChunks: expect.any(Array) }),
       }),
     ]);
     expect(graph.blockingErrors).toEqual([
-      expect.objectContaining({ description: { en: "Makes an unsupported promise." } }),
+      expect.objectContaining({
+        description: expect.objectContaining({ queryChunks: expect.any(Array) }),
+      }),
     ]);
   });
 });

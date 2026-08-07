@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
+import { getAiMentorPracticeTodayQueryKey } from "~/api/queries/useAiMentorPracticeToday";
 import { queryClient } from "~/api/queryClient";
 
 import { ApiClient } from "../api-client";
@@ -13,7 +14,7 @@ export function useCreateAiMentorPractice() {
       return response.data.data;
     },
     onSuccess: (practice) => {
-      queryClient.setQueryData(["aiMentorPractice", "today"], practice);
+      queryClient.setQueryData(getAiMentorPracticeTodayQueryKey(), practice);
       queryClient.setQueryData(["aiMentorPractice", practice.id], practice);
     },
   });

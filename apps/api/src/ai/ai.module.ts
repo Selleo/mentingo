@@ -8,6 +8,7 @@ import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration
 import { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { RagRepository } from "src/ai/repositories/rag.repository";
+import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
 import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
@@ -32,6 +33,7 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiJudgeConfigurationGenerationWorkflowService,
     AiJudgeConfigurationValidatorService,
     AiPracticeJudgeConfigurationService,
+    AiPracticeContentGeneratorService,
     ChatService,
     AiRuntimeService,
     AiService,

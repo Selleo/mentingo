@@ -2,9 +2,107 @@
   "dashboardHome": {
     "widgets": {
       "ai_mentor_practice": {
+        "title": "Pratique avec l'AI Mentor",
+        "description": "Créez chaque jour un scénario de pratique ciblé",
         "aiNotConfigured": "L'AI Mentor n'est pas configuré pour cette organisation."
+      },
+      "studentTiles": {
+        "aiMentorPractice": {
+          "description": "Créez chaque jour un scénario de pratique ciblé",
+          "empty": "Décrivez une situation et entraînez-vous avec l'AI Mentor.",
+          "emptyPrompt": "Quelle conversation aimeriez-vous aborder avec plus d'assurance ?",
+          "startCta": "Commencer la pratique",
+          "continueCta": "Continuer la pratique",
+          "feedbackCta": "Voir le retour",
+          "todayEyebrow": "Répétition du jour",
+          "completedEyebrow": "Répétition terminée",
+          "returnHint": "Votre conversation est enregistrée",
+          "privateHint": "Un espace privé pour essayer et progresser",
+          "status": {
+            "queued": "Votre scénario est en attente.",
+            "processing": "Votre scénario est en préparation.",
+            "ready": "La pratique du jour est prête.",
+            "failed": "La préparation du scénario a échoué."
+          }
+        }
       }
     }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Pratiquez une vraie conversation.",
+      "promptEyebrow": "Plantez le décor",
+      "mentorPrompt": "Parlez-moi de la conversation que vous souhaitez répéter. Avec qui échangez-vous, que se passe-t-il et que voulez-vous mieux gérer ?",
+      "scenario": "Que souhaitez-vous pratiquer ?",
+      "scenarioPlaceholder": "Par exemple : je veux m'entraîner à donner un retour constructif à un collègue qui n'a pas respecté un délai.",
+      "scenarioHint": "Ajoutez le contexte utile, comme la situation, les personnes concernées ou votre objectif.",
+      "privateHint": "Vous seul pouvez voir cette pratique.",
+      "submit": "Créer la pratique",
+      "suggestions": {
+        "title": "Commencez par un exemple",
+        "feedback": {
+          "label": "Donner un retour",
+          "value": "Je veux m'entraîner à donner un retour constructif à un collègue qui n'a pas respecté un délai important."
+        },
+        "boundary": {
+          "label": "Poser une limite",
+          "value": "Je veux m'entraîner à poser une limite claire lorsqu'un collègue me demande de prendre en charge une tâche urgente hors de mes priorités actuelles."
+        },
+        "explanation": {
+          "label": "Expliquer une décision",
+          "value": "Je veux m'entraîner à expliquer une décision difficile à quelqu'un qui n'est pas d'accord."
+        },
+        "request": {
+          "label": "Faire une demande",
+          "value": "Je veux m'entraîner à demander de l'aide à mon responsable quand ma charge de travail devient trop lourde."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Plantez le décor",
+          "description": "Décrivez le moment avec vos propres mots."
+        },
+        "rehearse": {
+          "title": "Répétez pour de vrai",
+          "description": "Parlez ou écrivez pendant que l'AI Mentor joue l'autre personne."
+        },
+        "reflect": {
+          "title": "Voyez ce qui a fonctionné",
+          "description": "Terminez lorsque vous êtes prêt et recevez un retour ciblé."
+        }
+      }
+    },
+    "generating": "L'AI Mentor prépare votre scénario.",
+    "failed": "Nous n'avons pas pu générer ce scénario.",
+    "error": "Nous n'avons pas pu charger cette pratique.",
+    "retry": "Réessayer la génération",
+    "backToDashboard": "Retour au tableau de bord",
+    "rehearsalEyebrow": "Répétition du jour",
+    "successGoal": "Votre objectif",
+    "successGoalFallback": "Menez la conversation clairement et convenez d'une prochaine étape constructive.",
+    "viewFeedback": "Voir le retour",
+    "practiceAgain": "Recommencer la pratique",
+    "replayLoadingTitle": "Préparation de votre prochaine répétition",
+    "yourRole": "Votre rôle",
+    "mentorRole": "Rôle de l'AI Mentor",
+    "feedback": {
+      "title": "Retour sur la pratique",
+      "summaryTitle": "Ce qu'il faut retenir",
+      "summaryDescription": "Utilisez ces observations pour améliorer votre prochaine tentative.",
+      "scoreLabel": "Résultat de la pratique",
+      "criteriaTitle": "Ce que l'évaluateur IA a observé",
+      "criterionFallback": "Critère {{number}}",
+      "importantFeedbackTitle": "Retour important"
+    },
+    "startHint": "Commencez la conversation lorsque vous êtes prêt.",
+    "checkHint": "Terminez quand vous le souhaitez pour voir l'effet de votre approche.",
+    "checkPractice": "Terminer et réfléchir",
+    "practiceComplete": "Votre répétition est terminée. Vous pouvez revoir votre retour à tout moment.",
+    "preparingBackgroundDescription": "Votre pratique est préparée en arrière-plan. Vous pouvez retourner au tableau de bord et revenir lorsqu'elle sera prête.",
+    "conversationTitle": "Pratique avec l'AI Mentor",
+    "mentorName": "AI Mentor",
+    "message": "Message à l'AI Mentor",
+    "send": "Envoyer"
   },
   "common": {
     "button": {

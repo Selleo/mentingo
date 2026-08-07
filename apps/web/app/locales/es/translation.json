@@ -88,8 +88,14 @@
         "aiMentorPractice": {
           "description": "Crea un escenario de práctica al día",
           "empty": "Describe una situación y practícala con Mentor IA.",
+          "emptyPrompt": "¿Qué conversación te gustaría afrontar con más confianza?",
           "startCta": "Iniciar práctica",
           "continueCta": "Continuar práctica",
+          "feedbackCta": "Ver comentarios",
+          "todayEyebrow": "Ensayo de hoy",
+          "completedEyebrow": "Ensayo completado",
+          "returnHint": "Tu conversación está guardada",
+          "privateHint": "Un espacio privado para probar y mejorar",
           "status": {
             "queued": "Tu escenario está en cola.",
             "processing": "Tu escenario se está preparando.",
@@ -163,14 +169,72 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Crear la práctica de hoy con Mentor IA",
-      "description": "Responde tres preguntas breves para preparar el escenario.",
-      "challenge": "¿Qué situación quieres practicar?",
-      "counterpart": "¿Con quién hablarás?",
-      "desiredOutcome": "¿Qué resultado quieres lograr?",
-      "submit": "Generar práctica"
+      "title": "Practica una conversación real.",
+      "promptEyebrow": "Prepara la escena",
+      "mentorPrompt": "Cuéntame la conversación que quieres ensayar. ¿Con quién hablas, qué está ocurriendo y qué te gustaría manejar mejor?",
+      "scenario": "¿Qué quieres practicar?",
+      "scenarioPlaceholder": "Por ejemplo: Quiero practicar cómo dar comentarios constructivos a un compañero que no cumplió un plazo.",
+      "scenarioHint": "Añade contexto para que la práctica sea realista, como la situación, las personas o tu objetivo.",
+      "privateHint": "Solo tú puedes ver esta práctica.",
+      "submit": "Crear práctica",
+      "suggestions": {
+        "title": "Empieza con un ejemplo",
+        "feedback": {
+          "label": "Dar comentarios",
+          "value": "Quiero practicar cómo dar comentarios constructivos a un compañero cuyo trabajo no cumplió un plazo importante."
+        },
+        "boundary": {
+          "label": "Marcar un límite",
+          "value": "Quiero practicar cómo marcar un límite claro cuando un compañero me pide trabajo urgente fuera de mis prioridades actuales."
+        },
+        "explanation": {
+          "label": "Explicar una decisión",
+          "value": "Quiero practicar cómo explicar una decisión difícil a alguien que no está de acuerdo."
+        },
+        "request": {
+          "label": "Hacer una petición",
+          "value": "Quiero practicar cómo pedir apoyo a mi responsable cuando la carga de trabajo es demasiado alta."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Prepara la escena",
+          "description": "Describe el momento con tus propias palabras."
+        },
+        "rehearse": {
+          "title": "Ensáyalo de verdad",
+          "description": "Habla o escribe mientras Mentor IA interpreta a la otra persona."
+        },
+        "reflect": {
+          "title": "Descubre qué funcionó",
+          "description": "Termina cuando estés listo y recibe comentarios concretos."
+        }
+      }
     },
+    "backToDashboard": "Volver al panel",
+    "rehearsalEyebrow": "Ensayo de hoy",
+    "successGoal": "Tu objetivo",
+    "successGoalFallback": "Conduce la conversación con claridad y acuerda un siguiente paso constructivo.",
+    "viewFeedback": "Ver comentarios",
+    "practiceAgain": "Practicar de nuevo",
+    "replayLoadingTitle": "Preparando tu próximo ensayo",
+    "yourRole": "Tu papel",
+    "mentorRole": "Papel del Mentor IA",
+    "feedback": {
+      "title": "Comentarios de la práctica",
+      "summaryTitle": "Qué llevarte para la próxima vez",
+      "summaryDescription": "Utiliza estas observaciones para mejorar tu próximo intento.",
+      "scoreLabel": "Resultado de la práctica",
+      "criteriaTitle": "Qué observó el evaluador IA",
+      "criterionFallback": "Criterio {{number}}",
+      "importantFeedbackTitle": "Comentarios importantes"
+    },
+    "startHint": "Empieza la conversación cuando estés listo.",
+    "checkHint": "Termina cuando quieras para ver cómo funcionó tu enfoque.",
+    "checkPractice": "Terminar y reflexionar",
+    "practiceComplete": "Tu ensayo ha terminado. Puedes volver a tus comentarios cuando quieras.",
     "generating": "Mentor IA está preparando tu escenario.",
+    "preparingBackgroundDescription": "Tu práctica se está preparando en segundo plano. Puedes volver al panel y regresar cuando esté lista.",
     "failed": "No se pudo generar el escenario.",
     "error": "No se pudo cargar la práctica.",
     "retry": "Intentar de nuevo",

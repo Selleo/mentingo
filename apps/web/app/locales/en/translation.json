@@ -88,8 +88,14 @@
         "aiMentorPractice": {
           "description": "Create one focused practice scenario each day",
           "empty": "Describe a situation and practice it with AI Mentor.",
+          "emptyPrompt": "What conversation would you like to handle with more confidence?",
           "startCta": "Start practice",
           "continueCta": "Continue practice",
+          "feedbackCta": "View feedback",
+          "todayEyebrow": "Today's rehearsal",
+          "completedEyebrow": "Rehearsal complete",
+          "returnHint": "Your conversation is saved",
+          "privateHint": "A private place to try, adjust, and try again",
           "status": {
             "queued": "Your practice scenario is queued.",
             "processing": "Your practice scenario is being prepared.",
@@ -163,14 +169,72 @@
   },
   "aiMentorPractice": {
     "form": {
-      "title": "Create today's AI Mentor practice",
-      "description": "Answer three short questions so AI Mentor can prepare a focused scenario.",
-      "challenge": "What situation do you want to practice?",
-      "counterpart": "Who will you be speaking with?",
-      "desiredOutcome": "What outcome do you want to achieve?",
-      "submit": "Generate practice"
+      "title": "Practice a real conversation.",
+      "promptEyebrow": "Set the scene",
+      "mentorPrompt": "Tell me about the conversation you want to rehearse. Who are you speaking with, what is happening, and what would you like to handle better?",
+      "scenario": "What would you like to practice?",
+      "scenarioPlaceholder": "For example: I want to practice giving constructive feedback to a colleague who missed a deadline.",
+      "scenarioHint": "Include any context that would help make the practice realistic, such as the situation, people involved, or your goal.",
+      "privateHint": "Only you can see this practice.",
+      "submit": "Create practice",
+      "suggestions": {
+        "title": "Start with an example",
+        "feedback": {
+          "label": "Give feedback",
+          "value": "I want to practice giving constructive feedback to a colleague whose work missed an important deadline."
+        },
+        "boundary": {
+          "label": "Set a boundary",
+          "value": "I want to practice setting a clear boundary when a teammate asks me to take on urgent work outside my current priorities."
+        },
+        "explanation": {
+          "label": "Explain a decision",
+          "value": "I want to practice explaining a difficult decision to someone who disagrees with it."
+        },
+        "request": {
+          "label": "Make a request",
+          "value": "I want to practice asking my manager for support with a workload that is becoming too heavy."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Set the scene",
+          "description": "Describe the moment in your own words."
+        },
+        "rehearse": {
+          "title": "Rehearse it for real",
+          "description": "Speak or type while AI Mentor plays the other person."
+        },
+        "reflect": {
+          "title": "See what worked",
+          "description": "Finish when you are ready and get focused feedback."
+        }
+      }
     },
+    "backToDashboard": "Back to dashboard",
+    "rehearsalEyebrow": "Today's rehearsal",
+    "successGoal": "Your goal",
+    "successGoalFallback": "Handle the conversation clearly and reach a constructive next step.",
+    "viewFeedback": "View feedback",
+    "practiceAgain": "Practice again",
+    "replayLoadingTitle": "Setting up your next rehearsal",
+    "yourRole": "Your role",
+    "mentorRole": "AI Mentor role",
+    "feedback": {
+      "title": "Practice feedback",
+      "summaryTitle": "What to take forward",
+      "summaryDescription": "Use these observations to strengthen your next attempt.",
+      "scoreLabel": "Practice score",
+      "criteriaTitle": "What the Judge noticed",
+      "criterionFallback": "Criterion {{number}}",
+      "importantFeedbackTitle": "Important feedback"
+    },
+    "startHint": "Start the conversation when you are ready.",
+    "checkHint": "Finish whenever you want to see how your approach landed.",
+    "checkPractice": "Finish and reflect",
+    "practiceComplete": "Your rehearsal is complete. Your feedback is ready whenever you want to revisit it.",
     "generating": "AI Mentor is preparing your scenario.",
+    "preparingBackgroundDescription": "Your practice is being prepared in the background. You can return to the dashboard and come back when it is ready.",
     "failed": "We could not generate this practice scenario.",
     "error": "We could not load this practice.",
     "retry": "Try generation again",
