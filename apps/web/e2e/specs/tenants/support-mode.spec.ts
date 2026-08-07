@@ -49,7 +49,7 @@ test("managing admin can enter support mode and see the support banner", async (
       await enterSupportModeFromListFlow(page, tenant.id);
 
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.BANNER)).toBeVisible();
-      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/courses$`));
+      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/dashboard$`));
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.MESSAGE)).toBeVisible();
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.TIME_LEFT)).toBeVisible();
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.EXIT_BUTTON)).toBeVisible();
@@ -151,7 +151,7 @@ test("support mode blocks super-admin access and can be exited", async ({
       await enterSupportModeFromListFlow(page, tenant.id);
 
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.BANNER)).toBeVisible();
-      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/courses$`));
+      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/dashboard$`));
       await expect(page.getByTestId(NAVIGATION_HANDLES.SUPER_ADMIN_GROUP)).toHaveCount(0);
 
       const originalOrigin = requireOrigin(origin);

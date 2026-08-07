@@ -6,7 +6,6 @@ import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
-import { SettingsService } from "src/settings/settings.service";
 
 import { CertificateRepository } from "./certificate.repository";
 import { CertificatesController } from "./certificates.controller";
@@ -22,7 +21,6 @@ import { CertificateEmailHandler } from "./handlers/certificate-email.handler";
     CertificateRepository,
     CertificatesCron,
     CertificateEmailHandler,
-    SettingsService,
     LocalizationService,
   ],
   exports: [CertificatesService],

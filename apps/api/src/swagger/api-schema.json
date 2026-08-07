@@ -748,6 +748,40 @@
         }
       }
     },
+    "/api/settings/dashboard": {
+      "get": {
+        "operationId": "SettingsController_getAvailableDashboardWidgets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAvailableDashboardWidgetsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/dashboard/default": {
+      "get": {
+        "operationId": "SettingsController_getDefaultDashboardWidgets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDefaultDashboardWidgetsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/new-user-notification": {
       "patch": {
         "operationId": "SettingsController_updateAdminNewUserNotification",
@@ -14263,33 +14297,6 @@
         }
       }
     },
-    "/api/super-admin/tenants/{id}/support-roles": {
-      "get": {
-        "operationId": "TenantsController_findSupportRoles",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FindSupportRolesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/super-admin/tenants/{id}/support-users": {
       "get": {
         "operationId": "TenantsController_findSupportUsers",
@@ -14327,31 +14334,6 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "roleSlug",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "scope",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "admins",
-                  "type": "string"
-                },
-                {
-                  "const": "all",
-                  "type": "string"
-                }
-              ]
             }
           }
         ],
@@ -17691,6 +17673,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "dashboard.read",
+                      "type": "string"
+                    },
+                    {
                       "const": "course.read_assigned",
                       "type": "string"
                     },
@@ -18994,12 +18980,94 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "dashboard": {
+                    "type": "object",
+                    "properties": {
+                      "widgets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "anyOf": [
+                                {
+                                  "const": "a_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_training_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_incomplete_courses",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_deadline_risks",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_continue_learning",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_required_course",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_course_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_certificates",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_ai_mentor_practice",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "order": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "width": {
+                              "anyOf": [
+                                {
+                                  "const": 1,
+                                  "type": "number"
+                                },
+                                {
+                                  "const": 2,
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "width"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "widgets"
+                    ]
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret"
+                  "MFASecret",
+                  "dashboard"
                 ]
               },
               {
@@ -19052,6 +19120,87 @@
                       }
                     ]
                   },
+                  "dashboard": {
+                    "type": "object",
+                    "properties": {
+                      "widgets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "anyOf": [
+                                {
+                                  "const": "a_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_training_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_incomplete_courses",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_deadline_risks",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_continue_learning",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_required_course",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_course_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_certificates",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_ai_mentor_practice",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "order": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "width": {
+                              "anyOf": [
+                                {
+                                  "const": 1,
+                                  "type": "number"
+                                },
+                                {
+                                  "const": 2,
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "width"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "widgets"
+                    ]
+                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -19066,6 +19215,7 @@
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
+                  "dashboard",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
@@ -19129,6 +19279,87 @@
                     "type": "null"
                   }
                 ]
+              },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
+                ]
               }
             }
           },
@@ -19180,6 +19411,87 @@
                   {
                     "type": "null"
                   }
+                ]
+              },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
                 ]
               },
               "adminNewUserNotification": {
@@ -19249,12 +19561,94 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "dashboard": {
+                    "type": "object",
+                    "properties": {
+                      "widgets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "anyOf": [
+                                {
+                                  "const": "a_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_training_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_incomplete_courses",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_deadline_risks",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_continue_learning",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_required_course",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_course_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_certificates",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_ai_mentor_practice",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "order": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "width": {
+                              "anyOf": [
+                                {
+                                  "const": 1,
+                                  "type": "number"
+                                },
+                                {
+                                  "const": 2,
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "width"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "widgets"
+                    ]
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "MFASecret"
+                  "MFASecret",
+                  "dashboard"
                 ]
               },
               {
@@ -19307,6 +19701,87 @@
                       }
                     ]
                   },
+                  "dashboard": {
+                    "type": "object",
+                    "properties": {
+                      "widgets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "anyOf": [
+                                {
+                                  "const": "a_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_training_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_incomplete_courses",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "a_deadline_risks",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_continue_learning",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_required_course",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_course_completion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_certificates",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_ai_mentor_practice",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "order": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "width": {
+                              "anyOf": [
+                                {
+                                  "const": 1,
+                                  "type": "number"
+                                },
+                                {
+                                  "const": 2,
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "width"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "widgets"
+                    ]
+                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   },
@@ -19321,12 +19796,149 @@
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
+                  "dashboard",
                   "adminNewUserNotification",
                   "adminFinishedCourseNotification",
                   "configWarningDismissed"
                 ]
               }
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAvailableDashboardWidgetsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "const": "a_event_calendar",
+                  "type": "string"
+                },
+                {
+                  "const": "a_training_completion",
+                  "type": "string"
+                },
+                {
+                  "const": "a_incomplete_courses",
+                  "type": "string"
+                },
+                {
+                  "const": "a_deadline_risks",
+                  "type": "string"
+                },
+                {
+                  "const": "s_continue_learning",
+                  "type": "string"
+                },
+                {
+                  "const": "s_event_calendar",
+                  "type": "string"
+                },
+                {
+                  "const": "s_required_course",
+                  "type": "string"
+                },
+                {
+                  "const": "s_course_completion",
+                  "type": "string"
+                },
+                {
+                  "const": "s_certificates",
+                  "type": "string"
+                },
+                {
+                  "const": "s_ai_mentor_practice",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDefaultDashboardWidgetsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "anyOf": [
+                    {
+                      "const": "a_event_calendar",
+                      "type": "string"
+                    },
+                    {
+                      "const": "a_training_completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "a_incomplete_courses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "a_deadline_risks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_continue_learning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_event_calendar",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_required_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_course_completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_certificates",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_ai_mentor_practice",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "order": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "const": 1,
+                      "type": "number"
+                    },
+                    {
+                      "const": 2,
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "order",
+                "width"
+              ]
+            }
           }
         },
         "required": [
@@ -19386,6 +19998,87 @@
                   }
                 ]
               },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
+                ]
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -19400,6 +20093,7 @@
               "language",
               "isMFAEnabled",
               "MFASecret",
+              "dashboard",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -21491,6 +22185,87 @@
                   }
                 ]
               },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
+                ]
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -21505,6 +22280,7 @@
               "language",
               "isMFAEnabled",
               "MFASecret",
+              "dashboard",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -21568,6 +22344,87 @@
                   }
                 ]
               },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
+                ]
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -21582,6 +22439,7 @@
               "language",
               "isMFAEnabled",
               "MFASecret",
+              "dashboard",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -22588,6 +23446,87 @@
                   }
                 ]
               },
+              "dashboard": {
+                "type": "object",
+                "properties": {
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "anyOf": [
+                            {
+                              "const": "a_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_training_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_incomplete_courses",
+                              "type": "string"
+                            },
+                            {
+                              "const": "a_deadline_risks",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_required_course",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_course_completion",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_certificates",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_ai_mentor_practice",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "order": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "const": 1,
+                              "type": "number"
+                            },
+                            {
+                              "const": 2,
+                              "type": "number"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "order",
+                        "width"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "widgets"
+                ]
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -22602,6 +23541,7 @@
               "language",
               "isMFAEnabled",
               "MFASecret",
+              "dashboard",
               "adminNewUserNotification",
               "adminFinishedCourseNotification",
               "configWarningDismissed"
@@ -55526,41 +56466,6 @@
           "data"
         ]
       },
-      "FindSupportRolesResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "slug": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "isSystem": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "id",
-                "slug",
-                "name",
-                "isSystem"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "FindSupportUsersResponse": {
         "type": "object",
         "properties": {
@@ -55595,33 +56500,6 @@
                       "type": "null"
                     }
                   ]
-                },
-                "roles": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "slug": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "isSystem": {
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "slug",
-                      "name",
-                      "isSystem"
-                    ]
-                  }
                 }
               },
               "required": [
@@ -55630,8 +56508,7 @@
                 "firstName",
                 "lastName",
                 "label",
-                "profilePictureUrl",
-                "roles"
+                "profilePictureUrl"
               ]
             }
           },

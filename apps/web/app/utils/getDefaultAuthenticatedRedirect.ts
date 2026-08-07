@@ -24,6 +24,13 @@ export const getDefaultAuthenticatedRedirect = (
   const permissions = currentUser.permissions;
 
   if (
+    isAvailableRoute("/dashboard", excludedRoutes) &&
+    hasPermission(permissions, PERMISSIONS.DASHBOARD_READ)
+  ) {
+    return "/dashboard";
+  }
+
+  if (
     isAvailableRoute("/courses", excludedRoutes) &&
     hasPermission(permissions, PERMISSIONS.COURSE_READ)
   ) {

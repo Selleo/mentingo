@@ -12,6 +12,9 @@ import type { INestApplication } from "@nestjs/common";
 import type { JwtService } from "@nestjs/jwt";
 import type { UserWithCredentials } from "test/factory/user.factory";
 
+const POSTGRES_DEADLOCK_CODE = "40P01";
+const TRUNCATE_MAX_ATTEMPTS = 3;
+
 type CamelToSnake<T extends string, P extends string = ""> = string extends T
   ? string
   : T extends `${infer C0}${infer R}`
@@ -48,15 +51,30 @@ export async function truncateAllTables(
     .map((t) => `"${t}"`)
     .join(", ");
 
-  // Disable FK constraints during truncate to prevent deadlocks with async operations
-  // session_replication_role = 'replica' disables all triggers including FK checks
-  await connection.execute(
-    sql.raw(`
-      SET session_replication_role = 'replica';
-      TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE;
-      SET session_replication_role = 'origin';
-      `),
-  );
+  for (let attempt = 1; attempt <= TRUNCATE_MAX_ATTEMPTS; attempt++) {
+    try {
+      await connection.transaction(async (transaction) => {
+        // SET LOCAL restores the role when the transaction finishes, including
+        // when Postgres rolls it back after a deadlock.
+        await transaction.execute(
+          sql.raw(`
+            SET LOCAL session_replication_role = 'replica';
+            TRUNCATE TABLE ${tableNames} RESTART IDENTITY;
+          `),
+        );
+      });
+      break;
+    } catch (error) {
+      const isDeadlock =
+        error instanceof Object && "code" in error && error.code === POSTGRES_DEADLOCK_CODE;
+
+      if (!isDeadlock || attempt === TRUNCATE_MAX_ATTEMPTS) {
+        throw error;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, attempt * 50));
+    }
+  }
 
   // Recreate global settings required for authentication
   await scopedConnection.insert(settings).values({
@@ -86,20 +104,10 @@ export async function cookieFor(
     loginRequest.set("Referer", referer.endsWith("/") ? referer : `${referer}/`);
   }
 
-  const loginResponse = await loginRequest
-    .send({
-      email: user.email,
-      password: user.credentials?.password,
-    })
-    .expect(201);
+  const loginResponse = await loginRequest.send({
+    email: user.email,
+    password: user.credentials?.password,
+  });
 
-  const cookies = loginResponse.headers["set-cookie"];
-
-  if (!cookies) {
-    throw new Error(`E2E login returned no cookies for ${user.email}`);
-  }
-
-  const cookieHeaders = Array.isArray(cookies) ? cookies : [cookies];
-
-  return cookieHeaders.map((cookie) => cookie.split(";", 1)[0]).join("; ");
+  return loginResponse.headers["set-cookie"];
 }

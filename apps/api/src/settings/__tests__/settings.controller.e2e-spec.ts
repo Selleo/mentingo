@@ -1,3 +1,4 @@
+import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_WIDTHS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -93,6 +94,56 @@ describe("SettingsController (e2e)", () => {
           .put("/api/settings")
           .set("Cookie", testCookies)
           .send(invalidUpdatePayload)
+          .expect(400);
+      });
+
+      it("should update a valid dashboard layout", async () => {
+        const dashboard = {
+          widgets: [
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+              order: 0,
+              width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+            },
+          ],
+        };
+
+        const response = await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({ dashboard })
+          .expect(200);
+
+        expect(response.body.data.dashboard).toEqual(dashboard);
+      });
+
+      it("should return 400 if a widget uses a width that its definition does not allow", async () => {
+        await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({
+            dashboard: {
+              widgets: [
+                {
+                  id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+                  order: 0,
+                  width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+                },
+              ],
+            },
+          })
+          .expect(400);
+      });
+
+      it("should return 400 if dashboard settings contain an unknown widget or width", async () => {
+        await request(app.getHttpServer())
+          .put("/api/settings")
+          .set("Cookie", testCookies)
+          .send({
+            dashboard: {
+              widgets: [{ id: "unknown", order: 0, width: 3 }],
+            },
+          })
           .expect(400);
       });
 
@@ -198,7 +249,85 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body).toBeDefined();
         expect(response.body.data).toBeDefined();
+        expect(response.body.data.dashboard).toEqual({
+          widgets: [
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+              order: 1,
+              width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+            },
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+              order: 2,
+              width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+            },
+            {
+              id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
+              order: 3,
+              width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+            },
+          ],
+        });
       });
+    });
+
+    describe("dashboard widget catalog", () => {
+      beforeEach(async () => {
+        await truncateTables(baseDb, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        testUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        testCookies = await cookieFor(testUser, app);
+      });
+
+      it("should return dashboard widgets available to the current user", async () => {
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/dashboard")
+          .set("Cookie", testCookies)
+          .expect(200);
+
+        expect(response.body.data).toEqual([
+          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+          DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
+        ]);
+      });
+
+      it("should return the role-aware default dashboard layout", async () => {
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/dashboard/default")
+          .set("Cookie", testCookies)
+          .expect(200);
+
+        expect(response.body.data).toEqual([
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER1,
+            order: 1,
+            width: DASHBOARD_WIDGET_WIDTHS.MEDIUM,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER2,
+            order: 2,
+            width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+          },
+          {
+            id: DASHBOARD_WIDGET_IDS.STUDENT_PLACEHOLDER3,
+            order: 3,
+            width: DASHBOARD_WIDGET_WIDTHS.SMALL,
+          },
+        ]);
+      });
+
+      it.each(["/api/settings/dashboard", "/api/settings/dashboard/default"])(
+        "should return 401 for unauthenticated requests to %s",
+        async (endpoint) => {
+          await request(app.getHttpServer()).get(endpoint).expect(401);
+        },
+      );
     });
   });
 

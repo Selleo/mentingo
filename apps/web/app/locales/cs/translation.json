@@ -1,4 +1,55 @@
 {
+  "dashboardHome": {
+    "title": "Váš dashboard",
+    "subtitle": "Nejdůležitější informace a vzdělávací aktivity vždy po ruce.",
+    "customize": "Přizpůsobit dashboard",
+    "edit": {
+      "badge": "Úpravy",
+      "widgetsButton": "Widgety",
+      "restore": "Obnovit výchozí",
+      "instructions": "Přetažením widgetů změníte jejich pořadí. Můžete také změnit šířku a viditelnost.",
+      "changeWidth": "Změnit šířku {{title}}",
+      "drag": "Přesunout {{title}}",
+      "widgetLibrary": "Widgety dashboardu",
+      "widgetLibraryDescription": "Vyberte widgety, které mají být na dashboardu viditelné.",
+      "required": "Povinný",
+      "toggle": "Přepnout {{title}}",
+      "confirm": "Ano",
+      "cancel": "Ne"
+    },
+    "preview": {
+      "updated": "Aktuální",
+      "caption": "Rychlý přehled aktuální vzdělávací aktivity.",
+      "progress": "Pokrok"
+    },
+    "error": {
+      "title": "Dashboard se nepodařilo načíst",
+      "description": "Zkuste to za chvíli znovu.",
+      "retry": "Zkusit znovu",
+      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena."
+    },
+    "widgets": {
+      "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
+      "placeholderContent": "Tento widget je připravený na obsah konkrétní funkce.",
+      "placeholderFooter": "Ukázkový widget",
+      "a_placeholder_1": { "title": "Widget správce 1" },
+      "a_placeholder_2": { "title": "Widget správce 2" },
+      "a_placeholder_3": { "title": "Widget správce 3" },
+      "s_placeholder_1": { "title": "Widget studenta 1" },
+      "s_placeholder_2": { "title": "Widget studenta 2" },
+      "s_placeholder_3": { "title": "Widget studenta 3" },
+      "commonDescription": "Klíčové informace na první pohled",
+      "training_completion": { "title": "Dokončení školení" },
+      "deadline_risks": { "title": "Ohrožené termíny" },
+      "incomplete_courses": { "title": "Nedokončené kurzy" },
+      "event_calendar": { "title": "Kalendář událostí" },
+      "continue_learning": { "title": "Pokračovat ve vzdělávání" },
+      "required_course": { "title": "Povinné kurzy" },
+      "course_completion": { "title": "Dokončené kurzy" },
+      "certificates": { "title": "Certifikáty" },
+      "ai_mentor_practice": { "title": "Cvičení s AI Mentorem" }
+    }
+  },
   "common": {
     "button": {
       "save": "Uložit",
@@ -18,7 +69,8 @@
       "edit": "Upravit",
       "delete": "Smazat",
       "uploading": "Nahrávání...",
-      "sending": "Odesílání..."
+      "sending": "Odesílání...",
+      "loading": "Načítání..."
     },
     "toast": {
       "noAccess": "Nemáte oprávnění pro přístup k tomuto zdroji",
@@ -1549,6 +1601,7 @@
         "user_manage": "Může spravovat uživatele včetně rolí a stavu účtu.",
         "settings_read_self": "Může zobrazit vlastní nastavení profilu a předvoleb.",
         "settings_update_self": "Může aktualizovat vlastní nastavení profilu a předvoleb.",
+        "dashboard_read": "Může zobrazit svůj dashboard.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",

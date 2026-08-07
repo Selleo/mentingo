@@ -72,6 +72,9 @@ const CALENDAR_READ_ACCESS: PermissionRequirement = {
 const LIVE_TRAINING_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.LIVE_TRAINING_READ],
 };
+const DASHBOARD_READ_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.DASHBOARD_READ],
+};
 const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
   anyOf: [
     PERMISSIONS.LEARNING_PATH_CREATE,
@@ -103,6 +106,7 @@ export const routeAccessConfig = createRouteConfig({
   "articles/:articleId/edit": ARTICLE_EDIT_ACCESS,
   "news/add": NEWS_EDIT_ACCESS,
   "news/:newsId/edit": NEWS_EDIT_ACCESS,
+  dashboard: DASHBOARD_READ_ACCESS,
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,

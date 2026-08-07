@@ -1,6 +1,7 @@
 export const NAVIGATION_HANDLES = {
   PROFILE_FOOTER: "navigation-profile-footer",
   LOGOUT: "navigation-logout-button",
+  DASHBOARD_LINK: "navigation-dashboard-link",
   COURSES_GROUP: "navigation-courses-group",
   COURSES_LINK: "navigation-courses-link",
   LEARNING_PATHS_LINK: "navigation-learning-paths-link",

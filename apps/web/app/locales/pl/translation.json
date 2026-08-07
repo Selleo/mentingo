@@ -1,4 +1,55 @@
 {
+  "dashboardHome": {
+    "title": "Twój dashboard",
+    "subtitle": "Najważniejsze informacje i działania związane z nauką zawsze pod ręką.",
+    "customize": "Dostosuj dashboard",
+    "edit": {
+      "badge": "Edycja",
+      "widgetsButton": "Widżety",
+      "restore": "Przywróć domyślne",
+      "instructions": "Przeciągaj kafelki, aby zmienić ich kolejność. Możesz też zmieniać ich szerokość i widoczność.",
+      "changeWidth": "Zmień szerokość kafelka {{title}}",
+      "drag": "Przenieś kafelek {{title}}",
+      "widgetLibrary": "Kafelki dashboardu",
+      "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne na Twoim dashboardzie.",
+      "required": "Wymagany",
+      "toggle": "Przełącz kafelek {{title}}",
+      "confirm": "Tak",
+      "cancel": "Nie"
+    },
+    "empty": {
+      "title": "Twój dashboard jest pusty",
+      "description": "Dostosuj dashboard i dodaj najważniejsze dla Ciebie kafelki.",
+      "editDescription": "Włącz co najmniej jeden kafelek z powyższej listy."
+    },
+    "error": {
+      "title": "Nie udało się wczytać dashboardu",
+      "description": "Spróbuj ponownie za chwilę.",
+      "retry": "Spróbuj ponownie",
+      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka."
+    },
+    "widgets": {
+      "placeholderDescription": "Widżet pulpitu przygotowany pod dedykowany widok danych",
+      "placeholderContent": "Ten widżet jest gotowy na treść właściwą dla swojej funkcji.",
+      "placeholderFooter": "Przykładowy widżet",
+      "a_placeholder_1": { "title": "Widżet administratora 1" },
+      "a_placeholder_2": { "title": "Widżet administratora 2" },
+      "a_placeholder_3": { "title": "Widżet administratora 3" },
+      "s_placeholder_1": { "title": "Widżet uczestnika 1" },
+      "s_placeholder_2": { "title": "Widżet uczestnika 2" },
+      "s_placeholder_3": { "title": "Widżet uczestnika 3" },
+      "commonDescription": "Najważniejsze informacje w jednym miejscu",
+      "training_completion": { "title": "Realizacja szkoleń" },
+      "deadline_risks": { "title": "Zagrożone terminy" },
+      "incomplete_courses": { "title": "Nieukończone kursy" },
+      "event_calendar": { "title": "Kalendarz wydarzeń" },
+      "continue_learning": { "title": "Kontynuuj naukę" },
+      "required_course": { "title": "Kursy obowiązkowe" },
+      "course_completion": { "title": "Ukończone kursy" },
+      "certificates": { "title": "Certyfikaty" },
+      "ai_mentor_practice": { "title": "Ćwiczenia z Mentorem AI" }
+    }
+  },
   "common": {
     "button": {
       "save": "Zapisz",
@@ -19,7 +70,8 @@
       "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
-      "sending": "Wysyłanie..."
+      "sending": "Wysyłanie...",
+      "loading": "Ładowanie..."
     },
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
@@ -1769,6 +1821,7 @@
         "user_manage": "Może zarządzać użytkownikami, w tym rolami i statusem kont.",
         "settings_read_self": "Może przeglądać własne ustawienia profilu i preferencji.",
         "settings_update_self": "Może aktualizować własne ustawienia profilu i preferencji.",
+        "dashboard_read": "Może wyświetlać swój dashboard.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",

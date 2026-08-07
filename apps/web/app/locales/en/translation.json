@@ -1,4 +1,55 @@
 {
+  "dashboardHome": {
+    "title": "Your dashboard",
+    "subtitle": "Keep the most important learning information and actions within easy reach.",
+    "customize": "Customize dashboard",
+    "edit": {
+      "badge": "Editing",
+      "widgetsButton": "Widgets",
+      "restore": "Restore default",
+      "instructions": "Drag widgets to change their order. You can also change their width and visibility.",
+      "changeWidth": "Change width of {{title}}",
+      "drag": "Move {{title}}",
+      "widgetLibrary": "Dashboard widgets",
+      "widgetLibraryDescription": "Choose which widgets should be visible on your dashboard.",
+      "required": "Required",
+      "toggle": "Toggle {{title}}",
+      "confirm": "Yes",
+      "cancel": "No"
+    },
+    "empty": {
+      "title": "Your dashboard is empty",
+      "description": "Customize the dashboard to add the widgets that matter to you.",
+      "editDescription": "Enable at least one widget in the list above."
+    },
+    "error": {
+      "title": "We could not load the dashboard",
+      "description": "Try again in a moment.",
+      "retry": "Try again",
+      "invalidWidgetWidth": "This width is not allowed for the selected widget."
+    },
+    "widgets": {
+      "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
+      "placeholderContent": "This widget is ready for its feature-specific content.",
+      "placeholderFooter": "Example widget",
+      "a_placeholder_1": { "title": "Admin widget 1" },
+      "a_placeholder_2": { "title": "Admin widget 2" },
+      "a_placeholder_3": { "title": "Admin widget 3" },
+      "s_placeholder_1": { "title": "Learner widget 1" },
+      "s_placeholder_2": { "title": "Learner widget 2" },
+      "s_placeholder_3": { "title": "Learner widget 3" },
+      "commonDescription": "Key information at a glance",
+      "training_completion": { "title": "Training completion" },
+      "deadline_risks": { "title": "Deadline risks" },
+      "incomplete_courses": { "title": "Incomplete courses" },
+      "event_calendar": { "title": "Event calendar" },
+      "continue_learning": { "title": "Continue learning" },
+      "required_course": { "title": "Required courses" },
+      "course_completion": { "title": "Completed courses" },
+      "certificates": { "title": "Certificates" },
+      "ai_mentor_practice": { "title": "AI Mentor practice" }
+    }
+  },
   "common": {
     "button": {
       "save": "Save",
@@ -18,7 +69,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "uploading": "Uploading...",
-      "sending": "Sending..."
+      "sending": "Sending...",
+      "loading": "Loading..."
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",
@@ -1552,6 +1604,7 @@
         "user_manage": "Manage users, including roles and account status.",
         "settings_read_self": "View their own profile and preference settings.",
         "settings_update_self": "Update their own profile and preference settings.",
+        "dashboard_read": "View their dashboard.",
         "settings_manage": "Manage global platform settings.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",
