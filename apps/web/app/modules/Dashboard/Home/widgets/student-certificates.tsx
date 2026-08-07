@@ -72,49 +72,51 @@ export function WidgetStudentCertificates() {
             <div className="flex min-h-32 items-center justify-center text-center text-neutral-600">
               {t("dashboardHome.widgets.studentTiles.certificates.empty")}
             </div>
-          ) : data ? (
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={openDialog}
-                className="group flex w-full items-center gap-3 rounded-lg border border-purple-100 bg-purple-50 p-4 text-left transition-colors hover:border-purple-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 focus-visible:ring-offset-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="h4 text-purple-700">{data.activeCount}</p>
-                  <p className="body-sm-md text-purple-800">
-                    {t("dashboardHome.widgets.studentTiles.certificates.active")}
-                  </p>
-                </div>
-                <ChevronRight
-                  className="size-5 text-purple-500 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </button>
-              {data.expiringSoon && (
-                <div className="rounded-lg border border-warning-100 bg-warning-50 p-4">
-                  <div className="flex items-center gap-2 text-warning-800">
-                    <CalendarDays className="size-4" aria-hidden="true" />
-                    <p className="body-sm-md">
-                      {t("dashboardHome.widgets.studentTiles.certificates.expiringSoon")}
+          ) : (
+            data && (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={openDialog}
+                  className="group flex w-full items-center gap-3 rounded-lg border border-purple-100 bg-purple-50 p-4 text-left transition-colors hover:border-purple-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300 focus-visible:ring-offset-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="h4 text-purple-700">{data.activeCount}</p>
+                    <p className="body-sm-md text-purple-800">
+                      {t("dashboardHome.widgets.studentTiles.certificates.active")}
                     </p>
                   </div>
-                  <p className="mt-2 line-clamp-2 font-medium text-neutral-950">
-                    {data.expiringSoon.courseTitle}
-                  </p>
-                  <p className="details mt-1 text-warning-700">
-                    {formatDate(data.expiringSoon.expiresAt)}
-                  </p>
-                  <Button asChild variant="outline" size="sm" className="mt-3">
-                    <Link
-                      to={`/course/${data.expiringSoon.courseSlug}?certificate=${data.expiringSoon.certificateId}`}
-                    >
-                      {t("dashboardHome.widgets.studentTiles.certificates.cta")}
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          ) : null}
+                  <ChevronRight
+                    className="size-5 text-purple-500 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </button>
+                {data.expiringSoon && (
+                  <div className="rounded-lg border border-warning-100 bg-warning-50 p-4">
+                    <div className="flex items-center gap-2 text-warning-800">
+                      <CalendarDays className="size-4" aria-hidden="true" />
+                      <p className="body-sm-md">
+                        {t("dashboardHome.widgets.studentTiles.certificates.expiringSoon")}
+                      </p>
+                    </div>
+                    <p className="mt-2 line-clamp-2 font-medium text-neutral-950">
+                      {data.expiringSoon.courseTitle}
+                    </p>
+                    <p className="details mt-1 text-warning-700">
+                      {formatDate(data.expiringSoon.expiresAt)}
+                    </p>
+                    <Button asChild variant="outline" size="sm" className="mt-3">
+                      <Link
+                        to={`/course/${data.expiringSoon.courseSlug}?certificate=${data.expiringSoon.certificateId}`}
+                      >
+                        {t("dashboardHome.widgets.studentTiles.certificates.cta")}
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )
+          )}
         </DashboardWidgetContent>
       </DashboardWidgetCard>
 

@@ -1,5 +1,4 @@
 import { PERMISSIONS, type PermissionKey } from "@repo/shared";
-import { createContext, useContext, useMemo } from "react";
 import { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useMarkCourseOpened } from "~/api/mutations/useMarkCourseOpened";
