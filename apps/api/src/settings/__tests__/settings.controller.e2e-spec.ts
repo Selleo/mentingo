@@ -2,6 +2,7 @@ import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_WIDTHS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { EnvService } from "src/env/services/env.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -366,7 +367,13 @@ describe("SettingsController (e2e)", () => {
     });
 
     describe("dashboard widget catalog", () => {
+      let aiConfiguredSpy: jest.SpyInstance;
+
       beforeEach(async () => {
+        aiConfiguredSpy = jest
+          .spyOn(app.get(EnvService), "getAIConfigured")
+          .mockResolvedValue({ enabled: true });
+
         await truncateTables(baseDb, ["settings"]);
         await globalSettingsFactory.create({ userId: null });
 
@@ -376,6 +383,10 @@ describe("SettingsController (e2e)", () => {
           .create();
 
         testCookies = await cookieFor(testUser, app);
+      });
+
+      afterEach(() => {
+        aiConfiguredSpy.mockRestore();
       });
 
       it("should return dashboard widgets available to the current user", async () => {
