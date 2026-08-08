@@ -16,7 +16,6 @@
       "clearAll": "Borrar todo",
       "validate": "Validar",
       "edit": "Editar",
-      "delete": "Eliminar",
       "uploading": "Subiendo...",
       "sending": "Enviando..."
     },
@@ -421,7 +420,9 @@
     "loading": "Cargando eventos",
     "empty": "No hay eventos para mostrar",
     "today": "Hoy",
-    "legend": { "label": "Fuentes" },
+    "legend": {
+      "label": "Fuentes"
+    },
     "microsoft": {
       "staleWarning": "Los eventos de Microsoft pueden estar desactualizados. Vuelve a conectar o reintenta desde los ajustes de la cuenta.",
       "horizonNotice": "Los eventos de Microsoft se importan desde 30 días atrás hasta 6 meses adelante, por lo que este intervalo puede estar incompleto."
@@ -1578,23 +1579,23 @@
         "certificate_share": "Certificados de acciones.",
         "certificate_render": "Generar archivos de certificados.",
         "file_upload": "Subir archivos a la plataforma.",
-        "file_delete": "Eliminar archivos cargados.",
+        "file_delete": "Eliminar archivos directamente del almacenamiento de la plataforma.",
         "ai_use": "Utilice funciones de plataforma impulsadas por IA.",
         "announcement_read": "Ver anuncios.",
         "announcement_create": "Crear anuncios.",
         "announcement_delete": "Eliminar anuncios.",
-        "news_read_public": "Ver publicaciones de noticias públicas.",
+        "news_read_public": "Ver noticias disponibles.",
         "news_manage": "Cree, edite y elimine todas las publicaciones de noticias.",
         "news_manage_own": "Crea, edita y elimina publicaciones de noticias propias.",
-        "article_read_public": "Ver artículos públicos de la base de conocimientos.",
+        "article_read_public": "Ver artículos disponibles de la base de conocimientos.",
         "article_manage": "Cree, edite y elimine todos los artículos de la base de conocimientos.",
         "article_manage_own": "Cree, edite y elimine artículos propios de su base de conocimientos.",
-        "qa_read_public": "Ver entradas públicas de Q&A.",
+        "qa_read_public": "Ver entradas de Q&A disponibles.",
         "qa_manage": "Cree, edite y elimine todas las entradas Q&A.",
         "qa_manage_own": "Cree, edite y elimine entradas propias de Q&A.",
-        "report_read": "Ver informes.",
+        "report_read": "Descargar informes resumidos de los cursos dentro del ámbito permitido del usuario.",
         "statistics_read_self": "Ver estadísticas propias.",
-        "statistics_read": "Ver estadísticas de toda la plataforma.",
+        "statistics_read": "Ver estadísticas agregadas de los cursos dentro del ámbito permitido del usuario.",
         "billing_checkout": "Acceda a los flujos de pago y facturación.",
         "billing_manage": "Administre la configuración de facturación y las suscripciones.",
         "integration_key_manage": "Gestionar claves de integración API.",
@@ -1604,7 +1605,7 @@
         "live_training_read": "Ver entrenamientos en vivo.",
         "live_training_create": "Crea entrenamientos en vivo.",
         "live_training_update": "Edita cualquier entrenamiento en vivo.",
-        "live_training_update_own": "Edite entrenamientos en vivo creados por este usuario.",
+        "live_training_update_own": "Editar entrenamientos en vivo en los que este usuario está asignado como anfitrión.",
         "live_training_delete": "Eliminar entrenamientos en vivo.",
         "live_training_delete_own": "Eliminar entrenamientos en vivo creados por este usuario.",
         "live_training_join": "Únete a sesiones de entrenamiento en vivo.",
@@ -1612,7 +1613,8 @@
         "live_training_end": "Finalizar las sesiones de entrenamiento en vivo.",
         "live_training_statistics": "Vea la asistencia y las estadísticas de entrenamiento en vivo.",
         "activity_log_read": "Ver registros de actividad.",
-        "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial."
+        "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial.",
+        "email_template_manage": "Crear, editar y gestionar plantillas de notificaciones por correo electrónico."
       }
     },
     "dropdown": {
@@ -1994,6 +1996,13 @@
         "optionInsertFailed": "No se pudo agregar la opción de prueba.",
         "embedCreateFailed": "No se pudo crear la lección para insertar.",
         "signedUrlDownloadFailed": "No se pudo descargar el archivo desde la URL firmada."
+      },
+      "forbidden": {
+        "updateCourse": "No tienes permiso para actualizar este curso."
+      },
+      "media": {
+        "imageUploadFailed": "No se pudo subir la imagen del curso.",
+        "updateFailed": "No se pudieron actualizar los archivos multimedia del curso."
       }
     },
     "thinking": {
@@ -2919,7 +2928,8 @@
         "invalidSnapshot": "Este curso no se pudo preparar para la exportación SCORM.",
         "fallback": "Error al exportar SCORM."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Asigna al menos un grupo para configurar las fechas límite."
   },
   "registerView": {
     "header": "Registrarse",
@@ -3454,7 +3464,8 @@
       "newsSettingUpdatedSuccessfully": "Configuración de noticias actualizada exitosamente",
       "articlesSettingUpdatedSuccessfully": "La configuración de la base de conocimientos se actualizó correctamente",
       "learningPathsUpdatedSuccessfully": "La configuración de las rutas de desarrollo se actualizó correctamente"
-    }
+    },
+    "supportModeNoAvailable": "No hay configuraciones disponibles para este usuario en el modo de soporte."
   },
   "certificateBackgroundUpload": {
     "title": "Carga de antecedentes del certificado",
@@ -4608,7 +4619,8 @@
     "errors": {
       "generic": "No se pudo iniciar el modo de soporte",
       "targetAdminRequired": "Elija un usuario administrador activo de la organización seleccionada",
-      "invalidSession": "La sesión de soporte no es válida"
+      "invalidSession": "La sesión de soporte no es válida",
+      "targetUserRequired": "Elija un usuario activo de la organización seleccionada"
     }
   },
   "superAdminTenantsView": {
@@ -4639,7 +4651,8 @@
       "actions": {
         "title": "Acciones",
         "enterSupportMode": "Ingrese al modo de soporte",
-        "impersonateAdmin": "Entrar como administrador"
+        "impersonateAdmin": "Entrar como administrador",
+        "impersonateUser": "Suplantar usuario"
       }
     },
     "activityTrend": {
@@ -4650,9 +4663,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
-      "loading": "Cargando usuarios administradores...",
+      "loading": "Cargando usuarios...",
       "empty": "No se encontraron usuarios administradores activos.",
-      "loadMore": "Cargar más usuarios"
+      "loadMore": "Cargar más usuarios",
+      "tabs": {
+        "admins": "Administradores",
+        "allUsers": "Todos los usuarios"
+      },
+      "emptyAdmins": "No se encontraron administradores activos.",
+      "emptyAdminsSearch": "No se encontraron administradores activos para \"{{search}}\".",
+      "emptyAllUsers": "No se encontraron usuarios activos.",
+      "searchAllUsers": "Buscar entre todos los usuarios"
     },
     "status": {
       "active": "Activo",
@@ -5131,6 +5152,144 @@
       "uploadFailed": "Error al subir la imagen. Por favor, inténtelo de nuevo.",
       "tooLarge": "La imagen es demasiado grande. El tamaño máximo es 10 MB.",
       "invalidType": "Tipo de imagen no válido. Permitidos: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "saveChanges": "Guardar cambios",
+      "enabled": "Activado",
+      "disabled": "Desactivado"
+    },
+    "learningMode": {
+      "title": "Estás realizando este curso en modo aprendizaje",
+      "description": "Se está registrando tu progreso. Las lecciones completadas cuentan para tu progreso y las estadísticas del curso.",
+      "enter": "Entrar en modo aprendizaje",
+      "exit": "Salir del modo aprendizaje"
+    },
+    "overview": {
+      "courseSettings": "Configuración del curso",
+      "manageCategories": "Gestionar categorías",
+      "settingsDescription": "Gestiona la configuración de este curso.",
+      "titlePlaceholder": "Introduce el título del curso...",
+      "editMedia": "Editar contenido multimedia",
+      "continueLearning": "Continuar aprendiendo",
+      "courseDetails": "Detalles del curso",
+      "closeDetails": "Cerrar los detalles del curso",
+      "aboutCourse": "Acerca de este curso",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Introduce la descripción del curso...",
+      "whatYouWillMaster": "Lo que dominarás",
+      "noLearningOutcomes": "Aún no se han añadido resultados de aprendizaje.",
+      "learningOutcomePlaceholder": "Añade un resultado de aprendizaje...",
+      "addLearningOutcome": "Añadir resultado de aprendizaje",
+      "removeLearningOutcome": "Eliminar resultado de aprendizaje",
+      "closeSettings": "Cerrar la configuración del curso",
+      "settingsComingSoon": "Configuración próximamente",
+      "settingsIntro": "Aquí podrás configurar:",
+      "settingsStatus": "Estado del curso (Borrador/Publicado)",
+      "settingsPricing": "Precios y opciones de pago",
+      "settingsAssignments": "Participantes y grupos asignados",
+      "settingsSequential": "Exigir finalización secuencial",
+      "settingsVisibility": "Visibilidad del curso",
+      "settingsPermissions": "Permisos de acceso"
+    },
+    "media": {
+      "title": "Editar contenido multimedia del curso",
+      "currentImage": "Imagen principal actual: ajusta la posición",
+      "previewAlt": "Vista previa de la imagen principal",
+      "previewPosition": "Vista previa con la posición actual",
+      "verticalPosition": "Posición vertical",
+      "uploadImage": "Subir nueva imagen principal",
+      "dropImage": "Suelta aquí la imagen principal",
+      "browse": "o haz clic para buscar",
+      "imageLimit": "PNG, JPG hasta 10 MB",
+      "imageRecommendation": "Recomendado: 1920x820 px (21:9)",
+      "trailer": "Tráiler del curso (opcional)",
+      "dropVideo": "Suelta aquí el tráiler",
+      "videoLimit": "MP4, MOV hasta 50 MB",
+      "videoRecommendation": "Recomendado: 30–90 segundos",
+      "save": "Subir contenido multimedia"
+    },
+    "stats": {
+      "yourProgress": "Tu progreso",
+      "remaining": "restante",
+      "courseFinished": "Curso finalizado",
+      "chapterProgress_one": "{{completed}} / {{total}} capítulo",
+      "chapterProgress_other": "{{completed}} / {{total}} capítulos",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "para registrar tu progreso.",
+      "deadline": "Fecha límite",
+      "daysLeft_one": "Queda {{count}} día",
+      "daysLeft_other": "Quedan {{count}} días",
+      "certificate": "Certificado",
+      "uponCompletion": "Al finalizar",
+      "aboutAuthor": "Acerca del autor"
+    },
+    "certificate": {
+      "close": "Cerrar configuración del certificado",
+      "title": "Configuración del certificado",
+      "previewTitle": "Certificado de finalización",
+      "certifies": "Se certifica que",
+      "completed": "ha completado satisfactoriamente",
+      "signaturePlaceholder": "Espacio para la firma",
+      "enable": "Activar certificado",
+      "enableDescription": "Los participantes recibirán un certificado al completar el curso",
+      "fontColor": "Color de fuente",
+      "uploadSignature": "Subir firma",
+      "uploadSignatureHint": "Haz clic para subir la imagen de la firma",
+      "signatureLimit": "PNG, JPG hasta 2 MB",
+      "save": "Guardar certificado"
+    },
+    "deadline": {
+      "close": "Cerrar configuración de fechas límite",
+      "title": "Configuración de fechas límite",
+      "enable": "Activar fechas límite",
+      "enableDescription": "Establece fechas límite específicas para distintos grupos",
+      "current": "Fecha límite actual: {{deadline}}"
+    },
+    "author": {
+      "close": "Cerrar configuración del autor",
+      "pictureAlt": "Imagen del autor",
+      "showSection": "Mostrar sección del autor",
+      "showSectionDescription": "Mostrar información del autor en la página del curso",
+      "otherCourses": "Otros cursos"
+    },
+    "contents": {
+      "title": "Índice",
+      "statistics": "Estadísticas",
+      "edit": "Editar contenido",
+      "missingTranslationsTitle": "Faltan traducciones",
+      "missingTranslationsDescription": "Falta la traducción de parte del contenido del curso al idioma seleccionado.",
+      "completedChapters_one": "{{count}} capítulo completado",
+      "completedChapters_other": "{{count}} capítulos completados",
+      "lessons_one": "{{count}} lección",
+      "lessons_other": "{{count}} lecciones",
+      "showAllChapters": "Mostrar todos los capítulos ({{count}} más)",
+      "courseStatistics": "Estadísticas del curso",
+      "statisticsDescription": "Resumen del progreso y la participación",
+      "totalStudents": "Total de participantes",
+      "completionRate": "Tasa de finalización",
+      "averageTime": "Tiempo medio",
+      "averageRating": "Valoración media",
+      "detailedStatisticsSoon": "Estadísticas detalladas próximamente",
+      "detailedStatisticsDescription": "Esta sección mostrará análisis completos del progreso, finalización de capítulos, participación y mucho más.",
+      "status": {
+        "completed": "Completado",
+        "inProgress": "En curso",
+        "notStarted": "No iniciado"
+      },
+      "lessonTypes": {
+        "content": "Contenido",
+        "quiz": "Cuestionario",
+        "aiMentor": "Mentor de IA",
+        "lesson": "Lección"
+      }
     }
   }
 }

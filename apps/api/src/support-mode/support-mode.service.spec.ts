@@ -1,5 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
-import { SUPPORT_SESSION_STATUSES, TENANT_STATUSES } from "@repo/shared";
+import { SUPPORT_SESSION_STATUSES, SUPPORT_USER_SCOPES, TENANT_STATUSES } from "@repo/shared";
 
 import { SupportModeService } from "./support-mode.service";
 
@@ -10,9 +10,10 @@ import type { FileService } from "src/file/file.service";
 const createRepositoryMock = () =>
   ({
     findTenantById: jest.fn(),
-    findSupportAdminUserById: jest.fn(),
-    findSupportAdminUsers: jest.fn(),
-    countSupportAdminUsers: jest.fn(),
+    findSupportUserById: jest.fn(),
+    findSupportUsers: jest.fn(),
+    countSupportUsers: jest.fn(),
+    findSupportRoles: jest.fn(),
     revokeOtherActiveSessions: jest.fn(),
     createSupportSession: jest.fn(),
   }) as unknown as jest.Mocked<SupportModeRepository>;
@@ -37,13 +38,14 @@ describe("SupportModeService", () => {
     permissions: [],
     tenantId: sourceTenant.id,
   };
-  const targetAdmin = {
+  const targetUser = {
     id: "target-user-id",
     email: "target@example.com",
     firstName: "Target",
     lastName: "Admin",
     label: "Target Admin (target@example.com)",
     avatarReference: null,
+    roles: [],
   };
 
   let repository: jest.Mocked<SupportModeRepository>;
@@ -62,24 +64,24 @@ describe("SupportModeService", () => {
     );
   });
 
-  it("requires the target user to be an active admin in the target tenant", async () => {
+  it("requires the target user to be active in the target tenant", async () => {
     repository.findTenantById
       .mockResolvedValueOnce(sourceTenant)
       .mockResolvedValueOnce(targetTenant);
-    repository.findSupportAdminUserById.mockResolvedValueOnce(null);
+    repository.findSupportUserById.mockResolvedValueOnce(null);
 
     await expect(
-      service.createSupportSession(currentUser, targetTenant.id, targetAdmin.id),
+      service.createSupportSession(currentUser, targetTenant.id, targetUser.id),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it("stores the selected target admin user on the support session", async () => {
+  it("stores the selected target user on the support session", async () => {
     repository.findTenantById
       .mockResolvedValueOnce(sourceTenant)
       .mockResolvedValueOnce(targetTenant);
-    repository.findSupportAdminUserById.mockResolvedValueOnce(targetAdmin);
+    repository.findSupportUserById.mockResolvedValueOnce(targetUser);
 
-    const result = await service.createSupportSession(currentUser, targetTenant.id, targetAdmin.id);
+    const result = await service.createSupportSession(currentUser, targetTenant.id, targetUser.id);
 
     expect(result.redirectUrl).toContain(`${targetTenant.host}/api/auth/support/callback?grant=`);
     expect(repository.createSupportSession).toHaveBeenCalledWith(
@@ -87,34 +89,46 @@ describe("SupportModeService", () => {
         originalUserId: currentUser.userId,
         originalTenantId: sourceTenant.id,
         targetTenantId: targetTenant.id,
-        targetUserId: targetAdmin.id,
+        targetUserId: targetUser.id,
         returnUrl: `${sourceTenant.host}/super-admin/tenants`,
         status: SUPPORT_SESSION_STATUSES.PENDING,
       }),
     );
   });
 
-  it("returns selector users with backend-generated labels", async () => {
-    repository.findSupportAdminUsers.mockResolvedValueOnce([
-      { ...targetAdmin, avatarReference: "avatars/target.png" },
+  it("returns selector users with backend-generated labels and roles", async () => {
+    repository.findTenantById.mockResolvedValueOnce(targetTenant);
+    repository.findSupportUsers.mockResolvedValueOnce([
+      { ...targetUser, avatarReference: "avatars/target.png" },
     ]);
-    repository.countSupportAdminUsers.mockResolvedValueOnce(1);
+    repository.countSupportUsers.mockResolvedValueOnce(1);
 
-    const result = await service.listSupportAdminUsers(targetTenant.id, {
+    const result = await service.listSupportUsers(targetTenant.id, {
       page: 1,
       perPage: 20,
+      scope: SUPPORT_USER_SCOPES.ALL,
+      roleSlug: "student",
     });
 
     expect(result.data).toEqual([
       {
-        id: targetAdmin.id,
-        email: targetAdmin.email,
-        firstName: targetAdmin.firstName,
-        lastName: targetAdmin.lastName,
-        label: targetAdmin.label,
+        id: targetUser.id,
+        email: targetUser.email,
+        firstName: targetUser.firstName,
+        lastName: targetUser.lastName,
+        label: targetUser.label,
         profilePictureUrl: "https://files.local/avatars/target.png",
+        roles: [],
       },
     ]);
     expect(result.pagination).toEqual({ totalItems: 1, page: 1, perPage: 20 });
+    expect(repository.findSupportUsers).toHaveBeenCalledWith({
+      tenantId: targetTenant.id,
+      page: 1,
+      perPage: 20,
+      search: undefined,
+      scope: SUPPORT_USER_SCOPES.ALL,
+      roleSlug: "student",
+    });
   });
 });

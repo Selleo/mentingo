@@ -16,7 +16,6 @@
       "clearAll": "Alles löschen",
       "validate": "Bestätigen",
       "edit": "Bearbeiten",
-      "delete": "Löschen",
       "uploading": "Hochladen...",
       "sending": "Senden..."
     },
@@ -430,7 +429,9 @@
     "loading": "Ereignisse werden geladen",
     "empty": "Keine Ereignisse zum Anzeigen",
     "today": "Heute",
-    "legend": { "label": "Quellen" },
+    "legend": {
+      "label": "Quellen"
+    },
     "microsoft": {
       "staleWarning": "Microsoft-Termine sind möglicherweise veraltet. Verbinden Sie das Konto neu oder versuchen Sie es in den Kontoeinstellungen erneut.",
       "horizonNotice": "Microsoft-Termine werden von 30 Tagen in der Vergangenheit bis 6 Monate im Voraus importiert; dieser Zeitraum kann unvollständig sein."
@@ -569,7 +570,6 @@
       "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
-
   "liveTrainingView": {
     "title": "Live-Schulung",
     "description": "Diese Seite wird den vollständigen Arbeitsbereich für Live-Schulungen enthalten.",
@@ -1555,14 +1555,75 @@
         "live_training_read": "Live-Schulungen anzeigen.",
         "live_training_create": "Live-Schulungen erstellen.",
         "live_training_update": "Beliebige Live-Schulungen bearbeiten.",
-        "live_training_update_own": "Vom Benutzer erstellte Live-Schulungen bearbeiten.",
+        "live_training_update_own": "Live-Schulungen bearbeiten, bei denen dieser Benutzer als Host zugewiesen ist.",
         "live_training_delete": "Live-Schulungen löschen.",
         "live_training_delete_own": "Vom Benutzer erstellte Live-Schulungen löschen.",
         "live_training_join": "Live-Schulungssitzungen beitreten.",
         "live_training_start": "Live-Schulungssitzungen starten.",
         "live_training_end": "Live-Schulungssitzungen beenden.",
         "live_training_statistics": "Anwesenheit und Statistiken für Live-Schulungen anzeigen.",
-        "activity_log_read": "Aktivitätsprotokolle anzeigen."
+        "activity_log_read": "Aktivitätsprotokolle anzeigen.",
+        "account_read_self": "Eigene Kontodaten anzeigen.",
+        "account_update_self": "Eigene Kontodaten bearbeiten.",
+        "user_read_self": "Eigenes Benutzerprofil anzeigen.",
+        "user_manage": "Benutzer einschließlich Rollen und Kontostatus verwalten.",
+        "settings_read_self": "Eigene Profil- und Präferenzeinstellungen anzeigen.",
+        "settings_update_self": "Eigene Profil- und Präferenzeinstellungen aktualisieren.",
+        "settings_manage": "Globale Plattformeinstellungen verwalten.",
+        "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
+        "env_manage": "Werte der Umgebungskonfiguration verwalten.",
+        "category_read": "Kurskategorien anzeigen.",
+        "category_manage": "Kurskategorien erstellen, bearbeiten und löschen.",
+        "group_read": "Benutzergruppen anzeigen.",
+        "group_manage": "Benutzergruppen erstellen, bearbeiten und löschen.",
+        "learning_path_read": "Entwicklungspfade anzeigen.",
+        "learning_path_create": "Entwicklungspfade erstellen.",
+        "learning_path_update": "Beliebige Entwicklungspfade bearbeiten.",
+        "learning_path_update_own": "Vom Benutzer erstellte Entwicklungspfade bearbeiten.",
+        "learning_path_delete": "Entwicklungspfade löschen.",
+        "learning_path_course_update": "Kurse in beliebigen Entwicklungspfaden hinzufügen, entfernen und neu anordnen.",
+        "learning_path_course_update_own": "Kurse in eigenen Entwicklungspfaden hinzufügen, entfernen und neu anordnen.",
+        "learning_path_enrollment": "Anmeldungen zu Entwicklungspfaden verwalten.",
+        "learning_path_export": "Entwicklungspfade in andere Organisationen exportieren.",
+        "course_read_assigned": "Dem Benutzer zugewiesene Kurse anzeigen.",
+        "course_read_manageable": "Kurse anzeigen, die der Benutzer verwalten kann.",
+        "course_read": "Kursinhalte anzeigen.",
+        "course_create": "Neue Kurse erstellen.",
+        "course_update": "Beliebige Kurse bearbeiten.",
+        "course_update_own": "Vom Benutzer erstellte Kurse bearbeiten.",
+        "course_delete": "Kurse löschen.",
+        "course_enrollment": "Kursanmeldungen verwalten.",
+        "course_statistics": "Kursanalysen und -statistiken anzeigen.",
+        "course_export": "Kursdaten exportieren.",
+        "learning_mode_use": "Funktionen des Lernmodus verwenden.",
+        "learning_progress_update": "Lernfortschritt aktualisieren.",
+        "certificate_read": "Zertifikate anzeigen.",
+        "certificate_share": "Zertifikate teilen.",
+        "certificate_render": "Zertifikatsdateien erstellen.",
+        "file_upload": "Dateien über die gemeinsamen Upload-Funktionen der Plattform hochladen.",
+        "file_delete": "Dateien direkt aus dem Plattformspeicher löschen.",
+        "ai_use": "KI-gestützte Plattformfunktionen verwenden.",
+        "announcement_read": "Ankündigungen anzeigen.",
+        "announcement_create": "Ankündigungen erstellen.",
+        "news_read_public": "Verfügbare News-Beiträge anzeigen.",
+        "news_manage": "Alle News-Beiträge erstellen, bearbeiten und löschen.",
+        "news_manage_own": "Eigene News-Beiträge erstellen, bearbeiten und löschen.",
+        "article_read_public": "Verfügbare Wissensdatenbank-Artikel anzeigen.",
+        "article_manage": "Alle Wissensdatenbank-Artikel erstellen, bearbeiten und löschen.",
+        "article_manage_own": "Eigene Wissensdatenbank-Artikel erstellen, bearbeiten und löschen.",
+        "qa_read_public": "Verfügbare Q&A-Einträge anzeigen.",
+        "qa_manage": "Alle Q&A-Einträge erstellen, bearbeiten und löschen.",
+        "qa_manage_own": "Eigene Q&A-Einträge erstellen, bearbeiten und löschen.",
+        "report_read": "Zusammenfassende Berichte für Kurse im erlaubten Umfang des Benutzers herunterladen.",
+        "statistics_read_self": "Eigene Statistiken anzeigen.",
+        "statistics_read": "Aggregierte Kursstatistiken im erlaubten Umfang des Benutzers anzeigen.",
+        "billing_checkout": "Auf Abrechnungs- und Bezahlvorgänge zugreifen.",
+        "billing_manage": "Abrechnungseinstellungen und Abonnements verwalten.",
+        "integration_key_manage": "Schlüssel der Integrations-API verwalten.",
+        "integration_api_use": "Endpunkte der Integrations-API verwenden.",
+        "tenant_manage": "Organisationsweite Konfiguration verwalten.",
+        "course_ai_generation": "Kursinhalte mit KI generieren.",
+        "email_template_manage": "E-Mail-Benachrichtigungsvorlagen erstellen, bearbeiten und verwalten."
       }
     },
     "dropdown": {
@@ -1944,6 +2005,13 @@
         "optionInsertFailed": "Quizoption konnte nicht hinzugefügt werden.",
         "embedCreateFailed": "Einbettungslektion konnte nicht erstellt werden.",
         "signedUrlDownloadFailed": "Die Datei konnte nicht von der signierten URL heruntergeladen werden."
+      },
+      "forbidden": {
+        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren."
+      },
+      "media": {
+        "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
+        "updateFailed": "Die Kursmedien konnten nicht aktualisiert werden."
       }
     },
     "thinking": {
@@ -2869,7 +2937,8 @@
         "invalidSnapshot": "Dieser Kurs konnte nicht für den SCORM-Export vorbereitet werden.",
         "fallback": "Der SCORM-Export ist fehlgeschlagen."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Weise mindestens eine Gruppe zu, um Fristen zu konfigurieren."
   },
   "registerView": {
     "header": "Melden Sie sich an",
@@ -3405,7 +3474,8 @@
       "newsSettingUpdatedSuccessfully": "Nachrichteneinstellungen erfolgreich aktualisiert",
       "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert",
       "learningPathsUpdatedSuccessfully": "Die Entwicklungspfad-Einstellungen wurden erfolgreich aktualisiert"
-    }
+    },
+    "supportModeNoAvailable": "Für diesen Benutzer sind im Supportmodus keine Einstellungen verfügbar."
   },
   "certificateBackgroundUpload": {
     "title": "Hochladen des Zertifikathintergrunds",
@@ -4681,7 +4751,8 @@
     "errors": {
       "generic": "Support-Modus konnte nicht gestartet werden",
       "targetAdminRequired": "Wählen Sie einen aktiven Administrator aus der ausgewählten Organisation",
-      "invalidSession": "Support-Sitzung ist ungültig"
+      "invalidSession": "Support-Sitzung ist ungültig",
+      "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation"
     }
   },
   "superAdminTenantsView": {
@@ -4712,7 +4783,8 @@
       "actions": {
         "title": "Aktionen",
         "enterSupportMode": "Wechseln Sie in den Support-Modus",
-        "impersonateAdmin": "Als Admin betreten"
+        "impersonateAdmin": "Als Admin betreten",
+        "impersonateUser": "Als Benutzer handeln"
       }
     },
     "activityTrend": {
@@ -4723,9 +4795,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Nach Name oder E-Mail suchen...",
-      "loading": "Administratoren werden geladen...",
+      "loading": "Benutzer werden geladen...",
       "empty": "Keine aktiven Administratoren gefunden.",
-      "loadMore": "Weitere Benutzer laden"
+      "loadMore": "Weitere Benutzer laden",
+      "tabs": {
+        "admins": "Administratoren",
+        "allUsers": "Alle Benutzer"
+      },
+      "emptyAdmins": "Keine aktiven Administratoren gefunden.",
+      "emptyAdminsSearch": "Keine aktiven Administratoren für \"{{search}}\" gefunden.",
+      "emptyAllUsers": "Keine aktiven Benutzer gefunden.",
+      "searchAllUsers": "Alle Benutzer durchsuchen"
     },
     "status": {
       "active": "Aktiv",
@@ -5062,6 +5142,145 @@
       "uploadFailed": "Bild-Upload fehlgeschlagen. Bitte erneut versuchen.",
       "tooLarge": "Bild ist zu groß. Maximale Größe beträgt 10 MB.",
       "invalidType": "Ungültiger Bildtyp. Erlaubt: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "saveChanges": "Änderungen speichern",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert"
+    },
+    "learningMode": {
+      "title": "Du absolvierst diesen Kurs im Lernmodus",
+      "description": "Dein Lernfortschritt wird erfasst. Abgeschlossene Lektionen zählen zu deinem Fortschritt und den Kursstatistiken.",
+      "enter": "Lernmodus starten",
+      "exit": "Lernmodus beenden"
+    },
+    "overview": {
+      "courseSettings": "Kurseinstellungen",
+      "manageCategories": "Kategorien verwalten",
+      "settingsDescription": "Verwalten Sie die Einstellungen für diesen Kurs.",
+      "titlePlaceholder": "Kurstitel eingeben...",
+      "editMedia": "Medien bearbeiten",
+      "continueLearning": "Weiterlernen",
+      "courseDetails": "Kursdetails",
+      "closeDetails": "Kursdetails schließen",
+      "aboutCourse": "Über diesen Kurs",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Kursbeschreibung eingeben...",
+      "whatYouWillMaster": "Das wirst du meistern",
+      "noLearningOutcomes": "Noch keine Lernergebnisse hinzugefügt.",
+      "learningOutcomePlaceholder": "Lernergebnis hinzufügen...",
+      "addLearningOutcome": "Lernergebnis hinzufügen",
+      "removeLearningOutcome": "Lernergebnis entfernen",
+      "closeSettings": "Kurseinstellungen schließen",
+      "settingsComingSoon": "Einstellungen bald verfügbar",
+      "settingsIntro": "Hier kannst du Folgendes konfigurieren:",
+      "settingsStatus": "Kursstatus (Entwurf/Veröffentlicht)",
+      "settingsPricing": "Preise und Zahlungsoptionen",
+      "settingsAssignments": "Zugewiesene Teilnehmer und Gruppen",
+      "settingsSequential": "Reihenfolge beim Abschluss erzwingen",
+      "settingsVisibility": "Sichtbarkeit des Kurses",
+      "settingsPermissions": "Zugriffsberechtigungen"
+    },
+    "media": {
+      "title": "Kursmedien bearbeiten",
+      "currentImage": "Aktuelles Titelbild – Position anpassen",
+      "previewAlt": "Vorschau des Kurstitelbilds",
+      "previewPosition": "Vorschau mit aktueller Position",
+      "verticalPosition": "Vertikale Position",
+      "uploadImage": "Neues Titelbild hochladen",
+      "dropImage": "Titelbild hier ablegen",
+      "browse": "oder zum Auswählen klicken",
+      "imageLimit": "PNG, JPG bis 10 MB",
+      "imageRecommendation": "Empfohlen: 1920x820 px (21:9)",
+      "trailer": "Kurstrailer (optional)",
+      "dropVideo": "Trailer hier ablegen",
+      "videoLimit": "MP4, MOV bis 50 MB",
+      "videoRecommendation": "Empfohlen: 30–90 Sekunden",
+      "save": "Medien hochladen"
+    },
+    "stats": {
+      "yourProgress": "Dein Fortschritt",
+      "remaining": "verbleibend",
+      "courseFinished": "Kurs abgeschlossen",
+      "chapterProgress_one": "{{completed}} / {{total}} Kapitel",
+      "chapterProgress_other": "{{completed}} / {{total}} Kapitel",
+      "duration": {
+        "minutes": "{{minutes}} Min.",
+        "hours": "{{hours}} Std.",
+        "hoursAndMinutes": "{{hours}} Std. {{minutes}} Min."
+      },
+      "trackProgress": "um deinen Fortschritt zu verfolgen.",
+      "deadline": "Frist",
+      "daysLeft_one": "Noch {{count}} Tag",
+      "daysLeft_other": "Noch {{count}} Tage",
+      "certificate": "Zertifikat",
+      "uponCompletion": "Nach Abschluss",
+      "aboutAuthor": "Über den Autor"
+    },
+    "certificate": {
+      "close": "Zertifikateinstellungen schließen",
+      "title": "Zertifikateinstellungen",
+      "previewTitle": "Abschlusszertifikat",
+      "certifies": "Hiermit wird bestätigt, dass",
+      "completed": "erfolgreich abgeschlossen hat",
+      "signaturePlaceholder": "Platzhalter für Unterschrift",
+      "enable": "Zertifikat aktivieren",
+      "enableDescription": "Teilnehmer erhalten nach Kursabschluss ein Zertifikat",
+      "fontColor": "Schriftfarbe",
+      "uploadSignature": "Unterschrift hochladen",
+      "uploadSignatureHint": "Zum Hochladen der Unterschrift klicken",
+      "signatureLimit": "PNG, JPG bis 2 MB",
+      "save": "Zertifikat speichern"
+    },
+    "deadline": {
+      "close": "Fristeinstellungen schließen",
+      "title": "Fristeinstellungen",
+      "enable": "Fristen aktivieren",
+      "enableDescription": "Spezifische Fristen für verschiedene Gruppen festlegen",
+      "current": "Aktuelle Frist: {{deadline}}"
+    },
+    "author": {
+      "close": "Autoreinstellungen schließen",
+      "pictureAlt": "Bild des Autors",
+      "showSection": "Autorenbereich anzeigen",
+      "showSectionDescription": "Autoreninformationen auf der Kursseite anzeigen",
+      "otherCourses": "Weitere Kurse"
+    },
+    "contents": {
+      "title": "Inhaltsverzeichnis",
+      "statistics": "Statistiken",
+      "edit": "Inhalt bearbeiten",
+      "missingTranslationsTitle": "Fehlende Übersetzungen",
+      "missingTranslationsDescription": "Einige Kursinhalte sind in der ausgewählten Sprache nicht übersetzt.",
+      "completedChapters_one": "{{count}} abgeschlossenes Kapitel",
+      "completedChapters_other": "{{count}} abgeschlossene Kapitel",
+      "lessons_one": "{{count}} Lektion",
+      "lessons_other": "{{count}} Lektionen",
+      "showAllChapters": "Alle Kapitel anzeigen ({{count}} weitere)",
+      "courseStatistics": "Kursstatistiken",
+      "statisticsDescription": "Überblick über Fortschritt und Beteiligung",
+      "totalStudents": "Teilnehmer insgesamt",
+      "completionRate": "Abschlussquote",
+      "averageTime": "Durchschn. Lernzeit",
+      "averageRating": "Durchschn. Bewertung",
+      "detailedStatisticsSoon": "Detaillierte Statistiken folgen bald",
+      "detailedStatisticsDescription": "Dieser Bereich zeigt künftig umfassende Analysen zu Fortschritt, Kapitelabschlüssen, Beteiligung und mehr.",
+      "status": {
+        "started": "Begonnen",
+        "completed": "Abgeschlossen",
+        "inProgress": "In Bearbeitung",
+        "notStarted": "Nicht begonnen"
+      },
+      "lessonTypes": {
+        "content": "Inhalt",
+        "quiz": "Quiz",
+        "aiMentor": "KI-Mentor",
+        "lesson": "Lektion"
+      }
     }
   }
 }

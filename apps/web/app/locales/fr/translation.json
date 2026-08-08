@@ -1584,23 +1584,23 @@
         "certificate_share": "Partager les certificats.",
         "certificate_render": "Générez des fichiers de certificat.",
         "file_upload": "Importer des fichiers sur la plateforme.",
-        "file_delete": "Supprimer les fichiers importés.",
+        "file_delete": "Supprimer des fichiers directement du stockage de la plateforme.",
         "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
         "announcement_delete": "Supprimer les annonces.",
-        "news_read_public": "Consultez les articles d'actualité publics.",
+        "news_read_public": "Consulter les actualités disponibles.",
         "news_manage": "Créez, modifiez et supprimez tous les articles d'actualité.",
         "news_manage_own": "Créez, modifiez et supprimez vos propres articles d'actualité.",
-        "article_read_public": "Consultez les articles publics de la base de connaissances.",
+        "article_read_public": "Consulter les articles disponibles de la base de connaissances.",
         "article_manage": "Créez, modifiez et supprimez tous les articles de la base de connaissances.",
         "article_manage_own": "Créez, modifiez et supprimez vos propres articles de la base de connaissances.",
-        "qa_read_public": "Consultez les entrées publiques de questions et réponses.",
+        "qa_read_public": "Consulter les entrées de questions-réponses disponibles.",
         "qa_manage": "Créez, modifiez et supprimez toutes les entrées de questions-réponses.",
         "qa_manage_own": "Créez, modifiez et supprimez vos propres entrées de questions-réponses.",
-        "report_read": "Afficher les rapports.",
+        "report_read": "Télécharger les rapports de synthèse des cours dans le périmètre autorisé de l’utilisateur.",
         "statistics_read_self": "Afficher vos propres statistiques.",
-        "statistics_read": "Consultez les statistiques à l’échelle de la plateforme.",
+        "statistics_read": "Consulter les statistiques agrégées des cours dans le périmètre autorisé de l’utilisateur.",
         "billing_checkout": "Accédez aux flux de paiement de facturation.",
         "billing_manage": "Gérez les paramètres de facturation et les abonnements.",
         "integration_key_manage": "Gérer les clés API d'intégration.",
@@ -1610,7 +1610,7 @@
         "live_training_read": "Visualisez les formations en direct.",
         "live_training_create": "Créez des formations en direct.",
         "live_training_update": "Modifiez n’importe quelle formation en direct.",
-        "live_training_update_own": "Modifiez les formations en direct créées par cet utilisateur.",
+        "live_training_update_own": "Modifier les formations en direct auxquelles cet utilisateur est affecté en tant qu’hôte.",
         "live_training_delete": "Supprimez les formations en direct.",
         "live_training_delete_own": "Supprimez les formations en direct créées par cet utilisateur.",
         "live_training_join": "Rejoignez des sessions de formation en direct.",
@@ -1618,7 +1618,8 @@
         "live_training_end": "Terminez les sessions de formation en direct.",
         "live_training_statistics": "Consultez la participation aux formations en direct et les statistiques.",
         "activity_log_read": "Afficher les journaux d'activité.",
-        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA."
+        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
+        "email_template_manage": "Créer, modifier et gérer les modèles de notifications par e-mail."
       }
     },
     "dropdown": {
@@ -3439,6 +3440,7 @@
   },
   "settings": {
     "title": "Paramètres",
+    "supportModeNoAvailable": "Aucun paramètre n'est disponible pour cet utilisateur en mode assistance.",
     "buttons": {
       "cancel": "Annuler",
       "save": "Enregistrer"
@@ -4613,7 +4615,7 @@
     },
     "errors": {
       "generic": "Impossible de démarrer le mode support",
-      "targetAdminRequired": "Choisissez un utilisateur administrateur actif de l'organisation sélectionnée",
+      "targetUserRequired": "Choisissez un utilisateur actif de l'organisation sélectionnée",
       "invalidSession": "La session d'assistance n'est pas valide"
     }
   },
@@ -4645,7 +4647,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Passer en mode assistance",
-        "impersonateAdmin": "Entrez en tant qu'administrateur"
+        "impersonateUser": "Agir en tant qu'utilisateur"
       }
     },
     "activityTrend": {
@@ -4656,8 +4658,15 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Rechercher par nom ou par email...",
-      "loading": "Chargement des utilisateurs administrateurs...",
-      "empty": "Aucun utilisateur administrateur actif trouvé.",
+      "tabs": {
+        "admins": "Administrateurs",
+        "allUsers": "Tous les utilisateurs"
+      },
+      "loading": "Chargement des utilisateurs...",
+      "emptyAdmins": "Aucun administrateur actif trouvé.",
+      "emptyAdminsSearch": "Aucun administrateur actif trouvé pour \"{{search}}\".",
+      "emptyAllUsers": "Aucun utilisateur actif trouvé.",
+      "searchAllUsers": "Rechercher parmi tous les utilisateurs",
       "loadMore": "Charger plus d'utilisateurs"
     },
     "status": {

@@ -39,7 +39,6 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
                 table,
                 event,
                 id: row.id,
-                idx: row.index,
                 value: row.getIsSelected(),
                 lastSelectedRowIndex,
                 setLastSelectedRowIndex,

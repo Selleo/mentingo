@@ -16,7 +16,6 @@
       "clearAll": "Išvalyti viską",
       "validate": "Patvirtinti",
       "edit": "Redaguoti",
-      "delete": "Ištrinti",
       "uploading": "Įkeliama...",
       "sending": "Siunčiama..."
     },
@@ -430,7 +429,9 @@
     "loading": "Įvykiai įkeliami",
     "empty": "Nėra įvykių",
     "today": "Šiandien",
-    "legend": { "label": "Šaltiniai" },
+    "legend": {
+      "label": "Šaltiniai"
+    },
     "microsoft": {
       "staleWarning": "Microsoft įvykiai gali būti pasenę. Prijunkite iš naujo arba kartokite paskyros nustatymuose.",
       "horizonNotice": "Microsoft įvykiai importuojami nuo 30 dienų praeityje iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti nepilnas."
@@ -1554,14 +1555,75 @@
         "live_training_read": "Gali peržiūrėti gyvus mokymus.",
         "live_training_create": "Gali kurti gyvus mokymus.",
         "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
-        "live_training_update_own": "Gali redaguoti šio naudotojo sukurtus gyvus mokymus.",
+        "live_training_update_own": "Gali redaguoti gyvus mokymus, kuriuose šis naudotojas priskirtas vedėju.",
         "live_training_delete": "Gali trinti gyvus mokymus.",
         "live_training_delete_own": "Gali trinti šio naudotojo sukurtus gyvus mokymus.",
         "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
         "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
         "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
-        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
+        "account_read_self": "Gali peržiūrėti savo paskyros duomenis.",
+        "account_update_self": "Gali redaguoti savo paskyros duomenis.",
+        "user_read_self": "Gali peržiūrėti savo naudotojo profilį.",
+        "user_manage": "Gali valdyti naudotojus, įskaitant vaidmenis ir paskyros būseną.",
+        "settings_read_self": "Gali peržiūrėti savo profilio ir nuostatų nustatymus.",
+        "settings_update_self": "Gali atnaujinti savo profilio ir nuostatų nustatymus.",
+        "settings_manage": "Gali valdyti bendruosius platformos nustatymus.",
+        "env_read_public": "Gali peržiūrėti viešas aplinkos konfigūracijos reikšmes.",
+        "env_manage": "Gali valdyti aplinkos konfigūracijos reikšmes.",
+        "category_read": "Gali peržiūrėti kursų kategorijas.",
+        "category_manage": "Gali kurti, redaguoti ir trinti kursų kategorijas.",
+        "group_read": "Gali peržiūrėti naudotojų grupes.",
+        "group_manage": "Gali kurti, redaguoti ir trinti naudotojų grupes.",
+        "learning_path_read": "Gali peržiūrėti tobulėjimo planus.",
+        "learning_path_create": "Gali kurti tobulėjimo planus.",
+        "learning_path_update": "Gali redaguoti bet kuriuos tobulėjimo planus.",
+        "learning_path_update_own": "Gali redaguoti šio naudotojo sukurtus tobulėjimo planus.",
+        "learning_path_delete": "Gali trinti tobulėjimo planus.",
+        "learning_path_course_update": "Gali pridėti, pašalinti ir keisti kursų tvarką bet kuriame tobulėjimo plane.",
+        "learning_path_course_update_own": "Gali pridėti, pašalinti ir keisti kursų tvarką savo tobulėjimo planuose.",
+        "learning_path_enrollment": "Gali valdyti registraciją į tobulėjimo planus.",
+        "learning_path_export": "Gali eksportuoti tobulėjimo planus į kitas organizacijas.",
+        "course_read_assigned": "Gali peržiūrėti šiam naudotojui priskirtus kursus.",
+        "course_read_manageable": "Gali peržiūrėti kursus, kuriuos šis naudotojas gali valdyti.",
+        "course_read": "Gali peržiūrėti kursų turinį.",
+        "course_create": "Gali kurti naujus kursus.",
+        "course_update": "Gali redaguoti bet kuriuos kursus.",
+        "course_update_own": "Gali redaguoti šio naudotojo sukurtus kursus.",
+        "course_delete": "Gali trinti kursus.",
+        "course_enrollment": "Gali valdyti registraciją į kursus.",
+        "course_statistics": "Gali peržiūrėti kursų analizę ir statistiką.",
+        "course_export": "Gali eksportuoti kursų duomenis.",
+        "learning_mode_use": "Gali naudoti mokymosi režimo funkcijas.",
+        "learning_progress_update": "Gali atnaujinti besimokančiojo pažangą.",
+        "certificate_read": "Gali peržiūrėti sertifikatus.",
+        "certificate_share": "Gali bendrinti sertifikatus.",
+        "certificate_render": "Gali generuoti sertifikatų failus.",
+        "file_upload": "Gali įkelti failus naudodamas bendrus platformos įkėlimo įrankius.",
+        "file_delete": "Gali trinti failus tiesiai iš platformos saugyklos.",
+        "ai_use": "Gali naudoti AI pagrįstas platformos funkcijas.",
+        "announcement_read": "Gali peržiūrėti pranešimus.",
+        "announcement_create": "Gali kurti pranešimus.",
+        "news_read_public": "Gali peržiūrėti prieinamas naujienas.",
+        "news_manage": "Gali kurti, redaguoti ir trinti visas naujienas.",
+        "news_manage_own": "Gali kurti, redaguoti ir trinti savo naujienas.",
+        "article_read_public": "Gali peržiūrėti prieinamus žinių bazės straipsnius.",
+        "article_manage": "Gali kurti, redaguoti ir trinti visus žinių bazės straipsnius.",
+        "article_manage_own": "Gali kurti, redaguoti ir trinti savo žinių bazės straipsnius.",
+        "qa_read_public": "Gali peržiūrėti prieinamus Q&A įrašus.",
+        "qa_manage": "Gali kurti, redaguoti ir trinti visus Q&A įrašus.",
+        "qa_manage_own": "Gali kurti, redaguoti ir trinti savo Q&A įrašus.",
+        "report_read": "Gali atsisiųsti kursų suvestines pagal naudotojui leidžiamą apimtį.",
+        "statistics_read_self": "Gali peržiūrėti savo statistiką.",
+        "statistics_read": "Gali peržiūrėti apibendrintą kursų statistiką pagal naudotojui leidžiamą apimtį.",
+        "billing_checkout": "Gali pasiekti atsiskaitymo ir mokėjimo procesus.",
+        "billing_manage": "Gali valdyti atsiskaitymo nustatymus ir prenumeratas.",
+        "integration_key_manage": "Gali valdyti integracijos API raktus.",
+        "integration_api_use": "Gali naudoti integracijos API galinius taškus.",
+        "tenant_manage": "Gali valdyti organizacijos konfigūraciją.",
+        "course_ai_generation": "Gali generuoti kursų turinį naudodamas AI.",
+        "email_template_manage": "Kurti, redaguoti ir tvarkyti el. pašto pranešimų šablonus."
       }
     },
     "dropdown": {
@@ -1943,6 +2005,13 @@
         "optionInsertFailed": "Nepavyko pridėti testo parinkties.",
         "embedCreateFailed": "Nepavyko sukurti įdėjimo pamokos.",
         "signedUrlDownloadFailed": "Nepavyko atsisiųsti failo iš pasirašyto URL."
+      },
+      "forbidden": {
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+      },
+      "media": {
+        "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
+        "updateFailed": "Nepavyko atnaujinti kurso medijos."
       }
     },
     "thinking": {
@@ -2870,7 +2939,8 @@
         "invalidSnapshot": "Nepavyko paruošti šio kurso SCORM eksportui.",
         "fallback": "SCORM eksportas nepavyko."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Priskirkite bent vieną grupę, kad galėtumėte nustatyti terminus."
   },
   "registerView": {
     "header": "Registruotis",
@@ -3408,7 +3478,8 @@
       "newsSettingUpdatedSuccessfully": "Naujienų nustatymai sėkmingai atnaujinti",
       "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti",
       "learningPathsUpdatedSuccessfully": "Tobulėjimo kelių nustatymai sėkmingai atnaujinti"
-    }
+    },
+    "supportModeNoAvailable": "Šiam naudotojui palaikymo režimu nustatymai nepasiekiami."
   },
   "certificateBackgroundUpload": {
     "title": "Foninis sertifikato įkėlimas",
@@ -4685,7 +4756,8 @@
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetAdminRequired": "Pasirinkite aktyvų administratorių iš pasirinktos organizacijos",
-      "invalidSession": "Palaikymo sesija netinkama"
+      "invalidSession": "Palaikymo sesija netinkama",
+      "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos"
     }
   },
   "superAdminTenantsView": {
@@ -4716,7 +4788,8 @@
       "actions": {
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
-        "impersonateAdmin": "Įeiti kaip administratorius"
+        "impersonateAdmin": "Įeiti kaip administratorius",
+        "impersonateUser": "Apsimesti naudotoju"
       }
     },
     "activityTrend": {
@@ -4727,9 +4800,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
-      "loading": "Įkeliami administratoriai...",
+      "loading": "Įkeliami naudotojai...",
       "empty": "Aktyvių administratorių nerasta.",
-      "loadMore": "Įkelti daugiau naudotojų"
+      "loadMore": "Įkelti daugiau naudotojų",
+      "tabs": {
+        "admins": "Administratoriai",
+        "allUsers": "Visi naudotojai"
+      },
+      "emptyAdmins": "Aktyvių administratorių nerasta.",
+      "emptyAdminsSearch": "Aktyvių administratorių pagal \"{{search}}\" nerasta.",
+      "emptyAllUsers": "Aktyvių naudotojų nerasta.",
+      "searchAllUsers": "Ieškoti tarp visų naudotojų"
     },
     "status": {
       "active": "Aktyvus",
@@ -5066,6 +5147,149 @@
       "uploadFailed": "Paveikslo įkėlimas nepavyko. Bandykite dar kartą.",
       "tooLarge": "Paveikslas per didelis. Maksimalus dydis yra 10 MB.",
       "invalidType": "Netinkamas paveikslo tipas. Leidžiami: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Atšaukti",
+      "close": "Uždaryti",
+      "saveChanges": "Išsaugoti pakeitimus",
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "learningMode": {
+      "title": "Šį kursą mokotės mokymosi režimu",
+      "description": "Jūsų mokymosi pažanga stebima. Baigtos pamokos įtraukiamos į asmeninę pažangą ir kurso statistiką.",
+      "enter": "Įjungti mokymosi režimą",
+      "exit": "Išjungti mokymosi režimą"
+    },
+    "overview": {
+      "courseSettings": "Kurso nustatymai",
+      "manageCategories": "Tvarkyti kategorijas",
+      "settingsDescription": "Tvarkykite šio kurso nustatymus.",
+      "titlePlaceholder": "Įveskite kurso pavadinimą...",
+      "editMedia": "Redaguoti mediją",
+      "continueLearning": "Tęsti mokymąsi",
+      "courseDetails": "Kurso informacija",
+      "closeDetails": "Uždaryti kurso informaciją",
+      "aboutCourse": "Apie šį kursą",
+      "description": "Aprašymas",
+      "descriptionPlaceholder": "Įveskite kurso aprašymą...",
+      "whatYouWillMaster": "Ką įvaldysite",
+      "noLearningOutcomes": "Mokymosi rezultatai dar nepridėti.",
+      "learningOutcomePlaceholder": "Pridėkite mokymosi rezultatą...",
+      "addLearningOutcome": "Pridėti mokymosi rezultatą",
+      "removeLearningOutcome": "Pašalinti mokymosi rezultatą",
+      "closeSettings": "Uždaryti kurso nustatymus",
+      "settingsComingSoon": "Nustatymai netrukus",
+      "settingsIntro": "Čia galėsite konfigūruoti:",
+      "settingsStatus": "Kurso būsena (Juodraštis/Paskelbtas)",
+      "settingsPricing": "Kainos ir mokėjimo parinktys",
+      "settingsAssignments": "Priskirti dalyviai ir grupės",
+      "settingsSequential": "Reikalauti nuoseklaus užbaigimo",
+      "settingsVisibility": "Kurso matomumo nustatymai",
+      "settingsPermissions": "Prieigos teisės"
+    },
+    "media": {
+      "title": "Redaguoti kurso mediją",
+      "currentImage": "Dabartinis pagrindinis vaizdas – koreguokite padėtį",
+      "previewAlt": "Kurso pagrindinio vaizdo peržiūra",
+      "previewPosition": "Peržiūra su dabartine padėtimi",
+      "verticalPosition": "Vertikali padėtis",
+      "uploadImage": "Įkelti naują pagrindinį vaizdą",
+      "dropImage": "Nuvilkite pagrindinį vaizdą čia",
+      "browse": "arba spustelėkite ir pasirinkite",
+      "imageLimit": "PNG, JPG iki 10 MB",
+      "imageRecommendation": "Rekomenduojama: 1920x820 px (21:9)",
+      "trailer": "Kurso anonsas (nebūtina)",
+      "dropVideo": "Nuvilkite anonsą čia",
+      "videoLimit": "MP4, MOV iki 50 MB",
+      "videoRecommendation": "Rekomenduojama: 30–90 sekundžių",
+      "save": "Įkelti mediją"
+    },
+    "stats": {
+      "yourProgress": "Jūsų pažanga",
+      "remaining": "liko",
+      "courseFinished": "Kursas baigtas",
+      "chapterProgress_one": "{{completed}} / {{total}} skyrius",
+      "chapterProgress_few": "{{completed}} / {{total}} skyriai",
+      "chapterProgress_other": "{{completed}} / {{total}} skyrių",
+      "duration": {
+        "minutes": "{{minutes}} min.",
+        "hours": "{{hours}} val.",
+        "hoursAndMinutes": "{{hours}} val. {{minutes}} min."
+      },
+      "trackProgress": "kad galėtumėte stebėti pažangą.",
+      "deadline": "Terminas",
+      "daysLeft_one": "Liko {{count}} diena",
+      "daysLeft_few": "Liko {{count}} dienos",
+      "daysLeft_other": "Liko {{count}} dienų",
+      "certificate": "Sertifikatas",
+      "uponCompletion": "Baigus kursą",
+      "aboutAuthor": "Apie autorių"
+    },
+    "certificate": {
+      "close": "Uždaryti sertifikato nustatymus",
+      "title": "Sertifikato nustatymai",
+      "previewTitle": "Baigimo sertifikatas",
+      "certifies": "Patvirtinama, kad",
+      "completed": "sėkmingai baigė",
+      "signaturePlaceholder": "Parašo vieta",
+      "enable": "Įjungti sertifikatą",
+      "enableDescription": "Baigę kursą dalyviai gaus sertifikatą",
+      "fontColor": "Šrifto spalva",
+      "uploadSignature": "Įkelti parašą",
+      "uploadSignatureHint": "Spustelėkite, kad įkeltumėte parašo vaizdą",
+      "signatureLimit": "PNG, JPG iki 2 MB",
+      "save": "Išsaugoti sertifikatą"
+    },
+    "deadline": {
+      "close": "Uždaryti terminų nustatymus",
+      "title": "Terminų nustatymai",
+      "enable": "Įjungti terminus",
+      "enableDescription": "Nustatykite atskirus terminus skirtingoms grupėms",
+      "current": "Dabartinis terminas: {{deadline}}"
+    },
+    "author": {
+      "close": "Uždaryti autoriaus nustatymus",
+      "pictureAlt": "Autoriaus nuotrauka",
+      "showSection": "Rodyti autoriaus skiltį",
+      "showSectionDescription": "Rodyti autoriaus informaciją kurso puslapyje",
+      "otherCourses": "Kiti kursai"
+    },
+    "contents": {
+      "title": "Turinys",
+      "statistics": "Statistika",
+      "edit": "Redaguoti turinį",
+      "missingTranslationsTitle": "Trūksta vertimų",
+      "missingTranslationsDescription": "Dalis kurso turinio nėra išversta į pasirinktą kalbą.",
+      "completedChapters_one": "Baigtas {{count}} skyrius",
+      "completedChapters_few": "Baigti {{count}} skyriai",
+      "completedChapters_other": "Baigta {{count}} skyrių",
+      "lessons_one": "{{count}} pamoka",
+      "lessons_few": "{{count}} pamokos",
+      "lessons_other": "{{count}} pamokų",
+      "showAllChapters": "Rodyti visus skyrius (dar {{count}})",
+      "courseStatistics": "Kurso statistika",
+      "statisticsDescription": "Dalyvių pažangos ir įsitraukimo apžvalga",
+      "totalStudents": "Iš viso dalyvių",
+      "completionRate": "Baigimo rodiklis",
+      "averageTime": "Vid. mokymosi laikas",
+      "averageRating": "Vid. įvertinimas",
+      "detailedStatisticsSoon": "Išsami statistika jau netrukus",
+      "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
+      "status": {
+        "started": "Pradėta",
+        "completed": "Baigta",
+        "inProgress": "Vykdoma",
+        "notStarted": "Nepradėta"
+      },
+      "lessonTypes": {
+        "content": "Turinys",
+        "quiz": "Testas",
+        "aiMentor": "DI mentorius",
+        "lesson": "Pamoka"
+      }
     }
   }
 }

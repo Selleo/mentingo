@@ -36,6 +36,24 @@ describe("ArticlesController (e2e)", () => {
     });
   };
 
+  const createContentCreator = async () => {
+    return userFactory
+      .withCredentials({ password })
+      .withContentCreatorSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+  };
+
+  const createTrainer = async () => {
+    return userFactory
+      .withCredentials({ password })
+      .withTrainerSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.TRAINER });
+  };
+
+  const createStudent = async () => {
+    return userFactory.withCredentials({ password }).withUserSettings(db).create();
+  };
+
   const seedGlobalSettings = async (overrides: Partial<typeof DEFAULT_GLOBAL_SETTINGS> = {}) => {
     await settingsFactory.create();
     await db
@@ -109,6 +127,44 @@ describe("ArticlesController (e2e)", () => {
       expect(response.body[0].title).toBe("Public article");
     });
 
+    it("allows a student to read published articles with public read access", async () => {
+      const student = await createStudent();
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Trainer visibility" });
+
+      const publicArticle = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Public article",
+        isPublic: true,
+      });
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Private article",
+        isPublic: false,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/articles?language=en")
+        .set("Cookie", await cookieFor(student, app))
+        .expect(200);
+
+      expect(response.body.map((article: { id: string }) => article.id)).toEqual(
+        expect.arrayContaining([publicArticle.id]),
+      );
+      expect(response.body).toHaveLength(2);
+    });
+
+    it("denies article access to a trainer without public article read access", async () => {
+      const trainer = await createTrainer();
+
+      await request(app.getHttpServer())
+        .get("/api/articles?language=en")
+        .set("Cookie", await cookieFor(trainer, app))
+        .expect(403);
+    });
+
     it("returns private articles for authenticated admin", async () => {
       const admin = await createAdmin();
       const author = await userFactory.create();
@@ -177,6 +233,59 @@ describe("ArticlesController (e2e)", () => {
 
       await request(app.getHttpServer()).get(`/api/articles/${article.id}?language=pl`).expect(404);
     });
+
+    it("allows a content creator to read published articles created by another user", async () => {
+      const contentCreator = await createContentCreator();
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Published access" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Published article",
+        isPublic: true,
+      });
+      const cookie = await cookieFor(contentCreator, app);
+
+      const articleResponse = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(articleResponse.body.data.id).toBe(article.id);
+
+      const tocResponse = await request(app.getHttpServer())
+        .get("/api/articles/toc?language=en")
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(tocResponse.body.data.sections).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            articles: expect.arrayContaining([expect.objectContaining({ id: article.id })]),
+          }),
+        ]),
+      );
+    });
+
+    it("allows an admin to open a published article in draft mode for editing", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Published edit" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: admin.id,
+        title: "Published article",
+        status: "published",
+        isPublic: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en&isDraftMode=true`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.id).toBe(article.id);
+      expect(response.body.data.title).toBe("Published article");
+    });
   });
 
   describe("GET /api/articles/drafts", () => {
@@ -210,6 +319,103 @@ describe("ArticlesController (e2e)", () => {
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].id).toBe(draft.id);
+    });
+
+    it("returns only drafts authored by a content creator", async () => {
+      const owner = await createContentCreator();
+      const otherAuthor = await createContentCreator();
+      const section = await sectionFactory.create({ title: "Draft section" });
+      const ownDraft = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: owner.id,
+        status: "draft",
+        title: "Own draft",
+      });
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: otherAuthor.id,
+        status: "draft",
+        title: "Other draft",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/articles/drafts?language=en")
+        .set("Cookie", await cookieFor(owner, app))
+        .expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].id).toBe(ownDraft.id);
+    });
+  });
+
+  describe("draft article access for ARTICLE_MANAGE_OWN", () => {
+    it("allows the author and rejects a different content creator", async () => {
+      const owner = await createContentCreator();
+      const otherAuthor = await createContentCreator();
+      const section = await sectionFactory.create({ title: "Draft access" });
+      const draft = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: owner.id,
+        status: "draft",
+        title: "Owned draft",
+      });
+
+      await request(app.getHttpServer())
+        .get(`/api/articles/${draft.id}?language=en&isDraftMode=true`)
+        .set("Cookie", await cookieFor(owner, app))
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/api/articles/${draft.id}?language=en&isDraftMode=true`)
+        .set("Cookie", await cookieFor(otherAuthor, app))
+        .expect(404);
+
+      const previewBody = {
+        articleId: draft.id,
+        language: "en",
+        content: "<p>Preview</p>",
+      };
+
+      await request(app.getHttpServer())
+        .post("/api/articles/preview")
+        .set("Cookie", await cookieFor(owner, app))
+        .send(previewBody)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post("/api/articles/preview")
+        .set("Cookie", await cookieFor(otherAuthor, app))
+        .send(previewBody)
+        .expect(400);
+    });
+
+    it("limits draft TOC entries to the current author's drafts", async () => {
+      const owner = await createContentCreator();
+      const otherAuthor = await createContentCreator();
+      const section = await sectionFactory.create({ title: "Draft TOC" });
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: owner.id,
+        status: "draft",
+        title: "Own TOC draft",
+      });
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: otherAuthor.id,
+        status: "draft",
+        title: "Other TOC draft",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/articles/toc?language=en&isDraftMode=true")
+        .set("Cookie", await cookieFor(owner, app))
+        .expect(200);
+
+      expect(response.body.data.sections).toEqual([
+        expect.objectContaining({
+          articles: [expect.objectContaining({ title: "Own TOC draft" })],
+        }),
+      ]);
     });
   });
 

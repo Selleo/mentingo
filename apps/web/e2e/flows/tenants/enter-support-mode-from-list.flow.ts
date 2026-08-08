@@ -8,9 +8,11 @@ export const enterSupportModeFromListFlow = async (page: Page, tenantId: string)
   await expect(tenantRow).toBeVisible();
   await tenantRow.getByTestId(TENANTS_PAGE_HANDLES.supportModeButton(tenantId)).click();
   await page.getByTestId(TENANTS_PAGE_HANDLES.SUPPORT_MODE_POPOVER).waitFor();
-  await page
+  const userOption = page
     .locator(`[data-testid^="${TENANTS_PAGE_HANDLES.SUPPORT_MODE_USER_OPTION_PREFIX}"]`)
-    .first()
-    .click();
+    .first();
+
+  await expect(userOption).toBeVisible();
+  await userOption.click({ force: true });
   await page.getByTestId(TENANTS_PAGE_HANDLES.SUPPORT_MODE_SUBMIT).click();
 };

@@ -31,7 +31,7 @@ The Knowledge Base gives employees a consistent source of truth inside the learn
 
 A content manager adds sections from the end of the section list. Selecting "New article" at the end of an expanded section immediately creates the entry in that section and opens its editor. They can update public visibility while editing title, summary, content, and cover independently for each language. Switching language does not overwrite another translation. The editor submits only translations changed during the session, while a single save can include changes from several languages.
 
-When an article is published, Mentingo requires a title for every language currently attached to that article. Learners and content creators can browse published articles through the section table of contents. Content creators with own-content management rights can read another author's article, but its edit and delete actions are hidden. Public visitors can open only articles allowed by both tenant configuration and the article's public setting.
+When an article is published, Mentingo requires a title for every language currently attached to that article. Learners, trainers, and content creators can browse published articles through the section table of contents. Content creators with own-content management rights can read another author's article, but its edit and delete actions are hidden. Public visitors can open only articles allowed by both tenant configuration and the article's public setting.
 
 Each localized cover is resolved for the requested language. Management views may fall back to the immutable base-language cover when the requested locale has no cover, rather than allowing another translation's image to take over.
 

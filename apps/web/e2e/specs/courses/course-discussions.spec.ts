@@ -34,6 +34,8 @@ const DISCUSSION_REACTION = "👍";
 
 const uniqueLabel = (prefix: string) => `${prefix}-${randomUUID().slice(0, 8)}`;
 
+test.describe.configure({ mode: "serial" });
+
 const getGlobalSettings = async (apiClient: FixtureApiClient): Promise<GlobalSettings> => {
   const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
 

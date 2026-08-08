@@ -172,6 +172,16 @@ export class IntegrationService {
     });
   }
 
+  async deleteTenantForIntegration(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<void> {
+    this.assertCanManageTenants(actor, keyTenant);
+
+    await this.tenantsService.deleteTenantById(tenantId, keyTenant.tenantId);
+  }
+
   async updateTenantForIntegration(
     tenantId: string,
     input: IntegrationUpdateTenantBody,

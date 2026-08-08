@@ -41,25 +41,6 @@
             }
           }
         }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
       }
     },
     "/api/file/videos/init": {
@@ -4448,6 +4429,43 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetCourseDuplicationJobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/{id}/media": {
+      "patch": {
+        "operationId": "CourseController_updateCourseMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCourseMediaResponse"
                 }
               }
             }
@@ -13507,6 +13525,54 @@
         "tags": [
           "Integration"
         ]
+      },
+      "delete": {
+        "operationId": "IntegrationController_deleteTenant",
+        "summary": "Delete tenant via integration API",
+        "description": "Permanently deletes the target tenant and its tenant-owned data.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
       }
     },
     "/api/integration/tenants/{tenantId}/deactivate": {
@@ -14741,6 +14807,33 @@
         }
       }
     },
+    "/api/super-admin/tenants/{id}/support-roles": {
+      "get": {
+        "operationId": "TenantsController_findSupportRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindSupportRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/super-admin/tenants/{id}/support-users": {
       "get": {
         "operationId": "TenantsController_findSupportUsers",
@@ -14778,6 +14871,31 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "roleSlug",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "admins",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -26104,6 +26222,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -26312,6 +26436,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26642,6 +26772,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -27007,6 +27143,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -27211,6 +27353,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -27484,6 +27632,10 @@
                                 "contentType"
                               ]
                             }
+                          },
+                          "estimatedDurationSeconds": {
+                            "minimum": 0,
+                            "type": "number"
                           }
                         },
                         "required": [
@@ -27538,6 +27690,10 @@
                       "type": "number"
                     },
                     "displayOrder": {
+                      "type": "number"
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
                       "type": "number"
                     }
                   },
@@ -27627,6 +27783,22 @@
               },
               "thumbnailUrl": {
                 "type": "string"
+              },
+              "thumbnailPositionY": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "showAuthorSection": {
+                "type": "boolean"
               },
               "trailerUrl": {
                 "anyOf": [
@@ -27754,6 +27926,7 @@
               "isContentReadonly",
               "courseType",
               "priceInCents",
+              "thumbnailPositionY",
               "title",
               "slug",
               "stripeProductId",
@@ -28576,6 +28749,18 @@
               "thumbnailS3Key": {
                 "type": "string"
               },
+              "thumbnailPositionY": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "learningOutcomes": {
+                "maxItems": 5,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -28827,6 +29012,77 @@
           "data"
         ]
       },
+      "UpdateCourseMediaBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "image": {
+            "format": "binary",
+            "description": "Course thumbnail image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "thumbnailPositionY"
+        ]
+      },
+      "UpdateCourseMediaResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateCourseBody": {
         "type": "object",
         "properties": {
@@ -28838,6 +29094,21 @@
           },
           "thumbnailS3Key": {
             "type": "string"
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "learningOutcomes": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "showAuthorSection": {
+            "type": "boolean"
           },
           "status": {
             "anyOf": [
@@ -30953,6 +31224,10 @@
                           "contentType"
                         ]
                       }
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
+                      "type": "number"
                     }
                   },
                   "required": [
@@ -31007,6 +31282,10 @@
                 "type": "number"
               },
               "displayOrder": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
                 "type": "number"
               }
             },
@@ -62308,6 +62587,41 @@
           "data"
         ]
       },
+      "FindSupportRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "name",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "FindSupportUsersResponse": {
         "type": "object",
         "properties": {
@@ -62342,6 +62656,33 @@
                       "type": "null"
                     }
                   ]
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "slug": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isSystem": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "slug",
+                      "name",
+                      "isSystem"
+                    ]
+                  }
                 }
               },
               "required": [
@@ -62350,7 +62691,8 @@
                 "firstName",
                 "lastName",
                 "label",
-                "profilePictureUrl"
+                "profilePictureUrl",
+                "roles"
               ]
             }
           },

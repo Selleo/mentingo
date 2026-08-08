@@ -122,6 +122,8 @@ import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-lo
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
+import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 export const users = pgTable(
@@ -320,10 +322,20 @@ export const courses = pgTable(
     description: jsonb("description").$type<LocalizedText>().default({}).notNull(),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
     status: coursesStatusEnum("status").$type<CourseStatus>().notNull().default("draft"),
+    thumbnailPositionY: integer("thumbnail_position_y").notNull().default(50),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),
+    showAuthorSection: boolean("show_author_section").notNull().default(true),
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
+    learningOutcomes: jsonb("learning_outcomes")
+      .$type<CourseLearningOutcomesByLanguage>()
+      .default({})
+      .notNull(),
+    durationEstimates: jsonb("duration_estimates")
+      .$type<CourseDurationEstimatesByLanguage>()
+      .default({})
+      .notNull(),
     courseType: courseTypeEnum("course_type")
       .$type<CourseType>()
       .notNull()

@@ -1,7 +1,7 @@
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
-import { LESSON_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { LESSON_TYPES, SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -210,7 +210,11 @@ describe("Master course export and sync (e2e)", () => {
       targetTenantId = existingTargetTenant.id;
       await baseDb
         .update(tenants)
-        .set({ isManaging: false, name: "Target Tenant" })
+        .set({
+          isManaging: false,
+          name: "Target Tenant",
+          status: TENANT_STATUSES.ACTIVE,
+        })
         .where(eq(tenants.id, targetTenantId));
     } else {
       const [createdTargetTenant] = await baseDb
@@ -353,6 +357,12 @@ describe("Master course export and sync (e2e)", () => {
             en: "Master Source Description",
             pl: "Opis kursu zrodlowego master",
           }),
+          learningOutcomes: {
+            en: ["Understand the source course"],
+            pl: ["Zrozumiec kurs zrodlowy"],
+          },
+          showAuthorSection: false,
+          thumbnailPositionY: 72,
           availableLocales: ["en", "pl"],
         })
         .where(eq(courses.id, sourceCourse.id));
@@ -541,6 +551,41 @@ describe("Master course export and sync (e2e)", () => {
     expect(response.body.data.summary.remainingCount).toBe(candidateTenants.length - 1);
   });
 
+  it("excludes inactive tenants from course sharing candidates and export", async () => {
+    const { sourceCourseId, sourceCookie } = await setupAndExport();
+
+    await baseDb
+      .update(tenants)
+      .set({ status: TENANT_STATUSES.INACTIVE })
+      .where(eq(tenants.id, targetTenantId));
+
+    try {
+      const response = await withTenantHost(
+        request(app.getHttpServer())
+          .get(`/api/course/master/${sourceCourseId}/export-candidates`)
+          .set("Cookie", sourceCookie),
+        SOURCE_HOST,
+      ).expect(200);
+
+      expect(
+        response.body.data.tenants.some((tenant: { id: string }) => tenant.id === targetTenantId),
+      ).toBe(false);
+
+      await withTenantHost(
+        request(app.getHttpServer())
+          .post(`/api/course/master/${sourceCourseId}/export`)
+          .set("Cookie", sourceCookie)
+          .send({ targetTenantIds: [targetTenantId] }),
+        SOURCE_HOST,
+      ).expect(400);
+    } finally {
+      await baseDb
+        .update(tenants)
+        .set({ status: TENANT_STATUSES.ACTIVE })
+        .where(eq(tenants.id, targetTenantId));
+    }
+  });
+
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
     const { sourceCourseId, sourceChapterId, sourceLessonId, targetCourseId, targetCookie } =
       await setupAndExport();
@@ -568,6 +613,9 @@ describe("Master course export and sync (e2e)", () => {
         .select({
           title: courses.title,
           description: courses.description,
+          learningOutcomes: courses.learningOutcomes,
+          showAuthorSection: courses.showAuthorSection,
+          thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
           priceInCents: courses.priceInCents,
           currency: courses.currency,
@@ -590,6 +638,12 @@ describe("Master course export and sync (e2e)", () => {
         en: "Master Source Description",
         pl: "Opis kursu zrodlowego master",
       });
+      expect(targetCourse.learningOutcomes).toEqual({
+        en: ["Understand the source course"],
+        pl: ["Zrozumiec kurs zrodlowy"],
+      });
+      expect(targetCourse.showAuthorSection).toBe(false);
+      expect(targetCourse.thumbnailPositionY).toBe(72);
       expect(targetCourse.status).toBe("draft");
       expect(targetCourse.priceInCents).toBe(0);
       expect(targetCourse.currency).toBe("eur");
@@ -684,7 +738,7 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
-  it("preserves the target course status when source updates are synced", async () => {
+  it("syncs course overview fields while preserving the target course status", async () => {
     const { sourceCourseId, targetCourseId } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
@@ -699,6 +753,12 @@ describe("Master course export and sync (e2e)", () => {
             en: updatedTitle,
             pl: "Kurs zrodlowy master",
           }),
+          learningOutcomes: {
+            en: ["Apply the updated course"],
+            pl: ["Zastosowac zaktualizowany kurs"],
+          },
+          showAuthorSection: true,
+          thumbnailPositionY: 28,
         })
         .where(eq(courses.id, sourceCourseId)),
     );
@@ -720,7 +780,13 @@ describe("Master course export and sync (e2e)", () => {
 
     const syncedTargetCourse = await runAsTenant(targetTenantId, async () => {
       const [targetCourse] = await db
-        .select({ title: courses.title, status: courses.status })
+        .select({
+          title: courses.title,
+          learningOutcomes: courses.learningOutcomes,
+          showAuthorSection: courses.showAuthorSection,
+          thumbnailPositionY: courses.thumbnailPositionY,
+          status: courses.status,
+        })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
@@ -729,6 +795,12 @@ describe("Master course export and sync (e2e)", () => {
     });
 
     expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.learningOutcomes).toEqual({
+      en: ["Apply the updated course"],
+      pl: ["Zastosowac zaktualizowany kurs"],
+    });
+    expect(syncedTargetCourse?.showAuthorSection).toBe(true);
+    expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
     expect(syncedTargetCourse?.status).toBe("published");
   });
 

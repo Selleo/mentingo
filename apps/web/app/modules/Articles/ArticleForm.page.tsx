@@ -242,16 +242,17 @@ function ArticleFormPage() {
 
   const persistedLocales = existingArticle?.availableLocales ?? [];
   const hasFormChanges =
-    availableLocales.some(
-      (language) => hasDirtyTranslation(language) || !persistedLocales.includes(language),
-    ) || Boolean(formState.dirtyFields.isPublic);
+    formState.isDirty || availableLocales.some((language) => !persistedLocales.includes(language));
 
   const saveArticle = async (values: ArticleFormValues) => {
     if (!articleId || items.length || !hasFormChanges) return;
 
-    const translations = availableLocales
-      .filter((language) => hasDirtyTranslation(language) || !persistedLocales.includes(language))
-      .map((language) => ({ language, ...values.translations[language] }));
+    const dirtyLanguages = availableLocales.filter(
+      (language) => hasDirtyTranslation(language) || !persistedLocales.includes(language),
+    );
+    const translations = (dirtyLanguages.length ? dirtyLanguages : [activeLanguage]).map(
+      (language) => ({ language, ...values.translations[language] }),
+    );
     const covers: Partial<Record<`cover.${SupportedLanguages}`, File>> = {};
     translations.forEach(({ language, cover }) => {
       if (cover) covers[`cover.${language}`] = cover;

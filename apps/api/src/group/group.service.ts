@@ -632,6 +632,7 @@ export class GroupService {
         ...getTableColumns(groups),
         name: this.getLocalizedGroupName(language),
         characteristic: this.getLocalizedGroupCharacteristic(language),
+        isMandatory: groupCourses.isMandatory,
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(groupCourses)

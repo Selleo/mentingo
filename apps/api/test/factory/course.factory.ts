@@ -3,7 +3,7 @@ import { COURSE_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, buildJsonbStringArrayField } from "src/common/helpers/sqlHelpers";
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 
 import { categories, courses, users } from "../../src/storage/schema";
@@ -70,6 +70,11 @@ export const createCourseFactory = (db: DatabasePg) => {
           ...course,
           title: buildJsonbField("en", course.title),
           description: buildJsonbField("en", course.description),
+          learningOutcomes: buildJsonbStringArrayField(
+            SUPPORTED_LANGUAGES.EN,
+            course.learningOutcomes[SUPPORTED_LANGUAGES.EN] ?? [],
+          ),
+          durationEstimates: sql`'{}'::jsonb`,
           categoryId,
           authorId,
         })
@@ -92,6 +97,10 @@ export const createCourseFactory = (db: DatabasePg) => {
       title: faker.commerce.department() + randomHex,
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
+      thumbnailPositionY: 50,
+      learningOutcomes: {},
+      durationEstimates: {},
+      showAuthorSection: true,
       status: "published",
       hasCertificate: false,
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),

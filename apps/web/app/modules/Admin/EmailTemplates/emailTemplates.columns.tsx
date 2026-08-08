@@ -72,7 +72,6 @@ export const getEmailTemplatesColumns = ({
             lastSelectedRowIndex,
             setLastSelectedRowIndex,
             id: row.id,
-            idx: row.index,
             value: row.getIsSelected(),
           });
         }}

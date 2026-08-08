@@ -41,7 +41,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
         this.tenantResolver.resolveTenantId(req).then((tenantId) => {
           if (!tenantId) throw new UnauthorizedException("Missing tenantId");
 
-          return this.runner.runWithTenant(tenantId, () => lastValueFrom(next.handle()));
+          return this.runner.runWithTenantContext(tenantId, () => lastValueFrom(next.handle()));
         }),
       ),
     );

@@ -1,9 +1,12 @@
 import type {
+  SupportUserScope,
   SupportSessionStatus as SharedSupportSessionStatus,
   TenantStatus,
 } from "@repo/shared";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { supportSessions } from "src/storage/schema";
+
+export type { SupportUserScope };
 
 export type SupportSession = InferSelectModel<typeof supportSessions>;
 
@@ -29,30 +32,42 @@ export type SupportTenant = {
   status: TenantStatus;
 };
 
-export type SupportAdminUser = {
+export type SupportUserRole = {
+  id: string;
+  slug: string;
+  name: string;
+  isSystem: boolean;
+};
+
+export type SupportUser = {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
   label: string;
   profilePictureUrl: string | null;
+  roles: SupportUserRole[];
 };
 
-export type SupportAdminUserRecord = Omit<SupportAdminUser, "profilePictureUrl"> & {
+export type SupportUserRecord = Omit<SupportUser, "profilePictureUrl"> & {
   avatarReference: string | null;
 };
 
-export type ListSupportAdminUsersQuery = {
+export type ListSupportUsersQuery = {
   page?: number;
   perPage?: number;
   search?: string;
+  scope?: SupportUserScope;
+  roleSlug?: string;
 };
 
-export type FindSupportAdminUsersParams = {
+export type FindSupportUsersParams = {
   tenantId: string;
   page: number;
   perPage: number;
   search?: string;
+  scope: SupportUserScope;
+  roleSlug?: string;
 };
 
 export type CreateSupportSessionRecord = InferInsertModel<typeof supportSessions>;

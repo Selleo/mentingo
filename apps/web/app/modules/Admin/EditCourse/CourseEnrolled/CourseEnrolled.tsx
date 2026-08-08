@@ -132,7 +132,6 @@ export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement 
               table,
               event,
               id: row.id,
-              idx: row.index,
               value: row.getIsSelected(),
               lastSelectedRowIndex,
               setLastSelectedRowIndex,

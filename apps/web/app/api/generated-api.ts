@@ -1815,6 +1815,7 @@ export interface GetAllCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1853,6 +1854,7 @@ export interface GetStudentCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1919,6 +1921,7 @@ export interface GetAvailableCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1978,6 +1981,7 @@ export interface GetTopCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -2014,6 +2018,7 @@ export interface GetContentCreatorCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -2064,6 +2069,8 @@ export interface GetCourseResponse {
           fileName?: string;
           allowFullscreen?: boolean;
         }[];
+        /** @min 0 */
+        estimatedDurationSeconds?: number;
       }[];
       completedLessonCount?: number;
       chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2074,6 +2081,8 @@ export interface GetCourseResponse {
       updatedAt?: string;
       quizCount?: number;
       displayOrder: number;
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedChapterCount?: number;
     courseChapterCount: number;
@@ -2090,6 +2099,11 @@ export interface GetCourseResponse {
     courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
+    thumbnailPositionY: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
+    learningOutcomes?: string[];
+    showAuthorSection?: boolean;
     trailerUrl?: string | null;
     title: string;
     slug: string;
@@ -2232,6 +2246,13 @@ export type CreateCourseBody = {
   description: string;
   status?: "draft" | "published" | "private";
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
+  /** @maxItems 5 */
+  learningOutcomes?: string[];
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -2293,10 +2314,39 @@ export interface GetCourseDuplicationJobStatusResponse {
   };
 }
 
+export interface UpdateCourseMediaBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY: number;
+  /**
+   * Course thumbnail image
+   * @format binary
+   */
+  image?: File;
+}
+
+export interface UpdateCourseMediaResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
+  /** @maxItems 5 */
+  learningOutcomes?: string[];
+  showAuthorSection?: boolean;
   status?: "draft" | "published" | "private";
   priceInCents?: number;
   currency?: string;
@@ -2790,6 +2840,8 @@ export interface GetChapterWithLessonResponse {
         fileName?: string;
         allowFullscreen?: boolean;
       }[];
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedLessonCount?: number;
     chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2800,6 +2852,8 @@ export interface GetChapterWithLessonResponse {
     updatedAt?: string;
     quizCount?: number;
     displayOrder: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
   };
 }
 
@@ -7669,6 +7723,7 @@ export interface ListTemplatesResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7689,6 +7744,7 @@ export interface ListTemplatesResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -7728,6 +7784,7 @@ export interface CreateTemplateBody {
     lt?: string;
     cs?: string;
     es?: string;
+    fr?: string;
   };
   blocks?: {
     type?: string;
@@ -7748,6 +7805,7 @@ export interface CreateTemplateBody {
     lt?: object;
     cs?: object;
     es?: object;
+    fr?: object;
   };
 }
 
@@ -7764,6 +7822,7 @@ export interface CreateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7784,6 +7843,7 @@ export interface CreateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -7805,6 +7865,7 @@ export interface GetTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7825,6 +7886,7 @@ export interface GetTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -7849,6 +7911,7 @@ export interface UpdateTemplateBody {
     lt?: string;
     cs?: string;
     es?: string;
+    fr?: string;
   };
   blocks?: {
     type?: string;
@@ -7869,6 +7932,7 @@ export interface UpdateTemplateBody {
     lt?: object;
     cs?: object;
     es?: object;
+    fr?: object;
   };
 }
 
@@ -7885,6 +7949,7 @@ export interface UpdateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7905,6 +7970,7 @@ export interface UpdateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -7926,6 +7992,7 @@ export interface PublishTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7946,6 +8013,7 @@ export interface PublishTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -7967,6 +8035,7 @@ export interface MakeTemplateDraftResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7987,6 +8056,7 @@ export interface MakeTemplateDraftResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -8008,6 +8078,7 @@ export interface ArchiveTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8028,6 +8099,7 @@ export interface ArchiveTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -8055,6 +8127,7 @@ export interface UnarchiveTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8075,6 +8148,7 @@ export interface UnarchiveTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -8110,6 +8184,7 @@ export interface DuplicateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8130,6 +8205,7 @@ export interface DuplicateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
@@ -8482,6 +8558,16 @@ export interface UpdateTenantByIdResponse {
   };
 }
 
+export interface FindSupportRolesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    slug: string;
+    name: string;
+    isSystem: boolean;
+  }[];
+}
+
 export interface FindSupportUsersResponse {
   data: {
     /** @format uuid */
@@ -8492,6 +8578,13 @@ export interface FindSupportUsersResponse {
     lastName: string;
     label: string;
     profilePictureUrl: string | null;
+    roles: {
+      /** @format uuid */
+      id: string;
+      slug: string;
+      name: string;
+      isSystem: boolean;
+    }[];
   }[];
   pagination: {
     totalItems: number;
@@ -9535,26 +9628,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.FormData,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
         ...params,
       }),
 
@@ -11819,6 +11892,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetCourseDuplicationJobStatusResponse, any>({
         path: `/api/course/duplication-jobs/${jobId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateCourseMedia
+     * @request PATCH:/api/course/{id}/media
+     */
+    courseControllerUpdateCourseMedia: (
+      id: string,
+      data: UpdateCourseMediaBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCourseMediaResponse, any>({
+        path: `/api/course/${id}/media`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -16101,6 +16194,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Permanently deletes the target tenant and its tenant-owned data. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.
+     *
+     * @tags Integration
+     * @name IntegrationControllerDeleteTenant
+     * @summary Delete tenant via integration API
+     * @request DELETE:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerDeleteTenant: (tenantId: string, params: RequestParams = {}) =>
+      this.request<void, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
      * @description Marks the target tenant as inactive. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
@@ -16521,6 +16629,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name TenantsControllerFindSupportRoles
+     * @request GET:/api/super-admin/tenants/{id}/support-roles
+     */
+    tenantsControllerFindSupportRoles: (id: string, params: RequestParams = {}) =>
+      this.request<FindSupportRolesResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-roles`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name TenantsControllerFindSupportUsers
      * @request GET:/api/super-admin/tenants/{id}/support-users
      */
@@ -16532,6 +16654,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         perPage?: number;
         search?: string;
+        roleSlug?: string;
+        scope?: "admins" | "all";
       },
       params: RequestParams = {},
     ) =>

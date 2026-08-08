@@ -5,6 +5,7 @@ import {
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
+  TENANT_STATUSES,
   type MasterCourseEntityType,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -193,7 +194,7 @@ export class MasterCourseRepository {
           eq(masterCourseExports.targetTenantId, tenants.id),
         ),
       )
-      .where(ne(tenants.id, sourceTenantId))
+      .where(and(ne(tenants.id, sourceTenantId), eq(tenants.status, TENANT_STATUSES.ACTIVE)))
       .orderBy(asc(tenants.name));
   }
 

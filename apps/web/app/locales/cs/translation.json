@@ -3,7 +3,7 @@
     "button": {
       "save": "Uložit",
       "saving": "Ukládání...",
-      "delete": "Vymazat",
+      "delete": "Smazat",
       "create": "Vytvořit",
       "cancel": "Zrušit",
       "back": "Zadní",
@@ -16,7 +16,6 @@
       "clearAll": "Vymazat vše",
       "validate": "Ověřit",
       "edit": "Upravit",
-      "delete": "Smazat",
       "uploading": "Nahrávání...",
       "sending": "Odesílání..."
     },
@@ -430,7 +429,9 @@
     "loading": "Načítání událostí",
     "empty": "Žádné události k zobrazení",
     "today": "Dnes",
-    "legend": { "label": "Zdroje" },
+    "legend": {
+      "label": "Zdroje"
+    },
     "microsoft": {
       "staleWarning": "Události Microsoft mohou být zastaralé. Připojte účet znovu nebo opakujte akci v nastavení účtu.",
       "horizonNotice": "Události Microsoft se importují od 30 dnů zpětně do 6 měsíců dopředu, takže tento rozsah může být neúplný."
@@ -1554,14 +1555,75 @@
         "live_training_read": "Může zobrazit živá školení.",
         "live_training_create": "Může vytvářet živá školení.",
         "live_training_update": "Může upravovat libovolné živé školení.",
-        "live_training_update_own": "Může upravovat živá školení vytvořená tímto uživatelem.",
+        "live_training_update_own": "Může upravovat živá školení, u kterých je tento uživatel přiřazen jako hostitel.",
         "live_training_delete": "Může mazat živá školení.",
         "live_training_delete_own": "Může mazat živá školení vytvořená tímto uživatelem.",
         "live_training_join": "Může se připojit k relacím živého školení.",
         "live_training_start": "Může spouštět relace živého školení.",
         "live_training_end": "Může ukončovat relace živého školení.",
         "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
-        "activity_log_read": "Může zobrazit protokoly aktivit."
+        "activity_log_read": "Může zobrazit protokoly aktivit.",
+        "account_read_self": "Může zobrazit údaje vlastního účtu.",
+        "account_update_self": "Může upravit údaje vlastního účtu.",
+        "user_read_self": "Může zobrazit vlastní uživatelský profil.",
+        "user_manage": "Může spravovat uživatele včetně rolí a stavu účtu.",
+        "settings_read_self": "Může zobrazit vlastní nastavení profilu a předvoleb.",
+        "settings_update_self": "Může aktualizovat vlastní nastavení profilu a předvoleb.",
+        "settings_manage": "Může spravovat globální nastavení platformy.",
+        "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
+        "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
+        "category_read": "Může zobrazit kategorie kurzů.",
+        "category_manage": "Může vytvářet, upravovat a mazat kategorie kurzů.",
+        "group_read": "Může zobrazit skupiny uživatelů.",
+        "group_manage": "Může vytvářet, upravovat a mazat skupiny uživatelů.",
+        "learning_path_read": "Může zobrazit rozvojové cesty.",
+        "learning_path_create": "Může vytvářet rozvojové cesty.",
+        "learning_path_update": "Může upravovat libovolné rozvojové cesty.",
+        "learning_path_update_own": "Může upravovat rozvojové cesty vytvořené tímto uživatelem.",
+        "learning_path_delete": "Může mazat rozvojové cesty.",
+        "learning_path_course_update": "Může přidávat, odebírat a měnit pořadí kurzů v libovolné rozvojové cestě.",
+        "learning_path_course_update_own": "Může přidávat, odebírat a měnit pořadí kurzů ve vlastních rozvojových cestách.",
+        "learning_path_enrollment": "Může spravovat zápisy do rozvojových cest.",
+        "learning_path_export": "Může exportovat rozvojové cesty do jiných organizací.",
+        "course_read_assigned": "Může zobrazit kurzy přiřazené tomuto uživateli.",
+        "course_read_manageable": "Může zobrazit kurzy, které tento uživatel může spravovat.",
+        "course_read": "Může zobrazit obsah kurzů.",
+        "course_create": "Může vytvářet nové kurzy.",
+        "course_update": "Může upravovat libovolné kurzy.",
+        "course_update_own": "Může upravovat kurzy vytvořené tímto uživatelem.",
+        "course_delete": "Může mazat kurzy.",
+        "course_enrollment": "Může spravovat zápisy do kurzů.",
+        "course_statistics": "Může zobrazit analýzy a statistiky kurzů.",
+        "course_export": "Může exportovat data kurzů.",
+        "learning_mode_use": "Může používat funkce režimu učení.",
+        "learning_progress_update": "Může aktualizovat studijní postup.",
+        "certificate_read": "Může zobrazit certifikáty.",
+        "certificate_share": "Může sdílet certifikáty.",
+        "certificate_render": "Může generovat soubory certifikátů.",
+        "file_upload": "Může nahrávat soubory pomocí sdílených nástrojů platformy.",
+        "file_delete": "Může mazat soubory přímo z úložiště platformy.",
+        "ai_use": "Může používat funkce platformy využívající AI.",
+        "announcement_read": "Může zobrazit oznámení.",
+        "announcement_create": "Může vytvářet oznámení.",
+        "news_read_public": "Může zobrazit dostupné novinky.",
+        "news_manage": "Může vytvářet, upravovat a mazat všechny novinky.",
+        "news_manage_own": "Může vytvářet, upravovat a mazat vlastní novinky.",
+        "article_read_public": "Může zobrazit dostupné články znalostní báze.",
+        "article_manage": "Může vytvářet, upravovat a mazat všechny články znalostní báze.",
+        "article_manage_own": "Může vytvářet, upravovat a mazat vlastní články znalostní báze.",
+        "qa_read_public": "Může zobrazit dostupné Q&A záznamy.",
+        "qa_manage": "Může vytvářet, upravovat a mazat všechny Q&A záznamy.",
+        "qa_manage_own": "Může vytvářet, upravovat a mazat vlastní Q&A záznamy.",
+        "report_read": "Může stáhnout souhrnné reporty pro kurzy v povoleném rozsahu uživatele.",
+        "statistics_read_self": "Může zobrazit vlastní statistiky.",
+        "statistics_read": "Může zobrazit souhrnné statistiky kurzů v povoleném rozsahu uživatele.",
+        "billing_checkout": "Může přistupovat k procesům fakturace a platby.",
+        "billing_manage": "Může spravovat nastavení fakturace a předplatná.",
+        "integration_key_manage": "Může spravovat klíče integračního API.",
+        "integration_api_use": "Může používat koncové body integračního API.",
+        "tenant_manage": "Může spravovat konfiguraci organizace.",
+        "course_ai_generation": "Může generovat obsah kurzů pomocí AI.",
+        "email_template_manage": "Vytvářet, upravovat a spravovat šablony e-mailových oznámení."
       }
     },
     "dropdown": {
@@ -1943,6 +2005,13 @@
         "optionInsertFailed": "Možnost kvízu se nepodařilo přidat.",
         "embedCreateFailed": "Vloženou lekci se nepodařilo vytvořit.",
         "signedUrlDownloadFailed": "Soubor se nepodařilo stáhnout z podepsané adresy URL."
+      },
+      "forbidden": {
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+      },
+      "media": {
+        "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
+        "updateFailed": "Nepodařilo se aktualizovat média kurzu."
       }
     },
     "thinking": {
@@ -2869,7 +2938,8 @@
         "invalidSnapshot": "Tento kurz se nepodařilo připravit pro export SCORM.",
         "fallback": "Export SCORM se nezdařil."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Přiřaďte alespoň jednu skupinu, abyste mohli nastavit termíny."
   },
   "registerView": {
     "header": "Zaregistrujte se",
@@ -3407,7 +3477,8 @@
       "newsSettingUpdatedSuccessfully": "Nastavení zpráv byla úspěšně aktualizována",
       "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována",
       "learningPathsUpdatedSuccessfully": "Nastavení rozvojových cest byla úspěšně aktualizována"
-    }
+    },
+    "supportModeNoAvailable": "V režimu podpory nejsou pro tohoto uživatele dostupná žádná nastavení."
   },
   "certificateBackgroundUpload": {
     "title": "Nahrání certifikátu na pozadí",
@@ -4683,7 +4754,8 @@
     "errors": {
       "generic": "Režim podpory se nepodařilo spustit",
       "targetAdminRequired": "Vyberte aktivního administrátora z vybrané organizace",
-      "invalidSession": "Relace podpory je neplatná"
+      "invalidSession": "Relace podpory je neplatná",
+      "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace"
     }
   },
   "superAdminTenantsView": {
@@ -4714,7 +4786,8 @@
       "actions": {
         "title": "Akce",
         "enterSupportMode": "Vstupte do režimu podpory",
-        "impersonateAdmin": "Vstoupit jako administrátor"
+        "impersonateAdmin": "Vstoupit jako administrátor",
+        "impersonateUser": "Jednat jako uživatel"
       }
     },
     "activityTrend": {
@@ -4725,9 +4798,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
-      "loading": "Načítání administrátorů...",
+      "loading": "Načítání uživatelů...",
       "empty": "Nebyli nalezeni žádní aktivní administrátoři.",
-      "loadMore": "Načíst další uživatele"
+      "loadMore": "Načíst další uživatele",
+      "tabs": {
+        "admins": "Administrátoři",
+        "allUsers": "Všichni uživatelé"
+      },
+      "emptyAdmins": "Nebyli nalezeni žádní aktivní administrátoři.",
+      "emptyAdminsSearch": "Pro \"{{search}}\" nebyli nalezeni žádní aktivní administrátoři.",
+      "emptyAllUsers": "Nebyli nalezeni žádní aktivní uživatelé.",
+      "searchAllUsers": "Hledat mezi všemi uživateli"
     },
     "status": {
       "active": "Aktivní",
@@ -5064,6 +5145,149 @@
       "uploadFailed": "Nahrávání obrázku se nezdařilo. Zkuste to znovu.",
       "tooLarge": "Obrázek je příliš velký. Maximální velikost je 10 MB.",
       "invalidType": "Neplatný typ obrázku. Povoleno: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Zrušit",
+      "close": "Zavřít",
+      "saveChanges": "Uložit změny",
+      "enabled": "Zapnuto",
+      "disabled": "Vypnuto"
+    },
+    "learningMode": {
+      "title": "Tento kurz absolvujete ve výukovém režimu",
+      "description": "Váš pokrok je sledován. Dokončené lekce se započítávají do vašeho pokroku a statistik kurzu.",
+      "enter": "Spustit výukový režim",
+      "exit": "Ukončit výukový režim"
+    },
+    "overview": {
+      "courseSettings": "Nastavení kurzu",
+      "manageCategories": "Spravovat kategorie",
+      "settingsDescription": "Spravujte nastavení tohoto kurzu.",
+      "titlePlaceholder": "Zadejte název kurzu...",
+      "editMedia": "Upravit média",
+      "continueLearning": "Pokračovat ve studiu",
+      "courseDetails": "Podrobnosti kurzu",
+      "closeDetails": "Zavřít podrobnosti kurzu",
+      "aboutCourse": "O tomto kurzu",
+      "description": "Popis",
+      "descriptionPlaceholder": "Zadejte popis kurzu...",
+      "whatYouWillMaster": "Co si osvojíte",
+      "noLearningOutcomes": "Zatím nebyly přidány žádné výsledky učení.",
+      "learningOutcomePlaceholder": "Přidejte výsledek učení...",
+      "addLearningOutcome": "Přidat výsledek učení",
+      "removeLearningOutcome": "Odebrat výsledek učení",
+      "closeSettings": "Zavřít nastavení kurzu",
+      "settingsComingSoon": "Nastavení již brzy",
+      "settingsIntro": "Zde můžete nastavit:",
+      "settingsStatus": "Stav kurzu (Koncept/Publikováno)",
+      "settingsPricing": "Ceny a možnosti platby",
+      "settingsAssignments": "Přiřazení účastníci a skupiny",
+      "settingsSequential": "Vynutit postupné dokončení",
+      "settingsVisibility": "Viditelnost kurzu",
+      "settingsPermissions": "Přístupová oprávnění"
+    },
+    "media": {
+      "title": "Upravit média kurzu",
+      "currentImage": "Aktuální hlavní obrázek – upravte pozici",
+      "previewAlt": "Náhled hlavního obrázku kurzu",
+      "previewPosition": "Náhled s aktuální pozicí",
+      "verticalPosition": "Svislá pozice",
+      "uploadImage": "Nahrát nový hlavní obrázek",
+      "dropImage": "Přetáhněte hlavní obrázek sem",
+      "browse": "nebo klikněte a vyberte soubor",
+      "imageLimit": "PNG, JPG do 10 MB",
+      "imageRecommendation": "Doporučeno: 1920x820 px (21:9)",
+      "trailer": "Upoutávka kurzu (volitelné)",
+      "dropVideo": "Přetáhněte upoutávku sem",
+      "videoLimit": "MP4, MOV do 50 MB",
+      "videoRecommendation": "Doporučeno: 30–90 sekund",
+      "save": "Nahrát média"
+    },
+    "stats": {
+      "yourProgress": "Váš pokrok",
+      "remaining": "zbývá",
+      "courseFinished": "Kurz dokončen",
+      "chapterProgress_one": "{{completed}} / {{total}} kapitola",
+      "chapterProgress_few": "{{completed}} / {{total}} kapitoly",
+      "chapterProgress_other": "{{completed}} / {{total}} kapitol",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "pro sledování vašeho pokroku.",
+      "deadline": "Termín",
+      "daysLeft_one": "Zbývá {{count}} den",
+      "daysLeft_few": "Zbývají {{count}} dny",
+      "daysLeft_other": "Zbývá {{count}} dní",
+      "certificate": "Certifikát",
+      "uponCompletion": "Po dokončení",
+      "aboutAuthor": "O autorovi"
+    },
+    "certificate": {
+      "close": "Zavřít nastavení certifikátu",
+      "title": "Nastavení certifikátu",
+      "previewTitle": "Certifikát o dokončení",
+      "certifies": "Tímto se potvrzuje, že",
+      "completed": "úspěšně dokončil(a)",
+      "signaturePlaceholder": "Místo pro podpis",
+      "enable": "Povolit certifikát",
+      "enableDescription": "Účastníci obdrží certifikát po dokončení kurzu",
+      "fontColor": "Barva písma",
+      "uploadSignature": "Nahrát podpis",
+      "uploadSignatureHint": "Kliknutím nahrajte obrázek podpisu",
+      "signatureLimit": "PNG, JPG do 2 MB",
+      "save": "Uložit certifikát"
+    },
+    "deadline": {
+      "close": "Zavřít nastavení termínů",
+      "title": "Nastavení termínů",
+      "enable": "Povolit termíny",
+      "enableDescription": "Nastavte konkrétní termíny pro různé skupiny",
+      "current": "Aktuální termín: {{deadline}}"
+    },
+    "author": {
+      "close": "Zavřít nastavení autora",
+      "pictureAlt": "Obrázek autora",
+      "showSection": "Zobrazit sekci autora",
+      "showSectionDescription": "Zobrazit informace o autorovi na stránce kurzu",
+      "otherCourses": "Další kurzy"
+    },
+    "contents": {
+      "title": "Obsah",
+      "statistics": "Statistiky",
+      "edit": "Upravit obsah",
+      "missingTranslationsTitle": "Chybějící překlady",
+      "missingTranslationsDescription": "Část obsahu kurzu není přeložena do vybraného jazyka.",
+      "completedChapters_one": "{{count}} dokončená kapitola",
+      "completedChapters_few": "{{count}} dokončené kapitoly",
+      "completedChapters_other": "{{count}} dokončených kapitol",
+      "lessons_one": "{{count}} lekce",
+      "lessons_few": "{{count}} lekce",
+      "lessons_other": "{{count}} lekcí",
+      "showAllChapters": "Zobrazit všechny kapitoly (dalších {{count}})",
+      "courseStatistics": "Statistiky kurzu",
+      "statisticsDescription": "Přehled pokroku a zapojení účastníků",
+      "totalStudents": "Celkem účastníků",
+      "completionRate": "Míra dokončení",
+      "averageTime": "Prům. doba studia",
+      "averageRating": "Prům. hodnocení",
+      "detailedStatisticsSoon": "Podrobné statistiky již brzy",
+      "detailedStatisticsDescription": "Tato sekce zobrazí podrobnou analýzu pokroku, dokončení kapitol, zapojení a další údaje.",
+      "status": {
+        "started": "Zahájeno",
+        "completed": "Dokončeno",
+        "inProgress": "Probíhá",
+        "notStarted": "Nezahájeno"
+      },
+      "lessonTypes": {
+        "content": "Obsah",
+        "quiz": "Kvíz",
+        "aiMentor": "AI mentor",
+        "lesson": "Lekce"
+      }
     }
   }
 }

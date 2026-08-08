@@ -16,7 +16,6 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
-      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending..."
     },
@@ -1590,23 +1589,23 @@
         "certificate_share": "Share certificates.",
         "certificate_render": "Generate certificate files.",
         "file_upload": "Upload files to the platform.",
-        "file_delete": "Delete uploaded files.",
+        "file_delete": "Delete files directly from platform storage.",
         "ai_use": "Use AI-powered platform features.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
         "announcement_delete": "Delete announcements.",
-        "news_read_public": "View public news posts.",
+        "news_read_public": "View available news posts.",
         "news_manage": "Create, edit, and delete all news posts.",
         "news_manage_own": "Create, edit, and delete own news posts.",
-        "article_read_public": "View public knowledge-base articles.",
+        "article_read_public": "View available knowledge-base articles.",
         "article_manage": "Create, edit, and delete all knowledge-base articles.",
         "article_manage_own": "Create, edit, and delete own knowledge-base articles.",
-        "qa_read_public": "View public Q&A entries.",
+        "qa_read_public": "View available Q&A entries.",
         "qa_manage": "Create, edit, and delete all Q&A entries.",
         "qa_manage_own": "Create, edit, and delete own Q&A entries.",
-        "report_read": "View reports.",
+        "report_read": "Download summary reports for courses within the user's permitted scope.",
         "statistics_read_self": "View own statistics.",
-        "statistics_read": "View platform-wide statistics.",
+        "statistics_read": "View aggregate course statistics within the user's permitted scope.",
         "billing_checkout": "Access billing checkout flows.",
         "billing_manage": "Manage billing settings and subscriptions.",
         "integration_key_manage": "Manage integration API keys.",
@@ -1616,7 +1615,7 @@
         "live_training_read": "View live trainings.",
         "live_training_create": "Create live trainings.",
         "live_training_update": "Edit any live training.",
-        "live_training_update_own": "Edit live trainings created by this user.",
+        "live_training_update_own": "Edit live trainings where this user is assigned as a host.",
         "live_training_delete": "Delete live trainings.",
         "live_training_delete_own": "Delete live trainings created by this user.",
         "live_training_join": "Join live training sessions.",
@@ -1624,7 +1623,8 @@
         "live_training_end": "End live training sessions.",
         "live_training_statistics": "View live training attendance and statistics.",
         "activity_log_read": "View activity logs.",
-        "course_ai_generation": "Generate course structure and content with AI tools."
+        "course_ai_generation": "Generate course structure and content with AI tools.",
+        "email_template_manage": "Create, edit, and manage email notification templates."
       }
     },
     "dropdown": {
@@ -2006,6 +2006,13 @@
         "optionInsertFailed": "Failed to add quiz option.",
         "embedCreateFailed": "Failed to create embed lesson.",
         "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
+      },
+      "forbidden": {
+        "updateCourse": "You do not have permission to update this course."
+      },
+      "media": {
+        "imageUploadFailed": "Failed to upload the course image.",
+        "updateFailed": "Failed to update course media."
       }
     },
     "thinking": {
@@ -2931,7 +2938,8 @@
         "invalidSnapshot": "This course could not be prepared for SCORM export.",
         "fallback": "SCORM export failed."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines."
   },
   "registerView": {
     "header": "Sign Up",
@@ -3467,7 +3475,8 @@
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
       "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
       "learningPathsUpdatedSuccessfully": "Development Paths settings updated successfully"
-    }
+    },
+    "supportModeNoAvailable": "No settings are available for this user while in support mode."
   },
   "certificateBackgroundUpload": {
     "title": "Certificate Background Upload",
@@ -4622,7 +4631,8 @@
     "errors": {
       "generic": "Could not start support mode",
       "targetAdminRequired": "Choose an active admin user from the selected organization",
-      "invalidSession": "Support session is invalid"
+      "invalidSession": "Support session is invalid",
+      "targetUserRequired": "Choose an active user from the selected organization"
     }
   },
   "superAdminTenantsView": {
@@ -4653,7 +4663,8 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Enter as admin"
+        "impersonateAdmin": "Enter as admin",
+        "impersonateUser": "Impersonate user"
       }
     },
     "activityTrend": {
@@ -4664,9 +4675,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "loading": "Loading admin users...",
+      "loading": "Loading users...",
       "empty": "No active admin users found.",
-      "loadMore": "Load more users"
+      "loadMore": "Load more users",
+      "tabs": {
+        "admins": "Admins",
+        "allUsers": "All users"
+      },
+      "emptyAdmins": "No active admin users found.",
+      "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
+      "emptyAllUsers": "No active users found.",
+      "searchAllUsers": "Search all users"
     },
     "status": {
       "active": "Active",
@@ -5145,6 +5164,145 @@
       "uploadFailed": "Image upload failed. Please try again.",
       "tooLarge": "Image is too large. Maximum size is 10 MB.",
       "invalidType": "Invalid image type. Allowed: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "saveChanges": "Save changes",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "learningMode": {
+      "title": "You're taking this course in learning mode",
+      "description": "Your learning progress is being tracked. Completed lessons count toward your personal completion and course statistics.",
+      "enter": "Enter learning mode",
+      "exit": "Exit learning mode"
+    },
+    "overview": {
+      "courseSettings": "Course settings",
+      "manageCategories": "Manage categories",
+      "settingsDescription": "Manage settings for this course.",
+      "titlePlaceholder": "Enter course title...",
+      "editMedia": "Edit media",
+      "continueLearning": "Continue learning",
+      "courseDetails": "Course details",
+      "closeDetails": "Close course details",
+      "aboutCourse": "About this course",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter course description...",
+      "whatYouWillMaster": "What you'll master",
+      "noLearningOutcomes": "No learning outcomes added yet.",
+      "learningOutcomePlaceholder": "Add a learning outcome...",
+      "addLearningOutcome": "Add learning outcome",
+      "removeLearningOutcome": "Remove learning outcome",
+      "closeSettings": "Close course settings",
+      "settingsComingSoon": "Settings coming soon",
+      "settingsIntro": "Here you'll be able to configure:",
+      "settingsStatus": "Course status (Draft/Published)",
+      "settingsPricing": "Pricing & payment options",
+      "settingsAssignments": "Assigned students & groups",
+      "settingsSequential": "Enforce sequential completion",
+      "settingsVisibility": "Course visibility settings",
+      "settingsPermissions": "Access permissions"
+    },
+    "media": {
+      "title": "Edit course media",
+      "currentImage": "Current hero image - adjust position",
+      "previewAlt": "Course hero preview",
+      "previewPosition": "Preview with current position",
+      "verticalPosition": "Vertical position",
+      "uploadImage": "Upload new hero image",
+      "dropImage": "Drop hero image here",
+      "browse": "or click to browse",
+      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageRecommendation": "Recommended: 1920x820 px (21:9)",
+      "trailer": "Course trailer (optional)",
+      "dropVideo": "Drop trailer video here",
+      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoRecommendation": "Recommended: 30-90 seconds",
+      "save": "Upload media"
+    },
+    "stats": {
+      "yourProgress": "Your progress",
+      "remaining": "remaining",
+      "courseFinished": "Course finished",
+      "chapterProgress_one": "{{completed}} / {{total}} chapter",
+      "chapterProgress_other": "{{completed}} / {{total}} chapters",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "to track your progress.",
+      "deadline": "Deadline",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "certificate": "Certificate",
+      "uponCompletion": "Upon completion",
+      "aboutAuthor": "About author"
+    },
+    "certificate": {
+      "close": "Close certificate settings",
+      "title": "Certificate settings",
+      "previewTitle": "Certificate of completion",
+      "certifies": "This certifies that",
+      "completed": "has successfully completed",
+      "signaturePlaceholder": "Signature placeholder",
+      "enable": "Enable certificate",
+      "enableDescription": "Students will receive a certificate upon course completion",
+      "fontColor": "Font color",
+      "uploadSignature": "Upload signature",
+      "uploadSignatureHint": "Click to upload signature image",
+      "signatureLimit": "PNG, JPG up to 2 MB",
+      "save": "Save certificate"
+    },
+    "deadline": {
+      "close": "Close deadline settings",
+      "title": "Deadline settings",
+      "enable": "Enable deadlines",
+      "enableDescription": "Set specific deadlines for different groups",
+      "current": "Current deadline: {{deadline}}"
+    },
+    "author": {
+      "close": "Close author settings",
+      "pictureAlt": "Author picture",
+      "showSection": "Show author section",
+      "showSectionDescription": "Display author information on course page",
+      "otherCourses": "Other courses"
+    },
+    "contents": {
+      "title": "Table of contents",
+      "statistics": "Statistics",
+      "edit": "Edit content",
+      "missingTranslationsTitle": "Missing translations",
+      "missingTranslationsDescription": "Some course content is missing a translation in the selected language.",
+      "completedChapters_one": "{{count}} completed chapter",
+      "completedChapters_other": "{{count}} completed chapters",
+      "lessons_one": "{{count}} lesson",
+      "lessons_other": "{{count}} lessons",
+      "showAllChapters": "Show all chapters ({{count}} more)",
+      "courseStatistics": "Course statistics",
+      "statisticsDescription": "Overview of student progress and engagement",
+      "totalStudents": "Total students",
+      "completionRate": "Completion rate",
+      "averageTime": "Avg. time spent",
+      "averageRating": "Avg. rating",
+      "detailedStatisticsSoon": "Detailed statistics coming soon",
+      "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
+      "status": {
+        "started": "Started",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "lessonTypes": {
+        "content": "Content",
+        "quiz": "Quiz",
+        "aiMentor": "AI Mentor",
+        "lesson": "Lesson"
+      }
     }
   }
 }
