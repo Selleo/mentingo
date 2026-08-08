@@ -23,9 +23,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import type { CourseDueDateReminderRecipient } from "../types/course-due-date-reminder.types";
 
 @EventsHandler(CourseDueDateReminderEmailEvent)
-export class CourseDueDateReminderEmailHandler
-  implements IEventHandler<CourseDueDateReminderEmailEvent>
-{
+export class CourseDueDateReminderEmailHandler implements IEventHandler<CourseDueDateReminderEmailEvent> {
   private readonly logger = new Logger(CourseDueDateReminderEmailHandler.name);
 
   constructor(
@@ -60,13 +58,14 @@ export class CourseDueDateReminderEmailHandler
   private async sendCourseDueDateReminderEmail(recipient: CourseDueDateReminderRecipient) {
     const formattedDueDate = format(new Date(recipient.dueDate), "dd.MM.yyyy");
 
-    const { text, html } = new CourseDueDateReminderEmail({
+    const emailTemplate = new CourseDueDateReminderEmail({
       courseName: recipient.courseName,
       courseLink: `${recipient.tenantHost.replace(/\/$/, "")}/course/${recipient.courseId}`,
       dueDate: formattedDueDate,
       daysBeforeDueDate: recipient.daysBeforeDueDate,
       ...recipient.defaultEmailSettings,
     });
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
     await this.emailService.sendEmailWithLogo(
       {

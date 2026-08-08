@@ -16,7 +16,6 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
-      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending..."
     },
@@ -354,6 +353,7 @@
     "announcements": "Announcements",
     "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
+    "emailTemplates": "Email templates",
     "manage": "Manage",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
@@ -1623,7 +1623,8 @@
         "live_training_end": "End live training sessions.",
         "live_training_statistics": "View live training attendance and statistics.",
         "activity_log_read": "View activity logs.",
-        "course_ai_generation": "Generate course structure and content with AI tools."
+        "course_ai_generation": "Generate course structure and content with AI tools.",
+        "email_template_manage": "Create, edit, and manage email notification templates."
       }
     },
     "dropdown": {
@@ -1924,7 +1925,6 @@
     "deadline": "Deadline",
     "selectDate": "Select date",
     "deadlineRequired": "Deadline is required for mandatory course",
-    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines.",
     "common": {
       "settings": "Settings",
       "curriculum": "Curriculum",
@@ -1992,13 +1992,6 @@
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
       },
-      "forbidden": {
-        "updateCourse": "You do not have permission to update this course."
-      },
-      "media": {
-        "imageUploadFailed": "Failed to upload the course image.",
-        "updateFailed": "Failed to update course media."
-      },
       "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
@@ -2013,6 +2006,13 @@
         "optionInsertFailed": "Failed to add quiz option.",
         "embedCreateFailed": "Failed to create embed lesson.",
         "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
+      },
+      "forbidden": {
+        "updateCourse": "You do not have permission to update this course."
+      },
+      "media": {
+        "imageUploadFailed": "Failed to upload the course image.",
+        "updateFailed": "Failed to update course media."
       }
     },
     "thinking": {
@@ -2938,7 +2938,8 @@
         "invalidSnapshot": "This course could not be prepared for SCORM export.",
         "fallback": "SCORM export failed."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines."
   },
   "registerView": {
     "header": "Sign Up",
@@ -3452,7 +3453,6 @@
   },
   "settings": {
     "title": "Settings",
-    "supportModeNoAvailable": "No settings are available for this user while in support mode.",
     "buttons": {
       "cancel": "Cancel",
       "save": "Save"
@@ -3475,7 +3475,8 @@
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
       "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
       "learningPathsUpdatedSuccessfully": "Development Paths settings updated successfully"
-    }
+    },
+    "supportModeNoAvailable": "No settings are available for this user while in support mode."
   },
   "certificateBackgroundUpload": {
     "title": "Certificate Background Upload",
@@ -4144,7 +4145,9 @@
     "tenants": "Organizations",
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
-    "adminLearningPathEditor": "Development Path Editor"
+    "adminLearningPathEditor": "Development Path Editor",
+    "emailTemplates": "Email templates",
+    "editEmailTemplate": "Edit email template"
   },
   "learningPathsView": {
     "title": "Development Paths",
@@ -4627,8 +4630,9 @@
     },
     "errors": {
       "generic": "Could not start support mode",
-      "targetUserRequired": "Choose an active user from the selected organization",
-      "invalidSession": "Support session is invalid"
+      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "invalidSession": "Support session is invalid",
+      "targetUserRequired": "Choose an active user from the selected organization"
     }
   },
   "superAdminTenantsView": {
@@ -4659,6 +4663,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
+        "impersonateAdmin": "Enter as admin",
         "impersonateUser": "Impersonate user"
       }
     },
@@ -4670,13 +4675,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "tabs": { "admins": "Admins", "allUsers": "All users" },
       "loading": "Loading users...",
+      "empty": "No active admin users found.",
+      "loadMore": "Load more users",
+      "tabs": {
+        "admins": "Admins",
+        "allUsers": "All users"
+      },
       "emptyAdmins": "No active admin users found.",
       "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
       "emptyAllUsers": "No active users found.",
-      "searchAllUsers": "Search all users",
-      "loadMore": "Load more users"
+      "searchAllUsers": "Search all users"
     },
     "status": {
       "active": "Active",
@@ -4960,6 +4969,201 @@
       "liveKitNotConfigured": "LiveKit is not configured.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Email templates",
+      "edit": "Edit"
+    },
+    "list": {
+      "title": "Email templates",
+      "subHeader": "Create and manage reusable notification email templates.",
+      "createButton": "Create new",
+      "deleteSelected": "Delete selected",
+      "searchPlaceholder": "Search by name",
+      "statusFilter": "Status",
+      "empty": "No email templates yet.",
+      "loading": "Loading templates...",
+      "loadFailed": "Could not load email templates.",
+      "status": {
+        "all": "All"
+      },
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "languages": "Languages",
+        "updatedAt": "Updated at",
+        "selectAll": "Select all",
+        "selectRow": "Select row"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Delete email template",
+      "titleMultiple": "Delete email templates",
+      "descriptionSingle": "Are you sure you want to delete this email template? This action cannot be undone.",
+      "descriptionMultiple": "Are you sure you want to delete {{count}} email templates? This action cannot be undone."
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "edit": {
+      "loadFailed": "Could not load this email template."
+    },
+    "form": {
+      "field": {
+        "name": "Name",
+        "subject": "Subject line",
+        "subjectHelp": "Fill in the subject for each language. Variables like {{user.first_name}} can be used.",
+        "subjectPlaceholder": "e.g. Welcome, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Name is required.",
+        "nameTooLong": "Name is too long.",
+        "localesRequired": "Choose at least one language.",
+        "baseLanguageMissing": "Base language must be one of the available languages."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Email template created.",
+      "createFailed": "Failed to create email template.",
+      "updatedSuccessfully": "Email template saved.",
+      "updateFailed": "Failed to save email template.",
+      "publishedSuccessfully": "Email template published.",
+      "publishFailed": "Failed to publish email template.",
+      "publishBlocked": "Cannot publish — see the diagnostics below.",
+      "archivedSuccessfully": "Email template archived.",
+      "archiveFailed": "Failed to archive email template.",
+      "unarchivedSuccessfully": "Email template restored to draft.",
+      "unarchiveFailed": "Failed to unarchive email template.",
+      "previewFailed": "Failed to render preview.",
+      "previewLanguageUnavailable": "This language is not available for this template.",
+      "duplicatedSuccessfully": "Email template duplicated.",
+      "duplicateFailed": "Failed to duplicate email template.",
+      "madeDraftSuccessfully": "Email template reverted to draft.",
+      "makeDraftFailed": "Failed to revert email template to draft.",
+      "deletedSuccessfully": "Email template deleted.",
+      "deleteFailed": "Failed to delete email template.",
+      "nameAlreadyExists": "An email template with this name already exists.",
+      "testEmailSentSuccessfully": "Test email sent.",
+      "testEmailSendFailed": "Failed to send test email."
+    },
+    "actions": {
+      "preview": "Preview",
+      "duplicate": "Duplicate",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "publish": "Publish",
+      "makeDraft": "Make draft",
+      "edit": "Edit",
+      "rename": "Rename",
+      "sendTest": "Send test"
+    },
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Default",
+      "notAddedLanguages": "Languages to add",
+      "setBaseLanguage": "Set as default",
+      "setBaseTitle": "Change default language",
+      "setBaseDescription": "Use {{language}} as the default language for this template?",
+      "createTitle": "Add translation",
+      "createDescription": "Add a translation for this template in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Template name is required",
+        "no_language_versions": "Add at least one language version",
+        "subject_missing": "Subject line is required for the default language",
+        "body_missing": "Email body is empty",
+        "button_label_missing": "Button label is required",
+        "button_url_missing": "Button has no redirect target",
+        "empty_translation": "Translation is empty",
+        "invalid_url_protocol": "URL uses a disallowed protocol",
+        "unchanged_from_base": "Translation is identical to the base language",
+        "footer_missing": "Footer is missing",
+        "logo_branding_missing": "Logo branding is missing"
+      },
+      "blockedToast": {
+        "save": "Cannot save template. See diagnostics",
+        "publish": "Cannot publish template. See diagnostics"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Type / to open the block menu",
+        "heading": "Heading {{level}}",
+        "htmlCode": "HTML code…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Media",
+          "structure": "Structure",
+          "interactive": "Interactive",
+          "footer": "Footer"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Plain text paragraph."
+        },
+        "heading1": {
+          "title": "Heading 1",
+          "description": "Large section heading (H1)."
+        },
+        "heading2": {
+          "title": "Heading 2",
+          "description": "Medium section heading (H2)."
+        },
+        "heading3": {
+          "title": "Heading 3",
+          "description": "Small section heading (H3)."
+        },
+        "image": {
+          "title": "Image",
+          "description": "Full-width image."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Full logo."
+        },
+        "variable": {
+          "title": "Variable",
+          "description": "Inserts a {{variable}} that can be set later to a given value in the automation engine."
+        },
+        "section": {
+          "title": "Section",
+          "description": "Grouped content container."
+        },
+        "columns": {
+          "title": "Columns",
+          "description": "Multi-column layout."
+        },
+        "divider": {
+          "title": "Divider",
+          "description": "Horizontal divider line."
+        },
+        "spacer": {
+          "title": "Spacer",
+          "description": "Vertical spacing between blocks."
+        },
+        "button": {
+          "title": "Button",
+          "description": "Call-to-action button."
+        },
+        "footer": {
+          "title": "Footer",
+          "description": "Footer text block."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Image upload failed. Please try again.",
+      "tooLarge": "Image is too large. Maximum size is 10 MB.",
+      "invalidType": "Invalid image type. Allowed: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   },
   "modernCourseView": {

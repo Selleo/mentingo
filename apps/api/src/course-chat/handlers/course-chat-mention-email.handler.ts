@@ -35,9 +35,7 @@ const CourseChatMentionEmailEvents = [CourseChatUserMentionedEvent] as const;
 
 @Injectable()
 @EventsHandler(...CourseChatMentionEmailEvents)
-export class CourseChatMentionEmailHandler
-  implements IEventHandler<CourseChatMentionEmailEventType>
-{
+export class CourseChatMentionEmailHandler implements IEventHandler<CourseChatMentionEmailEventType> {
   constructor(
     private readonly courseChatRepository: CourseChatRepository,
     private readonly announcementRepository: AnnouncementsRepository,
@@ -108,7 +106,7 @@ export class CourseChatMentionEmailHandler
           if (!courseContext) return;
 
           const authorName = `${message.userFirstName} ${message.userLastName}`;
-          const { text, html } = new BaseEmailTemplate({
+          const emailTemplate = new BaseEmailTemplate({
             heading: getCourseChatMentionEmailHeading(defaultEmailSettings.language),
             paragraphs: getCourseChatMentionEmailParagraphs(defaultEmailSettings.language, {
               recipientName: recipient.firstName,
@@ -120,6 +118,7 @@ export class CourseChatMentionEmailHandler
             buttonLink: `${tenantOrigin}/course/${courseId}?tab=Discussion`,
             ...defaultEmailSettings,
           });
+          const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
           await this.emailService.sendEmailWithLogo(
             {

@@ -147,6 +147,9 @@ export const routeAccessConfig = createRouteConfig({
   "admin/categories/*": {
     allOf: [PERMISSIONS.CATEGORY_MANAGE],
   },
+  "admin/email-templates/*": {
+    allOf: [PERMISSIONS.EMAIL_TEMPLATE_MANAGE],
+  },
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,
   "provider-information": PUBLIC,

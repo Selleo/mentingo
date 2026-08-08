@@ -16,7 +16,6 @@
       "clearAll": "Išvalyti viską",
       "validate": "Patvirtinti",
       "edit": "Redaguoti",
-      "delete": "Ištrinti",
       "uploading": "Įkeliama...",
       "sending": "Siunčiama..."
     },
@@ -354,6 +353,7 @@
     "announcements": "Skelbimai",
     "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
+    "emailTemplates": "El. pašto šablonai",
     "manage": "Tvarkyti",
     "ariaLabels": {
       "goToAvailableCourses": "Eikite į galimus kursus"
@@ -429,7 +429,9 @@
     "loading": "Įvykiai įkeliami",
     "empty": "Nėra įvykių",
     "today": "Šiandien",
-    "legend": { "label": "Šaltiniai" },
+    "legend": {
+      "label": "Šaltiniai"
+    },
     "microsoft": {
       "staleWarning": "Microsoft įvykiai gali būti pasenę. Prijunkite iš naujo arba kartokite paskyros nustatymuose.",
       "horizonNotice": "Microsoft įvykiai importuojami nuo 30 dienų praeityje iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti nepilnas."
@@ -1543,6 +1545,24 @@
         "other": "platformos funkcijas"
       },
       "descriptions": {
+        "course_discussion_read": "Gali peržiūrėti kursų diskusijas.",
+        "course_discussion_message_create": "Gali kurti žinutes kursų diskusijose.",
+        "course_discussion_message_react": "Gali reaguoti į kursų diskusijų žinutes.",
+        "course_discussion_message_delete_own": "Gali trinti savo kursų diskusijų žinutes.",
+        "course_discussion_message_delete": "Gali trinti kursų diskusijų žinutes.",
+        "announcement_delete": "Gali trinti pranešimus.",
+        "calendar_read": "Gali peržiūrėti kalendoriaus įvykius.",
+        "live_training_read": "Gali peržiūrėti gyvus mokymus.",
+        "live_training_create": "Gali kurti gyvus mokymus.",
+        "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
+        "live_training_update_own": "Gali redaguoti gyvus mokymus, kuriuose šis naudotojas priskirtas vedėju.",
+        "live_training_delete": "Gali trinti gyvus mokymus.",
+        "live_training_delete_own": "Gali trinti šio naudotojo sukurtus gyvus mokymus.",
+        "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
+        "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
+        "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
+        "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
         "account_read_self": "Gali peržiūrėti savo paskyros duomenis.",
         "account_update_self": "Gali redaguoti savo paskyros duomenis.",
         "user_read_self": "Gali peržiūrėti savo naudotojo profilį.",
@@ -1603,24 +1623,7 @@
         "integration_api_use": "Gali naudoti integracijos API galinius taškus.",
         "tenant_manage": "Gali valdyti organizacijos konfigūraciją.",
         "course_ai_generation": "Gali generuoti kursų turinį naudodamas AI.",
-        "course_discussion_read": "Gali peržiūrėti kursų diskusijas.",
-        "course_discussion_message_create": "Gali kurti žinutes kursų diskusijose.",
-        "course_discussion_message_react": "Gali reaguoti į kursų diskusijų žinutes.",
-        "course_discussion_message_delete_own": "Gali trinti savo kursų diskusijų žinutes.",
-        "course_discussion_message_delete": "Gali trinti kursų diskusijų žinutes.",
-        "announcement_delete": "Gali trinti pranešimus.",
-        "calendar_read": "Gali peržiūrėti kalendoriaus įvykius.",
-        "live_training_read": "Gali peržiūrėti gyvus mokymus.",
-        "live_training_create": "Gali kurti gyvus mokymus.",
-        "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
-        "live_training_update_own": "Gali redaguoti gyvus mokymus, kuriuose šis naudotojas priskirtas vedėju.",
-        "live_training_delete": "Gali trinti gyvus mokymus.",
-        "live_training_delete_own": "Gali trinti šio naudotojo sukurtus gyvus mokymus.",
-        "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
-        "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
-        "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
-        "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
-        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
+        "email_template_manage": "Kurti, redaguoti ir tvarkyti el. pašto pranešimų šablonus."
       }
     },
     "dropdown": {
@@ -1921,7 +1924,6 @@
     "deadline": "Terminas",
     "selectDate": "Pasirinkite datą",
     "deadlineRequired": "Privalomiesiems kursams reikalingas terminas",
-    "deadlineNoAssignedGroups": "Priskirkite bent vieną grupę, kad galėtumėte nustatyti terminus.",
     "common": {
       "settings": "Nustatymai",
       "curriculum": "Mokymosi programa",
@@ -1989,13 +1991,6 @@
         "chapter": "Skyrius nerastas.",
         "lesson": "Pamoka nerasta."
       },
-      "forbidden": {
-        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
-      },
-      "media": {
-        "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
-        "updateFailed": "Nepavyko atnaujinti kurso medijos."
-      },
       "statisticsAccessForbidden": "Neturite teisės peržiūrėti šio kurso statistikos.",
       "create": {
         "courseFailed": "Nepavyko sukurti kurso.",
@@ -2010,6 +2005,13 @@
         "optionInsertFailed": "Nepavyko pridėti testo parinkties.",
         "embedCreateFailed": "Nepavyko sukurti įdėjimo pamokos.",
         "signedUrlDownloadFailed": "Nepavyko atsisiųsti failo iš pasirašyto URL."
+      },
+      "forbidden": {
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+      },
+      "media": {
+        "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
+        "updateFailed": "Nepavyko atnaujinti kurso medijos."
       }
     },
     "thinking": {
@@ -2937,7 +2939,8 @@
         "invalidSnapshot": "Nepavyko paruošti šio kurso SCORM eksportui.",
         "fallback": "SCORM eksportas nepavyko."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Priskirkite bent vieną grupę, kad galėtumėte nustatyti terminus."
   },
   "registerView": {
     "header": "Registruotis",
@@ -3453,7 +3456,6 @@
   },
   "settings": {
     "title": "Nustatymai",
-    "supportModeNoAvailable": "Šiam naudotojui palaikymo režimu nustatymai nepasiekiami.",
     "buttons": {
       "cancel": "Atšaukti",
       "save": "Išsaugoti"
@@ -3476,7 +3478,8 @@
       "newsSettingUpdatedSuccessfully": "Naujienų nustatymai sėkmingai atnaujinti",
       "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti",
       "learningPathsUpdatedSuccessfully": "Tobulėjimo kelių nustatymai sėkmingai atnaujinti"
-    }
+    },
+    "supportModeNoAvailable": "Šiam naudotojui palaikymo režimu nustatymai nepasiekiami."
   },
   "certificateBackgroundUpload": {
     "title": "Foninis sertifikato įkėlimas",
@@ -4127,7 +4130,9 @@
     "activityLogs": "Veiklos žurnalas",
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
-    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
+    "emailTemplates": "El. pašto šablonai",
+    "editEmailTemplate": "Redaguoti el. pašto šabloną"
   },
   "masterCourse": {
     "error": {
@@ -4750,8 +4755,9 @@
     },
     "errors": {
       "generic": "Nepavyko paleisti palaikymo režimo",
-      "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
-      "invalidSession": "Palaikymo sesija netinkama"
+      "targetAdminRequired": "Pasirinkite aktyvų administratorių iš pasirinktos organizacijos",
+      "invalidSession": "Palaikymo sesija netinkama",
+      "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos"
     }
   },
   "superAdminTenantsView": {
@@ -4782,6 +4788,7 @@
       "actions": {
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
+        "impersonateAdmin": "Įeiti kaip administratorius",
         "impersonateUser": "Apsimesti naudotoju"
       }
     },
@@ -4793,13 +4800,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
-      "tabs": { "admins": "Administratoriai", "allUsers": "Visi naudotojai" },
       "loading": "Įkeliami naudotojai...",
+      "empty": "Aktyvių administratorių nerasta.",
+      "loadMore": "Įkelti daugiau naudotojų",
+      "tabs": {
+        "admins": "Administratoriai",
+        "allUsers": "Visi naudotojai"
+      },
       "emptyAdmins": "Aktyvių administratorių nerasta.",
       "emptyAdminsSearch": "Aktyvių administratorių pagal \"{{search}}\" nerasta.",
       "emptyAllUsers": "Aktyvių naudotojų nerasta.",
-      "searchAllUsers": "Ieškoti tarp visų naudotojų",
-      "loadMore": "Įkelti daugiau naudotojų"
+      "searchAllUsers": "Ieškoti tarp visų naudotojų"
     },
     "status": {
       "active": "Aktyvus",
@@ -4941,6 +4952,201 @@
       "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "El. laiškų šablonai",
+      "edit": "Redaguoti"
+    },
+    "list": {
+      "title": "El. laiškų šablonai",
+      "subHeader": "Kurkite ir tvarkykite daugkartinio naudojimo pranešimų el. laiškų šablonus.",
+      "createButton": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus",
+      "searchPlaceholder": "Ieškoti pagal pavadinimą",
+      "statusFilter": "Būsena",
+      "empty": "Šablonų dar nėra.",
+      "loading": "Kraunami šablonai...",
+      "loadFailed": "Nepavyko įkelti el. laiškų šablonų.",
+      "status": {
+        "all": "Visi"
+      },
+      "columns": {
+        "name": "Pavadinimas",
+        "status": "Būsena",
+        "languages": "Kalbos",
+        "updatedAt": "Atnaujinta",
+        "selectAll": "Pažymėti visus",
+        "selectRow": "Pažymėti eilutę"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Ištrinti el. laiško šabloną",
+      "titleMultiple": "Ištrinti el. laiškų šablonus",
+      "descriptionSingle": "Ar tikrai norite ištrinti šį el. laiško šabloną? Šio veiksmo atšaukti nebus galima.",
+      "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} el. laiškų šablonus? Šio veiksmo atšaukti nebus galima."
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "archived": "Suarchyvuota"
+    },
+    "edit": {
+      "loadFailed": "Nepavyko įkelti šio el. laiško šablono."
+    },
+    "form": {
+      "field": {
+        "name": "Pavadinimas",
+        "subject": "Temos eilutė",
+        "subjectHelp": "Užpildykite temą kiekvienai kalbai. Galite naudoti kintamuosius, pvz., {{user.first_name}}.",
+        "subjectPlaceholder": "pvz., Sveiki, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Pavadinimas privalomas.",
+        "nameTooLong": "Pavadinimas per ilgas.",
+        "localesRequired": "Pasirinkite bent vieną kalbą.",
+        "baseLanguageMissing": "Bazinė kalba turi būti tarp galimų kalbų."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "El. laiško šablonas sukurtas.",
+      "createFailed": "Nepavyko sukurti el. laiško šablono.",
+      "updatedSuccessfully": "El. laiško šablonas išsaugotas.",
+      "updateFailed": "Nepavyko išsaugoti el. laiško šablono.",
+      "publishedSuccessfully": "El. laiško šablonas paskelbtas.",
+      "publishFailed": "Nepavyko paskelbti el. laiško šablono.",
+      "publishBlocked": "Skelbti negalima — žr. diagnostiką žemiau.",
+      "archivedSuccessfully": "El. laiško šablonas suarchyvuotas.",
+      "archiveFailed": "Nepavyko suarchyvuoti el. laiško šablono.",
+      "unarchivedSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "unarchiveFailed": "Nepavyko atkurti šablono iš archyvo.",
+      "previewFailed": "Nepavyko sugeneruoti peržiūros.",
+      "previewLanguageUnavailable": "Ši kalba šiam šablonui nepasiekiama.",
+      "duplicatedSuccessfully": "El. laiško šablonas nukopijuotas.",
+      "duplicateFailed": "Nepavyko nukopijuoti el. laiško šablono.",
+      "madeDraftSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "makeDraftFailed": "Nepavyko grąžinti el. laiško šablono į juodraštį.",
+      "deletedSuccessfully": "El. laiško šablonas ištrintas.",
+      "deleteFailed": "Nepavyko ištrinti el. laiško šablono.",
+      "nameAlreadyExists": "El. laiško šablonas tokiu pavadinimu jau egzistuoja.",
+      "testEmailSentSuccessfully": "Bandomasis el. laiškas išsiųstas.",
+      "testEmailSendFailed": "Nepavyko išsiųsti bandomojo el. laiško."
+    },
+    "actions": {
+      "preview": "Peržiūra",
+      "duplicate": "Kopijuoti",
+      "archive": "Archyvuoti",
+      "unarchive": "Išarchyvuoti",
+      "publish": "Skelbti",
+      "makeDraft": "Pažymėti kaip juodraštį",
+      "edit": "Redaguoti",
+      "rename": "Pervadinti",
+      "sendTest": "Siųsti testą"
+    },
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Kalbos, kurias galima pridėti",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Pakeisti numatytąją kalbą",
+      "setBaseDescription": "Naudoti {{language}} kaip numatytąją šio šablono kalbą?",
+      "createTitle": "Pridėti vertimą",
+      "createDescription": "Pridėti šio šablono vertimą į {{language}}?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti vertimą {{language}}? Jo turinys bus pašalintas."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Šablono pavadinimas privalomas",
+        "no_language_versions": "Pridėkite bent vieną kalbos versiją",
+        "subject_missing": "Numatytosios kalbos temai reikia turinio",
+        "body_missing": "El. laiško turinys tuščias",
+        "button_label_missing": "Mygtuko etiketė privaloma",
+        "button_url_missing": "Mygtukas neturi paskirties adreso",
+        "empty_translation": "Vertimas tuščias",
+        "invalid_url_protocol": "URL naudoja neleistiną protokolą",
+        "unchanged_from_base": "Vertimas identiškas bazinei kalbai",
+        "footer_missing": "Trūksta poraštės",
+        "logo_branding_missing": "Trūksta logotipo prekės ženklo"
+      },
+      "blockedToast": {
+        "save": "Šablono išsaugoti nepavyko. Žiūrėkite diagnostiką",
+        "publish": "Šablono paskelbti nepavyko. Žiūrėkite diagnostiką"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Įveskite /, kad atidarytumėte blokų meniu",
+        "heading": "Antraštė {{level}}",
+        "htmlCode": "HTML kodas…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Tekstas",
+          "media": "Medija",
+          "structure": "Struktūra",
+          "interactive": "Interaktyvūs",
+          "footer": "Poraštė"
+        },
+        "text": {
+          "title": "Tekstas",
+          "description": "Paprastojo teksto pastraipa."
+        },
+        "heading1": {
+          "title": "Antraštė 1",
+          "description": "Didelė sekcijos antraštė (H1)."
+        },
+        "heading2": {
+          "title": "Antraštė 2",
+          "description": "Vidutinė sekcijos antraštė (H2)."
+        },
+        "heading3": {
+          "title": "Antraštė 3",
+          "description": "Maža sekcijos antraštė (H3)."
+        },
+        "image": {
+          "title": "Vaizdas",
+          "description": "Viso pločio vaizdas."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Visas logotipas."
+        },
+        "variable": {
+          "title": "Kintamasis",
+          "description": "Įterpia {{kintamąjį}}, kuriam vėliau galima priskirti reikšmę automatizavimo variklyje."
+        },
+        "section": {
+          "title": "Sekcija",
+          "description": "Turinio grupavimo konteineris."
+        },
+        "columns": {
+          "title": "Stulpeliai",
+          "description": "Kelių stulpelių išdėstymas."
+        },
+        "divider": {
+          "title": "Skirtukas",
+          "description": "Horizontali skiriamoji linija."
+        },
+        "spacer": {
+          "title": "Tarpas",
+          "description": "Vertikalus tarpas tarp blokų."
+        },
+        "button": {
+          "title": "Mygtukas",
+          "description": "Raginimo veikti mygtukas."
+        },
+        "footer": {
+          "title": "Poraštė",
+          "description": "Poraštės teksto blokas."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Paveikslo įkėlimas nepavyko. Bandykite dar kartą.",
+      "tooLarge": "Paveikslas per didelis. Maksimalus dydis yra 10 MB.",
+      "invalidType": "Netinkamas paveikslo tipas. Leidžiami: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   },
   "modernCourseView": {

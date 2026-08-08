@@ -32,3 +32,6 @@ allowedPackages:
   - caniuse-lite@1.0.30001684 # CC-BY-4.0
   - "@promptbook/utils@0.69.5" # CC-BY-4.0
   - spdx-exceptions@2.5.0 # CC-BY-3.0
+  - "@maily-to/core@0.3.7" # MIT
+  - "@maily-to/render@0.2.3" # MIT
+  - slick@1.12.2 # MIT

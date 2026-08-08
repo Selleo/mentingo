@@ -225,11 +225,12 @@ export class NotifyUsersHandler implements IEventHandler {
       const invitingUsername =
         invitedByUserName || `${invitingUser?.firstName} ${invitingUser?.lastName}` || "Admin";
 
-      const { text, html } = new UserInviteEmail({
+      const emailTemplate = new UserInviteEmail({
         invitedByUserName: invitingUsername,
         createPasswordLink: url,
         ...defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -279,11 +280,12 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFirstLoginEmail({
+    const emailTemplate = new UserFirstLoginEmail({
       name: user.firstName,
       coursesUrl: `${baseOrigin}/courses`,
       ...defaultEmailSettings,
     });
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
     await this.emailService.sendEmailWithLogo(
       {
@@ -313,10 +315,11 @@ export class NotifyUsersHandler implements IEventHandler {
         createToken: token,
       });
 
-      const { text, html } = new CreatePasswordReminderEmail({
+      const emailTemplate = new CreatePasswordReminderEmail({
         createPasswordLink,
         ...defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -361,10 +364,11 @@ export class NotifyUsersHandler implements IEventHandler {
         userId,
       );
 
-      const { text, html } = new WelcomeEmail({
+      const emailTemplate = new WelcomeEmail({
         coursesLink: `${baseOrigin}/courses`,
         ...defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -402,12 +406,13 @@ export class NotifyUsersHandler implements IEventHandler {
           studentId,
         );
 
-        const { text, html } = new UserAssignedToCourseEmail({
+        const emailTemplate = new UserAssignedToCourseEmail({
           courseName,
           courseLink: `${baseOrigin}/course/${courseId}`,
           formatedCourseDueDate: dueDatesByStudent[studentId] ?? null,
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return await this.emailService.sendEmailWithLogo(
           {
@@ -448,11 +453,12 @@ export class NotifyUsersHandler implements IEventHandler {
           user.userId,
         );
 
-        const { text, html } = new UserShortInactivityEmail({
+        const emailTemplate = new UserShortInactivityEmail({
           courseName,
           courseLink,
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -493,11 +499,12 @@ export class NotifyUsersHandler implements IEventHandler {
           user.userId,
         );
 
-        const { text, html } = new UserLongInactivityEmail({
+        const emailTemplate = new UserLongInactivityEmail({
           courseName: course?.courseName,
           courseLink,
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -529,12 +536,13 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFinishedChapterEmail({
+    const emailTemplate = new UserFinishedChapterEmail({
       courseName,
       courseLink,
       chapterName,
       ...defaultEmailSettings,
     });
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
     const subject = getEmailSubject("userChapterFinishedEmail", defaultEmailSettings.language, {
       chapterName,
@@ -569,12 +577,13 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFinishedCourseEmail({
+    const emailTemplate = new UserFinishedCourseEmail({
       buttonLink,
       courseName,
       ...defaultEmailSettings,
       hasCertificate,
     });
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
     await this.emailService.sendEmailWithLogo(
       {

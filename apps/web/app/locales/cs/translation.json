@@ -3,7 +3,7 @@
     "button": {
       "save": "Uložit",
       "saving": "Ukládání...",
-      "delete": "Vymazat",
+      "delete": "Smazat",
       "create": "Vytvořit",
       "cancel": "Zrušit",
       "back": "Zadní",
@@ -16,7 +16,6 @@
       "clearAll": "Vymazat vše",
       "validate": "Ověřit",
       "edit": "Upravit",
-      "delete": "Smazat",
       "uploading": "Nahrávání...",
       "sending": "Odesílání..."
     },
@@ -354,6 +353,7 @@
     "announcements": "Oznámení",
     "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
+    "emailTemplates": "E-mailové šablony",
     "manage": "Spravovat",
     "ariaLabels": {
       "goToAvailableCourses": "Přejděte na dostupné kurzy"
@@ -429,7 +429,9 @@
     "loading": "Načítání událostí",
     "empty": "Žádné události k zobrazení",
     "today": "Dnes",
-    "legend": { "label": "Zdroje" },
+    "legend": {
+      "label": "Zdroje"
+    },
     "microsoft": {
       "staleWarning": "Události Microsoft mohou být zastaralé. Připojte účet znovu nebo opakujte akci v nastavení účtu.",
       "horizonNotice": "Události Microsoft se importují od 30 dnů zpětně do 6 měsíců dopředu, takže tento rozsah může být neúplný."
@@ -1543,6 +1545,24 @@
         "other": "funkce platformy"
       },
       "descriptions": {
+        "course_discussion_read": "Může zobrazit diskuse ke kurzům.",
+        "course_discussion_message_create": "Může vytvářet zprávy v diskusích ke kurzům.",
+        "course_discussion_message_react": "Může reagovat na zprávy v diskusích ke kurzům.",
+        "course_discussion_message_delete_own": "Může mazat vlastní zprávy v diskusích ke kurzům.",
+        "course_discussion_message_delete": "Může mazat zprávy v diskusích ke kurzům.",
+        "announcement_delete": "Může mazat oznámení.",
+        "calendar_read": "Může zobrazit události v kalendáři.",
+        "live_training_read": "Může zobrazit živá školení.",
+        "live_training_create": "Může vytvářet živá školení.",
+        "live_training_update": "Může upravovat libovolné živé školení.",
+        "live_training_update_own": "Může upravovat živá školení, u kterých je tento uživatel přiřazen jako hostitel.",
+        "live_training_delete": "Může mazat živá školení.",
+        "live_training_delete_own": "Může mazat živá školení vytvořená tímto uživatelem.",
+        "live_training_join": "Může se připojit k relacím živého školení.",
+        "live_training_start": "Může spouštět relace živého školení.",
+        "live_training_end": "Může ukončovat relace živého školení.",
+        "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
+        "activity_log_read": "Může zobrazit protokoly aktivit.",
         "account_read_self": "Může zobrazit údaje vlastního účtu.",
         "account_update_self": "Může upravit údaje vlastního účtu.",
         "user_read_self": "Může zobrazit vlastní uživatelský profil.",
@@ -1603,24 +1623,7 @@
         "integration_api_use": "Může používat koncové body integračního API.",
         "tenant_manage": "Může spravovat konfiguraci organizace.",
         "course_ai_generation": "Může generovat obsah kurzů pomocí AI.",
-        "course_discussion_read": "Může zobrazit diskuse ke kurzům.",
-        "course_discussion_message_create": "Může vytvářet zprávy v diskusích ke kurzům.",
-        "course_discussion_message_react": "Může reagovat na zprávy v diskusích ke kurzům.",
-        "course_discussion_message_delete_own": "Může mazat vlastní zprávy v diskusích ke kurzům.",
-        "course_discussion_message_delete": "Může mazat zprávy v diskusích ke kurzům.",
-        "announcement_delete": "Může mazat oznámení.",
-        "calendar_read": "Může zobrazit události v kalendáři.",
-        "live_training_read": "Může zobrazit živá školení.",
-        "live_training_create": "Může vytvářet živá školení.",
-        "live_training_update": "Může upravovat libovolné živé školení.",
-        "live_training_update_own": "Může upravovat živá školení, u kterých je tento uživatel přiřazen jako hostitel.",
-        "live_training_delete": "Může mazat živá školení.",
-        "live_training_delete_own": "Může mazat živá školení vytvořená tímto uživatelem.",
-        "live_training_join": "Může se připojit k relacím živého školení.",
-        "live_training_start": "Může spouštět relace živého školení.",
-        "live_training_end": "Může ukončovat relace živého školení.",
-        "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
-        "activity_log_read": "Může zobrazit protokoly aktivit."
+        "email_template_manage": "Vytvářet, upravovat a spravovat šablony e-mailových oznámení."
       }
     },
     "dropdown": {
@@ -1921,7 +1924,6 @@
     "deadline": "Lhůta",
     "selectDate": "Vyberte datum",
     "deadlineRequired": "U povinného kurzu je nutný termín",
-    "deadlineNoAssignedGroups": "Přiřaďte alespoň jednu skupinu, abyste mohli nastavit termíny.",
     "common": {
       "settings": "Nastavení",
       "curriculum": "Osnovy",
@@ -1989,13 +1991,6 @@
         "chapter": "Kapitola nenalezena.",
         "lesson": "Lekce nenalezena."
       },
-      "forbidden": {
-        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
-      },
-      "media": {
-        "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
-        "updateFailed": "Nepodařilo se aktualizovat média kurzu."
-      },
       "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
@@ -2010,6 +2005,13 @@
         "optionInsertFailed": "Možnost kvízu se nepodařilo přidat.",
         "embedCreateFailed": "Vloženou lekci se nepodařilo vytvořit.",
         "signedUrlDownloadFailed": "Soubor se nepodařilo stáhnout z podepsané adresy URL."
+      },
+      "forbidden": {
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+      },
+      "media": {
+        "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
+        "updateFailed": "Nepodařilo se aktualizovat média kurzu."
       }
     },
     "thinking": {
@@ -2936,7 +2938,8 @@
         "invalidSnapshot": "Tento kurz se nepodařilo připravit pro export SCORM.",
         "fallback": "Export SCORM se nezdařil."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Přiřaďte alespoň jednu skupinu, abyste mohli nastavit termíny."
   },
   "registerView": {
     "header": "Zaregistrujte se",
@@ -3452,7 +3455,6 @@
   },
   "settings": {
     "title": "Nastavení",
-    "supportModeNoAvailable": "V režimu podpory nejsou pro tohoto uživatele dostupná žádná nastavení.",
     "buttons": {
       "cancel": "Zrušit",
       "save": "Uložit"
@@ -3475,7 +3477,8 @@
       "newsSettingUpdatedSuccessfully": "Nastavení zpráv byla úspěšně aktualizována",
       "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována",
       "learningPathsUpdatedSuccessfully": "Nastavení rozvojových cest byla úspěšně aktualizována"
-    }
+    },
+    "supportModeNoAvailable": "V režimu podpory nejsou pro tohoto uživatele dostupná žádná nastavení."
   },
   "certificateBackgroundUpload": {
     "title": "Nahrání certifikátu na pozadí",
@@ -4125,7 +4128,9 @@
     "activityLogs": "Log aktivit",
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
-    "adminLearningPathEditor": "Editor rozvojové cesty"
+    "adminLearningPathEditor": "Editor rozvojové cesty",
+    "emailTemplates": "E-mailové šablony",
+    "editEmailTemplate": "Upravit e-mailovou šablonu"
   },
   "masterCourse": {
     "error": {
@@ -4748,8 +4753,9 @@
     },
     "errors": {
       "generic": "Režim podpory se nepodařilo spustit",
-      "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace",
-      "invalidSession": "Relace podpory je neplatná"
+      "targetAdminRequired": "Vyberte aktivního administrátora z vybrané organizace",
+      "invalidSession": "Relace podpory je neplatná",
+      "targetUserRequired": "Vyberte aktivního uživatele z vybrané organizace"
     }
   },
   "superAdminTenantsView": {
@@ -4780,6 +4786,7 @@
       "actions": {
         "title": "Akce",
         "enterSupportMode": "Vstupte do režimu podpory",
+        "impersonateAdmin": "Vstoupit jako administrátor",
         "impersonateUser": "Jednat jako uživatel"
       }
     },
@@ -4791,13 +4798,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
-      "tabs": { "admins": "Administrátoři", "allUsers": "Všichni uživatelé" },
       "loading": "Načítání uživatelů...",
+      "empty": "Nebyli nalezeni žádní aktivní administrátoři.",
+      "loadMore": "Načíst další uživatele",
+      "tabs": {
+        "admins": "Administrátoři",
+        "allUsers": "Všichni uživatelé"
+      },
       "emptyAdmins": "Nebyli nalezeni žádní aktivní administrátoři.",
       "emptyAdminsSearch": "Pro \"{{search}}\" nebyli nalezeni žádní aktivní administrátoři.",
       "emptyAllUsers": "Nebyli nalezeni žádní aktivní uživatelé.",
-      "searchAllUsers": "Hledat mezi všemi uživateli",
-      "loadMore": "Načíst další uživatele"
+      "searchAllUsers": "Hledat mezi všemi uživateli"
     },
     "status": {
       "active": "Aktivní",
@@ -4939,6 +4950,201 @@
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "E‑mailové šablony",
+      "edit": "Upravit"
+    },
+    "list": {
+      "title": "E‑mailové šablony",
+      "subHeader": "Vytvářejte a spravujte opakovaně použitelné šablony e-mailových oznámení.",
+      "createButton": "Vytvořit novou",
+      "deleteSelected": "Smazat vybrané",
+      "searchPlaceholder": "Hledat podle názvu",
+      "statusFilter": "Stav",
+      "empty": "Zatím zde nejsou žádné šablony.",
+      "loading": "Načítání šablon...",
+      "loadFailed": "E‑mailové šablony se nepodařilo načíst.",
+      "status": {
+        "all": "Vše"
+      },
+      "columns": {
+        "name": "Název",
+        "status": "Stav",
+        "languages": "Jazyky",
+        "updatedAt": "Aktualizováno",
+        "selectAll": "Vybrat vše",
+        "selectRow": "Vybrat řádek"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Smazat e‑mailovou šablonu",
+      "titleMultiple": "Smazat e‑mailové šablony",
+      "descriptionSingle": "Opravdu chcete smazat tuto e‑mailovou šablonu? Tuto akci nelze vrátit zpět.",
+      "descriptionMultiple": "Opravdu chcete smazat {{count}} e‑mailových šablon? Tuto akci nelze vrátit zpět."
+    },
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "archived": "Archivováno"
+    },
+    "edit": {
+      "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst."
+    },
+    "form": {
+      "field": {
+        "name": "Název",
+        "subject": "Předmět",
+        "subjectHelp": "Doplňte předmět pro každý jazyk. Můžete použít proměnné jako {{user.first_name}}.",
+        "subjectPlaceholder": "např. Vítejte, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Název je povinný.",
+        "nameTooLong": "Název je příliš dlouhý.",
+        "localesRequired": "Vyberte alespoň jeden jazyk.",
+        "baseLanguageMissing": "Základní jazyk musí patřit mezi dostupné jazyky."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "E‑mailová šablona byla vytvořena.",
+      "createFailed": "E‑mailovou šablonu se nepodařilo vytvořit.",
+      "updatedSuccessfully": "E‑mailová šablona byla uložena.",
+      "updateFailed": "E‑mailovou šablonu se nepodařilo uložit.",
+      "publishedSuccessfully": "E‑mailová šablona byla publikována.",
+      "publishFailed": "E‑mailovou šablonu se nepodařilo publikovat.",
+      "publishBlocked": "Publikaci nelze provést — viz diagnostika níže.",
+      "archivedSuccessfully": "E‑mailová šablona byla archivována.",
+      "archiveFailed": "E‑mailovou šablonu se nepodařilo archivovat.",
+      "unarchivedSuccessfully": "E‑mailová šablona byla obnovena do stavu koncept.",
+      "unarchiveFailed": "E‑mailovou šablonu se nepodařilo obnovit z archivu.",
+      "previewFailed": "Náhled se nepodařilo vykreslit.",
+      "previewLanguageUnavailable": "Tento jazyk není pro tuto šablonu dostupný.",
+      "duplicatedSuccessfully": "E‑mailová šablona byla duplikována.",
+      "duplicateFailed": "E‑mailovou šablonu se nepodařilo duplikovat.",
+      "madeDraftSuccessfully": "E‑mailová šablona byla vrácena do konceptu.",
+      "makeDraftFailed": "E‑mailovou šablonu se nepodařilo vrátit do konceptu.",
+      "deletedSuccessfully": "E‑mailová šablona byla smazána.",
+      "deleteFailed": "E‑mailovou šablonu se nepodařilo smazat.",
+      "nameAlreadyExists": "E‑mailová šablona s tímto názvem již existuje.",
+      "testEmailSentSuccessfully": "Testovací e-mail odeslán.",
+      "testEmailSendFailed": "Nepodařilo se odeslat testovací e-mail."
+    },
+    "actions": {
+      "preview": "Náhled",
+      "duplicate": "Duplikovat",
+      "archive": "Archivovat",
+      "unarchive": "Odarchivovat",
+      "publish": "Publikovat",
+      "makeDraft": "Označit jako koncept",
+      "edit": "Upravit",
+      "rename": "Přejmenovat",
+      "sendTest": "Odeslat test"
+    },
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Změnit výchozí jazyk",
+      "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto šablonu?",
+      "createTitle": "Přidat překlad",
+      "createDescription": "Přidat překlad této šablony v jazyce {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Název šablony je povinný",
+        "no_language_versions": "Přidejte alespoň jednu jazykovou verzi",
+        "subject_missing": "Předmět je pro výchozí jazyk povinný",
+        "body_missing": "Tělo e-mailu je prázdné",
+        "button_label_missing": "Popisek tlačítka je povinný",
+        "button_url_missing": "Tlačítko nemá cíl",
+        "empty_translation": "Překlad je prázdný",
+        "invalid_url_protocol": "URL používá nepovolený protokol",
+        "unchanged_from_base": "Překlad je totožný se základním jazykem",
+        "footer_missing": "Chybí zápatí",
+        "logo_branding_missing": "Chybí logo značky"
+      },
+      "blockedToast": {
+        "save": "Šablonu nelze uložit. Podívejte se do diagnostiky",
+        "publish": "Šablonu nelze publikovat. Podívejte se do diagnostiky"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Napište / pro otevření nabídky bloků",
+        "heading": "Nadpis {{level}}",
+        "htmlCode": "Kód HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Média",
+          "structure": "Struktura",
+          "interactive": "Interaktivní",
+          "footer": "Zápatí"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Odstavec prostého textu."
+        },
+        "heading1": {
+          "title": "Nadpis 1",
+          "description": "Velký nadpis sekce (H1)."
+        },
+        "heading2": {
+          "title": "Nadpis 2",
+          "description": "Střední nadpis sekce (H2)."
+        },
+        "heading3": {
+          "title": "Nadpis 3",
+          "description": "Malý nadpis sekce (H3)."
+        },
+        "image": {
+          "title": "Obrázek",
+          "description": "Obrázek na celou šířku."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Celé logo."
+        },
+        "variable": {
+          "title": "Proměnná",
+          "description": "Vloží {{proměnnou}}, které lze později v automatizačním enginu přiřadit hodnotu."
+        },
+        "section": {
+          "title": "Sekce",
+          "description": "Kontejner pro seskupení obsahu."
+        },
+        "columns": {
+          "title": "Sloupce",
+          "description": "Vícesloupcové rozvržení."
+        },
+        "divider": {
+          "title": "Oddělovač",
+          "description": "Vodorovná dělicí čára."
+        },
+        "spacer": {
+          "title": "Mezera",
+          "description": "Svislý odstup mezi bloky."
+        },
+        "button": {
+          "title": "Tlačítko",
+          "description": "Tlačítko výzvy k akci."
+        },
+        "footer": {
+          "title": "Zápatí",
+          "description": "Textový blok zápatí."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Nahrávání obrázku se nezdařilo. Zkuste to znovu.",
+      "tooLarge": "Obrázek je příliš velký. Maximální velikost je 10 MB.",
+      "invalidType": "Neplatný typ obrázku. Povoleno: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   },
   "modernCourseView": {

@@ -6,7 +6,7 @@ const generateCentralBarrel = () => {
   const srcDir = path.resolve(process.cwd(), "src");
   const files = globSync("**/*.{ts,tsx}", {
     cwd: srcDir,
-    ignore: ["**/index.ts", "**/*.d.ts"],
+    ignore: ["**/index.ts", "**/*.d.ts", "**/__tests__/**", "**/*.spec.ts", "**/*.test.ts"],
   });
 
   files.sort();

@@ -16,7 +16,6 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
-      "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
       "sending": "Wysyłanie..."
@@ -353,6 +352,7 @@
     "announcements": "Ogłoszenia",
     "notifications": "Powiadomienia",
     "promotionCodes": "Kody promocyjne",
+    "emailTemplates": "Szablony e-mail",
     "manage": "Zarządzaj",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
@@ -363,7 +363,8 @@
     "activityLogs": "Dziennik zdarzeń",
     "learningPaths": "Ścieżki Rozwoju",
     "adminLearningPaths": "Ścieżki Rozwoju",
-    "adminLearningPathEditor": "Edytor ścieżki rozwoju"
+    "adminLearningPathEditor": "Edytor ścieżki rozwoju",
+    "editEmailTemplate": "Edytuj szablon e-mail"
   },
   "microsoftCalendar": {
     "title": "Kalendarz Microsoft",
@@ -433,7 +434,9 @@
     "loading": "Ładowanie wydarzeń",
     "empty": "Brak wydarzeń do wyświetlenia",
     "today": "Dzisiaj",
-    "legend": { "label": "Źródła" },
+    "legend": {
+      "label": "Źródła"
+    },
     "microsoft": {
       "staleWarning": "Wydarzenia Microsoft mogą być nieaktualne. Połącz konto ponownie lub ponów próbę w ustawieniach konta.",
       "horizonNotice": "Wydarzenia Microsoft są importowane od 30 dni wstecz do 6 miesięcy naprzód, więc ten zakres może być niepełny."
@@ -1840,7 +1843,8 @@
         "live_training_end": "Może kończyć sesje szkolenia live.",
         "live_training_statistics": "Może przeglądać obecność i statystyki szkoleń live.",
         "activity_log_read": "Może przeglądać dziennik aktywności.",
-        "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI."
+        "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI.",
+        "email_template_manage": "Tworzenie, edytowanie i zarządzanie szablonami powiadomień e-mail."
       }
     },
     "dropdown": {
@@ -2142,7 +2146,6 @@
     "deadline": "Termin wykonania",
     "selectDate": "Wybierz datę",
     "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
-    "deadlineNoAssignedGroups": "Przypisz co najmniej jedną grupę, aby skonfigurować terminy.",
     "common": {
       "settings": "Ustawienia",
       "curriculum": "Program nauczania",
@@ -2212,13 +2215,6 @@
         "chapter": "Nie znaleziono rozdziału.",
         "lesson": "Nie znaleziono lekcji."
       },
-      "forbidden": {
-        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
-      },
-      "media": {
-        "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
-        "updateFailed": "Nie udało się zaktualizować multimediów kursu."
-      },
       "statisticsAccessForbidden": "Nie masz uprawnień do wyświetlania statystyk tego kursu.",
       "create": {
         "courseFailed": "Nie udało się utworzyć kursu.",
@@ -2233,6 +2229,13 @@
         "optionInsertFailed": "Nie udało się dodać odpowiedzi quizu.",
         "embedCreateFailed": "Nie udało się utworzyć lekcji z osadzeniem.",
         "signedUrlDownloadFailed": "Nie udało się pobrać pliku z podpisanego adresu URL."
+      },
+      "forbidden": {
+        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
+      },
+      "media": {
+        "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
+        "updateFailed": "Nie udało się zaktualizować multimediów kursu."
       }
     },
     "thinking": {
@@ -3173,7 +3176,8 @@
         "invalidSnapshot": "Nie udało się przygotować tego kursu do eksportu SCORM.",
         "fallback": "Eksport SCORM nie powiódł się."
       }
-    }
+    },
+    "deadlineNoAssignedGroups": "Przypisz co najmniej jedną grupę, aby skonfigurować terminy."
   },
   "registerView": {
     "header": "Rejestracja",
@@ -3692,7 +3696,6 @@
   },
   "settings": {
     "title": "Ustawienia",
-    "supportModeNoAvailable": "W trybie wsparcia dla tego użytkownika nie są dostępne żadne ustawienia.",
     "buttons": {
       "cancel": "Odrzuć",
       "save": "Zapisz"
@@ -3712,7 +3715,8 @@
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
       "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane",
       "learningPathsUpdatedSuccessfully": "Ustawienia ścieżek rozwoju zostały pomyślnie zaktualizowane"
-    }
+    },
+    "supportModeNoAvailable": "W trybie wsparcia dla tego użytkownika nie są dostępne żadne ustawienia."
   },
   "platformSimpleLogo": {
     "header": "Proste logo platformy (ikona)",
@@ -4666,8 +4670,9 @@
     },
     "errors": {
       "generic": "Nie można uruchomić trybu wsparcia",
-      "targetUserRequired": "Wybierz aktywnego użytkownika z wybranej organizacji",
-      "invalidSession": "Sesja wsparcia jest nieprawidłowa"
+      "targetAdminRequired": "Wybierz aktywnego administratora z wybranej organizacji",
+      "invalidSession": "Sesja wsparcia jest nieprawidłowa",
+      "targetUserRequired": "Wybierz aktywnego użytkownika z wybranej organizacji"
     }
   },
   "superAdminTenantsView": {
@@ -4698,6 +4703,7 @@
       "actions": {
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
+        "impersonateAdmin": "Wejdź jako admin",
         "impersonateUser": "Wejdź jako użytkownik"
       }
     },
@@ -4709,13 +4715,17 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
-      "tabs": { "admins": "Administratorzy", "allUsers": "Wszyscy użytkownicy" },
       "loading": "Ładowanie użytkowników...",
+      "empty": "Nie znaleziono aktywnych administratorów.",
+      "loadMore": "Załaduj więcej użytkowników",
+      "tabs": {
+        "admins": "Administratorzy",
+        "allUsers": "Wszyscy użytkownicy"
+      },
       "emptyAdmins": "Nie znaleziono aktywnych administratorów.",
       "emptyAdminsSearch": "Nie znaleziono aktywnych administratorów dla \"{{search}}\".",
       "emptyAllUsers": "Nie znaleziono aktywnych użytkowników.",
-      "searchAllUsers": "Szukaj wśród wszystkich użytkowników",
-      "loadMore": "Załaduj więcej użytkowników"
+      "searchAllUsers": "Szukaj wśród wszystkich użytkowników"
     },
     "status": {
       "active": "Aktywny",
@@ -4999,6 +5009,201 @@
       "liveKitNotConfigured": "LiveKit nie jest skonfigurowany.",
       "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
       "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Szablony e‑maili",
+      "edit": "Edytuj"
+    },
+    "list": {
+      "title": "Szablony e‑maili",
+      "subHeader": "Twórz i zarządzaj szablonami e-maili z powiadomieniami.",
+      "createButton": "Utwórz nowy",
+      "deleteSelected": "Usuń zaznaczone",
+      "searchPlaceholder": "Szukaj po nazwie",
+      "statusFilter": "Status",
+      "empty": "Nie ma jeszcze żadnych szablonów e‑maili.",
+      "loading": "Ładowanie szablonów...",
+      "loadFailed": "Nie udało się załadować szablonów e‑maili.",
+      "status": {
+        "all": "Wszystkie"
+      },
+      "columns": {
+        "name": "Nazwa",
+        "status": "Status",
+        "languages": "Języki",
+        "updatedAt": "Zaktualizowano",
+        "selectAll": "Zaznacz wszystkie",
+        "selectRow": "Zaznacz wiersz"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Usuń szablon e‑maila",
+      "titleMultiple": "Usuń szablony e‑maili",
+      "descriptionSingle": "Czy na pewno chcesz usunąć ten szablon e‑maila? Tej operacji nie można cofnąć.",
+      "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} szablonów e‑maili? Tej operacji nie można cofnąć."
+    },
+    "status": {
+      "draft": "Wersja robocza",
+      "published": "Opublikowany",
+      "archived": "Zarchiwizowany"
+    },
+    "edit": {
+      "loadFailed": "Nie udało się załadować tego szablonu e‑maila."
+    },
+    "form": {
+      "field": {
+        "name": "Nazwa",
+        "subject": "Temat",
+        "subjectHelp": "Uzupełnij temat dla każdego języka. Możesz używać zmiennych, np. {{user.first_name}}.",
+        "subjectPlaceholder": "np. Witaj, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Nazwa jest wymagana.",
+        "nameTooLong": "Nazwa jest zbyt długa.",
+        "localesRequired": "Wybierz co najmniej jeden język.",
+        "baseLanguageMissing": "Język bazowy musi znajdować się wśród dostępnych języków."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Szablon e‑maila utworzony.",
+      "createFailed": "Nie udało się utworzyć szablonu e‑maila.",
+      "updatedSuccessfully": "Szablon e‑maila zapisany.",
+      "updateFailed": "Nie udało się zapisać szablonu e‑maila.",
+      "publishedSuccessfully": "Szablon e‑maila opublikowany.",
+      "publishFailed": "Nie udało się opublikować szablonu e‑maila.",
+      "publishBlocked": "Nie można opublikować — sprawdź diagnostykę poniżej.",
+      "archivedSuccessfully": "Szablon e‑maila zarchiwizowany.",
+      "archiveFailed": "Nie udało się zarchiwizować szablonu e‑maila.",
+      "unarchivedSuccessfully": "Szablon e‑maila przywrócony do wersji roboczej.",
+      "unarchiveFailed": "Nie udało się przywrócić szablonu z archiwum.",
+      "previewFailed": "Nie udało się wygenerować podglądu.",
+      "previewLanguageUnavailable": "Ten język nie jest dostępny dla tego szablonu.",
+      "duplicatedSuccessfully": "Szablon e‑maila zduplikowany.",
+      "duplicateFailed": "Nie udało się zduplikować szablonu e‑maila.",
+      "madeDraftSuccessfully": "Szablon e‑maila przywrócony do wersji roboczej.",
+      "makeDraftFailed": "Nie udało się przywrócić szablonu do wersji roboczej.",
+      "deletedSuccessfully": "Szablon e‑maila usunięty.",
+      "deleteFailed": "Nie udało się usunąć szablonu e‑maila.",
+      "nameAlreadyExists": "Szablon e‑maila o tej nazwie już istnieje.",
+      "testEmailSentSuccessfully": "Testowy e-mail wysłany.",
+      "testEmailSendFailed": "Nie udało się wysłać testowego e-maila."
+    },
+    "actions": {
+      "preview": "Podgląd",
+      "duplicate": "Duplikuj",
+      "archive": "Archiwizuj",
+      "unarchive": "Odarchiwizuj",
+      "publish": "Opublikuj",
+      "makeDraft": "Oznacz jako szkic",
+      "edit": "Edytuj",
+      "rename": "Zmień nazwę",
+      "sendTest": "Wyślij test"
+    },
+    "language": {
+      "label": "Język",
+      "baseLanguage": "Domyślny",
+      "notAddedLanguages": "Języki do dodania",
+      "setBaseLanguage": "Ustaw jako domyślny",
+      "setBaseTitle": "Zmień domyślny język",
+      "setBaseDescription": "Użyć języka {{language}} jako domyślnego dla tego szablonu?",
+      "createTitle": "Dodaj tłumaczenie",
+      "createDescription": "Dodać tłumaczenie tego szablonu w języku {{language}}?",
+      "deleteTitle": "Usuń tłumaczenie",
+      "deleteDescription": "Usunąć tłumaczenie {{language}}? Jego treść zostanie usunięta."
+    },
+    "publishDiagnostics": {
+      "reasons": {
+        "name_missing": "Nazwa szablonu jest wymagana",
+        "no_language_versions": "Dodaj co najmniej jedną wersję językową",
+        "subject_missing": "Temat jest wymagany dla języka domyślnego",
+        "body_missing": "Treść wiadomości jest pusta",
+        "button_label_missing": "Etykieta przycisku jest wymagana",
+        "button_url_missing": "Przycisk nie ma adresu docelowego",
+        "empty_translation": "Tłumaczenie jest puste",
+        "invalid_url_protocol": "URL używa niedozwolonego protokołu",
+        "unchanged_from_base": "Tłumaczenie jest identyczne z językiem bazowym",
+        "footer_missing": "Brakuje stopki",
+        "logo_branding_missing": "Brakuje logo marki"
+      },
+      "blockedToast": {
+        "save": "Nie można zapisać szablonu. Zobacz diagnostykę",
+        "publish": "Nie można opublikować szablonu. Zobacz diagnostykę"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Wpisz /, aby otworzyć menu bloków",
+        "heading": "Nagłówek {{level}}",
+        "htmlCode": "Kod HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Tekst",
+          "media": "Multimedia",
+          "structure": "Struktura",
+          "interactive": "Interaktywne",
+          "footer": "Stopka"
+        },
+        "text": {
+          "title": "Tekst",
+          "description": "Akapit zwykłego tekstu."
+        },
+        "heading1": {
+          "title": "Nagłówek 1",
+          "description": "Duży nagłówek sekcji (H1)."
+        },
+        "heading2": {
+          "title": "Nagłówek 2",
+          "description": "Średni nagłówek sekcji (H2)."
+        },
+        "heading3": {
+          "title": "Nagłówek 3",
+          "description": "Mały nagłówek sekcji (H3)."
+        },
+        "image": {
+          "title": "Obraz",
+          "description": "Obraz na pełną szerokość."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Pełne logo."
+        },
+        "variable": {
+          "title": "Zmienna",
+          "description": "Wstawia {{zmienną}}, której później można nadać wartość w silniku automatyzacji."
+        },
+        "section": {
+          "title": "Sekcja",
+          "description": "Kontener grupujący treść."
+        },
+        "columns": {
+          "title": "Kolumny",
+          "description": "Układ wielokolumnowy."
+        },
+        "divider": {
+          "title": "Separator",
+          "description": "Pozioma linia oddzielająca."
+        },
+        "spacer": {
+          "title": "Odstęp",
+          "description": "Pionowy odstęp między blokami."
+        },
+        "button": {
+          "title": "Przycisk",
+          "description": "Przycisk wezwania do działania."
+        },
+        "footer": {
+          "title": "Stopka",
+          "description": "Blok tekstu stopki."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Przesyłanie obrazu nie powiodło się. Spróbuj ponownie.",
+      "tooLarge": "Obraz jest za duży. Maksymalny rozmiar to 10 MB.",
+      "invalidType": "Nieprawidłowy format obrazu. Dozwolone: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   },
   "modernCourseView": {

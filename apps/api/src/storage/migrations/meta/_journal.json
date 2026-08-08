@@ -1268,6 +1268,20 @@
       "when": 1785344688595,
       "tag": "0180_backfill_course_duration_estimates",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1785400000000,
+      "tag": "0181_add_email_notification_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1785400001000,
+      "tag": "0182_enable_email_notification_templates_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -259,6 +259,7 @@ export interface CurrentUserResponse {
       | "announcement.read"
       | "announcement.create"
       | "announcement.delete"
+      | "email_template.manage"
       | "news.read_public"
       | "news.manage"
       | "news.manage_own"
@@ -7706,6 +7707,516 @@ export interface FinishScormAttemptResponse {
     messageKey: string | null;
     scormStatus: string | null;
     nextScoId: string | null;
+  };
+}
+
+export interface ListTemplatesResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+/** @minItems 1 */
+export type DeleteManyTemplatesBody = string[];
+
+export interface DeleteManyTemplatesResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface CreateTemplateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @minItems 1 */
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+  subject?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  blocks?: {
+    type?: string;
+    attrs?: object;
+    content?: any[];
+    marks?: {
+      type: string;
+      attrs?: object;
+      [key: string]: any;
+    }[];
+    text?: string;
+    [key: string]: any;
+  };
+  strings?: {
+    en?: object;
+    pl?: object;
+    de?: object;
+    lt?: object;
+    cs?: object;
+    es?: object;
+    fr?: object;
+  };
+}
+
+export interface CreateTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface GetTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface UpdateTemplateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @minItems 1 */
+  availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+  subject?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  blocks?: {
+    type?: string;
+    attrs?: object;
+    content?: any[];
+    marks?: {
+      type: string;
+      attrs?: object;
+      [key: string]: any;
+    }[];
+    text?: string;
+    [key: string]: any;
+  };
+  strings?: {
+    en?: object;
+    pl?: object;
+    de?: object;
+    lt?: object;
+    cs?: object;
+    es?: object;
+    fr?: object;
+  };
+}
+
+export interface UpdateTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface PublishTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface MakeTemplateDraftResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface ArchiveTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface DeleteTemplateResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnarchiveTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface PreviewTemplateResponse {
+  data: {
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    subject: string;
+    html: string;
+  };
+}
+
+export interface SendTestEmailResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface DuplicateTemplateResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: string;
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    blocks: {
+      type?: string;
+      attrs?: object;
+      content?: any[];
+      marks?: {
+        type: string;
+        attrs?: object;
+        [key: string]: any;
+      }[];
+      text?: string;
+      [key: string]: any;
+    };
+    strings: {
+      en?: object;
+      pl?: object;
+      de?: object;
+      lt?: object;
+      cs?: object;
+      es?: object;
+      fr?: object;
+    };
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    status: "draft" | "published" | "archived";
+    archivedAt: string | null;
+  };
+}
+
+export interface UploadResponse {
+  data: {
+    url: string;
   };
 }
 
@@ -15342,6 +15853,286 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     scormControllerStreamScormContent: (packageId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/scorm/content/${packageId}/*`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerListTemplates
+     * @request GET:/api/email-notification-templates
+     */
+    emailNotificationTemplatesControllerListTemplates: (
+      query?: {
+        status?: "draft" | "published" | "archived";
+        name?: string;
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListTemplatesResponse, any>({
+        path: `/api/email-notification-templates`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerCreateTemplate
+     * @request POST:/api/email-notification-templates
+     */
+    emailNotificationTemplatesControllerCreateTemplate: (
+      data: CreateTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateTemplateResponse, any>({
+        path: `/api/email-notification-templates`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerDeleteManyTemplates
+     * @request DELETE:/api/email-notification-templates/bulk
+     */
+    emailNotificationTemplatesControllerDeleteManyTemplates: (
+      data: DeleteManyTemplatesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteManyTemplatesResponse, any>({
+        path: `/api/email-notification-templates/bulk`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerGetTemplate
+     * @request GET:/api/email-notification-templates/{id}
+     */
+    emailNotificationTemplatesControllerGetTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<GetTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerUpdateTemplate
+     * @request PATCH:/api/email-notification-templates/{id}
+     */
+    emailNotificationTemplatesControllerUpdateTemplate: (
+      id: string,
+      data: UpdateTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerDeleteTemplate
+     * @request DELETE:/api/email-notification-templates/{id}
+     */
+    emailNotificationTemplatesControllerDeleteTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerPublishTemplate
+     * @request POST:/api/email-notification-templates/{id}/publish
+     */
+    emailNotificationTemplatesControllerPublishTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<PublishTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}/publish`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerMakeTemplateDraft
+     * @request POST:/api/email-notification-templates/{id}/make-draft
+     */
+    emailNotificationTemplatesControllerMakeTemplateDraft: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<MakeTemplateDraftResponse, any>({
+        path: `/api/email-notification-templates/${id}/make-draft`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerArchiveTemplate
+     * @request POST:/api/email-notification-templates/{id}/archive
+     */
+    emailNotificationTemplatesControllerArchiveTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<ArchiveTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}/archive`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerUnarchiveTemplate
+     * @request POST:/api/email-notification-templates/{id}/unarchive
+     */
+    emailNotificationTemplatesControllerUnarchiveTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnarchiveTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}/unarchive`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerPreviewTemplate
+     * @request POST:/api/email-notification-templates/{id}/preview
+     */
+    emailNotificationTemplatesControllerPreviewTemplate: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PreviewTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}/preview`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerSendTestEmail
+     * @request POST:/api/email-notification-templates/{id}/test-send
+     */
+    emailNotificationTemplatesControllerSendTestEmail: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SendTestEmailResponse, any>({
+        path: `/api/email-notification-templates/${id}/test-send`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailNotificationTemplatesControllerDuplicateTemplate
+     * @request POST:/api/email-notification-templates/{id}/duplicate
+     */
+    emailNotificationTemplatesControllerDuplicateTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<DuplicateTemplateResponse, any>({
+        path: `/api/email-notification-templates/${id}/duplicate`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateImageControllerUpload
+     * @request POST:/api/email-notification-templates/images
+     */
+    emailTemplateImageControllerUpload: (
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadResponse, any>({
+        path: `/api/email-notification-templates/images`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PublicCourseThumbnailControllerGetThumbnail
+     * @request GET:/api/public/course-thumbnail/{courseId}
+     */
+    publicCourseThumbnailControllerGetThumbnail: (courseId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/public/course-thumbnail/${courseId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PublicEmailTemplateImageControllerServe
+     * @request GET:/api/public/email-template-image/{reference}
+     */
+    publicEmailTemplateImageControllerServe: (reference: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/public/email-template-image/${reference}`,
         method: "GET",
         ...params,
       }),

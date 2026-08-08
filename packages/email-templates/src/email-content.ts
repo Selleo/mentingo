@@ -1,4 +1,4 @@
 export interface EmailContent {
-  text: string;
-  html: string;
+  text: Promise<string>;
+  html: Promise<string>;
 }

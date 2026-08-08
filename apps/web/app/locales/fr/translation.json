@@ -1618,7 +1618,8 @@
         "live_training_end": "Terminez les sessions de formation en direct.",
         "live_training_statistics": "Consultez la participation aux formations en direct et les statistiques.",
         "activity_log_read": "Afficher les journaux d'activité.",
-        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA."
+        "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA.",
+        "email_template_manage": "Créer, modifier et gérer les modèles de notifications par e-mail."
       }
     },
     "dropdown": {
@@ -4657,7 +4658,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Rechercher par nom ou par email...",
-      "tabs": { "admins": "Administrateurs", "allUsers": "Tous les utilisateurs" },
+      "tabs": {
+        "admins": "Administrateurs",
+        "allUsers": "Tous les utilisateurs"
+      },
       "loading": "Chargement des utilisateurs...",
       "emptyAdmins": "Aucun administrateur actif trouvé.",
       "emptyAdminsSearch": "Aucun administrateur actif trouvé pour \"{{search}}\".",

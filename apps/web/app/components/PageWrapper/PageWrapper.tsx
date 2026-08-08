@@ -1,3 +1,5 @@
+import { Fragment, type HTMLAttributes, type ReactNode } from "react";
+
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -5,8 +7,6 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { cn } from "~/lib/utils";
-
-import type { HTMLAttributes, ReactNode } from "react";
 
 type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   breadcrumbs?: { title: string; href: string }[];
@@ -34,15 +34,17 @@ export const Breadcrumbs = ({ breadcrumbs = [] }: BreadcrumbsProps) => {
   return (
     <BreadcrumbList className="mb-4">
       {breadcrumbs.slice(0, lastIndex).map(({ href, title }, index) => (
-        <BreadcrumbItem key={index}>
-          <BreadcrumbLink
-            className="details-md text-neutral-800 hover:text-neutral-800"
-            href={href}
-          >
-            {title}
-          </BreadcrumbLink>
+        <Fragment key={index}>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              className="details-md text-neutral-800 hover:text-neutral-800"
+              href={href}
+            >
+              {title}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-        </BreadcrumbItem>
+        </Fragment>
       ))}
       <BreadcrumbItem>
         <BreadcrumbLink

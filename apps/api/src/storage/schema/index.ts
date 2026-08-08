@@ -26,6 +26,7 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  EMAIL_TEMPLATE_STATUSES,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
@@ -100,6 +101,9 @@ import type {
   AnnouncementSourceType,
   AnnouncementStatus,
   CourseGenerationSyncStatus,
+  EmailTemplateBlocks,
+  EmailTemplateStatus,
+  EmailTemplateStrings,
   LiveTrainingDeliveryType,
   LiveTrainingLinkEntityType,
   LiveTrainingMemberRole,
@@ -1888,6 +1892,35 @@ export const groupAnnouncements = pgTable(
   },
   withTenantIdIndex("group_announcements", (table) => ({
     unq: unique().on(table.groupId, table.announcementId),
+  })),
+);
+
+export const emailNotificationTemplates = pgTable(
+  "email_notification_templates",
+  {
+    ...id,
+    ...timestamps,
+    name: text("name").notNull(),
+    subject: jsonb("subject").$type<LocalizedText>().default({}).notNull(),
+    status: text("status")
+      .$type<EmailTemplateStatus>()
+      .notNull()
+      .default(EMAIL_TEMPLATE_STATUSES.DRAFT),
+    blocks: jsonb("blocks")
+      .$type<EmailTemplateBlocks>()
+      .default({ type: "doc", content: [] })
+      .notNull(),
+    strings: jsonb("strings").$type<EmailTemplateStrings>().default({}).notNull(),
+    baseLanguage,
+    availableLocales,
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("email_notification_templates", (table) => ({
+    tenantNameUniqueIdx: uniqueIndex("email_notification_templates_tenant_id_name_unique_idx").on(
+      table.tenantId,
+      table.name,
+    ),
   })),
 );
 
