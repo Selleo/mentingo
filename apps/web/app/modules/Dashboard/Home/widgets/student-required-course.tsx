@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSummary";
 import { cn } from "~/lib/utils";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -14,8 +15,6 @@ import {
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
-
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 
 export function WidgetStudentRequiredCourse() {
   const { t, i18n } = useTranslation();

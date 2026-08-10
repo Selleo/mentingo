@@ -10,6 +10,7 @@ import { CalendarEventDetailsDialog } from "~/modules/Calendar/components/Calend
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -17,8 +18,6 @@ import {
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
-
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 
 import type { GetDashboardEventsResponse } from "~/api/generated-api";
 

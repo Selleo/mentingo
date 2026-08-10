@@ -3,8 +3,8 @@ import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
-import { mockDashboardWidget } from "../../flows/dashboard/mock-dashboard-widget.flow";
 import { expect, test } from "../../fixtures/test.fixture";
+import { mockDashboardWidget } from "../../flows/dashboard/mock-dashboard-widget.flow";
 
 const CONTINUE_COURSE_ID = "11111111-1111-4111-8111-111111111111";
 const CONTINUE_LESSON_ID = "22222222-2222-4222-8222-222222222222";

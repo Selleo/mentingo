@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useDashboardIncompleteCourses } from "~/api/queries/useDashboardIncompleteCourses";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -13,8 +14,6 @@ import {
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
-
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 
 export function WidgetAdminIncompleteCourses() {
   const { t } = useTranslation();

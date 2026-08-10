@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAiMentorPracticeToday } from "~/api/queries/useAiMentorPracticeToday";
 import { Button } from "~/components/ui/button";
 
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../../../../e2e/data/ai-mentor-practice/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -12,8 +13,6 @@ import {
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
-
-import { AI_MENTOR_PRACTICE_HANDLES } from "../../../../../e2e/data/ai-mentor-practice/handles";
 
 export function WidgetStudentAiMentorPractice() {
   const { t } = useTranslation();
