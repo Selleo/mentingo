@@ -3588,6 +3588,7 @@
         },
         "retakeModalTitle": "¿Estás seguro de que quieres volver a tomar la lección?",
         "retakeModalDescription": "Esto restablecerá su progreso en esta lección. Esta acción no se puede deshacer.",
+        "retakeLoadingTitle": "Preparando tu próximo intento",
         "retakeAccessDenied": "Puede volver a tomar esta lección solo si está inscrito en el curso o es el autor del curso."
       }
     },

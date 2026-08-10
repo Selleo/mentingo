@@ -3446,6 +3446,7 @@
         },
         "retakeModalTitle": "Êtes-vous sûr de vouloir reprendre la leçon ?",
         "retakeModalDescription": "Cela réinitialisera votre progression dans cette leçon. Cette action ne peut pas être annulée.",
+        "retakeLoadingTitle": "Préparation de votre prochaine tentative",
         "retakeAccessDenied": "Vous ne pouvez reprendre cette leçon que si vous êtes inscrit au cours ou si vous en êtes l'auteur."
       }
     },

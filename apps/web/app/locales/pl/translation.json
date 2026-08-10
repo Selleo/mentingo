@@ -3838,6 +3838,7 @@
         },
         "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
         "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć.",
+        "retakeLoadingTitle": "Przygotowujemy kolejną próbę",
         "retakeAccessDenied": "Możesz powtórzyć tę lekcję tylko, jeśli jesteś zapisany/a na kurs lub jesteś autorem/autorką kursu."
       }
     },
