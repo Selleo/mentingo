@@ -46,6 +46,8 @@ const VAD_CONFIG = {
 const POST_REDEMPTION_EMPTY_AUDIO_MS = VAD_CONFIG.redemptionMs;
 const MAX_AUDIO_RECONNECT_ATTEMPTS = 8;
 const START_ACCEPT_TIMEOUT_MS = 10000;
+const AUDIO_LEVEL_NOISE_FLOOR = 0.008;
+const AUDIO_LEVEL_SCALE = 4;
 
 export class RealtimePCMStreamerWorklet {
   private readonly protocol: StreamProtocol<unknown, unknown>;
@@ -414,7 +416,10 @@ export class RealtimePCMStreamerWorklet {
       this.lastSentAudioSeq = meta.seq;
       this.sentChunks.set(meta.seq, chunkBuffer);
       this.trimSentChunks();
-      this.onChunkSent?.(meta);
+
+      if (this.captureMode === AUDIO_CAPTURE_MODE.VAD_SEGMENTED) {
+        this.onChunkSent?.(meta);
+      }
     }
   }
 
@@ -448,6 +453,9 @@ export class RealtimePCMStreamerWorklet {
       video: false,
     });
     const audioContext = new AudioContext({ sampleRate: this.targetSr });
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
     const source = audioContext.createMediaStreamSource(stream);
     const processor = audioContext.createScriptProcessor(1024, 1, 1);
     const silentGain = audioContext.createGain();
@@ -725,7 +733,10 @@ function calculateAudioLevel(audio: Float32Array) {
     sum += sample * sample;
   }
 
-  return Math.min(1, Math.sqrt(sum / audio.length) * 4);
+  const rms = Math.sqrt(sum / audio.length);
+  const signal = Math.max(0, rms - AUDIO_LEVEL_NOISE_FLOOR);
+
+  return Math.min(1, Math.sqrt(signal) * AUDIO_LEVEL_SCALE);
 }
 
 function float32ToPcm16(audio: Float32Array): Int16Array {

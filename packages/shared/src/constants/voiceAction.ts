@@ -13,6 +13,7 @@ export const VOICE_SOCKET_EVENT = {
   AUDIO_INTERRUPTED: "audioInterrupted",
   AUDIO_OUTPUT_COMPLETED: "audioOutputCompleted",
   MENTOR_TRANSCRIPTION: "mentorTranscription",
+  MENTOR_RESPONSE_DELTA: "mentorResponseDelta",
   MENTOR_RESPONSE_COMPLETED: "mentorResponseCompleted",
   STOP_AUDIO: "stopAudio",
   CANCEL_AUDIO: "cancelAudio",

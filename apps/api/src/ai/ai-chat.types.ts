@@ -7,6 +7,8 @@ export type AiStreamMessageInput = {
   content: string;
   id?: UUIDType;
   voiceSessionId?: string;
+  voiceTurnWasInterrupted?: boolean;
+  abortSignal?: AbortSignal;
 };
 
 export type AiStreamTextResult = ReturnType<typeof streamText>;

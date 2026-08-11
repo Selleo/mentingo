@@ -142,6 +142,7 @@ export class AiService {
           data.content,
           isVoiceMentor,
           data.id,
+          data.voiceTurnWasInterrupted,
         );
 
         const generationConfig = isVoiceMentor
@@ -572,12 +573,13 @@ export class AiService {
       instructions,
       messages,
       maxOutputTokens: MAX_TOKENS,
+      abortSignal: data.abortSignal,
       ...generationConfig,
       experimental_telemetry: { isEnabled: true },
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 
-        if (persistOnFinish) {
+        if (persistOnFinish && !data.abortSignal?.aborted) {
           await this.persistMentorChatMessages({
             data,
             model,

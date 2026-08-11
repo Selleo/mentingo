@@ -65,6 +65,7 @@ export class PromptService implements OnModuleInit {
     content: string,
     isVoiceMentor: boolean = false,
     tempMessageId?: string,
+    voiceTurnWasInterrupted: boolean = false,
   ) {
     const { history } = await this.messageService.findMessageHistory(threadId, false);
 
@@ -105,6 +106,24 @@ export class PromptService implements OnModuleInit {
         userName: null,
         content: voiceMentorAddon,
       });
+
+      metaMessages.push({
+        id: "",
+        role: MESSAGE_ROLE.SYSTEM,
+        userName: null,
+        content:
+          "VOICE INTERRUPTION POLICY: Treat an interruption as current only when this request contains the explicit marker [VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]. Ignore interruption mentions in conversation history because they describe earlier turns.",
+      });
+
+      if (voiceTurnWasInterrupted) {
+        metaMessages.push({
+          id: "",
+          role: MESSAGE_ROLE.SYSTEM,
+          userName: null,
+          content:
+            "[VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED] The learner interrupted the previous mentor response in the current turn. Continue naturally from the conversation context and prioritize the learner's new message. Do not mention this internal event.",
+        });
+      }
     }
 
     if (summary) {

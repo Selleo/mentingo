@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
 import { RealtimePCMStreamerWorklet } from "../audio-stream";
-import { voiceSocketProtocol } from "../voiceSocketProtocol";
 import { AUDIO_CAPTURE_MODE } from "../audio-stream.types";
+import { voiceSocketProtocol } from "../voiceSocketProtocol";
 
 import type { StreamProtocol } from "../audio-stream";
 import type { Dispatch, SetStateAction } from "react";

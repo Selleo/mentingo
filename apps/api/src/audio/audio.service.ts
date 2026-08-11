@@ -31,6 +31,7 @@ import type { WsUser } from "src/websocket/websocket.types";
 @Injectable()
 export class AudioService implements OnModuleInit {
   private readonly logger = new Logger(AudioService.name);
+  private readonly audioChunkQueues = new Map<string, Promise<void>>();
 
   constructor(
     private readonly queueService: QueueService,
@@ -87,10 +88,32 @@ export class AudioService implements OnModuleInit {
           voiceAction: payload.voiceAction,
         });
       }
+      return;
     }
+
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, {});
   }
 
   async audioChunk(sessionId: string, meta: PcmChunkMeta, bytes: Buffer) {
+    let result = false;
+    const previous = this.audioChunkQueues.get(sessionId) ?? Promise.resolve();
+    const current = previous.catch(() => undefined).then(async () => {
+      result = await this.processAudioChunk(sessionId, meta, bytes);
+    });
+
+    this.audioChunkQueues.set(sessionId, current);
+
+    try {
+      await current;
+      return result;
+    } finally {
+      if (this.audioChunkQueues.get(sessionId) === current) {
+        this.audioChunkQueues.delete(sessionId);
+      }
+    }
+  }
+
+  private async processAudioChunk(sessionId: string, meta: PcmChunkMeta, bytes: Buffer) {
     const voiceAction = await this.getVoiceAction(sessionId);
     if (this.isExternalVoiceAction(voiceAction)) {
       return this.externalAudioService.audioChunk(sessionId, meta, bytes);
@@ -110,6 +133,7 @@ export class AudioService implements OnModuleInit {
   }
 
   async stopAudio(sessionId: string, tenantId?: string) {
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
     const voiceAction = await this.getVoiceAction(sessionId);
     if (!voiceAction) {
       this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.STOP_AUDIO, sessionId, {
@@ -131,6 +155,7 @@ export class AudioService implements OnModuleInit {
   }
 
   async cancelAudio(sessionId: string) {
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
     const voiceAction = await this.getVoiceAction(sessionId);
     if (this.isExternalVoiceAction(voiceAction)) {
       await this.externalAudioService.cancelAudio(sessionId);
@@ -143,6 +168,7 @@ export class AudioService implements OnModuleInit {
   }
 
   async handleDisconnect(sessionId: string) {
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
     this.externalAudioService.clearSession(sessionId);
     await this.clearAudioState(sessionId);
   }

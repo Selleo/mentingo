@@ -14,6 +14,7 @@ import { cn } from "~/lib/utils";
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
 const VOICE_VISUALIZER_COLOR = "var(--primary)";
+const VOICE_ACTIVITY_THRESHOLD = 0.04;
 const MOBILE_CONTROL_CLASS_NAME =
   "size-12 rounded-full bg-white text-primary-800 shadow-none transition-transform hover:scale-105 hover:bg-primary-50 hover:text-primary-800";
 const MOBILE_CHECK_CLASS_NAME =
@@ -125,8 +126,10 @@ export function VoiceMentorModeOverlay({
       "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.speaking.title",
     ),
   };
-  const isListening = state === VOICE_MODE_STATE.LISTENING && !isMicMuted;
-  const voiceVolume = isListening ? Math.max(0, Math.min(1, voiceLevel)) : 0;
+  const isLocalVoiceActive = voiceLevel >= VOICE_ACTIVITY_THRESHOLD;
+  const isListening =
+    !isMicMuted && (state === VOICE_MODE_STATE.LISTENING || isLocalVoiceActive);
+  const voiceVolume = !isMicMuted ? Math.max(0, Math.min(1, voiceLevel)) : 0;
   const mentorVolume =
     state === VOICE_MODE_STATE.SPEAKING ? Math.max(0, Math.min(1, mentorVoiceLevel)) : 0;
   const auraState = state === VOICE_MODE_STATE.SPEAKING ? "speaking" : "thinking";

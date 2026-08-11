@@ -4,6 +4,9 @@ import {
   LUMA_AUDIO_FORMATS,
   LUMA_SOCKET_MESSAGE_TYPES,
   type AudioChunkPayload,
+  type AudioOutputErrorPayload,
+  type AudioOutputCompletePayload,
+  type AudioOutputInterruptedPayload,
   type AudioStopPayload,
   type MentorTranscriptionPayload,
   type StartAudioPayload,
@@ -36,6 +39,7 @@ import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realti
 import type {
   AiMentorTTSPreset,
   AudioSpeechEventPayload,
+  MentorResponseDeltaEventPayload,
   MentorResponseCompletedEventPayload,
   MentorTranscriptionEventPayload,
   PcmChunkMeta,
@@ -52,14 +56,14 @@ type VoiceMentorSocketHandlers = {
   audioStarted: () => void;
   mentorTranscription: (payload: MentorTranscriptionPayload) => Promise<void>;
   audioOutputChunk: (payload: { data: AudioSpeechEventPayload }) => void;
-  audioOutputInterrupted: () => void;
-  audioOutputComplete: () => void;
+  audioOutputInterrupted: (payload: AudioOutputInterruptedPayload) => void;
+  audioOutputError: (payload: AudioOutputErrorPayload) => void;
+  audioOutputComplete: (payload: AudioOutputCompletePayload) => void;
 };
 
 @Injectable()
 export class ExternalAudioService {
   private readonly logger = new Logger(ExternalAudioService.name);
-  private static readonly MENTOR_DELTA_FLUSH_MIN_CHARS = 48;
   private static readonly MENTOR_DELTA_FLUSH_MAX_CHARS = 140;
 
   constructor(
@@ -209,6 +213,10 @@ export class ExternalAudioService {
       lessonId: payload.lessonId,
       userId: currentUser.userId,
       activeTurnId: null,
+      audioOutputErrors: new Map(),
+      pendingInterruption: false,
+      interruptedTurnIds: new Set(),
+      activeMentorStream: null,
     };
 
     this.registerVoiceMentorHandlers(session);
@@ -228,6 +236,7 @@ export class ExternalAudioService {
     socket.onMentorTranscription(handlers.mentorTranscription);
     socket.onAudioOutputChunk(handlers.audioOutputChunk);
     socket.onAudioOutputInterrupted(handlers.audioOutputInterrupted);
+    socket.onAudioOutputError(handlers.audioOutputError);
     socket.onAudioOutputComplete(handlers.audioOutputComplete);
     socket.onAudioStarted(handlers.audioStarted);
   }
@@ -261,27 +270,65 @@ export class ExternalAudioService {
         };
         this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_SPEECH, sessionId, nextPayload);
       },
-      audioOutputInterrupted: () => {
+      audioOutputInterrupted: (payload) => {
+        const interruptedTurnId =
+          session.activeTurnId && payload.jobId === session.activeTurnId
+            ? session.activeTurnId
+            : null;
         const nextPayload = {
-          turnId: session.activeTurnId ?? undefined,
+          turnId: interruptedTurnId ?? undefined,
         };
         this.realtimePublisher.emitToRoom(
           VOICE_SOCKET_EVENT.AUDIO_INTERRUPTED,
           sessionId,
           nextPayload,
         );
-        session.activeTurnId = null;
+        if (interruptedTurnId) {
+          session.pendingInterruption = true;
+          if (session.activeMentorStream?.turnId === interruptedTurnId) {
+            session.interruptedTurnIds.add(interruptedTurnId);
+            session.activeMentorStream.abortController.abort("MENTOR_RESPONSE_INTERRUPTED");
+          }
+        }
+        if (interruptedTurnId) {
+          session.audioOutputErrors.delete(interruptedTurnId);
+        }
+        if (session.activeTurnId === interruptedTurnId) {
+          session.activeTurnId = null;
+        }
       },
-      audioOutputComplete: () => {
+      audioOutputError: (payload) => {
+        if (!session.activeTurnId || payload.jobId !== session.activeTurnId) {
+          return;
+        }
+
+        session.audioOutputErrors.set(payload.jobId, payload.data);
+        if (session.activeMentorStream?.turnId === payload.jobId) {
+          session.activeMentorStream.abortController.abort("TTS_STREAM_ERROR");
+        }
+        this.logger.warn(
+          `Luma audio output failed for mentor turn ${payload.jobId} in session ${sessionId}: ${payload.data.code}`,
+        );
+      },
+      audioOutputComplete: (payload) => {
+        const completedTurnId =
+          session.activeTurnId && payload.jobId === session.activeTurnId
+            ? session.activeTurnId
+            : null;
         const nextPayload = {
-          turnId: session.activeTurnId ?? undefined,
+          turnId: completedTurnId ?? undefined,
         };
         this.realtimePublisher.emitToRoom(
           VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED,
           sessionId,
           nextPayload,
         );
-        session.activeTurnId = null;
+        if (completedTurnId) {
+          session.audioOutputErrors.delete(completedTurnId);
+        }
+        if (session.activeTurnId === completedTurnId) {
+          session.activeTurnId = null;
+        }
       },
     };
   }
@@ -301,6 +348,13 @@ export class ExternalAudioService {
     }
 
     session.activeTurnId = payload.jobId ?? null;
+    const voiceTurnWasInterrupted = session.pendingInterruption;
+    session.pendingInterruption = false;
+    const abortController = new AbortController();
+    session.activeMentorStream = {
+      turnId: payload.jobId,
+      abortController,
+    };
 
     this.emitMentorTranscription(sessionId, {
       text,
@@ -308,10 +362,17 @@ export class ExternalAudioService {
     });
 
     let shouldForwardMentorText = true;
+    let stoppedByAudioOutputError = false;
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
         const stream = await this.aiService.streamMessage(
-          { threadId: session.threadId, content: text, voiceSessionId: sessionId },
+          {
+            threadId: session.threadId,
+            content: text,
+            voiceSessionId: sessionId,
+            voiceTurnWasInterrupted,
+            abortSignal: abortController.signal,
+          },
           OPENAI_MODELS.BASIC,
           session.currentUser,
           true,
@@ -322,6 +383,10 @@ export class ExternalAudioService {
         let pendingDeltaChunk = "";
         let seq = 1;
         for await (const delta of stream.textStream) {
+          if (shouldForwardMentorText && session.audioOutputErrors.has(payload.jobId)) {
+            stoppedByAudioOutputError = true;
+            break;
+          }
           if (!delta) continue;
 
           responseText += delta;
@@ -334,11 +399,56 @@ export class ExternalAudioService {
           if (shouldForwardMentorText) {
             seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
           }
+          this.emitMentorResponseDelta(sessionId, {
+            text: this.sanitizeMentorResponseDelta(pendingDeltaChunk),
+            jobId: payload.jobId,
+          });
           pendingDeltaChunk = "";
+        }
+
+        const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
+        if (wasInterrupted) {
+          session.audioOutputErrors.delete(payload.jobId);
+          this.emitMentorResponseCompleted(sessionId, {
+            text: "",
+            jobId: payload.jobId,
+            reason: "error",
+          });
+          if (session.activeTurnId === payload.jobId) {
+            session.activeTurnId = null;
+          }
+          return;
+        }
+
+        const audioOutputError = session.audioOutputErrors.get(payload.jobId);
+        if (shouldForwardMentorText && (stoppedByAudioOutputError || audioOutputError)) {
+          session.audioOutputErrors.delete(payload.jobId);
+          session.socket.sendMentorTextError({
+            type: "mentor.text.error",
+            jobId: payload.jobId,
+            code: audioOutputError?.code ?? "AUDIO_OUTPUT_ERROR",
+            message: audioOutputError?.message ?? "Mentor audio output failed",
+            retryable: audioOutputError?.retryable ?? false,
+          });
+          this.emitMentorResponseCompleted(sessionId, {
+            text: "",
+            jobId: payload.jobId,
+            reason: "error",
+          });
+          if (session.activeTurnId === payload.jobId) {
+            session.activeTurnId = null;
+          }
+          return;
         }
 
         if (shouldForwardMentorText && pendingDeltaChunk.length > 0) {
           seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
+        }
+        if (pendingDeltaChunk.length > 0) {
+          this.emitMentorResponseDelta(sessionId, {
+            text: this.sanitizeMentorResponseDelta(pendingDeltaChunk),
+            jobId: payload.jobId,
+          });
         }
 
         if (shouldForwardMentorText) {
@@ -358,6 +468,41 @@ export class ExternalAudioService {
     } catch (error) {
       this.logger.error("Failed to stream mentor response", error);
 
+      const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
+      if (wasInterrupted) {
+        session.audioOutputErrors.delete(payload.jobId);
+        this.emitMentorResponseCompleted(sessionId, {
+          text: "",
+          jobId: payload.jobId,
+          reason: "error",
+        });
+        if (session.activeTurnId === payload.jobId) {
+          session.activeTurnId = null;
+        }
+        return;
+      }
+
+      const audioOutputError = session.audioOutputErrors.get(payload.jobId);
+      if (shouldForwardMentorText && audioOutputError) {
+        session.audioOutputErrors.delete(payload.jobId);
+        session.socket.sendMentorTextError({
+          type: "mentor.text.error",
+          jobId: payload.jobId,
+          code: audioOutputError.code,
+          message: audioOutputError.message,
+          retryable: audioOutputError.retryable,
+        });
+        this.emitMentorResponseCompleted(sessionId, {
+          text: "",
+          jobId: payload.jobId,
+          reason: "error",
+        });
+        if (session.activeTurnId === payload.jobId) {
+          session.activeTurnId = null;
+        }
+        return;
+      }
+
       if (shouldForwardMentorText) {
         session.socket.sendMentorTextEnd({
           type: "mentor.text.end",
@@ -370,19 +515,55 @@ export class ExternalAudioService {
         jobId: payload.jobId,
         reason: "error",
       });
+    } finally {
+      if (session.activeMentorStream?.turnId === payload.jobId) {
+        session.activeMentorStream = null;
+      }
     }
   }
 
   private shouldFlushMentorDeltaChunk(chunk: string): boolean {
+    if (this.hasIncompleteVoiceControlTag(chunk)) {
+      return false;
+    }
+
     if (chunk.length >= ExternalAudioService.MENTOR_DELTA_FLUSH_MAX_CHARS) {
       return true;
     }
 
-    if (chunk.length < ExternalAudioService.MENTOR_DELTA_FLUSH_MIN_CHARS) {
-      return false;
+    return /[.!?]\s*$/.test(chunk) || /\s$/.test(chunk);
+  }
+
+  private hasIncompleteVoiceControlTag(text: string): boolean {
+    const lastOpeningBracket = text.lastIndexOf("<");
+    const lastClosingBracket = text.lastIndexOf(">");
+    if (lastOpeningBracket > lastClosingBracket) {
+      const trailingTag = text.slice(lastOpeningBracket);
+      if (/^<\/?(?:emotion|break|spell)\b/i.test(trailingTag)) {
+        return true;
+      }
     }
 
-    return /[.!?]\s*$/.test(chunk) || /\s$/.test(chunk);
+    const normalizedText = text.toLowerCase();
+    const lastSpellOpening = normalizedText.lastIndexOf("<spell");
+    const lastSpellClosing = normalizedText.lastIndexOf("</spell>");
+    if (lastSpellOpening > lastSpellClosing) {
+      return true;
+    }
+
+    return normalizedText.lastIndexOf("[laughter") > normalizedText.lastIndexOf("]");
+  }
+
+  private sanitizeMentorResponseDelta(text: string): string {
+    const leadingWhitespace = text.match(/^\s*/)?.[0] ?? "";
+    const trailingWhitespace = text.match(/\s*$/)?.[0] ?? "";
+    const strippedText = stripVoiceControlTags(text);
+
+    if (!strippedText) {
+      return "";
+    }
+
+    return `${leadingWhitespace}${strippedText}${trailingWhitespace}`;
   }
 
   private sendMentorTextDeltaChunk(
@@ -406,6 +587,21 @@ export class ExternalAudioService {
     payload: MentorTranscriptionEventPayload,
   ): void {
     this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION, sessionId, payload);
+  }
+
+  private emitMentorResponseDelta(
+    sessionId: string,
+    payload: MentorResponseDeltaEventPayload,
+  ): void {
+    if (!payload.text) {
+      return;
+    }
+
+    this.realtimePublisher.emitToRoom(
+      VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA,
+      sessionId,
+      payload,
+    );
   }
 
   private emitMentorResponseCompleted(

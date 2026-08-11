@@ -24,6 +24,11 @@ export type MentorTranscriptionEventPayload = {
   jobId?: string;
 };
 
+export type MentorResponseDeltaEventPayload = {
+  text: string;
+  jobId?: string;
+};
+
 export type MentorResponseCompletedEventPayload = {
   text: string;
   jobId?: string;

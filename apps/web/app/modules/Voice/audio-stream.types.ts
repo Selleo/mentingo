@@ -1,3 +1,5 @@
+import { VOICE_SOCKET_EVENT } from "@repo/shared";
+
 export const AUDIO_CAPTURE_MODE = {
   CONTINUOUS: "continuous",
   VAD_SEGMENTED: "vad_segmented",
@@ -16,7 +18,7 @@ export const TRANSCRIPTION_PROVIDER = {
 
 export const AUDIO_STREAM_EVENT = {
   RECONNECT: "audio_reconnect",
-  START_ACCEPTED: "audio:start",
+  START_ACCEPTED: VOICE_SOCKET_EVENT.AUDIO_STARTED,
   RECOVERED: "audio:recovered",
   RECONNECT_ERROR: "audio:reconnect_error",
   CHUNK_ACCEPTED: "audio:chunked",
