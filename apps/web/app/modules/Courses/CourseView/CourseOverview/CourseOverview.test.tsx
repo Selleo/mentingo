@@ -25,6 +25,7 @@ const course = {
   baseLanguage: "en",
   category: "Analytics",
   categoryId: "category-1",
+  chapters: [],
   description: "Course description",
   estimatedDurationSeconds: 3_600,
   learningOutcomes: [],

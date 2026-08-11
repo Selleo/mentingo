@@ -30,6 +30,6 @@ describe("CertificateStatCard", () => {
       <CertificateStatCard hasCertificate isAdminExperience={false} onOpen={vi.fn()} />,
     );
 
-    expect(screen.getByRole("button", { name: /certificate upon completion/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /certificate not issued yet/i })).toBeDisabled();
   });
 });
