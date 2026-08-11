@@ -1,8 +1,11 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_TAB_VALUES, EDIT_COURSE_PAGE_HANDLES } from "../../data/courses/handles";
+import { COURSE_OVERVIEW_HANDLES, COURSE_TAB_VALUES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
+import {
+  openCourseOverviewSettingsFlow,
+  selectCourseOverviewSettingsTabFlow,
+} from "../../flows/courses/open-course-overview-settings.flow";
 import { updateCoursePricingFlow } from "../../flows/courses/update-course-pricing.flow";
 
 test("admin can update course pricing when pricing is enabled", async ({
@@ -25,10 +28,11 @@ test("admin can update course pricing when pricing is enabled", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.PRICING);
+    await openCourseOverviewSettingsFlow(page, course.id);
 
-    const pricingTab = page.getByTestId(EDIT_COURSE_PAGE_HANDLES.tab(COURSE_TAB_VALUES.PRICING));
+    const pricingTab = page.getByTestId(COURSE_OVERVIEW_HANDLES.settingsTab("pricing"));
     test.skip((await pricingTab.count()) === 0, "Pricing tab is hidden when Stripe is disabled.");
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.PRICING);
 
     await updateCoursePricingFlow(page, { isFree: false, price: "12.34" });
 

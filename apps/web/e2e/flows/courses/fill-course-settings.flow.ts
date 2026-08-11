@@ -36,7 +36,11 @@ export const fillCourseSettingsFlow = async (
   }
 
   if (description !== undefined) {
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR).fill(description);
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR).blur();
+    const descriptionEditor = page
+      .getByTestId(COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR)
+      .locator('[contenteditable="true"]');
+
+    await descriptionEditor.fill(description);
+    await descriptionEditor.blur();
   }
 };

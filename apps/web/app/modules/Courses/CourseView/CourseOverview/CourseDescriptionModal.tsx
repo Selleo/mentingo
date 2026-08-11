@@ -1,9 +1,11 @@
 import { Check, Clock, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { BaseEditor } from "~/components/RichText/Editor";
+import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
-import { formatDuration } from "~/modules/Courses/utils/formatDuration";
+import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -23,11 +25,17 @@ export default function CourseDescriptionModal({
 }: CourseDescriptionModalProps) {
   const { course, isAdminExperience } = useCourseAccessProvider();
   const { t } = useTranslation();
+  const saveAndClose = async () => {
+    if (isAdminExperience) {
+      await onSaveDescription();
+    }
+    onClose();
+  };
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && void saveAndClose()}>
       <DialogContent
-        className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
+        className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-4xl overflow-x-hidden overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
         noCloseButton
         aria-describedby={undefined}
       >
@@ -41,7 +49,7 @@ export default function CourseDescriptionModal({
               variant="ghost"
               size="icon"
               aria-label={t("modernCourseView.overview.closeDetails")}
-              onClick={onClose}
+              onClick={() => void saveAndClose()}
               className="rounded-full"
             >
               <X className="size-5 text-neutral-800" />
@@ -56,7 +64,7 @@ export default function CourseDescriptionModal({
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="size-4" />
-                {formatDuration(course.estimatedDurationSeconds, t)}
+                {formatDurationToHalfHour(course.estimatedDurationSeconds, t)}
               </span>
             </div>
           </div>
@@ -66,16 +74,19 @@ export default function CourseDescriptionModal({
               {t("modernCourseView.overview.description")}
             </h5>
             {isAdminExperience ? (
-              <textarea
-                data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}
-                value={courseDescription}
-                onChange={(event) => onChangeDescription(event.target.value)}
-                className="min-h-32 w-full rounded-lg border-2 border-neutral-200 p-3 leading-relaxed text-neutral-950 focus:border-primary-700 focus:outline-none"
-                placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
-                onBlur={() => void onSaveDescription()}
-              />
+              <div data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}>
+                <BaseEditor
+                  content={courseDescription}
+                  onChange={onChangeDescription}
+                  onBlur={() => void onSaveDescription()}
+                  placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
+                  onCtrlSave={() => void saveAndClose()}
+                  parentClassName="min-w-0"
+                  editorClassName="min-h-32"
+                />
+              </div>
             ) : (
-              <p className="leading-relaxed text-neutral-800">{course.description}</p>
+              <Viewer content={course.description} style="prose" className="text-neutral-800" />
             )}
           </div>
 
@@ -86,8 +97,8 @@ export default function CourseDescriptionModal({
               </h5>
               <ul className="space-y-3">
                 {course.learningOutcomes.map((outcome) => (
-                  <li key={outcome} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-success-500 text-success-500">
+                  <li key={outcome} className="flex items-center gap-3">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-success-500 text-success-500">
                       <Check className="size-3" strokeWidth={3} />
                     </span>
                     <span className="text-lg font-medium leading-relaxed text-neutral-800">
@@ -103,10 +114,14 @@ export default function CourseDescriptionModal({
             <Button
               type="button"
               variant="primary"
-              onClick={onClose}
+              onClick={() => void saveAndClose()}
               className="px-6 font-semibold"
             >
-              {t("modernCourseView.common.close")}
+              {t(
+                isAdminExperience
+                  ? "modernCourseView.common.saveChanges"
+                  : "modernCourseView.common.close",
+              )}
             </Button>
           </div>
         </div>

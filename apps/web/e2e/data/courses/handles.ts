@@ -153,6 +153,7 @@ export const COURSE_OVERVIEW_HANDLES = {
   SETTINGS_BUTTON: "course-overview-settings-button",
   EDIT_MEDIA_BUTTON: "course-overview-edit-media-button",
   SETTINGS_DRAWER: "course-overview-settings-drawer",
+  settingsTab: (tab: string) => `course-overview-settings-tab-${tab}`,
   AUTHOR_CARD: "course-overview-author-card",
   AUTHOR_TRANSFER_BUTTON: "course-overview-author-transfer-button",
   TRANSFER_OWNERSHIP_SELECT: "course-transfer-ownership-select",

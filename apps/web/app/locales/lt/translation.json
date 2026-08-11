@@ -5020,6 +5020,7 @@
       "daysLeft_other": "Liko {{count}} dienų",
       "certificate": "Sertifikatas",
       "uponCompletion": "Baigus kursą",
+      "notIssuedYet": "Dar neišduotas",
       "aboutAuthor": "Apie autorių"
     },
     "certificate": {

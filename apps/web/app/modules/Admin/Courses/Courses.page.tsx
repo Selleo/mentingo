@@ -317,7 +317,7 @@ const Courses = () => {
   };
 
   const handleRowClick = (courseId: string) => {
-    navigate(`/admin/beta-courses/${courseId}`);
+    navigate(`/course/${courseId}`);
   };
 
   return (

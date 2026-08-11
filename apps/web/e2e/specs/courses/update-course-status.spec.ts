@@ -2,7 +2,10 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { COURSE_TAB_VALUES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
+import {
+  openCourseOverviewSettingsFlow,
+  selectCourseOverviewSettingsTabFlow,
+} from "../../flows/courses/open-course-overview-settings.flow";
 import { saveCourseStatusFlow } from "../../flows/courses/save-course-status.flow";
 import { selectCourseStatusFlow } from "../../flows/courses/select-course-status.flow";
 
@@ -22,7 +25,8 @@ test("admin can update course status", async ({ cleanup, factories, withWorkerPa
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.STATUS);
+    await openCourseOverviewSettingsFlow(page, course.id);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.STATUS);
     await selectCourseStatusFlow(page, "private");
     await saveCourseStatusFlow(page);
 

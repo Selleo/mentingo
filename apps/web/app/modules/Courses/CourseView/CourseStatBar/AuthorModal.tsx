@@ -79,7 +79,7 @@ export default function AuthorModal({
         aria-describedby={undefined}
       >
         <div className="flex flex-col md:flex-row">
-          <div className="relative flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 p-6 md:w-2/5 md:rounded-l-2xl md:p-8">
+          <div className="relative flex shrink-0 items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 p-6 md:w-72 md:rounded-l-2xl">
             <button
               type="button"
               aria-label={t("modernCourseView.author.close")}
@@ -92,11 +92,11 @@ export default function AuthorModal({
             <UserAvatar
               userName={authorFullName}
               profilePictureUrl={author?.profilePictureUrl}
-              className="size-30"
+              className="size-24 min-h-24 min-w-24 max-h-24 max-w-24 md:size-28 md:min-h-28 md:min-w-28 md:max-h-28 md:max-w-28"
             />
           </div>
 
-          <div className="relative p-4 md:w-3/5 md:p-6 lg:p-8">
+          <div className="relative min-w-0 flex-1 p-4 md:p-6 lg:p-8">
             <button
               type="button"
               aria-label={t("modernCourseView.author.close")}

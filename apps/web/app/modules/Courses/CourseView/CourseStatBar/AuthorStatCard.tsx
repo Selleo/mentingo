@@ -36,21 +36,21 @@ export default function AuthorStatCard({
       data-testid={COURSE_OVERVIEW_HANDLES.AUTHOR_CARD}
       onClick={onOpen}
       className={cn(
-        "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg transition-all hover:bg-neutral-50 hover:shadow-xl",
+        "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-sm transition-all hover:bg-neutral-50 hover:shadow-xl",
         {
           "opacity-50 hover:bg-neutral-100 hover:opacity-75":
             isAdminExperience && !showAuthorSection,
         },
       )}
     >
-      <div className="absolute inset-y-0 left-0 w-1 bg-primary-700" aria-hidden="true" />
+      <div className="absolute inset-y-0 left-0 w-1.5 bg-primary-700" aria-hidden="true" />
       <div className="flex items-center gap-4">
         <UserAvatar
           userName={authorName}
           profilePictureUrl={author?.profilePictureUrl}
-          className="size-8"
+          className="size-12 min-h-12 min-w-12 max-h-12 max-w-12 flex-none"
         />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
             {t("modernCourseView.stats.aboutAuthor")}
           </p>

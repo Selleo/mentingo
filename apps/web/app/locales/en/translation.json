@@ -5037,6 +5037,7 @@
       "daysLeft_other": "{{count}} days left",
       "certificate": "Certificate",
       "uponCompletion": "Upon completion",
+      "notIssuedYet": "Not issued yet",
       "aboutAuthor": "About author"
     },
     "certificate": {

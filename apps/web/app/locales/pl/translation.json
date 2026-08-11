@@ -5079,6 +5079,7 @@
       "daysLeft_many": "Pozostało {{count}} dni",
       "certificate": "Certyfikat",
       "uponCompletion": "Po ukończeniu",
+      "notIssuedYet": "Jeszcze niewydany",
       "aboutAuthor": "O autorze"
     },
     "certificate": {

@@ -33,7 +33,7 @@ describe("CourseDescriptionModal", () => {
       />,
     );
 
-    expect(screen.getByRole("dialog", { name: "About this course" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
 

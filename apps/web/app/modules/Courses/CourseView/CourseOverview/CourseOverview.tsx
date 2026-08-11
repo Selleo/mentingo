@@ -14,7 +14,6 @@ import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia
 import { useCategories, useCurrentUser } from "~/api/queries";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
-import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,6 +28,7 @@ import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { cn } from "~/lib/utils";
 import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
 import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
@@ -91,7 +91,7 @@ export default function CourseOverview({
   const { getSessionForFile, uploadVideo, isUploading: isUploadingTrailer } = useTusVideoUpload();
 
   const savedImagePosition = course.thumbnailPositionY ?? 50;
-  const imageUrl = course.thumbnailUrl ?? CardPlaceholder;
+  const heroImageUrl = course.thumbnailUrl;
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const trailerInputRef = useRef<HTMLInputElement>(null);
@@ -115,9 +115,21 @@ export default function CourseOverview({
   const { categoryId, description, heroImagePosition, imageFile, title, trailerFile } = watch();
 
   const selectedImagePreviewUrl = useObjectUrl(imageFile);
-  const imagePreviewUrl = selectedImagePreviewUrl ?? imageUrl;
+  const imagePreviewUrl = selectedImagePreviewUrl ?? heroImageUrl;
   const selectedCategoryTitle =
     categories.find((category) => category.id === categoryId)?.title ?? course.category;
+  const supportedScormLessonTypes = new Set<LessonType>([
+    LessonType.CONTENT,
+    LessonType.QUIZ,
+    LessonType.EMBED,
+    LessonType.SCORM,
+  ]);
+  const unsupportedScormExportLessonCount = course.chapters.reduce(
+    (total, chapter) =>
+      total +
+      chapter.lessons.filter((lesson) => !supportedScormLessonTypes.has(lesson.type)).length,
+    0,
+  );
 
   useEffect(() => {
     reset({
@@ -292,11 +304,11 @@ export default function CourseOverview({
   return (
     <section
       data-testid={COURSE_OVERVIEW_HANDLES.HERO}
-      className="mb-4 w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-lg md:mb-6"
+      className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
     >
       <CourseHeroImage
         alt={course.title}
-        imageUrl={imageUrl}
+        imageUrl={heroImageUrl}
         imagePosition={course.thumbnailPositionY}
       >
         {isAdminExperience && (
@@ -306,7 +318,7 @@ export default function CourseOverview({
                 variant="outline"
                 data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
                 onClick={() => setShowSettingsDrawer(true)}
-                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-lg backdrop-blur-sm transition sm:w-auto sm:px-4"
+                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-sm backdrop-blur-sm transition sm:w-auto sm:px-4"
               >
                 <Settings className="size-4 text-primary-700" />
 
@@ -319,7 +331,7 @@ export default function CourseOverview({
                 variant="outline"
                 onClick={openMediaModal}
                 data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
-                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-lg backdrop-blur-sm transition sm:w-auto sm:px-4"
+                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-sm backdrop-blur-sm transition sm:w-auto sm:px-4"
               >
                 <Upload className="size-4 text-primary-700" />
 
@@ -467,10 +479,15 @@ export default function CourseOverview({
       )}
 
       <CourseSettingsDrawer
+        currency={course.currency}
         courseId={course.id}
+        language={language}
         onOpenChange={setShowSettingsDrawer}
         open={showSettingsDrawer}
+        priceInCents={course.priceInCents}
+        status={course.status}
         title={t("modernCourseView.overview.courseSettings")}
+        unsupportedLessonCount={unsupportedScormExportLessonCount}
       />
     </section>
   );

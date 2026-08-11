@@ -46,7 +46,7 @@ test("admin can update course settings", async ({ cleanup, factories, withWorker
       .toEqual({
         title: updatedTitle,
         categoryId: updatedCategory.id,
-        description: updatedDescription,
+        description: `<p>${updatedDescription}</p>`,
       });
   });
 });
