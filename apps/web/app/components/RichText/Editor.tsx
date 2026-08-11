@@ -26,6 +26,7 @@ type RichTextEditorVariant =
 type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
+  onBlur?: (editor: TiptapEditor | null) => void;
   onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
   onCtrlSave?: (editor: TiptapEditor | null) => void;
   uploadProgress?: number | null;
@@ -60,6 +61,7 @@ const Editor = ({
   placeholder,
   ariaLabel,
   onChange,
+  onBlur,
   onUpload,
   onCtrlSave,
   id,
@@ -170,6 +172,7 @@ const Editor = ({
       lastEmittedContentRef.current = nextContent;
       onChange(nextContent);
     },
+    onBlur: ({ editor }) => onBlur?.(editor),
     onDrop: handleDrop,
     editorProps: {
       handleKeyDown,

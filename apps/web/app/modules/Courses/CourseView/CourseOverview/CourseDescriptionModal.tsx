@@ -26,12 +26,14 @@ export default function CourseDescriptionModal({
   const { course, isAdminExperience } = useCourseAccessProvider();
   const { t } = useTranslation();
   const saveAndClose = async () => {
-    await onSaveDescription();
+    if (isAdminExperience) {
+      await onSaveDescription();
+    }
     onClose();
   };
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && void saveAndClose()}>
       <DialogContent
         className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-4xl overflow-x-hidden overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
         noCloseButton
@@ -47,7 +49,7 @@ export default function CourseDescriptionModal({
               variant="ghost"
               size="icon"
               aria-label={t("modernCourseView.overview.closeDetails")}
-              onClick={onClose}
+              onClick={() => void saveAndClose()}
               className="rounded-full"
             >
               <X className="size-5 text-neutral-800" />
@@ -76,6 +78,7 @@ export default function CourseDescriptionModal({
                 <BaseEditor
                   content={courseDescription}
                   onChange={onChangeDescription}
+                  onBlur={() => void onSaveDescription()}
                   placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
                   onCtrlSave={() => void saveAndClose()}
                   parentClassName="min-w-0"
@@ -111,7 +114,7 @@ export default function CourseDescriptionModal({
             <Button
               type="button"
               variant="primary"
-              onClick={() => void (isAdminExperience ? saveAndClose() : Promise.resolve(onClose()))}
+              onClick={() => void saveAndClose()}
               className="px-6 font-semibold"
             >
               {t(
