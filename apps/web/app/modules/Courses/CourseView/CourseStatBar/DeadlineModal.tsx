@@ -44,7 +44,7 @@ function DeadlineDatePicker({ deadline, onChange, placeholder }: DeadlineDatePic
   const currentYear = new Date().getFullYear();
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -57,7 +57,12 @@ function DeadlineDatePicker({ deadline, onChange, placeholder }: DeadlineDatePic
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-2">
+      <PopoverContent
+        align="start"
+        className="z-[70] w-auto p-2"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
         <Calendar
           variant="default"
           mode="single"

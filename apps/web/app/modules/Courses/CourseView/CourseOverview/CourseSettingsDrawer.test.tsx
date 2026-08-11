@@ -10,6 +10,10 @@ vi.mock("~/modules/Admin/EditCourse/CourseSettings/components/CourseSettingsSwit
   CourseSettingsSwitches: () => <div>Course settings switches</div>,
 }));
 
+vi.mock("~/modules/Admin/EditCourse/hooks/useEditCourseTabs", () => ({
+  useEditCourseTabs: () => [{ label: "Status", value: "status" }],
+}));
+
 describe("CourseSettingsDrawer", () => {
   it("uses dialog semantics and closes through the Sheet API", async () => {
     const user = userEvent.setup();
@@ -18,9 +22,12 @@ describe("CourseSettingsDrawer", () => {
     renderWith().render(
       <CourseSettingsDrawer
         courseId="course-id"
+        language="en"
         onOpenChange={onOpenChange}
         open
+        status="draft"
         title="Course settings"
+        unsupportedLessonCount={0}
       />,
     );
 

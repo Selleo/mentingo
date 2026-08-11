@@ -27,8 +27,8 @@ export default function ProgressStatCard({
   const timeLeftLabel = isAdminExperience ? 0 : formatDuration(timeLeftSeconds, t);
 
   return (
-    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 shadow-lg">
-      <div className="absolute inset-y-0 left-0 w-1 bg-success-500" aria-hidden="true" />
+    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 pl-6 shadow-sm">
+      <div className="absolute inset-y-0 left-0 w-1.5 bg-success-500" aria-hidden="true" />
       <div
         className={cn("flex w-full items-center gap-4 transition-all duration-200", {
           "opacity-45 group-hover:blur-[2px]": isAdminExperience,

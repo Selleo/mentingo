@@ -39,7 +39,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
             <Card
               data-testid={COURSE_PRICING_HANDLES.FREE_CARD}
               className={cn(
-                "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
+                "flex w-full cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
                   "border-primary-500 bg-primary-50": isFree === true,
                 },
@@ -74,7 +74,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
             <Card
               data-testid={COURSE_PRICING_HANDLES.PAID_CARD}
               className={cn(
-                "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
+                "flex w-full cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
                   "border-primary-500 bg-primary-50": isFree === false,
                 },

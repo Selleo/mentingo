@@ -120,6 +120,10 @@ vi.mock("./ProgressStatCard", () => ({
   default: () => null,
 }));
 
+vi.mock("../CourseCertificate", () => ({
+  default: () => null,
+}));
+
 vi.mock("./DeadlineStatCard", () => ({
   default: ({ isAdminExperience, onOpen }: { isAdminExperience: boolean; onOpen: () => void }) =>
     isAdminExperience ? (

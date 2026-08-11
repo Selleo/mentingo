@@ -132,7 +132,7 @@ export default function CourseViewPage() {
       <CourseAccessProvider course={course}>
         <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBanner />}>
           <div className="flex w-full min-w-0 max-w-full flex-col">
-            <div className="flex min-w-0 flex-col gap-y-6 overflow-hidden">
+            <div className="flex min-w-0 flex-col gap-y-3 overflow-hidden pb-3 md:gap-y-4 md:pb-4">
               <CourseOverview
                 language={language}
                 onLanguageChange={handleCourseLanguageChange}

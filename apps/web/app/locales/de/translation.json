@@ -5014,6 +5014,7 @@
       "daysLeft_other": "Noch {{count}} Tage",
       "certificate": "Zertifikat",
       "uponCompletion": "Nach Abschluss",
+      "notIssuedYet": "Noch nicht ausgestellt",
       "aboutAuthor": "Über den Autor"
     },
     "certificate": {
