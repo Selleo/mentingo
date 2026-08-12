@@ -53,7 +53,7 @@ export async function truncateAllTables(
   await connection.execute(
     sql.raw(`
       SET session_replication_role = 'replica';
-      TRUNCATE TABLE ${tableNames} RESTART IDENTITY;
+      TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE;
       SET session_replication_role = 'origin';
       `),
   );
@@ -86,10 +86,20 @@ export async function cookieFor(
     loginRequest.set("Referer", referer.endsWith("/") ? referer : `${referer}/`);
   }
 
-  const loginResponse = await loginRequest.send({
-    email: user.email,
-    password: user.credentials?.password,
-  });
+  const loginResponse = await loginRequest
+    .send({
+      email: user.email,
+      password: user.credentials?.password,
+    })
+    .expect(201);
 
-  return loginResponse.headers["set-cookie"];
+  const cookies = loginResponse.headers["set-cookie"];
+
+  if (!cookies) {
+    throw new Error(`E2E login returned no cookies for ${user.email}`);
+  }
+
+  const cookieHeaders = Array.isArray(cookies) ? cookies : [cookies];
+
+  return cookieHeaders.map((cookie) => cookie.split(";", 1)[0]).join("; ");
 }

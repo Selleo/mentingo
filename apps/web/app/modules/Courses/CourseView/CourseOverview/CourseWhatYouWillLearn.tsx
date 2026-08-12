@@ -11,6 +11,7 @@ import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseWhatYouWillLearnProps = {
   courseOutcomes?: string[];
+  idOrSlug: string;
   language: SupportedLanguages;
 };
 
@@ -24,6 +25,7 @@ const areOutcomesEqual = (first: string[], second: string[]) =>
 
 export default function CourseWhatYouWillLearn({
   courseOutcomes = [],
+  idOrSlug,
   language,
 }: CourseWhatYouWillLearnProps) {
   const { t } = useTranslation();
@@ -65,6 +67,7 @@ export default function CourseWhatYouWillLearn({
         language,
         learningOutcomes: normalizedOutcomes,
       },
+      courseOverviewCache: { idOrSlug, language },
     });
   };
 

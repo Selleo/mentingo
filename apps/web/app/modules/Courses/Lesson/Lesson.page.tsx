@@ -3,7 +3,8 @@ import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { courseQueryOptions, useCourse, useCurrentUser, useLesson } from "~/api/queries";
+import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
+import { courseQueryOptions, getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
@@ -124,7 +125,7 @@ export default function LessonPage() {
       if (lessonIndex !== -1) {
         if (lessonIndex + 1 < chapter.lessons.length) {
           const nextLessonId = chapter.lessons[lessonIndex + 1].id;
-          queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+          queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId) });
           navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
             state: { chapterId: chapter.id },
           });
@@ -132,7 +133,7 @@ export default function LessonPage() {
           const currentChapterIndex = chapters.indexOf(chapter);
           if (currentChapterIndex + 1 < chapters.length) {
             const nextLessonId = chapters[currentChapterIndex + 1].lessons[0].id;
-            queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+            queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId) });
             navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
               state: { chapterId: chapters[currentChapterIndex + 1].id },
             });

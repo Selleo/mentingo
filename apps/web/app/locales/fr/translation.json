@@ -4948,5 +4948,145 @@
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
       "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
     }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "saveChanges": "Enregistrer les modifications",
+      "enabled": "Activé",
+      "disabled": "Désactivé"
+    },
+    "learningMode": {
+      "title": "Vous suivez ce cours en mode apprentissage",
+      "description": "Votre progression est suivie. Les leçons terminées comptent dans votre progression personnelle et les statistiques du cours.",
+      "enter": "Entrer en mode apprentissage",
+      "exit": "Quitter le mode apprentissage"
+    },
+    "overview": {
+      "courseSettings": "Paramètres du cours",
+      "manageCategories": "Gérer les catégories",
+      "settingsDescription": "Gérer les paramètres de ce cours.",
+      "titlePlaceholder": "Saisissez le titre du cours...",
+      "editMedia": "Modifier les médias",
+      "continueLearning": "Continuer l'apprentissage",
+      "courseDetails": "Détails du cours",
+      "closeDetails": "Fermer les détails du cours",
+      "aboutCourse": "À propos de ce cours",
+      "description": "Description",
+      "descriptionPlaceholder": "Saisissez la description du cours...",
+      "whatYouWillMaster": "Ce que vous apprendrez",
+      "noLearningOutcomes": "Aucun objectif d'apprentissage ajouté pour le moment.",
+      "learningOutcomePlaceholder": "Ajouter un objectif d'apprentissage...",
+      "addLearningOutcome": "Ajouter un objectif d'apprentissage",
+      "removeLearningOutcome": "Supprimer l'objectif d'apprentissage",
+      "closeSettings": "Fermer les paramètres du cours",
+      "settingsComingSoon": "Paramètres bientôt disponibles",
+      "settingsIntro": "Vous pourrez configurer ici :",
+      "settingsStatus": "Statut du cours (Brouillon/Publié)",
+      "settingsPricing": "Tarification et options de paiement",
+      "settingsAssignments": "Étudiants et groupes assignés",
+      "settingsSequential": "Imposer la validation séquentielle",
+      "settingsVisibility": "Paramètres de visibilité du cours",
+      "settingsPermissions": "Autorisations d'accès"
+    },
+    "media": {
+      "title": "Modifier les médias du cours",
+      "currentImage": "Image principale actuelle — ajuster la position",
+      "previewAlt": "Aperçu de l'image principale du cours",
+      "previewPosition": "Aperçu avec la position actuelle",
+      "verticalPosition": "Position verticale",
+      "uploadImage": "Télécharger une nouvelle image principale",
+      "dropImage": "Déposez l'image principale ici",
+      "browse": "ou cliquez pour parcourir",
+      "imageLimit": "PNG, JPG jusqu'à 10 Mo",
+      "imageRecommendation": "Recommandé : 1920 x 820 px (21:9)",
+      "trailer": "Bande-annonce du cours (facultatif)",
+      "dropVideo": "Déposez la bande-annonce ici",
+      "videoLimit": "MP4, MOV jusqu'à 50 Mo",
+      "videoRecommendation": "Recommandé : 30 à 90 secondes",
+      "save": "Télécharger les médias"
+    },
+    "stats": {
+      "yourProgress": "Votre progression",
+      "remaining": "restant",
+      "courseFinished": "Cours terminé",
+      "chapterProgress_one": "{{completed}} / {{total}} chapitre",
+      "chapterProgress_other": "{{completed}} / {{total}} chapitres",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "pour suivre votre progression.",
+      "deadline": "Date limite",
+      "daysLeft_one": "{{count}} jour restant",
+      "daysLeft_other": "{{count}} jours restants",
+      "certificate": "Certificat",
+      "uponCompletion": "À la fin du cours",
+      "notIssuedYet": "Pas encore délivré",
+      "aboutAuthor": "À propos de l'auteur"
+    },
+    "certificate": {
+      "close": "Fermer les paramètres du certificat",
+      "title": "Paramètres du certificat",
+      "previewTitle": "Certificat de réussite",
+      "certifies": "Le présent certificat atteste que",
+      "completed": "a terminé avec succès",
+      "signaturePlaceholder": "Emplacement de la signature",
+      "enable": "Activer le certificat",
+      "enableDescription": "Les étudiants recevront un certificat à la fin du cours",
+      "fontColor": "Couleur de la police",
+      "uploadSignature": "Télécharger la signature",
+      "uploadSignatureHint": "Cliquez pour télécharger l'image de la signature",
+      "signatureLimit": "PNG, JPG jusqu'à 2 Mo",
+      "save": "Enregistrer le certificat"
+    },
+    "deadline": {
+      "close": "Fermer les paramètres de date limite",
+      "title": "Paramètres des dates limites",
+      "enable": "Activer les dates limites",
+      "enableDescription": "Définissez des dates limites spécifiques pour différents groupes",
+      "current": "Date limite actuelle : {{deadline}}"
+    },
+    "author": {
+      "close": "Fermer les paramètres de l'auteur",
+      "pictureAlt": "Photo de l'auteur",
+      "showSection": "Afficher la section de l'auteur",
+      "showSectionDescription": "Afficher les informations sur l'auteur sur la page du cours",
+      "otherCourses": "Autres cours"
+    },
+    "contents": {
+      "title": "Table des matières",
+      "statistics": "Statistiques",
+      "edit": "Modifier le contenu",
+      "missingTranslationsTitle": "Traductions manquantes",
+      "missingTranslationsDescription": "Certains contenus du cours ne sont pas traduits dans la langue sélectionnée.",
+      "completedChapters_one": "{{count}} chapitre terminé",
+      "completedChapters_other": "{{count}} chapitres terminés",
+      "lessons_one": "{{count}} leçon",
+      "lessons_other": "{{count}} leçons",
+      "showAllChapters": "Afficher tous les chapitres ({{count}} de plus)",
+      "courseStatistics": "Statistiques du cours",
+      "statisticsDescription": "Aperçu de la progression et de l'engagement des étudiants",
+      "totalStudents": "Nombre total d'étudiants",
+      "completionRate": "Taux de réussite",
+      "averageTime": "Temps moyen passé",
+      "averageRating": "Note moyenne",
+      "detailedStatisticsSoon": "Statistiques détaillées bientôt disponibles",
+      "detailedStatisticsDescription": "Cette section affichera des analyses détaillées, notamment la progression des étudiants au fil du temps, les taux de validation des chapitres, les indicateurs d'engagement et plus encore.",
+      "status": {
+        "started": "Commencé",
+        "completed": "Terminé",
+        "inProgress": "En cours",
+        "notStarted": "Non commencé"
+      },
+      "lessonTypes": {
+        "content": "Contenu",
+        "quiz": "Quiz",
+        "aiMentor": "Mentor IA",
+        "lesson": "Leçon"
+      }
+    }
   }
 }
