@@ -38,7 +38,7 @@ export class AutomationLogsRepository {
     return this.db.select().from(automationLogs);
   }
 
-  async GetByAutomationId(automationId: UUIDType) {
+  async getByAutomationId(automationId: UUIDType) {
     return this.db
       .select()
       .from(automationLogs)

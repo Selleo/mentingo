@@ -51,7 +51,7 @@ export default function AutomationBuilderPage() {
   const loadNodes = useBuilderStore((s) => s.loadNodes);
   const reset = useBuilderStore((s) => s.reset);
   const setAutomationName = useBuilderStore((s) => s.setAutomationName);
-  const setActive = useBuilderStore((s) => s.setActive);
+  const setStatus = useBuilderStore((s) => s.setStatus);
   const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
 
   const { data: automation } = useAutomationById(automationId);
@@ -86,13 +86,13 @@ export default function AutomationBuilderPage() {
 
       if (hasInvalidNodes) {
         setSimulationPassed(false);
-        setActive(false);
+        setStatus("draft");
       } else {
         setSimulationPassed(savedSimulationPassed);
-        setActive(automation.status === "enabled");
+        setStatus(automation.status);
       }
     }
-  }, [automation]);
+  }, [automation, loadNodes, reset, setAutomationName, setSimulationPassed, setStatus]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

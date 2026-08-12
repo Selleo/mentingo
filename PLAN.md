@@ -2,13 +2,14 @@
 
 ## Scope and status
 
-This plan turns [`FEEDBACK.md`](./FEEDBACK.md) into an implementation sequence. The review turn was documentation-only: no application feedback below has been implemented. The two review documents are the only completed deliverables.
+This plan turns [`FEEDBACK.md`](./FEEDBACK.md) into an implementation sequence. The implementation pass has addressed the core backend/API, generated-client, lifecycle, seed, and delivery-boundary findings. Remaining validation and scale work is explicit below.
 
 Status vocabulary:
 
 - **Not implemented:** identified during review; no code change was made.
+- **Partially implemented:** code changes exist, but required validation or part of the finding remains outstanding.
 - **Ready to implement:** acceptance criteria are defined, but implementation still requires an authorized coding pass.
-- **Implemented:** code and the relevant validation have been completed. None of the application findings are in this state.
+- **Implemented:** code and the relevant validation have been completed.
 
 ## Phase 0 — Rebase and establish a safe baseline
 
@@ -18,7 +19,7 @@ Status vocabulary:
 
 **Exit criteria:** the branch is based on current `staging`, the worktree is clean except for intentional changes, and all subsequent migration/file references are based on the rebased tree.
 
-Status: **Not implemented**
+Status: **Partially implemented** — staging was merged and the migration chain was regenerated through 0184; local upgrade application and journal/tail validation pass, while a separate fresh/staging-upgrade rehearsal remains pending.
 
 ## Phase 1 — Make the database migration chain deployable
 
@@ -32,7 +33,7 @@ Feedback: **F-01**
 
 **Exit criteria:** one deterministic migration chain works both from empty and existing staging databases, including email-template RLS.
 
-Status: **Not implemented**
+Status: **Partially implemented** — schemas, validation decorators, generated artifacts, graph validation, exact trigger matching, and no-row handling are implemented; full HTTP contract tests and structured node-level error mapping remain pending.
 
 ## Phase 2 — Establish authoritative API and graph contracts
 
@@ -49,7 +50,7 @@ Feedback: **F-03, F-04, F-15, F-16, F-17**
 
 **Exit criteria:** malformed or cross-automation graphs receive 400 responses, tenant/permission boundaries are enforced server-side, and generated web types describe the actual API.
 
-Status: **Not implemented**
+Status: **Partially implemented** — atomic save, runner safeguards, tenant-aware rendering, localized resolution, seed hardening, and queued retryable email delivery are implemented; cross-module delivery/idempotency and end-to-end validation remain pending.
 
 ## Phase 3 — Make save and execution reliable
 
@@ -66,7 +67,7 @@ Feedback: **F-05, F-07, F-08, F-09, F-10, F-13, F-14**
 
 **Exit criteria:** a save is atomic from the user's perspective, enabled workflows cannot run an invalid/empty tree, delivery can be retried without duplicate sends, and localized branded emails are correct.
 
-Status: **Not implemented**
+Status: **Partially implemented** — atomic save, runner safeguards, tenant-aware rendering, localized resolution, seed hardening, and queued retryable email delivery are implemented; cross-module delivery/idempotency and end-to-end validation remain pending.
 
 ## Phase 4 — Align web permissions and lifecycle UX
 
@@ -83,7 +84,7 @@ Feedback: **F-02, F-06, F-11, F-12, U-01 through U-08**
 
 **Exit criteria:** an automation-only administrator can discover, edit, save, pause, and recover from errors without encountering a route/API mismatch or ambiguous lifecycle state.
 
-Status: **Not implemented**
+Status: **Partially implemented** — permission/client/lifecycle/autosave/create-to-builder/responsive modal work is implemented; persistent save-state UI, server pagination/filtering, and keyboard/error-placement polish remain pending.
 
 ## Phase 5 — Test and cleanup
 
@@ -97,32 +98,39 @@ Feedback: **F-18** and maintainability feedback
 
 **Exit criteria:** tests cover the cross-module paths that caused the blocking findings, dead/duplicate code is removed, and all failures are either fixed or explicitly documented as pre-existing.
 
-Status: **Not implemented**
+Status: **Partially implemented** — focused API/web unit coverage and migration metadata checks are in place; cross-module API/browser E2E and fresh/upgrade database rehearsals remain pending.
 
 ## Feedback implementation matrix
 
 | Feedback | Area | Feasibility | Implementation status | Required validation |
 | --- | --- | ---: | --- | --- |
-| F-01 | Migrations/RLS | Low | Not implemented | Fresh and staging-upgrade migration tests |
-| F-02 | API/web permissions | High | Not implemented | API 403/200 tests and route/navigation permission test |
-| F-03 | Graph integrity | Medium | Not implemented | Cross-automation, missing-parent, duplicate, cycle tests |
-| F-04 | Runtime API schemas | Medium | Not implemented | 400 contract tests, Swagger/client regeneration, typecheck |
-| F-05 | Atomic save | Low | Not implemented | Transaction failure/retry and save-navigation E2E |
-| F-06 | Generated client | High | Not implemented | Generated client usage search and web typecheck |
-| F-07 | Empty execution | High | Not implemented | Empty/invalid enabled-tree runner test |
-| F-08 | Delivery reliability | Low | Not implemented | Per-recipient retry/idempotency integration test |
-| F-09 | Email rendering | Medium | Not implemented | Branded HTML/text/logo/language delivery test |
-| F-10 | Inactivity locale | High | Not implemented | User-preference localization test |
-| F-11 | Navigation permission | High | Not implemented | Automation-only admin E2E |
-| F-12 | Lifecycle semantics | High | Not implemented | Enabled/disabled/draft transition tests and UI E2E |
-| F-13 | Default seed | Medium | Not implemented | Concurrent/idempotent seed test |
-| F-14 | Announcement locale | Medium | Not implemented | Supported-language and fallback tests |
-| F-15 | Trigger equality | High | Not implemented | Exact event-name repository test |
-| F-16 | Logging/errors | High | Not implemented | No debug output and no-row error tests |
-| F-17 | Validation ownership | Medium | Not implemented | Structured server validation mapped in builder |
-| F-18 | Cross-module tests | Medium | Not implemented | Focused API/web E2E and migration checks |
-| U-01–U-08 | UI/UX | Medium | Not implemented | Save, lifecycle, responsive, permission, and scale E2E |
+| F-01 | Migrations/RLS | Low | Partially implemented | Fresh and staging-upgrade migration tests |
+| F-02 | API/web permissions | High | Implemented | API 403/200 tests and route/navigation permission test |
+| F-03 | Graph integrity | Medium | Implemented | Cross-automation, missing-parent, duplicate, cycle tests |
+| F-04 | Runtime API schemas | Medium | Partially implemented | 400 contract tests, Swagger/client regeneration, typecheck |
+| F-05 | Atomic save | Low | Implemented | Transaction failure/retry and save-navigation E2E |
+| F-06 | Generated client | High | Implemented | Generated client usage search and web typecheck |
+| F-07 | Empty execution | High | Partially implemented | Empty/invalid enabled-tree runner test |
+| F-08 | Delivery reliability | Low | Partially implemented | Per-recipient retry/idempotency integration test |
+| F-09 | Email rendering | Medium | Partially implemented | Branded HTML/text/logo/language delivery test |
+| F-10 | Inactivity locale | High | Partially implemented | User-preference localization test |
+| F-11 | Navigation permission | High | Implemented | Automation-only admin E2E |
+| F-12 | Lifecycle semantics | High | Implemented | Enabled/disabled/draft transition tests and UI E2E |
+| F-13 | Default seed | Medium | Partially implemented | Concurrent/idempotent seed test |
+| F-14 | Announcement locale | Medium | Partially implemented | Supported-language and fallback tests |
+| F-15 | Trigger equality | High | Partially implemented | Exact event-name repository test |
+| F-16 | Logging/errors | High | Implemented | No debug output and no-row error tests |
+| F-17 | Validation ownership | Medium | Partially implemented | Structured server validation mapped in builder |
+| F-18 | Cross-module tests | Medium | Partially implemented | Focused API/web E2E and migration checks |
+| U-01 | Save/recovery UX | Medium | Partially implemented | Persistent save-state and recovery E2E |
+| U-02 | Lifecycle vocabulary | High | Implemented | Lifecycle E2E |
+| U-03 | Create-to-builder | High | Implemented | Create flow E2E |
+| U-04 | Autosave reliability | Medium | Implemented | Close/race E2E |
+| U-05 | Localized merge | Medium | Implemented | Multi-locale save test |
+| U-06 | Responsive action editor | Medium | Partially implemented | Responsive/accessibility E2E |
+| U-07 | List/log scale controls | Medium | Not implemented | Pagination/filter URL E2E |
+| U-08 | Theme/error placement | Medium | Not implemented | Dark-mode/node-error E2E |
 
 ## Final implementation gate
 
-Do not merge until F-01 through F-05 are resolved and validated on a branch rebased with `staging`. After that, resolve the remaining API/client and execution findings, then complete the permission/lifecycle UX and cross-module tests. Re-request review with the final migration diff, generated artifact diff, exact test commands/results, and any explicitly accepted non-blocking gaps.
+Do not merge until the remaining F-01/F-04 validation gaps and cross-module tests are resolved on the staging-based branch. Server-side list/log scale controls and the remaining UI polish can follow as separate work if product scope permits. Re-request review with the final migration diff, generated artifact diff, exact test commands/results, and any explicitly accepted non-blocking gaps.

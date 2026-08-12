@@ -10,6 +10,7 @@ import { UserModule } from "src/user/user.module";
 
 import { AutomationLogsController } from "./automation-logs/automation-logs.controller";
 import { AutomationDataResolverService } from "./automation-runner/automation-data-resolver.service";
+import { AutomationEmailDeliveryWorker } from "./automation-runner/automation-email-delivery.worker";
 import { AutomationRunnerService } from "./automation-runner/automation-runner.service";
 import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
@@ -42,6 +43,7 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationStepsRepository,
     AutomationsHandler,
     AutomationRunnerService,
+    AutomationEmailDeliveryWorker,
     AutomationDataResolverService,
     AutomationTemplateService,
     AutomationSimulationService,

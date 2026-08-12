@@ -26,10 +26,12 @@ import {
   UsersShortInactivityEvent,
   UserWelcomeEvent,
 } from "src/events";
+import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { courses, studentCourses, users } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
+import { getLocalizedText } from "src/utils/jsonb";
 
 import type { AutomationResolvedRecipient } from "./automation-data-resolver.types";
 import type { AutomationEventTypes } from "../handlers/automations-handler";
@@ -46,6 +48,7 @@ export class AutomationDataResolverService {
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly courseChatRepository: CourseChatRepository,
     private readonly tenantRunner: TenantDbRunnerService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async resolve(event: AutomationEventTypes): Promise<AutomationResolvedRecipient[]> {
@@ -272,6 +275,7 @@ export class AutomationDataResolverService {
     const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
 
     return inactiveUsers.map((u) => ({
+      userId: u.userId,
       userEmail: u.email,
       tenantId,
       variables: {
@@ -292,6 +296,7 @@ export class AutomationDataResolverService {
     const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
 
     return inactiveUsers.map((u) => ({
+      userId: u.userId,
       userEmail: u.email,
       tenantId,
       variables: {
@@ -510,8 +515,6 @@ export class AutomationDataResolverService {
 
     const tenantId = announcement.tenantId;
     const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
-    const title = String(Object.values(announcement.title ?? {})[0] ?? "");
-    const content = String(Object.values(announcement.content ?? {})[0] ?? "");
     const announcementUrl = `${origin}/announcements`;
 
     const recipients =
@@ -523,6 +526,7 @@ export class AutomationDataResolverService {
 
     for (const recipient of recipients) {
       const user = await this.getUserSafe(recipient.id);
+      const language = await this.resolveUserLanguage(recipient.id);
 
       results.push({
         userId: recipient.id,
@@ -531,8 +535,8 @@ export class AutomationDataResolverService {
         variables: {
           userFirstName: user?.firstName ?? "",
           userLastName: user?.lastName ?? "",
-          announcementTitle: title,
-          announcementContent: content,
+          announcementTitle: getLocalizedText(announcement.title, language) ?? "",
+          announcementContent: getLocalizedText(announcement.content, language) ?? "",
           announcementUrl,
         },
       });
@@ -617,6 +621,14 @@ export class AutomationDataResolverService {
     } catch {
       this.logger.warn(`Could not resolve user ${userId} for automation data`);
       return null;
+    }
+  }
+
+  private async resolveUserLanguage(userId: UUIDType) {
+    try {
+      return (await this.settingsService.getUserSettings(userId, this.dbAdmin)).language ?? "en";
+    } catch {
+      return "en";
     }
   }
 

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
+import { validateAutomationStepTree } from "../schemas/automation-tree.validation";
 
 import type {
   AutomationStep,
@@ -25,6 +26,10 @@ export class AutomationStepsService {
 
   async getAllAutomationSteps(automationId: UUIDType) {
     return this.automationStepsRepository.getAllAutomationStepsByAutomationId(automationId);
+  }
+
+  async getTriggerNamesByTenantId(tenantId: UUIDType) {
+    return this.automationStepsRepository.getTriggerNamesByTenantId(tenantId);
   }
 
   async getAutomationStepById(stepId: UUIDType) {
@@ -58,21 +63,8 @@ export class AutomationStepsService {
     return updatedId;
   }
 
-  async ReplaceAutomationStepTree(automationId: UUIDType, input: AutomationStepBulkUpdate[]) {
-    const roots = input.filter((step) => step.parentId == null);
-    if (roots.length !== 1) {
-      throw new BadRequestException("automationSteps.toast.wrongNumberOfRoots");
-    }
-    const root = this.buildStepGraph(input as AutomationStep[]);
-    const hasCycle = this.hasCycle(root);
-    const isConnected = this.isConnected(root, input.length);
-
-    if (hasCycle) {
-      throw new BadRequestException("automationSteps.toast.cycleDetected");
-    }
-    if (!isConnected) {
-      throw new BadRequestException("automationSteps.toast.treeNotConnected");
-    }
+  async replaceAutomationStepTree(automationId: UUIDType, input: AutomationStepBulkUpdate[]) {
+    validateAutomationStepTree(automationId, input);
 
     const res = await this.automationStepsRepository.replaceAutomationStepTree(automationId, input);
     if (!res) {
@@ -95,19 +87,6 @@ export class AutomationStepsService {
     return stepId;
   }
 
-  private async deletePreviousTree(automationId: UUIDType) {
-    const allSteps = await this.getAllAutomationSteps(automationId);
-    if (allSteps.length > 0) {
-      const rootStep = allSteps.find((step) => step.parentId == null);
-      if (!rootStep) {
-        throw new BadRequestException("automationSteps.toast.updateFailed");
-      }
-      const deletedId = await this.deleteAutomationStep(rootStep.id);
-      if (!deletedId) {
-        throw new BadRequestException("automationSteps.toast.deleteFailed");
-      }
-    }
-  }
   private async getIdsToDeleteCascade(stepId: UUIDType) {
     const stepToDelete = await this.getAutomationStepById(stepId);
     const allSteps = await this.getAllAutomationSteps(stepToDelete.automationId);
@@ -175,31 +154,10 @@ export class AutomationStepsService {
     }
 
     if (input.parentId) {
-      await this.getAutomationStepById(input.parentId);
-    }
-  }
-
-  private async validateTree(input: AutomationStepRecordInput) {
-    const fetchedSteps = (await this.getAllAutomationSteps(input.automationId)) as AutomationStep[];
-
-    if (fetchedSteps.length === 0) {
-      return;
-    }
-
-    const stepToInsert: AutomationStep = {
-      id: "-1",
-      automationId: input.automationId,
-      parentId: input.parentId,
-      type: input.type,
-      typeContext: input.typeContext,
-    };
-
-    fetchedSteps.push(stepToInsert);
-
-    const root = this.buildStepGraph(fetchedSteps);
-
-    if (this.hasCycle(root)) {
-      throw new BadRequestException("automationSteps.toast.cycleDetected");
+      const parent = await this.getAutomationStepById(input.parentId);
+      if (parent.automationId !== input.automationId) {
+        throw new BadRequestException("automationSteps.toast.automationIdMismatch");
+      }
     }
   }
 
@@ -237,53 +195,4 @@ export class AutomationStepsService {
     return root;
   }
 
-  private hasCycle(root: StepNode) {
-    const visited = new Set<UUIDType>();
-    const visiting = new Set<UUIDType>();
-
-    function dfs(node: StepNode): boolean {
-      const id = node.value.id;
-
-      if (visiting.has(id)) {
-        return true;
-      }
-
-      if (visited.has(id)) {
-        return false;
-      }
-
-      visiting.add(id);
-
-      for (const child of node.children) {
-        if (dfs(child)) {
-          return true;
-        }
-      }
-
-      visiting.delete(id);
-      visited.add(id);
-
-      return false;
-    }
-
-    return dfs(root);
-  }
-
-  private isConnected(root: StepNode, numberOfSteps: number) {
-    const visited = new Set<UUIDType>();
-
-    const dfs = (node: StepNode) => {
-      if (visited.has(node.value.id)) {
-        return;
-      }
-
-      visited.add(node.value.id);
-      for (const child of node.children) {
-        dfs(child);
-      }
-    };
-    dfs(root);
-
-    return visited.size === numberOfSteps;
-  }
 }

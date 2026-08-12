@@ -32,6 +32,7 @@ describe("AutomationsController", () => {
             getAutomationById: jest.fn(),
             updateAutomation: jest.fn(),
             updateStatus: jest.fn(),
+            saveAutomation: jest.fn(),
             deleteAutomation: jest.fn(),
           },
         },
@@ -106,7 +107,6 @@ describe("AutomationsController", () => {
   describe("createAutomation", () => {
     it("creates automation and returns BaseResponse", async () => {
       const input = {
-        tenantId,
         name: { en: "New Automation" },
         description: { en: "Description" },
         status: AutomationStatus.Draft,

@@ -51,7 +51,7 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
     ],
   });
   const { hasAccess: canManageAutomation } = usePermissions({
-    required: PERMISSIONS.AUTOMATION_MANAGE || PERMISSIONS.USER_MANAGE,
+    required: PERMISSIONS.AUTOMATION_MANAGE,
   });
   const navigate = useNavigate();
 

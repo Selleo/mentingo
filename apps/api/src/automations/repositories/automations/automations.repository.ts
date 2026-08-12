@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { buildJsonbFieldWithMultipleEntries, mergeJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB } from "src/storage/db/db.providers";
 import { automationLogs, automations } from "src/storage/schema";
 
@@ -62,30 +63,36 @@ export class AutomationsRepository {
     return automation;
   }
   async updateAutomation(automationId: UUIDType, input: AutomationRecordUpdateInput) {
-    const setFields: Record<string, unknown> = {};
-    if (input.name !== undefined) setFields.name = input.name;
-    if (input.description !== undefined) setFields.description = input.description;
-    if (input.status !== undefined) setFields.status = input.status;
+    const setFields = {
+      ...(input.name !== undefined && {
+        name: mergeJsonbField(automations.name, buildJsonbFieldWithMultipleEntries(input.name)),
+      }),
+      ...(input.description !== undefined && {
+        description: mergeJsonbField(
+          automations.description,
+          buildJsonbFieldWithMultipleEntries(input.description),
+        ),
+      }),
+      ...(input.status !== undefined && { status: input.status }),
+    };
 
-    if (Object.keys(setFields).length === 0) {
-      return automationId;
-    }
+    if (Object.keys(setFields).length === 0) return undefined;
 
     const [updated] = await this.db
       .update(automations)
       .set(setFields)
       .where(eq(automations.id, automationId))
       .returning();
-    return updated.id;
+    return updated?.id;
   }
 
   async changeStatus(automationId: UUIDType, status: AutomationStatus) {
     const [updated] = await this.db
       .update(automations)
-      .set({ status: status })
+      .set({ status })
       .where(eq(automations.id, automationId))
       .returning();
-    return updated.id;
+    return updated?.id;
   }
 
   async deleteAutomation(automationId: UUIDType) {

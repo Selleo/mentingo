@@ -162,6 +162,7 @@ export const getNavigationConfig = (
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
           PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
+          PERMISSIONS.AUTOMATION_MANAGE,
         ],
       },
       items: [

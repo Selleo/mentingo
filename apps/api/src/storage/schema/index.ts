@@ -2854,7 +2854,12 @@ export const automationSteps = pgTable(
     type: automationTypeEnum("type").notNull(),
     typeContext: jsonb("type_context").$type<TypeContext>().notNull(),
   },
-  withTenantIdIndex("automation_steps_index"),
+  (table) => ({
+    ...withTenantIdIndex("automation_steps_index")(table),
+    triggerNameUniqueIdx: uniqueIndex("automation_steps_tenant_trigger_name_unique_idx")
+      .on(table.tenantId, sql`(${table.typeContext} ->> 'name')`)
+      .where(sql`${table.type} = 'trigger'`),
+  }),
 );
 export const automationLogStatusEnum = pgEnum("automation_log_status", [
   "success",

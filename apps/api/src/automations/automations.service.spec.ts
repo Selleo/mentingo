@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
 import { AutomationStatus } from "src/announcements/types/automations.types";
+import { DB } from "src/storage/db/db.providers";
 
 import { AutomationsService } from "./automations.service";
 import { AutomationsRepository } from "./repositories/automations/automations.repository";
@@ -30,6 +31,10 @@ describe("AutomationsService", () => {
             deleteAutomation: jest.fn(),
           },
         },
+        {
+          provide: DB,
+          useValue: { transaction: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -44,7 +49,6 @@ describe("AutomationsService", () => {
   describe("createAutomation", () => {
     it("delegates creation to repository and returns result", async () => {
       const input = {
-        tenantId,
         name: { en: "Test Automation" },
         description: { en: "Test description" },
         status: AutomationStatus.Draft,

@@ -4,16 +4,22 @@ const DEFAULT_DELAY_MS = 400;
 
 export function useAutoSave<T>(onSave: (payload: T) => void, delayMs = DEFAULT_DELAY_MS) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<(() => void) | null>(null);
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
 
   const trigger = useCallback(
     (payload: T) => {
+      pendingSaveRef.current = () => {
+        pendingSaveRef.current = null;
+        onSaveRef.current(payload);
+      };
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
       debounceRef.current = setTimeout(() => {
-        onSaveRef.current(payload);
+        debounceRef.current = null;
+        pendingSaveRef.current?.();
       }, delayMs);
     },
     [delayMs],
@@ -24,6 +30,7 @@ export function useAutoSave<T>(onSave: (payload: T) => void, delayMs = DEFAULT_D
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
+      pendingSaveRef.current?.();
     };
   }, []);
 

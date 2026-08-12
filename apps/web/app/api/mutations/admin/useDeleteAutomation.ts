@@ -13,11 +13,9 @@ export function useDeleteAutomation() {
 
   return useMutation({
     mutationFn: async (automationId: string) => {
-      const { data } = await ApiClient.instance.delete<{ data: unknown }>(
-        `/api/automations/${automationId}`,
-      );
+      const response = await ApiClient.api.automationsControllerDeleteAutomation(automationId);
       await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      return data.data;
+      return response.data;
     },
 
     onSuccess: () => {

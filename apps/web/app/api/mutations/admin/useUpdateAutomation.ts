@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
@@ -16,28 +17,46 @@ interface UpdateAutomationInput {
   automationId: string;
   body: UpdateAutomationBody;
   steps?: AutomationStepBulkItem[];
+  showSuccessToast?: boolean;
 }
 
 export function useUpdateAutomation() {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const queueRef = useRef<Promise<unknown>>(Promise.resolve());
 
   return useMutation({
-    mutationFn: async ({ automationId, body, steps }: UpdateAutomationInput) => {
-      const { data } = await ApiClient.instance.patch<{ data: unknown }>(
-        `/api/automations/${automationId}`,
-        body,
-      );
+    mutationFn: (input: UpdateAutomationInput) => {
+      const request = queueRef.current.then(async () => {
+        if (input.steps !== undefined) {
+          const response = await ApiClient.api.automationsControllerSaveAutomation(
+            input.automationId,
+            {
+              metadata: input.body,
+              steps: input.steps,
+            },
+          );
 
-      if (steps && steps.length > 0) {
-        await ApiClient.instance.put(`/api/automation-steps/${automationId}/steps`, steps);
-      }
+          await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
+          return response.data.data;
+        }
 
-      await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      return data.data;
+        const response = await ApiClient.api.automationsControllerUpdateAutomation(
+          input.automationId,
+          input.body,
+        );
+
+        await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
+        return response.data.data;
+      });
+
+      queueRef.current = request.catch(() => undefined);
+      return request;
     },
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      if (variables.showSuccessToast === false) return;
+
       toast({
         variant: "default",
         description: t("automationView.toasts.updated"),

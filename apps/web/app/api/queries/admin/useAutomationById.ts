@@ -10,15 +10,12 @@ import type { AutomationDetail, AutomationRecord, AutomationStepRaw } from "./au
 const useAutomationByIdQuery = (automationId: string) => ({
   queryKey: [AUTOMATIONS_QUERY_KEY, { automationId }],
   queryFn: async (): Promise<AutomationDetail> => {
-    const { data: automationRes } = await ApiClient.instance.get<{ data: AutomationRecord }>(
-      `/api/automations/${automationId}`,
-    );
-    const record = automationRes.data;
+    const automationResponse =
+      await ApiClient.api.automationsControllerGetAutomationById(automationId);
+    const record = automationResponse.data.data as AutomationRecord;
 
-    const { data: stepsRes } = await ApiClient.instance.get<{ data: AutomationStepRaw[] }>(
-      `/api/automation-steps/automation/${automationId}`,
-    );
-    const nodes = stepsToNodes(stepsRes.data);
+    const stepsResponse = await ApiClient.api.automationStepsControllerGetAll(automationId);
+    const nodes = stepsToNodes(stepsResponse.data.data as AutomationStepRaw[]);
 
     return {
       id: record.id,

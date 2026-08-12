@@ -6,7 +6,7 @@ import type { SupportedLanguages } from "@repo/shared";
 
 export async function fetchCustomTemplatePreview(
   templateId: string,
-  language: string,
+  language: SupportedLanguages,
   placeholderValues: Record<string, string>,
   sampleValues: Record<string, string>,
   t: (key: string, options?: Record<string, string>) => string,
@@ -15,7 +15,7 @@ export async function fetchCustomTemplatePreview(
     const { data } = await ApiClient.api.emailNotificationTemplatesControllerPreviewTemplate(
       templateId,
       {
-        language: language as SupportedLanguages,
+        language,
       },
     );
 
@@ -44,15 +44,14 @@ export async function fetchCustomTemplatePreview(
 
 export async function fetchSystemTemplatePreview(
   templateId: string,
-  language: string,
+  language: SupportedLanguages,
   _placeholderValues: Record<string, string>,
   t: (key: string, options?: Record<string, string>) => string,
 ): Promise<{ subject: string; html: string }> {
   try {
-    const response = await ApiClient.instance.get<{ data: { subject: string; html: string } }>(
-      `/api/automations/system-template-preview/${encodeURIComponent(templateId)}`,
-      { params: { language } },
-    );
+    const response = await ApiClient.api.automationsControllerPreviewSystemTemplate(templateId, {
+      language,
+    });
 
     const { subject, html } = response.data.data;
 

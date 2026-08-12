@@ -21,9 +21,9 @@ export function useCreateAutomation() {
 
   return useMutation({
     mutationFn: async (body: CreateAutomationBody) => {
-      const { data } = await ApiClient.instance.post<{ data: unknown }>("/api/automations", body);
+      const response = await ApiClient.api.automationsControllerCreateAutomation(body);
       await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      return data.data;
+      return response.data.data;
     },
 
     onSuccess: () => {

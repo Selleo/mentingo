@@ -50,6 +50,7 @@ export function nodesToSteps(
     type: node.kind as AutomationNodeKind,
     typeContext: {
       name: node.type,
+      providedVariables: [],
       label: node.label,
       config: node.config,
       position: node.position,

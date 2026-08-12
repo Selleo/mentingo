@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
 import { useUpdateAutomation } from "~/api/mutations/admin/useUpdateAutomation";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { useBuilderStore } from "../automationBuilderStore";
 
@@ -18,16 +19,18 @@ interface UseBuilderHeaderActionsParams {
 }
 
 export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderActionsParams) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const navigate = useNavigate();
 
   const automationName = useBuilderStore((s) => s.automationName);
   const isActive = useBuilderStore((s) => s.isActive);
+  const status = useBuilderStore((s) => s.status);
   const simulationPassed = useBuilderStore((s) => s.simulationPassed);
   const lastSavedAt = useBuilderStore((s) => s.lastSavedAt);
   const isDirty = useBuilderStore((s) => s.isDirty);
   const nodes = useBuilderStore((s) => s.nodes);
-  const setActive = useBuilderStore((s) => s.setActive);
+  const setStatus = useBuilderStore((s) => s.setStatus);
 
   const updateAutomation = useUpdateAutomation();
   const deleteAutomation = useDeleteAutomation();
@@ -41,15 +44,14 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
 
   useSimulationPersistence(simulationState, automationId);
 
-  const handleSave = useCallback(() => {
-    if (automationId === "new") return;
+  const handleSave = useCallback(async () => {
+    if (automationId === "new") return false;
 
-    const lang = i18n.language || "pl";
-    const { automationName: name, isActive: active } = useBuilderStore.getState();
-    const status: AutomationStatus = active ? "enabled" : "draft";
+    const { automationName: name, status } = useBuilderStore.getState();
 
-    saveSteps({ name: { [lang]: name }, status });
-  }, [automationId, i18n.language, saveSteps]);
+    await saveSteps({ name: { [language]: name }, status });
+    return true;
+  }, [automationId, language, saveSteps]);
 
   const handleBack = useCallback(() => {
     if (useBuilderStore.getState().isDirty) {
@@ -59,10 +61,15 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     }
   }, [navigate]);
 
-  const handleSaveAndLeave = useCallback(() => {
-    handleSave();
-    setShowLeaveDialog(false);
-    navigate("/admin/automation");
+  const handleSaveAndLeave = useCallback(async () => {
+    try {
+      const saved = await handleSave();
+      if (!saved) return;
+      setShowLeaveDialog(false);
+      navigate("/admin/automation");
+    } catch {
+      // The mutation owns the translated error toast; keep the dialog and dirty state open.
+    }
   }, [handleSave, navigate]);
 
   const handleLeaveWithoutSaving = useCallback(() => {
@@ -107,14 +114,14 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     (active: boolean) => {
       if (active && (useBuilderStore.getState().isDirty || !canActivate || hasInvalidNodes)) return;
 
-      setActive(active);
+      const nextStatus: AutomationStatus = active ? "enabled" : "disabled";
+      setStatus(nextStatus);
 
       if (automationId !== "new") {
-        const status: AutomationStatus = active ? "enabled" : "draft";
-        updateAutomation.mutate({ automationId, body: { status } });
+        updateAutomation.mutate({ automationId, body: { status: nextStatus } });
       }
     },
-    [automationId, canActivate, hasInvalidNodes, setActive, updateAutomation],
+    [automationId, canActivate, hasInvalidNodes, setStatus, updateAutomation],
   );
 
   const getToggleTooltip = useCallback((): string | null => {
@@ -135,6 +142,7 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   return {
     automationName,
     isActive,
+    status,
     isDirty,
     lastSavedAt,
     toggleDisabled,

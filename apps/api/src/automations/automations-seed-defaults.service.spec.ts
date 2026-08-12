@@ -21,14 +21,14 @@ describe("AutomationsSeedDefaultsService", () => {
         {
           provide: AutomationsService,
           useValue: {
-            getAllAutomations: jest.fn(),
             createAutomation: jest.fn(),
+            deleteAutomation: jest.fn(),
           },
         },
         {
           provide: AutomationStepsService,
           useValue: {
-            getAllAutomationSteps: jest.fn(),
+            getTriggerNamesByTenantId: jest.fn(),
             createAutomationStep: jest.fn(),
           },
         },
@@ -48,7 +48,7 @@ describe("AutomationsSeedDefaultsService", () => {
     const tenantId = "tenant-1" as UUIDType;
 
     it("creates all default automations when none exist", async () => {
-      automationsService.getAllAutomations.mockResolvedValue([]);
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue([]);
       automationsService.createAutomation.mockResolvedValue({
         id: "new-automation-id" as UUIDType,
         name: {},
@@ -73,18 +73,7 @@ describe("AutomationsSeedDefaultsService", () => {
     });
 
     it("skips automations that already have matching triggers", async () => {
-      automationsService.getAllAutomations.mockResolvedValue([
-        { id: "existing-automation" as UUIDType } as any,
-      ]);
-      automationStepsService.getAllAutomationSteps.mockResolvedValue([
-        {
-          id: "step-1",
-          automationId: "existing-automation",
-          parentId: null,
-          type: "trigger",
-          typeContext: { name: "user_invited", providedVariables: [] },
-        } as any,
-      ]);
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue(["user_invited"]);
       automationsService.createAutomation.mockResolvedValue({
         id: "new-id" as UUIDType,
         name: {},
@@ -128,24 +117,7 @@ describe("AutomationsSeedDefaultsService", () => {
         "course_due_date_reminder",
       ];
 
-      const fakeAutomations = allTriggerTypes.map((_, i) => ({
-        id: `automation-${i}` as UUIDType,
-      }));
-
-      automationsService.getAllAutomations.mockResolvedValue(fakeAutomations as any);
-
-      automationStepsService.getAllAutomationSteps.mockImplementation(async (automationId) => {
-        const index = parseInt((automationId as string).replace("automation-", ""));
-        return [
-          {
-            id: `step-${index}`,
-            automationId,
-            parentId: null,
-            type: "trigger",
-            typeContext: { name: allTriggerTypes[index], providedVariables: [] },
-          },
-        ] as any;
-      });
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue(allTriggerTypes);
 
       const result = await service.seedDefaults(tenantId, "en");
 
@@ -156,7 +128,7 @@ describe("AutomationsSeedDefaultsService", () => {
     });
 
     it("creates automation with enabled status and properly structured steps", async () => {
-      automationsService.getAllAutomations.mockResolvedValue([]);
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue([]);
       automationsService.createAutomation.mockResolvedValue({
         id: "created-id" as UUIDType,
         name: { pl: "test", en: "test" },
@@ -209,7 +181,7 @@ describe("AutomationsSeedDefaultsService", () => {
     });
 
     it("maps placeholderValues correctly for user_invited trigger", async () => {
-      automationsService.getAllAutomations.mockResolvedValue([]);
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue([]);
       automationsService.createAutomation.mockResolvedValue({
         id: "created-id" as UUIDType,
         name: {},
@@ -239,6 +211,31 @@ describe("AutomationsSeedDefaultsService", () => {
           createPasswordLink: "inviteLink",
         },
       });
+    });
+
+    it("reports failed creation separately and removes the partial automation", async () => {
+      automationStepsService.getTriggerNamesByTenantId.mockResolvedValue([]);
+      automationsService.createAutomation.mockResolvedValue({
+        id: "created-id" as UUIDType,
+        name: {},
+        description: {},
+        status: "enabled",
+        tenantId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastRun: null,
+      } as any);
+      automationStepsService.createAutomationStep
+        .mockResolvedValueOnce("trigger-step-id" as unknown as UUIDType)
+        .mockRejectedValueOnce(new Error("step insert failed"))
+        .mockResolvedValue("step-id" as unknown as UUIDType);
+
+      const result = await service.seedDefaults(tenantId, "en");
+
+      expect(result.failed).toBe(1);
+      expect(result.created).toBe(17);
+      expect(result.skipped).toBe(0);
+      expect(automationsService.deleteAutomation).toHaveBeenCalledWith("created-id");
     });
   });
 });

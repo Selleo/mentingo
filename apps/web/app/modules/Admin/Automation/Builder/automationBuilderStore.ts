@@ -12,7 +12,7 @@ interface BuilderActions {
   updateNodeType: (nodeId: string, type: TriggerType | ActionType, label: string) => void;
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
   setAutomationName: (name: string) => void;
-  setActive: (active: boolean) => void;
+  setStatus: (status: BuilderState["status"]) => void;
   setSimulationPassed: (passed: boolean) => void;
   loadNodes: (nodes: BuilderNode[]) => void;
   markSaved: () => void;
@@ -25,6 +25,7 @@ const initialState: BuilderState = {
   selectedNodeId: null,
   automationName: "New Automation",
   isActive: false,
+  status: "draft",
   simulationPassed: false,
   lastSavedAt: null,
   isDirty: false,
@@ -38,6 +39,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       nodes: [...state.nodes, node],
       isDirty: true,
       isActive: false,
+      status: "draft",
       simulationPassed: false,
     })),
 
@@ -48,6 +50,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
         .concat({ ...node, parentId }),
       isDirty: true,
       isActive: false,
+      status: "draft",
       simulationPassed: false,
     })),
 
@@ -72,6 +75,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
         selectedNodeId: state.selectedNodeId === nodeId ? null : state.selectedNodeId,
         isDirty: true,
         isActive: false,
+        status: "draft",
         simulationPassed: false,
       };
     }),
@@ -85,6 +89,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       ),
       isDirty: true,
       isActive: false,
+      status: "draft",
       simulationPassed: false,
     })),
 
@@ -100,6 +105,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, type, label, config: {} } : n)),
       isDirty: true,
       isActive: false,
+      status: "draft",
       simulationPassed: false,
     })),
 
@@ -110,7 +116,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
 
   setAutomationName: (name) => set({ automationName: name }),
 
-  setActive: (active) => set({ isActive: active }),
+  setStatus: (status) => set({ status, isActive: status === "enabled" }),
 
   setSimulationPassed: (passed) => set({ simulationPassed: passed }),
 

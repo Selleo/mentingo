@@ -6,12 +6,7 @@ import { AUTOMATIONS_QUERY_KEY } from "~/api/queries/admin/useAutomations";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
-
-export interface SeedDefaultsResponse {
-  created: number;
-  skipped: number;
-  total: number;
-}
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 /**
  * Seeds default automations for the current tenant.
@@ -22,17 +17,14 @@ export interface SeedDefaultsResponse {
  */
 export function useSeedDefaultAutomations() {
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
 
   return useMutation({
     mutationFn: async () => {
-      const language = i18n.language || "en";
-      const { data } = await ApiClient.instance.post<{ data: SeedDefaultsResponse }>(
-        "/api/automations/seed-defaults",
-        { language },
-      );
+      const response = await ApiClient.api.automationsControllerSeedDefaults({ language });
       await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      return data.data;
+      return response.data.data;
     },
 
     onSuccess: (result) => {

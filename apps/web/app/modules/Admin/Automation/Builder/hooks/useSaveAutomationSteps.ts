@@ -8,7 +8,7 @@ import { useBuilderStore } from "../automationBuilderStore";
 import { computeTreePositions } from "../utils/computeTreePositions";
 
 import type { BuilderNode } from "../automationBuilder.types";
-import type { AutomationNode } from "~/api/queries/admin/automation.types";
+import type { AutomationNode, UpdateAutomationBody } from "~/api/queries/admin/automation.types";
 
 export function buildStepsFromNodes(nodes: BuilderNode[], automationId: string) {
   const positionedNodes = computeTreePositions(nodes);
@@ -29,28 +29,25 @@ export function buildStepsFromNodes(nodes: BuilderNode[], automationId: string) 
 
 export function useSaveAutomationSteps() {
   const { id: automationId = "new" } = useParams<{ id: string }>();
-  const updateAutomation = useUpdateAutomation();
+  const { mutateAsync: updateAutomation, isPending } = useUpdateAutomation();
 
   const saveSteps = useCallback(
-    (body: Record<string, unknown> = {}) => {
+    async (body: UpdateAutomationBody = {}, options: { showSuccessToast?: boolean } = {}) => {
       if (automationId === "new") return;
 
       const nodes = useBuilderStore.getState().nodes;
       const steps = buildStepsFromNodes(nodes, automationId);
 
-      if (steps.length > 0) {
-        updateAutomation.mutate(
-          { automationId, body, steps },
-          {
-            onSuccess: () => {
-              useBuilderStore.getState().markSaved();
-            },
-          },
-        );
-      }
+      await updateAutomation({
+        automationId,
+        body,
+        steps,
+        showSuccessToast: options.showSuccessToast,
+      });
+      useBuilderStore.getState().markSaved();
     },
     [automationId, updateAutomation],
   );
 
-  return { saveSteps, isPending: updateAutomation.isPending };
+  return { saveSteps, isPending };
 }

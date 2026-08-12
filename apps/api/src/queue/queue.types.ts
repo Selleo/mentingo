@@ -15,6 +15,7 @@ export const QUEUE_NAMES = {
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   EMAIL_TEMPLATE_IMAGE_CLEANUP: "email-template-image-cleanup",
+  AUTOMATION_EMAIL_DELIVERY: "automation-email-delivery",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -81,4 +82,15 @@ export interface EmailTemplateImageCleanupJobData {
   tenantId: UUIDType;
   srcs: string[];
   excludeTemplateId?: UUIDType;
+}
+
+export interface AutomationEmailDeliveryJobData {
+  tenantId: UUIDType;
+  automationId: UUIDType;
+  automationName: string;
+  eventName: string;
+  recipientEmail: string;
+  subject: string;
+  text: string;
+  html: string;
 }

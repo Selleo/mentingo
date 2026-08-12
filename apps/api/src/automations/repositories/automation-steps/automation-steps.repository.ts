@@ -38,6 +38,22 @@ export class AutomationStepsRepository {
       .where(eq(automationSteps.automationId, automationId));
   }
 
+  async getTriggerNamesByTenantId(tenantId: UUIDType) {
+    const rows = await this.db
+      .selectDistinct({
+        triggerName: sql<string>`${automationSteps.typeContext} ->> 'name'`,
+      })
+      .from(automationSteps)
+      .where(
+        and(
+          eq(automationSteps.tenantId, tenantId),
+          eq(automationSteps.type, "trigger"),
+        ),
+      );
+
+    return rows.flatMap(({ triggerName }) => (triggerName ? [triggerName] : []));
+  }
+
   async getAutomationStepById(stepId: UUIDType) {
     const [step] = await this.db
       .select()
@@ -95,7 +111,7 @@ export class AutomationStepsRepository {
       .innerJoin(automations, eq(automationSteps.automationId, automations.id))
       .where(
         and(
-          sql`${automationSteps.typeContext} ->> 'name' LIKE ${triggerName}`,
+          sql`${automationSteps.typeContext} ->> 'name' = ${triggerName}`,
           eq(automations.status, AutomationStatus.Enabled),
         ),
       );

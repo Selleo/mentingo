@@ -28,7 +28,7 @@ describe("AutomationLogsController", () => {
           provide: AutomationLogsRepository,
           useValue: {
             getAll: jest.fn(),
-            GetByAutomationId: jest.fn(),
+            getByAutomationId: jest.fn(),
           },
         },
       ],
@@ -64,17 +64,17 @@ describe("AutomationLogsController", () => {
 
   describe("getByAutomationId", () => {
     it("returns logs for specific automation wrapped in BaseResponse", async () => {
-      repository.GetByAutomationId.mockResolvedValue(mockLogs as any);
+      repository.getByAutomationId.mockResolvedValue(mockLogs as any);
 
       const result = await controller.getByAutomationId(automationId);
 
-      expect(repository.GetByAutomationId).toHaveBeenCalledWith(automationId);
+      expect(repository.getByAutomationId).toHaveBeenCalledWith(automationId);
       expect(result).toBeInstanceOf(BaseResponse);
       expect(result.data).toEqual(mockLogs);
     });
 
     it("returns empty array when no logs for automation", async () => {
-      repository.GetByAutomationId.mockResolvedValue([]);
+      repository.getByAutomationId.mockResolvedValue([]);
 
       const result = await controller.getByAutomationId(automationId);
 

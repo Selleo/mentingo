@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { AutomationDrawer } from "./components/AutomationDrawer";
 import { AutomationFilters, type StatusFilter } from "./components/AutomationFilters";
@@ -26,11 +27,12 @@ import { AutomationTable } from "./components/AutomationTable";
 import type { AutomationListItem } from "~/api/queries/admin/automation.types";
 
 export default function AutomationPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const navigate = useNavigate();
 
   const { data: automations = [], isLoading } = useAutomations();
-  const createAutomation = useCreateAutomation();
+  const { mutateAsync: createAutomation } = useCreateAutomation();
   const deleteAutomation = useDeleteAutomation();
   const seedDefaultAutomations = useSeedDefaultAutomations();
 
@@ -41,13 +43,13 @@ export default function AutomationPage() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [showSeedDefaultsDialog, setShowSeedDefaultsDialog] = useState(false);
 
-  const handleCreate = () => {
-    const lang = i18n.language || "pl";
-    createAutomation.mutate({
-      name: { [lang]: t("automationView.newAutomation.name") },
-      description: { [lang]: t("automationView.newAutomation.description") },
+  const handleCreate = async () => {
+    const created = await createAutomation({
+      name: { [language]: t("automationView.newAutomation.name") },
+      description: { [language]: t("automationView.newAutomation.description") },
       status: "draft",
     });
+    navigate(`/admin/automation/${created.id}/builder`);
   };
 
   const handleOpenDrawer = (automation: AutomationListItem) => {

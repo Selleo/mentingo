@@ -13169,6 +13169,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -13228,6 +13232,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -17337,16 +17345,38 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAutomationsResponse"
+                }
+              }
+            }
           }
         }
       },
       "post": {
         "operationId": "AutomationsController_createAutomation",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAutomationBody"
+              }
+            }
+          }
+        },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAutomationResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17360,21 +17390,57 @@
             "required": true,
             "in": "path",
             "schema": {
+              "minLength": 1,
               "type": "string"
             }
           },
           {
             "name": "language",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewSystemTemplateResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17383,9 +17449,25 @@
       "post": {
         "operationId": "AutomationsController_runSimulation",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSimulationBody"
+              }
+            }
+          }
+        },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSimulationResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17394,9 +17476,25 @@
       "post": {
         "operationId": "AutomationsController_seedDefaults",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedDefaultsBody"
+              }
+            }
+          }
+        },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeedDefaultsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17410,13 +17508,20 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAutomationByIdResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -17428,13 +17533,30 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAutomationBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAutomationResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -17446,6 +17568,7 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -17466,13 +17589,67 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/automations/{id}/save": {
+      "patch": {
+        "operationId": "AutomationsController_saveAutomation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAutomationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveAutomationResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17481,65 +17658,25 @@
       "post": {
         "operationId": "AutomationStepsController_create",
         "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/automation-steps/{id}": {
-      "get": {
-        "operationId": "AutomationStepsController_getById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBody"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "AutomationStepsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponse"
+                }
+              }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "AutomationStepsController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -17553,6 +17690,94 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/automation-steps/{id}": {
+      "get": {
+        "operationId": "AutomationStepsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AutomationStepsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AutomationStepsController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -17573,6 +17798,7 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -17582,17 +17808,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "$ref": "#/components/schemas/ReplaceAutomationStepTreeBody"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceAutomationStepTreeResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17603,7 +17832,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17617,13 +17852,20 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetByAutomationIdResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -54927,6 +55169,9 @@
                     },
                     "es": {
                       "type": "string"
+                    },
+                    "fr": {
+                      "type": "string"
                     }
                   }
                 },
@@ -55302,6 +55547,60 @@
                           }
                         }
                       }
+                    },
+                    "fr": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {
+                          "type": "array",
+                          "items": {
+                            "$id": "TiptapJsonNode",
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              },
+                              "content": {
+                                "type": "array",
+                                "items": {
+                                  "$ref": "TiptapJsonNode"
+                                }
+                              },
+                              "marks": {
+                                "type": "array",
+                                "items": {
+                                  "additionalProperties": true,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "attrs": {
+                                      "type": "object",
+                                      "patternProperties": {
+                                        "^(.*)$": {}
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -55329,6 +55628,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -55359,6 +55662,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -55497,6 +55804,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -55528,6 +55839,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -55551,6 +55866,9 @@
                 "type": "string"
               },
               "es": {
+                "type": "string"
+              },
+              "fr": {
                 "type": "string"
               }
             }
@@ -55875,6 +56193,60 @@
                 }
               },
               "es": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "array",
+                    "items": {
+                      "$id": "TiptapJsonNode",
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "attrs": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {}
+                          }
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "TiptapJsonNode"
+                          }
+                        },
+                        "marks": {
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ]
+                          }
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "fr": {
                 "type": "object",
                 "patternProperties": {
                   "^(.*)$": {
@@ -55974,6 +56346,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -56349,6 +56724,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -56376,6 +56805,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -56406,6 +56839,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -56495,6 +56932,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -56870,6 +57310,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -56897,6 +57391,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -56927,6 +57425,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -57011,6 +57513,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -57042,6 +57548,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -57065,6 +57575,9 @@
                 "type": "string"
               },
               "es": {
+                "type": "string"
+              },
+              "fr": {
                 "type": "string"
               }
             }
@@ -57441,6 +57954,60 @@
                     }
                   }
                 }
+              },
+              "fr": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "array",
+                    "items": {
+                      "$id": "TiptapJsonNode",
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "attrs": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {}
+                          }
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "TiptapJsonNode"
+                          }
+                        },
+                        "marks": {
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "attrs": {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ]
+                          }
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -57483,6 +58050,9 @@
                     "type": "string"
                   },
                   "es": {
+                    "type": "string"
+                  },
+                  "fr": {
                     "type": "string"
                   }
                 }
@@ -57859,6 +58429,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -57886,6 +58510,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -57916,6 +58544,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -58005,6 +58637,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -58380,6 +59015,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -58407,6 +59096,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -58437,6 +59130,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -58526,6 +59223,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -58901,6 +59601,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -58928,6 +59682,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -58958,6 +59716,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -59047,6 +59809,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -59422,6 +60187,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -59449,6 +60268,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -59479,6 +60302,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -59587,6 +60414,9 @@
                   },
                   "es": {
                     "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
                   }
                 }
               },
@@ -59962,6 +60792,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -59989,6 +60873,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -60019,6 +60907,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -60101,6 +60993,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -60178,6 +61074,9 @@
                     "type": "string"
                   },
                   "es": {
+                    "type": "string"
+                  },
+                  "fr": {
                     "type": "string"
                   }
                 }
@@ -60554,6 +61453,60 @@
                         }
                       }
                     }
+                  },
+                  "fr": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "array",
+                        "items": {
+                          "$id": "TiptapJsonNode",
+                          "additionalProperties": true,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "attrs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^(.*)$": {}
+                              }
+                            },
+                            "content": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "TiptapJsonNode"
+                              }
+                            },
+                            "marks": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": true,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "attrs": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                      "^(.*)$": {}
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
@@ -60581,6 +61534,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -60611,6 +61568,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -66719,6 +67680,1684 @@
             }
           }
         }
+      },
+      "GetAllAutomationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "pl": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    },
+                    "lt": {
+                      "type": "string"
+                    },
+                    "cs": {
+                      "type": "string"
+                    },
+                    "es": {
+                      "type": "string"
+                    },
+                    "fr": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "en": {
+                          "type": "string"
+                        },
+                        "pl": {
+                          "type": "string"
+                        },
+                        "de": {
+                          "type": "string"
+                        },
+                        "lt": {
+                          "type": "string"
+                        },
+                        "cs": {
+                          "type": "string"
+                        },
+                        "es": {
+                          "type": "string"
+                        },
+                        "fr": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "enabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "disabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "archived",
+                      "type": "string"
+                    },
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "lastRun": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "name",
+                "description",
+                "status",
+                "lastRun"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "PreviewSystemTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "html": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "subject",
+              "html"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RunSimulationBody": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "kind": {
+                  "anyOf": [
+                    {
+                      "const": "trigger",
+                      "type": "string"
+                    },
+                    {
+                      "const": "action",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "user_invited",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users_imported_invite",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_password_reminder",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_welcome",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_first_login",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users_assigned_to_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users_short_inactivity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users_long_inactivity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_chapter_finished",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_course_finished",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_registered",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user_password_created",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificate_expiration_warning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificate_archived",
+                      "type": "string"
+                    },
+                    {
+                      "const": "announcement_published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_chat_user_mentioned",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_due_date_reminder",
+                      "type": "string"
+                    },
+                    {
+                      "const": "send_email",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "parentId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                },
+                "config": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "type",
+                "label",
+                "parentId",
+                "children",
+                "config"
+              ]
+            }
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "nodes",
+          "language"
+        ]
+      },
+      "RunSimulationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "overallStatus": {
+                "anyOf": [
+                  {
+                    "const": "success",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "nodeResults": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "nodeId": {
+                      "type": "string"
+                    },
+                    "nodeName": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "const": "trigger",
+                          "type": "string"
+                        },
+                        {
+                          "const": "action",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "valid",
+                          "type": "string"
+                        },
+                        {
+                          "const": "invalid",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nodeId": {
+                            "type": "string"
+                          },
+                          "nodeName": {
+                            "type": "string"
+                          },
+                          "field": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "nodeId",
+                          "nodeName",
+                          "field",
+                          "description"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "nodeId",
+                    "nodeName",
+                    "kind",
+                    "status",
+                    "errors"
+                  ]
+                }
+              },
+              "eventData": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "dataType": {
+                      "anyOf": [
+                        {
+                          "const": "string",
+                          "type": "string"
+                        },
+                        {
+                          "const": "number",
+                          "type": "string"
+                        },
+                        {
+                          "const": "date",
+                          "type": "string"
+                        },
+                        {
+                          "const": "url",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "label",
+                    "dataType"
+                  ]
+                }
+              },
+              "placeholderMappings": {
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "placeholder": {
+                        "type": "string"
+                      },
+                      "mappedVariable": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sampleValue": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "placeholder",
+                      "mappedVariable",
+                      "sampleValue"
+                    ]
+                  }
+                },
+                "type": "object",
+                "properties": {}
+              },
+              "emailPreviews": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "nodeId": {
+                      "type": "string"
+                    },
+                    "nodeName": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "senderAddress": {
+                      "type": "string"
+                    },
+                    "htmlBody": {
+                      "type": "string"
+                    },
+                    "recipientAddress": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "nodeId",
+                    "nodeName",
+                    "subject",
+                    "senderAddress",
+                    "htmlBody",
+                    "recipientAddress"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "overallStatus",
+              "nodeResults",
+              "eventData",
+              "placeholderMappings",
+              "emailPreviews"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SeedDefaultsBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "SeedDefaultsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "created": {
+                "type": "number"
+              },
+              "skipped": {
+                "type": "number"
+              },
+              "failed": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "created",
+              "skipped",
+              "failed",
+              "total"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAutomationByIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  },
+                  "es": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string"
+                      },
+                      "pl": {
+                        "type": "string"
+                      },
+                      "de": {
+                        "type": "string"
+                      },
+                      "lt": {
+                        "type": "string"
+                      },
+                      "cs": {
+                        "type": "string"
+                      },
+                      "es": {
+                        "type": "string"
+                      },
+                      "fr": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "enabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "disabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  },
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  }
+                ]
+              },
+              "lastRun": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "name",
+              "description",
+              "status",
+              "lastRun"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAutomationBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              },
+              "es": {
+                "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              },
+              "es": {
+                "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "enabled",
+                "type": "string"
+              },
+              {
+                "const": "disabled",
+                "type": "string"
+              },
+              {
+                "const": "archived",
+                "type": "string"
+              },
+              {
+                "const": "draft",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ]
+      },
+      "CreateAutomationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  },
+                  "es": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string"
+                      },
+                      "pl": {
+                        "type": "string"
+                      },
+                      "de": {
+                        "type": "string"
+                      },
+                      "lt": {
+                        "type": "string"
+                      },
+                      "cs": {
+                        "type": "string"
+                      },
+                      "es": {
+                        "type": "string"
+                      },
+                      "fr": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "enabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "disabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  },
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  }
+                ]
+              },
+              "lastRun": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "name",
+              "description",
+              "status",
+              "lastRun"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateStatusBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "const": "enabled",
+                "type": "string"
+              },
+              {
+                "const": "disabled",
+                "type": "string"
+              },
+              {
+                "const": "archived",
+                "type": "string"
+              },
+              {
+                "const": "draft",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "UpdateStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAutomationBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              },
+              "es": {
+                "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              },
+              "es": {
+                "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "enabled",
+                "type": "string"
+              },
+              {
+                "const": "disabled",
+                "type": "string"
+              },
+              {
+                "const": "archived",
+                "type": "string"
+              },
+              {
+                "const": "draft",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateAutomationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SaveAutomationBody": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  },
+                  "es": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  },
+                  "es": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                }
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "enabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "disabled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  },
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "parentId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "automationId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "action",
+                      "type": "string"
+                    },
+                    {
+                      "const": "condition",
+                      "type": "string"
+                    },
+                    {
+                      "const": "trigger",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "typeContext": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "providedVariables": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "value": {}
+                        },
+                        "required": [
+                          "key",
+                          "value"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "providedVariables"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "parentId",
+                "automationId",
+                "type",
+                "typeContext"
+              ]
+            }
+          }
+        },
+        "required": [
+          "metadata",
+          "steps"
+        ]
+      },
+      "SaveAutomationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "stepCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "stepCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateBody": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "automationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "const": "action",
+                "type": "string"
+              },
+              {
+                "const": "condition",
+                "type": "string"
+              },
+              {
+                "const": "trigger",
+                "type": "string"
+              }
+            ]
+          },
+          "typeContext": {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "providedVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "key",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "name",
+              "providedVariables"
+            ]
+          }
+        },
+        "required": [
+          "parentId",
+          "automationId",
+          "type",
+          "typeContext"
+        ]
+      },
+      "CreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAllResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetByIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "automationId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "parentId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "action",
+                    "type": "string"
+                  },
+                  {
+                    "const": "condition",
+                    "type": "string"
+                  },
+                  {
+                    "const": "trigger",
+                    "type": "string"
+                  }
+                ]
+              },
+              "typeContext": {
+                "additionalProperties": true,
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "providedVariables": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "value": {}
+                      },
+                      "required": [
+                        "key",
+                        "value"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "providedVariables"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "automationId",
+              "parentId",
+              "type",
+              "typeContext"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateBody": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "automationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "const": "action",
+                "type": "string"
+              },
+              {
+                "const": "condition",
+                "type": "string"
+              },
+              {
+                "const": "trigger",
+                "type": "string"
+              }
+            ]
+          },
+          "typeContext": {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "providedVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "key",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "name",
+              "providedVariables"
+            ]
+          }
+        },
+        "required": [
+          "parentId",
+          "automationId",
+          "type",
+          "typeContext"
+        ]
+      },
+      "UpdateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceAutomationStepTreeBody": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "parentId": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "automationId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "const": "action",
+                  "type": "string"
+                },
+                {
+                  "const": "condition",
+                  "type": "string"
+                },
+                {
+                  "const": "trigger",
+                  "type": "string"
+                }
+              ]
+            },
+            "typeContext": {
+              "additionalProperties": true,
+              "type": "object",
+              "properties": {
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "providedVariables": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "key",
+                      "value"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "providedVariables"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "parentId",
+            "automationId",
+            "type",
+            "typeContext"
+          ]
+        }
+      },
+      "ReplaceAutomationStepTreeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetByAutomationIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "data"
+        ]
       }
     }
   }

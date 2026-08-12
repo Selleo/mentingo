@@ -42,7 +42,7 @@ export function useSimulationPersistence(
     }
 
     setTimeout(() => {
-      saveStepsRef.current({});
+      void saveStepsRef.current({}, { showSuccessToast: false });
     }, 0);
   }, [simulationState, automationId, updateNodeConfigSilent, setSimulationPassed]);
 }

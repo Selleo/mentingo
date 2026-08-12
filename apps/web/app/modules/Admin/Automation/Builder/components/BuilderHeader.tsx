@@ -1,5 +1,6 @@
 import { ArrowLeft, Loader2, Play, Save, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import {
   AlertDialog,
@@ -41,6 +42,7 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   const {
     automationName,
     isActive,
+    status,
     lastSavedAt,
     toggleDisabled,
     showLeaveDialog,
@@ -65,6 +67,11 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
     isSavePending,
     isDeletePending,
   } = useBuilderHeaderActions({ automationId });
+
+  const statusLabel = match(status)
+    .with("enabled", () => t("automationBuilder.header.active"))
+    .with("disabled", () => t("automationView.status.disabled"))
+    .otherwise(() => t("automationBuilder.header.draft"));
 
   return (
     <TooltipProvider>
@@ -138,12 +145,10 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
             <span
               className={cn(
                 "text-xs font-medium",
-                isActive ? "text-success-600" : "text-amber-600",
+                status === "enabled" ? "text-success-600" : "text-amber-600",
               )}
             >
-              {isActive
-                ? t("automationBuilder.header.active")
-                : t("automationBuilder.header.draft")}
+              {statusLabel}
             </span>
             <Tooltip>
               <TooltipTrigger asChild>

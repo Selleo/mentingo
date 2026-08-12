@@ -111,6 +111,11 @@ export interface UpdateAutomationBody {
   status?: AutomationStatus;
 }
 
+type AutomationProvidedVariable = {
+  key: string;
+  value: unknown;
+};
+
 /** Step payload for bulk replace (PUT /automation-steps/:automationId/steps) */
 export interface AutomationStepBulkItem {
   id: string;
@@ -119,6 +124,7 @@ export interface AutomationStepBulkItem {
   type: AutomationNodeKind;
   typeContext: {
     name: string;
+    providedVariables: AutomationProvidedVariable[];
     label?: string;
     config?: Record<string, unknown>;
     position?: { x: number; y: number };

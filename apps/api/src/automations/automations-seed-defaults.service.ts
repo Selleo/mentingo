@@ -105,7 +105,7 @@ const TEMPLATE_VARIABLE_MAPPINGS: Record<string, Record<string, string>> = {
   },
 };
 
-const TRIGGER_NAMES: Record<TriggerType, Record<SupportedLanguages, string>> = {
+const TRIGGER_NAMES: Record<TriggerType, Partial<Record<SupportedLanguages, string>>> = {
   user_invited: {
     pl: "Zaproszenie użytkownika",
     en: "User Invitation",
@@ -252,7 +252,7 @@ const TRIGGER_NAMES: Record<TriggerType, Record<SupportedLanguages, string>> = {
   },
 };
 
-const DESCRIPTION_TEMPLATES: Record<SupportedLanguages, string> = {
+const DESCRIPTION_TEMPLATES: Partial<Record<SupportedLanguages, string>> = {
   pl: "Domyślna automatyzacja dla zdarzenia: ",
   en: "Default automation for event: ",
   de: "Standardautomatisierung für Ereignis: ",
@@ -261,7 +261,7 @@ const DESCRIPTION_TEMPLATES: Record<SupportedLanguages, string> = {
   es: "Automatización predeterminada para evento: ",
 };
 
-const SEND_EMAIL_LABELS: Record<SupportedLanguages, string> = {
+const SEND_EMAIL_LABELS: Partial<Record<SupportedLanguages, string>> = {
   pl: "Wyślij e-mail",
   en: "Send email",
   de: "E-Mail senden",
@@ -273,6 +273,7 @@ const SEND_EMAIL_LABELS: Record<SupportedLanguages, string> = {
 export interface SeedDefaultsResult {
   created: number;
   skipped: number;
+  failed: number;
   total: number;
 }
 
@@ -289,21 +290,13 @@ export class AutomationsSeedDefaultsService {
     tenantId: UUIDType,
     language: SupportedLanguages,
   ): Promise<SeedDefaultsResult> {
-    const existingAutomations = await this.automationsService.getAllAutomations(tenantId);
-
-    const existingTriggerTypes = new Set<string>();
-
-    for (const automation of existingAutomations) {
-      const steps = await this.automationStepsService.getAllAutomationSteps(automation.id);
-      for (const step of steps) {
-        if (step.type === "trigger" && step.typeContext?.name) {
-          existingTriggerTypes.add(step.typeContext.name);
-        }
-      }
-    }
+    const existingTriggerTypes = new Set(
+      await this.automationStepsService.getTriggerNamesByTenantId(tenantId),
+    );
 
     let created = 0;
     let skipped = 0;
+    let failed = 0;
 
     for (const triggerType of AUTOMATION_TRIGGER_TYPES) {
       if (existingTriggerTypes.has(triggerType)) {
@@ -317,13 +310,14 @@ export class AutomationsSeedDefaultsService {
         created++;
       } catch (error) {
         this.logger.error(`Failed to create default automation for trigger: ${triggerType}`, error);
-        skipped++;
+        failed++;
       }
     }
 
     return {
       created,
       skipped,
+      failed,
       total: AUTOMATION_TRIGGER_TYPES.length,
     };
   }
@@ -349,50 +343,59 @@ export class AutomationsSeedDefaultsService {
     };
 
     const input: AutomationRecordInput = {
-      tenantId, // Pamiętaj o przekazaniu tenantId!
       name,
       description,
       status: AutomationStatus.Enabled,
     };
 
-    const automation = await this.automationsService.createAutomation(input);
+    let automationId: UUIDType | undefined;
 
-    const triggerDef = STEP_DEFINITIONS.find((s) => s.kind === "trigger" && s.type === triggerType);
+    try {
+      const automation = await this.automationsService.createAutomation(input);
+      automationId = automation.id;
 
-    const triggerLabel = label;
+      const triggerDef = STEP_DEFINITIONS.find(
+        (s) => s.kind === "trigger" && s.type === triggerType,
+      );
 
-    const triggerStepId = await this.automationStepsService.createAutomationStep({
-      parentId: null,
-      automationId: automation.id,
-      type: "trigger",
-      typeContext: {
-        name: triggerType,
-        label: triggerLabel,
-        config: {},
-        position: { x: 0, y: 0 },
-        providedVariables: triggerDef?.providedVariables ?? [],
-      } as any,
-    });
-
-    const placeholderValues = TEMPLATE_VARIABLE_MAPPINGS[templateId] ?? {};
-
-    const actionLabel = SEND_EMAIL_LABELS[language] ?? SEND_EMAIL_LABELS.en;
-
-    await this.automationStepsService.createAutomationStep({
-      parentId: triggerStepId,
-      automationId: automation.id,
-      type: "action",
-      typeContext: {
-        name: "send_email",
-        label: actionLabel,
-        config: {
-          emailTemplate: templateId,
-          language: "user_default",
-          placeholderValues,
+      const triggerStepId = await this.automationStepsService.createAutomationStep({
+        parentId: null,
+        automationId: automation.id,
+        type: "trigger",
+        typeContext: {
+          name: triggerType,
+          label,
+          config: {},
+          position: { x: 0, y: 0 },
+          providedVariables:
+            triggerDef?.providedVariables?.map((variable) => ({ ...variable, value: null })) ?? [],
         },
-        position: { x: 0, y: 150 },
-        providedVariables: [],
-      } as any,
-    });
+      });
+
+      const placeholderValues = TEMPLATE_VARIABLE_MAPPINGS[templateId] ?? {};
+      const actionLabel = SEND_EMAIL_LABELS[language] ?? SEND_EMAIL_LABELS.en;
+
+      await this.automationStepsService.createAutomationStep({
+        parentId: triggerStepId,
+        automationId: automation.id,
+        type: "action",
+        typeContext: {
+          name: "send_email",
+          label: actionLabel,
+          config: {
+            emailTemplate: templateId,
+            language: "user_default",
+            placeholderValues,
+          },
+          position: { x: 0, y: 150 },
+          providedVariables: [],
+        },
+      });
+    } catch (error) {
+      if (automationId) {
+        await this.automationsService.deleteAutomation(automationId);
+      }
+      throw error;
+    }
   }
 }

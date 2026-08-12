@@ -12,14 +12,16 @@ import type { EmailTemplateBlocks, SupportedLanguages } from "@repo/shared";
 const DEFAULT_BUTTON_URL = "";
 const DEFAULT_TENANT_LOGO_HEIGHT = "32";
 
-const DEFAULT_PLACEHOLDER_TEXT: Record<
-  SupportedLanguages,
-  {
-    heading: string;
-    paragraph: string;
-    button: string;
-    footer: string;
-  }
+const DEFAULT_PLACEHOLDER_TEXT: Partial<
+  Record<
+    SupportedLanguages,
+    {
+      heading: string;
+      paragraph: string;
+      button: string;
+      footer: string;
+    }
+  >
 > = {
   [SUPPORTED_LANGUAGES.EN]: {
     heading: "Heading 2",
@@ -73,7 +75,7 @@ export const buildDefaultEmailTemplateBlocks = (
   baseLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
 ): EmailTemplateBlocks => {
   const placeholders =
-    DEFAULT_PLACEHOLDER_TEXT[baseLanguage] ?? DEFAULT_PLACEHOLDER_TEXT[SUPPORTED_LANGUAGES.EN];
+    DEFAULT_PLACEHOLDER_TEXT[baseLanguage] ?? DEFAULT_PLACEHOLDER_TEXT[SUPPORTED_LANGUAGES.EN]!;
 
   return {
     type: EMAIL_TEMPLATE_NODE_TYPES.DOC,

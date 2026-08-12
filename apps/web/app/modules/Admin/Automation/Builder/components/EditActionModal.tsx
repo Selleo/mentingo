@@ -128,7 +128,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="h-[90vh] max-w-[90vw] flex flex-col gap-0 p-0" noCloseButton>
+      <DialogContent className="flex h-[90vh] max-h-[90vh] w-[calc(100vw-2rem)] max-w-5xl flex-col gap-0 p-0 sm:w-[90vw]" noCloseButton>
         <DialogHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
           <div>
             <DialogTitle className="text-xl font-semibold">
@@ -143,8 +143,8 @@ export const EditActionModal: FC<EditActionModalProps> = ({
 
         <Separator />
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex w-1/2 flex-col gap-6 overflow-y-auto border-r p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+          <div className="flex min-h-0 w-full flex-col gap-6 overflow-y-auto border-b p-4 sm:p-6 md:w-1/2 md:border-b-0 md:border-r">
             <div>
               <h3 className="mb-4 text-base font-semibold">
                 {t("automationBuilder.editAction.sendEmail")}
@@ -211,7 +211,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({
             </div>
           </div>
 
-          <div className="flex w-1/2 flex-col overflow-y-auto p-6">
+          <div className="flex min-h-0 w-full flex-col overflow-y-auto p-4 sm:p-6 md:w-1/2">
             <h3 className="mb-4 text-base font-semibold">
               {t("automationBuilder.editAction.placeholders")}
             </h3>

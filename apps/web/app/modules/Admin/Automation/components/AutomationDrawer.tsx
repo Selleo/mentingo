@@ -24,6 +24,7 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { toast as showToast } from "~/components/ui/use-toast";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { useAutoSave } from "../hooks/useAutoSave";
 
@@ -56,7 +57,8 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   onDelete,
   onEdit,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const updateAutomation = useUpdateAutomation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -70,14 +72,14 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
     status: AutomationStatus;
   }>((fields) => {
     if (automation) {
-      const lang = i18n.language || "pl";
       updateAutomation.mutate({
         automationId: automation.id,
         body: {
-          name: { [lang]: fields.name },
-          description: { [lang]: fields.description },
+          name: { [language]: fields.name },
+          description: { [language]: fields.description },
           status: fields.status,
         },
+        showSuccessToast: false,
       });
     }
   });
@@ -115,10 +117,13 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   const handleStatusChange = (val: string) => {
     const newStatus = val as AutomationStatus;
     setStatus(newStatus);
-    const lang = i18n.language || "pl";
     updateAutomation.mutate({
       automationId: automation.id,
-      body: { name: { [lang]: name }, description: { [lang]: description }, status: newStatus },
+      body: {
+        name: { [language]: name },
+        description: { [language]: description },
+        status: newStatus,
+      },
     });
   };
 

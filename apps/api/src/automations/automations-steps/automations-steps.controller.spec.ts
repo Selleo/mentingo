@@ -27,7 +27,7 @@ describe("AutomationStepsController", () => {
             getAllAutomationSteps: jest.fn(),
             updateAutomationStep: jest.fn(),
             deleteAutomationStep: jest.fn(),
-            ReplaceAutomationStepTree: jest.fn(),
+            replaceAutomationStepTree: jest.fn(),
           },
         },
       ],
@@ -109,7 +109,7 @@ describe("AutomationStepsController", () => {
 
   describe("replaceAutomationStepTree", () => {
     it("replaces tree and returns success message", async () => {
-      service.ReplaceAutomationStepTree.mockResolvedValue(undefined);
+      service.replaceAutomationStepTree.mockResolvedValue(undefined);
 
       const steps = [
         {
@@ -123,7 +123,7 @@ describe("AutomationStepsController", () => {
 
       const result = await controller.replaceAutomationStepTree(automationId, steps);
 
-      expect(service.ReplaceAutomationStepTree).toHaveBeenCalledWith(automationId, steps);
+      expect(service.replaceAutomationStepTree).toHaveBeenCalledWith(automationId, steps);
       expect(result).toBeInstanceOf(BaseResponse);
       expect(result.data).toEqual({ message: "Step tree replaced successfully" });
     });

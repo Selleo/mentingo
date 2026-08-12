@@ -93,7 +93,7 @@ describe("useAutoSave", () => {
     expect(onSave2).toHaveBeenCalledWith("data");
   });
 
-  it("cleans up pending timeout on unmount", () => {
+  it("flushes the pending save on unmount", () => {
     const onSave = vi.fn();
     const { result, unmount } = renderHook(() => useAutoSave(onSave));
 
@@ -107,6 +107,7 @@ describe("useAutoSave", () => {
       vi.advanceTimersByTime(400);
     });
 
-    expect(onSave).not.toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalledOnce();
+    expect(onSave).toHaveBeenCalledWith("data");
   });
 });

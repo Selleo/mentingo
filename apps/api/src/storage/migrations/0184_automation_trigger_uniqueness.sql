@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "automation_steps_tenant_trigger_name_unique_idx" ON "automation_steps" USING btree ("tenant_id",("type_context" ->> 'name')) WHERE "automation_steps"."type" = 'trigger';

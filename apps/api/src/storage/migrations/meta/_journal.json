@@ -1275,6 +1275,27 @@
       "when": 1786368652108,
       "tag": "0181_normalize_legacy_bunny_video_content_types",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1786538906786,
+      "tag": "0182_automation_engine",
+      "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1786538913060,
+      "tag": "0183_enable_automation_email_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1786540730408,
+      "tag": "0184_automation_trigger_uniqueness",
+      "breakpoints": true
     }
   ]
 }

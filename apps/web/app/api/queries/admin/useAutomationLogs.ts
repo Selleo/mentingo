@@ -10,10 +10,8 @@ export function useAutomationLogs() {
   return useQuery({
     queryKey: [AUTOMATION_LOGS_QUERY_KEY],
     queryFn: async (): Promise<AutomationLogRecord[]> => {
-      const { data } = await ApiClient.instance.get<{ data: AutomationLogRecord[] }>(
-        "/api/automation-logs",
-      );
-      return data.data;
+      const response = await ApiClient.api.automationLogsControllerGetAll();
+      return response.data.data as AutomationLogRecord[];
     },
   });
 }
@@ -22,10 +20,8 @@ export function useAutomationLogsByAutomationId(automationId: string | undefined
   return useQuery({
     queryKey: [AUTOMATION_LOGS_QUERY_KEY, { automationId }],
     queryFn: async (): Promise<AutomationLogRecord[]> => {
-      const { data } = await ApiClient.instance.get<{ data: AutomationLogRecord[] }>(
-        `/api/automation-logs/automation/${automationId}`,
-      );
-      return data.data;
+      const response = await ApiClient.api.automationLogsControllerGetByAutomationId(automationId!);
+      return response.data.data as AutomationLogRecord[];
     },
     enabled: !!automationId,
   });

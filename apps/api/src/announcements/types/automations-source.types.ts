@@ -5,6 +5,7 @@ import { automationSteps } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 import type { AutomationStatus, AutomationType } from "./automations.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { LocalizedText } from "node_modules/@repo/shared/dist/index.cjs";
 import type { Static } from "node_modules/@sinclair/typebox/build/cjs/type";
@@ -12,7 +13,6 @@ import type { UUIDType } from "src/common";
 import type { automationLogs } from "src/storage/schema";
 
 export type AutomationRecordInput = {
-  tenantId: UUIDType;
   name: LocalizedText;
   description: LocalizedText;
   status: AutomationStatus;
@@ -32,11 +32,12 @@ export type TypeContext = {
     key: string;
     value: unknown;
   }>;
+  [key: string]: unknown;
 };
 
 export type SendEmailActionContext = TypeContext & {
   templateId: string;
-  language?: string;
+  language?: SupportedLanguages | "user_default";
   variableMapping: Record<string, string>;
 };
 

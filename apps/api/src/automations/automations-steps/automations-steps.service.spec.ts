@@ -207,7 +207,7 @@ describe("AutomationStepsService", () => {
     });
   });
 
-  describe("ReplaceAutomationStepTree", () => {
+  describe("replaceAutomationStepTree", () => {
     it("replaces step tree for valid connected acyclic input", async () => {
       const steps: AutomationStepBulkUpdate[] = [
         {
@@ -228,7 +228,7 @@ describe("AutomationStepsService", () => {
 
       repository.replaceAutomationStepTree.mockResolvedValue(true);
 
-      await service.ReplaceAutomationStepTree(automationId, steps);
+      await service.replaceAutomationStepTree(automationId, steps);
 
       expect(repository.replaceAutomationStepTree).toHaveBeenCalledWith(automationId, steps);
     });
@@ -251,7 +251,7 @@ describe("AutomationStepsService", () => {
         },
       ];
 
-      await expect(service.ReplaceAutomationStepTree(automationId, steps)).rejects.toThrow(
+      await expect(service.replaceAutomationStepTree(automationId, steps)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -274,12 +274,12 @@ describe("AutomationStepsService", () => {
         },
       ];
 
-      await expect(service.ReplaceAutomationStepTree(automationId, steps)).rejects.toThrow(
+      await expect(service.replaceAutomationStepTree(automationId, steps)).rejects.toThrow(
         "automationSteps.toast.wrongNumberOfRoots",
       );
     });
 
-    it("rejects disconnected step tree", async () => {
+    it("rejects a step tree with a missing parent", async () => {
       const steps: AutomationStepBulkUpdate[] = [
         {
           id: "root" as UUIDType,
@@ -304,8 +304,8 @@ describe("AutomationStepsService", () => {
         },
       ];
 
-      await expect(service.ReplaceAutomationStepTree(automationId, steps)).rejects.toThrow(
-        "automationSteps.toast.treeNotConnected",
+      await expect(service.replaceAutomationStepTree(automationId, steps)).rejects.toThrow(
+        "automationSteps.toast.missingParent",
       );
     });
   });

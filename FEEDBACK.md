@@ -11,7 +11,7 @@
 
 The PR is large (275 changed files, approximately 65,003 additions), is reported as `CONFLICTING` by GitHub, and its recorded checks include backend lint/build failures and frontend lint failure. Those check results are treated as evidence to reproduce after rebasing, not as a substitute for local validation.
 
-No application-code feedback was implemented in this review. The only files added are this review and the implementation plan.
+The review findings were implemented in this worktree where they were within the PR scope. Remaining gaps are explicitly marked below; no changes were pushed or opened as a PR.
 
 ## Existing Mentingo review style
 
@@ -43,7 +43,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** There are two migrations with the `0179` prefix. The automation migration already creates `email_notification_templates`, while the second `0179` repeats that table. The journal has 180 entries and ends at `0179_add_automation_tables`; it has no journal entry for the email-template migration or `0180`. The `0180_snapshot.json` is also not represented in the journal chain.
 - **Risk:** Fresh databases and upgraded databases can execute different effective schemas. Drizzle can fail to apply, skip, or misidentify the migration; RLS may be absent on an upgraded database; duplicate objects can hide an incomplete migration rather than make it safe.
 - **Better pattern:** Merge/fetch the target `staging` baseline first, then assign unique migration names/numbers, regenerate snapshots and `_journal.json` through the repository migration script, and inspect every `id`/`prevId` link. Validate both a fresh database and an upgrade from the current staging schema, including RLS and policies.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: the migration chain was regenerated through 0184, applied to the local upgrade database, and its journal/file/tail snapshot links validate. A separate empty-database and staging-upgrade rehearsal remains pending.
 
 ### F-02 — Frontend route access grants a permission rejected by the API
 
@@ -53,7 +53,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** A user with only `USER_MANAGE` can pass the web route guard and load the automation page, but every automation API request can return 403.
 - **Risk:** The user sees a broken page, confusing authorization errors, and possibly partial UI state. It also creates two contradictory access-control contracts.
 - **Better pattern:** Make `AUTOMATION_MANAGE` the canonical route requirement. If `USER_MANAGE` is intentionally sufficient, change the backend permission policy and cover both paths with authorization tests; do not rely on frontend hiding as security.
-- **Status:** Not implemented.
+- **Status:** Implemented: route access, navigation group access, and API controllers now require `AUTOMATION_MANAGE`.
 
 ### F-03 — Automation tree validation accepts a parent from another automation
 
@@ -63,7 +63,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** A caller can create or replace a step in automation B with a parent ID from automation A in the same tenant. The persisted graph then has an orphaned node or a tree that does not represent the requested automation.
 - **Risk:** Runtime execution can omit nodes, execute only a partial tree, or produce a misleading successful save. A malformed tree can be introduced through the API even if the builder UI cannot create it.
 - **Better pattern:** Validate the complete submitted tree in one transaction: all IDs belong to the automation, IDs are unique, exactly one root exists, every non-root parent exists in the submitted set, node kinds/configurations are valid, and no cycle exists. Reject missing parents rather than ignoring them. Add cross-tenant and cross-automation tests.
-- **Status:** Not implemented.
+- **Status:** Implemented: server-side tree validation now checks roots, duplicates, missing/cross-automation parents, cycles, and disconnected nodes, with focused validation/service tests.
 
 ### F-04 — Automation endpoints accept compile-time types instead of runtime schemas
 
@@ -73,7 +73,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** HTTP clients can submit unknown properties, invalid UUIDs, unsupported statuses, malformed localized values, or arbitrary node contexts.
 - **Risk:** Invalid data reaches services and JSONB columns, API documentation is incomplete, and the generated client cannot accurately protect callers. This combines with F-03 to make graph corruption possible outside the UI.
 - **Better pattern:** Define TypeBox request/response schemas in the API contract layer, apply `@Validate`, document responses, and regenerate Swagger and the web client using existing scripts. Add 400-response tests for malformed nodes, status transitions, localized fields, and simulation payloads.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: TypeBox schemas, `@Validate`, Swagger export, and generated client regeneration were added. Controller tests cover the decorated handlers, but full HTTP 400 contract tests remain pending.
 
 ### F-05 — Metadata and step-tree saves are two independent requests
 
@@ -83,7 +83,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The two writes are not atomic, and the navigation callback does not await the mutation. A successful metadata update followed by a failed tree update leaves a split-brain automation; navigation can also hide the failure from the user.
 - **Risk:** Users can lose a graph, enable a stale graph, or believe changes were saved when the second request failed. Retries can produce ambiguous state.
 - **Better pattern:** Add one backend command that validates and persists metadata plus the complete tree in one database transaction, or provide an explicit server-side version/claim protocol. Await the mutation before navigation, preserve dirty state on failure, and show an inline save/error state.
-- **Status:** Not implemented.
+- **Status:** Implemented: the web builder sends metadata and the complete step tree to the transaction-backed save endpoint, serializes mutations, awaits save-before-navigation, and preserves the leave dialog on failure. Full browser save-failure E2E remains pending.
 
 ### F-06 — Frontend automation calls bypass the generated API client
 
@@ -93,7 +93,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The repository contract requires app endpoints to use `ApiClient.api...`; direct Axios calls bypass generated request/response types and can drift from the API schema.
 - **Risk:** Contract changes are not caught at compile time, response envelopes can be handled inconsistently, and auth/error behavior can diverge from generated callers.
 - **Better pattern:** Complete the API schemas first, regenerate `apps/web/app/api/generated-api.ts`, and use generated methods in all automation hooks. Do not hand-edit generated artifacts.
-- **Status:** Not implemented.
+- **Status:** Implemented: automation hooks use regenerated `ApiClient.api...` methods; no automation hook uses the direct Axios instance.
 
 ### F-07 — Empty or racing automation execution can crash before logging
 
@@ -103,7 +103,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** An enabled automation can temporarily have no steps during a save, migration, deletion, or race. Indexing the empty array throws before the failure can be represented as an automation log.
 - **Risk:** Event processing can fail with an unhandled TypeError, with no tenant-scoped run record and no actionable operator signal.
 - **Better pattern:** Load and validate the automation and tree first; derive tenant ID from the automation record, not an arbitrary first step. Record a skipped/failed run with a reason for empty or invalid trees, and make the transition/update transaction prevent enabled-invalid state.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: empty and invalid execution paths are guarded and logged, but the runner’s cross-module execution test remains pending.
 
 ### F-08 — Batch runner reports one result for multiple non-idempotent email sends
 
@@ -113,7 +113,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** If recipient 1 succeeds and recipient 2 fails, the aggregate run is marked failed even though one message was delivered. Retrying the event can send recipient 1 again. There is no per-recipient state, idempotency key, or retry boundary.
 - **Risk:** Duplicate emails, incomplete delivery with no precise diagnosis, and long-running event handlers that are difficult to retry safely.
 - **Better pattern:** Use the existing outbox/queue conventions for durable email commands, create a run/event ID, persist per-recipient attempts, and make sends idempotent where the provider supports it. Keep the HTTP/event handler focused on validation, claiming, and enqueueing.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: email sends are one-recipient BullMQ jobs with deterministic job IDs, three attempts, exponential backoff, and terminal failure logs. A provider-level duplicate-send/idempotency integration test remains pending.
 
 ### F-09 — Custom template rendering drops tenant branding and plain-text content
 
@@ -123,7 +123,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The automation path does not resolve the tenant's branding before rendering, while the email-template preview/test path does. The plain-text part is the subject rather than a text representation of the message.
 - **Risk:** Tenant emails can lose their visual identity, render invalid styles, and be inaccessible or unusable for clients that prefer plain text.
 - **Better pattern:** Centralize tenant-aware rendering and logo resolution in the email-template service, use the recipient tenant for every render, and generate a real text fallback from the rendered content. Add a send-path test for branding, language, logo attachment, subject, HTML, and text.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: tenant branding, logo, and real plain-text rendering were added; delivery-path tests remain pending.
 
 ### F-10 — Inactivity recipients omit `userId`, so language resolution falls back to English
 
@@ -133,7 +133,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** `InactiveUser` events contain the user ID, but the resolver discards it.
 - **Risk:** Users with Polish or another supported preference can receive the wrong template language for short/long inactivity automations.
 - **Better pattern:** Preserve `userId` in every recipient resolver and add one test per inactivity event proving the selected localized template follows the user's preference.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: inactivity resolvers now preserve `userId` and resolve user language; preference tests remain pending.
 
 ### F-11 — Navigation hides automation from automation-only administrators
 
@@ -143,7 +143,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The API and route contract introduce a dedicated automation permission, but the navigation group still requires unrelated management permissions.
 - **Risk:** A correctly authorized automation administrator cannot discover or open the feature through normal navigation.
 - **Better pattern:** Add `AUTOMATION_MANAGE` to the group requirement and add a permission-focused navigation test. Keep the route and API requirements aligned with F-02.
-- **Status:** Not implemented.
+- **Status:** Implemented: the Manage navigation group includes `AUTOMATION_MANAGE`.
 
 ### F-12 — Turning Active off changes the automation to Draft instead of Disabled
 
@@ -153,7 +153,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** A pause action has different semantics from reverting a workflow to an unvalidated draft.
 - **Risk:** Operators cannot temporarily pause a valid automation without losing its active lifecycle state or being forced through simulation again. The UI's “Active/Draft” language disagrees with the backend's enabled/disabled/archived/draft model.
 - **Better pattern:** Use `disabled` for an intentional pause, reserve `draft` for incomplete/unvalidated configuration, and make the transition rules explicit in the API. Confirm destructive lifecycle changes and show the current state consistently in list, drawer, builder, and logs.
-- **Status:** Not implemented.
+- **Status:** Implemented: turning activation off persists `disabled`, while edits return the workflow to `draft`; list, drawer, and builder labels use the backend lifecycle vocabulary.
 
 ### F-13 — Default seeding is N+1, race-prone, and hides failures as skips
 
@@ -163,7 +163,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** Concurrent seed requests can both observe a missing trigger and create duplicates. A real creation failure is indistinguishable from an intentional existing-trigger skip.
 - **Risk:** Duplicate default workflows, extra database load for large tenants, and misleading operational results.
 - **Better pattern:** Add a tenant-scoped uniqueness strategy for default trigger types, use a transaction or idempotent upsert, batch the trigger query, and return separate `created`, `alreadyExists`, and `failed` results.
-- **Status:** Not implemented.
+- **Status:** Implemented: default seeding batch-reads trigger names, reports `created`/`skipped`/`failed` separately, cleans up partial creations, and has a tenant-scoped unique trigger index. Concurrent-database integration coverage remains pending.
 
 ### F-14 — Localized announcement content is selected arbitrarily
 
@@ -173,7 +173,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** Object order is not a recipient-language policy. The resolver does not use the recipient's supported language or the repository's localization helper.
 - **Risk:** Recipients can receive an arbitrary locale, and the selected language can change as JSONB keys are written in a different order.
 - **Better pattern:** Resolve localized values using the recipient's language with the existing localization service, define a documented fallback chain, and test all supported languages plus fallback.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: announcement content now resolves per recipient language with fallback; supported-language tests remain pending.
 
 ### F-15 — Trigger lookup uses `LIKE` instead of an exact event match
 
@@ -183,7 +183,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** Event names are identifiers, not patterns. A pattern-like value can match unintended triggers.
 - **Risk:** The wrong automations can run for an event, especially as event names grow or contain shared prefixes.
 - **Better pattern:** Use an exact equality predicate, centralize the event-name enum/map, and validate trigger names when steps are saved.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: trigger matching now uses exact equality; a repository integration test remains pending.
 
 ### F-16 — Debug output and unchecked update results remain in production paths
 
@@ -193,7 +193,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** Production paths should use the structured Nest logger and typed unknown-error handling. Repository update/delete no-row cases should become explicit domain errors, not later property access failures.
 - **Risk:** Noisy logs, missing context, and misleading 500s for stale/deleted automation IDs.
 - **Better pattern:** Remove debug logs, use structured logger metadata, narrow unknown errors, and return `NotFoundException`/domain errors when an update affects no row. Rename `GetByAutomationId` and `ReplaceAutomationStepTree` to repository-native camelCase while touching the code.
-- **Status:** Not implemented.
+- **Status:** Implemented: debug logs were removed, unknown errors are typed, no-row updates are checked, and legacy method names were changed to camelCase. The focused service suite passes.
 
 ### F-17 — Validation and simulation rules are duplicated across backend and frontend
 
@@ -203,7 +203,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The UI can say a graph is valid while the server rejects it, or the server can change a rule without updating the builder.
 - **Risk:** Confusing activation failures and drift in supported node/action configuration.
 - **Better pattern:** Make the server contract authoritative, share only stable types/constants through the shared package, and return structured validation errors that the builder can map to nodes. Keep frontend validation as fast feedback, not authorization.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: server schemas and tree validation are authoritative and the builder has local fast feedback, but structured node-level server validation mapping is unfinished.
 
 ### F-18 — Test coverage does not cover the production automation path
 
@@ -213,7 +213,7 @@ Feasibility describes the relative implementation effort/risk: **High** is a foc
 - **Why:** The highest-risk behavior is cross-module and transactional; unit tests alone do not prove the deployed contract.
 - **Risk:** The issues above can pass isolated tests and fail only when an event, tenant context, database migration, email renderer, and UI permission are combined.
 - **Better pattern:** Add narrow API E2E scenarios using existing factories/Mailhog: permission denial, cross-tenant/cross-automation parent rejection, valid activation, disabled behavior, localized custom template delivery, partial recipient failure/retry, and fresh/upgrade migration checks. Add web E2E for permission-based navigation, save failure recovery, and active/disabled UX.
-- **Status:** Not implemented.
+- **Status:** Partially implemented: focused API service/controller/tree/seed tests and the autosave unit test pass. Cross-module API E2E, migration rehearsal, and browser permission/delivery E2E remain pending.
 
 ## Maintainability and cleanup feedback
 
@@ -230,36 +230,36 @@ These are not merge blockers individually, but should be addressed while the aff
 
 ### U-01 — Save state and recovery are unclear
 
-The builder appears to combine explicit save, autosave, simulation, and navigation, but the save-and-leave path does not await the mutation. Show a persistent `Saving…`, `Saved`, and `Save failed — retry` state; disable or defer navigation while a save is pending; and retain unsaved changes when the request fails. Autosave should not produce a success toast on every keystroke.
+The builder now awaits save before leaving, retains the leave dialog on failure, and suppresses autosave success toasts. A persistent `Saving…`, `Saved`, and `Save failed — retry` status surface is still recommended.
 
 ### U-02 — Activation lifecycle needs one vocabulary
 
-The frontend uses “Active/Draft”, the backend has enabled/disabled/archived/draft, and the toggle maps off to draft. Use one user-facing state model with explicit “Pause/Disable” semantics and explain why activation is unavailable when a simulation is required.
+Implemented: the frontend uses enabled/disabled/draft/archived semantics, maps pause to `disabled`, and keeps activation gated by validation/simulation.
 
 ### U-03 — Create should lead to a useful next action
 
-`AutomationPage:44-50` creates a draft but leaves the user on the list. Return the created ID and navigate to its builder, or provide an explicit “Open builder” action in the success state. A newly created empty draft should not look like a silently completed workflow.
+Implemented: creation returns the created record and navigates directly to its builder.
 
 ### U-04 — Autosave can lose the last edit and race requests
 
-The drawer autosave behavior should flush on close/unmount, serialize mutations, and expose pending/error state. Otherwise a fast close or two quick edits can leave the server behind the UI.
+Implemented: autosave flushes on unmount, mutations are serialized, and the autosave hook has focused coverage. A dedicated pending/error indicator remains recommended.
 
 ### U-05 — Localized editing can overwrite other languages
 
-The drawer sends only the current language while the repository appears to replace the localized JSONB object. Preserve existing locale keys with a server-side merge or make the locale scope explicit before saving.
+Implemented: the repository merges localized JSONB updates, and the drawer sends the selected application language without replacing other locale keys.
 
 ### U-06 — Large action modal needs responsive and accessible behavior
 
-`apps/web/app/modules/Admin/Automation/Builder/components/EditActionModal.tsx:129-148` uses a 90% viewport modal with two fixed half-width columns. Stack the columns at narrow widths, keep the footer/actions visible, and provide keyboard-accessible alternatives for graph editing and adding nodes.
+Implemented: the action modal uses a responsive width, stacks its panes below the medium breakpoint, and keeps the scrollable content/footer structure intact. Broader keyboard graph-editing coverage remains pending.
 
 ### U-07 — List and logs need server-side scale controls
 
-The list and logs are filtered client-side after loading all records. Add backend pagination and filters for status, automation, event, and date; preserve the current filter in the URL; and show an explicit “no matching results” state. This is important before automation logs grow in production.
+Not implemented: list/log pagination, server-side filters, and URL-persisted filters remain follow-up scale work.
 
 ### U-08 — Builder visual tokens and error placement
 
-Avoid hard-coded connector colors such as `colors.black`; use theme tokens with dark-mode contrast. Put node validation errors next to the affected node/action and provide a summary before activation so users do not need to infer why the toggle is disabled.
+Not implemented: theme-token connector colors and structured node-level error placement remain follow-up UI work.
 
 ## Review conclusion
 
-The feature direction is viable, and the UI has a reasonable foundation of builder, simulation, template, and log surfaces. The current implementation is not ready to merge because the deployable migration chain and several authoritative backend contracts are incomplete or inconsistent with the web application. Resolve F-01 through F-05 first, then F-06 through F-18 and the UI items in the order listed, rebase against `staging`, and rerun the focused API/web checks plus migration validation.
+The feature direction is viable, and the implementation now addresses the blocking permission, graph-integrity, atomic-save, generated-client, lifecycle, seed, and queue-boundary findings. It is not fully release-validated yet: fresh/upgrade migration rehearsal, HTTP contract/E2E coverage, server-side list/log scale controls, and the remaining UI polish still need completion before merge.

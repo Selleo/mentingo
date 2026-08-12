@@ -279,6 +279,7 @@ export interface CurrentUserResponse {
       | "tenant.manage"
       | "course.ai_generation"
       | "activity_log.read"
+      | "automation.manage"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -7723,6 +7724,7 @@ export interface ListTemplatesResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7743,9 +7745,10 @@ export interface ListTemplatesResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   }[];
@@ -7772,9 +7775,9 @@ export interface CreateTemplateBody {
    * @maxLength 200
    */
   name?: string;
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @minItems 1 */
-  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   subject?: {
     en?: string;
     pl?: string;
@@ -7782,6 +7785,7 @@ export interface CreateTemplateBody {
     lt?: string;
     cs?: string;
     es?: string;
+    fr?: string;
   };
   blocks?: {
     type?: string;
@@ -7802,6 +7806,7 @@ export interface CreateTemplateBody {
     lt?: object;
     cs?: object;
     es?: object;
+    fr?: object;
   };
 }
 
@@ -7818,6 +7823,7 @@ export interface CreateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7838,9 +7844,10 @@ export interface CreateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7859,6 +7866,7 @@ export interface GetTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7879,9 +7887,10 @@ export interface GetTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7893,9 +7902,9 @@ export interface UpdateTemplateBody {
    * @maxLength 200
    */
   name?: string;
-  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @minItems 1 */
-  availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  availableLocales?: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
   subject?: {
     en?: string;
     pl?: string;
@@ -7903,6 +7912,7 @@ export interface UpdateTemplateBody {
     lt?: string;
     cs?: string;
     es?: string;
+    fr?: string;
   };
   blocks?: {
     type?: string;
@@ -7923,6 +7933,7 @@ export interface UpdateTemplateBody {
     lt?: object;
     cs?: object;
     es?: object;
+    fr?: object;
   };
 }
 
@@ -7939,6 +7950,7 @@ export interface UpdateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -7959,9 +7971,10 @@ export interface UpdateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -7980,6 +7993,7 @@ export interface PublishTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8000,9 +8014,10 @@ export interface PublishTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8021,6 +8036,7 @@ export interface MakeTemplateDraftResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8041,9 +8057,10 @@ export interface MakeTemplateDraftResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8062,6 +8079,7 @@ export interface ArchiveTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8082,9 +8100,10 @@ export interface ArchiveTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8109,6 +8128,7 @@ export interface UnarchiveTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8129,9 +8149,10 @@ export interface UnarchiveTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -8139,7 +8160,7 @@ export interface UnarchiveTemplateResponse {
 
 export interface PreviewTemplateResponse {
   data: {
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     subject: string;
     html: string;
   };
@@ -8164,6 +8185,7 @@ export interface DuplicateTemplateResponse {
       lt?: string;
       cs?: string;
       es?: string;
+      fr?: string;
     };
     blocks: {
       type?: string;
@@ -8184,9 +8206,10 @@ export interface DuplicateTemplateResponse {
       lt?: object;
       cs?: object;
       es?: object;
+      fr?: object;
     };
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     status: "draft" | "published" | "archived";
     archivedAt: string | null;
   };
@@ -9420,6 +9443,401 @@ export interface LifecycleNotificationsBody {
     [key: string]: any;
   }[];
   [key: string]: any;
+}
+
+export interface GetAllAutomationsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    } | null;
+    status: "enabled" | "disabled" | "archived" | "draft";
+    lastRun: string | null;
+  }[];
+}
+
+export interface PreviewSystemTemplateResponse {
+  data: {
+    subject: string;
+    html: string;
+  };
+}
+
+export interface RunSimulationBody {
+  nodes: {
+    /** @format uuid */
+    id: string;
+    kind: "trigger" | "action";
+    type:
+      | "user_invited"
+      | "users_imported_invite"
+      | "user_password_reminder"
+      | "user_welcome"
+      | "user_first_login"
+      | "users_assigned_to_course"
+      | "users_short_inactivity"
+      | "users_long_inactivity"
+      | "user_chapter_finished"
+      | "user_course_finished"
+      | "user_registered"
+      | "user_password_created"
+      | "course_completed"
+      | "certificate_expiration_warning"
+      | "certificate_archived"
+      | "announcement_published"
+      | "course_chat_user_mentioned"
+      | "course_due_date_reminder"
+      | "send_email";
+    label: string;
+    parentId: string | null;
+    children: string[];
+    config: object;
+  }[];
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface RunSimulationResponse {
+  data: {
+    overallStatus: "success" | "failed";
+    nodeResults: {
+      nodeId: string;
+      nodeName: string;
+      kind: "trigger" | "action";
+      status: "valid" | "invalid";
+      errors: {
+        nodeId: string;
+        nodeName: string;
+        field: string;
+        description: string;
+      }[];
+    }[];
+    eventData: {
+      key: string;
+      label: string;
+      dataType: "string" | "number" | "date" | "url";
+    }[];
+    placeholderMappings: Record<
+      string,
+      {
+        placeholder: string;
+        mappedVariable: string | null;
+        sampleValue: string | null;
+      }[]
+    >;
+    emailPreviews: {
+      nodeId: string;
+      nodeName: string;
+      subject: string;
+      senderAddress: string;
+      htmlBody: string;
+      recipientAddress: string;
+    }[];
+  };
+}
+
+export interface SeedDefaultsBody {
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface SeedDefaultsResponse {
+  data: {
+    created: number;
+    skipped: number;
+    failed: number;
+    total: number;
+  };
+}
+
+export interface GetAutomationByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    } | null;
+    status: "enabled" | "disabled" | "archived" | "draft";
+    lastRun: string | null;
+  };
+}
+
+export interface CreateAutomationBody {
+  name: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  description?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  status: "enabled" | "disabled" | "archived" | "draft";
+}
+
+export interface CreateAutomationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    } | null;
+    status: "enabled" | "disabled" | "archived" | "draft";
+    lastRun: string | null;
+  };
+}
+
+export interface UpdateStatusBody {
+  status: "enabled" | "disabled" | "archived" | "draft";
+}
+
+export interface UpdateStatusResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UpdateAutomationBody {
+  name?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  description?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  status?: "enabled" | "disabled" | "archived" | "draft";
+}
+
+export interface UpdateAutomationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface SaveAutomationBody {
+  metadata: {
+    name?: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    description?: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    status?: "enabled" | "disabled" | "archived" | "draft";
+  };
+  steps: {
+    /** @format uuid */
+    id: string;
+    parentId: string | null;
+    /** @format uuid */
+    automationId: string;
+    type: "action" | "condition" | "trigger";
+    typeContext: {
+      /** @minLength 1 */
+      name: string;
+      providedVariables: {
+        /** @minLength 1 */
+        key: string;
+        value: any;
+      }[];
+      [key: string]: any;
+    };
+  }[];
+}
+
+export interface SaveAutomationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    stepCount: number;
+  };
+}
+
+export interface CreateBody {
+  parentId: string | null;
+  /** @format uuid */
+  automationId: string;
+  type: "action" | "condition" | "trigger";
+  typeContext: {
+    /** @minLength 1 */
+    name: string;
+    providedVariables: {
+      /** @minLength 1 */
+      key: string;
+      value: any;
+    }[];
+    [key: string]: any;
+  };
+}
+
+export interface CreateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface GetAllResponse {
+  data: any[];
+}
+
+export interface GetByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    /** @format uuid */
+    automationId: string;
+    parentId: string | null;
+    type: "action" | "condition" | "trigger";
+    typeContext: {
+      /** @minLength 1 */
+      name: string;
+      providedVariables: {
+        /** @minLength 1 */
+        key: string;
+        value: any;
+      }[];
+      [key: string]: any;
+    };
+  };
+}
+
+export interface UpdateBody {
+  parentId: string | null;
+  /** @format uuid */
+  automationId: string;
+  type: "action" | "condition" | "trigger";
+  typeContext: {
+    /** @minLength 1 */
+    name: string;
+    providedVariables: {
+      /** @minLength 1 */
+      key: string;
+      value: any;
+    }[];
+    [key: string]: any;
+  };
+}
+
+export interface UpdateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export type ReplaceAutomationStepTreeBody = {
+  /** @format uuid */
+  id: string;
+  parentId: string | null;
+  /** @format uuid */
+  automationId: string;
+  type: "action" | "condition" | "trigger";
+  typeContext: {
+    /** @minLength 1 */
+    name: string;
+    providedVariables: {
+      /** @minLength 1 */
+      key: string;
+      value: any;
+    }[];
+    [key: string]: any;
+  };
+}[];
+
+export interface ReplaceAutomationStepTreeResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetByAutomationIdResponse {
+  data: any[];
 }
 
 import type {
@@ -16017,7 +16435,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     emailNotificationTemplatesControllerPreviewTemplate: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16038,7 +16456,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     emailNotificationTemplatesControllerSendTestEmail: (
       id: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17694,12 +18112,85 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name AutomationsControllerGetAllAutomations
-     * @request GET:/api/automations/tenant/{tenantId}
+     * @request GET:/api/automations
      */
-    automationsControllerGetAllAutomations: (tenantId: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/automations/tenant/${tenantId}`,
+    automationsControllerGetAllAutomations: (params: RequestParams = {}) =>
+      this.request<GetAllAutomationsResponse, any>({
+        path: `/api/automations`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerCreateAutomation
+     * @request POST:/api/automations
+     */
+    automationsControllerCreateAutomation: (
+      data: CreateAutomationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAutomationResponse, any>({
+        path: `/api/automations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerPreviewSystemTemplate
+     * @request GET:/api/automations/system-template-preview/{templateId}
+     */
+    automationsControllerPreviewSystemTemplate: (
+      templateId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PreviewSystemTemplateResponse, any>({
+        path: `/api/automations/system-template-preview/${templateId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerRunSimulation
+     * @request POST:/api/automations/simulate
+     */
+    automationsControllerRunSimulation: (data: RunSimulationBody, params: RequestParams = {}) =>
+      this.request<RunSimulationResponse, any>({
+        path: `/api/automations/simulate`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerSeedDefaults
+     * @request POST:/api/automations/seed-defaults
+     */
+    automationsControllerSeedDefaults: (data: SeedDefaultsBody, params: RequestParams = {}) =>
+      this.request<SeedDefaultsResponse, any>({
+        path: `/api/automations/seed-defaults`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -17710,9 +18201,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/automations/{id}
      */
     automationsControllerGetAutomationById: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<GetAutomationByIdResponse, any>({
         path: `/api/automations/${id}`,
         method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -17722,10 +18214,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AutomationsControllerUpdateAutomation
      * @request PATCH:/api/automations/{id}
      */
-    automationsControllerUpdateAutomation: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+    automationsControllerUpdateAutomation: (
+      id: string,
+      data: UpdateAutomationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAutomationResponse, any>({
         path: `/api/automations/${id}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -17745,13 +18244,161 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name AutomationsControllerCreateAutomation
-     * @request POST:/api/automations
+     * @name AutomationsControllerUpdateStatus
+     * @request PATCH:/api/automations/status/{id}
      */
-    automationsControllerCreateAutomation: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/automations`,
+    automationsControllerUpdateStatus: (
+      id: string,
+      data: UpdateStatusBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateStatusResponse, any>({
+        path: `/api/automations/status/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerSaveAutomation
+     * @request PATCH:/api/automations/{id}/save
+     */
+    automationsControllerSaveAutomation: (
+      id: string,
+      data: SaveAutomationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SaveAutomationResponse, any>({
+        path: `/api/automations/${id}/save`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerCreate
+     * @request POST:/api/automation-steps
+     */
+    automationStepsControllerCreate: (data: CreateBody, params: RequestParams = {}) =>
+      this.request<CreateResponse, any>({
+        path: `/api/automation-steps`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerGetAll
+     * @request GET:/api/automation-steps/automation/{automationId}
+     */
+    automationStepsControllerGetAll: (automationId: string, params: RequestParams = {}) =>
+      this.request<GetAllResponse, any>({
+        path: `/api/automation-steps/automation/${automationId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerGetById
+     * @request GET:/api/automation-steps/{id}
+     */
+    automationStepsControllerGetById: (id: string, params: RequestParams = {}) =>
+      this.request<GetByIdResponse, any>({
+        path: `/api/automation-steps/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerUpdate
+     * @request PATCH:/api/automation-steps/{id}
+     */
+    automationStepsControllerUpdate: (id: string, data: UpdateBody, params: RequestParams = {}) =>
+      this.request<UpdateResponse, any>({
+        path: `/api/automation-steps/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerDelete
+     * @request DELETE:/api/automation-steps/{id}
+     */
+    automationStepsControllerDelete: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automation-steps/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationStepsControllerReplaceAutomationStepTree
+     * @request PUT:/api/automation-steps/{automationId}/steps
+     */
+    automationStepsControllerReplaceAutomationStepTree: (
+      automationId: string,
+      data: ReplaceAutomationStepTreeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceAutomationStepTreeResponse, any>({
+        path: `/api/automation-steps/${automationId}/steps`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationLogsControllerGetAll
+     * @request GET:/api/automation-logs
+     */
+    automationLogsControllerGetAll: (params: RequestParams = {}) =>
+      this.request<GetAllResponse, any>({
+        path: `/api/automation-logs`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationLogsControllerGetByAutomationId
+     * @request GET:/api/automation-logs/automation/{automationId}
+     */
+    automationLogsControllerGetByAutomationId: (automationId: string, params: RequestParams = {}) =>
+      this.request<GetByAutomationIdResponse, any>({
+        path: `/api/automation-logs/automation/${automationId}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };

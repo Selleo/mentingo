@@ -20,6 +20,7 @@ export {
 import { ACTION_DEFINITIONS, TRIGGER_DEFINITIONS } from "@repo/shared";
 
 import type { ActionType, NodeKind, TriggerType } from "@repo/shared";
+import type { AutomationStatus } from "~/api/queries/admin/automation.types";
 
 export interface StepConfigField {
   key: string;
@@ -67,6 +68,7 @@ export interface BuilderState {
   selectedNodeId: string | null;
   automationName: string;
   isActive: boolean;
+  status: AutomationStatus;
   simulationPassed: boolean;
   lastSavedAt: string | null;
   isDirty: boolean;

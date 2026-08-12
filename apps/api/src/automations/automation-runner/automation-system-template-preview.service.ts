@@ -51,7 +51,7 @@ interface PreviewSampleData {
   };
 }
 
-const SAMPLE_DATA: Record<SupportedLanguages, PreviewSampleData> = {
+const SAMPLE_DATA: Partial<Record<SupportedLanguages, PreviewSampleData>> = {
   pl: {
     userName: "Jan",
     userFullName: "Jan Kowalski",
@@ -238,7 +238,7 @@ export class AutomationSystemTemplatePreviewService {
   }
 
   private getSampleData(language: SupportedLanguages): PreviewSampleData {
-    return SAMPLE_DATA[language] ?? SAMPLE_DATA.en;
+    return SAMPLE_DATA[language] ?? SAMPLE_DATA.en!;
   }
 
   private async renderRawPreview(

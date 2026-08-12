@@ -1,5 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { DEFAULT_TENANT_PRIMARY_COLOR, TENANT_LOGO_CID_SRC } from "@repo/shared";
 
+import { EmailService } from "src/common/emails/emails.service";
 import { EmailNotificationTemplatesService } from "src/email-notification-templates/email-templates.service";
 import { renderTemplateContent } from "src/email-notification-templates/utils/renderTemplateContent";
 
@@ -16,11 +18,15 @@ export type AutomationEmailTemplate = {
 export class AutomationTemplateService {
   private readonly logger = new Logger(AutomationTemplateService.name);
 
-  constructor(private readonly emailTemplatesService: EmailNotificationTemplatesService) {}
+  constructor(
+    private readonly emailTemplatesService: EmailNotificationTemplatesService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async getTemplate(
     templateId: UUIDType,
     language?: SupportedLanguages,
+    tenantId?: UUIDType,
   ): Promise<AutomationEmailTemplate | null> {
     this.logger.debug(`Fetching email template: ${templateId}`);
 
@@ -33,6 +39,9 @@ export class AutomationTemplateService {
       }
 
       const resolvedLanguage = language ?? template.baseLanguage;
+      const primaryColor = tenantId
+        ? (await this.emailService.getDefaultEmailProperties(tenantId)).primaryColor
+        : DEFAULT_TENANT_PRIMARY_COLOR;
 
       const rendered = await renderTemplateContent({
         blocks: template.blocks,
@@ -40,7 +49,8 @@ export class AutomationTemplateService {
         subject: template.subject,
         language: resolvedLanguage,
         baseLanguage: template.baseLanguage,
-        primaryColor: "",
+        primaryColor,
+        tenantLogoSrc: TENANT_LOGO_CID_SRC,
       });
 
       return {
