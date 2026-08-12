@@ -65,7 +65,7 @@ export class CourseDueDateReminderEmailHandler implements IEventHandler<CourseDu
       daysBeforeDueDate: recipient.daysBeforeDueDate,
       ...recipient.defaultEmailSettings,
     });
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     await this.emailService.sendEmailWithLogo(
       {

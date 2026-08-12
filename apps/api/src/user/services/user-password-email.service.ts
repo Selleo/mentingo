@@ -240,7 +240,7 @@ export class UserPasswordEmailService {
         resetLink: buildCreateNewPasswordLink(tenantOrigin, { resetToken }),
         ...recipient.defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       emails.push({
         userId: recipient.id,
@@ -279,7 +279,7 @@ export class UserPasswordEmailService {
         createPasswordLink: buildCreateNewPasswordLink(tenantOrigin, { createToken }),
         ...recipient.defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       emails.push({
         userId: recipient.id,

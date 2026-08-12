@@ -661,7 +661,7 @@ export class AuthService {
       }),
       ...defaultEmailSettings,
     });
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     return { createToken, emailContent: { text, html } };
   }
@@ -872,7 +872,7 @@ export class AuthService {
         ...defaultEmailSettings,
       });
 
-      const [text, html] = await Promise.all([magicLinkEmail.text, magicLinkEmail.html]);
+      const { text, html } = magicLinkEmail;
 
       await this.emailService.sendEmailWithLogo(
         {

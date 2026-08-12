@@ -4846,7 +4846,7 @@ export class CourseService {
           coursesLink: this.buildAdminCoursesUrl(tenantHost),
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return this.emailService.sendEmailWithLogo(
           {

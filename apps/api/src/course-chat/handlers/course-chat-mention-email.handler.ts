@@ -118,7 +118,7 @@ export class CourseChatMentionEmailHandler implements IEventHandler<CourseChatMe
             buttonLink: `${tenantOrigin}/course/${courseId}?tab=Discussion`,
             ...defaultEmailSettings,
           });
-          const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+          const { text, html } = emailTemplate;
 
           await this.emailService.sendEmailWithLogo(
             {

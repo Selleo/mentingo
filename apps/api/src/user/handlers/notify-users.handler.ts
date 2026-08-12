@@ -230,7 +230,7 @@ export class NotifyUsersHandler implements IEventHandler {
         createPasswordLink: url,
         ...defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -285,7 +285,7 @@ export class NotifyUsersHandler implements IEventHandler {
       coursesUrl: `${baseOrigin}/courses`,
       ...defaultEmailSettings,
     });
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     await this.emailService.sendEmailWithLogo(
       {
@@ -319,7 +319,7 @@ export class NotifyUsersHandler implements IEventHandler {
         createPasswordLink,
         ...defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -368,7 +368,7 @@ export class NotifyUsersHandler implements IEventHandler {
         coursesLink: `${baseOrigin}/courses`,
         ...defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -412,7 +412,7 @@ export class NotifyUsersHandler implements IEventHandler {
           formatedCourseDueDate: dueDatesByStudent[studentId] ?? null,
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return await this.emailService.sendEmailWithLogo(
           {
@@ -458,7 +458,7 @@ export class NotifyUsersHandler implements IEventHandler {
           courseLink,
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -504,7 +504,7 @@ export class NotifyUsersHandler implements IEventHandler {
           courseLink,
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -542,7 +542,7 @@ export class NotifyUsersHandler implements IEventHandler {
       chapterName,
       ...defaultEmailSettings,
     });
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     const subject = getEmailSubject("userChapterFinishedEmail", defaultEmailSettings.language, {
       chapterName,
@@ -583,7 +583,7 @@ export class NotifyUsersHandler implements IEventHandler {
       ...defaultEmailSettings,
       hasCertificate,
     });
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     await this.emailService.sendEmailWithLogo(
       {

@@ -61,7 +61,7 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
         expiresAt,
         ...defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       await this.emailService.sendEmailWithLogo(
         {
@@ -97,7 +97,7 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
         reason,
         ...defaultEmailSettings,
       });
-      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+      const { text, html } = emailTemplate;
 
       await this.emailService.sendEmailWithLogo(
         {

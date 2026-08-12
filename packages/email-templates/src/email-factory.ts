@@ -18,12 +18,12 @@ export function emailTemplateFactory<T extends unknown[]>(
       return this.args;
     }
 
-    get text(): Promise<string> {
-      return Promise.resolve(toPlainText(this.renderDocument()));
+    get text(): string {
+      return toPlainText(this.renderDocument());
     }
 
-    get html(): Promise<string> {
-      return Promise.resolve(this.renderDocument());
+    get html(): string {
+      return this.renderDocument();
     }
 
     private renderDocument(): string {

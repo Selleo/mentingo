@@ -62,7 +62,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           profileLink: `${baseOrigin}/profile/${user.id}`,
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -101,7 +101,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           progressLink: `${baseOrigin}/course/${courseId}`,
           ...defaultEmailSettings,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+        const { text, html } = emailTemplate;
 
         return this.emailService.sendEmailWithLogo(
           {

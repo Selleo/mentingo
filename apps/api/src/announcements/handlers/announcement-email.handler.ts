@@ -127,7 +127,7 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
     language: SupportedLanguages;
   }) {
     const emailTemplate = this.buildEmailTemplate(input);
-    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+    const { text, html } = emailTemplate;
 
     return { text, html };
   }
