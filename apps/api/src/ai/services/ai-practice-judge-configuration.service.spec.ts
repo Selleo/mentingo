@@ -1,10 +1,9 @@
-import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
+import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 
 import type { GeneratedAiJudgeConfiguration } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 
-describe("AiPracticeJudgeConfigurationService", () => {
+describe("buildAiPracticeJudgeConfiguration", () => {
   it("maps a generated Judge configuration into bulk-persistable rows", () => {
-    const service = new AiPracticeJudgeConfigurationService();
     const configuration: GeneratedAiJudgeConfiguration = {
       taskGoal: "Reach a clear agreement.",
       passingThresholdPercent: 70,
@@ -22,7 +21,11 @@ describe("AiPracticeJudgeConfigurationService", () => {
       blockingErrors: [{ description: "Makes an unsupported promise." }],
     };
 
-    const graph = service.build("00000000-0000-0000-0000-000000000001", configuration, "en");
+    const graph = buildAiPracticeJudgeConfiguration(
+      "00000000-0000-0000-0000-000000000001",
+      configuration,
+      "en",
+    );
 
     expect(graph.configuration).toEqual(
       expect.objectContaining({

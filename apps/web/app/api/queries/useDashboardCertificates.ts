@@ -15,8 +15,10 @@ export function useDashboardCertificates(page: number, enabled: boolean) {
   return useQuery({
     queryKey: ["dashboard", "certificates", currentUser?.id, language, page],
     queryFn: async () => {
+      if (!currentUser?.id) throw new Error("Current user is required");
+
       const response = await ApiClient.api.certificatesControllerGetAllCertificates({
-        userId: currentUser!.id,
+        userId: currentUser.id,
         language,
         page,
         perPage: DASHBOARD_CERTIFICATES_PAGE_SIZE,

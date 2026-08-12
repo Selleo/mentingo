@@ -1688,6 +1688,190 @@
         }
       }
     },
+    "/api/statistics/dashboard/training-completion": {
+      "get": {
+        "operationId": "StatisticsController_getDashboardTrainingCompletion",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardTrainingCompletionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/dashboard/deadline-risks/summary": {
+      "get": {
+        "operationId": "StatisticsController_getDashboardDeadlineRiskSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardDeadlineRiskSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/dashboard/incomplete-courses": {
+      "get": {
+        "operationId": "StatisticsController_getDashboardIncompleteCourses",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardIncompleteCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/dashboard/deadline-risks": {
+      "get": {
+        "operationId": "StatisticsController_getDashboardDeadlineRisks",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "overdue",
+                  "type": "string"
+                },
+                {
+                  "const": "dueSoon",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardDeadlineRisksResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/all": {
       "get": {
         "operationId": "UserController_getUsers",
@@ -2355,7 +2539,16 @@
     "/api/user/onboarding-status/{page}": {
       "patch": {
         "operationId": "UserController_markOnboardingComplete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -6736,14 +6929,6 @@
             }
           },
           {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6779,6 +6964,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -8457,6 +8650,33 @@
         }
       }
     },
+    "/api/ai/practice/{id}/replay": {
+      "post": {
+        "operationId": "AiController_replayPractice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayPracticeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -9949,24 +10169,6 @@
         "operationId": "AnnouncementsController_getAllAnnouncements",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -10039,6 +10241,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -10134,24 +10354,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -10186,6 +10388,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -12468,6 +12688,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -12483,6 +12711,14 @@
         "parameters": [
           {
             "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
             "required": true,
             "in": "query",
             "schema": {
@@ -12926,15 +13162,6 @@
             }
           },
           {
-            "name": "scoId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -12970,6 +13197,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -14690,6 +14926,79 @@
             }
           },
           {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "from",
             "required": false,
             "in": "query",
@@ -14929,79 +15238,6 @@
                       }
                     ]
                   }
-                }
-              ]
-            }
-          },
-          {
-            "name": "resourceType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "user",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                },
-                {
-                  "const": "chapter",
-                  "type": "string"
-                },
-                {
-                  "const": "lesson",
-                  "type": "string"
-                },
-                {
-                  "const": "announcement",
-                  "type": "string"
-                },
-                {
-                  "const": "group",
-                  "type": "string"
-                },
-                {
-                  "const": "settings",
-                  "type": "string"
-                },
-                {
-                  "const": "integration",
-                  "type": "string"
-                },
-                {
-                  "const": "category",
-                  "type": "string"
-                },
-                {
-                  "const": "qa",
-                  "type": "string"
-                },
-                {
-                  "const": "news",
-                  "type": "string"
-                },
-                {
-                  "const": "article",
-                  "type": "string"
-                },
-                {
-                  "const": "articleSection",
-                  "type": "string"
-                },
-                {
-                  "const": "live_training",
-                  "type": "string"
-                },
-                {
-                  "const": "learning_path",
-                  "type": "string"
-                },
-                {
-                  "const": "scorm",
-                  "type": "string"
                 }
               ]
             }
@@ -16794,6 +17030,89 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetEventsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/dashboard/events": {
+      "get": {
+        "operationId": "CalendarController_getDashboardEvents",
+        "parameters": [
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "timezone",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDashboardEventsResponse"
                 }
               }
             }
@@ -19276,6 +19595,10 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -19408,6 +19731,10 @@
                                 },
                                 {
                                   "const": "s_continue_learning",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "s_event_calendar",
                                   "type": "string"
                                 },
                                 {
@@ -19567,6 +19894,10 @@
                               "type": "string"
                             },
                             {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
                               "const": "s_required_course",
                               "type": "string"
                             },
@@ -19693,6 +20024,10 @@
                             },
                             {
                               "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -19841,6 +20176,10 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -19976,6 +20315,10 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "s_event_calendar",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "s_required_course",
                                   "type": "string"
                                 },
@@ -20077,6 +20420,10 @@
                   "type": "string"
                 },
                 {
+                  "const": "s_event_calendar",
+                  "type": "string"
+                },
+                {
                   "const": "s_required_course",
                   "type": "string"
                 },
@@ -20128,6 +20475,10 @@
                     },
                     {
                       "const": "s_continue_learning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "s_event_calendar",
                       "type": "string"
                     },
                     {
@@ -20258,6 +20609,10 @@
                             },
                             {
                               "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -22444,6 +22799,10 @@
                               "type": "string"
                             },
                             {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
                               "const": "s_required_course",
                               "type": "string"
                             },
@@ -22596,6 +22955,10 @@
                             },
                             {
                               "const": "s_continue_learning",
+                              "type": "string"
+                            },
+                            {
+                              "const": "s_event_calendar",
                               "type": "string"
                             },
                             {
@@ -23697,6 +24060,10 @@
                               "type": "string"
                             },
                             {
+                              "const": "s_event_calendar",
+                              "type": "string"
+                            },
+                            {
                               "const": "s_required_course",
                               "type": "string"
                             },
@@ -24175,6 +24542,197 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetDashboardTrainingCompletionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "completed": {
+                "type": "number"
+              },
+              "inProgress": {
+                "type": "number"
+              },
+              "notStarted": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              },
+              "percentage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "completed",
+              "inProgress",
+              "notStarted",
+              "total",
+              "percentage"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDashboardDeadlineRiskSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "overdueCount": {
+                "type": "number"
+              },
+              "dueSoonCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "overdueCount",
+              "dueSoonCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDashboardIncompleteCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "hasEnrollments": {
+                "type": "boolean"
+              },
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "overdue": {
+                      "type": "number"
+                    },
+                    "completed": {
+                      "type": "number"
+                    },
+                    "inProgress": {
+                      "type": "number"
+                    },
+                    "notStarted": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "total",
+                    "overdue",
+                    "completed",
+                    "inProgress",
+                    "notStarted"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "hasEnrollments",
+              "courses"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDashboardDeadlineRisksResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "students": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "dueDate": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "dueDate"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "students"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "GetUsersResponse": {
@@ -44890,9 +45448,6 @@
                   "practiceDate": {
                     "type": "string"
                   },
-                  "timezone": {
-                    "type": "string"
-                  },
                   "language": {
                     "anyOf": [
                       {
@@ -44925,15 +45480,6 @@
                       }
                     ]
                   },
-                  "challenge": {
-                    "type": "string"
-                  },
-                  "counterpart": {
-                    "type": "string"
-                  },
-                  "desiredOutcome": {
-                    "type": "string"
-                  },
                   "title": {
                     "anyOf": [
                       {
@@ -44944,7 +45490,7 @@
                       }
                     ]
                   },
-                  "instructions": {
+                  "aiMentorName": {
                     "anyOf": [
                       {
                         "type": "string"
@@ -44959,6 +45505,146 @@
                       {
                         "format": "uuid",
                         "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "threadStatus": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "const": "active",
+                            "type": "string"
+                          },
+                          {
+                            "const": "completed",
+                            "type": "string"
+                          },
+                          {
+                            "const": "archived",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "taskGoal": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "evaluation": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "passed": {
+                            "type": "boolean"
+                          },
+                          "minScore": {
+                            "type": "integer"
+                          },
+                          "score": {
+                            "type": "integer"
+                          },
+                          "maxScore": {
+                            "type": "integer"
+                          },
+                          "percentage": {
+                            "type": "integer"
+                          },
+                          "criteria": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "criterionId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "awardedScore": {
+                                  "type": "integer"
+                                },
+                                "maxScore": {
+                                  "type": "integer"
+                                },
+                                "status": {
+                                  "anyOf": [
+                                    {
+                                      "const": "not_met",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "partial",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "met",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "learnerSafeFeedback": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "criterionId",
+                                "title",
+                                "awardedScore",
+                                "maxScore",
+                                "status",
+                                "learnerSafeFeedback"
+                              ]
+                            }
+                          },
+                          "blockingErrors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "blockingErrorId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "learnerSafeFeedback": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "blockingErrorId",
+                                "description",
+                                "learnerSafeFeedback"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "passed",
+                          "minScore",
+                          "score",
+                          "maxScore",
+                          "percentage",
+                          "criteria",
+                          "blockingErrors"
+                        ]
                       },
                       {
                         "type": "null"
@@ -44999,14 +45685,13 @@
                 "required": [
                   "id",
                   "practiceDate",
-                  "timezone",
                   "language",
-                  "challenge",
-                  "counterpart",
-                  "desiredOutcome",
                   "title",
-                  "instructions",
+                  "aiMentorName",
                   "threadId",
+                  "threadStatus",
+                  "taskGoal",
+                  "evaluation",
                   "status",
                   "errorCode"
                 ]
@@ -45056,27 +45741,15 @@
               }
             ]
           },
-          "challenge": {
+          "scenario": {
             "minLength": 1,
-            "maxLength": 1000,
-            "type": "string"
-          },
-          "counterpart": {
-            "minLength": 1,
-            "maxLength": 1000,
-            "type": "string"
-          },
-          "desiredOutcome": {
-            "minLength": 1,
-            "maxLength": 1000,
+            "maxLength": 3000,
             "type": "string"
           }
         },
         "required": [
           "language",
-          "challenge",
-          "counterpart",
-          "desiredOutcome"
+          "scenario"
         ]
       },
       "CreatePracticeResponse": {
@@ -45090,9 +45763,6 @@
                 "type": "string"
               },
               "practiceDate": {
-                "type": "string"
-              },
-              "timezone": {
                 "type": "string"
               },
               "language": {
@@ -45127,15 +45797,6 @@
                   }
                 ]
               },
-              "challenge": {
-                "type": "string"
-              },
-              "counterpart": {
-                "type": "string"
-              },
-              "desiredOutcome": {
-                "type": "string"
-              },
               "title": {
                 "anyOf": [
                   {
@@ -45146,7 +45807,7 @@
                   }
                 ]
               },
-              "instructions": {
+              "aiMentorName": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -45161,6 +45822,146 @@
                   {
                     "format": "uuid",
                     "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadStatus": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "archived",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "taskGoal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evaluation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "minScore": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "integer"
+                      },
+                      "maxScore": {
+                        "type": "integer"
+                      },
+                      "percentage": {
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "minScore",
+                      "score",
+                      "maxScore",
+                      "percentage",
+                      "criteria",
+                      "blockingErrors"
+                    ]
                   },
                   {
                     "type": "null"
@@ -45201,14 +46002,13 @@
             "required": [
               "id",
               "practiceDate",
-              "timezone",
               "language",
-              "challenge",
-              "counterpart",
-              "desiredOutcome",
               "title",
-              "instructions",
+              "aiMentorName",
               "threadId",
+              "threadStatus",
+              "taskGoal",
+              "evaluation",
               "status",
               "errorCode"
             ]
@@ -45231,9 +46031,6 @@
               "practiceDate": {
                 "type": "string"
               },
-              "timezone": {
-                "type": "string"
-              },
               "language": {
                 "anyOf": [
                   {
@@ -45266,15 +46063,6 @@
                   }
                 ]
               },
-              "challenge": {
-                "type": "string"
-              },
-              "counterpart": {
-                "type": "string"
-              },
-              "desiredOutcome": {
-                "type": "string"
-              },
               "title": {
                 "anyOf": [
                   {
@@ -45285,7 +46073,7 @@
                   }
                 ]
               },
-              "instructions": {
+              "aiMentorName": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -45300,6 +46088,146 @@
                   {
                     "format": "uuid",
                     "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadStatus": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "archived",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "taskGoal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evaluation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "minScore": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "integer"
+                      },
+                      "maxScore": {
+                        "type": "integer"
+                      },
+                      "percentage": {
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "minScore",
+                      "score",
+                      "maxScore",
+                      "percentage",
+                      "criteria",
+                      "blockingErrors"
+                    ]
                   },
                   {
                     "type": "null"
@@ -45340,14 +46268,13 @@
             "required": [
               "id",
               "practiceDate",
-              "timezone",
               "language",
-              "challenge",
-              "counterpart",
-              "desiredOutcome",
               "title",
-              "instructions",
+              "aiMentorName",
               "threadId",
+              "threadStatus",
+              "taskGoal",
+              "evaluation",
               "status",
               "errorCode"
             ]
@@ -45370,9 +46297,6 @@
               "practiceDate": {
                 "type": "string"
               },
-              "timezone": {
-                "type": "string"
-              },
               "language": {
                 "anyOf": [
                   {
@@ -45405,15 +46329,6 @@
                   }
                 ]
               },
-              "challenge": {
-                "type": "string"
-              },
-              "counterpart": {
-                "type": "string"
-              },
-              "desiredOutcome": {
-                "type": "string"
-              },
               "title": {
                 "anyOf": [
                   {
@@ -45424,7 +46339,7 @@
                   }
                 ]
               },
-              "instructions": {
+              "aiMentorName": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -45439,6 +46354,146 @@
                   {
                     "format": "uuid",
                     "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadStatus": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "archived",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "taskGoal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evaluation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "minScore": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "integer"
+                      },
+                      "maxScore": {
+                        "type": "integer"
+                      },
+                      "percentage": {
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "minScore",
+                      "score",
+                      "maxScore",
+                      "percentage",
+                      "criteria",
+                      "blockingErrors"
+                    ]
                   },
                   {
                     "type": "null"
@@ -45479,14 +46534,279 @@
             "required": [
               "id",
               "practiceDate",
-              "timezone",
               "language",
-              "challenge",
-              "counterpart",
-              "desiredOutcome",
               "title",
-              "instructions",
+              "aiMentorName",
               "threadId",
+              "threadStatus",
+              "taskGoal",
+              "evaluation",
+              "status",
+              "errorCode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplayPracticeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "practiceDate": {
+                "type": "string"
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aiMentorName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "threadStatus": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "archived",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "taskGoal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evaluation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "minScore": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "integer"
+                      },
+                      "maxScore": {
+                        "type": "integer"
+                      },
+                      "percentage": {
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "minScore",
+                      "score",
+                      "maxScore",
+                      "percentage",
+                      "criteria",
+                      "blockingErrors"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ready",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "practiceDate",
+              "language",
+              "title",
+              "aiMentorName",
+              "threadId",
+              "threadStatus",
+              "taskGoal",
+              "evaluation",
               "status",
               "errorCode"
             ]
@@ -61314,6 +62634,63 @@
             "required": [
               "events"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDashboardEventsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceType": {
+                  "anyOf": [
+                    {
+                      "const": "live_training",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_due_date",
+                      "type": "string"
+                    },
+                    {
+                      "const": "microsoft_outlook",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "targetId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "startsAt": {
+                  "type": "string"
+                },
+                "allDay": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "sourceType",
+                "targetId",
+                "title",
+                "startsAt",
+                "allDay"
+              ]
+            }
           }
         },
         "required": [

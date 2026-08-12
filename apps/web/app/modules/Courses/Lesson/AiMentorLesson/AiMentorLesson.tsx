@@ -427,7 +427,7 @@ const AiMentorLesson = ({
 
             {!hideControls && (
               <>
-                <hr className="mt-4 w-full border-t border-[#EDEDED]" />
+                <hr className="mt-4 w-full border-t border-neutral-100" />
                 <div className="mt-4 flex w-full justify-center">
                   {isThreadActive && !isJudgePending && (
                     <Button

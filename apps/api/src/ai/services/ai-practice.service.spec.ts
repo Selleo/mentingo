@@ -2,7 +2,7 @@ import { AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 
-import { AiPracticeJudgeConfigurationService } from "./ai-practice-judge-configuration.service";
+import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { AiPracticeService } from "./ai-practice.service";
 
 import type { GeneratedAiJudgeConfiguration } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
@@ -57,7 +57,6 @@ describe("AiPracticeService", () => {
     const service = new AiPracticeService(
       repository as never,
       {} as never,
-      new AiPracticeJudgeConfigurationService(),
       contentGenerator as never,
       generator as unknown as AiJudgeConfigurationGeneratorService,
       aiService as never,
@@ -135,7 +134,6 @@ describe("AiPracticeService", () => {
     const service = new AiPracticeService(
       repository as never,
       {} as never,
-      new AiPracticeJudgeConfigurationService(),
       {} as never,
       {} as never,
       aiService as never,

@@ -16,7 +16,7 @@ import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
-import { AiPracticeJudgeConfigurationService } from "src/ai/services/ai-practice-judge-configuration.service";
+import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { EnvService } from "src/env/services/env.service";
@@ -33,7 +33,6 @@ export class AiPracticeService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly aiPracticeQueueService: AiPracticeQueueService,
-    private readonly aiPracticeJudgeConfigurationService: AiPracticeJudgeConfigurationService,
     private readonly aiPracticeContentGeneratorService: AiPracticeContentGeneratorService,
     private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiService: AiService,
@@ -169,7 +168,7 @@ export class AiPracticeService {
         content.title,
         content.aiMentorName,
         content.instructions,
-        this.aiPracticeJudgeConfigurationService.build(
+        buildAiPracticeJudgeConfiguration(
           session.id,
           judgeConfiguration,
           session.language,

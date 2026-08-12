@@ -128,7 +128,7 @@ export class AiJudgeConfigurationRepository {
   }
 
   async getConfigurationsForCourse(courseId: UUIDType) {
-    const rows = await this.db
+    return this.db
       .select({
         id: aiJudgeConfigurations.id,
         taskGoal: aiJudgeConfigurations.taskGoal,
@@ -143,8 +143,6 @@ export class AiJudgeConfigurationRepository {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(courses.id, courseId))
       .orderBy(asc(chapters.displayOrder), asc(lessons.displayOrder));
-
-    return rows;
   }
 
   async getCriteriaForCourse(courseId: UUIDType) {
