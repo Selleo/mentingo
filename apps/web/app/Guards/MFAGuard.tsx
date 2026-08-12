@@ -1,10 +1,10 @@
-import { Navigate, useLocation } from "@remix-run/react";
+import { Navigate, useLocation, useNavigate } from "@remix-run/react";
 import { useEffect } from "react";
 import { match } from "ts-pattern";
 
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
-import { LOGIN_REDIRECT_URL, REQUIRED_PASSWORD_CHANGE_URL } from "~/modules/Auth/constants";
+import { REQUIRED_PASSWORD_CHANGE_URL } from "~/modules/Auth/constants";
 import { resolvePostAuthRedirectPath } from "~/modules/Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
@@ -17,10 +17,10 @@ type MFAGuardProps = {
 
 export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data: currentUser, isLoading } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
-  const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
   const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
@@ -30,8 +30,8 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   useEffect(() => {
     if (mode !== "auth" || !currentUser || shouldVerifyMFA) return;
 
-    clearHistory();
-  }, [clearHistory, currentUser, mode, shouldVerifyMFA]);
+    navigate(redirectPath, { replace: true });
+  }, [currentUser, mode, navigate, redirectPath, shouldVerifyMFA]);
 
   if (isLoading) {
     return null;
@@ -52,7 +52,7 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
       }
 
       if (!shouldVerifyMFA && !requiresPasswordChange) {
-        return <Navigate to={redirectPath || LOGIN_REDIRECT_URL} />;
+        return null;
       }
 
       return children;

@@ -1,4 +1,4 @@
-import { Navigate, redirect, useLocation } from "@remix-run/react";
+import { redirect, useLocation, useNavigate } from "@remix-run/react";
 import { useEffect } from "react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
@@ -31,24 +31,24 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 
 export default function UserDashboardLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const { data: user } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
-  const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   useSyncUserAfterLogin(user);
 
   const shouldRedirect = Boolean(lastEntry && lastEntry.pathname !== location.pathname);
 
   useEffect(() => {
-    if (shouldRedirect) {
-      clearHistory();
-    }
-  }, [clearHistory, shouldRedirect]);
+    if (!shouldRedirect || !lastEntry) return;
+
+    navigate(lastEntry.pathname || LOGIN_REDIRECT_URL, { replace: true });
+  }, [lastEntry, navigate, shouldRedirect]);
 
   if (shouldRedirect) {
-    return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
+    return null;
   }
 
   const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
