@@ -8,9 +8,9 @@ import type { SupportedLanguages } from "@repo/shared";
 
 export const COURSE_VIEW_QUERY_KEY = ["course"];
 
-export const getCourseQueryKey = (id: string, language?: SupportedLanguages) => [
+export const getCourseQueryKey = (idOrSlug: string, language?: SupportedLanguages) => [
   ...COURSE_VIEW_QUERY_KEY,
-  { id, ...(language ? { language } : {}) },
+  { id: idOrSlug, ...(language ? { language } : {}) },
 ];
 
 export const courseQueryOptions = (idOrSlug: string, language?: SupportedLanguages) =>

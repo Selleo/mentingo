@@ -4948,5 +4948,10 @@
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
       "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
     }
+  },
+  "modernCourseView": {
+    "overview": {
+      "whatYouWillMaster": "Ce que vous apprendrez"
+    }
   }
 }

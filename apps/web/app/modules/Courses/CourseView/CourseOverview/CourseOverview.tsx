@@ -50,6 +50,7 @@ import CourseWhatYouWillLearn from "./CourseWhatYouWillLearn";
 import type { SupportedLanguages } from "@repo/shared";
 
 type CourseHeroProps = {
+  idOrSlug: string;
   language: SupportedLanguages;
   onLanguageChange: (language: SupportedLanguages) => void;
   openGenerateTranslationModal: boolean;
@@ -57,6 +58,7 @@ type CourseHeroProps = {
 };
 
 export default function CourseOverview({
+  idOrSlug,
   language,
   onLanguageChange,
   openGenerateTranslationModal,
@@ -256,6 +258,7 @@ export default function CourseOverview({
         description: normalizedDescription,
         language,
       },
+      courseOverviewCache: { idOrSlug, language },
     });
   };
 
@@ -265,10 +268,18 @@ export default function CourseOverview({
       return;
     }
 
+    const nextCategoryTitle =
+      categories.find((category) => category.id === nextCategoryId)?.title ?? course.category;
+
     await updateCourse({
       courseId: course.id,
       data: {
         categoryId: nextCategoryId,
+        language,
+      },
+      courseOverviewCache: {
+        categoryTitle: nextCategoryTitle,
+        idOrSlug,
         language,
       },
     });
@@ -296,6 +307,7 @@ export default function CourseOverview({
         title: normalizedTitle,
         language,
       },
+      courseOverviewCache: { idOrSlug, language },
     });
 
     setIsEditingTitle(false);
@@ -406,7 +418,11 @@ export default function CourseOverview({
             />
           </div>
         </div>
-        <CourseWhatYouWillLearn courseOutcomes={course.learningOutcomes} language={language} />
+        <CourseWhatYouWillLearn
+          courseOutcomes={course.learningOutcomes}
+          idOrSlug={idOrSlug}
+          language={language}
+        />
       </CourseHeroImage>
 
       {isMediaModalOpen && (

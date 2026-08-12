@@ -1,5 +1,5 @@
 import { Navigate } from "@remix-run/react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import { useCurrentUserSuspense } from "~/api/queries";
 import { useUserSettings } from "~/api/queries/useUserSettings";
@@ -15,15 +15,10 @@ export default function MFAPage() {
   const { data: userSettings, isLoading, isFetching } = useUserSettings();
   const { data: currentUser } = useCurrentUserSuspense();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
-  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
-  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
-  const redirectPath = useMemo(() => {
-    mergeNavigationHistory();
-
-    return resolvePostAuthRedirectPath({ pathname: getLastEntry()?.pathname });
-  }, [getLastEntry, mergeNavigationHistory]);
+  const redirectPath = resolvePostAuthRedirectPath({ pathname: lastEntry?.pathname });
 
   useEffect(() => {
     if (!hasVerifiedMFA) return;

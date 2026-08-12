@@ -19,6 +19,8 @@ describe("CertificateStatCard", () => {
 
     expect(card).toBeEnabled();
     expect(card).toHaveClass("opacity-50");
+    expect(card).toHaveClass("shadow-sm");
+    expect(card).not.toHaveClass("shadow-lg");
 
     await user.click(card);
 

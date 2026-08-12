@@ -1,5 +1,5 @@
 import { Navigate, redirect, useLocation } from "@remix-run/react";
-import { useMemo } from "react";
+import { useEffect } from "react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
@@ -34,20 +34,20 @@ export default function UserDashboardLayout() {
 
   const { data: user } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
-  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
-  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
-
-  const lastEntry = useMemo(() => {
-    mergeNavigationHistory();
-
-    return getLastEntry();
-  }, [getLastEntry, mergeNavigationHistory]);
 
   useSyncUserAfterLogin(user);
 
-  if (lastEntry && lastEntry.pathname !== location.pathname) {
-    clearHistory();
+  const shouldRedirect = Boolean(lastEntry && lastEntry.pathname !== location.pathname);
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      clearHistory();
+    }
+  }, [clearHistory, shouldRedirect]);
+
+  if (shouldRedirect) {
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
   }
 

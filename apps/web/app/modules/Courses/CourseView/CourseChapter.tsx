@@ -73,7 +73,7 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
 
     return (
       <span
-        key={index}
+        key={`${chapter.id}-progress-${index}`}
         className={cn("h-1 w-full rounded-lg", {
           "bg-secondary-100":
             typeof chapter?.completedLessonCount === "number" &&
@@ -172,9 +172,8 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
                     (hasCourseLearningAccess && lessonWithPublicAccess.hasAccess);
 
                   return canOpenLesson ? (
-                    <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
+                    <Link key={lesson.id} to={`/course/${courseSlug}/lesson/${lesson.id}`}>
                       <CourseChapterLesson
-                        key={lesson.id}
                         lesson={lessonWithPublicAccess}
                         allowPreviewAccess={!isPublicVisitor}
                       />

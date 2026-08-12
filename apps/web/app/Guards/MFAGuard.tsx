@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "@remix-run/react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { match } from "ts-pattern";
 
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
@@ -19,18 +19,13 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   const location = useLocation();
   const { data: currentUser, isLoading } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
-  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
-  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
   const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
   const requiresPasswordChange = Boolean(currentUser?.requiresPasswordChange);
-  const redirectPath = useMemo(() => {
-    mergeNavigationHistory();
-
-    return resolvePostAuthRedirectPath({ pathname: getLastEntry()?.pathname });
-  }, [getLastEntry, mergeNavigationHistory]);
+  const redirectPath = resolvePostAuthRedirectPath({ pathname: lastEntry?.pathname });
 
   useEffect(() => {
     if (mode !== "auth" || !currentUser || shouldVerifyMFA) return;

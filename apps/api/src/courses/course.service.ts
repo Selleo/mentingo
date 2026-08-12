@@ -1158,7 +1158,7 @@ export class CourseService {
         description: shouldUseExactLanguage
           ? this.localizationService.getFieldByLanguage(courses.description, language)
           : this.localizationService.getLocalizedSqlField(courses.description, language),
-        learningOutcomes: this.getLocalizedLearningOutcomes(language, true),
+        learningOutcomes: this.getLocalizedLearningOutcomes(language, !shouldUseExactLanguage),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
