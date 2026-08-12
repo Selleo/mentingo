@@ -5010,7 +5010,9 @@
       "archived": "Archived"
     },
     "edit": {
-      "loadFailed": "Could not load this email template."
+      "loadFailed": "Could not load this email template.",
+      "unsavedChangesTitle": "Leave email template editor?",
+      "unsavedChanges": "You have unsaved changes. Are you sure you want to leave this page?"
     },
     "form": {
       "field": {

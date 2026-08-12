@@ -4952,5 +4952,11 @@
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
       "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
     }
+  },
+  "emailTemplates": {
+    "edit": {
+      "unsavedChangesTitle": "Quitter l'éditeur de modèles d'e-mails ?",
+      "unsavedChanges": "Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter cette page ?"
+    }
   }
 }

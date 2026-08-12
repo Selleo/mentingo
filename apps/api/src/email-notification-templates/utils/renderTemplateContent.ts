@@ -4,6 +4,7 @@ import { load as loadHtml } from "cheerio";
 
 import { assertSafeBlockUrls } from "./assertSafeBlockUrls";
 import { flattenTranslationsForRender } from "./flattenTranslationsForRender";
+import { assertEmailTemplateDocumentWithinLimits } from "./assertEmailTemplateDocumentWithinLimits";
 
 import type {
   EmailTemplateBlocks,
@@ -44,6 +45,7 @@ export const renderTemplateContent = async (params: {
     language: params.language,
     baseLanguage: params.baseLanguage,
   });
+  assertEmailTemplateDocumentWithinLimits({ blocks: monolingualBlocks, strings: {} });
   assertSafeBlockUrls(monolingualBlocks);
   replaceTenantLogoSrc(monolingualBlocks, params.tenantLogoSrc ?? TENANT_LOGO_CID_SRC);
 

@@ -33,6 +33,7 @@ import {
 import { flattenTranslationsForRender } from "./utils/flattenTranslationsForRender";
 import { pruneOrphanStrings } from "./utils/pruneOrphanStrings";
 import { renderTemplateContent } from "./utils/renderTemplateContent";
+import { assertEmailTemplateDocumentWithinLimits } from "./utils/assertEmailTemplateDocumentWithinLimits";
 
 import type { CreateEmailNotificationTemplate } from "./schemas/createEmailNotificationTemplate.schema";
 import type { UpdateEmailNotificationTemplate } from "./schemas/updateEmailNotificationTemplate.schema";
@@ -80,6 +81,7 @@ export class EmailNotificationTemplatesService {
     const strings = input.strings ?? {};
     const subject = input.subject ?? {};
 
+    assertEmailTemplateDocumentWithinLimits({ blocks, strings });
     this.assertSafeRenderedBlockUrls({
       blocks,
       strings,
@@ -137,7 +139,9 @@ export class EmailNotificationTemplatesService {
 
     const nextBlocks = input.blocks ?? existing.blocks;
     const nextStrings = input.strings ?? existing.strings;
+    const nextSubject = input.subject ?? existing.subject;
     const pruned = pruneOrphanStrings(nextBlocks, nextStrings);
+    assertEmailTemplateDocumentWithinLimits({ blocks: nextBlocks, strings: pruned });
     if (
       input.blocks !== undefined ||
       input.strings !== undefined ||
@@ -149,6 +153,17 @@ export class EmailNotificationTemplatesService {
         strings: pruned,
         availableLocales: nextAvailableLocales,
         baseLanguage: nextBaseLanguage,
+      });
+    }
+
+    if (existing.status === EMAIL_TEMPLATE_STATUSES.PUBLISHED) {
+      this.assertPublishable({
+        name: input.name ?? existing.name,
+        availableLocales: nextAvailableLocales,
+        baseLanguage: nextBaseLanguage,
+        subject: nextSubject,
+        blocks: nextBlocks,
+        strings: pruned,
       });
     }
 
@@ -170,13 +185,17 @@ export class EmailNotificationTemplatesService {
     }
     if (!template) throw new BadRequestException("emailTemplates.toast.updateFailed");
 
-    await this.cleanupOrphanedImages(removedSrcs, tenantId, id);
+    await this.cleanupOrphanedImages(removedSrcs, tenantId);
 
     return template;
   }
 
   async publishTemplate(id: UUIDType) {
     const existing = await this.getTemplateById(id);
+    if (existing.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED) {
+      throw new ConflictException("emailTemplates.toast.publishFailed");
+    }
+    assertEmailTemplateDocumentWithinLimits({ blocks: existing.blocks, strings: existing.strings });
     this.assertSafeRenderedBlockUrls({
       blocks: existing.blocks,
       strings: existing.strings,
@@ -192,7 +211,10 @@ export class EmailNotificationTemplatesService {
   }
 
   async makeDraftTemplate(id: UUIDType) {
-    await this.getTemplateById(id);
+    const existing = await this.getTemplateById(id);
+    if (existing.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED) {
+      throw new ConflictException("emailTemplates.toast.makeDraftFailed");
+    }
 
     const template = await this.repository.setStatus(id, EMAIL_TEMPLATE_STATUSES.DRAFT, null);
     if (!template) throw new BadRequestException("emailTemplates.toast.makeDraftFailed");
@@ -313,7 +335,10 @@ export class EmailNotificationTemplatesService {
   }
 
   async unarchiveTemplate(id: UUIDType) {
-    await this.getTemplateById(id);
+    const existing = await this.getTemplateById(id);
+    if (existing.status === EMAIL_TEMPLATE_STATUSES.PUBLISHED) {
+      throw new ConflictException("emailTemplates.toast.unarchiveFailed");
+    }
 
     const template = await this.repository.setStatus(id, EMAIL_TEMPLATE_STATUSES.DRAFT, null);
     if (!template) throw new BadRequestException("emailTemplates.toast.unarchiveFailed");
@@ -476,6 +501,17 @@ export class EmailNotificationTemplatesService {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.logger.warn(`Failed to enqueue email template image cleanup: ${message}`);
+      try {
+        await this.purgeOrphanedImages({
+          tenantId,
+          srcs: [...srcs],
+          excludeTemplateId,
+        });
+      } catch (fallbackError) {
+        const fallbackMessage =
+          fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+        this.logger.error(`Failed to run fallback email template image cleanup: ${fallbackMessage}`);
+      }
     }
   }
 

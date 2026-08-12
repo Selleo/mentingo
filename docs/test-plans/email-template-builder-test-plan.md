@@ -13,7 +13,7 @@ Covered today:
 Not covered today:
 
 - Main email notification template API controller E2E flows for list, create, update, delete, publish, archive, unarchive, preview, test-send, and duplicate.
-- Full frontend page behavior for the email template list and edit builder pages.
+- Full frontend page behavior for the email template list and edit builder pages, including the dirty-navigation guard.
 - Browser-level Playwright coverage for the real administrator builder workflow.
 - Automated tests in the `@repo/email-templates` package itself; it currently has generated HTML fixtures but no package-level test script.
 
@@ -65,6 +65,7 @@ Recommended additions:
 - Controller-level tests are not required if the E2E spec covers route validation, permissions, response wrappers, and delegation.
 - Add unit tests only for any uncovered helper extracted during E2E setup.
 - Add a cleanup queue/worker unit test if the worker behavior is not indirectly covered by service tests.
+- Keep regression coverage for malformed public image references, published-template update blocking, status transition guards, and the update cleanup race.
 
 ## Frontend List Page Coverage
 
@@ -97,6 +98,7 @@ Required assertions:
 - Dirty form state is saved before a status change.
 - Duplicate calls the duplicate mutation and navigates to the duplicated template.
 - Send test email saves a dirty form before calling the test-send mutation.
+- Dirty navigation opens the discard confirmation and browser unloads expose the native warning.
 - Inline rename commits on Enter and cancels on Escape/blur.
 - Adding a language updates `availableLocales` and initializes `strings[language]`.
 - Removing a language removes it from `availableLocales` and deletes `strings[language]`.

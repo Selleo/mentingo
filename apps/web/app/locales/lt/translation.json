@@ -4993,7 +4993,9 @@
       "archived": "Suarchyvuota"
     },
     "edit": {
-      "loadFailed": "Nepavyko įkelti šio el. laiško šablono."
+      "loadFailed": "Nepavyko įkelti šio el. laiško šablono.",
+      "unsavedChangesTitle": "Išeiti iš el. laiško šablono redaktoriaus?",
+      "unsavedChanges": "Turite neišsaugotų pakeitimų. Ar tikrai norite išeiti iš šio puslapio?"
     },
     "form": {
       "field": {

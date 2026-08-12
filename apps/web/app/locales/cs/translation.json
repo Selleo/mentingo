@@ -4991,7 +4991,9 @@
       "archived": "Archivováno"
     },
     "edit": {
-      "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst."
+      "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst.",
+      "unsavedChangesTitle": "Opustit editor e-mailové šablony?",
+      "unsavedChanges": "Máte neuložené změny. Opravdu chcete tuto stránku opustit?"
     },
     "form": {
       "field": {

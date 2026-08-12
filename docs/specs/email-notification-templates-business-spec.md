@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Email notification templates let HR and L&D teams control the messages Mentingo sends around learning workflows without relying on engineering for every wording or layout update. Administrators can create reusable email templates, edit subject lines and body content, manage translations, send themselves a test email, and decide whether a template is draft, published, or archived.
+Email notification templates let HR and L&D teams control the messages Mentingo sends around learning workflows without relying on engineering for every wording or layout update. Administrators can create reusable email templates, edit subject lines and body content, manage translations, send themselves a test email, and decide whether a template is draft, published, or archived. In this release, publication completes the authoring workflow but does not bind a template to a notification trigger; existing notification handlers continue using their established templates until an explicit trigger-binding contract is introduced.
 
 The feature matters because learning communication is part of the learner experience. Clear, branded, localized email content helps learners recognize required actions, understand training context, and trust that a message belongs to their organization.
 
@@ -38,7 +38,7 @@ Mentingo calculates diagnostics from the template name, available languages, sub
 
 Draft and published templates can keep a button without a target URL when an administrator wants the button as a visual placeholder or intends to finish the destination later. Mentingo shows the missing button URL as a nonblocking warning note, while the backend URL safety layer still rejects dangerous URL schemes such as script-based links.
 
-When an administrator adds a new content block in a translated version, Mentingo waits until the editor leaves that new block before showing its missing-translation warning. Other diagnostics still appear immediately, and untouched new blocks or programmatic changes do not keep warnings hidden after focus is resolved.
+When an administrator adds a new content block in a translated version, Mentingo waits until the editor leaves that new block before showing its missing-translation warning. Other diagnostics still appear immediately, and untouched new blocks or programmatic changes do not keep warnings hidden after focus is resolved. Leaving the editor with unsaved changes shows an in-app confirmation and protects browser or tab exits with the browser's unload prompt.
 
 When templates are rendered for backend preview or test-send flows, Mentingo uses the selected available language with tenant branding such as the primary color and logo. If the tenant has not configured a logo, the builder and rendered output use the Mentingo logo instead of exposing the internal logo placeholder. Preview HTML uses a browser-readable logo URL, while sent test emails embed the logo as an inline email image so mailbox clients can display it inside the message body. The backend rejects unsupported or duplicate language configuration, rejects unavailable preview/test languages, checks template name uniqueness, prunes translations for deleted blocks, and queues unused uploaded email images for cleanup after updates or deletes.
 
@@ -49,11 +49,12 @@ When templates are rendered for backend preview or test-send flows, Mentingo use
 - The main API module is `apps/api/src/email-notification-templates`, with endpoints for list, create, update, publish, make draft, archive, unarchive, delete, duplicate, preview, and test-send.
 - Shared language, diagnostic, and branding contracts live in `@repo/shared`, including supported languages, email template node types, `computeEmailTemplateDiagnostics`, and the tenant-logo variable/CID constants.
 - Backend template creation seeds the default body blocks with localized placeholder text based on the selected base language when no custom blocks are supplied.
-- A BullMQ cleanup worker purges uploaded email-template images only after confirming they are no longer referenced by another template.
+- A BullMQ cleanup worker purges uploaded email-template images only after confirming they are no longer referenced by another template; update cleanup includes the just-updated template, and a direct fallback runs when queue submission is unavailable.
+- The API enforces bounded template document size, depth, node count, and text length, blocks invalid updates to published templates, and rejects invalid status transitions.
 - Inline diagnostics are a frontend safety layer; backend validation still protects language configuration, URL safety, preview/test language availability, logo-variable rendering, and template persistence.
 
 ## Test Evidence
 
 Backend unit tests cover locale validation, unique template names, auto-generated names, duplicate naming and block re-keying, preview and test-send language behavior, tenant color and logo rendering, inline email logo attachments, translation pruning, queued image cleanup, deletion, and status transitions. Focused URL-safety coverage verifies that freshly created default draft blocks can be saved with an empty starter button URL, publishing is not blocked by that warning, and unsafe protocols are still rejected.
 
-Frontend unit tests cover the email builder upload handler, translation-mode wiring, inline diagnostic rendering and placement safeguards, delayed missing-translation warnings for newly added blocks, inline note severity styling, language tag visibility, and diagnostic reason rendering. Playwright E2E coverage verifies that an admin can create a template, rename it, edit and save the subject, reload the edit page, see the template in the list, and delete it.
+Frontend unit tests cover the email builder upload handler, translation-mode wiring, inline diagnostic rendering and placement safeguards, delayed missing-translation warnings for newly added blocks, inline note severity styling, language tag visibility, and diagnostic reason rendering. Focused backend regression tests cover published-update blocking, status guards, cleanup scope, and malformed public image references. Playwright E2E coverage verifies that an admin can create a template, rename it, edit and save the subject, reload the edit page, see the template in the list, and delete it; the full trigger-binding workflow remains intentionally out of scope for this release.

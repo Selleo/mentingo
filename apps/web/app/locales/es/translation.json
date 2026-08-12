@@ -4998,7 +4998,9 @@
       "archived": "Archivada"
     },
     "edit": {
-      "loadFailed": "No se pudo cargar esta plantilla de correo."
+      "loadFailed": "No se pudo cargar esta plantilla de correo.",
+      "unsavedChangesTitle": "¿Salir del editor de plantillas de correo?",
+      "unsavedChanges": "Tienes cambios sin guardar. ¿Seguro que quieres abandonar esta página?"
     },
     "form": {
       "field": {

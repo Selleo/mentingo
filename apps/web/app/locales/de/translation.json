@@ -4988,7 +4988,9 @@
       "archived": "Archiviert"
     },
     "edit": {
-      "loadFailed": "Diese E‑Mail‑Vorlage konnte nicht geladen werden."
+      "loadFailed": "Diese E‑Mail‑Vorlage konnte nicht geladen werden.",
+      "unsavedChangesTitle": "E-Mail-Vorlageneditor verlassen?",
+      "unsavedChanges": "Sie haben nicht gespeicherte Änderungen. Möchten Sie diese Seite wirklich verlassen?"
     },
     "form": {
       "field": {

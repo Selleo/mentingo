@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@remix-run/react";
+import { useBeforeUnload, useBlocker, useNavigate, useParams } from "@remix-run/react";
 import {
   EMAIL_TEMPLATE_NODE_UUID_ATTR,
   EMAIL_TEMPLATE_STATUSES,
@@ -20,6 +20,14 @@ import { useEmailTemplate } from "~/api/queries/admin/useEmailTemplate";
 import { LanguageSelector } from "~/components/LanguageSelector/LanguageSelector";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -62,6 +70,64 @@ const EmailTemplateEditor = lazy(() =>
     default: m.EmailTemplateEditor,
   })),
 );
+
+const EmailTemplateExitGuard = ({ enabled }: { enabled: boolean }) => {
+  const { t } = useTranslation();
+  const message = t("emailTemplates.edit.unsavedChanges");
+  const blocker = useBlocker(enabled);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useBeforeUnload(
+    (event) => {
+      if (!enabled) return;
+      event.preventDefault();
+      event.returnValue = message;
+    },
+    { capture: true },
+  );
+
+  useEffect(() => {
+    setIsDialogOpen(blocker.state === "blocked");
+  }, [blocker.state]);
+
+  return (
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && blocker.state === "blocked") blocker.reset();
+        setIsDialogOpen(nextOpen);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("emailTemplates.edit.unsavedChangesTitle")}</DialogTitle>
+          <DialogDescription>{message}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              blocker.reset();
+              setIsDialogOpen(false);
+            }}
+          >
+            {t("common.button.cancel")}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              blocker.proceed();
+              setIsDialogOpen(false);
+            }}
+          >
+            {t("common.button.proceed")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editEmailTemplate");
 
@@ -326,10 +392,11 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
+      <EmailTemplateExitGuard enabled={isDirty && !isSubmitting} />
       <FormProvider {...form}>
         <div className="flex h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-md border bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b p-3">
-            <div className="relative mr-3 min-w-0 max-w-full">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b p-3">
+            <div className="relative min-w-0 max-w-full flex-1">
               {isEditingName ? (
                 <input
                   ref={nameInputRef}
@@ -373,7 +440,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
               <Button
                 variant="outline"
                 onClick={handleDuplicate}
@@ -387,7 +454,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 disabled={isStatusChanging}
               >
                 <SelectTrigger
-                  className="h-9 w-[160px]"
+                  className="h-9 w-full sm:w-[160px]"
                   aria-label={t("emailTemplates.list.columns.status")}
                   data-testid="edit-email-template-status-select"
                 >
@@ -458,7 +525,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
             className="min-h-0 flex-1 space-y-3 overflow-auto py-6"
             data-testid="edit-email-template-page"
           >
-            <div className="mx-auto w-[90%] max-w-[500px] rounded-3xl border border-neutral-200 bg-white px-[50px] py-4 shadow-sm">
+            <div className="mx-auto w-[90%] max-w-[500px] rounded-3xl border border-neutral-200 bg-white px-4 py-4 shadow-sm sm:px-[50px]">
               <label
                 htmlFor="email-template-subject"
                 className="mb-1 block text-xs font-medium text-neutral-600"

@@ -10,7 +10,12 @@ export class PublicEmailTemplateImageService {
   constructor(private readonly fileService: FileService) {}
 
   async resolveSignedUrl(reference: string, tenantId: UUIDType): Promise<string | null> {
-    const decoded = decodeURIComponent(reference);
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(reference);
+    } catch {
+      return null;
+    }
     const expectedPrefix = `${tenantId}/${RESOURCE_CATEGORIES.EMAIL_TEMPLATE_IMAGE}/`;
 
     if (!decoded.startsWith(expectedPrefix)) return null;

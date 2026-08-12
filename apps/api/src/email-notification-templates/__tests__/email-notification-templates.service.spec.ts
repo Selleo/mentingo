@@ -876,34 +876,38 @@ describe("EmailNotificationTemplatesService — status transitions", () => {
   const cases = [
     {
       method: "publishTemplate" as const,
+      fromStatus: EMAIL_TEMPLATE_STATUSES.DRAFT,
       status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
       archivedAtIsDate: false,
       errorKey: "emailTemplates.toast.publishFailed",
     },
     {
       method: "makeDraftTemplate" as const,
+      fromStatus: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
       status: EMAIL_TEMPLATE_STATUSES.DRAFT,
       archivedAtIsDate: false,
       errorKey: "emailTemplates.toast.makeDraftFailed",
     },
     {
       method: "archiveTemplate" as const,
+      fromStatus: EMAIL_TEMPLATE_STATUSES.DRAFT,
       status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
       archivedAtIsDate: true,
       errorKey: "emailTemplates.toast.archiveFailed",
     },
     {
       method: "unarchiveTemplate" as const,
+      fromStatus: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
       status: EMAIL_TEMPLATE_STATUSES.DRAFT,
       archivedAtIsDate: false,
       errorKey: "emailTemplates.toast.unarchiveFailed",
     },
   ] as const;
 
-  for (const { method, status, archivedAtIsDate, errorKey } of cases) {
+  for (const { method, fromStatus, status, archivedAtIsDate, errorKey } of cases) {
     it(`${method} calls setStatus with status=${status}`, async () => {
       const { service, repository } = createService();
-      repository.findById.mockResolvedValue(makeTemplate());
+      repository.findById.mockResolvedValue(makeTemplate({ status: fromStatus }));
       repository.setStatus.mockResolvedValue(makeTemplate({ status }));
 
       await service[method](TEMPLATE_ID);
@@ -917,10 +921,51 @@ describe("EmailNotificationTemplatesService — status transitions", () => {
 
     it(`${method} throws BadRequestException when repository returns null/undefined`, async () => {
       const { service, repository } = createService();
-      repository.findById.mockResolvedValue(makeTemplate());
+      repository.findById.mockResolvedValue(makeTemplate({ status: fromStatus }));
       repository.setStatus.mockResolvedValue(undefined);
 
       await expect(service[method](TEMPLATE_ID)).rejects.toThrow(new BadRequestException(errorKey));
     });
   }
+});
+
+describe("EmailNotificationTemplatesService — review regressions", () => {
+  it("rejects a published update that introduces blocking diagnostics", async () => {
+    const { service, repository } = createService();
+    repository.findById.mockResolvedValue(
+      makeTemplate({ status: EMAIL_TEMPLATE_STATUSES.PUBLISHED }),
+    );
+
+    await expect(service.updateTemplate(TEMPLATE_ID, { subject: {} }, TENANT_ID)).rejects.toThrow(
+      new BadRequestException("emailTemplates.toast.publishBlocked"),
+    );
+    expect(repository.updateTemplate).not.toHaveBeenCalled();
+  });
+
+  it("does not exclude the updated template from image cleanup", async () => {
+    const { service, repository, cleanupQueue } = createService();
+    const oldSrc = `/api/public/email-template-image/${TENANT_ID}/email_template_image/old.webp`;
+    repository.findById.mockResolvedValue(makeTemplate({ blocks: imageBlocks(oldSrc) }));
+    repository.updateTemplate.mockResolvedValue(makeTemplate());
+
+    await service.updateTemplate(TEMPLATE_ID, { blocks: makeBlocks(), strings: {} }, TENANT_ID);
+
+    expect(cleanupQueue.enqueueImageCleanup).toHaveBeenCalledWith({
+      tenantId: TENANT_ID,
+      srcs: [oldSrc],
+      excludeTemplateId: undefined,
+    });
+  });
+
+  it("does not publish an archived template", async () => {
+    const { service, repository } = createService();
+    repository.findById.mockResolvedValue(
+      makeTemplate({ status: EMAIL_TEMPLATE_STATUSES.ARCHIVED }),
+    );
+
+    await expect(service.publishTemplate(TEMPLATE_ID)).rejects.toThrow(
+      new ConflictException("emailTemplates.toast.publishFailed"),
+    );
+    expect(repository.setStatus).not.toHaveBeenCalled();
+  });
 });

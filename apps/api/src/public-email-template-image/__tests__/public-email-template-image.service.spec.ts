@@ -60,5 +60,12 @@ describe("PublicEmailTemplateImageService", () => {
       expect(getImageUrlByQuality).toHaveBeenCalledWith(rawRef);
       expect(result).toBe(signedUrl);
     });
+
+    it("returns null for malformed percent encoding", async () => {
+      const { service, getImageUrlByQuality } = createService();
+
+      await expect(service.resolveSignedUrl("%E0%A4%A", TENANT_ID)).resolves.toBeNull();
+      expect(getImageUrlByQuality).not.toHaveBeenCalled();
+    });
   });
 });

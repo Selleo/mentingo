@@ -5050,7 +5050,9 @@
       "archived": "Zarchiwizowany"
     },
     "edit": {
-      "loadFailed": "Nie udało się załadować tego szablonu e‑maila."
+      "loadFailed": "Nie udało się załadować tego szablonu e‑maila.",
+      "unsavedChangesTitle": "Opuścić edytor szablonu e‑maila?",
+      "unsavedChanges": "Masz niezapisane zmiany. Czy na pewno chcesz opuścić tę stronę?"
     },
     "form": {
       "field": {
