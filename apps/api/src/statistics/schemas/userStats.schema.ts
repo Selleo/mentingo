@@ -1,3 +1,4 @@
+import { DASHBOARD_DEADLINE_RISK_TYPES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { nextLessonSchema } from "src/lesson/lesson.schema";
@@ -98,10 +99,7 @@ const DashboardDeadlineStudentSchema = Type.Object({
   dueDate: Type.String(),
 });
 
-export const DashboardDeadlineRiskTypeSchema = Type.Union([
-  Type.Literal("overdue"),
-  Type.Literal("dueSoon"),
-]);
+export const DashboardDeadlineRiskTypeSchema = Type.Enum(DASHBOARD_DEADLINE_RISK_TYPES);
 
 export const DashboardDeadlineRiskCourseSchema = Type.Object({
   id: Type.String(),

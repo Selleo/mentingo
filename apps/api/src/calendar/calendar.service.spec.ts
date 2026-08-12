@@ -53,4 +53,55 @@ describe("CalendarService dashboard events", () => {
       },
     ]);
   });
+
+  it("limits only the upcoming view and excludes the selected day", async () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-08-12T12:00:00.000Z"));
+    const service = new CalendarService({} as never, {} as never);
+    const events = Array.from({ length: 7 }, (_, index) => ({
+      id: `00000000-0000-0000-0000-00000000000${index + 1}`,
+      uid: `event-${index + 1}`,
+      sourceType: CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE,
+      sourceId: "00000000-0000-0000-0000-000000000002",
+      title: `Deadline ${index + 1}`,
+      description: null,
+      startsAt: new Date(Date.UTC(2026, 7, 20 + index)).toISOString(),
+      endsAt: new Date(Date.UTC(2026, 7, 21 + index)).toISOString(),
+      allDay: true,
+      timezone: "UTC",
+      location: null,
+      status: "scheduled",
+      payload: {
+        courseDueDate: {
+          courseId: "00000000-0000-0000-0000-000000000003",
+          courseTitle: "Compliance",
+          groupId: "00000000-0000-0000-0000-000000000004",
+          groupName: "Everyone",
+          dueDate: new Date(Date.UTC(2026, 7, 20 + index)).toISOString(),
+        },
+      },
+    })) as never;
+    jest.spyOn(service, "getEvents").mockResolvedValue({ events });
+
+    const result = await service.getDashboardEvents(
+      {
+        start: "2026-08-01T00:00:00.000Z",
+        end: "2026-09-01T00:00:00.000Z",
+        language: "en",
+        timezone: "UTC",
+        view: "upcoming",
+        selectedDate: "2026-08-20",
+      },
+      {} as never,
+    );
+
+    expect(result).toHaveLength(5);
+    expect(result.map(({ title }) => title)).toEqual([
+      "Deadline 2",
+      "Deadline 3",
+      "Deadline 4",
+      "Deadline 5",
+      "Deadline 6",
+    ]);
+    jest.useRealTimers();
+  });
 });

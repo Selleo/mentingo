@@ -16,7 +16,12 @@ const { calendarEvents } = vi.hoisted(() => ({
 }));
 
 vi.mock("~/api/queries/useDashboardEventCalendar", () => ({
-  useDashboardEventCalendar: () => ({ data: calendarEvents }),
+  useDashboardEventCalendar: ({ view, selectedDate }: { view: string; selectedDate?: string }) => ({
+    data:
+      view === "upcoming"
+        ? calendarEvents.filter((event) => event.startsAt.slice(0, 10) !== selectedDate)
+        : calendarEvents,
+  }),
 }));
 
 const createLiveTrainingEvent = (id: string, title: string, startsAt: string): CalendarEvent => ({

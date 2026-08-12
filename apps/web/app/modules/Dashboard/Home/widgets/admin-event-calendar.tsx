@@ -1,5 +1,5 @@
 import { CALENDAR_EVENT_SOURCE_TYPES, DASHBOARD_WIDGET_IDS } from "@repo/shared";
-import { endOfMonth, endOfWeek, isSameDay, startOfMonth, startOfWeek } from "date-fns";
+import { endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -76,29 +76,37 @@ export function WidgetAdminEventCalendar() {
   const rangeEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
   const {
     data: events = [],
-    isLoading,
-    isError,
-    refetch,
+    isLoading: isAllEventsLoading,
+    isError: isAllEventsError,
+    refetch: refetchAllEvents,
   } = useDashboardEventCalendar({
     start: rangeStart.toISOString(),
     end: rangeEnd.toISOString(),
     language,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    view: "all",
+  });
+  const {
+    data: upcomingEvents = [],
+    isLoading: isUpcomingEventsLoading,
+    isError: isUpcomingEventsError,
+    refetch: refetchUpcomingEvents,
+  } = useDashboardEventCalendar({
+    start: rangeStart.toISOString(),
+    end: rangeEnd.toISOString(),
+    language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    view: "upcoming",
+    selectedDate: format(selectedDay, "yyyy-MM-dd"),
   });
   const selectedEvents = events.filter((event) => isSameDay(new Date(event.startsAt), selectedDay));
   const eventDays = useMemo(() => events.map((event) => new Date(event.startsAt)), [events]);
-  const upcomingEvents = useMemo(
-    () =>
-      [...events]
-        .filter(
-          (event) =>
-            Date.parse(event.startsAt) >= Date.now() &&
-            !isSameDay(new Date(event.startsAt), selectedDay),
-        )
-        .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt))
-        .slice(0, 5),
-    [events, selectedDay],
-  );
+  const isLoading = isAllEventsLoading || isUpcomingEventsLoading;
+  const isError = isAllEventsError || isUpcomingEventsError;
+
+  async function refetchCalendar() {
+    await Promise.all([refetchAllEvents(), refetchUpcomingEvents()]);
+  }
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR];
 
   function openEventDialog(eventId: string) {
@@ -126,7 +134,7 @@ export function WidgetAdminEventCalendar() {
               <DashboardWidgetQueryState
                 isLoading={isLoading}
                 isError={isError}
-                onRetry={() => void refetch()}
+                onRetry={() => void refetchCalendar()}
               />
             </div>
           ) : (

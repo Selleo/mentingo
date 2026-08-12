@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_PRACTICE_ERROR_CODES, AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AiPracticeQueueService } from "src/ai/ai-practice.queue.service";
 import {
@@ -16,9 +16,9 @@ import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
-import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { EnvService } from "src/env/services/env.service";
 
 import type {
@@ -86,10 +86,7 @@ export class AiPracticeService {
     sessionId: UUIDType,
     currentUser: CurrentUserType,
   ): Promise<AiMentorPracticeSessionResponse> {
-    const session = await this.aiRepository.findPracticeSessionById(sessionId);
-    if (!session) throw new NotFoundException("common.toast.notFound");
-    if (session.userId !== currentUser.userId)
-      throw new ForbiddenException("common.toast.noAccess");
+    const session = await this.getOwnedSession(sessionId, currentUser);
 
     return this.mapSession(session);
   }
@@ -98,10 +95,7 @@ export class AiPracticeService {
     sessionId: UUIDType,
     currentUser: CurrentUserType,
   ): Promise<AiMentorPracticeSessionResponse> {
-    const session = await this.aiRepository.findPracticeSessionById(sessionId);
-    if (!session) throw new NotFoundException("common.toast.notFound");
-    if (session.userId !== currentUser.userId)
-      throw new ForbiddenException("common.toast.noAccess");
+    const session = await this.getOwnedSession(sessionId, currentUser);
     if (session.status !== AI_MENTOR_PRACTICE_STATUSES.FAILED)
       throw new ConflictException("common.toast.somethingWentWrong");
 
@@ -117,10 +111,7 @@ export class AiPracticeService {
     sessionId: UUIDType,
     currentUser: CurrentUserType,
   ): Promise<AiMentorPracticeSessionResponse> {
-    const session = await this.aiRepository.findPracticeSessionById(sessionId);
-    if (!session) throw new NotFoundException("common.toast.notFound");
-    if (session.userId !== currentUser.userId)
-      throw new ForbiddenException("common.toast.noAccess");
+    const session = await this.getOwnedSession(sessionId, currentUser);
     if (
       session.status !== AI_MENTOR_PRACTICE_STATUSES.READY ||
       session.threadStatus !== THREAD_STATUS.COMPLETED
@@ -168,11 +159,7 @@ export class AiPracticeService {
         content.title,
         content.aiMentorName,
         content.instructions,
-        buildAiPracticeJudgeConfiguration(
-          session.id,
-          judgeConfiguration,
-          session.language,
-        ),
+        buildAiPracticeJudgeConfiguration(session.id, judgeConfiguration, session.language),
       );
       await this.aiService.getPracticeThreadWithSetup({
         practiceSessionId: session.id,
@@ -187,7 +174,7 @@ export class AiPracticeService {
     } catch (error) {
       await this.aiRepository.updatePracticeSession(session.id, {
         status: AI_MENTOR_PRACTICE_STATUSES.FAILED,
-        errorCode: "generation_failed",
+        errorCode: AI_MENTOR_PRACTICE_ERROR_CODES.GENERATION_FAILED,
       });
       throw error;
     }
@@ -197,13 +184,23 @@ export class AiPracticeService {
     return new Date().toISOString().slice(0, 10);
   }
 
+  private async getOwnedSession(sessionId: UUIDType, currentUser: CurrentUserType) {
+    const session = await this.aiRepository.findPracticeSessionById(sessionId);
+    if (!session) throw new NotFoundException("common.toast.notFound");
+    if (session.userId !== currentUser.userId) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
+
+    return session;
+  }
+
   private async enqueueGeneration(sessionId: UUIDType, tenantId: UUIDType) {
     try {
       await this.aiPracticeQueueService.enqueue({ tenantId, sessionId });
     } catch (error) {
       await this.aiRepository.updatePracticeSession(sessionId, {
         status: AI_MENTOR_PRACTICE_STATUSES.FAILED,
-        errorCode: "queue_failed",
+        errorCode: AI_MENTOR_PRACTICE_ERROR_CODES.QUEUE_FAILED,
       });
       throw error;
     }

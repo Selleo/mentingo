@@ -58,6 +58,14 @@ export const DASHBOARD_WIDGET_IDS = {
   STUDENT_AI_MENTOR_PRACTICE: "s_ai_mentor_practice",
 } as const;
 
+export const DASHBOARD_DEADLINE_RISK_TYPES = {
+  OVERDUE: "overdue",
+  DUE_SOON: "dueSoon",
+} as const;
+
+export type DashboardDeadlineRiskType =
+  (typeof DASHBOARD_DEADLINE_RISK_TYPES)[keyof typeof DASHBOARD_DEADLINE_RISK_TYPES];
+
 export const DASHBOARD_WIDGETS = {
   [DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR]: {
     alwaysVisible: true,

@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_DEADLINE_RISK_TYPES, DASHBOARD_WIDGET_IDS } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,11 +31,7 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
-const RISK_TYPE = {
-  OVERDUE: "overdue",
-  DUESOON: "dueSoon",
-} as const;
-type RiskType = (typeof RISK_TYPE)[keyof typeof RISK_TYPE];
+type RiskType = (typeof DASHBOARD_DEADLINE_RISK_TYPES)[keyof typeof DASHBOARD_DEADLINE_RISK_TYPES];
 
 const DETAILS_PAGE_SIZE = 20;
 
@@ -43,11 +39,11 @@ export function WidgetAdminDeadlineRisks() {
   const { t, i18n } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const { data: risks, isLoading, isError, refetch } = useDashboardDeadlineRiskSummary();
-  const [selectedRisk, setSelectedRisk] = useState<RiskType>(RISK_TYPE.OVERDUE);
+  const [selectedRisk, setSelectedRisk] = useState<RiskType>(DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE);
   const [areRiskDetailsOpen, setAreRiskDetailsOpen] = useState(false);
   const [page, setPage] = useState(1);
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS];
-  const isOverdue = selectedRisk === "overdue";
+  const isOverdue = selectedRisk === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE;
   const {
     data: riskDetails,
     isLoading: areRiskDetailsLoading,
@@ -101,7 +97,7 @@ export function WidgetAdminDeadlineRisks() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => openRiskDetails(RISK_TYPE.OVERDUE)}
+                onClick={() => openRiskDetails(DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE)}
                 className="min-h-28 rounded-lg border border-error-100 bg-error-50 p-4 text-left transition-colors hover:border-error-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-300 focus-visible:ring-offset-2"
               >
                 <span className="h4 text-error-700">{risks?.overdueCount ?? 0}</span>
@@ -111,7 +107,7 @@ export function WidgetAdminDeadlineRisks() {
               </button>
               <button
                 type="button"
-                onClick={() => openRiskDetails(RISK_TYPE.DUESOON)}
+                onClick={() => openRiskDetails(DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON)}
                 className="min-h-28 rounded-lg border border-warning-100 bg-warning-50 p-4 text-left transition-colors hover:border-warning-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-300 focus-visible:ring-offset-2"
               >
                 <span className="h4 text-warning-700">{risks?.dueSoonCount ?? 0}</span>

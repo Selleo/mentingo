@@ -645,16 +645,18 @@ export class SettingsService {
       throw new NotFoundException("User settings not found");
     }
 
-    const widgetIds = (userSettings.dashboard.widgets ?? []).map((widget) => widget.id);
+    const dashboard = userSettings.dashboard ?? {
+      widgets: await this.getDefaultDashboardWidgets(userId),
+    };
+    const widgets = dashboard.widgets ?? (await this.getDefaultDashboardWidgets(userId));
+    const widgetIds = widgets.map((widget) => widget.id);
     const validIds = await this.filterDashboardWidgets(userId, widgetIds);
-    const returnedWidgets = userSettings.dashboard.widgets.filter((widget) =>
-      validIds.includes(widget.id),
-    );
+    const returnedWidgets = widgets.filter((widget) => validIds.includes(widget.id));
 
     return {
       ...userSettings,
       dashboard: {
-        ...userSettings.dashboard,
+        ...dashboard,
         widgets: returnedWidgets,
       },
     };

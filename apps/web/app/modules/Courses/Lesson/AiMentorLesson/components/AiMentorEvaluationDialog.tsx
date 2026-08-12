@@ -1,5 +1,6 @@
 import { CheckCircle2, Info, MessageSquareText, ShieldAlert, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { P, match } from "ts-pattern";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -66,19 +67,16 @@ export function AiMentorEvaluationDialog({
   const criteria = evaluation.criteria ?? [];
   const blockingErrors = evaluation.blockingErrors ?? [];
   const isPractice = context === AI_MENTOR_EVALUATION_CONTEXT.PRACTICE;
-  let statusLabel = t("aiMentorPractice.feedback.summaryTitle");
+  const statusTitle = match([isPractice, passed])
+    .with([true, P._], () => t("aiMentorPractice.feedback.summaryTitle"))
+    .with([false, true], () => t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle"))
+    .otherwise(() => t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle"));
   let statusDescription = t("aiMentorPractice.feedback.summaryDescription");
   if (!isPractice) {
-    statusLabel = passed
-      ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle")
-      : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle");
     statusDescription = passed
       ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedDescription")
       : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedDescription");
   }
-  let statusIcon = <MessageSquareText className="size-5" />;
-  if (!isPractice)
-    statusIcon = passed ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,10 +116,16 @@ export function AiMentorEvaluationDialog({
                   },
                 )}
               >
-                {statusIcon}
+                {isPractice ? (
+                  <MessageSquareText className="size-5" />
+                ) : passed ? (
+                  <CheckCircle2 className="size-5" />
+                ) : (
+                  <XCircle className="size-5" />
+                )}
               </span>
               <div className="grid gap-1">
-                <h3 className="text-base font-semibold text-neutral-950">{statusLabel}</h3>
+                <h3 className="text-base font-semibold text-neutral-950">{statusTitle}</h3>
                 <p className="text-sm leading-relaxed text-neutral-600">{statusDescription}</p>
               </div>
             </DialogHeader>

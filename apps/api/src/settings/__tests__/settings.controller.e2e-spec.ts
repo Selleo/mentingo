@@ -86,6 +86,24 @@ describe("SettingsController (e2e)", () => {
         expect(userSettings?.language).toBe("de");
       });
 
+      it("should return the default dashboard when legacy settings omit it", async () => {
+        await db
+          .update(settings)
+          .set({ settings: sql`${settings.settings} - 'dashboard'` })
+          .where(eq(settings.userId, testUser.id));
+
+        const response = await request(app.getHttpServer())
+          .get("/api/settings")
+          .set("Cookie", testCookies)
+          .expect(200);
+
+        expect(response.body.data.dashboard.widgets).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING }),
+          ]),
+        );
+      });
+
       it("should return 400 if invalid data is provided", async () => {
         const invalidUpdatePayload = {
           language: 12345,

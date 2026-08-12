@@ -36,6 +36,7 @@ import type {
 } from "../schemas/calendar-event-list.schema";
 import type { DashboardCalendarEventList } from "../schemas/dashboard-calendar-event-list.schema";
 import type { GetCalendarEventsQuery } from "../schemas/get-calendar-events-query.schema";
+import type { GetDashboardCalendarEventsQuery } from "../schemas/get-dashboard-calendar-events-query.schema";
 import type {
   CalendarEventLinkedCourse,
   CalendarEventMaterialRow,
@@ -67,12 +68,11 @@ export class CalendarService {
   }
 
   async getDashboardEvents(
-    query: GetCalendarEventsQuery,
+    query: GetDashboardCalendarEventsQuery,
     currentUser: CurrentUserType,
   ): Promise<DashboardCalendarEventList> {
     const { events } = await this.getEvents(query, currentUser);
-
-    return events.map((event) => ({
+    const dashboardEvents = events.map((event) => ({
       id: event.id,
       sourceType: event.sourceType,
       targetId:
@@ -81,6 +81,33 @@ export class CalendarService {
       startsAt: event.startsAt,
       allDay: event.allDay,
     }));
+
+    if (query.view !== "upcoming") return dashboardEvents;
+
+    return dashboardEvents
+      .filter((event) => {
+        if (Date.parse(event.startsAt) < Date.now()) return false;
+        return (
+          !query.selectedDate ||
+          !this.isEventOnDate(event.startsAt, query.selectedDate, query.timezone)
+        );
+      })
+      .slice(0, 5);
+  }
+
+  private isEventOnDate(startsAt: string, selectedDate: string, timezone?: string) {
+    try {
+      const eventDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: timezone ?? "UTC",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(startsAt));
+
+      return eventDate === selectedDate;
+    } catch {
+      return startsAt.slice(0, 10) === selectedDate;
+    }
   }
 
   async getEventDetails(

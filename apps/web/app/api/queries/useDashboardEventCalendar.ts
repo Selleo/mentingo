@@ -9,6 +9,8 @@ type DashboardEventCalendarParams = {
   end: string;
   language: SupportedLanguages;
   timezone?: string;
+  view: "all" | "upcoming";
+  selectedDate?: string;
 };
 
 export const dashboardEventCalendarQueryOptions = (params: DashboardEventCalendarParams) => ({

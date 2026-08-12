@@ -24,6 +24,10 @@ import {
   getCalendarEventsQuerySchema,
   type GetCalendarEventsQuery,
 } from "./schemas/get-calendar-events-query.schema";
+import {
+  getDashboardCalendarEventsQuerySchema,
+  type GetDashboardCalendarEventsQuery,
+} from "./schemas/get-dashboard-calendar-events-query.schema";
 import { CalendarService } from "./services/calendar.service";
 
 @UseGuards(PermissionsGuard)
@@ -74,17 +78,35 @@ export class CalendarController {
   @RequirePermission(PERMISSIONS.CALENDAR_READ)
   @Validate({
     request: [
-      { type: "query", name: "start", schema: getCalendarEventsQuerySchema.properties.start },
-      { type: "query", name: "end", schema: getCalendarEventsQuerySchema.properties.end },
+      {
+        type: "query",
+        name: "start",
+        schema: getDashboardCalendarEventsQuerySchema.properties.start,
+      },
+      {
+        type: "query",
+        name: "end",
+        schema: getDashboardCalendarEventsQuerySchema.properties.end,
+      },
       {
         type: "query",
         name: "language",
-        schema: getCalendarEventsQuerySchema.properties.language,
+        schema: getDashboardCalendarEventsQuerySchema.properties.language,
       },
       {
         type: "query",
         name: "timezone",
-        schema: getCalendarEventsQuerySchema.properties.timezone,
+        schema: getDashboardCalendarEventsQuerySchema.properties.timezone,
+      },
+      {
+        type: "query",
+        name: "view",
+        schema: getDashboardCalendarEventsQuerySchema.properties.view,
+      },
+      {
+        type: "query",
+        name: "selectedDate",
+        schema: getDashboardCalendarEventsQuerySchema.properties.selectedDate,
       },
     ],
     response: baseResponse(dashboardCalendarEventListSchema),
@@ -93,12 +115,14 @@ export class CalendarController {
     @Query("start") start: GetCalendarEventsQuery["start"],
     @Query("end") end: GetCalendarEventsQuery["end"],
     @Query("language") language: GetCalendarEventsQuery["language"],
-    @Query("timezone") timezone: GetCalendarEventsQuery["timezone"],
+    @Query("timezone") timezone: GetDashboardCalendarEventsQuery["timezone"],
+    @Query("view") view: GetDashboardCalendarEventsQuery["view"],
+    @Query("selectedDate") selectedDate: GetDashboardCalendarEventsQuery["selectedDate"],
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<DashboardCalendarEventList>> {
     return new BaseResponse(
       await this.calendarService.getDashboardEvents(
-        { start, end, language, timezone },
+        { start, end, language, timezone, view, selectedDate },
         currentUser,
       ),
     );

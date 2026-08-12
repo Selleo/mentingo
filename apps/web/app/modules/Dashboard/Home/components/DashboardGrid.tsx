@@ -52,6 +52,7 @@ type ActiveWidgetSize = {
 
 const VIEWPORT_PADDING = 16;
 
+/** Keeps the drag preview inside the visible viewport while preserving its Y position. */
 const restrictOverlayToViewport: Modifier = ({ transform, draggingNodeRect, windowRect }) => {
   if (!draggingNodeRect || !windowRect) return transform;
 
@@ -81,20 +82,27 @@ type DashboardDragState = {
   initialDroppableRects: Parameters<CollisionDetection>[0]["droppableRects"] | null;
 };
 
+type DashboardGridRefs = {
+  grid: HTMLDivElement | null;
+  dragState: DashboardDragState;
+};
+
 export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: DashboardGridProps) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState<DashboardWidgetId | null>(null);
   const [activeWidgetSize, setActiveWidgetSize] = useState<ActiveWidgetSize | null>(null);
   const [previewWidgets, setPreviewWidgets] = useState<DashboardLayoutItem[] | null>(null);
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const dragStateRef = useRef<DashboardDragState>({
-    previewWidgets: null,
-    widgetsAtDragStart: null,
-    hasDragOrderChanged: false,
-    lastOverId: null,
-    lastDropPlacement: null,
-    appliedDropTarget: null,
-    initialDroppableRects: null,
+  const dashboardRefs = useRef<DashboardGridRefs>({
+    grid: null,
+    dragState: {
+      previewWidgets: null,
+      widgetsAtDragStart: null,
+      hasDragOrderChanged: false,
+      lastOverId: null,
+      lastDropPlacement: null,
+      appliedDropTarget: null,
+      initialDroppableRects: null,
+    },
   });
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
@@ -111,13 +119,14 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
    * Keeps pointer-based collision detection tied to the original grid geometry
    * so the dragged card does not make its own drop target move underneath it.
    */
+  /** Resolves pointer and keyboard collisions against the stable grid geometry. */
   const dashboardCollisionDetection: CollisionDetection = (args) => {
     const inactiveDroppableContainers = args.droppableContainers.filter(
       (container) => container.id !== args.active.id,
     );
 
     if (args.pointerCoordinates) {
-      const gridRect = gridRef.current?.getBoundingClientRect();
+      const gridRect = dashboardRefs.current.grid?.getBoundingClientRect();
       const isPointerInsideGrid =
         gridRect &&
         args.pointerCoordinates.x >= gridRect.left &&
@@ -126,30 +135,32 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
         args.pointerCoordinates.y <= gridRect.bottom;
 
       if (!isPointerInsideGrid) {
-        dragStateRef.current.lastOverId = null;
-        dragStateRef.current.lastDropPlacement = null;
+        dashboardRefs.current.dragState.lastOverId = null;
+        dashboardRefs.current.dragState.lastDropPlacement = null;
         return [];
       }
 
-      if (!dragStateRef.current.initialDroppableRects) {
-        dragStateRef.current.initialDroppableRects = new Map(args.droppableRects);
+      if (!dashboardRefs.current.dragState.initialDroppableRects) {
+        dashboardRefs.current.dragState.initialDroppableRects = new Map(args.droppableRects);
       }
 
       const pointerCollisions = pointerWithin({
         ...args,
-        droppableRects: dragStateRef.current.initialDroppableRects,
+        droppableRects: dashboardRefs.current.dragState.initialDroppableRects,
       });
       const [pointerCollision] = pointerCollisions;
       if (pointerCollision) {
         const pointerCollisionId = pointerCollision.id as DashboardWidgetId;
         const previousPlacement =
-          dragStateRef.current.lastOverId === pointerCollisionId
-            ? dragStateRef.current.lastDropPlacement
+          dashboardRefs.current.dragState.lastOverId === pointerCollisionId
+            ? dashboardRefs.current.dragState.lastDropPlacement
             : null;
-        dragStateRef.current.lastOverId = pointerCollisionId;
-        const targetRect = dragStateRef.current.initialDroppableRects.get(pointerCollision.id);
+        dashboardRefs.current.dragState.lastOverId = pointerCollisionId;
+        const targetRect = dashboardRefs.current.dragState.initialDroppableRects.get(
+          pointerCollision.id,
+        );
         const activeRect = args.active.rect.current.initial;
-        dragStateRef.current.lastDropPlacement = getDashboardDropPlacement(
+        dashboardRefs.current.dragState.lastDropPlacement = getDashboardDropPlacement(
           args.pointerCoordinates.x,
           targetRect,
           activeRect,
@@ -158,7 +169,9 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
         return pointerCollisions;
       }
 
-      return dragStateRef.current.lastOverId ? [{ id: dragStateRef.current.lastOverId }] : [];
+      return dashboardRefs.current.dragState.lastOverId
+        ? [{ id: dashboardRefs.current.dragState.lastOverId }]
+        : [];
     }
 
     const keyboardCollisions = closestCenter({
@@ -167,42 +180,44 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
     });
     const [keyboardCollision] = keyboardCollisions;
     if (keyboardCollision) {
-      dragStateRef.current.lastOverId = keyboardCollision.id as DashboardWidgetId;
-      dragStateRef.current.lastDropPlacement = null;
+      dashboardRefs.current.dragState.lastOverId = keyboardCollision.id as DashboardWidgetId;
+      dashboardRefs.current.dragState.lastDropPlacement = null;
     }
 
     return keyboardCollisions;
   };
 
+  /** Captures the starting layout and geometry used by the drag preview. */
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveId(active.id as DashboardWidgetId);
     const initialPreview = sortedWidgets.map((widget) => ({ ...widget }));
     setPreviewWidgets(initialPreview);
-    dragStateRef.current.previewWidgets = initialPreview;
-    dragStateRef.current.widgetsAtDragStart = initialPreview;
-    dragStateRef.current.hasDragOrderChanged = false;
-    dragStateRef.current.lastOverId = null;
-    dragStateRef.current.lastDropPlacement = null;
-    dragStateRef.current.appliedDropTarget = null;
-    dragStateRef.current.initialDroppableRects = null;
+    dashboardRefs.current.dragState.previewWidgets = initialPreview;
+    dashboardRefs.current.dragState.widgetsAtDragStart = initialPreview;
+    dashboardRefs.current.dragState.hasDragOrderChanged = false;
+    dashboardRefs.current.dragState.lastOverId = null;
+    dashboardRefs.current.dragState.lastDropPlacement = null;
+    dashboardRefs.current.dragState.appliedDropTarget = null;
+    dashboardRefs.current.dragState.initialDroppableRects = null;
 
     const activeRect = active.rect.current.initial;
     setActiveWidgetSize(activeRect ? { width: activeRect.width, height: activeRect.height } : null);
   };
 
+  /** Applies the projected order while dragging and reports whether it changed. */
   const updateDragPreview = ({ active, over }: DragOverEvent | DragMoveEvent) => {
     if (!over) return;
 
     const overId = over.id as DashboardWidgetId;
-    const dropPlacement = dragStateRef.current.lastDropPlacement;
-    const previousAppliedTarget = dragStateRef.current.appliedDropTarget;
+    const dropPlacement = dashboardRefs.current.dragState.lastDropPlacement;
+    const previousAppliedTarget = dashboardRefs.current.dragState.appliedDropTarget;
     if (previousAppliedTarget?.id === overId && previousAppliedTarget.placement === dropPlacement) {
       return;
     }
-    dragStateRef.current.appliedDropTarget = { id: overId, placement: dropPlacement };
+    dashboardRefs.current.dragState.appliedDropTarget = { id: overId, placement: dropPlacement };
 
     if (active.id === overId) {
-      const initialWidgets = dragStateRef.current.widgetsAtDragStart;
+      const initialWidgets = dashboardRefs.current.dragState.widgetsAtDragStart;
       if (!initialWidgets) return;
 
       setPreviewWidgets((currentWidgets) => {
@@ -210,15 +225,15 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
           return currentWidgets;
         }
 
-        dragStateRef.current.previewWidgets = initialWidgets;
-        dragStateRef.current.hasDragOrderChanged = false;
+        dashboardRefs.current.dragState.previewWidgets = initialWidgets;
+        dashboardRefs.current.dragState.hasDragOrderChanged = false;
         return initialWidgets;
       });
       return;
     }
 
     setPreviewWidgets((currentWidgets) => {
-      const initialWidgets = dragStateRef.current.widgetsAtDragStart;
+      const initialWidgets = dashboardRefs.current.dragState.widgetsAtDragStart;
       if (!currentWidgets || !initialWidgets) return currentWidgets;
 
       const projectedPreview = projectDashboardDragPreview(
@@ -228,35 +243,40 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
         overId,
         dropPlacement ?? undefined,
       );
-      dragStateRef.current.previewWidgets = projectedPreview.widgets;
-      dragStateRef.current.hasDragOrderChanged = projectedPreview.hasChanged;
+      dashboardRefs.current.dragState.previewWidgets = projectedPreview.widgets;
+      dashboardRefs.current.dragState.hasDragOrderChanged = projectedPreview.hasChanged;
 
       return projectedPreview.widgets;
     });
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
-    if (dragStateRef.current.lastDropPlacement) {
+    if (dashboardRefs.current.dragState.lastDropPlacement) {
       updateDragPreview(event);
     }
   };
 
+  /** Clears transient drag state after completion or cancellation. */
   const resetDragState = () => {
     setActiveId(null);
     setActiveWidgetSize(null);
     setPreviewWidgets(null);
-    dragStateRef.current.previewWidgets = null;
-    dragStateRef.current.widgetsAtDragStart = null;
-    dragStateRef.current.hasDragOrderChanged = false;
-    dragStateRef.current.lastOverId = null;
-    dragStateRef.current.lastDropPlacement = null;
-    dragStateRef.current.appliedDropTarget = null;
-    dragStateRef.current.initialDroppableRects = null;
+    dashboardRefs.current.dragState.previewWidgets = null;
+    dashboardRefs.current.dragState.widgetsAtDragStart = null;
+    dashboardRefs.current.dragState.hasDragOrderChanged = false;
+    dashboardRefs.current.dragState.lastOverId = null;
+    dashboardRefs.current.dragState.lastDropPlacement = null;
+    dashboardRefs.current.dragState.appliedDropTarget = null;
+    dashboardRefs.current.dragState.initialDroppableRects = null;
   };
 
   const handleDragEnd = ({ over }: DragEndEvent) => {
-    if (over && dragStateRef.current.hasDragOrderChanged && dragStateRef.current.previewWidgets) {
-      onWidgetsChange(dragStateRef.current.previewWidgets);
+    if (
+      over &&
+      dashboardRefs.current.dragState.hasDragOrderChanged &&
+      dashboardRefs.current.dragState.previewWidgets
+    ) {
+      onWidgetsChange(dashboardRefs.current.dragState.previewWidgets);
     }
 
     resetDragState();
@@ -266,6 +286,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
     resetDragState();
   };
 
+  /** Cycles a widget through the widths allowed by its shared definition. */
   const handleWidthChange = (id: DashboardWidgetId) => {
     onWidgetsChange(
       widgets.map((widget) => {
@@ -300,7 +321,9 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
             strategy={gridReflowStrategy}
           >
             <div
-              ref={gridRef}
+              ref={(element) => {
+                dashboardRefs.current.grid = element;
+              }}
               className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:gap-6"
             >
               {displayedWidgets.map((widget) => (

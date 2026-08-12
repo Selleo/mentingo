@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT, DASHBOARD_DEADLINE_RISK_TYPES, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -183,9 +183,9 @@ export class StatisticsRepository {
   async getDashboardTrainingCompletion(ownerUserId?: UUIDType) {
     const [result] = await this.db
       .select({
-        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'completed')::INTEGER`,
-        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'in_progress')::INTEGER`,
-        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'not_started')::INTEGER`,
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.COMPLETED})::INTEGER`,
+        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS})::INTEGER`,
+        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.NOT_STARTED})::INTEGER`,
         total: sql<number>`COUNT(*)::INTEGER`,
       })
       .from(studentCourses)
@@ -209,12 +209,12 @@ export class StatisticsRepository {
       .select({
         id: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'completed')::INTEGER`,
-        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'in_progress')::INTEGER`,
-        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = 'not_started')::INTEGER`,
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.COMPLETED})::INTEGER`,
+        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS})::INTEGER`,
+        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.NOT_STARTED})::INTEGER`,
         total: sql<number>`COUNT(*)::INTEGER`,
         overdue: sql<number>`COUNT(*) FILTER (
-          WHERE ${studentCourses.progress} != 'completed'
+          WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}
             AND ${groupCourses.isMandatory} = TRUE
             AND ${groupCourses.dueDate} < NOW()
         )::INTEGER`,
@@ -236,14 +236,18 @@ export class StatisticsRepository {
         ),
       )
       .groupBy(courses.id, courses.title)
-      .having(sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != 'completed') > 0`)
+      .having(
+        sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}) > 0`,
+      )
       .orderBy(
-        desc(sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != 'completed')`),
         desc(
-          sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != 'completed')::DECIMAL / COUNT(*)`,
+          sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED})`,
+        ),
+        desc(
+          sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED})::DECIMAL / COUNT(*)`,
         ),
         desc(sql`COUNT(*) FILTER (
-          WHERE ${studentCourses.progress} != 'completed'
+          WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}
             AND ${groupCourses.isMandatory} = TRUE
             AND ${groupCourses.dueDate} < NOW()
         )`),
@@ -274,7 +278,7 @@ export class StatisticsRepository {
       .where(
         and(
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-          sql`${studentCourses.progress} != 'completed'`,
+          sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
           eq(groupCourses.isMandatory, true),
           sql`${groupCourses.dueDate} IS NOT NULL`,
           sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
@@ -293,7 +297,7 @@ export class StatisticsRepository {
     perPage: number,
   ) {
     const riskCondition =
-      riskType === "overdue"
+      riskType === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE
         ? sql`${groupCourses.dueDate} < NOW()`
         : and(
             sql`${groupCourses.dueDate} >= NOW()`,
@@ -301,7 +305,7 @@ export class StatisticsRepository {
           );
     const commonCondition = and(
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-      sql`${studentCourses.progress} != 'completed'`,
+      sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
       eq(groupCourses.isMandatory, true),
       sql`${groupCourses.dueDate} IS NOT NULL`,
       riskCondition,
