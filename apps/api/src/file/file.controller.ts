@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   Head,
   Options,
@@ -17,7 +16,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ApiBody, ApiConsumes, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { PERMISSIONS, VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -245,22 +244,6 @@ export class FileController {
   })
   async handleBunnyWebhook(@Body() payload: BunnyWebhookBody) {
     return this.fileService.handleBunnyWebhook(payload);
-  }
-
-  @RequirePermission(PERMISSIONS.FILE_DELETE)
-  @Delete()
-  @ApiQuery({
-    name: "fileKey",
-    description: "Key of the file to delete",
-    type: "string",
-    required: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description: "File deleted successfully",
-  })
-  async deleteFile(@Query("fileKey") fileKey: string): Promise<void> {
-    await this.fileService.deleteFile(fileKey);
   }
 
   @Public()

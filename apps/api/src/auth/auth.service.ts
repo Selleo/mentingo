@@ -513,10 +513,6 @@ export class AuthService {
       this.dbAdmin,
     );
 
-    if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN)) {
-      throw new UnauthorizedException("supportMode.errors.targetAdminRequired");
-    }
-
     const supportPayload = {
       userId: targetUser.id,
       email: targetUser.email,

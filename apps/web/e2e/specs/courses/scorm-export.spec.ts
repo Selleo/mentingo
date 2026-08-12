@@ -3,10 +3,15 @@ import { USER_ROLE } from "~/config/userRoles";
 import { TOAST_HANDLES } from "../../data/common/handles";
 import { COURSE_TAB_VALUES, SCORM_EXPORT_CARD_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
+import {
+  openCourseOverviewSettingsFlow,
+  selectCourseOverviewSettingsTabFlow,
+} from "../../flows/courses/open-course-overview-settings.flow";
 import { createCurriculumCourse } from "../curriculum/curriculum-test-helpers";
 
-const mockScormExportDownload = async (page: Parameters<typeof openEditCoursePageFlow>[0]) => {
+const mockScormExportDownload = async (
+  page: Parameters<typeof openCourseOverviewSettingsFlow>[0],
+) => {
   let exportRequestUrl: string | null = null;
 
   await page.route("**/api/course/*/scorm-export**", async (route) => {
@@ -53,7 +58,8 @@ test("admin can export a course as a SCORM package from the exports tab", async 
 
     const exportDownload = await mockScormExportDownload(page);
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.EXPORTS);
+    await openCourseOverviewSettingsFlow(page, course.id);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.EXPORTS);
     await expect(page.getByTestId(SCORM_EXPORT_CARD_HANDLES.ROOT)).toBeVisible();
     await page.getByTestId(SCORM_EXPORT_CARD_HANDLES.EXPORT_BUTTON).click();
 
@@ -96,7 +102,8 @@ test("admin confirms SCORM export when unsupported lessons will be skipped", asy
 
     const exportDownload = await mockScormExportDownload(page);
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.EXPORTS);
+    await openCourseOverviewSettingsFlow(page, course.id);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.EXPORTS);
     await page.getByTestId(SCORM_EXPORT_CARD_HANDLES.EXPORT_BUTTON).click();
     await expect(page.getByTestId(SCORM_EXPORT_CARD_HANDLES.WARNING_DIALOG)).toBeVisible();
     expect(exportDownload.getExportRequestUrl()).toBeNull();

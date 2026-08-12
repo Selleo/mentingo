@@ -161,7 +161,7 @@ test("SCORM courses hide unsupported admin course features", async ({
       "SCORM",
     );
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.CURRICULUM);
+    await openEditCoursePageFlow(page, course.id);
     await expect(
       page.getByTestId(EDIT_COURSE_PAGE_HANDLES.tab(COURSE_TAB_VALUES.CURRICULUM)),
     ).toHaveCount(0);

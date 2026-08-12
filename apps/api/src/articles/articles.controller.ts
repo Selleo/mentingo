@@ -11,10 +11,11 @@ import {
   Req,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
+import { AnyFilesInterceptor, FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
 import {
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
@@ -74,11 +75,20 @@ import {
 } from "./schemas/selectArticle.schema";
 import {
   UpdateArticle,
+  updateArticleMultipartSchema,
   updateArticleSchema,
   UpdateArticleSection,
   updateArticleSectionSchema,
 } from "./schemas/updateArticle.schema";
 import { ArticlesService } from "./services/articles.service";
+
+const optionalBooleanQuerySchema = Type.Optional(
+  Type.Union([Type.Boolean(), Type.Literal("true"), Type.Literal("false")]),
+);
+
+type BooleanQuery = boolean | "true" | "false";
+
+const parseBooleanQuery = (value?: BooleanQuery) => value === true || value === "true";
 
 @Controller("articles")
 export class ArticlesController {
@@ -210,8 +220,9 @@ export class ArticlesController {
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async getDraftArticles(
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<GetArticlesResponse> {
-    return this.articlesService.getDraftArticles(language);
+    return this.articlesService.getDraftArticles(language, currentUser);
   }
 
   @Public()
@@ -219,17 +230,21 @@ export class ArticlesController {
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "isDraftMode", schema: Type.Optional(Type.Boolean()) },
+      { type: "query", name: "isDraftMode", schema: optionalBooleanQuerySchema },
     ],
     response: baseResponse(getArticleSectionResponseSchema),
   })
   @RequireFeature({ features: [FEATURES.ARTICLES], allowUnregisteredUser: true })
   async getArticleToc(
     @Query("language") language: SupportedLanguages,
-    @Query("isDraftMode") isDraftMode?: boolean,
+    @Query("isDraftMode") isDraftMode?: BooleanQuery,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<GetArticleTocResponse>> {
-    const toc = await this.articlesService.getArticlesToc(language, isDraftMode, currentUser);
+    const toc = await this.articlesService.getArticlesToc(
+      language,
+      parseBooleanQuery(isDraftMode),
+      currentUser,
+    );
 
     return new BaseResponse(toc);
   }
@@ -259,7 +274,7 @@ export class ArticlesController {
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "isDraftMode", schema: Type.Optional(Type.Boolean()) },
+      { type: "query", name: "isDraftMode", schema: optionalBooleanQuerySchema },
     ],
     response: baseResponse(getArticleResponseSchema),
   })
@@ -267,10 +282,15 @@ export class ArticlesController {
   async getArticle(
     @Param("id") id: string,
     @Query("language") language: SupportedLanguages,
-    @Query("isDraftMode") isDraftMode?: boolean,
+    @Query("isDraftMode") isDraftMode?: BooleanQuery,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<GetArticleResponse>> {
-    const article = await this.articlesService.getArticle(id, language, isDraftMode, currentUser);
+    const article = await this.articlesService.getArticle(
+      id,
+      language,
+      parseBooleanQuery(isDraftMode),
+      currentUser,
+    );
 
     return new BaseResponse(article);
   }
@@ -306,13 +326,11 @@ export class ArticlesController {
   }
 
   @Patch(":id")
-  @UseInterceptors(FileInterceptor("cover"))
+  @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes("multipart/form-data")
+  @ApiBody({ schema: updateArticleMultipartSchema })
   @Validate({
-    request: [
-      { type: "param", name: "id", schema: UUIDSchema },
-      { type: "body", schema: updateArticleSchema },
-    ],
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(createArticleResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
@@ -320,20 +338,20 @@ export class ArticlesController {
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
-    @UploadedFile(
+    @UploadedFiles(
       getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    cover?: Express.Multer.File,
+    covers: Express.Multer.File[] = [],
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const updatedArticle = await this.articlesService.updateArticle(
       id,
       updateArticleBody,
       currentUser,
-      cover,
+      covers,
     );
 
     return new BaseResponse(updatedArticle);
@@ -440,12 +458,14 @@ export class ArticlesController {
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async generateArticlePreview(
     @Body() body: PreviewArticleRequest,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<PreviewArticleResponse>> {
     const { articleId, language, content } = body;
     const previewContent = await this.articlesService.generateArticlePreview(
       articleId,
       language,
       content,
+      currentUser,
     );
 
     return new BaseResponse({ parsedContent: previewContent });

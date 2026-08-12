@@ -23,6 +23,8 @@ const mapRoleToRoleSlug = (role?: string): SystemRoleSlug => {
       return SYSTEM_ROLE_SLUGS.ADMIN;
     case "content_creator":
       return SYSTEM_ROLE_SLUGS.CONTENT_CREATOR;
+    case "trainer":
+      return SYSTEM_ROLE_SLUGS.TRAINER;
     default:
       return SYSTEM_ROLE_SLUGS.STUDENT;
   }
@@ -74,6 +76,14 @@ class UserFactory extends Factory<UserFactoryAttributes> {
         return user;
       },
     );
+  }
+
+  withTrainerSettings(db: DatabasePg) {
+    return this.associations({ roleSlug: SYSTEM_ROLE_SLUGS.TRAINER }).afterCreate(async (user) => {
+      const settingsFactory = createSettingsFactory(db, user.id, false);
+      await settingsFactory.create();
+      return user;
+    });
   }
 }
 

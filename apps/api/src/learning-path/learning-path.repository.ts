@@ -7,6 +7,7 @@ import {
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_CERTIFICATE_STATUSES,
   SUPPORTED_LANGUAGES,
+  TENANT_STATUSES,
   type LearningPathEnrollmentType,
   type LearningPathProgressStatus,
   type LearningPathEntityType,
@@ -866,7 +867,7 @@ export class LearningPathRepository {
           eq(learningPathExports.targetTenantId, tenants.id),
         ),
       )
-      .where(ne(tenants.id, sourceTenantId))
+      .where(and(ne(tenants.id, sourceTenantId), eq(tenants.status, TENANT_STATUSES.ACTIVE)))
       .orderBy(asc(tenants.name));
   }
 

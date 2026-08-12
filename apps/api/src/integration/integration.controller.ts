@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -230,6 +232,33 @@ export class IntegrationController {
         keyTenant,
       ),
     );
+  }
+
+  @Delete("tenants/:tenantId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Delete tenant via integration API",
+    description:
+      "Permanently deletes the target tenant and its tenant-owned data.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Tenant ID is not required because the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+  })
+  async deleteTenant(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<void> {
+    await this.integrationService.deleteTenantForIntegration(tenantId, currentUser, keyTenant);
   }
 
   @Get("users")

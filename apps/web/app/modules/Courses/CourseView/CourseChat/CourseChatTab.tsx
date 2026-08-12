@@ -134,11 +134,11 @@ export function CourseChatTab({
 
   return (
     <Card
-      className="overflow-hidden border-neutral-200 shadow-sm"
+      className="overflow-visible border-neutral-200 shadow-sm"
       data-testid={COURSE_DISCUSSION_HANDLES.ROOT}
     >
-      <CardContent className="min-h-[560px] bg-neutral-50 p-0">
-        <div className="flex min-w-0 flex-col">
+      <CardContent className="bg-neutral-50 p-0">
+        <div className="flex min-h-96 min-w-0 flex-col">
           <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-4 md:px-5">
             {mainFeedContent}
           </div>

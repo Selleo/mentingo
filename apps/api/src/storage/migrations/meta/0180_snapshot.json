@@ -1,6 +1,6 @@
 {
-  "id": "c7610d0b-5919-4f9c-ba4b-8a12c77bf5ab",
-  "prevId": "e27ef116-efb6-4cf0-988c-3030cca3a5e0",
+  "id": "893607a2-3d24-4fe0-be9a-e89abcad47ff",
+  "prevId": "35265d10-9e6a-45a3-b7ca-8c206489657e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -4473,6 +4473,13 @@
           "notNull": true,
           "default": "'draft'"
         },
+        "thumbnail_position_y": {
+          "name": "thumbnail_position_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
         "has_certificate": {
           "name": "has_certificate",
           "type": "boolean",
@@ -4487,6 +4494,13 @@
           "notNull": true,
           "default": 0
         },
+        "show_author_section": {
+          "name": "show_author_section",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
         "currency": {
           "name": "currency",
           "type": "varchar",
@@ -4500,6 +4514,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "learning_outcomes": {
+          "name": "learning_outcomes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "duration_estimates": {
+          "name": "duration_estimates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "course_type": {
           "name": "course_type",
@@ -5371,149 +5399,6 @@
           "nullsNotDistinct": false
         }
       }
-    },
-    "public.email_notification_templates": {
-      "name": "email_notification_templates",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "subject": {
-          "name": "subject",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "blocks": {
-          "name": "blocks",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{\"type\":\"doc\",\"content\":[]}'::jsonb"
-        },
-        "strings": {
-          "name": "strings",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "base_language": {
-          "name": "base_language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        },
-        "available_locales": {
-          "name": "available_locales",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "ARRAY['en']::text[]"
-        },
-        "archived_at": {
-          "name": "archived_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "email_notification_templates_tenant_id_idx": {
-          "name": "email_notification_templates_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "email_notification_templates_tenant_id_name_unique_idx": {
-          "name": "email_notification_templates_tenant_id_name_unique_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "email_notification_templates_tenant_id_tenants_id_fk": {
-          "name": "email_notification_templates_tenant_id_tenants_id_fk",
-          "tableFrom": "email_notification_templates",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     },
     "public.form_field_answers": {
       "name": "form_field_answers",

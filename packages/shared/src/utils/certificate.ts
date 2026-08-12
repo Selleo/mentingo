@@ -124,6 +124,19 @@ const certificateTranslations = {
     expiryDate: "Caduca",
     signature: "Firma",
   },
+  fr: {
+    certificate: "CERTIFICAT",
+    courseCompletion: "DE RÉUSSITE DU COURS",
+    certifyThat: "CECI CERTIFIE QUE",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "a terminé avec succès le cours",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "a terminé avec succès le parcours de développement",
+    },
+    confirmation: "confirmant ainsi sa participation à l'ensemble du programme de formation.",
+    date: "Date",
+    expiryDate: "Expire le",
+    signature: "Signature",
+  },
 };
 
 export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): string {

@@ -28,7 +28,7 @@ export const contentCreatorCoursesOptions = (
 ) => {
   return {
     enabled: !!authorId && canManageOwnCourses,
-    queryKey: ["content-creator-courses", authorId, { language: searchParams?.language }],
+    queryKey: ["content-creator-courses", authorId, searchParams],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");

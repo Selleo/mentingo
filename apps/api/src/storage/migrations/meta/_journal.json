@@ -1258,8 +1258,22 @@
     {
       "idx": 179,
       "version": "7",
-      "when": 1785331794294,
-      "tag": "0179_add_automation_tables",
+      "when": 1785344676126,
+      "tag": "0179_add_course_overview_fields_and_duration_estimates",
+      "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1785344688595,
+      "tag": "0180_backfill_course_duration_estimates",
+      "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1786368652108,
+      "tag": "0181_normalize_legacy_bunny_video_content_types",
       "breakpoints": true
     }
   ]

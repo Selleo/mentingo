@@ -880,7 +880,7 @@ export class FileService {
     entityType: EntityType,
     relationshipType: string | undefined,
     language: SupportedLanguages,
-    options?: { quality?: ImageQuality },
+    options?: { quality?: ImageQuality; requireLanguage?: boolean },
   ): Promise<LocalizedResourceForEntity[]>;
   async getResourcesForEntity(
     entityId: UUIDType,
@@ -892,13 +892,14 @@ export class FileService {
     entityType: EntityType,
     relationshipType?: string,
     language?: SupportedLanguages,
-    options: { quality?: ImageQuality } = {},
+    options: { quality?: ImageQuality; requireLanguage?: boolean } = {},
   ): Promise<ResourceForEntity[]> {
     const conditions = [
       eq(resourceEntity.entityId, entityId),
       eq(resourceEntity.entityType, entityType),
       eq(resources.archived, false),
       relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : null,
+      language && options.requireLanguage ? sql`${resources.title} ? ${language}` : null,
     ].filter((condition): condition is ReturnType<typeof eq> => Boolean(condition));
 
     const tableColumns = getTableColumns(resources);

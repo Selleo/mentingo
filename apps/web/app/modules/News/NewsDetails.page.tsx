@@ -5,12 +5,21 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteNews } from "~/api/mutations";
-import { useNews } from "~/api/queries";
+import { useCurrentUser, useNews } from "~/api/queries";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
 import { TOC } from "~/components/TOC/TOC";
 import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
@@ -25,7 +34,8 @@ export default function NewsDetailsPage() {
   const { newsId } = useParams();
 
   const { language } = useLanguageStore();
-  const { hasAccess: canManageNews } = usePermissions({
+  const { data: currentUser } = useCurrentUser();
+  const { permissions } = usePermissions({
     required: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
   });
   const { data: news, isLoading: isLoadingNews } = useNews(
@@ -33,7 +43,7 @@ export default function NewsDetailsPage() {
     { language },
     { enabled: Boolean(newsId) },
   );
-  const { mutateAsync: deleteNews } = useDeleteNews();
+  const { mutateAsync: deleteNews, isPending: isDeleting } = useDeleteNews();
 
   const [contentWithIds, setContentWithIds] = useState(news?.plainContent ?? "");
   const handleContentWithIds = useCallback((html: string) => setContentWithIds(html || ""), []);
@@ -62,6 +72,9 @@ export default function NewsDetailsPage() {
 
   const headerImageUrl = news.resources?.coverImage?.fileUrl;
   const publishedDate = news.publishedAt ? new Date(news.publishedAt) : null;
+  const canManageNews =
+    hasPermission(permissions, PERMISSIONS.NEWS_MANAGE) ||
+    (hasPermission(permissions, PERMISSIONS.NEWS_MANAGE_OWN) && currentUser?.id === news.authorId);
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>
@@ -91,28 +104,53 @@ export default function NewsDetailsPage() {
                 {t("newsView.edit")}
               </span>
             </Button>
-            <Button
-              data-testid={NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON}
-              variant="outline"
-              className="w-28 gap-2"
-              onClick={async () => {
-                if (!newsId) return;
-
-                await deleteNews(
-                  { id: newsId },
-                  {
-                    onSuccess: () => {
-                      navigate("/news");
-                    },
-                  },
-                );
-              }}
-            >
-              <Icon name="TrashIcon" className="size-4" />
-              <span className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("newsView.button.delete")}
-              </span>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  data-testid={NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON}
+                  variant="destructive"
+                  className="w-28 gap-2"
+                  disabled={isDeleting}
+                >
+                  <Icon name="TrashIcon" className="size-4" />
+                  <span className="text-sm font-semibold leading-5">
+                    {t("newsView.button.delete")}
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className="max-w-md"
+                noCloseButton={isDeleting}
+                data-testid={NEWS_DETAILS_PAGE_HANDLES.DELETE_DIALOG}
+              >
+                <DialogTitle>{t("newsView.deleteModal.title")}</DialogTitle>
+                <DialogDescription>{t("newsView.deleteModal.description")}</DialogDescription>
+                <div className="flex justify-end gap-2">
+                  <DialogClose asChild>
+                    <Button variant="ghost" disabled={isDeleting}>
+                      {t("common.button.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    data-testid={NEWS_DETAILS_PAGE_HANDLES.DELETE_CONFIRM_BUTTON}
+                    variant="destructive"
+                    disabled={isDeleting}
+                    onClick={() => {
+                      void deleteNews(
+                        { id: news.id },
+                        {
+                          onSuccess: () => {
+                            navigate("/news");
+                          },
+                        },
+                      );
+                    }}
+                  >
+                    {t("newsView.button.delete")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 

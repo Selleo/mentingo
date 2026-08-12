@@ -121,7 +121,7 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
         />
         {matchingUsers.length > 0 && (
           <div
-            className="absolute bottom-full left-0 z-10 mb-2 w-72 rounded-xl border border-neutral-200 bg-background p-2 shadow-lg"
+            className="absolute bottom-full left-0 z-50 mb-2 max-h-64 w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-neutral-200 bg-background p-2 shadow-lg"
             data-testid={testIds?.mentionList}
           >
             {matchingUsers.map((user, index) => {
@@ -146,7 +146,9 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
                     userName={userName}
                     profilePictureUrl={user.avatarReference}
                   />
-                  <span className="body-sm-md truncate text-neutral-950">{userName}</span>
+                  <span className="body-sm-md min-w-0 flex-1 truncate text-neutral-950">
+                    {userName}
+                  </span>
                 </button>
               );
             })}

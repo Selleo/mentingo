@@ -51,6 +51,14 @@ export const getCreatePasswordReminderEmailTranslations = (language: SupportedLa
       ],
       buttonText: "CREAR CONTRASEÑA",
     },
+    fr: {
+      heading: "Rappel",
+      paragraphs: [
+        "Nous vous rappelons que la configuration de votre compte n'est pas encore terminée. 🔒",
+        "Pour terminer la configuration de votre compte, créez votre mot de passe en cliquant sur le bouton ci-dessous. Si vous l'avez déjà créé, ignorez ce rappel.",
+      ],
+      buttonText: "CRÉER UN MOT DE PASSE",
+    },
   };
 
   return emailContent[language];

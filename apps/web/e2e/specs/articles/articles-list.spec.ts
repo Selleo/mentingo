@@ -11,14 +11,12 @@ test("admin can browse articles list", async ({ cleanup, factories, withReadonly
     const prefix = `articles-list-${Date.now()}`;
     const { article: firstArticle, section } = await articleFactory.createWithSection({
       title: `${prefix}-first`,
-      status: "published",
       isPublic: true,
     });
 
     const secondArticle = await articleFactory.create({
       sectionId: section.id,
       title: `${prefix}-second`,
-      status: "published",
       isPublic: true,
     });
 

@@ -19,6 +19,8 @@ test("admin can delete news from details page", async ({ cleanup, factories, wit
 
     await openNewsDetailsPageFlow(page, news.id);
     await page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON).click();
+    await expect(page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.DELETE_DIALOG)).toBeVisible();
+    await page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.DELETE_CONFIRM_BUTTON).click();
 
     await expect(page).toHaveURL(/\/news(\?.*)?$/);
     await expect

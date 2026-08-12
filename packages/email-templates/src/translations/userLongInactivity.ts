@@ -12,6 +12,7 @@ export const getUserLongInactivityEmailTranslations = (
     lt: courseName ? `kurse ${courseName}` : "platformoje",
     cs: courseName ? `v kurzu ${courseName}` : "na platformě",
     es: courseName ? `en ${courseName}` : "en la plataforma",
+    fr: courseName ? `dans le cours ${courseName}` : "sur la plateforme",
   };
 
   const emailContent: Record<SupportedLanguages, EmailContent> = {
@@ -62,6 +63,14 @@ export const getUserLongInactivityEmailTranslations = (
         `Han pasado 30 días desde tu última actividad ${activityContext.es}. Retomarlo ahora te ayudará a terminar a tiempo.`,
       ],
       buttonText: "RETOMAR CURSO",
+    },
+    fr: {
+      heading: "Il est temps de reprendre votre cours",
+      paragraphs: [
+        "Continuez à apprendre 📚",
+        `Cela fait 30 jours depuis votre dernière activité ${activityContext.fr}. Reprendre maintenant vous aidera à terminer à temps.`,
+      ],
+      buttonText: "REPRENDRE LE COURS",
     },
   };
 

@@ -126,6 +126,7 @@ export class SettingsController {
 
   @Get()
   @AllowPasswordChangeRequired()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_SELF)
   @Validate({
     response: baseResponse(userSettingsJSONContentSchema),
   })
@@ -137,6 +138,7 @@ export class SettingsController {
 
   @Put()
   @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_UPDATE_SELF)
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsJSONContentSchema),

@@ -167,6 +167,54 @@
         "tags": [
           "Integration"
         ]
+      },
+      "delete": {
+        "operationId": "IntegrationController_deleteTenant",
+        "summary": "Delete tenant via integration API",
+        "description": "Permanently deletes the target tenant and its tenant-owned data.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
       }
     },
     "/api/integration/tenants/{tenantId}/deactivate": {
@@ -791,6 +839,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -1307,6 +1359,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -2046,6 +2102,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -2254,6 +2314,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -2282,6 +2346,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]

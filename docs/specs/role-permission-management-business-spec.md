@@ -36,6 +36,12 @@ An administrator opens User Management and assigns roles while creating a user, 
 
 The user list displays assigned role badges and includes a permissions matrix for the system roles. A user details page can also show the effective permissions produced by that user's assigned roles, helping administrators understand what access the user really has.
 
+The default role matrix mirrors supported product behavior: students can read content covered by their read permissions, while trainers do not receive CMS read permissions for News, Knowledge Base articles, or Q&A. Unregistered users see only content explicitly made public when guest access is enabled. Current Q&A authoring and maintenance remain admin-only. The matrix hides grants that do not represent a current user-facing action: the reserved `qa.manage_own` grant and the unused direct-storage `file.delete` endpoint. File removal performed while managing a course, News post, article, or another content entity remains part of that entity's own management permission.
+
+The matrix also omits the technical file-upload permissions from its user-facing rows. Course-authoring uploads continue to use their existing backend capability, while the unused generic file-delete route is removed. Resource Library operations resolve the target entity first and enforce its full or owner-scoped management permission; deleting an asset checks every entity currently using it because the operation removes all of those relations. `article.manage_own` is enforced for draft lists, draft TOC/content, previews, and Resource Library operations. `settings.read_self`, `settings.update_self`, and `statistics.read_self` are enforced on their corresponding self-service API endpoints. Live-training owner wording describes the assigned host behavior implemented by the API.
+
+Every displayed permission has a dedicated description in Czech, German, English, Spanish, French, Lithuanian, and Polish. Descriptions explain organization visibility and role-dependent data scope instead of treating “public” content as necessarily available to unauthenticated visitors or describing content-creator statistics as platform-wide.
+
 When a user's roles change, Mentingo replaces the role assignments and checks whether the effective role set changed. If it did, the platform revokes the user's active sessions and emits a permissions-updated notification so stale access does not continue silently.
 
 ## Key Technical Context
@@ -45,7 +51,8 @@ When a user's roles change, Mentingo replaces the role assignments and checks wh
 - Frontend route access is centralized in `apps/web/app/config/routeAccessConfig.ts` and enforced by `apps/web/app/Guards/RouteGuard.tsx`.
 - User role assignment flows are implemented in `apps/api/src/user/user.controller.ts`, `apps/api/src/user/user.service.ts`, and `apps/web/app/modules/Admin/Users`.
 - System roles and rule sets are ensured per tenant through `ensureSystemRolesForTenant` and `PermissionsBackfillService`; the trainer role is only valid when live training is enabled.
+- Missing trainer public-content read grants are added to existing system rule sets by the system-permission backfill.
 
 ## Test Evidence
 
-Frontend E2E coverage verifies role access outcomes across environment, Q&A, articles, settings, statistics, tenant administration, and user-management flows. User-management E2E coverage verifies role updates, bulk role updates, and self-role-change protection. Unit tests cover permission-matrix helpers and route-guard permission matching. Backend authorization confidence comes from guard source, protected controller usage, and feature-level E2E flows; no dedicated backend permission-guard E2E spec was found in this pass.
+Focused backend E2E coverage verifies article owner/non-owner draft, preview, and TOC access (18 tests), Resource Library target ownership and multi-entity deletion behavior (11 tests), and Settings/Statistics self-permission allow/deny behavior (3 tests). Unit tests cover permission-matrix helpers, hidden implementation-only rows, all permission descriptions in every supported locale, route-guard permission matching, and the three self-permission guards. Full web unit tests and API/web typechecks are part of the validation pass; browser Playwright execution remains environment-dependent.

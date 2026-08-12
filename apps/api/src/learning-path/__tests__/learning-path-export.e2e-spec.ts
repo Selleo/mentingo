@@ -3,6 +3,7 @@ import {
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   SYSTEM_ROLE_SLUGS,
+  TENANT_STATUSES,
 } from "@repo/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
@@ -115,7 +116,11 @@ describe("LearningPathExportController (e2e)", () => {
       targetTenantId = existingTargetTenant.id;
       await baseDb
         .update(tenants)
-        .set({ isManaging: false, name: "Target Tenant" })
+        .set({
+          isManaging: false,
+          name: "Target Tenant",
+          status: TENANT_STATUSES.ACTIVE,
+        })
         .where(eq(tenants.id, targetTenantId));
     } else {
       const [createdTargetTenant] = await baseDb
@@ -357,6 +362,43 @@ describe("LearningPathExportController (e2e)", () => {
       expect(targetCourseResponse.body.data.id).toBe(courseId);
       expect(targetCourseResponse.body.data.originType).toBe("exported");
       expect(targetCourseResponse.body.data.sourceTenantId).toBe(sourceTenantId);
+    }
+  });
+
+  it("excludes inactive tenants from learning path sharing candidates and export", async () => {
+    const { learningPathId, sourceCookie } = await setupSourcePath();
+
+    await baseDb
+      .update(tenants)
+      .set({ status: TENANT_STATUSES.INACTIVE })
+      .where(eq(tenants.id, targetTenantId));
+
+    try {
+      const candidatesResponse = await withTenantHost(
+        request(app.getHttpServer())
+          .get(`/api/learning-path/master/${learningPathId}/export-candidates`)
+          .set("Cookie", sourceCookie),
+        SOURCE_HOST,
+      ).expect(200);
+
+      expect(
+        candidatesResponse.body.data.tenants.some(
+          (tenant: { id: string }) => tenant.id === targetTenantId,
+        ),
+      ).toBe(false);
+
+      await withTenantHost(
+        request(app.getHttpServer())
+          .post(`/api/learning-path/master/${learningPathId}/export`)
+          .set("Cookie", sourceCookie)
+          .send({ targetTenantIds: [targetTenantId] }),
+        SOURCE_HOST,
+      ).expect(400);
+    } finally {
+      await baseDb
+        .update(tenants)
+        .set({ status: TENANT_STATUSES.ACTIVE })
+        .where(eq(tenants.id, targetTenantId));
     }
   });
 

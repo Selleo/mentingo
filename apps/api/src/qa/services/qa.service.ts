@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateQAEvent } from "src/events/qa/create-qa.event";
 import { DeleteQAEvent } from "src/events/qa/delete-qa.event";
 import { UpdateQAEvent } from "src/events/qa/update-qa.event";
@@ -42,14 +44,14 @@ export class QAService {
     return { id: qa.id };
   }
 
-  async getQA(qaId: UUIDType, language: SupportedLanguages, userId: UUIDType) {
-    await this.checkAccess(userId);
+  async getQA(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {
+    await this.checkAccess(currentUser);
 
     return this.qaRepository.getQA(qaId, language);
   }
 
-  async getAllQA(language: SupportedLanguages, currentUserId?: UUIDType) {
-    await this.checkAccess(currentUserId);
+  async getAllQA(language: SupportedLanguages, currentUser?: CurrentUserType) {
+    await this.checkAccess(currentUser);
 
     return this.qaRepository.getAllQA(language);
   }
@@ -160,11 +162,13 @@ export class QAService {
     return updatedQA;
   }
 
-  private async checkAccess(currentUserId?: UUIDType) {
-    const { QAEnabled, unregisteredUserQAAccessibility } =
-      await this.settingsService.getGlobalSettings();
+  private async checkAccess(currentUser?: CurrentUserType) {
+    const { unregisteredUserQAAccessibility } = await this.settingsService.getGlobalSettings();
+    const canManageAll = hasPermission(currentUser?.permissions, PERMISSIONS.QA_MANAGE);
+    const canReadPublic = hasPermission(currentUser?.permissions, PERMISSIONS.QA_READ_PUBLIC);
 
-    const hasAccess = Boolean(QAEnabled && (currentUserId || unregisteredUserQAAccessibility));
+    const hasAccess =
+      canManageAll || canReadPublic || (!currentUser && unregisteredUserQAAccessibility);
 
     if (!hasAccess) {
       throw new BadRequestException({ message: "common.toast.noAccess" });

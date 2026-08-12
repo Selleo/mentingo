@@ -41,25 +41,6 @@
             }
           }
         }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
       }
     },
     "/api/file/videos/init": {
@@ -702,6 +683,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -1591,6 +1576,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -1642,6 +1631,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -1839,6 +1832,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -2413,6 +2410,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -2472,6 +2473,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -2624,6 +2629,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -2736,6 +2745,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -2793,6 +2806,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -2927,6 +2944,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -3118,6 +3139,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -3292,6 +3317,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -3420,6 +3449,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -3621,6 +3654,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -3804,6 +3841,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -3871,6 +3912,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -3979,6 +4024,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -4038,6 +4087,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -4124,6 +4177,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -4185,6 +4242,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -4245,6 +4306,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -4364,6 +4429,43 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetCourseDuplicationJobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/{id}/media": {
+      "patch": {
+        "operationId": "CourseController_updateCourseMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCourseMediaResponse"
                 }
               }
             }
@@ -5009,6 +5111,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -5078,6 +5184,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -5221,6 +5331,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -5373,6 +5487,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -5524,6 +5642,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -5575,6 +5697,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -5640,6 +5766,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -5685,6 +5815,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -5749,6 +5883,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -6026,6 +6164,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -6218,6 +6360,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -6446,6 +6592,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -6506,6 +6656,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -6887,7 +7041,8 @@
                       "de",
                       "lt",
                       "cs",
-                      "es"
+                      "es",
+                      "fr"
                     ]
                   },
                   "title": {
@@ -7211,6 +7366,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -7305,6 +7464,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -7512,6 +7675,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -7572,6 +7739,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -7667,6 +7838,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -7814,6 +7989,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -7900,6 +8079,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -8314,6 +8497,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -8374,6 +8561,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -8646,6 +8837,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -8725,6 +8920,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -8892,7 +9091,8 @@
                       "de",
                       "lt",
                       "cs",
-                      "es"
+                      "es",
+                      "fr"
                     ]
                   }
                 },
@@ -8973,6 +9173,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9043,6 +9247,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9102,6 +9310,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -9163,6 +9375,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9223,6 +9439,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9282,6 +9502,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -9352,6 +9576,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9421,6 +9649,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -9482,6 +9714,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -9663,6 +9899,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -10454,6 +10694,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -10538,6 +10782,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -10633,6 +10881,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -10690,6 +10942,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -11066,6 +11322,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -11158,6 +11418,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -11278,6 +11542,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -11857,6 +12125,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -12021,6 +12293,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -12072,6 +12348,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -12428,6 +12708,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -13233,6 +13517,54 @@
         "tags": [
           "Integration"
         ]
+      },
+      "delete": {
+        "operationId": "IntegrationController_deleteTenant",
+        "summary": "Delete tenant via integration API",
+        "description": "Permanently deletes the target tenant and its tenant-owned data.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint. The managing tenant cannot delete itself.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
       }
     },
     "/api/integration/tenants/{tenantId}/deactivate": {
@@ -13857,6 +14189,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -14463,6 +14799,33 @@
         }
       }
     },
+    "/api/super-admin/tenants/{id}/support-roles": {
+      "get": {
+        "operationId": "TenantsController_findSupportRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindSupportRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/super-admin/tenants/{id}/support-users": {
       "get": {
         "operationId": "TenantsController_findSupportUsers",
@@ -14500,6 +14863,31 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "roleSlug",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "admins",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -14965,6 +15353,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15023,6 +15415,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -15098,6 +15494,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -15185,6 +15585,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15240,6 +15644,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15285,6 +15693,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -15413,6 +15825,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15448,7 +15864,42 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNewsBody"
+                "type": "object",
+                "properties": {
+                  "translations": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "draft",
+                        "type": "string"
+                      },
+                      {
+                        "const": "published",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isPublic": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true",
+                        "type": "string"
+                      },
+                      {
+                        "const": "false",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "translations"
+                ]
               }
             }
           }
@@ -15561,6 +16012,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15656,6 +16111,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -15707,7 +16166,8 @@
                       "de",
                       "lt",
                       "cs",
-                      "es"
+                      "es",
+                      "fr"
                     ]
                   },
                   "title": {
@@ -15809,6 +16269,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -15961,6 +16425,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -16006,6 +16474,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -16059,6 +16531,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -16068,7 +16544,19 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16158,6 +16646,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -16167,7 +16659,19 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -16201,7 +16705,18 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateArticleBody"
+                "type": "object",
+                "properties": {
+                  "translations": {
+                    "type": "string"
+                  },
+                  "isPublic": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "translations"
+                ]
               }
             }
           }
@@ -16271,6 +16786,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -16397,6 +16916,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -16537,6 +17060,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             }
@@ -16606,6 +17133,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -17501,6 +18032,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -18404,6 +18939,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -19160,6 +19699,10 @@
                         {
                           "const": "es",
                           "type": "string"
+                        },
+                        {
+                          "const": "fr",
+                          "type": "string"
                         }
                       ]
                     },
@@ -19189,6 +19732,10 @@
                           },
                           {
                             "const": "es",
+                            "type": "string"
+                          },
+                          {
+                            "const": "fr",
                             "type": "string"
                           }
                         ]
@@ -19267,6 +19814,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   },
@@ -19319,6 +19870,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -19394,6 +19949,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -19441,6 +20000,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -19506,6 +20069,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   },
@@ -19558,6 +20125,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -19633,6 +20204,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -21735,6 +22310,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -21807,6 +22386,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -22164,6 +22747,10 @@
                         "es": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "fr": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -22192,6 +22779,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -22222,6 +22813,10 @@
                           },
                           {
                             "const": "es",
+                            "type": "string"
+                          },
+                          {
+                            "const": "fr",
                             "type": "string"
                           }
                         ]
@@ -22309,6 +22904,10 @@
                     "es": {
                       "minLength": 1,
                       "type": "string"
+                    },
+                    "fr": {
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "minProperties": 1
@@ -22337,6 +22936,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -22367,6 +22970,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -22441,6 +23048,10 @@
                         "es": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "fr": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -22469,6 +23080,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -22499,6 +23114,10 @@
                           },
                           {
                             "const": "es",
+                            "type": "string"
+                          },
+                          {
+                            "const": "fr",
                             "type": "string"
                           }
                         ]
@@ -22787,6 +23406,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -24185,6 +24808,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -24433,6 +25060,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -24461,6 +25092,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -24622,6 +25257,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -24650,6 +25289,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -24786,6 +25429,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -24814,6 +25461,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -24959,6 +25610,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -25026,6 +25681,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -25081,6 +25740,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -25109,6 +25772,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -25254,6 +25921,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -25283,6 +25954,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -25356,6 +26031,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -25384,6 +26063,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -25440,6 +26123,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -25488,6 +26175,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -25516,6 +26207,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -25667,6 +26362,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -25695,6 +26394,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -25811,6 +26514,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26020,6 +26729,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26351,6 +27066,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -26544,6 +27265,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -26572,6 +27297,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -26706,6 +27435,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -26911,6 +27646,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -27184,6 +27925,10 @@
                                 "contentType"
                               ]
                             }
+                          },
+                          "estimatedDurationSeconds": {
+                            "minimum": 0,
+                            "type": "number"
                           }
                         },
                         "required": [
@@ -27238,6 +27983,10 @@
                       "type": "number"
                     },
                     "displayOrder": {
+                      "type": "number"
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
                       "type": "number"
                     }
                   },
@@ -27328,6 +28077,22 @@
               "thumbnailUrl": {
                 "type": "string"
               },
+              "thumbnailPositionY": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "showAuthorSection": {
+                "type": "boolean"
+              },
               "trailerUrl": {
                 "anyOf": [
                   {
@@ -27391,6 +28156,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -27420,6 +28189,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -27446,6 +28219,7 @@
               "isContentReadonly",
               "courseType",
               "priceInCents",
+              "thumbnailPositionY",
               "title",
               "slug",
               "stripeProductId",
@@ -27774,6 +28548,10 @@
                                           {
                                             "const": "es",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "fr",
+                                            "type": "string"
                                           }
                                         ]
                                       }
@@ -27810,6 +28588,10 @@
                                     },
                                     {
                                       "const": "es",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "fr",
                                       "type": "string"
                                     }
                                   ]
@@ -28125,6 +28907,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -28153,6 +28939,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -28252,6 +29042,18 @@
               "thumbnailS3Key": {
                 "type": "string"
               },
+              "thumbnailPositionY": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "learningOutcomes": {
+                "maxItems": 5,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -28293,6 +29095,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -28499,6 +29305,77 @@
           "data"
         ]
       },
+      "UpdateCourseMediaBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "image": {
+            "format": "binary",
+            "description": "Course thumbnail image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "thumbnailPositionY"
+        ]
+      },
+      "UpdateCourseMediaResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateCourseBody": {
         "type": "object",
         "properties": {
@@ -28510,6 +29387,21 @@
           },
           "thumbnailS3Key": {
             "type": "string"
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "learningOutcomes": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "showAuthorSection": {
+            "type": "boolean"
           },
           "status": {
             "anyOf": [
@@ -28572,6 +29464,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -30621,6 +31517,10 @@
                           "contentType"
                         ]
                       }
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
+                      "type": "number"
                     }
                   },
                   "required": [
@@ -30675,6 +31575,10 @@
                 "type": "number"
               },
               "displayOrder": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
                 "type": "number"
               }
             },
@@ -30948,6 +31852,10 @@
                                     {
                                       "const": "es",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "fr",
+                                      "type": "string"
                                     }
                                   ]
                                 }
@@ -30984,6 +31892,10 @@
                               },
                               {
                                 "const": "es",
+                                "type": "string"
+                              },
+                              {
+                                "const": "fr",
                                 "type": "string"
                               }
                             ]
@@ -31455,6 +32367,10 @@
                                         {
                                           "const": "es",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "fr",
+                                          "type": "string"
                                         }
                                       ]
                                     }
@@ -31491,6 +32407,10 @@
                                   },
                                   {
                                     "const": "es",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "fr",
                                     "type": "string"
                                   }
                                 ]
@@ -31701,6 +32621,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -32192,6 +33116,10 @@
                             {
                               "const": "es",
                               "type": "string"
+                            },
+                            {
+                              "const": "fr",
+                              "type": "string"
                             }
                           ]
                         },
@@ -32361,6 +33289,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -33499,6 +34431,10 @@
                               {
                                 "const": "es",
                                 "type": "string"
+                              },
+                              {
+                                "const": "fr",
+                                "type": "string"
                               }
                             ]
                           }
@@ -33535,6 +34471,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -33755,6 +34695,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -33945,6 +34889,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -34330,6 +35278,10 @@
                               {
                                 "const": "es",
                                 "type": "string"
+                              },
+                              {
+                                "const": "fr",
+                                "type": "string"
                               }
                             ]
                           }
@@ -34366,6 +35318,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -34822,6 +35778,10 @@
                                   {
                                     "const": "es",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "fr",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -34858,6 +35818,10 @@
                             },
                             {
                               "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
                               "type": "string"
                             }
                           ]
@@ -34983,6 +35947,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -35232,6 +36200,10 @@
                               {
                                 "const": "es",
                                 "type": "string"
+                              },
+                              {
+                                "const": "fr",
+                                "type": "string"
                               }
                             ]
                           }
@@ -35268,6 +36240,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -35550,6 +36526,10 @@
                                   {
                                     "const": "es",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "fr",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -35586,6 +36566,10 @@
                             },
                             {
                               "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
                               "type": "string"
                             }
                           ]
@@ -35641,6 +36625,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -35915,6 +36903,10 @@
                                   {
                                     "const": "es",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "fr",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -35951,6 +36943,10 @@
                             },
                             {
                               "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
                               "type": "string"
                             }
                           ]
@@ -36121,6 +37117,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               }
@@ -36262,6 +37262,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -36506,6 +37510,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -36712,6 +37720,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   },
@@ -36739,6 +37751,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -36769,6 +37785,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -37047,6 +38067,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -37074,6 +38098,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -37104,6 +38132,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -37356,6 +38388,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -37383,6 +38419,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -37413,6 +38453,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -42994,6 +44038,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -43314,6 +44362,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -44011,6 +45063,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -44884,6 +45940,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -45118,6 +46178,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -47135,6 +48199,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 },
@@ -47164,6 +48232,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -47386,6 +48458,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 },
@@ -47415,6 +48491,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -47527,6 +48607,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -47560,6 +48644,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -47725,6 +48813,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -47754,6 +48846,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -48258,6 +49354,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -48416,6 +49516,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -49186,6 +50290,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -49237,6 +50345,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -49265,6 +50377,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -49360,6 +50476,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -49388,6 +50508,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -49446,6 +50570,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -49515,6 +50643,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -49560,6 +50692,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -49588,6 +50724,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -50854,6 +51994,10 @@
                         {
                           "const": "es",
                           "type": "string"
+                        },
+                        {
+                          "const": "fr",
+                          "type": "string"
                         }
                       ]
                     },
@@ -50883,6 +52027,10 @@
                           },
                           {
                             "const": "es",
+                            "type": "string"
+                          },
+                          {
+                            "const": "fr",
                             "type": "string"
                           }
                         ]
@@ -51205,6 +52353,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   },
@@ -51234,6 +52386,10 @@
                         },
                         {
                           "const": "es",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fr",
                           "type": "string"
                         }
                       ]
@@ -51496,6 +52652,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -51680,6 +52840,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -51709,6 +52873,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -51769,6 +52937,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -51949,6 +53121,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -51978,6 +53154,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -52996,6 +54176,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   },
@@ -53099,6 +54283,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -53172,6 +54360,10 @@
                       },
                       {
                         "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
                         "type": "string"
                       }
                     ]
@@ -53491,6 +54683,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -53616,6 +54812,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -59573,6 +60773,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -60109,6 +61313,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -60137,6 +61345,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -60949,6 +62161,41 @@
           "data"
         ]
       },
+      "FindSupportRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "name",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "FindSupportUsersResponse": {
         "type": "object",
         "properties": {
@@ -60983,6 +62230,33 @@
                       "type": "null"
                     }
                   ]
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "slug": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "isSystem": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "slug",
+                      "name",
+                      "isSystem"
+                    ]
+                  }
                 }
               },
               "required": [
@@ -60991,7 +62265,8 @@
                 "firstName",
                 "lastName",
                 "label",
-                "profilePictureUrl"
+                "profilePictureUrl",
+                "roles"
               ]
             }
           },
@@ -61330,6 +62605,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -61359,6 +62638,10 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -61427,6 +62710,10 @@
                 {
                   "const": "es",
                   "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
                 }
               ]
             },
@@ -61456,6 +62743,10 @@
                   },
                   {
                     "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
                     "type": "string"
                   }
                 ]
@@ -61504,6 +62795,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -61598,6 +62893,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 },
@@ -61629,6 +62928,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -61644,6 +62947,10 @@
                   ]
                 },
                 "authorName": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "format": "uuid",
                   "type": "string"
                 },
                 "resources": {
@@ -61849,6 +63156,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorId",
                 "createdAt",
                 "updatedAt"
               ]
@@ -61917,6 +63225,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -62003,6 +63315,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -62034,6 +63350,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -62049,6 +63369,10 @@
                 ]
               },
               "authorName": {
+                "type": "string"
+              },
+              "authorId": {
+                "format": "uuid",
                 "type": "string"
               },
               "resources": {
@@ -62255,6 +63579,7 @@
               "availableLocales",
               "publishedAt",
               "authorName",
+              "authorId",
               "createdAt",
               "updatedAt"
             ]
@@ -62316,6 +63641,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 },
@@ -62347,6 +63676,10 @@
                       {
                         "const": "es",
                         "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
                       }
                     ]
                   }
@@ -62362,6 +63695,10 @@
                   ]
                 },
                 "authorName": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "format": "uuid",
                   "type": "string"
                 },
                 "resources": {
@@ -62567,6 +63904,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorId",
                 "createdAt",
                 "updatedAt"
               ]
@@ -62632,6 +63970,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -62661,84 +64003,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "UpdateNewsBody": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "const": "draft",
-                "type": "string"
-              },
-              {
-                "const": "published",
-                "type": "string"
-              }
-            ]
-          },
-          "isPublic": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "const": "true",
-                "type": "string"
-              },
-              {
-                "const": "false",
-                "type": "string"
-              }
-            ]
-          },
-          "cover": {
-            "format": "binary",
-            "description": "Cover image file",
-            "type": "string"
-          }
-        },
-        "required": [
-          "language"
         ]
       },
       "UpdateNewsResponse": {
@@ -62792,6 +64056,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -62920,6 +64188,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           }
@@ -62990,6 +64262,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -63021,6 +64297,10 @@
                     {
                       "const": "es",
                       "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
                     }
                   ]
                 }
@@ -63045,41 +64325,56 @@
       "UpdateArticleSectionBody": {
         "type": "object",
         "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
+          "translations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "default": "en",
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                }
               },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
+              "required": [
+                "language"
+              ]
+            }
           }
         },
         "required": [
-          "language"
+          "translations"
         ]
       },
       "UpdateArticleSectionResponse": {
@@ -63133,6 +64428,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -63524,6 +64823,10 @@
                   {
                     "const": "es",
                     "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
                   }
                 ]
               },
@@ -63554,6 +64857,10 @@
                     },
                     {
                       "const": "es",
+                      "type": "string"
+                    },
+                    {
+                      "const": "fr",
                       "type": "string"
                     }
                   ]
@@ -64082,6 +65389,10 @@
               {
                 "const": "es",
                 "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
               }
             ]
           },
@@ -64116,92 +65427,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "UpdateArticleBody": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "const": "draft",
-                "type": "string"
-              },
-              {
-                "const": "published",
-                "type": "string"
-              },
-              {
-                "const": "",
-                "type": "string"
-              }
-            ]
-          },
-          "isPublic": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "const": "true",
-                "type": "string"
-              },
-              {
-                "const": "false",
-                "type": "string"
-              },
-              {
-                "const": "",
-                "type": "string"
-              }
-            ]
-          },
-          "cover": {
-            "format": "binary",
-            "description": "Cover image file",
-            "type": "string"
-          }
-        },
-        "required": [
-          "language"
         ]
       },
       "UpdateArticleResponse": {
@@ -64260,6 +65485,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]
@@ -64329,6 +65558,10 @@
               },
               {
                 "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
                 "type": "string"
               }
             ]

@@ -11,10 +11,5 @@ export const shiftSelectGroupRangeFlow = async (
   const lastRowCheckbox = page.getByTestId(GROUPS_PAGE_HANDLES.rowCheckbox(lastGroupId));
 
   await firstRowCheckbox.click();
-  await page.keyboard.down("Shift");
-  try {
-    await lastRowCheckbox.click();
-  } finally {
-    await page.keyboard.up("Shift");
-  }
+  await lastRowCheckbox.click({ modifiers: ["Shift"] });
 };

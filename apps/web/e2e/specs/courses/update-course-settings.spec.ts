@@ -1,10 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_TAB_VALUES } from "../../data/courses/handles";
+import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCourseSettingsFlow } from "../../flows/courses/fill-course-settings.flow";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
-import { saveCourseSettingsFlow } from "../../flows/courses/save-course-settings.flow";
+import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 
 test("admin can update course settings", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -24,13 +23,16 @@ test("admin can update course settings", async ({ cleanup, factories, withWorker
       await categoryFactory.deleteMany([originalCategory.id, updatedCategory.id]);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.SETTINGS);
+    await openCourseOverviewFlow(page, course.id);
     await fillCourseSettingsFlow(page, {
       title: updatedTitle,
+      currentCategoryTitle: originalCategory.title,
       categoryTitle: updatedCategory.title,
+    });
+    await page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON).click();
+    await fillCourseSettingsFlow(page, {
       description: updatedDescription,
     });
-    await saveCourseSettingsFlow(page);
 
     await expect
       .poll(async () => {
