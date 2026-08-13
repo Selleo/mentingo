@@ -13,13 +13,17 @@ export function getFirstJsonbValueSql(field: SQLWrapper) {
   )`;
 }
 
-/** Reads both current localized objects and legacy scalar JSONB values. */
-export function getLocalizedJsonbValueSql(field: SQLWrapper, language: SQLWrapper) {
+/** Reads current localized objects and legacy scalar JSONB values as one localized string. */
+export function getLocalizedJsonbValueSql(
+  field: SQLWrapper,
+  language: SQLWrapper,
+  localizedValue: SQLWrapper = sql`${field} ->> ${language}`,
+) {
   const firstValue = getFirstJsonbValueSql(field);
 
   return sql<string>`CASE
     WHEN jsonb_typeof(${field}) = 'object' THEN COALESCE(
-      NULLIF(${field} ->> ${language}, ''),
+      NULLIF(${localizedValue}, ''),
       ${firstValue},
       ''
     )

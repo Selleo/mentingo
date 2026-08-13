@@ -314,10 +314,7 @@ export class AiRepository {
   private getPracticeSessionSelection() {
     const practiceCriterionTitle = sql<string>`COALESCE(
       NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
-      NULLIF(
-        ${getLocalizedJsonbValueSql(aiJudgeCriteria.title, aiMentorPracticeSessions.language)},
-        ''
-      ),
+      ${getLocalizedJsonbValueSql(aiJudgeCriteria.title, aiMentorPracticeSessions.language)},
       ''
     )`;
 
@@ -480,71 +477,37 @@ export class AiRepository {
     threadId: UUIDType,
     language: SupportedLanguages,
   ): Promise<AiJudgeRubricContext | undefined> {
-    const localizedTaskGoal = this.localizationService.getLocalizedSqlField(
+    const languageSql = sql`${language}`;
+    const taskGoal = getLocalizedJsonbValueSql(
       aiJudgeConfigurations.taskGoal,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeConfigurations.taskGoal, language),
     );
-    const localizedCriterionTitle = this.localizationService.getLocalizedSqlField(
+    const criterionTitle = getLocalizedJsonbValueSql(
       aiJudgeCriteria.title,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeCriteria.title, language),
     );
-    const localizedExpectedBehavior = this.localizationService.getLocalizedSqlField(
+    const expectedBehavior = getLocalizedJsonbValueSql(
       aiJudgeCriteria.expectedBehavior,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeCriteria.expectedBehavior, language),
     );
-    const localizedGuidanceDescription = this.localizationService.getLocalizedSqlField(
+    const guidanceDescription = getLocalizedJsonbValueSql(
       aiJudgeScoreGuidance.description,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeScoreGuidance.description, language),
     );
-    const localizedGuidanceExample = this.localizationService.getLocalizedSqlField(
+    const guidanceExample = getLocalizedJsonbValueSql(
       aiJudgeScoreGuidance.example,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeScoreGuidance.example, language),
     );
-    const localizedBlockingError = this.localizationService.getLocalizedSqlField(
+    const blockingError = getLocalizedJsonbValueSql(
       aiJudgeBlockingErrors.description,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeBlockingErrors.description, language),
     );
-
-    const taskGoal = sql<string>`COALESCE(
-      NULLIF(${localizedTaskGoal}, ''),
-      ${this.localizationService.getFirstValue(aiJudgeConfigurations.taskGoal)},
-      ''
-    )`;
-    const criterionTitle = sql<string>`COALESCE(
-      NULLIF(${localizedCriterionTitle}, ''),
-      NULLIF(
-        CASE
-          WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'object'
-            THEN ${aiJudgeCriteria.title} ->> ${language}
-          WHEN jsonb_typeof(${aiJudgeCriteria.title}) = 'string'
-            THEN ${aiJudgeCriteria.title} #>> '{}'
-          ELSE ''
-        END,
-        ''
-      ),
-      ${this.localizationService.getFirstValue(aiJudgeCriteria.title)},
-      ''
-    )`;
-    const expectedBehavior = sql<string>`COALESCE(
-      NULLIF(${localizedExpectedBehavior}, ''),
-      ${this.localizationService.getFirstValue(aiJudgeCriteria.expectedBehavior)},
-      ''
-    )`;
-    const guidanceDescription = sql<string>`COALESCE(
-      NULLIF(${localizedGuidanceDescription}, ''),
-      ${this.localizationService.getFirstValue(aiJudgeScoreGuidance.description)},
-      ''
-    )`;
-    const guidanceExample = sql<string>`COALESCE(
-      NULLIF(${localizedGuidanceExample}, ''),
-      ${this.localizationService.getFirstValue(aiJudgeScoreGuidance.example)},
-      ''
-    )`;
-    const blockingError = sql<string>`COALESCE(
-      NULLIF(${localizedBlockingError}, ''),
-      ${this.localizationService.getFirstValue(aiJudgeBlockingErrors.description)},
-      ''
-    )`;
 
     const [context] = await this.db
       .select({
