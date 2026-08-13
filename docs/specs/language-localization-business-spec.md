@@ -49,6 +49,7 @@ Curriculum has an extra safeguard: chapter and lesson structure is controlled fr
 - User language persistence uses the settings API and `PERMISSIONS.SETTINGS_UPDATE_SELF`.
 - Many content endpoints require an explicit `language` parameter to return localized fields.
 - Course and category list screens pass the active UI language into category/course queries so localized database entries can be displayed and filtered consistently.
+- The course enrollment screen passes the active UI language to group queries so translated group names appear when assigning groups to a course, even when the course content uses another language.
 
 ## Test Evidence
 
