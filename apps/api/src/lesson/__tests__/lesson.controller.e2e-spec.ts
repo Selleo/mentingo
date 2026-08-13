@@ -692,24 +692,22 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     it("updates only the selected language and returns localized AI mentor instructions", async () => {
       const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
 
-      await db
-        .update(aiMentorLessons)
-        .set({
-          customTtsReference: {
-            en: "voice-reference-en",
-            pl: "voice-reference-pl",
-          },
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Negotiation practice",
+          description: "<p>Practice a sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "AI Mentor",
+          voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+          ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: "voice-reference-en",
+          language: SUPPORTED_LANGUAGES.EN,
         })
-        .where(eq(aiMentorLessons.lessonId, lessonId));
-
-      const [initialStoredAiMentor] = await db
-        .select({ customTtsReference: aiMentorLessons.customTtsReference })
-        .from(aiMentorLessons)
-        .where(eq(aiMentorLessons.lessonId, lessonId));
-      expect(initialStoredAiMentor.customTtsReference).toEqual({
-        en: "voice-reference-en",
-        pl: "voice-reference-pl",
-      });
+        .expect(200);
 
       await request(app.getHttpServer())
         .patch("/api/lesson/beta-update-lesson/ai")
