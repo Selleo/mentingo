@@ -3508,6 +3508,17 @@
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
+      "courseListLayout": "Course list layout",
+      "courseListLayoutDescription": "How courses are displayed to all users on the platform",
+      "courseListLayoutClassic": "Classic",
+      "courseListLayoutModern": "Modern",
+      "courseListLayoutClassicDescription": "Traditional course grid layout",
+      "courseListLayoutModernDescription": "Hero section with featured courses",
+      "courseListLayoutPreview": {
+        "continueLearning": "Continue learning",
+        "topCourses": "Top 5 courses",
+        "availableCourses": "Available courses"
+      },
       "courseDiscussions": "Enable course discussions",
       "courseDiscussionsDescription": "Allow enrolled users to view and participate in course discussion threads",
       "calendar": "Enable calendar",

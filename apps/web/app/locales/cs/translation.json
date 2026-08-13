@@ -3508,6 +3508,17 @@
       "coursesVisibilityDescription": "Umožněte návštěvníkům zobrazit seznam kurzů a přistupovat k bezplatným lekcím bez přihlášení",
       "modernCourseList": "Použijte moderní zobrazení seznamu kurzů",
       "modernCourseListDescription": "Povolte nový design seznamu kurzů se sekcemi hrdinů a nejlepších kurzů",
+      "courseListLayout": "Rozvržení seznamu kurzů",
+      "courseListLayoutDescription": "Jak jsou kurzy zobrazeny všem uživatelům platformy",
+      "courseListLayoutClassic": "Klasické",
+      "courseListLayoutModern": "Moderní",
+      "courseListLayoutClassicDescription": "Tradiční rozvržení mřížky kurzů",
+      "courseListLayoutModernDescription": "Sekce hrdiny s doporučenými kurzy",
+      "courseListLayoutPreview": {
+        "continueLearning": "Pokračovat ve studiu",
+        "topCourses": "Top 5 kurzů",
+        "availableCourses": "Dostupné kurzy"
+      },
       "courseDiscussions": "Povolit diskuse v kurzech",
       "courseDiscussionsDescription": "Umožnit zapsaným uživatelům zobrazovat diskuse v kurzech a zapojovat se do nich",
       "calendar": "Povolit kalendář",

@@ -3786,6 +3786,17 @@
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
+      "courseListLayout": "Układ listy kursów",
+      "courseListLayoutDescription": "Sposób wyświetlania kursów wszystkim użytkownikom platformy",
+      "courseListLayoutClassic": "Klasyczny",
+      "courseListLayoutModern": "Nowoczesny",
+      "courseListLayoutClassicDescription": "Tradycyjny układ siatki kursów",
+      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami",
+      "courseListLayoutPreview": {
+        "continueLearning": "Kontynuuj naukę",
+        "topCourses": "Top 5 kursów",
+        "availableCourses": "Dostępne kursy"
+      },
       "courseDiscussions": "Włącz dyskusje w kursach",
       "courseDiscussionsDescription": "Pozwól zapisanym użytkownikom przeglądać i prowadzić dyskusje w kursach",
       "calendar": "Włącz kalendarz",

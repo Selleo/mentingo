@@ -3495,6 +3495,17 @@
       "coursesVisibilityDescription": "Permita que los visitantes vean la lista de cursos y accedan a lecciones gratuitas sin iniciar sesión",
       "modernCourseList": "Utilice la vista de lista de cursos moderna",
       "modernCourseListDescription": "Habilite el nuevo diseño de lista de cursos con secciones destacadas y de cursos principales",
+      "courseListLayout": "Diseño de lista de cursos",
+      "courseListLayoutDescription": "Cómo se muestran los cursos a todos los usuarios de la plataforma",
+      "courseListLayoutClassic": "Clásico",
+      "courseListLayoutModern": "Moderno",
+      "courseListLayoutClassicDescription": "Diseño de cuadrícula de cursos tradicional",
+      "courseListLayoutModernDescription": "Sección hero con cursos destacados",
+      "courseListLayoutPreview": {
+        "continueLearning": "Continuar aprendiendo",
+        "topCourses": "Top 5 cursos",
+        "availableCourses": "Cursos disponibles"
+      },
       "courseDiscussions": "Habilitar debates del curso",
       "courseDiscussionsDescription": "Permitir a los usuarios inscritos ver y participar en los hilos de discusión del curso.",
       "calendar": "Habilitar calendario",
