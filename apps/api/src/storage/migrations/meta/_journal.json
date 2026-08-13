@@ -1275,6 +1275,13 @@
       "when": 1786368652108,
       "tag": "0181_normalize_legacy_bunny_video_content_types",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1786543037446,
+      "tag": "0182_add_resource_visibility",
+      "breakpoints": true
     }
   ]
 }

@@ -9,3 +9,16 @@ export const RESOURCE_LIBRARY_ASSET_TYPE = {
 
 export type ResourceLibraryAssetType =
   (typeof RESOURCE_LIBRARY_ASSET_TYPE)[keyof typeof RESOURCE_LIBRARY_ASSET_TYPE];
+
+export const RESOURCE_VISIBILITY = {
+  PUBLIC: "public",
+  PRIVATE: "private",
+  HIDDEN: "hidden",
+} as const;
+
+export type ResourceVisibility = (typeof RESOURCE_VISIBILITY)[keyof typeof RESOURCE_VISIBILITY];
+
+export type EditableResourceVisibility = Exclude<
+  ResourceVisibility,
+  typeof RESOURCE_VISIBILITY.HIDDEN
+>;

@@ -4058,6 +4058,26 @@
       "upload": "Cargar recurso",
       "insert": "Insertar",
       "delete": "Eliminar",
+      "columns": {
+        "asset": "Recurso",
+        "actions": "Acciones"
+      },
+      "visibility": {
+        "public": "Público",
+        "private": "Privado",
+        "toggle": "Cambiar privacidad del recurso",
+        "select": "Seleccionar recurso",
+        "selectAll": "Seleccionar todo",
+        "deselectAll": "Deseleccionar todo",
+        "new": "Nuevo",
+        "selected": "{{count}} seleccionados",
+        "makePublic": "Hacer público",
+        "makePrivate": "Hacer privado",
+        "confirmationTitle": "¿Hacer privado el recurso?",
+        "usedWarning": "Este recurso se usa en contenido. Seguirá disponible allí, pero se ocultará de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkUsedWarning": "{{count}} recursos seleccionados se usan en contenido. Seguirán disponibles allí, pero se ocultarán de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkSkipped": "Algunos recursos ya tenían la visibilidad seleccionada y se omitieron."
+      },
       "loading": "Cargando recursos...",
       "loadingUsages": "Cargando usos...",
       "disabledUntilSaved": "Guarde este contenido antes de insertar o eliminar recursos existentes. La carga de un nuevo activo todavía está disponible.",

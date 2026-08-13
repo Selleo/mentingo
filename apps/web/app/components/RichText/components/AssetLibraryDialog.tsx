@@ -1,21 +1,17 @@
-import { ENTITY_TYPES } from "@repo/shared";
-import { Folder, Search, UploadCloud } from "lucide-react";
+import {
+  RESOURCE_VISIBILITY,
+  type EditableResourceVisibility,
+  type SupportedLanguages,
+} from "@repo/shared";
+import { Folder } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
+import { useBulkUpdateResourceLibraryAssetVisibility } from "~/api/mutations/useBulkUpdateResourceLibraryAssetVisibility";
 import { useDeleteResourceLibraryAsset } from "~/api/mutations/useDeleteResourceLibraryAsset";
-import { useUploadResourceLibraryAsset } from "~/api/mutations/useUploadResourceLibraryAsset";
-import {
-  RESOURCE_LIBRARY_ASSETS_QUERY_KEY,
-  useResourceLibraryAssets,
-} from "~/api/queries/useResourceLibraryAssets";
+import { useResourceLibraryAssets } from "~/api/queries/useResourceLibraryAssets";
 import { useResourceLibraryAssetUsages } from "~/api/queries/useResourceLibraryAssetUsages";
-import { queryClient } from "~/api/queryClient";
-import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
-import { Pagination } from "~/components/Pagination/Pagination";
 import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
-import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,13 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
 import { useToast } from "~/components/ui/use-toast";
-import { buildRichTextFileUploadHandler } from "~/hooks/buildRichTextFileUploadHandler";
 import { useDebounce } from "~/hooks/useDebounce";
-import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
-import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
-import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
@@ -38,10 +29,15 @@ import {
   getRichTextResourceTypeFromAsset,
   richTextResourceTypeNeedsDisplayMode,
 } from "./assetLibrary.utils";
-import { AssetLibraryAssetList } from "./AssetLibraryAssetList";
+import { AssetLibraryBrowser } from "./AssetLibraryBrowser";
 import { AssetLibraryDeleteConfirmation } from "./AssetLibraryDeleteConfirmation";
+import {
+  AssetLibraryVisibilityConfirmationDialog,
+  type VisibilityChangeConfirmation,
+} from "./AssetLibraryVisibilityConfirmationDialog";
+import { useAssetLibraryUploadHandler } from "./useAssetLibraryUploadHandler";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { RowSelectionState } from "@tanstack/react-table";
 import type { Editor } from "@tiptap/react";
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
 import type { RichTextResourceDisplayMode } from "~/components/RichText/utils/richTextResource.types";
@@ -77,8 +73,10 @@ export const AssetLibraryDialog = ({
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [assetToDelete, setAssetToDelete] = useState<ResourceLibraryAsset | null>(null);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [visibilityChangeConfirmation, setVisibilityChangeConfirmation] =
+    useState<VisibilityChangeConfirmation | null>(null);
   const debouncedSearch = useDebounce(search, 300);
-  const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
 
   const { entityId, contextId, entityType, language } = config;
 
@@ -96,29 +94,33 @@ export const AssetLibraryDialog = ({
     { id: assetToDelete?.id, language },
     { enabled: open && Boolean(assetToDelete) },
   );
-  const { mutateAsync: initVideoUpload, isPending: isInitializingVideoUpload } =
-    useInitVideoUpload();
-  const { getSessionForFile, uploadVideo, isUploading: isUploadingVideo } = useTusVideoUpload();
-  const { mutateAsync: uploadAsset, isPending: isUploadingAsset } = useUploadResourceLibraryAsset();
   const { mutateAsync: deleteAsset, isPending: isDeletingAsset } = useDeleteResourceLibraryAsset();
+  const { mutateAsync: bulkUpdateVisibility, isPending: isBulkUpdatingVisibility } =
+    useBulkUpdateResourceLibraryAssetVisibility();
+
+  const {
+    askForDisplayMode,
+    handleUploadToLibrary,
+    isUploadingToLibrary,
+    uploadDisplayModeDialog,
+  } = useAssetLibraryUploadHandler({ entityType, entityId, contextId, language });
 
   const hasEntity = Boolean(entityId);
   const canUseLibrary = Boolean(entityId || contextId);
   const canUploadToLibrary = canUseLibrary;
   const canInsertAsset = canUseLibrary;
   const assets = assetsResponse?.data ?? [];
+  const selectedAssetIds = Object.keys(rowSelection).filter((assetId) => rowSelection[assetId]);
   const usages = usagesResponse?.data ?? [];
   const totalAssets = assetsResponse?.pagination.totalItems ?? 0;
-  const isUploadingToLibrary = isUploadingAsset || isInitializingVideoUpload || isUploadingVideo;
-
-  const isMutating =
-    isUploadingAsset || isDeletingAsset || isInitializingVideoUpload || isUploadingVideo;
+  const isMutating = isDeletingAsset || isBulkUpdatingVisibility || isUploadingToLibrary;
 
   const resetDialog = (nextOpen: boolean) => {
     if (!nextOpen) {
       setAssetToDelete(null);
       setSearch("");
       setPage(1);
+      setRowSelection({});
     }
     onOpenChange(nextOpen);
   };
@@ -130,57 +132,6 @@ export const AssetLibraryDialog = ({
     if (!richTextResourceTypeNeedsDisplayMode(resourceType)) return "preview";
     return askForDisplayMode(fileName);
   };
-
-  const getVideoResource = () =>
-    entityType === ENTITY_TYPES.LESSON ? "lesson-content" : entityType;
-
-  const handleUploadToLibrary = buildRichTextFileUploadHandler({
-    entityType,
-    getVideoSessionForFile: (file) =>
-      getSessionForFile({
-        file,
-        init: () =>
-          initVideoUpload({
-            filename: file.name,
-            sizeBytes: file.size,
-            mimeType: file.type,
-            title: file.name,
-            resource: getVideoResource(),
-            contextId,
-            entityId,
-            entityType,
-            linkToEntity: false,
-          }),
-      }),
-    uploadVideo: (args) =>
-      uploadVideo({
-        ...args,
-        onUploaded: () => {
-          args.onUploaded?.();
-          void queryClient.invalidateQueries({ queryKey: RESOURCE_LIBRARY_ASSETS_QUERY_KEY });
-        },
-      }),
-    uploadResourceFile: async (file) => {
-      const response = await uploadAsset({
-        file,
-        entityType,
-        entityId,
-        contextId,
-        language,
-      });
-
-      return response.data.resourceId;
-    },
-    askForDisplayMode,
-    onVideoUploadError: (error) => {
-      toast({
-        description: getTranslatedApiErrorMessage(error, t, t("uploadFile.toast.videoFailed")),
-        variant: "destructive",
-      });
-    },
-    fallbackUploadErrorMessage: t("common.toast.somethingWentWrong"),
-    insertOnUpload: false,
-  });
 
   const handleInsert = async (asset: ResourceLibraryAsset) => {
     if (!canInsertAsset) {
@@ -237,8 +188,69 @@ export const AssetLibraryDialog = ({
     setAssetToDelete(null);
   };
 
+  const requestVisibilityChange = async ({
+    resourceIds,
+    visibility,
+    clearSelection,
+  }: Omit<VisibilityChangeConfirmation, "affectedUsedAssetCount">) => {
+    const { data } = await bulkUpdateVisibility({
+      resourceIds,
+      visibility,
+    });
+
+    if (data.requiresConfirmation) {
+      setVisibilityChangeConfirmation({
+        resourceIds,
+        visibility,
+        affectedUsedAssetCount: data.affectedUsedAssetCount,
+        clearSelection,
+      });
+
+      return;
+    }
+
+    if (clearSelection) setRowSelection({});
+  };
+
+  const handleVisibilityChange = async (asset: ResourceLibraryAsset) => {
+    const visibility =
+      asset.visibility === RESOURCE_VISIBILITY.PRIVATE
+        ? RESOURCE_VISIBILITY.PUBLIC
+        : RESOURCE_VISIBILITY.PRIVATE;
+
+    await requestVisibilityChange({ resourceIds: [asset.id], visibility, clearSelection: false });
+  };
+
+  const handleBulkVisibilityChange = async (visibility: EditableResourceVisibility) => {
+    const resourceIds = selectedAssetIds;
+    if (!resourceIds.length) return;
+
+    await requestVisibilityChange({ resourceIds, visibility, clearSelection: true });
+  };
+
+  const handleConfirmVisibilityChange = async () => {
+    if (!visibilityChangeConfirmation) return;
+
+    await bulkUpdateVisibility({
+      resourceIds: visibilityChangeConfirmation.resourceIds,
+      visibility: visibilityChangeConfirmation.visibility,
+      confirmUsedAssetPrivacyChange: true,
+    });
+
+    if (visibilityChangeConfirmation.clearSelection) setRowSelection({});
+    setVisibilityChangeConfirmation(null);
+  };
+
   return (
     <>
+      <AssetLibraryVisibilityConfirmationDialog
+        confirmation={visibilityChangeConfirmation}
+        isPending={isBulkUpdatingVisibility}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && !isBulkUpdatingVisibility) setVisibilityChangeConfirmation(null);
+        }}
+        onConfirm={() => void handleConfirmVisibilityChange()}
+      />
       <Dialog open={open} onOpenChange={resetDialog}>
         <DialogContent
           data-testid={RICH_TEXT_HANDLES.ASSET_LIBRARY_DIALOG}
@@ -263,69 +275,34 @@ export const AssetLibraryDialog = ({
               onConfirm={() => void handleDelete()}
             />
           ) : (
-            <div className="flex min-h-0 flex-col gap-4">
-              {!canUseLibrary && (
-                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                  {t("richText.assetLibrary.disabledUntilSaved")}
-                </div>
-              )}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
-                  <Input
-                    data-testid={RICH_TEXT_HANDLES.ASSET_LIBRARY_SEARCH_INPUT}
-                    value={search}
-                    onChange={(event) => {
-                      setSearch(event.target.value);
-                      setPage(1);
-                    }}
-                    placeholder={t("richText.assetLibrary.searchPlaceholder")}
-                    className="pl-9"
-                  />
-                </div>
-                <Input
-                  data-testid={RICH_TEXT_HANDLES.ASSET_LIBRARY_UPLOAD_INPUT}
-                  ref={uploadInputRef}
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept={acceptedFileTypes.join(",")}
-                  onChange={(event) => void handleUpload(event)}
-                />
-                <Button
-                  data-testid={RICH_TEXT_HANDLES.ASSET_LIBRARY_UPLOAD_BUTTON}
-                  type="button"
-                  disabled={!canUploadToLibrary || isUploadingToLibrary}
-                  onClick={() => uploadInputRef.current?.click()}
-                >
-                  <UploadCloud
-                    className={cn("mr-2 size-4", isUploadingToLibrary && "animate-pulse")}
-                    aria-hidden
-                  />
-                  {isUploadingToLibrary
-                    ? t("common.button.uploading")
-                    : t("richText.assetLibrary.upload")}
-                </Button>
-              </div>
-              <AssetLibraryAssetList
-                assets={assets}
-                isLoading={isLoadingAssets}
-                canInsert={canInsertAsset}
-                canDelete={hasEntity}
-                isMutating={isMutating}
-                onInsert={(asset) => void handleInsert(asset)}
-                onDelete={setAssetToDelete}
-              />
-              <Pagination
-                className="px-0"
-                emptyDataClassName="hidden"
-                totalItems={totalAssets}
-                itemsPerPage={PER_PAGE}
-                currentPage={page}
-                canChangeItemsPerPage={false}
-                onPageChange={setPage}
-              />
-            </div>
+            <AssetLibraryBrowser
+              assets={assets}
+              acceptedFileTypes={acceptedFileTypes}
+              canDelete={hasEntity}
+              canUseLibrary={canUseLibrary}
+              canInsertAsset={canInsertAsset}
+              canUploadToLibrary={canUploadToLibrary}
+              currentPage={page}
+              isLoadingAssets={isLoadingAssets}
+              isMutating={isMutating}
+              isUploadingToLibrary={isUploadingToLibrary}
+              search={search}
+              rowSelection={rowSelection}
+              selectedAssetCount={selectedAssetIds.length}
+              totalAssets={totalAssets}
+              uploadInputRef={uploadInputRef}
+              onDelete={setAssetToDelete}
+              onInsert={(asset) => void handleInsert(asset)}
+              onPageChange={setPage}
+              onSearchChange={(nextSearch) => {
+                setSearch(nextSearch);
+                setPage(1);
+              }}
+              onRowSelectionChange={setRowSelection}
+              onUpload={(event) => void handleUpload(event)}
+              onVisibilityChange={(asset) => void handleVisibilityChange(asset)}
+              onBulkVisibilityChange={(visibility) => void handleBulkVisibilityChange(visibility)}
+            />
           )}
         </DialogContent>
       </Dialog>

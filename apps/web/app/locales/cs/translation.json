@@ -4053,6 +4053,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",

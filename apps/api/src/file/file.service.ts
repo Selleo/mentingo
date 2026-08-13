@@ -16,6 +16,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ENTITY_TYPES,
+  RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
   type VideoProvider,
   type SupportedLanguages,
@@ -775,6 +776,7 @@ export class FileService {
             ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
           }),
           uploadedBy: currentUser?.userId || null,
+          visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
         })
         .returning();
 
@@ -822,6 +824,7 @@ export class FileService {
     description = {},
     currentUser,
     contextId,
+    visibility = RESOURCE_VISIBILITY.PUBLIC,
   }: CreateResourceForEntityParams) {
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
@@ -833,6 +836,7 @@ export class FileService {
           contentType,
           metadata: settingsToJSONBuildObject(metadata),
           uploadedBy: currentUser?.userId || null,
+          visibility,
         })
         .returning();
 

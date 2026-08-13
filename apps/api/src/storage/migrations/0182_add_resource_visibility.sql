@@ -1,0 +1,1 @@
+ALTER TABLE "resources" ADD COLUMN "visibility" varchar(20) DEFAULT 'public' NOT NULL;

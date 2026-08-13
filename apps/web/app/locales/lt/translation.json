@@ -4054,6 +4054,26 @@
       "upload": "Įkelti failą",
       "insert": "Įterpti",
       "delete": "Ištrinti",
+      "columns": {
+        "asset": "Failas",
+        "actions": "Veiksmai"
+      },
+      "visibility": {
+        "public": "Viešas",
+        "private": "Privatus",
+        "toggle": "Keisti failo privatumą",
+        "select": "Pasirinkti failą",
+        "selectAll": "Pasirinkti visus",
+        "deselectAll": "Atšaukti visų pasirinkimą",
+        "new": "Naujas",
+        "selected": "Pasirinkta: {{count}}",
+        "makePublic": "Padaryti viešą",
+        "makePrivate": "Padaryti privatų",
+        "confirmationTitle": "Padaryti failą privatų?",
+        "usedWarning": "Šis failas naudojamas turinyje. Jis liks ten pasiekiamas, bet bus paslėptas nuo kitų kūrėjų bibliotekų ir tiesioginės prieigos. Tęsti?",
+        "bulkUsedWarning": "{{count}} pasirinktų failų naudojami turinyje. Jie liks ten pasiekiami, bet bus paslėpti nuo kitų kūrėjų bibliotekų ir tiesioginės prieigos. Tęsti?",
+        "bulkSkipped": "Kai kurie failai jau turėjo pasirinktą matomumą ir buvo praleisti."
+      },
       "loading": "Įkeliami failai...",
       "loadingUsages": "Įkeliami panaudojimai...",
       "disabledUntilSaved": "Išsaugokite turinį prieš įterpdami arba trindami esamus failus. Naują failą vis dar galite įkelti.",

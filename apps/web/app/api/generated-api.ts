@@ -255,6 +255,7 @@ export interface CurrentUserResponse {
       | "certificate.render"
       | "file.upload"
       | "file.delete"
+      | "resource_library.manage"
       | "ai.use"
       | "announcement.read"
       | "announcement.create"
@@ -5802,6 +5803,9 @@ export interface GetAssetsResponse {
     reference: string;
     videoProvider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
     uploadedBy: string | null;
+    visibility: "public" | "private" | "hidden";
+    canChangeVisibility: boolean;
+    isNew: boolean;
     /** @format date-time */
     createdAt: string;
     usageCount: number;
@@ -5826,6 +5830,34 @@ export interface GetAssetUsagesResponse {
     /** @format date-time */
     createdAt: string;
   }[];
+}
+
+export interface UpdateAssetVisibilityBody {
+  visibility: "public" | "private";
+}
+
+export interface UpdateAssetVisibilityResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    visibility: "public" | "private";
+  };
+}
+
+export interface BulkUpdateAssetVisibilityBody {
+  /** @minItems 1 */
+  resourceIds: string[];
+  visibility: "public" | "private";
+  confirmUsedAssetPrivacyChange?: boolean;
+}
+
+export interface BulkUpdateAssetVisibilityResponse {
+  data: {
+    updatedIds: string[];
+    skippedIds: string[];
+    requiresConfirmation: boolean;
+    affectedUsedAssetCount: number;
+  };
 }
 
 export interface LinkAssetBody {
@@ -5870,6 +5902,7 @@ export interface UploadAssetBody {
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
+  visibility?: "public" | "private";
 }
 
 export interface UploadAssetResponse {
@@ -13343,6 +13376,45 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/resource-library/assets/${id}/usages`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUpdateAssetVisibility
+     * @request PATCH:/api/resource-library/assets/{id}/visibility
+     */
+    resourceLibraryControllerUpdateAssetVisibility: (
+      id: string,
+      data: UpdateAssetVisibilityBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAssetVisibilityResponse, any>({
+        path: `/api/resource-library/assets/${id}/visibility`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerBulkUpdateAssetVisibility
+     * @request PATCH:/api/resource-library/assets/visibility/bulk
+     */
+    resourceLibraryControllerBulkUpdateAssetVisibility: (
+      data: BulkUpdateAssetVisibilityBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BulkUpdateAssetVisibilityResponse, any>({
+        path: `/api/resource-library/assets/visibility/bulk`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

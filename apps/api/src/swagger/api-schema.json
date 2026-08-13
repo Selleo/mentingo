@@ -8584,6 +8584,70 @@
         }
       }
     },
+    "/api/resource-library/assets/{id}/visibility": {
+      "patch": {
+        "operationId": "ResourceLibraryController_updateAssetVisibility",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetVisibilityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAssetVisibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resource-library/assets/visibility/bulk": {
+      "patch": {
+        "operationId": "ResourceLibraryController_bulkUpdateAssetVisibility",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateAssetVisibilityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUpdateAssetVisibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/resource-library/assets/{id}/link": {
       "post": {
         "operationId": "ResourceLibraryController_linkAsset",
@@ -17776,6 +17840,10 @@
                     },
                     {
                       "const": "file.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "resource_library.manage",
                       "type": "string"
                     },
                     {
@@ -43942,6 +44010,28 @@
                     }
                   ]
                 },
+                "visibility": {
+                  "anyOf": [
+                    {
+                      "const": "public",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hidden",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "canChangeVisibility": {
+                  "type": "boolean"
+                },
+                "isNew": {
+                  "type": "boolean"
+                },
                 "createdAt": {
                   "format": "date-time",
                   "type": "string"
@@ -43960,6 +44050,9 @@
                 "originalFilename",
                 "reference",
                 "uploadedBy",
+                "visibility",
+                "canChangeVisibility",
+                "isNew",
                 "createdAt",
                 "usageCount"
               ]
@@ -44048,6 +44141,130 @@
                 "createdAt"
               ]
             }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAssetVisibilityBody": {
+        "type": "object",
+        "properties": {
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "public",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "visibility"
+        ]
+      },
+      "UpdateAssetVisibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "visibility": {
+                "anyOf": [
+                  {
+                    "const": "public",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "visibility"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BulkUpdateAssetVisibilityBody": {
+        "type": "object",
+        "properties": {
+          "resourceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "public",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
+          },
+          "confirmUsedAssetPrivacyChange": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "resourceIds",
+          "visibility"
+        ]
+      },
+      "BulkUpdateAssetVisibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "updatedIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "skippedIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "requiresConfirmation": {
+                "type": "boolean"
+              },
+              "affectedUsedAssetCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "updatedIds",
+              "skippedIds",
+              "requiresConfirmation",
+              "affectedUsedAssetCount"
+            ]
           }
         },
         "required": [
@@ -44235,6 +44452,18 @@
           },
           "description": {
             "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "public",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
