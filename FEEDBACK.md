@@ -94,7 +94,7 @@ validated.
 - [x] Remove redundant repository wrapping/normalization only where persisted
       JSONB and current callers prove it is safe, and add regression coverage for
       legacy rows.
-- [ ] Replace the student next-lesson post-processing loop with a bounded Drizzle
+- [x] Replace the student next-lesson post-processing loop with a bounded Drizzle
       query-builder expression if the resulting query remains readable and keeps one
       lesson per course.
 - [ ] Simplify the AI judge configuration repository return shape where callers

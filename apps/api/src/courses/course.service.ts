@@ -640,13 +640,9 @@ export class CourseService {
             )
             .orderBy(chapters.courseId, chapters.displayOrder, lessons.displayOrder)
         : [];
-    const nextLessonByCourse = new Map<UUIDType, { id: UUIDType; title: string | null }>();
-
-    for (const { courseId, id, title } of nextLessons) {
-      if (!nextLessonByCourse.has(courseId)) {
-        nextLessonByCourse.set(courseId, { id, title });
-      }
-    }
+    const nextLessonByCourse = new Map(
+      nextLessons.map(({ courseId, id, title }) => [courseId, { id, title }] as const),
+    );
 
     const continueLearningCourses = await Promise.all(
       continueCourses.map(async (course) => ({

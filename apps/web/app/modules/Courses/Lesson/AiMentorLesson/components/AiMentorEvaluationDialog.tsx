@@ -67,10 +67,6 @@ export function AiMentorEvaluationDialog({
   const criteria = evaluation.criteria ?? [];
   const blockingErrors = evaluation.blockingErrors ?? [];
   const isPractice = context === AI_MENTOR_EVALUATION_CONTEXT.PRACTICE;
-  const statusTitle = match([isPractice, passed])
-    .with([true, P._], () => t("aiMentorPractice.feedback.summaryTitle"))
-    .with([false, true], () => t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle"))
-    .otherwise(() => t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle"));
   let statusDescription = t("aiMentorPractice.feedback.summaryDescription");
   if (!isPractice) {
     statusDescription = passed
@@ -125,7 +121,16 @@ export function AiMentorEvaluationDialog({
                 )}
               </span>
               <div className="grid gap-1">
-                <h3 className="text-base font-semibold text-neutral-950">{statusTitle}</h3>
+                <h3 className="text-base font-semibold text-neutral-950">
+                  {match([isPractice, passed])
+                    .with([true, P._], () => t("aiMentorPractice.feedback.summaryTitle"))
+                    .with([false, true], () =>
+                      t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle"),
+                    )
+                    .otherwise(() =>
+                      t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle"),
+                    )}
+                </h3>
                 <p className="text-sm leading-relaxed text-neutral-600">{statusDescription}</p>
               </div>
             </DialogHeader>
