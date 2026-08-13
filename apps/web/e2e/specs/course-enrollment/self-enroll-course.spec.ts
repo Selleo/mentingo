@@ -20,23 +20,31 @@ test("student can self-enroll in a free published course", async ({
     withWorkerPage,
   });
 
-  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-    studentUserId = await enrollmentFactory.getCurrentUserId();
+  await withWorkerPage(
+    USER_ROLE.student,
+    async ({ page }) => {
+      studentUserId = await enrollmentFactory.getCurrentUserId();
 
-    await selfEnrollCourseFlow(page, courseId);
-    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${lessons.firstLesson.id}$`));
-    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(
-      lessons.firstLesson.title,
-    );
-  });
+      await selfEnrollCourseFlow(page, courseId);
+      await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${lessons.firstLesson.id}$`));
+      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(
+        lessons.firstLesson.title,
+      );
+    },
+    { root: true },
+  );
 
-  await withWorkerPage(USER_ROLE.admin, async () => {
-    await expect
-      .poll(async () => {
-        const enrolledUser = await enrollmentFactory.getUser(courseId, studentUserId);
+  await withWorkerPage(
+    USER_ROLE.admin,
+    async () => {
+      await expect
+        .poll(async () => {
+          const enrolledUser = await enrollmentFactory.getUser(courseId, studentUserId);
 
-        return Boolean(enrolledUser?.enrolledAt);
-      })
-      .toBe(true);
-  });
+          return Boolean(enrolledUser?.enrolledAt);
+        })
+        .toBe(true);
+    },
+    { root: true },
+  );
 });
