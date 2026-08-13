@@ -96,6 +96,7 @@ export default function CoursesAccessibilityPreferences({
                     <RadioGroupItem
                       value={layout}
                       id={layout}
+                      data-testid={SETTINGS_PAGE_HANDLES.courseListLayoutOption(layout)}
                       className={cn("mt-0.5 size-5 shrink-0 border-neutral-300 bg-white", {
                         "border-primary-700 text-primary-700": isSelected,
                       })}
