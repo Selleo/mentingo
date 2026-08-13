@@ -21,6 +21,9 @@ vi.mock("~/api/queries/useDashboardEventCalendar", () => ({
       view === "upcoming"
         ? calendarEvents.filter((event) => event.startsAt.slice(0, 10) !== selectedDate)
         : calendarEvents,
+    isError: false,
+    isLoading: false,
+    refetch: vi.fn(),
   }),
 }));
 
@@ -36,6 +39,25 @@ const createLiveTrainingEvent = (id: string, title: string, startsAt: string): C
 describe("WidgetAdminEventCalendar", () => {
   afterEach(() => {
     calendarEvents.length = 0;
+  });
+
+  it("keeps the calendar and upcoming events visible while reloading", () => {
+    calendarEvents.push(
+      createLiveTrainingEvent(
+        "previous-upcoming-event",
+        "Previous upcoming training",
+        new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      ),
+    );
+
+    renderWith({ withQuery: true }).render(
+      <MemoryRouter>
+        <WidgetAdminEventCalendar />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("grid")).toBeVisible();
+    expect(screen.getByRole("button", { name: /Previous upcoming training/ })).toBeVisible();
   });
 
   it("shows selected-day events first, highlights them, and keeps upcoming events below", async () => {

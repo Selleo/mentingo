@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { DASHBOARD_CALENDAR_VIEWS } from "@repo/shared";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
@@ -20,6 +21,7 @@ export const dashboardEventCalendarQueryOptions = (params: DashboardEventCalenda
 
     return response.data.data;
   },
+  placeholderData: params.view === DASHBOARD_CALENDAR_VIEWS.UPCOMING ? keepPreviousData : undefined,
   staleTime: 1000 * 60,
 });
 

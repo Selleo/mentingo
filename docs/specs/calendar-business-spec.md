@@ -38,7 +38,7 @@ The Outlook connection is personal to each user. Imported events are not editabl
 
 ## How It Works
 
-The calendar page requests events for the current date range, selected language, and user timezone. The API returns a normalized event list instead of exposing separate live-training and due-date queries to the web app.
+The calendar page requests events for the current date range, selected language, and user timezone. The API returns a normalized event list instead of exposing separate live-training and due-date queries to the web app. Changing the selected day refreshes only the upcoming-events list; the calendar grid and selected-day events remain visible while that request is in flight.
 
 Event details are resolved by source type. Live training events show session details and a link to the live-training page. Course due-date events represent mandatory group-course deadlines and show the relevant course deadline information.
 

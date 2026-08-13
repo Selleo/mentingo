@@ -92,7 +92,6 @@ export function WidgetAdminEventCalendar() {
   });
   const {
     data: upcomingEvents = [],
-    isLoading: isUpcomingEventsLoading,
     isError: isUpcomingEventsError,
     refetch: refetchUpcomingEvents,
   } = useDashboardEventCalendar({
@@ -105,12 +104,6 @@ export function WidgetAdminEventCalendar() {
   });
   const selectedEvents = events.filter((event) => isSameDay(new Date(event.startsAt), selectedDay));
   const eventDays = useMemo(() => events.map((event) => new Date(event.startsAt)), [events]);
-  const isLoading = isAllEventsLoading || isUpcomingEventsLoading;
-  const isError = isAllEventsError || isUpcomingEventsError;
-
-  async function refetchCalendar() {
-    await Promise.all([refetchAllEvents(), refetchUpcomingEvents()]);
-  }
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR];
 
   function openEventDialog(eventId: string) {
@@ -133,12 +126,12 @@ export function WidgetAdminEventCalendar() {
           iconContainerClassName={metadata.iconContainerClassName}
         />
         <DashboardWidgetContent className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.8fr)] lg:overflow-hidden px-5 pb-5 md:px-6 md:pb-6">
-          {isLoading || isError ? (
+          {isAllEventsLoading || isAllEventsError ? (
             <div className="lg:col-span-2">
               <DashboardWidgetQueryState
-                isLoading={isLoading}
-                isError={isError}
-                onRetry={() => void refetchCalendar()}
+                isLoading={isAllEventsLoading}
+                isError={isAllEventsError}
+                onRetry={() => void refetchAllEvents()}
               />
             </div>
           ) : (
@@ -199,7 +192,13 @@ export function WidgetAdminEventCalendar() {
                   <h3 className="body-sm-md mb-3 text-neutral-950">
                     {t("dashboardHome.widgets.event_calendar.upcoming")}
                   </h3>
-                  {upcomingEvents.length === 0 ? (
+                  {isUpcomingEventsError ? (
+                    <DashboardWidgetQueryState
+                      isLoading={false}
+                      isError
+                      onRetry={() => void refetchUpcomingEvents()}
+                    />
+                  ) : upcomingEvents.length === 0 ? (
                     <p className="text-neutral-500">
                       {t("dashboardHome.widgets.event_calendar.empty")}
                     </p>
