@@ -69,6 +69,7 @@ Learners can also create one standalone AI Mentor practice per UTC day from the 
 Standalone practice reuses the AI Mentor conversation experience but is deliberately separate from course learning. It does not update course or lesson progress and does not create a calendar event. Its generated Judge configuration evaluates the completed rehearsal and provides feedback under a localized task-assessment label, while failed generation can be retried without creating another daily session.
 
 Voice behavior has two layers. Learners can use microphone-assisted entry in the lesson UI, and when Luma voice mentor configuration is enabled, the primary message action can switch into a voice mentor mode. Luma is Mentingo's connected AI service for voice-enabled mentor behavior; the authoring form also exposes voice configuration controls when that service reports voice support.
+Voice behavior has two layers. Learners can use microphone-assisted entry in the lesson UI, and when Luma voice mentor configuration is enabled, the primary message action can switch into a voice mentor mode. Luma is Mentingo's connected AI service for voice-enabled mentor behavior; the authoring form also exposes voice configuration controls when that service reports voice support. When a course is shared, the lesson's preset and localized custom voice configuration are copied with the AI Mentor. Custom provider voice identifiers are treated as literal configuration and remain usable in the recipient tenant; they are not tenant-owned media assets.
 
 ## Key Technical Context
 

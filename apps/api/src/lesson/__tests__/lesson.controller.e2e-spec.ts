@@ -2,7 +2,9 @@ import { Readable } from "stream";
 
 import {
   AI_MENTOR_TEACHING_STYLE,
+  AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
@@ -690,6 +692,25 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     it("updates only the selected language and returns localized AI mentor instructions", async () => {
       const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
 
+      await db
+        .update(aiMentorLessons)
+        .set({
+          customTtsReference: {
+            en: "voice-reference-en",
+            pl: "voice-reference-pl",
+          },
+        })
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      const [initialStoredAiMentor] = await db
+        .select({ customTtsReference: aiMentorLessons.customTtsReference })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+      expect(initialStoredAiMentor.customTtsReference).toEqual({
+        en: "voice-reference-en",
+        pl: "voice-reference-pl",
+      });
+
       await request(app.getHttpServer())
         .patch("/api/lesson/beta-update-lesson/ai")
         .query({ id: lessonId })
@@ -698,6 +719,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
           name: "Mentor PL",
+          voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+          ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: "voice-reference-pl",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
@@ -707,6 +731,15 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         adminCookies,
         "<p>Lead the learner through a Polish scenario.</p>",
       );
+
+      const [storedAiMentor] = await db
+        .select({ customTtsReference: aiMentorLessons.customTtsReference })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+      expect(storedAiMentor.customTtsReference).toEqual({
+        en: "voice-reference-en",
+        pl: "voice-reference-pl",
+      });
 
       const englishAiMentor = await getAiMentorFromCourse(
         courseId,
@@ -723,9 +756,13 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(englishAiMentor).toMatchObject({
         name: "AI Mentor",
+        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+        customTtsReference: "voice-reference-en",
       });
       expect(polishAiMentor).toMatchObject({
         name: "Mentor PL",
+        aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+        customTtsReference: "voice-reference-pl",
       });
 
       const polishConfiguration = await request(app.getHttpServer())

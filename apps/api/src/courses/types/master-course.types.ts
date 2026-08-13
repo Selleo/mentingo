@@ -200,6 +200,21 @@ export type AiMentorRoleplayConfigurationSelect = InferSelectModel<
 export type AiMentorRoleplayConfigurationInsert = InferInsertModel<
   typeof aiMentorRoleplayConfigurations
 >;
+export type AiMentorLessonJsonbInsert = Omit<
+  AiMentorLessonInsert,
+  "aiMentorInstructions" | "name" | "customTtsReference"
+> & {
+  aiMentorInstructions: SQL<unknown>;
+  name: SQL<unknown>;
+  customTtsReference?: SQL<unknown> | null;
+};
+export type AiMentorLessonJsonbUpdate = Partial<
+  Omit<AiMentorLessonInsert, "aiMentorInstructions" | "name" | "customTtsReference">
+> & {
+  aiMentorInstructions?: SQL<unknown>;
+  name?: SQL<unknown>;
+  customTtsReference?: SQL<unknown> | null;
+};
 
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;

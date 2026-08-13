@@ -1234,15 +1234,13 @@ export class MasterCourseService {
         "aiMentorLessons.avatarReference",
         sourceAiMentor.avatarReference,
       );
-      const customTtsReference = this.buildCopiedAiMentorCustomTtsReference(
-        sourceAiMentor,
-        resourceCollection,
-      );
+      const customTtsReference = this.buildCopiedAiMentorCustomTtsReference(sourceAiMentor);
 
       if (!existingAiMentor) {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
-          name: sourceAiMentor.name,
+          aiMentorInstructions: toJsonbBuildObject(sourceAiMentor.aiMentorInstructions),
+          name: toJsonbBuildObject(sourceAiMentor.name),
           avatarReference,
           voiceMode: sourceAiMentor.voiceMode,
           ttsPreset: sourceAiMentor.ttsPreset,
@@ -1253,7 +1251,8 @@ export class MasterCourseService {
       }
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
-        name: sourceAiMentor.name,
+        aiMentorInstructions: toJsonbBuildObject(sourceAiMentor.aiMentorInstructions),
+        name: toJsonbBuildObject(sourceAiMentor.name),
         avatarReference,
         voiceMode: sourceAiMentor.voiceMode,
         ttsPreset: sourceAiMentor.ttsPreset,
@@ -1934,21 +1933,6 @@ export class MasterCourseService {
         fieldPath: "aiMentorLessons.avatarReference",
         reference: sourceAiMentor.avatarReference,
       });
-
-      const customTtsReference = normalizeJsonb<Record<string, unknown>>(
-        sourceAiMentor.customTtsReference,
-        {},
-      );
-
-      for (const [language, reference] of Object.entries(customTtsReference)) {
-        this.addInternalResourceReference(collection, {
-          group: "lessons",
-          sourceEntityType: ENTITY_TYPES.LESSON,
-          sourceEntityId: sourceAiMentor.lessonId,
-          fieldPath: `aiMentorLessons.customTtsReference.${language}`,
-          reference,
-        });
-      }
     }
 
     for (const sourceQuestion of sourceSnapshot.questions) {
@@ -2458,27 +2442,8 @@ export class MasterCourseService {
 
   private buildCopiedAiMentorCustomTtsReference(
     sourceAiMentor: SourceSnapshot["aiMentors"][number],
-    resourceCollection: MasterCourseResourceCollection,
   ) {
-    const customTtsReference = normalizeJsonb<Record<string, unknown>>(
-      sourceAiMentor.customTtsReference,
-      {},
-    );
-    const copiedCustomTtsReference = Object.fromEntries(
-      Object.entries(customTtsReference).map(([language, reference]) => [
-        language,
-        this.getCopiedInternalReference(
-          resourceCollection,
-          "lessons",
-          ENTITY_TYPES.LESSON,
-          sourceAiMentor.lessonId,
-          `aiMentorLessons.customTtsReference.${language}`,
-          typeof reference === "string" ? reference : null,
-        ),
-      ]),
-    );
-
-    return Object.keys(copiedCustomTtsReference).length ? copiedCustomTtsReference : null;
+    return toNullableJsonbBuildObject(sourceAiMentor.customTtsReference);
   }
 
   private getTargetResourceEntityId(
