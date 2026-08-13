@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, COURSE_TYPE } from "@repo/shared";
 import {
   type ColumnDef,
@@ -15,9 +15,8 @@ import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
-import { categoriesQueryOptions } from "~/api/queries";
+import { useCategoriesSuspense } from "~/api/queries";
 import { useCoursesSuspense } from "~/api/queries/useCourses";
-import { queryClient } from "~/api/queryClient";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
@@ -40,6 +39,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -55,7 +55,7 @@ import {
   getCourseStatus,
 } from "./utils";
 
-import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 import type { CourseType } from "@repo/shared";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
@@ -66,23 +66,13 @@ type TCourse = GetAllCoursesResponse["data"][number] & {
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 
-export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
-  try {
-    const { data } = await queryClient.fetchQuery(categoriesQueryOptions());
-    return data;
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-
-    throw new Error("Failed to load categories.");
-  }
-};
-
 const Courses = () => {
-  const categories = useLoaderData<typeof clientLoader>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useState<CourseParams>({});
+  const { language } = useLanguageStore();
 
-  const { data } = useCoursesSuspense(searchParams);
+  const { data: categories } = useCategoriesSuspense({ language });
+  const { data } = useCoursesSuspense({ ...searchParams, language });
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { t } = useTranslation();

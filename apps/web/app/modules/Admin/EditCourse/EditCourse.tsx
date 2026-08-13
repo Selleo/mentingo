@@ -596,7 +596,7 @@ const EditCourse = () => {
           />
         </TabsContent>
         <TabsContent value={EDIT_COURSE_TABS.ENROLLED}>
-          <CourseEnrolled language={courseLanguage} />
+          <CourseEnrolled language={language} />
         </TabsContent>
         <TabsContent value={EDIT_COURSE_TABS.EXPORTS}>
           <CourseSharingTabContent
