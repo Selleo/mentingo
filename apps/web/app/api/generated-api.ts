@@ -8133,6 +8133,7 @@ export interface GetActivityLogsResponse {
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
+    resourceName: string | null;
   }[];
   pagination: {
     totalItems: number;

@@ -4211,10 +4211,13 @@
       "before": "Prieš",
       "after": "Po",
       "context": "Kontekstas",
+      "resourceName": "Ištekliaus pavadinimas",
+      "resourceId": "Ištekliaus ID",
       "noMetadata": "Nėra galimų metaduomenų."
     },
     "fallbacks": {
       "unknown": "Nežinoma",
+      "nameUnavailable": "Pavadinimas nepasiekiamas",
       "notAvailable": "nėra"
     },
     "labels": {
@@ -4276,6 +4279,7 @@
       "email": "El. paštas",
       "action": "Veiksmas",
       "resource": "Išteklius",
+      "resourceName": "Ištekliaus pavadinimas",
       "details": "Išsamiai",
       "showDetails": "Rodyti detales",
       "loading": "Įkeliami veiklos žurnalai...",

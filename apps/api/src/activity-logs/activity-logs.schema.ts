@@ -24,4 +24,9 @@ const baseActivityLogSchema = omitTenantId(
   }),
 );
 
-export const activityLogsListSchema = Type.Array(baseActivityLogSchema);
+export const activityLogsListSchema = Type.Array(
+  Type.Object({
+    ...baseActivityLogSchema.properties,
+    resourceName: Type.Union([Type.String(), Type.Null()]),
+  }),
+);

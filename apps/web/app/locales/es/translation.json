@@ -4852,10 +4852,13 @@
       "before": "Antes",
       "after": "Después",
       "context": "Contexto",
+      "resourceName": "Nombre del recurso",
+      "resourceId": "ID del recurso",
       "noMetadata": "No hay metadatos disponibles."
     },
     "fallbacks": {
       "unknown": "Desconocido",
+      "nameUnavailable": "Nombre no disponible",
       "notAvailable": "N/D"
     },
     "labels": {
@@ -4917,6 +4920,7 @@
       "email": "Correo electrónico",
       "action": "Acción",
       "resource": "Recurso",
+      "resourceName": "Nombre del recurso",
       "details": "Detalles",
       "showDetails": "Mostrar detalles",
       "loading": "Cargando registros de actividad...",

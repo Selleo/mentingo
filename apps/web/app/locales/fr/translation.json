@@ -4842,10 +4842,13 @@
       "before": "Avant",
       "after": "Après",
       "context": "Contexte",
+      "resourceName": "Nom de la ressource",
+      "resourceId": "ID de la ressource",
       "noMetadata": "Aucune métadonnée disponible."
     },
     "fallbacks": {
       "unknown": "Inconnu",
+      "nameUnavailable": "Nom indisponible",
       "notAvailable": "s/o"
     },
     "labels": {
@@ -4907,6 +4910,7 @@
       "email": "Adresse e-mail",
       "action": "Action",
       "resource": "Ressource",
+      "resourceName": "Nom de la ressource",
       "details": "Détails",
       "showDetails": "Afficher les détails",
       "loading": "Chargement des journaux d'activité...",

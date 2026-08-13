@@ -15,11 +15,16 @@ describe("ActivityLogsService", () => {
     const queue = {
       enqueueActivityLog: jest.fn(),
     };
+    const resourceNameService = {
+      resolveCurrentResourceNames: jest.fn().mockResolvedValue(new Map()),
+      findResolvedResourceName: jest.fn().mockReturnValue(null),
+    };
 
     return {
       service: new ActivityLogsService(
         db as unknown as DatabasePg,
         queue as unknown as ConstructorParameters<typeof ActivityLogsService>[1],
+        resourceNameService as unknown as ConstructorParameters<typeof ActivityLogsService>[2],
       ),
       values,
     };
