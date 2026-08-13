@@ -20,6 +20,7 @@ The feature is not a standalone learner page. It appears inside authoring flows 
 - Open an asset-library dialog from rich-text authoring contexts.
 - Search and paginate existing assets for the current authoring language.
 - Upload a supported file into the library from the editor workflow.
+- Choose one public or private visibility for every batch dropped directly into a rich-text editor.
 - Keep personal assets private so other creators cannot discover or reuse them, while retaining delivery through the content where they are embedded.
 - Change visibility for one or several eligible assets at once, with warnings when used assets become private.
 - Insert a selected asset into rich text using the right preview or display mode.
@@ -37,6 +38,8 @@ Resource Library helps content teams keep training materials consistent and easi
 An author opens the asset-library dialog from a rich-text editor while editing a lesson, article, or news post. Mentingo lists reusable assets for the current language, supports search and pagination, and lets the author insert an existing asset into the editor.
 
 If the needed file is not already available, the author can upload it from the dialog. Library uploads are public by default. The uploader can later make their own asset private or return it to public, while administrators can manage visibility for any eligible asset. Private assets remain available to learners or readers through the lesson, article, or news item where they were placed, but are not shown to other creators in the Asset Library.
+
+When files are dragged into a rich-text editor, Mentingo asks the author to choose whether the entire dropped batch is public or private before uploading it. The choice applies consistently to images, documents, presentations, and videos.
 
 Shared-course resource copies use a separate hidden state in the receiving tenant. They keep the shared course working but never appear in that tenant's Asset Library, including for administrators.
 

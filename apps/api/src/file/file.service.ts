@@ -19,6 +19,7 @@ import {
   RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
   type VideoProvider,
+  type ResourceVisibility,
   type SupportedLanguages,
   type EntityType,
 } from "@repo/shared";
@@ -349,6 +350,7 @@ export class FileService {
     contextId?: UUIDType;
     relationshipType?: ResourceRelationshipType;
     linkToEntity?: boolean;
+    visibility?: ResourceVisibility;
   }) {
     const {
       entityType,
@@ -360,6 +362,7 @@ export class FileService {
       contextId,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       linkToEntity = true,
+      visibility = RESOURCE_VISIBILITY.PUBLIC,
     } = params;
 
     if (!entityId && !contextId) return undefined;
@@ -375,6 +378,7 @@ export class FileService {
         size: sizeBytes,
       },
       contextId,
+      visibility,
     });
 
     return resourceResult.resourceId;
@@ -392,6 +396,7 @@ export class FileService {
       entityType,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       linkToEntity = true,
+      visibility = RESOURCE_VISIBILITY.PUBLIC,
     } = data as VideoInitBody & { relationshipType?: ResourceRelationshipType };
 
     if (!entityId && !contextId) {
@@ -467,6 +472,7 @@ export class FileService {
       contextId,
       relationshipType,
       linkToEntity,
+      visibility,
     });
 
     return {

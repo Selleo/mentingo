@@ -7053,6 +7053,13 @@
                   },
                   "contextId": {
                     "type": "string"
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ]
                   }
                 },
                 "required": [
@@ -15703,6 +15710,13 @@
                   },
                   "description": {
                     "type": "string"
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ]
                   }
                 },
                 "required": [
@@ -16980,6 +16994,18 @@
           },
           "linkToEntity": {
             "type": "boolean"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "public",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -59092,6 +59118,18 @@
           },
           "description": {
             "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "const": "public",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [

@@ -45,6 +45,7 @@ export interface InitVideoUploadBody {
     | "live_training";
   relationshipType?: string;
   linkToEntity?: boolean;
+  visibility?: "public" | "private";
 }
 
 export interface InitVideoUploadResponse {
@@ -8747,6 +8748,7 @@ export interface UploadFileToArticleBody {
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
+  visibility?: "public" | "private";
 }
 
 export interface UploadFileToArticleResponse {
@@ -12642,6 +12644,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         title: string;
         description: string;
         contextId?: string;
+        visibility?: "public" | "private";
       },
       params: RequestParams = {},
     ) =>
@@ -16425,6 +16428,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         title: string;
         description: string;
+        visibility?: "public" | "private";
       },
       params: RequestParams = {},
     ) =>

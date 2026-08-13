@@ -24,8 +24,10 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
+  type EditableResourceVisibility,
   FEATURES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -297,6 +299,10 @@ export class NewsController {
         description: {
           type: "string",
         },
+        visibility: {
+          type: "string",
+          enum: [RESOURCE_VISIBILITY.PUBLIC, RESOURCE_VISIBILITY.PRIVATE],
+        },
       },
       required: ["file", "language", "title", "description"],
     },
@@ -324,6 +330,7 @@ export class NewsController {
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,
     @Body("description") description: string,
+    @Body("visibility") visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const fileData = await this.newsService.uploadFileToNews(
@@ -332,6 +339,7 @@ export class NewsController {
       language,
       title,
       description,
+      visibility,
       currentUser,
     );
 

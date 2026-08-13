@@ -1529,6 +1529,7 @@
         "learning_progress": "learning progress",
         "certificate": "certificates",
         "file": "files",
+        "resource_library": "Resource Library",
         "ai": "AI features",
         "announcement": "announcements",
         "news": "news",
@@ -1590,6 +1591,7 @@
         "certificate_render": "Generate certificate files.",
         "file_upload": "Upload files to the platform.",
         "file_delete": "Delete files directly from platform storage.",
+        "resource_library_manage": "Manage private assets in the Resource Library.",
         "ai_use": "Use AI-powered platform features.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
@@ -4009,6 +4011,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choose asset visibility",
+      "description": "Choose the visibility for all {{count}} dropped assets.",
+      "privateInfo": "Private assets are visible only to you and administrators in the Asset Library, but remain available to students in lesson content."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choose how to display this file",
       "description": "Select how \"{{name}}\" should appear for students.",

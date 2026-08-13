@@ -1524,6 +1524,7 @@
         "learning_progress": "progrès d'apprentissage",
         "certificate": "certificats",
         "file": "fichiers",
+        "resource_library": "Bibliothèque de ressources",
         "ai": "Fonctionnalités de l'IA",
         "announcement": "annonces",
         "news": "nouvelles",
@@ -1585,6 +1586,7 @@
         "certificate_render": "Générez des fichiers de certificat.",
         "file_upload": "Importer des fichiers sur la plateforme.",
         "file_delete": "Supprimer des fichiers directement du stockage de la plateforme.",
+        "resource_library_manage": "Gérer les ressources privées dans la bibliothèque de ressources.",
         "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
@@ -3996,6 +3998,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choisir la visibilité des ressources",
+      "description": "Choisissez la visibilité des {{count}} ressources déposées.",
+      "privateInfo": "Les ressources privées sont visibles uniquement par vous et les administrateurs dans la bibliothèque de ressources, mais restent disponibles pour les apprenants dans le contenu des leçons."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choisissez comment afficher ce fichier",
       "description": "Sélectionnez la manière dont « {{name}} » doit apparaître pour les apprenants.",

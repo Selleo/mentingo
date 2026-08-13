@@ -1527,6 +1527,7 @@
         "learning_progress": "Lernfortschritt",
         "certificate": "Zertifikate",
         "file": "Dateien",
+        "resource_library": "Ressourcenbibliothek",
         "ai": "KI-Funktionen",
         "announcement": "Ankündigungen",
         "news": "News",
@@ -1583,6 +1584,7 @@
         "certificate_render": "Zertifikatsdateien erstellen.",
         "file_upload": "Dateien über die gemeinsamen Upload-Funktionen der Plattform hochladen.",
         "file_delete": "Dateien direkt aus dem Plattformspeicher löschen.",
+        "resource_library_manage": "Private Ressourcen in der Ressourcenbibliothek verwalten.",
         "ai_use": "KI-gestützte Plattformfunktionen verwenden.",
         "announcement_read": "Ankündigungen anzeigen.",
         "announcement_create": "Ankündigungen erstellen.",
@@ -3988,6 +3990,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Sichtbarkeit der Ressourcen wählen",
+      "description": "Wählen Sie die Sichtbarkeit für alle {{count}} abgelegten Ressourcen.",
+      "privateInfo": "Private Ressourcen sind in der Ressourcenbibliothek nur für Sie und Administratoren sichtbar, bleiben aber für Lernende in den Lektionsinhalten verfügbar."
+    },
     "uploadDisplayModeDialog": {
       "title": "Wählen Sie aus, wie diese Datei angezeigt werden soll",
       "description": "Wählen Sie aus, wie „{{name}}“ für Studierende angezeigt werden soll.",

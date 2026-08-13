@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "@remix-run/react";
 import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ENTITY_TYPES,
+  type EditableResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -163,7 +164,7 @@ function ArticleFormPage() {
 
   const sharedFileUploadHandler = buildRichTextFileUploadHandler({
     entityType: ENTITY_TYPES.ARTICLES,
-    getVideoSessionForFile: (file) =>
+    getVideoSessionForFile: (file, visibility) =>
       getSessionForFile({
         file,
         init: () =>
@@ -176,15 +177,17 @@ function ArticleFormPage() {
             entityId: articleId,
             entityType: ENTITY_TYPES.ARTICLES,
             linkToEntity: false,
+            visibility,
           }),
       }),
     uploadVideo,
-    uploadResourceFile: (file) =>
+    uploadResourceFile: (file, visibility) =>
       uploadResource({
         file,
         entityType: ENTITY_TYPES.ARTICLES,
         entityId: articleId,
         language: activeLanguage,
+        visibility,
       }),
     askForDisplayMode,
     onVideoUploadError: () =>
@@ -193,8 +196,12 @@ function ArticleFormPage() {
     uploadQueue: { enqueue, setStatus, setProgress, attachUploadId, remove },
   });
 
-  const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
-    if (file) await sharedFileUploadHandler(file, editor);
+  const handleFileUpload = async (
+    file?: File,
+    editor?: TiptapEditor | null,
+    visibility?: EditableResourceVisibility,
+  ) => {
+    if (file) await sharedFileUploadHandler(file, editor, visibility);
   };
 
   const fetchPreview = useCallback(

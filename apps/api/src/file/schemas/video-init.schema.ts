@@ -1,4 +1,4 @@
-import { ENTITY_TYPES } from "@repo/shared";
+import { ENTITY_TYPES, RESOURCE_VISIBILITY } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -16,6 +16,12 @@ export const videoInitSchema = Type.Object({
   entityType: Type.Enum(ENTITY_TYPES),
   relationshipType: Type.Optional(Type.String()),
   linkToEntity: Type.Optional(Type.Boolean()),
+  visibility: Type.Optional(
+    Type.Union([
+      Type.Literal(RESOURCE_VISIBILITY.PUBLIC),
+      Type.Literal(RESOURCE_VISIBILITY.PRIVATE),
+    ]),
+  ),
 });
 
 export const videoInitResponseSchema = Type.Object({

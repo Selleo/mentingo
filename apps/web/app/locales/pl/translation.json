@@ -1746,6 +1746,7 @@
         "learning_progress": "postęp nauki",
         "certificate": "certyfikaty",
         "file": "pliki",
+        "resource_library": "Biblioteka zasobów",
         "ai": "funkcje AI",
         "announcement": "ogłoszenia",
         "news": "aktualności",
@@ -1807,6 +1808,7 @@
         "certificate_render": "Może generować pliki certyfikatów.",
         "file_upload": "Może przesyłać pliki na platformę.",
         "file_delete": "Może usuwać pliki bezpośrednio z pamięci platformy.",
+        "resource_library_manage": "Może zarządzać prywatnymi zasobami w Bibliotece zasobów.",
         "ai_use": "Może korzystać z funkcji platformy opartych na AI.",
         "announcement_read": "Może przeglądać ogłoszenia.",
         "announcement_create": "Może tworzyć ogłoszenia.",
@@ -4274,6 +4276,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Wybierz widoczność zasobów",
+      "description": "Wybierz widoczność dla wszystkich {{count}} przeciągniętych zasobów.",
+      "privateInfo": "Prywatne zasoby są widoczne w Bibliotece zasobów tylko dla Ciebie i administratorów, ale pozostają dostępne dla uczestników w treści lekcji."
+    },
     "uploadDisplayModeDialog": {
       "title": "Wybierz sposób wyświetlania pliku",
       "description": "Wybierz, jak plik „{{name}}” ma być widoczny dla studentów.",
