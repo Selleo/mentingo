@@ -1,4 +1,4 @@
-import { CALENDAR_EVENT_SOURCE_TYPES } from "@repo/shared";
+import { CALENDAR_EVENT_SOURCE_TYPES, DASHBOARD_CALENDAR_VIEWS } from "@repo/shared";
 
 import { CalendarService } from "./services/calendar.service";
 
@@ -88,7 +88,7 @@ describe("CalendarService dashboard events", () => {
         end: "2026-09-01T00:00:00.000Z",
         language: "en",
         timezone: "UTC",
-        view: "upcoming",
+        view: DASHBOARD_CALENDAR_VIEWS.UPCOMING,
         selectedDate: "2026-08-20",
       },
       {} as never,

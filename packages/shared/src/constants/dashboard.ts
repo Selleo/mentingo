@@ -35,6 +35,14 @@ export const STUDENT_DASHBOARD_LIMITS = {
   REQUIRED_COURSES: 5,
 } as const;
 
+export const DASHBOARD_CALENDAR_VIEWS = {
+  ALL: "all",
+  UPCOMING: "upcoming",
+} as const;
+
+export type DashboardCalendarView =
+  (typeof DASHBOARD_CALENDAR_VIEWS)[keyof typeof DASHBOARD_CALENDAR_VIEWS];
+
 export const STUDENT_COURSE_URGENCY = {
   OVERDUE: "overdue",
   DUE_SOON: "dueSoon",

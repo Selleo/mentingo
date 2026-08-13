@@ -3,6 +3,7 @@ import {
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_SOURCE_ROLES,
   COURSE_ENROLLMENT,
+  DASHBOARD_CALENDAR_VIEWS,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
   LIVE_TRAINING_STATUSES,
@@ -82,7 +83,7 @@ export class CalendarService {
       allDay: event.allDay,
     }));
 
-    if (query.view !== "upcoming") return dashboardEvents;
+    if (query.view !== DASHBOARD_CALENDAR_VIEWS.UPCOMING) return dashboardEvents;
 
     return dashboardEvents
       .filter((event) => {

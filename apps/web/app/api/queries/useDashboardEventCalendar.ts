@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { DashboardCalendarView, SupportedLanguages } from "@repo/shared";
 
 type DashboardEventCalendarParams = {
   start: string;
   end: string;
   language: SupportedLanguages;
   timezone?: string;
-  view: "all" | "upcoming";
+  view: DashboardCalendarView;
   selectedDate?: string;
 };
 

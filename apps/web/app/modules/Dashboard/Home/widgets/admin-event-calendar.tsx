@@ -1,4 +1,8 @@
-import { CALENDAR_EVENT_SOURCE_TYPES, DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import {
+  CALENDAR_EVENT_SOURCE_TYPES,
+  DASHBOARD_CALENDAR_VIEWS,
+  DASHBOARD_WIDGET_IDS,
+} from "@repo/shared";
 import { endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -84,7 +88,7 @@ export function WidgetAdminEventCalendar() {
     end: rangeEnd.toISOString(),
     language,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    view: "all",
+    view: DASHBOARD_CALENDAR_VIEWS.ALL,
   });
   const {
     data: upcomingEvents = [],
@@ -96,7 +100,7 @@ export function WidgetAdminEventCalendar() {
     end: rangeEnd.toISOString(),
     language,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    view: "upcoming",
+    view: DASHBOARD_CALENDAR_VIEWS.UPCOMING,
     selectedDate: format(selectedDay, "yyyy-MM-dd"),
   });
   const selectedEvents = events.filter((event) => isSameDay(new Date(event.startsAt), selectedDay));

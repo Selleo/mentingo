@@ -19,6 +19,7 @@ import {
   PERMISSIONS,
   type PermissionKey,
   type SupportedLanguages,
+  type StudentCourseUrgency,
   STUDENT_COURSE_URGENCY,
   STUDENT_DASHBOARD_LIMITS,
 } from "@repo/shared";
@@ -241,6 +242,23 @@ type OverdueCoursesByLanguageRow = {
   language: SupportedLanguages;
   courses: OverdueCoursesEmailCourse[];
 };
+
+const getRequiredCourseUrgency = (
+  dueDate: string | null,
+  now: number,
+  dueSoonBoundary: number,
+): StudentCourseUrgency =>
+  match(dueDate ? Date.parse(dueDate) : null)
+    .with(null, () => STUDENT_COURSE_URGENCY.NO_DEADLINE)
+    .when(
+      (timestamp) => timestamp < now,
+      () => STUDENT_COURSE_URGENCY.OVERDUE,
+    )
+    .when(
+      (timestamp) => timestamp <= dueSoonBoundary,
+      () => STUDENT_COURSE_URGENCY.DUE_SOON,
+    )
+    .otherwise(() => STUDENT_COURSE_URGENCY.SCHEDULED);
 
 @Injectable()
 export class CourseService {
@@ -629,13 +647,15 @@ export class CourseService {
             .where(
               and(
                 inArray(chapters.courseId, continueCourseIds),
-                sql`NOT (
-              ${studentLessonProgress.completedAt} IS NOT NULL
-              AND (
-                ${studentLessonProgress.isQuizPassed} IS TRUE
-                OR ${studentLessonProgress.isQuizPassed} IS NULL
-              )
-            )`,
+                not(
+                  and(
+                    isNotNull(studentLessonProgress.completedAt),
+                    or(
+                      eq(studentLessonProgress.isQuizPassed, true),
+                      isNull(studentLessonProgress.isQuizPassed),
+                    ),
+                  )!,
+                ),
               ),
             )
             .orderBy(chapters.courseId, chapters.displayOrder, lessons.displayOrder)
@@ -657,7 +677,8 @@ export class CourseService {
         lesson: nextLessonByCourse.get(course.courseId) ?? null,
       })),
     );
-    const dueSoonBoundary = addDays(new Date(), 7).getTime();
+    const now = Date.now();
+    const dueSoonBoundary = addDays(new Date(now), 7).getTime();
 
     const total = completion?.total ?? 0;
     const completed = completion?.completed ?? 0;
@@ -665,15 +686,7 @@ export class CourseService {
     return {
       continueLearningCourses,
       requiredCourses: requiredCourses.map((course) => {
-        let urgency: StudentCourseDashboardSummary["requiredCourses"][number]["urgency"] =
-          STUDENT_COURSE_URGENCY.NO_DEADLINE;
-
-        if (course.dueDate) {
-          const dueDate = new Date(course.dueDate).getTime();
-          if (dueDate < Date.now()) urgency = STUDENT_COURSE_URGENCY.OVERDUE;
-          else if (dueDate <= dueSoonBoundary) urgency = STUDENT_COURSE_URGENCY.DUE_SOON;
-          else urgency = STUDENT_COURSE_URGENCY.SCHEDULED;
-        }
+        const urgency = getRequiredCourseUrgency(course.dueDate, now, dueSoonBoundary);
 
         return {
           courseId: course.courseId,
