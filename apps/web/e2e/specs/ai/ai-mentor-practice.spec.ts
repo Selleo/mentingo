@@ -238,10 +238,14 @@ test("student can review practice feedback and start the practice again", async 
     await expect(page.getByRole("dialog")).toBeHidden();
 
     await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CHECK_BUTTON).click();
+    const feedbackDialog = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG);
+    await expect(feedbackDialog).toBeVisible();
+    await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
+    await expect(feedbackDialog).toBeHidden();
+
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON)).toBeVisible();
     await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON).click();
 
-    const feedbackDialog = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG);
     await expect(feedbackDialog).toBeVisible();
     await expect(feedbackDialog.getByText("State the request clearly")).toBeVisible();
     await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
