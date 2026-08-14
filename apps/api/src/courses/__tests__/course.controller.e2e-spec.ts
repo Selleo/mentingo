@@ -1891,11 +1891,12 @@ describe("CourseController (e2e)", () => {
         thumbnailS3Key: null,
       });
       await setFeaturedCourseId(course.id);
+      const cookies = await cookieFor(admin, app);
 
       await request(app.getHttpServer())
         .patch(`/api/course/${course.id}`)
         .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
-        .set("Cookie", await cookieFor(admin, app))
+        .set("Cookie", cookies)
         .expect(200);
 
       expect(await getFeaturedCourseId()).toBeUndefined();
@@ -1918,11 +1919,12 @@ describe("CourseController (e2e)", () => {
         thumbnailS3Key: null,
       });
       await setFeaturedCourseId(featuredCourse.id);
+      const cookies = await cookieFor(admin, app);
 
       await request(app.getHttpServer())
         .patch(`/api/course/${otherCourse.id}`)
         .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
-        .set("Cookie", await cookieFor(admin, app))
+        .set("Cookie", cookies)
         .expect(200);
 
       expect(await getFeaturedCourseId()).toBe(featuredCourse.id);
