@@ -1957,6 +1957,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Nemůžete upravit otázky v jiném než výchozím jazyce.",
       "noMissingTranslations": "Žádné chybějící překlady",
       "mismatchContentLength": "Počet překladů neodpovídá počtu vygenerovaných překladů",
+      "invalidTranslationStructure": "Vygenerovaný překlad nezachoval strukturu obsahu. Zkuste to prosím znovu.",
       "translationsGeneratedSuccessfully": "Překlady byly úspěšně vygenerovány",
       "lumaNotConfigured": "Luma API klíč není nakonfigurován.",
       "lumaBadRequest": "Požadavek Luma byl neplatný.",
