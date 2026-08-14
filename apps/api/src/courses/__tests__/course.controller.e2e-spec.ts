@@ -1895,6 +1895,7 @@ describe("CourseController (e2e)", () => {
 
       await request(app.getHttpServer())
         .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
         .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
         .set("Cookie", cookies)
         .expect(200);
@@ -1923,6 +1924,7 @@ describe("CourseController (e2e)", () => {
 
       await request(app.getHttpServer())
         .patch(`/api/course/${otherCourse.id}`)
+        .set("x-playwright-test", "true")
         .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
         .set("Cookie", cookies)
         .expect(200);
