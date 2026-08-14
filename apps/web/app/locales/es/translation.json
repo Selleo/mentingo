@@ -1948,6 +1948,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "No puede modificar las preguntas en un idioma que no sea el predeterminado.",
       "noMissingTranslations": "No faltan traducciones",
       "mismatchContentLength": "El número de traducciones no coincide con el número de traducciones generadas",
+      "invalidTranslationStructure": "La traducción generada no conservó la estructura del contenido. Inténtalo de nuevo.",
       "translationsGeneratedSuccessfully": "Traducciones generadas exitosamente",
       "lumaNotConfigured": "La clave Luma API no está configurada.",
       "lumaBadRequest": "La solicitud Luma no era válida.",

@@ -1958,6 +1958,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Sie können keine Fragen in einer anderen Sprache als der Standardsprache ändern.",
       "noMissingTranslations": "Keine fehlenden Übersetzungen",
       "mismatchContentLength": "Die Anzahl der Übersetzungen stimmt nicht mit der Anzahl der generierten Übersetzungen überein",
+      "invalidTranslationStructure": "Die generierte Übersetzung hat die Inhaltsstruktur nicht beibehalten. Bitte versuchen Sie es erneut.",
       "translationsGeneratedSuccessfully": "Übersetzungen erfolgreich generiert",
       "lumaNotConfigured": "Der Luma-API-Schlüssel ist nicht konfiguriert.",
       "lumaBadRequest": "Die Luma-Anfrage war ungültig.",

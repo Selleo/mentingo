@@ -1957,6 +1957,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Negalite keisti klausimų kita nei numatytoji kalba.",
       "noMissingTranslations": "Netrūksta vertimų",
       "mismatchContentLength": "Vertimų skaičius nesutampa su sugeneruotų vertimų skaičiumi",
+      "invalidTranslationStructure": "Sugeneruotame vertime nebuvo išsaugota turinio struktūra. Bandykite dar kartą.",
       "translationsGeneratedSuccessfully": "Vertimai sėkmingai sugeneruoti",
       "lumaNotConfigured": "Luma API raktas nesukonfigūruotas.",
       "lumaBadRequest": "Luma užklausa neteisinga.",

@@ -1,6 +1,6 @@
 id: translationPrompt
 description: Translation prompt for course translation generation
-version: 5
+version: 7
 
 template: |
   <role>
@@ -9,7 +9,7 @@ template: |
 
   <goal>
   Translate ALL content into {{ language }}.
-  Return a JSON array of strings in item order.
+  Return a JSON array of strings identified by the supplied ITEM IDs.
   </goal>
 
   <top_priority_rules>
@@ -25,7 +25,8 @@ template: |
 
   <non_negotiables>
   - Output MUST be a valid JSON array of strings only (no markdown, no prose, no keys).
-  - Preserve ITEM order 1:1.
+  - Return every ITEM exactly once.
+  - Start every output string with its matching ITEM ID, unchanged, followed by one newline and the translated text.
   - Preserve formatting exactly: HTML tags and attributes, placeholders, whitespace, line breaks, punctuation, emojis, and casing.
   - Never "fix" or rewrite content beyond translation.
   </non_negotiables>
@@ -57,13 +58,14 @@ template: |
   </rules>
 
   <input_format>
-  You will receive multiple ITEMS with METADATA, optional CONTEXT, and TEXT TO TRANSLATE.
+  You will receive multiple ITEMS with an ITEM ID, METADATA, optional CONTEXT, and TEXT TO TRANSLATE.
   METADATA identifies the content kind, including AI Mentor instructions and normalized AI Judge fields.
   CONTEXT is reference material for terminology and meaning. Translate only TEXT TO TRANSLATE.
+  Never copy, append, summarize, or translate CONTEXT into the output.
   </input_format>
 
   <output_format>
-  Output MUST be a JSON array of strings only. No extra text.
+  Output MUST be a JSON array of strings only. Each string uses this exact format: ITEM_ID, one newline, translated text. No extra text.
   </output_format>
 
   <target_language>

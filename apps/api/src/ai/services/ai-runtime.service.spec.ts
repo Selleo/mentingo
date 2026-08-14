@@ -186,6 +186,28 @@ describe("AiRuntimeService", () => {
     expect(generateCore).toHaveBeenCalledTimes(1);
   });
 
+  it("falls back to Core when Luma translation generation returns an invalid result", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+
+    const input = {
+      messages: [{ role: "user" as const, content: "Translate this" }],
+      temperature: 0,
+    };
+    const coreResult = { translations: ["translation-item-1\nTłumaczenie"] };
+    const generateCore = jest.fn().mockResolvedValue(coreResult);
+    const generateTranslations = jest.fn().mockResolvedValue({ translations: [null] });
+
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { generateTranslations } }),
+    });
+
+    await expect(service.generateTranslations(input, generateCore)).resolves.toEqual(coreResult);
+    expect(generateTranslations).toHaveBeenCalledWith(input);
+    expect(generateCore).toHaveBeenCalledTimes(1);
+  });
+
   it("uses Luma for AI Judge configuration validation", async () => {
     const service = new AiRuntimeService({} as EnvService);
     const validation = { summary: "The rubric is ready.", issues: [] };
