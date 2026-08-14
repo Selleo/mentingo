@@ -1,6 +1,252 @@
 {
+  "dashboardHome": {
+    "title": "Ihr Dashboard",
+    "subtitle": "Die wichtigsten Lerninformationen und Aktionen immer griffbereit.",
+    "customize": "Dashboard anpassen",
+    "edit": {
+      "badge": "Bearbeitung",
+      "widgetsButton": "Widgets",
+      "restore": "Standard wiederherstellen",
+      "instructions": "Ziehen Sie Widgets, um ihre Reihenfolge zu ändern. Breite und Sichtbarkeit lassen sich ebenfalls anpassen.",
+      "changeWidth": "Breite von {{title}} ändern",
+      "drag": "{{title}} verschieben",
+      "widgetLibrary": "Dashboard-Widgets",
+      "widgetLibraryDescription": "Wählen Sie die Widgets aus, die auf Ihrem Dashboard sichtbar sein sollen.",
+      "required": "Erforderlich",
+      "toggle": "{{title}} umschalten",
+      "confirm": "Ja",
+      "cancel": "Nein"
+    },
+    "empty": {
+      "title": "Ihr Dashboard ist leer",
+      "description": "Passen Sie das Dashboard an und fügen Sie wichtige Widgets hinzu.",
+      "editDescription": "Aktivieren Sie mindestens ein Widget in der Liste oben."
+    },
+    "error": {
+      "invalidWidgetLayout": "Das Dashboard-Layout enthält nicht verfügbare oder doppelte Widgets.",
+      "requiredWidgetMissing": "Ein erforderliches Dashboard-Widget fehlt.",
+      "title": "Dashboard konnte nicht geladen werden",
+      "description": "Versuchen Sie es gleich noch einmal.",
+      "retry": "Erneut versuchen",
+      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig."
+    },
+    "widgets": {
+      "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
+      "trainingCompletionChartLabel": "{{completed}} von {{total}} Zuweisungen abgeschlossen, {{percentage}} Prozent.",
+      "deadlineRisksPage": "Seite {{page}} von {{totalPages}}",
+      "placeholderDescription": "Dashboard-Widget für eine eigene Datenansicht",
+      "placeholderContent": "Dieses Widget ist für funktionsspezifische Inhalte vorbereitet.",
+      "placeholderFooter": "Beispiel-Widget",
+      "s_placeholder_1": { "title": "Lernenden-Widget 1" },
+      "s_placeholder_2": { "title": "Lernenden-Widget 2" },
+      "s_placeholder_3": { "title": "Lernenden-Widget 3" },
+      "loadError": "Dieses Widget konnte nicht geladen werden.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Alle von dir begonnenen Kurse",
+          "empty": "Du hast keine laufenden Kurse.",
+          "nextLesson": "Als Nächstes: {{title}}",
+          "openCourse": "Kurs öffnen",
+          "viewAll": "{{count}} laufende Kurse"
+        },
+        "requiredCourse": {
+          "description": "Alle noch abzuschließenden Pflichtkurse",
+          "empty": "Du hast keine offenen Pflichtkurse.",
+          "overdue": "Überfällig",
+          "dueSoon": "Bald fällig",
+          "scheduled": "Bevorstehend",
+          "noDeadline": "Keine Frist",
+          "dueDate": "Fällig am {{date}}",
+          "noDueDate": "Kein Fälligkeitsdatum",
+          "total": "{{count}} Pflichtkurse",
+          "overdueCount": "{{count}} überfällig"
+        },
+        "courseCompletion": {
+          "description": "Fortschritt deiner zugewiesenen Kurse",
+          "empty": "Dir wurden noch keine Kurse zugewiesen.",
+          "completedOfTotal": "{{completed}} von {{total}} abgeschlossen",
+          "completed": "Abgeschlossen",
+          "inProgress": "In Bearbeitung",
+          "notStarted": "Nicht begonnen"
+        },
+        "certificates": {
+          "description": "Aktive Zertifikate und bevorstehende Abläufe",
+          "empty": "Du hast keine aktiven Zertifikate.",
+          "active": "Aktive Zertifikate",
+          "expiringSoon": "Läuft innerhalb von 30 Tagen ab",
+          "cta": "Zertifikat anzeigen",
+          "viewAll": "Alle Zertifikate anzeigen",
+          "dialogTitle": "Deine Zertifikate",
+          "dialogDescription": "Alle erworbenen aktiven Zertifikate anzeigen.",
+          "issued": "Ausgestellt am {{date}}",
+          "expires": "Läuft am {{date}} ab",
+          "noExpiry": "Kein Ablaufdatum",
+          "previous": "Zurück",
+          "next": "Weiter",
+          "page": "Seite {{page}} von {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Erstelle täglich ein gezieltes Übungsszenario",
+          "empty": "Beschreibe eine Situation und übe sie mit dem KI-Mentor.",
+          "emptyPrompt": "Welches Gespräch möchtest du souveräner führen?",
+          "startCta": "Übung starten",
+          "continueCta": "Übung fortsetzen",
+          "feedbackCta": "Feedback ansehen",
+          "todayEyebrow": "Heutige Probe",
+          "completedEyebrow": "Probe abgeschlossen",
+          "returnHint": "Dein Gespräch ist gespeichert",
+          "privateHint": "Ein privater Ort zum Ausprobieren und Verbessern",
+          "status": {
+            "queued": "Dein Szenario wartet.",
+            "processing": "Dein Szenario wird vorbereitet.",
+            "ready": "Die heutige Übung ist bereit.",
+            "failed": "Die Erstellung ist fehlgeschlagen. Öffne sie zum Wiederholen."
+          }
+        }
+      },
+      "commonDescription": "Wichtige Informationen auf einen Blick",
+      "training_completion": {
+        "title": "Schulungsabschluss",
+        "description": "Abschlussstatus aller Kurszuweisungen",
+        "completed": "Abgeschlossen",
+        "inProgress": "In Bearbeitung",
+        "notStarted": "Nicht begonnen",
+        "viewAnalytics": "Analysen anzeigen",
+        "empty": "Noch keine Kurszuweisungen.",
+        "assignCourses": "Kurse zuweisen"
+      },
+      "deadline_risks": {
+        "title": "Terminrisiken",
+        "description": "Pflichtkurse, die Aufmerksamkeit benötigen",
+        "overdue": "Überfällig",
+        "dueSoon": "Bald fällig",
+        "empty": "Derzeit keine Terminrisiken.",
+        "overdueTitle": "Überfällige Pflichtkurse",
+        "dueSoonTitle": "Bald fällige Pflichtkurse",
+        "goToCourse": "Zum Kurs",
+        "affected_one": "{{count}} betroffene Person",
+        "affected_other": "{{count}} betroffene Personen"
+      },
+      "incomplete_courses": {
+        "title": "Unvollständige Kurse",
+        "description": "Kurse mit den meisten offenen Zuweisungen",
+        "allCompleted": "Alle zugewiesenen Kurse sind abgeschlossen.",
+        "noEnrollments": "Noch keine Kurszuweisungen.",
+        "enrollments": "Zuweisungen",
+        "notCompleted": "{{count}} nicht abgeschlossen"
+      },
+      "event_calendar": {
+        "title": "Veranstaltungskalender",
+        "description": "Lernveranstaltungen und Termine in diesem Monat",
+        "previousMonth": "Vorheriger Monat",
+        "nextMonth": "Nächster Monat",
+        "selectMonth": "Monat auswählen",
+        "selectYear": "Jahr auswählen",
+        "selectedDay": "Ausgewählter Tag",
+        "upcoming": "Bevorstehende Veranstaltungen",
+        "empty": "Keine Veranstaltungen in diesem Monat.",
+        "liveTraining": "Live-Schulung",
+        "courseDeadline": "Kurstermin",
+        "weekdays": {
+          "mon": "Mo",
+          "tue": "Di",
+          "wed": "Mi",
+          "thu": "Do",
+          "fri": "Fr",
+          "sat": "Sa",
+          "sun": "So"
+        }
+      },
+      "continue_learning": { "title": "Weiterlernen" },
+      "required_course": { "title": "Pflichtkurse" },
+      "course_completion": { "title": "Kursfortschritt" },
+      "certificates": { "title": "Zertifikate" },
+      "ai_mentor_practice": {
+        "title": "KI-Mentor-Übung",
+        "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
+      }
+    }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Ein echtes Gespräch üben.",
+      "promptEyebrow": "Szene festlegen",
+      "mentorPrompt": "Erzähl mir von dem Gespräch, das du proben möchtest. Mit wem sprichst du, was passiert und was möchtest du besser bewältigen?",
+      "scenario": "Was möchtest du üben?",
+      "scenarioPlaceholder": "Zum Beispiel: Ich möchte üben, einem Kollegen konstruktives Feedback zu einer verpassten Frist zu geben.",
+      "scenarioHint": "Ergänze hilfreichen Kontext, zum Beispiel die Situation, beteiligte Personen oder dein Ziel.",
+      "privateHint": "Nur du kannst diese Übung sehen.",
+      "submit": "Übung erstellen",
+      "suggestions": {
+        "title": "Mit einem Beispiel starten",
+        "feedback": {
+          "label": "Feedback geben",
+          "value": "Ich möchte üben, einem Kollegen konstruktives Feedback zu einer wichtigen verpassten Frist zu geben."
+        },
+        "boundary": {
+          "label": "Eine Grenze setzen",
+          "value": "Ich möchte üben, eine klare Grenze zu setzen, wenn ein Teammitglied mich um dringende Arbeit außerhalb meiner aktuellen Prioritäten bittet."
+        },
+        "explanation": {
+          "label": "Eine Entscheidung erklären",
+          "value": "Ich möchte üben, jemandem, der anderer Meinung ist, eine schwierige Entscheidung zu erklären."
+        },
+        "request": {
+          "label": "Eine Bitte äußern",
+          "value": "Ich möchte üben, meine Führungskraft bei einer zu hohen Arbeitsbelastung um Unterstützung zu bitten."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Szene festlegen",
+          "description": "Beschreibe den Moment mit deinen eigenen Worten."
+        },
+        "rehearse": {
+          "title": "Realistisch proben",
+          "description": "Sprich oder schreibe, während der KI-Mentor die andere Person spielt."
+        },
+        "reflect": {
+          "title": "Erkennen, was wirkt",
+          "description": "Beende die Probe, wenn du bereit bist, und erhalte gezieltes Feedback."
+        }
+      }
+    },
+    "backToDashboard": "Zurück zum Dashboard",
+    "rehearsalEyebrow": "Heutige Probe",
+    "successGoal": "Dein Ziel",
+    "successGoalFallback": "Führe das Gespräch klar und erreiche einen konstruktiven nächsten Schritt.",
+    "viewFeedback": "Feedback ansehen",
+    "practiceAgain": "Erneut üben",
+    "replayLoadingTitle": "Deine nächste Probe wird vorbereitet",
+    "yourRole": "Deine Rolle",
+    "mentorRole": "Rolle des KI-Mentors",
+    "feedback": {
+      "title": "Feedback zur Übung",
+      "summaryTitle": "Was du mitnehmen kannst",
+      "summaryDescription": "Nutze diese Beobachtungen, um deinen nächsten Versuch zu verbessern.",
+      "scoreLabel": "Übungsergebnis",
+      "criteriaTitle": "Was der KI-Judge bemerkt hat",
+      "criterionFallback": "Kriterium {{number}}",
+      "importantFeedbackTitle": "Wichtiges Feedback"
+    },
+    "startHint": "Beginne das Gespräch, wenn du bereit bist.",
+    "checkHint": "Beende jederzeit, um zu sehen, wie dein Ansatz angekommen ist.",
+    "checkPractice": "Beenden und reflektieren",
+    "practiceComplete": "Deine Probe ist abgeschlossen. Dein Feedback kannst du jederzeit erneut ansehen.",
+    "generating": "Der KI-Mentor bereitet dein Szenario vor.",
+    "preparingBackgroundDescription": "Deine Übung wird im Hintergrund vorbereitet. Du kannst zum Dashboard zurückkehren und später wiederkommen.",
+    "failed": "Das Übungsszenario konnte nicht erstellt werden.",
+    "error": "Die Übung konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "conversationTitle": "KI-Mentor-Übung",
+    "mentorName": "KI-Mentor",
+    "message": "Nachricht an den KI-Mentor",
+    "send": "Senden"
+  },
   "common": {
     "button": {
+      "previous": "Zurück",
+      "next": "Weiter",
       "save": "Speichern",
       "saving": "Sparen...",
       "delete": "Löschen",
@@ -18,7 +264,8 @@
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "uploading": "Hochladen...",
-      "sending": "Senden..."
+      "sending": "Senden...",
+      "loading": "Laden..."
     },
     "toast": {
       "noAccess": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
@@ -1550,6 +1797,7 @@
         "user_manage": "Benutzer einschließlich Rollen und Kontostatus verwalten.",
         "settings_read_self": "Eigene Profil- und Präferenzeinstellungen anzeigen.",
         "settings_update_self": "Eigene Profil- und Präferenzeinstellungen aktualisieren.",
+        "dashboard_read": "Das eigene Dashboard anzeigen.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
@@ -3352,6 +3600,7 @@
         },
         "retakeModalTitle": "Sind Sie sicher, dass Sie die Lektion wiederholen möchten?",
         "retakeModalDescription": "Dadurch wird Ihr Fortschritt in dieser Lektion zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "retakeLoadingTitle": "Dein nächster Versuch wird vorbereitet",
         "retakeAccessDenied": "Sie können diese Lektion nur wiederholen, wenn Sie im Kurs eingeschrieben sind oder der Autor des Kurses sind."
       }
     },

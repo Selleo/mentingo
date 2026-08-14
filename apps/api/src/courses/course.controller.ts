@@ -97,6 +97,7 @@ import {
   commonShowBetaCourseSchema,
   commonShowCourseSchema,
 } from "src/courses/schemas/showCourseCommon.schema";
+import { studentCourseDashboardSummarySchema } from "src/courses/schemas/studentDashboard.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
   updateCourseMediaSchema,
@@ -262,6 +263,35 @@ export class CourseController {
     const data = await this.courseService.getCoursesForUser(query, currentUserId);
 
     return new PaginatedResponse(data);
+  }
+
+  @Get("dashboard-summary")
+  @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
+  @Validate({
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    response: baseResponse(studentCourseDashboardSummarySchema),
+  })
+  async getStudentDashboardSummary(
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
+    return new BaseResponse(
+      await this.courseService.getStudentDashboardSummary(currentUserId, language),
+    );
+  }
+
+  @Post(":courseId/open")
+  @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(nullResponse()),
+  })
+  async markCourseOpened(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
+    await this.courseService.markCourseOpened(courseId, currentUserId);
+    return new BaseResponse(null);
   }
 
   @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)

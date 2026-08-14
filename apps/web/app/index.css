@@ -407,6 +407,41 @@ html {
   }
 }
 
+@keyframes loading-text-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.loading-text-shimmer {
+  color: var(--primary-700);
+  background-image: linear-gradient(
+    90deg,
+    var(--primary-700) 0%,
+    var(--primary-700) 42%,
+    var(--primary-300) 50%,
+    var(--primary-700) 58%,
+    var(--primary-700) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 200% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: loading-text-shimmer 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-text-shimmer {
+    background-image: none;
+    color: var(--primary-700);
+    animation: none;
+  }
+}
+
 .shimmer-45 {
   position: relative;
   overflow: hidden;

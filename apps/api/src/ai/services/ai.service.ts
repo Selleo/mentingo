@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
-import { PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
+import { AI_MENTOR_TYPE, PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
 
@@ -125,6 +125,38 @@ export class AiService {
       },
       { name: "Get Thread", asType: "span" },
     )();
+  }
+
+  async getPracticeThreadWithSetup(data: {
+    practiceSessionId: UUIDType;
+    userId: UUIDType;
+    userLanguage: SupportedLanguages;
+    practiceInstructions: string;
+  }) {
+    const existingThread = await this.aiRepository.findThread([
+      eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
+      eq(aiMentorThreads.userId, data.userId),
+    ]);
+
+    if (existingThread) return existingThread;
+
+    const thread = await this.aiRepository.createThread({
+      practiceSessionId: data.practiceSessionId,
+      userId: data.userId,
+      userLanguage: data.userLanguage,
+      status: THREAD_STATUS.ACTIVE,
+    });
+
+    const systemPrompt = await this.promptService.setSystemPrompt(
+      {
+        threadId: thread.id,
+        userId: thread.userId,
+      },
+      AI_MENTOR_TYPE.ROLEPLAY,
+    );
+    await this.sendWelcomeMessage(thread.id, systemPrompt, data.practiceInstructions);
+
+    return thread;
   }
 
   async streamMessage(
@@ -255,18 +287,33 @@ export class AiService {
     );
   }
 
-  async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
-    const welcomeMessagePrompt = await this.promptService.loadPrompt("welcomePrompt", {
-      systemPrompt,
-    });
+  async sendWelcomeMessage(
+    threadId: UUIDType,
+    systemPrompt: string,
+    practiceInstructions?: string,
+  ) {
+    const welcomeMessagePrompt = practiceInstructions
+      ? await this.promptService.loadPrompt("aiMentorPracticeOpeningPrompt", {
+          practiceInstructions,
+        })
+      : await this.promptService.loadPrompt("welcomePrompt", { systemPrompt });
+    const welcomeMessages: PublicAiMessage[] = [
+      { role: MESSAGE_ROLE.SYSTEM, content: systemPrompt },
+      { role: MESSAGE_ROLE.USER, content: welcomeMessagePrompt },
+    ];
 
     const content = await observe(
       async () => {
         return this.aiRuntimeService.generateMentorChat(
           {
-            messages: [{ role: MESSAGE_ROLE.USER, content: welcomeMessagePrompt }],
+            messages: welcomeMessages,
           },
-          () => this.chatService.generatePrompt(welcomeMessagePrompt, OPENAI_MODELS.BASIC),
+          () =>
+            this.chatService.generatePrompt(
+              welcomeMessagePrompt,
+              OPENAI_MODELS.BASIC,
+              systemPrompt,
+            ),
         );
       },
       { name: "Start Conversation", asType: "generation" },
@@ -304,15 +351,17 @@ export class AiService {
       thread.userId,
     );
 
-    await this.markAsCompletedIfJudge(
-      lessonId,
-      thread.userId,
-      learnerPermissions,
-      currentUser,
-      judged.data,
-      thread.userLanguage,
-      true,
-    );
+    if (lessonId) {
+      await this.markAsCompletedIfJudge(
+        lessonId,
+        thread.userId,
+        learnerPermissions,
+        currentUser,
+        judged.data,
+        thread.userLanguage,
+        true,
+      );
+    }
 
     const { status: _status, ...judgeData } = judged.data;
 

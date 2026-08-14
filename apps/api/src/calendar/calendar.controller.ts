@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
-import { BaseResponse, UUIDSchema, type UUIDType } from "src/common";
+import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
@@ -17,9 +17,17 @@ import {
   type CalendarEventList,
 } from "./schemas/calendar-event-list.schema";
 import {
+  dashboardCalendarEventListSchema,
+  type DashboardCalendarEventList,
+} from "./schemas/dashboard-calendar-event-list.schema";
+import {
   getCalendarEventsQuerySchema,
   type GetCalendarEventsQuery,
 } from "./schemas/get-calendar-events-query.schema";
+import {
+  getDashboardCalendarEventsQuerySchema,
+  type GetDashboardCalendarEventsQuery,
+} from "./schemas/get-dashboard-calendar-events-query.schema";
 import { CalendarService } from "./services/calendar.service";
 
 @UseGuards(PermissionsGuard)
@@ -64,6 +72,60 @@ export class CalendarController {
     );
 
     return new BaseResponse(events);
+  }
+
+  @Get("dashboard/events")
+  @RequirePermission(PERMISSIONS.CALENDAR_READ)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "start",
+        schema: getDashboardCalendarEventsQuerySchema.properties.start,
+      },
+      {
+        type: "query",
+        name: "end",
+        schema: getDashboardCalendarEventsQuerySchema.properties.end,
+      },
+      {
+        type: "query",
+        name: "language",
+        schema: getDashboardCalendarEventsQuerySchema.properties.language,
+      },
+      {
+        type: "query",
+        name: "timezone",
+        schema: getDashboardCalendarEventsQuerySchema.properties.timezone,
+      },
+      {
+        type: "query",
+        name: "view",
+        schema: getDashboardCalendarEventsQuerySchema.properties.view,
+      },
+      {
+        type: "query",
+        name: "selectedDate",
+        schema: getDashboardCalendarEventsQuerySchema.properties.selectedDate,
+      },
+    ],
+    response: baseResponse(dashboardCalendarEventListSchema),
+  })
+  async getDashboardEvents(
+    @Query("start") start: GetCalendarEventsQuery["start"],
+    @Query("end") end: GetCalendarEventsQuery["end"],
+    @Query("language") language: GetCalendarEventsQuery["language"],
+    @Query("timezone") timezone: GetDashboardCalendarEventsQuery["timezone"],
+    @Query("view") view: GetDashboardCalendarEventsQuery["view"],
+    @Query("selectedDate") selectedDate: GetDashboardCalendarEventsQuery["selectedDate"],
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<DashboardCalendarEventList>> {
+    return new BaseResponse(
+      await this.calendarService.getDashboardEvents(
+        { start, end, language, timezone, view, selectedDate },
+        currentUser,
+      ),
+    );
   }
 
   @Get("events/:eventId")

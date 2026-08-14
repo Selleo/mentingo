@@ -60,9 +60,6 @@ const NEWS_EDIT_ACCESS: PermissionRequirement = {
 const QA_EDIT_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.QA_MANAGE, PERMISSIONS.QA_MANAGE_OWN],
 };
-const LEARNING_PROGRESS_ACCESS: PermissionRequirement = {
-  anyOf: [PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE],
-};
 const LEARNING_PATH_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.LEARNING_PATH_READ],
 };
@@ -71,6 +68,9 @@ const CALENDAR_READ_ACCESS: PermissionRequirement = {
 };
 const LIVE_TRAINING_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.LIVE_TRAINING_READ],
+};
+const DASHBOARD_READ_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.DASHBOARD_READ],
 };
 const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
   anyOf: [
@@ -93,7 +93,6 @@ export const routeAccessConfig = createRouteConfig({
 
   // Client part
   "": PUBLIC,
-  progress: LEARNING_PROGRESS_ACCESS,
   notifications: {
     allOf: [PERMISSIONS.ANNOUNCEMENT_READ],
   },
@@ -103,6 +102,10 @@ export const routeAccessConfig = createRouteConfig({
   "articles/:articleId/edit": ARTICLE_EDIT_ACCESS,
   "news/add": NEWS_EDIT_ACCESS,
   "news/:newsId/edit": NEWS_EDIT_ACCESS,
+  dashboard: DASHBOARD_READ_ACCESS,
+  "ai-mentor/practice/:id": {
+    allOf: [PERMISSIONS.AI_USE],
+  },
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,
@@ -118,9 +121,6 @@ export const routeAccessConfig = createRouteConfig({
   "news/:newsId": PUBLIC,
 
   // Admin part
-  "admin/analytics": {
-    allOf: [PERMISSIONS.STATISTICS_READ],
-  },
   "admin/courses": COURSE_EDIT_ACCESS,
   "admin/courses/new": COURSE_EDIT_ACCESS,
   "admin/course/:courseId/lesson/:lessonId/preview": COURSE_EDIT_ACCESS,

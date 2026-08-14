@@ -10,7 +10,6 @@ import type { Page } from "@playwright/test";
 type RoleNavigationExpectation = {
   role: USER_ROLE;
   title: string;
-  canSeeAnalytics: boolean;
   canSeeManage: boolean;
 };
 
@@ -18,19 +17,16 @@ const ROLE_NAVIGATION_EXPECTATIONS: RoleNavigationExpectation[] = [
   {
     role: USER_ROLE.admin,
     title: "admin",
-    canSeeAnalytics: true,
     canSeeManage: true,
   },
   {
     role: USER_ROLE.contentCreator,
     title: "content creator",
-    canSeeAnalytics: true,
     canSeeManage: false,
   },
   {
     role: USER_ROLE.student,
     title: "student",
-    canSeeAnalytics: false,
     canSeeManage: false,
   },
 ];
@@ -44,7 +40,7 @@ const openManageMenu = async (page: Page) => {
   await expect(usersLink).toBeVisible();
 };
 
-for (const { role, title, canSeeAnalytics, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
+for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
   test(`${title} can navigate the sidebar`, async ({ withReadonlyPage }) => {
     await withReadonlyPage(role, async ({ page }) => {
       await prepareNavigationPageFlow(page);
@@ -54,19 +50,6 @@ for (const { role, title, canSeeAnalytics, canSeeManage } of ROLE_NAVIGATION_EXP
         "aria-current",
         "page",
       );
-
-      if (canSeeAnalytics) {
-        await clickHandleAndExpectUrlFlow(
-          page,
-          NAVIGATION_HANDLES.ANALYTICS_LINK,
-          "/admin/analytics",
-        );
-        await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
-      } else {
-        await expect(page.getByTestId(NAVIGATION_HANDLES.ANALYTICS_LINK)).toHaveCount(0);
-      }
-
-      await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.PROGRESS_LINK, "/progress");
 
       if (canSeeManage) {
         await openManageMenu(page);

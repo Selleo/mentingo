@@ -1,6 +1,258 @@
 {
+  "dashboardHome": {
+    "title": "Váš dashboard",
+    "subtitle": "Nejdůležitější informace a vzdělávací aktivity vždy po ruce.",
+    "customize": "Přizpůsobit dashboard",
+    "edit": {
+      "badge": "Úpravy",
+      "widgetsButton": "Widgety",
+      "restore": "Obnovit výchozí",
+      "instructions": "Přetažením widgetů změníte jejich pořadí. Můžete také změnit šířku a viditelnost.",
+      "changeWidth": "Změnit šířku {{title}}",
+      "drag": "Přesunout {{title}}",
+      "widgetLibrary": "Widgety dashboardu",
+      "widgetLibraryDescription": "Vyberte widgety, které mají být na dashboardu viditelné.",
+      "required": "Povinný",
+      "toggle": "Přepnout {{title}}",
+      "confirm": "Ano",
+      "cancel": "Ne"
+    },
+    "empty": {
+      "title": "Váš dashboard je prázdný",
+      "description": "Přizpůsobte dashboard a přidejte widgety, které potřebujete.",
+      "editDescription": "Zapněte alespoň jeden widget v seznamu výše."
+    },
+    "preview": {
+      "updated": "Aktuální",
+      "caption": "Rychlý přehled aktuální vzdělávací aktivity.",
+      "progress": "Pokrok"
+    },
+    "error": {
+      "invalidWidgetLayout": "Rozložení dashboardu obsahuje nedostupné nebo duplicitní widgety.",
+      "requiredWidgetMissing": "Chybí povinný widget dashboardu.",
+      "title": "Dashboard se nepodařilo načíst",
+      "description": "Zkuste to za chvíli znovu.",
+      "retry": "Zkusit znovu",
+      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena."
+    },
+    "widgets": {
+      "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
+      "deadlineRisksPage": "Strana {{page}} z {{totalPages}}",
+      "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
+      "placeholderContent": "Tento widget je připravený na obsah konkrétní funkce.",
+      "placeholderFooter": "Ukázkový widget",
+      "s_placeholder_1": { "title": "Widget studenta 1" },
+      "s_placeholder_2": { "title": "Widget studenta 2" },
+      "s_placeholder_3": { "title": "Widget studenta 3" },
+      "loadError": "Tento widget se nepodařilo načíst.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Všechny zahájené kurzy",
+          "empty": "Nemáte žádné rozpracované kurzy.",
+          "nextLesson": "Další: {{title}}",
+          "openCourse": "Otevřít kurz",
+          "viewAll": "{{count}} rozpracovaných kurzů"
+        },
+        "requiredCourse": {
+          "description": "Všechny nedokončené povinné kurzy",
+          "empty": "Nemáte žádné povinné kurzy k dokončení.",
+          "overdue": "Po termínu",
+          "dueSoon": "Brzy vyprší",
+          "scheduled": "Nadcházející",
+          "noDeadline": "Bez termínu",
+          "dueDate": "Termín {{date}}",
+          "noDueDate": "Bez data dokončení",
+          "total": "{{count}} povinných kurzů",
+          "overdueCount": "{{count}} po termínu"
+        },
+        "courseCompletion": {
+          "description": "Přehled průběhu přiřazených kurzů",
+          "empty": "Zatím nemáte přiřazené kurzy.",
+          "completedOfTotal": "Dokončeno {{completed}} z {{total}}",
+          "completed": "Dokončeno",
+          "inProgress": "Probíhá",
+          "notStarted": "Nezahájeno"
+        },
+        "certificates": {
+          "description": "Aktivní certifikáty a blížící se expirace",
+          "empty": "Nemáte žádné aktivní certifikáty.",
+          "active": "Aktivní certifikáty",
+          "expiringSoon": "Vyprší do 30 dnů",
+          "cta": "Zobrazit certifikát",
+          "viewAll": "Zobrazit všechny certifikáty",
+          "dialogTitle": "Vaše certifikáty",
+          "dialogDescription": "Prohlédněte si všechny získané aktivní certifikáty.",
+          "issued": "Vydáno {{date}}",
+          "expires": "Vyprší {{date}}",
+          "noExpiry": "Bez data expirace",
+          "previous": "Předchozí",
+          "next": "Další",
+          "page": "Strana {{page}} z {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Vytvořte každý den jeden cílený scénář",
+          "empty": "Popište situaci a procvičte ji s AI mentorem.",
+          "emptyPrompt": "Který rozhovor chcete zvládnout s větší jistotou?",
+          "startCta": "Zahájit trénink",
+          "continueCta": "Pokračovat v tréninku",
+          "feedbackCta": "Zobrazit zpětnou vazbu",
+          "todayEyebrow": "Dnešní nácvik",
+          "completedEyebrow": "Nácvik dokončen",
+          "returnHint": "Váš rozhovor je uložen",
+          "privateHint": "Soukromé místo pro zkoušení a zlepšování",
+          "status": {
+            "queued": "Scénář čeká.",
+            "processing": "Scénář se připravuje.",
+            "ready": "Dnešní trénink je připraven.",
+            "failed": "Generování selhalo. Otevřete jej a zkuste to znovu."
+          }
+        }
+      },
+      "commonDescription": "Klíčové informace na první pohled",
+      "training_completion": {
+        "title": "Dokončení školení",
+        "description": "Stav dokončení všech přiřazení kurzů",
+        "completed": "Dokončeno",
+        "inProgress": "Probíhá",
+        "notStarted": "Nezahájeno",
+        "viewAnalytics": "Zobrazit analytiku",
+        "empty": "Zatím žádná přiřazení kurzů.",
+        "assignCourses": "Přiřadit kurzy"
+      },
+      "deadline_risks": {
+        "title": "Rizika termínů",
+        "description": "Povinné kurzy vyžadující pozornost",
+        "overdue": "Po termínu",
+        "dueSoon": "Termín se blíží",
+        "empty": "Aktuálně žádná rizika termínů.",
+        "overdueTitle": "Povinné kurzy po termínu",
+        "dueSoonTitle": "Povinné kurzy s blížícím se termínem",
+        "goToCourse": "Přejít na kurz",
+        "affected_one": "{{count}} dotčený účastník",
+        "affected_few": "{{count}} dotčení účastníci",
+        "affected_other": "{{count}} dotčených účastníků"
+      },
+      "incomplete_courses": {
+        "title": "Nedokončené kurzy",
+        "description": "Kurzy s nejvíce nedokončenými přiřazeními",
+        "allCompleted": "Všechny přiřazené kurzy jsou dokončeny.",
+        "noEnrollments": "Zatím žádná přiřazení kurzů.",
+        "enrollments": "přiřazení",
+        "notCompleted": "{{count}} nedokončeno"
+      },
+      "event_calendar": {
+        "title": "Kalendář událostí",
+        "description": "Vzdělávací události a termíny v tomto měsíci",
+        "previousMonth": "Předchozí měsíc",
+        "nextMonth": "Další měsíc",
+        "selectMonth": "Vybrat měsíc",
+        "selectYear": "Vybrat rok",
+        "selectedDay": "Vybraný den",
+        "upcoming": "Nadcházející události",
+        "empty": "Tento měsíc nejsou žádné události.",
+        "liveTraining": "Živé školení",
+        "courseDeadline": "Termín kurzu",
+        "weekdays": {
+          "mon": "Po",
+          "tue": "Út",
+          "wed": "St",
+          "thu": "Čt",
+          "fri": "Pá",
+          "sat": "So",
+          "sun": "Ne"
+        }
+      },
+      "continue_learning": { "title": "Pokračovat ve vzdělávání" },
+      "required_course": { "title": "Povinné kurzy" },
+      "course_completion": { "title": "Průběh kurzů" },
+      "certificates": { "title": "Certifikáty" },
+      "ai_mentor_practice": {
+        "title": "Cvičení s AI Mentorem",
+        "aiNotConfigured": "AI Mentor není pro tohoto tenanta nakonfigurován."
+      }
+    }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Procvičte si skutečný rozhovor.",
+      "promptEyebrow": "Nastavte scénu",
+      "mentorPrompt": "Řekněte mi o rozhovoru, který si chcete nacvičit. S kým mluvíte, co se děje a co chcete zvládnout lépe?",
+      "scenario": "Co chcete procvičit?",
+      "scenarioPlaceholder": "Například: Chci si procvičit konstruktivní zpětnou vazbu kolegovi, který nedodržel termín.",
+      "scenarioHint": "Přidejte kontext pro realistické cvičení, například situaci, zapojené osoby nebo cíl.",
+      "privateHint": "Tento trénink vidíte pouze vy.",
+      "submit": "Vytvořit trénink",
+      "suggestions": {
+        "title": "Začněte příkladem",
+        "feedback": {
+          "label": "Poskytnout zpětnou vazbu",
+          "value": "Chci si procvičit poskytnutí konstruktivní zpětné vazby kolegovi, který nedodržel důležitý termín."
+        },
+        "boundary": {
+          "label": "Nastavit hranici",
+          "value": "Chci si procvičit nastavení jasné hranice, když mě kolega žádá o naléhavou práci mimo mé současné priority."
+        },
+        "explanation": {
+          "label": "Vysvětlit rozhodnutí",
+          "value": "Chci si procvičit vysvětlení obtížného rozhodnutí člověku, který s ním nesouhlasí."
+        },
+        "request": {
+          "label": "Přednést žádost",
+          "value": "Chci si procvičit požádání manažera o podporu při příliš vysokém pracovním vytížení."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Nastavte scénu",
+          "description": "Popište situaci vlastními slovy."
+        },
+        "rehearse": {
+          "title": "Nacvičte ji doopravdy",
+          "description": "Mluvte nebo pište, zatímco AI mentor hraje druhou osobu."
+        },
+        "reflect": {
+          "title": "Zjistěte, co fungovalo",
+          "description": "Ukončete nácvik, až budete připraveni, a získejte cílenou zpětnou vazbu."
+        }
+      }
+    },
+    "backToDashboard": "Zpět na nástěnku",
+    "rehearsalEyebrow": "Dnešní nácvik",
+    "successGoal": "Váš cíl",
+    "successGoalFallback": "Veďte rozhovor jasně a dohodněte konstruktivní další krok.",
+    "viewFeedback": "Zobrazit zpětnou vazbu",
+    "practiceAgain": "Procvičit znovu",
+    "replayLoadingTitle": "Připravujeme váš další nácvik",
+    "yourRole": "Vaše role",
+    "mentorRole": "Role AI mentora",
+    "feedback": {
+      "title": "Zpětná vazba k procvičení",
+      "summaryTitle": "Co si odnést dál",
+      "summaryDescription": "Využijte tyto postřehy k posílení dalšího pokusu.",
+      "scoreLabel": "Výsledek procvičení",
+      "criteriaTitle": "Čeho si všiml AI hodnotitel",
+      "criterionFallback": "Kritérium {{number}}",
+      "importantFeedbackTitle": "Důležitá zpětná vazba"
+    },
+    "startHint": "Začněte rozhovor, až budete připraveni.",
+    "checkHint": "Kdykoli skončete a zjistěte, jak váš přístup zapůsobil.",
+    "checkPractice": "Dokončit a zamyslet se",
+    "practiceComplete": "Nácvik je dokončen. Ke zpětné vazbě se můžete kdykoli vrátit.",
+    "generating": "AI mentor připravuje scénář.",
+    "preparingBackgroundDescription": "Vaše procvičování se připravuje na pozadí. Můžete se vrátit na hlavní panel a přijít zpět, až bude připravené.",
+    "failed": "Scénář se nepodařilo vytvořit.",
+    "error": "Trénink se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "conversationTitle": "Trénink s AI mentorem",
+    "mentorName": "AI mentor",
+    "message": "Zpráva pro AI mentora",
+    "send": "Odeslat"
+  },
   "common": {
     "button": {
+      "previous": "Předchozí",
+      "next": "Další",
       "save": "Uložit",
       "saving": "Ukládání...",
       "delete": "Vymazat",
@@ -18,7 +270,8 @@
       "edit": "Upravit",
       "delete": "Smazat",
       "uploading": "Nahrávání...",
-      "sending": "Odesílání..."
+      "sending": "Odesílání...",
+      "loading": "Načítání..."
     },
     "toast": {
       "noAccess": "Nemáte oprávnění pro přístup k tomuto zdroji",
@@ -1549,6 +1802,7 @@
         "user_manage": "Může spravovat uživatele včetně rolí a stavu účtu.",
         "settings_read_self": "Může zobrazit vlastní nastavení profilu a předvoleb.",
         "settings_update_self": "Může aktualizovat vlastní nastavení profilu a předvoleb.",
+        "dashboard_read": "Může zobrazit svůj dashboard.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
@@ -3352,6 +3606,7 @@
         },
         "retakeModalTitle": "Opravdu chcete lekci absolvovat znovu?",
         "retakeModalDescription": "Tím resetujete svůj pokrok v této lekci. Tuto akci nelze vrátit zpět.",
+        "retakeLoadingTitle": "Připravujeme váš další pokus",
         "retakeAccessDenied": "Tuto lekci můžete opakovat pouze tehdy, pokud jste do kurzu zapsáni nebo jste autorem kurzu."
       }
     },

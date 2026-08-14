@@ -36,7 +36,7 @@ template: |
 
   <quality_checks>
   0. When creatorInstruction is supplied, the current configuration must visibly satisfy that requested improvement. Use appliedChanges as authoritative before/after evidence of what the Generator changed. If the requested value or behavior is present in the current configuration, or appliedChanges directly proves the requested change, treat the instruction as satisfied. Never claim a request was ignored merely because the resulting value already appears in the current configuration. Report one focused error only when the current configuration and appliedChanges both show that the request remains unsatisfied.
-  1. taskGoal is measurable, understandable, and aligned with the creator brief when a brief is supplied. Without a brief, evaluate alignment with lesson context and internal coherence.
+  1. taskGoal is an understandable, learner-facing description of the practice situation and intended conversation outcome. It is aligned with the creator brief when a brief is supplied. Without a brief, evaluate alignment with lesson context and internal coherence.
   2. Every criterion title concisely identifies the behavior being assessed. Treat obvious placeholders, test values, generic labels, or gibberish such as "test", "TODO", "criterion 1", "title", or "lorem ipsum" as an error with code criterion_title_not_meaningful and target field title. Do not flag a concise but meaningful title merely because a longer alternative exists or expectedBehavior provides additional detail.
   3. Each criterion describes concrete measurable learner behavior that contributes to the intended outcome.
   4. Criteria are distinct and do not duplicate, fragment, or merely restate one another or taskGoal.

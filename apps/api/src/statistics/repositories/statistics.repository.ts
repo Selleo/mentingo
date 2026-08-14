@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT, DASHBOARD_DEADLINE_RISK_TYPES, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -10,6 +10,7 @@ import {
   courses,
   coursesSummaryStats,
   courseStudentsStats,
+  groupCourses,
   lessons,
   quizAttempts,
   studentChapterProgress,
@@ -24,7 +25,11 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { NextLesson } from "src/lesson/lesson.schema";
-import type { StatsByMonth, UserStatistic } from "src/statistics/schemas/userStats.schema";
+import type {
+  DashboardDeadlineRiskType,
+  StatsByMonth,
+  UserStatistic,
+} from "src/statistics/schemas/userStats.schema";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -173,6 +178,177 @@ export class StatisticsRepository {
       })
       .from(coursesSummaryStats)
       .where(userId ? eq(coursesSummaryStats.authorId, userId) : undefined);
+  }
+
+  async getDashboardTrainingCompletion(ownerUserId?: UUIDType) {
+    const [result] = await this.db
+      .select({
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.COMPLETED})::INTEGER`,
+        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS})::INTEGER`,
+        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.NOT_STARTED})::INTEGER`,
+        total: sql<number>`COUNT(*)::INTEGER`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .where(
+        and(
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+        ),
+      );
+
+    return result;
+  }
+
+  async getDashboardIncompleteCourses(
+    ownerUserId: UUIDType | undefined,
+    language: SupportedLanguages,
+  ) {
+    return this.db
+      .select({
+        id: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.COMPLETED})::INTEGER`,
+        inProgress: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS})::INTEGER`,
+        notStarted: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.NOT_STARTED})::INTEGER`,
+        total: sql<number>`COUNT(*)::INTEGER`,
+        overdue: sql<number>`COUNT(*) FILTER (
+          WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}
+            AND ${groupCourses.isMandatory} = TRUE
+            AND ${groupCourses.dueDate} < NOW()
+        )::INTEGER`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+        ),
+      )
+      .groupBy(courses.id, courses.title)
+      .having(
+        sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}) > 0`,
+      )
+      .orderBy(
+        desc(
+          sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED})`,
+        ),
+        desc(
+          sql`COUNT(*) FILTER (WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED})::DECIMAL / COUNT(*)`,
+        ),
+        desc(sql`COUNT(*) FILTER (
+          WHERE ${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}
+            AND ${groupCourses.isMandatory} = TRUE
+            AND ${groupCourses.dueDate} < NOW()
+        )`),
+      );
+  }
+
+  async getDashboardDeadlineRiskCounts(ownerUserId?: UUIDType) {
+    const [result] = await this.db
+      .select({
+        overdueCount: sql<number>`COUNT(*) FILTER (
+          WHERE ${groupCourses.dueDate} < NOW()
+        )::INTEGER`,
+        dueSoonCount: sql<number>`COUNT(*) FILTER (
+          WHERE ${groupCourses.dueDate} >= NOW()
+            AND ${groupCourses.dueDate} < NOW() + INTERVAL '7 days'
+        )::INTEGER`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .innerJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
+          eq(groupCourses.isMandatory, true),
+          sql`${groupCourses.dueDate} IS NOT NULL`,
+          sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
+          ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+        ),
+      );
+
+    return result;
+  }
+
+  async getDashboardDeadlineRisks(
+    ownerUserId: UUIDType | undefined,
+    language: SupportedLanguages,
+    riskType: DashboardDeadlineRiskType,
+    page: number,
+    perPage: number,
+  ) {
+    const riskCondition =
+      riskType === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE
+        ? sql`${groupCourses.dueDate} < NOW()`
+        : and(
+            sql`${groupCourses.dueDate} >= NOW()`,
+            sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
+          );
+    const commonCondition = and(
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
+      eq(groupCourses.isMandatory, true),
+      sql`${groupCourses.dueDate} IS NOT NULL`,
+      riskCondition,
+      ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+    );
+    const rowsQuery = this.db
+      .select({
+        courseId: courses.id,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+        studentId: users.id,
+        studentName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        dueDate: sql<string>`${groupCourses.dueDate}::TEXT`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .innerJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(commonCondition)
+      .orderBy(groupCourses.dueDate)
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+    const totalQuery = this.db
+      .select({ count: sql<number>`COUNT(*)::INTEGER` })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .innerJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(commonCondition);
+    const [rows, [total]] = await Promise.all([rowsQuery, totalQuery]);
+
+    return { rows, totalItems: total?.count ?? 0 };
   }
 
   async getConversionAfterFreemiumLesson(userId?: UUIDType) {

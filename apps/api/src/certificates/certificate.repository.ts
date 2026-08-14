@@ -34,6 +34,7 @@ import {
   certificates,
   users,
   courses,
+  courseSlugs,
   studentCourses,
   tenants,
   groups,
@@ -119,6 +120,61 @@ export class CertificateRepository {
       );
 
     return totalItems;
+  }
+
+  async getDashboardSummary(
+    userId: UUIDType,
+    language: SupportedLanguages,
+    expiringBefore: string,
+  ) {
+    const [{ activeCount }] = await this.db
+      .select({ activeCount: sql<number>`COUNT(*)::int` })
+      .from(certificates)
+      .where(
+        and(eq(certificates.userId, userId), eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE)),
+      );
+
+    const [expiringSoon] = await this.db
+      .select({
+        certificateId: certificates.id,
+        courseId: certificates.courseId,
+        courseShortId: courses.shortId,
+        courseSlugBase: courseSlugs.slug,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+        expiresAt: sql<string>`${certificates.expiresAt}`,
+      })
+      .from(certificates)
+      .innerJoin(courses, eq(courses.id, certificates.courseId))
+      .leftJoin(
+        courseSlugs,
+        and(eq(courseSlugs.courseShortId, courses.shortId), eq(courseSlugs.lang, language)),
+      )
+      .where(
+        and(
+          eq(certificates.userId, userId),
+          eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
+          gt(certificates.expiresAt, sql`CURRENT_TIMESTAMP`),
+          lte(certificates.expiresAt, expiringBefore),
+        ),
+      )
+      .orderBy(certificates.expiresAt)
+      .limit(1);
+
+    return {
+      activeCount,
+      expiringSoon: expiringSoon
+        ? {
+            certificateId: expiringSoon.certificateId,
+            courseId: expiringSoon.courseId,
+            courseSlug:
+              expiringSoon.courseShortId && expiringSoon.courseSlugBase
+                ? `${expiringSoon.courseShortId}-${expiringSoon.courseSlugBase}`
+                : expiringSoon.courseId,
+            courseTitle: expiringSoon.courseTitle,
+            expiresAt: expiringSoon.expiresAt,
+          }
+        : null,
+    };
   }
 
   async findUserById(userId: string, trx?: DatabasePg) {

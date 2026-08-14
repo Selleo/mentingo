@@ -3,6 +3,7 @@ import {
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_SOURCE_ROLES,
   COURSE_ENROLLMENT,
+  DASHBOARD_CALENDAR_VIEWS,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
   LIVE_TRAINING_STATUSES,
@@ -34,7 +35,9 @@ import type {
   CalendarEventList,
   CalendarEventListItem,
 } from "../schemas/calendar-event-list.schema";
+import type { DashboardCalendarEventList } from "../schemas/dashboard-calendar-event-list.schema";
 import type { GetCalendarEventsQuery } from "../schemas/get-calendar-events-query.schema";
+import type { GetDashboardCalendarEventsQuery } from "../schemas/get-dashboard-calendar-events-query.schema";
 import type {
   CalendarEventLinkedCourse,
   CalendarEventMaterialRow,
@@ -63,6 +66,49 @@ export class CalendarService {
     const events = sourceEvents.flat().sort(this.sortEventsByStartDate);
 
     return { events };
+  }
+
+  async getDashboardEvents(
+    query: GetDashboardCalendarEventsQuery,
+    currentUser: CurrentUserType,
+  ): Promise<DashboardCalendarEventList> {
+    const { events } = await this.getEvents(query, currentUser);
+    const dashboardEvents = events.map((event) => ({
+      id: event.id,
+      sourceType: event.sourceType,
+      targetId:
+        "courseDueDate" in event.payload ? event.payload.courseDueDate.courseId : event.sourceId,
+      title: event.title,
+      startsAt: event.startsAt,
+      allDay: event.allDay,
+    }));
+
+    if (query.view !== DASHBOARD_CALENDAR_VIEWS.UPCOMING) return dashboardEvents;
+
+    return dashboardEvents
+      .filter((event) => {
+        if (Date.parse(event.startsAt) < Date.now()) return false;
+        return (
+          !query.selectedDate ||
+          !this.isEventOnDate(event.startsAt, query.selectedDate, query.timezone)
+        );
+      })
+      .slice(0, 5);
+  }
+
+  private isEventOnDate(startsAt: string, selectedDate: string, timezone?: string) {
+    try {
+      const eventDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: timezone ?? "UTC",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date(startsAt));
+
+      return eventDate === selectedDate;
+    } catch {
+      return startsAt.slice(0, 10) === selectedDate;
+    }
   }
 
   async getEventDetails(
