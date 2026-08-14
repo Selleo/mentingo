@@ -1,9 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ACTIVITY_LOG_RESOURCE_TYPES, type ActivityLogResourceType } from "@repo/shared";
+import {
+  ACTIVITY_LOG_RESOURCE_TYPES,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  type ActivityLogResourceType,
+} from "@repo/shared";
 import { eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { DB } from "src/storage/db/db.providers";
 import {
   announcements,
   articleSections,
@@ -22,19 +27,21 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { ActivityLogResponse } from "./activity-logs.types";
-
-type ResourceReference = Pick<ActivityLogResponse, "resourceId" | "resourceType">;
-type NamedResource = { id: string; name: string };
+import type {
+  ActivityLogResourceReference,
+  NamedActivityLogResource,
+} from "./activity-log-resource-name.types";
 
 @Injectable()
 export class ActivityLogResourceNameService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async resolveCurrentResourceNames(resources: ResourceReference[]): Promise<Map<string, string>> {
+  async resolveCurrentResourceNames(
+    resources: ActivityLogResourceReference[],
+  ): Promise<Map<string, string>> {
     const resourcesByType = this.groupUniqueResourceIdsByType(resources);
 
     const resolvedResources = await Promise.all(
@@ -67,7 +74,7 @@ export class ActivityLogResourceNameService {
     return `${resourceType}:${resourceId}`;
   }
 
-  private groupUniqueResourceIdsByType(resources: ResourceReference[]) {
+  private groupUniqueResourceIdsByType(resources: ActivityLogResourceReference[]) {
     const resourcesByType = new Map<ActivityLogResourceType, Set<UUIDType>>();
 
     for (const { resourceType, resourceId } of resources) {
@@ -85,7 +92,7 @@ export class ActivityLogResourceNameService {
   private async fetchResourceNamesByType(
     resourceType: ActivityLogResourceType,
     ids: UUIDType[],
-  ): Promise<NamedResource[]> {
+  ): Promise<NamedActivityLogResource[]> {
     switch (resourceType) {
       case ACTIVITY_LOG_RESOURCE_TYPES.USER:
         return this.db
@@ -230,7 +237,7 @@ export class ActivityLogResourceNameService {
     }
   }
 
-  private async fetchScormResourceNames(ids: UUIDType[]): Promise<NamedResource[]> {
+  private async fetchScormResourceNames(ids: UUIDType[]): Promise<NamedActivityLogResource[]> {
     const packages = await this.db
       .select({
         id: scormPackages.id,
@@ -241,11 +248,11 @@ export class ActivityLogResourceNameService {
       .where(inArray(scormPackages.id, ids));
 
     const courseIds = packages
-      .filter(({ entityType }) => entityType === "course")
+      .filter(({ entityType }) => entityType === SCORM_PACKAGE_ENTITY_TYPE.COURSE)
       .map(({ entityId }) => entityId);
 
     const lessonIds = packages
-      .filter(({ entityType }) => entityType === "lesson")
+      .filter(({ entityType }) => entityType === SCORM_PACKAGE_ENTITY_TYPE.LESSON)
       .map(({ entityId }) => entityId);
 
     const [courseNames, lessonNames] = await Promise.all([
