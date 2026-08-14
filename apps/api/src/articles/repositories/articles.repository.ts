@@ -1,11 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ARTICLE_STATUS, ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
+import { ARTICLE_STATUS, ENTITY_TYPES } from "@repo/shared";
 import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } from "drizzle-orm";
 
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";
 
@@ -14,7 +13,6 @@ import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { ArticleItem } from "src/articles/schemas/articleToc.schema";
 import type { UUIDType } from "src/common";
-import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ArticlesRepository {
@@ -158,7 +156,11 @@ export class ArticlesRepository {
       .orderBy(desc(articles.publishedAt));
   }
 
-  async getDraftArticles(requestedLanguage: SupportedLanguages) {
+  async getDraftArticles(requestedLanguage: SupportedLanguages, authorId?: UUIDType) {
+    const visibilityConditions = [ne(articles.archived, true), isNull(articles.publishedAt)];
+
+    if (authorId) visibilityConditions.push(eq(articles.authorId, authorId));
+
     return this.db
       .select({
         ...getTableColumns(articles),
@@ -167,7 +169,7 @@ export class ArticlesRepository {
       })
       .from(articles)
       .leftJoin(users, eq(users.id, articles.authorId))
-      .where(and(ne(articles.archived, true), isNull(articles.publishedAt)))
+      .where(and(...visibilityConditions))
       .orderBy(desc(articles.createdAt));
   }
 
@@ -207,14 +209,25 @@ export class ArticlesRepository {
     articleId: UUIDType,
     requestedLanguage: SupportedLanguages,
     accessConditions: SQL<unknown>[],
+    useBaseLanguageFallback = false,
   ) {
+    const localizedTitle = useBaseLanguageFallback
+      ? this.localizationService.getLocalizedSqlField(articles.title, requestedLanguage, articles)
+      : this.localizationService.getFieldByLanguage(articles.title, requestedLanguage);
+    const localizedContent = useBaseLanguageFallback
+      ? this.localizationService.getLocalizedSqlField(articles.content, requestedLanguage, articles)
+      : this.localizationService.getFieldByLanguage(articles.content, requestedLanguage);
+    const localizedSummary = useBaseLanguageFallback
+      ? this.localizationService.getLocalizedSqlField(articles.summary, requestedLanguage, articles)
+      : this.localizationService.getFieldByLanguage(articles.summary, requestedLanguage);
+
     return this.db
       .select({
         ...getTableColumns(articles),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        title: this.localizationService.getFieldByLanguage(articles.title, requestedLanguage),
-        content: this.localizationService.getFieldByLanguage(articles.content, requestedLanguage),
-        summary: this.localizationService.getFieldByLanguage(articles.summary, requestedLanguage),
+        title: localizedTitle,
+        content: localizedContent,
+        summary: localizedSummary,
         baseLanguage: sql<SupportedLanguages>`${articles.baseLanguage}`,
         availableLocales: sql<SupportedLanguages[]>`${articles.availableLocales}`,
       })
@@ -339,23 +352,18 @@ export class ArticlesRepository {
   async getArticleSections(
     requestedLanguage: SupportedLanguages,
     conditions: SQL<unknown>[],
-    currentUser?: CurrentUserType,
+    canManageArticles: boolean,
   ) {
-    const sectionTitle = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.ARTICLE_MANAGE,
-      PERMISSIONS.ARTICLE_MANAGE_OWN,
-    ])
-      ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
-      : this.localizationService.getLocalizedSqlField(
+    const sectionTitle = canManageArticles
+      ? this.localizationService.getLocalizedSqlField(
           articleSections.title,
           requestedLanguage,
           articleSections,
-        );
-
-    const articleTitle = this.localizationService.getFieldByLanguage(
-      articles.title,
-      requestedLanguage,
-    );
+        )
+      : this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage);
+    const articleTitle = canManageArticles
+      ? this.localizationService.getLocalizedSqlField(articles.title, requestedLanguage, articles)
+      : this.localizationService.getFieldByLanguage(articles.title, requestedLanguage);
 
     return this.db
       .select({
@@ -373,6 +381,11 @@ export class ArticlesRepository {
       })
       .from(articleSections)
       .leftJoin(articles, and(eq(articles.articleSectionId, articleSections.id), ...conditions))
+      .where(
+        canManageArticles
+          ? undefined
+          : sql`${requestedLanguage} = ANY(${articleSections.availableLocales})`,
+      )
       .groupBy(articleSections.id, sectionTitle)
       .orderBy(asc(sectionTitle));
   }
@@ -386,22 +399,31 @@ export class ArticlesRepository {
 
   getVisibleArticleConditions(
     language: SupportedLanguages,
-    currentUser?: CurrentUserType,
-    options?: { isDraftMode?: boolean; excludedId?: UUIDType },
+    options?: {
+      isDraftMode?: boolean;
+      includeUnpublished?: boolean;
+      excludedId?: UUIDType;
+      authorId?: UUIDType;
+      canManageArticles?: boolean;
+      isPublicOnly?: boolean;
+    },
   ): SQL<unknown>[] {
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.ARTICLE_MANAGE,
-      PERMISSIONS.ARTICLE_MANAGE_OWN,
-    ]);
+    const canManageArticles = options?.canManageArticles ?? false;
+    let publicationConditions: SQL<unknown>[] = [];
+
+    if (!options?.includeUnpublished) {
+      publicationConditions = options?.isDraftMode
+        ? [isNull(articles.publishedAt)]
+        : [not(isNull(articles.publishedAt))];
+    }
 
     const conditions = [
       ne(articles.archived, true),
-      ...(options?.isDraftMode
-        ? [isNull(articles.publishedAt)]
-        : [not(isNull(articles.publishedAt))]),
-      ...(!currentUser ? [eq(articles.isPublic, true)] : []),
-      ...(isAdminLike ? [] : [sql`${language} = ANY(${articles.availableLocales})`]),
-      ...(isAdminLike ? [] : [sql`${language} = ANY(${articleSections.availableLocales})`]),
+      ...publicationConditions,
+      ...(options?.isPublicOnly ? [eq(articles.isPublic, true)] : []),
+      ...(options?.authorId ? [eq(articles.authorId, options.authorId)] : []),
+      ...(!canManageArticles ? [sql`${language} = ANY(${articles.availableLocales})`] : []),
+      ...(!canManageArticles ? [sql`${language} = ANY(${articleSections.availableLocales})`] : []),
     ];
 
     if (options?.excludedId) conditions.push(ne(articles.id, options.excludedId));

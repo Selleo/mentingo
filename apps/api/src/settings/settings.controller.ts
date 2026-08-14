@@ -61,6 +61,8 @@ import {
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
+  dashboardWidgetsIdsJSONContentSchema,
+  dashboardWidgetsJSONContentSchema,
   globalSettingsJSONSchema,
   loginPageResourceResponseSchema,
   settingsJSONContentSchema,
@@ -87,6 +89,8 @@ import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
   AdminSettingsJSONContentSchema,
+  DashboardWidgetsIdsJSONContentSchema,
+  DashboardWidgetsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
 } from "./schemas/settings.schema";
@@ -126,6 +130,7 @@ export class SettingsController {
 
   @Get()
   @AllowPasswordChangeRequired()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_SELF)
   @Validate({
     response: baseResponse(userSettingsJSONContentSchema),
   })
@@ -137,6 +142,7 @@ export class SettingsController {
 
   @Put()
   @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_UPDATE_SELF)
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsJSONContentSchema),
@@ -146,6 +152,28 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
+  }
+
+  @Get("dashboard")
+  @RequirePermission(PERMISSIONS.DASHBOARD_READ)
+  @Validate({
+    response: baseResponse(dashboardWidgetsIdsJSONContentSchema),
+  })
+  async getAvailableDashboardWidgets(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<DashboardWidgetsIdsJSONContentSchema>> {
+    return new BaseResponse(await this.settingsService.getAvailableDashboardWidgets(userId));
+  }
+
+  @Get("dashboard/default")
+  @RequirePermission(PERMISSIONS.DASHBOARD_READ)
+  @Validate({
+    response: baseResponse(dashboardWidgetsJSONContentSchema),
+  })
+  async getDefaultDashboardWidgets(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<DashboardWidgetsJSONContentSchema>> {
+    return new BaseResponse(await this.settingsService.getDefaultDashboardWidgets(userId));
   }
 
   @Patch("admin/new-user-notification")

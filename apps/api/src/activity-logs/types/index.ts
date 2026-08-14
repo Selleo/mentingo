@@ -1,4 +1,4 @@
-import type { ActivityLogActionType } from "@repo/shared";
+import type { ActivityLogActionType, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
@@ -119,6 +119,9 @@ export type CourseActivityLogSnapshot = {
   categoryId?: UUIDType | null;
   authorId?: UUIDType | null;
   thumbnailS3Key?: string | null;
+  thumbnailPositionY?: number;
+  learningOutcomes?: string[];
+  showAuthorSection?: boolean;
   baseLanguage?: string;
   availableLocales?: string[];
   settings?: Record<string, unknown>;
@@ -161,6 +164,16 @@ export type NewsActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   summary?: string | null;
+  translations?: Partial<
+    Record<
+      SupportedLanguages,
+      {
+        title?: string;
+        summary?: string;
+        content?: string;
+      }
+    >
+  >;
   status?: string | null;
   isPublic?: boolean | null;
   publishedAt?: string | null;
@@ -212,6 +225,16 @@ export type ArticleActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   summary?: string | null;
+  translations?: Partial<
+    Record<
+      SupportedLanguages,
+      {
+        title?: string;
+        summary?: string;
+        content?: string;
+      }
+    >
+  >;
   status?: string | null;
   content?: string | null;
   isPublic?: boolean | null;
@@ -224,6 +247,7 @@ export type ArticleActivityLogSnapshot = {
 export type ArticleSectionActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
+  translations?: Partial<Record<SupportedLanguages, { title?: string }>>;
   baseLanguage?: string;
   availableLocales?: string[];
 };

@@ -28,7 +28,9 @@ import {
   createTenantSchema,
   createSupportSessionResponseSchema,
   createSupportSessionSchema,
-  supportAdminUsersSchema,
+  supportRolesSchema,
+  supportUserScopeSchema,
+  supportUsersSchema,
   tenantListSortSchema,
   tenantResponseSchema,
   tenantsListSchema,
@@ -44,10 +46,11 @@ import {
 
 import type {
   CreateSupportSessionResponse,
-  SupportAdminUsersResponse,
+  SupportRolesResponse,
+  SupportUsersResponse,
   TenantResponse,
   TenantsListResponse,
-  ListSupportAdminUsersQuery,
+  ListSupportUsersQuery,
   ListTenantsQuery,
 } from "./types";
 
@@ -139,6 +142,17 @@ export class TenantsController {
     await this.tenantsService.deleteTenantById(id, currentTenantId);
   }
 
+  @Get(":id/support-roles")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
+    response: baseResponse(supportRolesSchema),
+  })
+  async findSupportRoles(@Param("id") id: string): Promise<BaseResponse<SupportRolesResponse>> {
+    const roles = await this.supportModeService.listSupportRoles(id);
+
+    return new BaseResponse(roles);
+  }
+
   @Get(":id/support-users")
   @Validate({
     request: [
@@ -146,17 +160,21 @@ export class TenantsController {
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "scope", schema: Type.Optional(supportUserScopeSchema) },
+      { type: "query", name: "roleSlug", schema: Type.Optional(Type.String()) },
     ],
-    response: paginatedResponse(supportAdminUsersSchema),
+    response: paginatedResponse(supportUsersSchema),
   })
   async findSupportUsers(
     @Param("id") id: string,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
     @Query("search") search?: string,
-  ): Promise<PaginatedResponse<SupportAdminUsersResponse>> {
-    const query: ListSupportAdminUsersQuery = { page, perPage, search };
-    const users = await this.supportModeService.listSupportAdminUsers(id, query);
+    @Query("scope") scope?: ListSupportUsersQuery["scope"],
+    @Query("roleSlug") roleSlug?: string,
+  ): Promise<PaginatedResponse<SupportUsersResponse>> {
+    const query: ListSupportUsersQuery = { page, perPage, search, scope, roleSlug };
+    const users = await this.supportModeService.listSupportUsers(id, query);
 
     return new PaginatedResponse(users);
   }

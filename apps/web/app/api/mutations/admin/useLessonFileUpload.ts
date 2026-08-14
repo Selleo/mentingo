@@ -6,7 +6,7 @@ import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "~/api/queries/useResourceLibr
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { EditableResourceVisibility, SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "~/api/types";
 
@@ -17,6 +17,7 @@ export type LessonFileUploadOptions = {
   language: SupportedLanguages;
   title: string;
   description: string;
+  visibility?: EditableResourceVisibility;
 };
 
 export function useLessonFileUpload() {
@@ -31,6 +32,7 @@ export function useLessonFileUpload() {
       formData.append("language", options.language);
       formData.append("title", options.title);
       formData.append("description", options.description);
+      if (options.visibility) formData.append("visibility", options.visibility);
 
       if (options.lessonId) {
         formData.append("lessonId", options.lessonId);

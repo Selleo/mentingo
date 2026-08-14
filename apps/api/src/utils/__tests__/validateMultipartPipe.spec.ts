@@ -107,6 +107,13 @@ describe("ValidateMultipartPipe", () => {
     expect(result.age).toBe(42);
   });
 
+  it("should parse integer strings correctly", () => {
+    const IntegerSchema = Type.Object({ position: Type.Integer() });
+    const integerPipe = new ValidateMultipartPipe(IntegerSchema);
+
+    expect(integerPipe.transform({ position: "35" })).toEqual({ position: 35 });
+  });
+
   it("should keep numeric-looking strings as strings for string schema fields", () => {
     const multipartData = {
       name: "123123",

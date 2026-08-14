@@ -2,7 +2,6 @@ import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLess
 import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
-  SETTINGS: "Settings",
   CURRICULUM: "Curriculum",
   PRICING: "Pricing",
   STATUS: "Status",

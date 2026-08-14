@@ -14,6 +14,9 @@ import {
   COURSE_FEATURE,
   ENTITY_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
+  type EditableResourceVisibility,
+  type SupportedLanguages,
 } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
@@ -64,7 +67,6 @@ import type {
   UpdateQuizLessonBody,
 } from "../lesson.schema";
 import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
-import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CourseContentEntityType } from "src/common/types/course-content-entity.type";
@@ -1371,6 +1373,7 @@ export class AdminLessonService {
     description: string,
     lessonId?: UUIDType,
     contextId?: string,
+    visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
   ) {
     if (lessonId) {
       await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
@@ -1395,7 +1398,7 @@ export class AdminLessonService {
       title: fileTitle,
       description: fileDescription,
       currentUser,
-      options: { contextId },
+      options: { contextId, visibility },
     });
 
     return { resourceId: fileData.resourceId };

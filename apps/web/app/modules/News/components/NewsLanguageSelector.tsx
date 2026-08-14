@@ -1,5 +1,3 @@
-import { useAddNewsLanguage } from "~/api/mutations/useAddNewsLanguage";
-import { useDeleteNewsLanguage } from "~/api/mutations/useDeleteNewsLanguage";
 import { LanguageSelector } from "~/components/LanguageSelector/LanguageSelector";
 
 import { NEWS_LANGUAGE_SELECTOR_HANDLES } from "../../../../e2e/data/news/handles";
@@ -13,27 +11,19 @@ type NewsLanguageSelectorProps = {
   baseLanguage?: SupportedLanguages | null;
   availableLocales?: SupportedLanguages[];
   onChange: (language: SupportedLanguages) => void;
+  onCreateLanguage?: (language: SupportedLanguages) => Promise<void>;
+  onDeleteLanguage?: (language: SupportedLanguages) => Promise<void>;
 };
 
 export const NewsLanguageSelector = ({
   formKey,
-  newsId,
   value,
   baseLanguage,
   availableLocales,
   onChange,
+  onCreateLanguage,
+  onDeleteLanguage,
 }: NewsLanguageSelectorProps) => {
-  const { mutateAsync: addLanguage } = useAddNewsLanguage();
-  const { mutateAsync: deleteLanguage } = useDeleteNewsLanguage();
-
-  const handleCreateLanguage = async (language: SupportedLanguages) => {
-    await addLanguage({ id: newsId, data: { language } });
-  };
-
-  const handleDeleteLanguage = async (language: SupportedLanguages) => {
-    await deleteLanguage({ id: newsId, language });
-  };
-
   return (
     <LanguageSelector
       formKey={formKey}
@@ -41,8 +31,8 @@ export const NewsLanguageSelector = ({
       baseLanguage={baseLanguage}
       availableLocales={availableLocales}
       onChange={onChange}
-      onCreateLanguage={handleCreateLanguage}
-      onDeleteLanguage={handleDeleteLanguage}
+      onCreateLanguage={onCreateLanguage}
+      onDeleteLanguage={onDeleteLanguage}
       testIds={{
         select: NEWS_LANGUAGE_SELECTOR_HANDLES.SELECT,
         deleteButton: NEWS_LANGUAGE_SELECTOR_HANDLES.DELETE_BUTTON,

@@ -13,11 +13,15 @@ import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
   type SupportedLanguages,
+  type StudentCourseUrgency,
+  STUDENT_COURSE_URGENCY,
+  STUDENT_DASHBOARD_LIMITS,
 } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
@@ -28,6 +32,7 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   gte,
   getTableColumns,
   ilike,
@@ -52,13 +57,19 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
-import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  buildJsonbField,
+  buildJsonbStringArrayField,
+  deleteJsonbField,
+  setJsonbField,
+  setJsonbStringArrayField,
+} from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
-import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { processInBatches } from "src/common/utils/processInBatches";
+import { CourseDurationService } from "src/courses/course-duration.service";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import {
@@ -92,6 +103,10 @@ import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   groupCourses,
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorStudentLessonProgress,
   categories,
   certificates,
@@ -135,7 +150,6 @@ import {
   VIDEO_COMPLETION_TRACKING_ENABLED,
 } from "./constants";
 import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-reminders.constants";
-import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
 import {
@@ -188,7 +202,9 @@ import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
+import type { StudentCourseDashboardSummary } from "./schemas/studentDashboard.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { UpdateCourseMediaBody } from "./schemas/updateCourseMedia.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SQL } from "drizzle-orm";
@@ -205,7 +221,6 @@ import type {
   ContextualCourseTranslationType,
   CourseTranslationType,
 } from "src/courses/types/course.types";
-import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   AdminLessonWithContentSchema,
@@ -230,6 +245,23 @@ type OverdueCoursesByLanguageRow = {
   language: SupportedLanguages;
   courses: OverdueCoursesEmailCourse[];
 };
+
+const getRequiredCourseUrgency = (
+  dueDate: string | null,
+  now: number,
+  dueSoonBoundary: number,
+): StudentCourseUrgency =>
+  match(dueDate ? Date.parse(dueDate) : null)
+    .with(null, () => STUDENT_COURSE_URGENCY.NO_DEADLINE)
+    .when(
+      (timestamp) => timestamp < now,
+      () => STUDENT_COURSE_URGENCY.OVERDUE,
+    )
+    .when(
+      (timestamp) => timestamp <= dueSoonBoundary,
+      () => STUDENT_COURSE_URGENCY.DUE_SOON,
+    )
+    .otherwise(() => STUDENT_COURSE_URGENCY.SCHEDULED);
 
 @Injectable()
 export class CourseService {
@@ -260,6 +292,7 @@ export class CourseService {
     private readonly certificatesService: CertificatesService,
     private readonly groupCourseDueDateCalendarService: GroupCourseDueDateCalendarService,
     private readonly searchIndexService: SearchIndexService,
+    private readonly courseDurationService: CourseDurationService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -500,6 +533,182 @@ export class CourseService {
     });
   }
 
+  async markCourseOpened(courseId: UUIDType, userId: UUIDType): Promise<void> {
+    const [updatedEnrollment] = await this.db
+      .update(studentCourses)
+      .set({ lastOpenedAt: sql`CURRENT_TIMESTAMP` })
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .returning({ id: studentCourses.id });
+
+    if (!updatedEnrollment) throw new ForbiddenException("common.toast.courseAccessDenied");
+  }
+
+  async getStudentDashboardSummary(
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<StudentCourseDashboardSummary> {
+    const continueCourses = await this.db
+      .select({
+        courseId: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        thumbnailS3Key: courses.thumbnailS3Key,
+        completedChapterCount: studentCourses.finishedChapterCount,
+        courseChapterCount: courses.chapterCount,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          eq(studentCourses.progress, PROGRESS_STATUSES.IN_PROGRESS),
+          isNull(studentCourses.completedAt),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        ),
+      )
+      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
+
+    const requiredCourses = await this.db
+      .select({
+        courseId: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        dueDate: sql<string | null>`${groupCourses.dueDate}`,
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .innerJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(studentCourses.completedAt),
+          eq(groupCourses.isMandatory, true),
+          inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        ),
+      )
+      .orderBy(groupCourses.dueDate, courses.title)
+      .limit(STUDENT_DASHBOARD_LIMITS.REQUIRED_COURSES);
+
+    const [completion] = await this.db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+        completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.completedAt} IS NOT NULL)::int`,
+        inProgress: sql<number>`COUNT(*) FILTER (
+          WHERE ${studentCourses.completedAt} IS NULL
+            AND ${studentCourses.progress} = ${PROGRESS_STATUSES.IN_PROGRESS}
+        )::int`,
+        notStarted: sql<number>`COUNT(*) FILTER (
+          WHERE ${studentCourses.completedAt} IS NULL
+            AND ${studentCourses.progress} <> ${PROGRESS_STATUSES.IN_PROGRESS}
+        )::int`,
+      })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    const continueCourseIds = continueCourses.map((course) => course.courseId);
+    const requiredCourseIds = requiredCourses.map((course) => course.courseId);
+    const courseIds = [...new Set([...continueCourseIds, ...requiredCourseIds])];
+    const slugs = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+
+    const nextLessons =
+      continueCourseIds.length > 0
+        ? await this.db
+            .selectDistinctOn([chapters.courseId], {
+              courseId: chapters.courseId,
+              id: lessons.id,
+              title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+            })
+            .from(lessons)
+            .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+            .innerJoin(courses, eq(courses.id, chapters.courseId))
+            .leftJoin(
+              studentLessonProgress,
+              and(
+                eq(studentLessonProgress.lessonId, lessons.id),
+                eq(studentLessonProgress.chapterId, chapters.id),
+                eq(studentLessonProgress.studentId, userId),
+              ),
+            )
+            .where(
+              and(
+                inArray(chapters.courseId, continueCourseIds),
+                not(
+                  and(
+                    isNotNull(studentLessonProgress.completedAt),
+                    or(
+                      eq(studentLessonProgress.isQuizPassed, true),
+                      isNull(studentLessonProgress.isQuizPassed),
+                    ),
+                  )!,
+                ),
+              ),
+            )
+            .orderBy(chapters.courseId, chapters.displayOrder, lessons.displayOrder)
+        : [];
+    const nextLessonByCourse = new Map(
+      nextLessons.map(({ courseId, id, title }) => [courseId, { id, title }] as const),
+    );
+
+    const continueLearningCourses = await Promise.all(
+      continueCourses.map(async (course) => ({
+        courseId: course.courseId,
+        slug: slugs.get(course.courseId) ?? course.courseId,
+        title: course.title,
+        thumbnailUrl: course.thumbnailS3Key
+          ? await this.getSignedCourseThumbnailUrl(course.thumbnailS3Key)
+          : null,
+        completedChapterCount: course.completedChapterCount,
+        courseChapterCount: course.courseChapterCount,
+        lesson: nextLessonByCourse.get(course.courseId) ?? null,
+      })),
+    );
+    const now = Date.now();
+    const dueSoonBoundary = addDays(new Date(now), 7).getTime();
+
+    const total = completion?.total ?? 0;
+    const completed = completion?.completed ?? 0;
+
+    return {
+      continueLearningCourses,
+      requiredCourses: requiredCourses.map((course) => {
+        const urgency = getRequiredCourseUrgency(course.dueDate, now, dueSoonBoundary);
+
+        return {
+          courseId: course.courseId,
+          slug: slugs.get(course.courseId) ?? course.courseId,
+          title: course.title,
+          dueDate: course.dueDate,
+          urgency,
+        };
+      }),
+      completion: {
+        total,
+        completed,
+        inProgress: completion?.inProgress ?? 0,
+        notStarted: completion?.notStarted ?? 0,
+        percentage: total ? Math.round((completed / total) * 100) : 0,
+      },
+    };
+  }
+
   async getStudentsWithEnrollmentDate(query: EnrolledStudentsQuery) {
     const { courseId, filters = {}, language, page = 1, perPage = DEFAULT_PAGE_SIZE } = query;
     const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
@@ -621,7 +830,7 @@ export class CourseService {
     });
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     return {
@@ -673,6 +882,40 @@ export class CourseService {
     return trailers[courseId] ?? null;
   }
 
+  private getLocalizedLearningOutcomes(
+    language: SupportedLanguages,
+    useBaseLanguageFallback = false,
+  ) {
+    if (useBaseLanguageFallback) {
+      return sql<string[]>`
+        ARRAY(
+          SELECT jsonb_array_elements_text(
+            CASE
+              WHEN jsonb_typeof(${courses.learningOutcomes}->${language}) = 'array'
+                AND jsonb_array_length(${courses.learningOutcomes}->${language}) > 0
+                THEN ${courses.learningOutcomes}->${language}
+              WHEN jsonb_typeof(${courses.learningOutcomes}->${courses.baseLanguage}) = 'array'
+                THEN ${courses.learningOutcomes}->${courses.baseLanguage}
+              ELSE '[]'::jsonb
+            END
+          )
+        )
+      `;
+    }
+
+    return sql<string[]>`
+      ARRAY(
+        SELECT jsonb_array_elements_text(
+          CASE
+            WHEN jsonb_typeof(${courses.learningOutcomes}->${language}) = 'array'
+              THEN ${courses.learningOutcomes}->${language}
+            ELSE '[]'::jsonb
+          END
+        )
+      )
+    `;
+  }
+
   private async getSignedCourseThumbnailUrl(
     thumbnailReference: string | null,
     quality: ImageQuality = IMAGE_QUALITY.XL,
@@ -685,138 +928,6 @@ export class CourseService {
       this.logger.error(`Failed to get signed URL for ${thumbnailReference}:`, error);
       return thumbnailReference;
     }
-  }
-
-  private countWordsFromHtml(content: string): number {
-    const $ = loadHtml(content);
-    const text = $.text();
-    return text.trim().split(/\s+/).filter(Boolean).length;
-  }
-
-  private lessonSeconds(params: {
-    descriptionHtml?: string | null;
-    quizQuestionCount: number;
-    lessonType: string;
-  }): number {
-    const { descriptionHtml, quizQuestionCount, lessonType } = params;
-
-    const wordCount = this.countWordsFromHtml(descriptionHtml || "");
-    const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
-
-    const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
-    return match(lessonType)
-      .with(
-        LESSON_TYPES.CONTENT,
-        () =>
-          readingSeconds +
-          embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
-          embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
-          embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
-          embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
-          quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(
-        LESSON_TYPES.QUIZ,
-        () => readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(LESSON_TYPES.AI_MENTOR, () => readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60)
-      .with(LESSON_TYPES.EMBED, () => readingSeconds + DURATION_DEFAULTS.embedMinutes * 60)
-      .otherwise(() => readingSeconds);
-  }
-
-  private countEmbeddedResourcesFromHtml(content: string): {
-    video: number;
-    image: number;
-    download: number;
-    presentation: number;
-  } {
-    const supportedNodeTypes = ["video", "image", "downloadable-file", "presentation"];
-
-    const { contentCount } = injectResourcesIntoContent(content, [], {
-      resourceIdRegex: createLessonResourceIdRegex(),
-      trackNodeTypes: supportedNodeTypes,
-      convertImageAnchors: false,
-    });
-    const videoCount = Number(contentCount.video) || 0;
-    const imageCount = Number(contentCount.image) || 0;
-    const downloadCount = Number(contentCount["downloadable-file"]) || 0;
-    const presentationCount = Number(contentCount.presentation) || 0;
-
-    return {
-      video: videoCount,
-      image: imageCount,
-      download: downloadCount,
-      presentation: presentationCount,
-    };
-  }
-
-  private async computeCourseDurationEstimates(
-    courseIds: UUIDType[],
-    language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<DurationEstimatesByCourse> {
-    if (!courseIds.length) return {};
-
-    const scopedLessonIds = dbInstance
-      .select({ id: lessons.id })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const questionCounts = dbInstance
-      .select({
-        lessonId: questions.lessonId,
-        questionCount: count(questions.id).as("questionCount"),
-      })
-      .from(questions)
-      .where(inArray(questions.lessonId, scopedLessonIds))
-      .groupBy(questions.lessonId)
-      .as("question_counts");
-
-    const lessonRows = await dbInstance
-      .select({
-        id: lessons.id,
-        courseId: chapters.courseId,
-        type: lessons.type,
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const secondsByCourse = new Map<UUIDType, number>();
-
-    for (const lesson of lessonRows) {
-      const lessonSeconds = this.lessonSeconds({
-        descriptionHtml: lesson.description as string,
-        quizQuestionCount: Number(lesson.questionCount) || 0,
-        lessonType: lesson.type,
-      });
-
-      secondsByCourse.set(
-        lesson.courseId,
-        (secondsByCourse.get(lesson.courseId) ?? 0) + lessonSeconds,
-      );
-    }
-
-    const estimates: DurationEstimatesByCourse = {};
-
-    for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = totalSeconds > 0 ? Math.ceil(Math.ceil(totalSeconds / 60) / 30) * 30 : 0;
-      estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
-    }
-
-    return estimates;
-  }
-
-  private formatMinutes(minutes: number): string {
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
   }
 
   private async getAvailableCoursesConditions(
@@ -986,13 +1097,16 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+        courseIds,
+        language,
+        trx,
+      );
       const dataWithDuration = dataWithSlugs.map((item) => {
         const duration = durationEstimates[item.id];
         return {
           ...item,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
-          estimatedDurationFormatted: duration?.formatted ?? null,
         };
       });
 
@@ -1077,6 +1191,7 @@ export class CourseService {
           ...getTableColumns(courses),
           title: this.localizationService.getLocalizedSqlField(courses.title, language),
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
+          learningOutcomes: this.getLocalizedLearningOutcomes(language, true),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
@@ -1153,7 +1268,11 @@ export class CourseService {
 
       const trailerUrls = await this.getCourseTrailerUrls(courseIds);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+        courseIds,
+        language,
+        trx,
+      );
 
       const coursesWithSignedUrls = await Promise.all(
         coursesRows.map(async (course) => {
@@ -1184,7 +1303,6 @@ export class CourseService {
           ...course,
           slug: slugsMap.get(course.id) || course.id,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
-          estimatedDurationFormatted: duration?.formatted ?? null,
         };
       });
 
@@ -1202,21 +1320,46 @@ export class CourseService {
       await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
     )
       .with({ type: "notFound" }, () => {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       })
       .otherwise((value) => value);
+
+    const [courseAccess] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, id));
+
+    if (!courseAccess) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    const canManageCourses =
+      hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE) ||
+      hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
+    const canEditCourse =
+      hasPermission(userPermissions, PERMISSIONS.USER_MANAGE) ||
+      (canManageCourses && userId === courseAccess.authorId);
+    const isCourseStudentModeActive = userId
+      ? await this.isCourseStudentModeEnabled(id, userId)
+      : false;
+    const shouldUseExactLanguage = canEditCourse && !isCourseStudentModeActive;
 
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: shouldUseExactLanguage
+          ? this.localizationService.getFieldByLanguage(courses.title, language)
+          : this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: this.localizationService.getLocalizedSqlField(
           categories.title,
           language,
           categories,
         ),
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        showAuthorSection: courses.showAuthorSection,
+        thumbnailPositionY: courses.thumbnailPositionY,
+        description: shouldUseExactLanguage
+          ? this.localizationService.getFieldByLanguage(courses.description, language)
+          : this.localizationService.getLocalizedSqlField(courses.description, language),
+        learningOutcomes: this.getLocalizedLearningOutcomes(language, !shouldUseExactLanguage),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
@@ -1256,11 +1399,12 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
     const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
 
-    if (!course) throw new NotFoundException("Course not found");
     if (
       !isAdmin &&
       userId !== course.authorId &&
@@ -1380,6 +1524,20 @@ export class CourseService {
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
+    const durationHierarchy = await this.courseDurationService.getCourseDurationHierarchy(
+      id,
+      language,
+    );
+
+    const chaptersWithDuration = courseChapterList.map((chapter) => ({
+      ...chapter,
+      estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
+      lessons: chapter.lessons.map((lesson) => ({
+        ...lesson,
+        estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
+      })),
+    }));
+
     const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
       course.thumbnailS3Key,
       IMAGE_QUALITY.XL,
@@ -1389,8 +1547,10 @@ export class CourseService {
     return {
       ...course,
       thumbnailUrl: thumbnailUrl ?? undefined,
+      estimatedDurationSeconds: durationHierarchy.totalSeconds,
+
       trailerUrl,
-      chapters: courseChapterList,
+      chapters: chaptersWithDuration,
       slug: currentSlug,
     };
   }
@@ -1404,7 +1564,7 @@ export class CourseService {
     const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
 
     if (lookupResult.type === "notFound") {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const courseId = lookupResult.courseId;
@@ -1430,7 +1590,7 @@ export class CourseService {
       .limit(1);
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const isEnrolled = !!course.enrolled;
@@ -1444,11 +1604,11 @@ export class CourseService {
         NON_PUBLIC_STATUSES.includes(course.status) &&
         !isEnrolled
       ) {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     } else {
       if (NON_PUBLIC_STATUSES.includes(course.status)) {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     }
 
@@ -1499,10 +1659,10 @@ export class CourseService {
       .innerJoin(categories, eq(courses.categoryId, categories.id))
       .where(and(eq(courses.id, id)));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
-      throw new ForbiddenException("You do not have permission to edit this course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const courseChapterList = await this.db
@@ -1616,6 +1776,10 @@ export class CourseService {
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
+    if (excludeCourseId) {
+      conditions.push(ne(courses.id, excludeCourseId));
+    }
+
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
       conditions.push(
         ...[
@@ -1654,6 +1818,9 @@ export class CourseService {
       );
     }
 
+    const enrolledStudentCourses = alias(studentCourses, "enrolled_student_courses");
+    const enrolledUsers = alias(users, "enrolled_users");
+
     const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
@@ -1670,7 +1837,7 @@ export class CourseService {
           categories,
         ),
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
-        enrolledParticipantCount: sql<number>`0`,
+        enrolledParticipantCount: sql<number>`COUNT(DISTINCT CASE WHEN ${enrolledUsers.id} IS NOT NULL THEN ${enrolledStudentCourses.studentId} END)::int`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`0`,
         priceInCents: courses.priceInCents,
@@ -1693,6 +1860,20 @@ export class CourseService {
       )
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(users, eq(courses.authorId, users.id))
+      .leftJoin(
+        enrolledStudentCourses,
+        and(
+          eq(enrolledStudentCourses.courseId, courses.id),
+          eq(enrolledStudentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .leftJoin(
+        enrolledUsers,
+        and(
+          eq(enrolledUsers.id, enrolledStudentCourses.studentId),
+          isNull(enrolledUsers.deletedAt),
+        ),
+      )
       .leftJoin(
         groupCourses,
         and(
@@ -1727,10 +1908,15 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+    const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      courseIds,
+      language,
+    );
 
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
+        const duration = durationEstimates[course.id];
 
         const authorAvatarSignedUrl =
           await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
@@ -1741,6 +1927,7 @@ export class CourseService {
             ? await this.getSignedCourseThumbnailUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
           slug: slugsMap.get(course.id) || course.id,
         };
       }),
@@ -1755,7 +1942,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
@@ -1808,7 +1995,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (settings.lessonSequenceEnabled !== undefined) {
@@ -1915,7 +2102,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const certificateSignatureUrl = course.settings.certificateSignature
@@ -2011,6 +2198,10 @@ export class CourseService {
         description: buildJsonbField(createCourseBody.language, createCourseBody.description),
         baseLanguage: createCourseBody.language,
         availableLocales: [createCourseBody.language],
+        learningOutcomes: buildJsonbStringArrayField(
+          createCourseBody.language,
+          createCourseBody.learningOutcomes ?? [],
+        ),
         thumbnailS3Key: createCourseBody.thumbnailS3Key,
         status: createCourseBody.status,
         priceInCents: createCourseBody.priceInCents,
@@ -2053,12 +2244,75 @@ export class CourseService {
     );
   }
 
+  async updateCourseMedia(
+    id: UUIDType,
+    { thumbnailPositionY, language }: UpdateCourseMediaBody,
+    currentUser: CurrentUserType,
+    image?: Express.Multer.File,
+  ) {
+    await this.masterCourseService.assertCourseContentEditable(id);
+
+    const [existingCourse] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, id));
+
+    if (!existingCourse) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
+    }
+
+    const previousCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
+    let thumbnailS3Key: string | undefined;
+
+    if (image) {
+      try {
+        const uploadResult = await this.fileService.uploadFile(
+          image,
+          ENTITY_TYPES.COURSE,
+          currentUser.tenantId,
+        );
+        thumbnailS3Key = uploadResult.fileKey;
+      } catch {
+        throw new ConflictException("adminCourseView.errors.media.imageUploadFailed");
+      }
+    }
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({
+        thumbnailPositionY,
+        ...(thumbnailS3Key && { thumbnailS3Key }),
+      })
+      .where(eq(courses.id, id))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("adminCourseView.errors.media.updateFailed");
+    }
+
+    const updatedCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
+
+    if (!this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
+      await this.outboxPublisher.publish(
+        new UpdateCourseEvent({
+          courseId: id,
+          actor: currentUser,
+          previousCourseData: previousCourseSnapshot,
+          updatedCourseData: updatedCourseSnapshot,
+        }),
+      );
+    }
+
+    return updatedCourse;
+  }
+
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
-    image?: Express.Multer.File,
   ) {
     const attemptedFieldKeys = Object.entries(updateCourseBody)
       .filter(([, value]) => value !== undefined)
@@ -2088,11 +2342,11 @@ export class CourseService {
         }
 
         if (!existingCourse) {
-          throw new NotFoundException("Course not found");
+          throw new NotFoundException("adminCourseView.errors.notFound.course");
         }
 
         if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
-          throw new ForbiddenException("You don't have permission to update course");
+          throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
         }
 
         const previousSnapshot = await this.buildCourseActivitySnapshot(
@@ -2108,30 +2362,23 @@ export class CourseService {
             .where(eq(categories.id, updateCourseBody.categoryId));
 
           if (!category) {
-            throw new NotFoundException("Category not found");
+            throw new NotFoundException("adminCourseView.errors.notFound.category");
           }
         }
 
-        // TODO: to remove and start use file service
-        let imageKey = undefined;
-        if (image) {
-          try {
-            const fileExtension = image.originalname.split(".").pop();
-            const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
-            imageKey = await this.fileService.uploadFile(image, resource, currentUser.tenantId);
-          } catch (error) {
-            throw new ConflictException("Failed to upload course image");
-          }
-        }
-
-        const { priceInCents, currency, title, description, language, ...rest } = updateCourseBody;
+        const { priceInCents, currency, title, description, learningOutcomes, language, ...rest } =
+          updateCourseBody;
 
         const updateData = {
           ...rest,
+          learningOutcomes: setJsonbStringArrayField(
+            courses.learningOutcomes,
+            language,
+            learningOutcomes,
+          ),
           title: setJsonbField(courses.title, language, title),
           description: setJsonbField(courses.description, language, description),
           ...(isStripeConfigured ? { priceInCents, currency } : {}),
-          ...(imageKey && { imageUrl: imageKey.fileUrl }),
         };
 
         const [updatedCourse] = await trx
@@ -2460,11 +2707,11 @@ export class CourseService {
       .where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
-      throw new ForbiddenException("You don't have permission to update course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const existingTrailerResources = await this.db
@@ -2510,7 +2757,7 @@ export class CourseService {
       )
       .where(and(eq(courses.id, id)));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (course.userDeletedAt) {
       throw new NotFoundException("User not found");
@@ -2551,7 +2798,7 @@ export class CourseService {
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
-    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+    if (!courseExists.length) throw new NotFoundException("adminCourseView.errors.notFound.course");
     if (!studentIds.length) throw new BadRequestException("Student ids not found");
 
     const existingStudentsEnrollments = await this.db
@@ -2646,7 +2893,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException(`Course ${courseId} not found`);
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
@@ -3166,7 +3413,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) {
       throw new ForbiddenException("You don't have permission to change student mode");
@@ -3252,7 +3499,7 @@ export class CourseService {
       .where(eq(courses.id, id));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
@@ -3940,13 +4187,25 @@ export class CourseService {
       return { averageScoresPerQuiz: [] };
     }
 
+    const activeEnrollment = this.db
+      .select({ studentId: studentCourses.studentId })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.studentId, studentLessonProgress.studentId),
+          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+        ),
+      );
+
     const conditions = [
       eq(chapters.courseId, courseId),
       eq(lessons.type, LESSON_TYPES.QUIZ),
       isNotNull(studentLessonProgress.completedAt),
       isNotNull(studentLessonProgress.quizScore),
-      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-      isNull(users.deletedAt),
+      exists(activeEnrollment),
     ];
 
     if (groupStudentIds.length) {
@@ -3969,14 +4228,6 @@ export class CourseService {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
       .innerJoin(studentLessonProgress, eq(studentLessonProgress.lessonId, lessons.id))
-      .innerJoin(
-        studentCourses,
-        and(
-          eq(studentCourses.studentId, studentLessonProgress.studentId),
-          eq(studentCourses.courseId, chapters.courseId),
-        ),
-      )
-      .innerJoin(users, eq(users.id, studentCourses.studentId))
       .where(and(...conditions))
       .groupBy(
         lessons.id,
@@ -4510,6 +4761,9 @@ export class CourseService {
         categoryId: courses.categoryId,
         authorId: courses.authorId,
         thumbnailS3Key: courses.thumbnailS3Key,
+        thumbnailPositionY: courses.thumbnailPositionY,
+        learningOutcomes: this.getLocalizedLearningOutcomes(resolvedLanguage),
+        showAuthorSection: courses.showAuthorSection,
         settings: courses.settings,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
@@ -4517,7 +4771,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     return {
       ...course,
@@ -4586,6 +4840,8 @@ export class CourseService {
 
       await this.searchIndexService.refreshCourse(courseId, trx);
     });
+
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
   }
 
   async deleteLanguage(
@@ -4601,24 +4857,33 @@ export class CourseService {
     );
 
     if (!availableLocales.includes(language) || baseLanguage === language) {
-      throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
+      throw new BadRequestException("adminCourseView.toast.invalidLanguageToDelete");
     }
 
-    const data = await this.getBetaCourseById(courseId, language, currentUser);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
 
     await this.db.transaction(async (trx) => {
-      const chapterIds = data.chapters.map(({ id }) => id);
-      const lessonIds: UUIDType[] = [];
-      const questionIds: UUIDType[] = [];
+      const chapterRows = await trx
+        .select({ id: chapters.id })
+        .from(chapters)
+        .where(eq(chapters.courseId, courseId));
+      const chapterIds = chapterRows.map(({ id }) => id);
 
-      for (const chapter of data.chapters) {
-        for (const lesson of chapter.lessons ?? []) {
-          lessonIds.push(lesson.id);
-          if (lesson.type === LESSON_TYPES.QUIZ && lesson.questions) {
-            for (const q of lesson.questions) if (q.id) questionIds.push(q.id);
-          }
-        }
-      }
+      const lessonRows = chapterIds.length
+        ? await trx
+            .select({ id: lessons.id })
+            .from(lessons)
+            .where(inArray(lessons.chapterId, chapterIds))
+        : [];
+      const lessonIds = lessonRows.map(({ id }) => id);
+
+      const questionRows = lessonIds.length
+        ? await trx
+            .select({ id: questions.id })
+            .from(questions)
+            .where(inArray(questions.lessonId, lessonIds))
+        : [];
+      const questionIds = questionRows.map(({ id }) => id);
 
       if (chapterIds.length) {
         await trx
@@ -4692,6 +4957,52 @@ export class CourseService {
             ),
           })
           .where(inArray(aiMentorRoleplayConfigurations.configurationId, aiMentorConfigurationIds));
+
+        const aiJudgeConfigurationRows = await trx
+          .select({ id: aiJudgeConfigurations.id })
+          .from(aiJudgeConfigurations)
+          .innerJoin(
+            aiMentorLessons,
+            eq(aiMentorLessons.id, aiJudgeConfigurations.aiMentorLessonId),
+          )
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
+        const aiJudgeConfigurationIds = aiJudgeConfigurationRows.map(({ id }) => id);
+
+        if (aiJudgeConfigurationIds.length) {
+          await trx
+            .update(aiJudgeConfigurations)
+            .set({ taskGoal: deleteJsonbField(aiJudgeConfigurations.taskGoal, language) })
+            .where(inArray(aiJudgeConfigurations.id, aiJudgeConfigurationIds));
+
+          const aiJudgeCriterionRows = await trx
+            .select({ id: aiJudgeCriteria.id })
+            .from(aiJudgeCriteria)
+            .where(inArray(aiJudgeCriteria.configurationId, aiJudgeConfigurationIds));
+          const aiJudgeCriterionIds = aiJudgeCriterionRows.map(({ id }) => id);
+
+          if (aiJudgeCriterionIds.length) {
+            await trx
+              .update(aiJudgeCriteria)
+              .set({
+                title: deleteJsonbField(aiJudgeCriteria.title, language),
+                expectedBehavior: deleteJsonbField(aiJudgeCriteria.expectedBehavior, language),
+              })
+              .where(inArray(aiJudgeCriteria.id, aiJudgeCriterionIds));
+
+            await trx
+              .update(aiJudgeScoreGuidance)
+              .set({
+                description: deleteJsonbField(aiJudgeScoreGuidance.description, language),
+                example: deleteJsonbField(aiJudgeScoreGuidance.example, language),
+              })
+              .where(inArray(aiJudgeScoreGuidance.criterionId, aiJudgeCriterionIds));
+          }
+
+          await trx
+            .update(aiJudgeBlockingErrors)
+            .set({ description: deleteJsonbField(aiJudgeBlockingErrors.description, language) })
+            .where(inArray(aiJudgeBlockingErrors.configurationId, aiJudgeConfigurationIds));
+        }
       }
 
       if (questionIds.length) {
@@ -4718,6 +5029,7 @@ export class CourseService {
         .set({
           title: deleteJsonbField(courses.title, language),
           description: deleteJsonbField(courses.description, language),
+          learningOutcomes: deleteJsonbField(courses.learningOutcomes, language),
           availableLocales: sql`ARRAY_REMOVE(${courses.availableLocales}, ${language})`,
         })
         .where(eq(courses.id, courseId));
@@ -4726,6 +5038,8 @@ export class CourseService {
 
       await this.searchIndexService.refreshLessons(lessonIds, trx);
     });
+
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
   }
 
   async getStudentsDueDatesForCourse(
@@ -5116,6 +5430,8 @@ export class CourseService {
       }
     });
 
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
+
     this.logger.debug(
       `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,
     );
@@ -5131,7 +5447,7 @@ export class CourseService {
       .limit(1);
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const [currentAuthor] = await this.db

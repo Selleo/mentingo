@@ -54,7 +54,7 @@ test("visitor can create a password from the invite email", async ({
     });
     await submitCreateNewPasswordFormFlow(page);
 
-    await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/dashboard");
   } finally {
     await context.close();
   }

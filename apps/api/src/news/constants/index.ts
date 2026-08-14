@@ -5,4 +5,5 @@ export const baseNewsTitle = {
   lt: "Nenurodytas straipsnis",
   cs: "Nepojmenovaný článek",
   es: "Artículo sin título",
+  fr: "Article sans titre",
 };

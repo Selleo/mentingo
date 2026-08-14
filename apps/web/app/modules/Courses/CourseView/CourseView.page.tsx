@@ -1,49 +1,24 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
-import { courseLookupQueryOptions, useCourse, useCurrentUser } from "~/api/queries";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { courseLookupQueryOptions, useCourse } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
-import { canManageCourseByAuthor, hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { usePermissions } from "~/hooks/usePermissions";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
-import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
-import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
-import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
-import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
-import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
+import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOverview";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
-import { COURSE_DISCUSSION_HANDLES } from "../../../../e2e/data/courses/handles";
-import { COURSE_STATISTICS_HANDLES } from "../../../../e2e/data/statistics/handles";
-
-import { ChapterListOverview } from "./components/ChapterListOverview";
-import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
-import CourseCertificate from "./CourseCertificate";
-import { CourseChatTab } from "./CourseChat/CourseChatTab";
+import { buildCourseRedirectPath } from "./courseRedirect.utils";
+import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
+import { LearningModeBanner } from "./LearningModeBanner";
+import { TableOfContent } from "./TableOfContent/TableOfContent";
 
 import type { SupportedLanguages } from "@repo/shared";
-
-const COURSE_VIEW_TAB_QUERY_VALUES = {
-  CHAPTERS: "Chapters",
-  DISCUSSION: "Discussion",
-  MORE_FROM_AUTHOR: "MoreFromAuthor",
-  STATISTICS: "Statistics",
-} as const;
-
-const getCourseViewTabTestId = (tabValue: string) =>
-  match(tabValue)
-    .with("chat", () => COURSE_DISCUSSION_HANDLES.TAB)
-    .with("statistics", () => COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB)
-    .otherwise(() => undefined);
 
 const resolvePreferredLanguage = (url: URL): SupportedLanguages => {
   const languageFromQuery = url.searchParams.get("language");
@@ -87,8 +62,7 @@ export const clientLoader = async ({
   const { status, slug } = lookupCourse;
 
   if (status === "redirect" && slug) {
-    const redirectUrl = new URL(`/course/${slug}`, request.url);
-    throw redirect(`${redirectUrl.pathname}${redirectUrl.search ?? ""}`, 302);
+    throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
 
   return null;
@@ -101,12 +75,26 @@ export default function CourseViewPage() {
 
   const { language: defaultLanguage } = useLanguageStore();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
   const previewLanguage = searchParams.get("language");
   const language =
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
   const { data: course, error } = useCourse(id, language);
-  const { data: globalSettings } = useGlobalSettings();
+
+  const handleCourseLanguageChange = useCallback(
+    (nextLanguage: SupportedLanguages) => {
+      setSearchParams(
+        (currentSearchParams) => {
+          const nextSearchParams = new URLSearchParams(currentSearchParams);
+          nextSearchParams.set("language", nextLanguage);
+          return nextSearchParams;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   useEffect(() => {
     if (isAxiosError(error) && error.response?.status === 404) {
@@ -124,97 +112,13 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
-  const { hasAccess: canViewCourseStatistics } = usePermissions({
-    required: PERMISSIONS.COURSE_STATISTICS,
-  });
-  const { data: currentUser } = useCurrentUser();
-  const canManageCourse = canManageCourseByAuthor({
-    permissions: currentUser?.permissions ?? [],
-    courseAuthorId: course?.authorId,
-    currentUserId: currentUser?.id,
-  });
-
-  const courseViewTabs = useMemo(
-    () => [
-      {
-        value: "chapters",
-        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.CHAPTERS,
-        title: t("studentCourseView.tabs.chapters"),
-        itemCount: course?.chapters?.length,
-        content: <ChapterListOverview />,
-        isForAdminLike: false,
-        isForUnregistered: true,
-        isForEnrolled: false,
-      },
-      {
-        value: "chat",
-        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.DISCUSSION,
-        title: t("studentCourseView.tabs.chat"),
-        content: (
-          <CourseChatTab
-            courseId={course?.id ?? ""}
-            currentUserId={currentUser?.id ?? ""}
-            canDeleteAnyMessage={hasPermission(
-              currentUser?.permissions ?? [],
-              PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
-            )}
-          />
-        ),
-        isForAdminLike: false,
-        isForUnregistered: false,
-        isForEnrolled: true,
-        isFeatureEnabled: Boolean(globalSettings?.courseDiscussionsEnabled),
-      },
-      {
-        value: "moreFromAuthor",
-        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.MORE_FROM_AUTHOR,
-        title: t("studentCourseView.tabs.moreFromAuthor"),
-        content: (
-          <div className="flex flex-col gap-6">
-            <MoreCoursesByAuthor courseId={course?.id ?? ""} contentCreatorId={course?.authorId} />
-            <YouMayBeInterestedIn courseId={course?.id} category={course?.category} />
-          </div>
-        ),
-        isForAdminLike: false,
-        isForUnregistered: false,
-        isForEnrolled: false,
-      },
-      {
-        value: "statistics",
-        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.STATISTICS,
-        title: t("studentCourseView.tabs.statistics"),
-        content: <CourseAdminStatistics course={course} canManageCourse={canManageCourse} />,
-        isForAdminLike: true,
-        isForUnregistered: false,
-        isForEnrolled: false,
-      },
-    ],
-    [
-      t,
-      course,
-      currentUser?.id,
-      currentUser?.permissions,
-      canManageCourse,
-      globalSettings?.courseDiscussionsEnabled,
-    ],
-  );
-
-  const handleTabChange = useCallback(
-    (tabValue: string) => {
-      const tabQueryValue = courseViewTabs.find((tab) => tab.value === tabValue)?.queryValue;
-      if (!tabQueryValue) return;
-
-      setSearchParams((prevParams) => {
-        const nextParams = new URLSearchParams(prevParams);
-        nextParams.set("tab", tabQueryValue);
-        return nextParams;
-      });
-    },
-    [courseViewTabs, setSearchParams],
-  );
+  useEffect(() => {
+    if (course && !course.availableLocales.includes(language)) {
+      handleCourseLanguageChange(course.baseLanguage);
+    }
+  }, [course, handleCourseLanguageChange, language]);
 
   if (!course) return null;
-
   const breadcrumbs = [
     {
       title: t("studentCoursesView.breadcrumbs.courses"),
@@ -223,67 +127,22 @@ export default function CourseViewPage() {
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const canView = (isForAdminLike: boolean, isForUnregistered: boolean, isForEnrolled: boolean) => {
-    const hideForAdmin =
-      isForAdminLike && (!canViewCourseStatistics || !currentUser || !canManageCourse);
-    const hideWhenUnregistered = !isForUnregistered && !currentUser;
-    const hideWhenNotEnrolled = isForEnrolled && !course.enrolled;
-
-    return !(hideForAdmin || hideWhenUnregistered || hideWhenNotEnrolled);
-  };
-
-  const visibleCourseTabs = courseViewTabs.filter(
-    ({ isForAdminLike, isForUnregistered, isForEnrolled, isFeatureEnabled = true }) =>
-      isFeatureEnabled && canView(isForAdminLike, isForUnregistered, isForEnrolled),
-  );
-  const selectedTabQuery = searchParams.get("tab");
-  const activeTab =
-    visibleCourseTabs.find(
-      (tab) =>
-        tab.queryValue.toLowerCase() === selectedTabQuery?.toLowerCase() ||
-        tab.value.toLowerCase() === selectedTabQuery?.toLowerCase(),
-    )?.value ?? visibleCourseTabs[0]?.value;
-
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <CourseAccessProvider course={course}>
         <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBanner />}>
-          <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
-            <div className="flex flex-col gap-y-6 overflow-hidden">
-              <CourseOverview course={course} />
-
-              <CourseCertificate courseId={course.id} />
-
-              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
-                  {visibleCourseTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab.value}
-                      value={tab.value}
-                      data-testid={getCourseViewTabTestId(tab.value)}
-                      className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
-                    >
-                      <span className="body-sm">{tab.title}</span>{" "}
-                      {tab.itemCount && (
-                        <span className="body-sm bg-neutral-200 px-2 rounded-lg">
-                          {tab.itemCount}
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                {visibleCourseTabs.map((tab) => (
-                  <TabsContent
-                    key={tab.value}
-                    value={tab.value}
-                    className="data-[state=active]:mt-6"
-                  >
-                    {tab.content}
-                  </TabsContent>
-                ))}
-              </Tabs>
+          <div className="flex w-full min-w-0 max-w-full flex-col">
+            <div className="flex min-w-0 flex-col gap-y-3 overflow-hidden pb-3 md:gap-y-4 md:pb-4">
+              <CourseOverview
+                idOrSlug={id}
+                language={language}
+                onLanguageChange={handleCourseLanguageChange}
+                openGenerateTranslationModal={openGenerateTranslationModal}
+                setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+              />
+              <CourseStatBar language={language} />
+              <TableOfContent language={language} />
             </div>
-            <CourseViewSidebar course={course} />
           </div>
         </PageWrapper>
       </CourseAccessProvider>

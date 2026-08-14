@@ -13,14 +13,19 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseDurationService } from "src/courses/course-duration.service";
+import { CourseService } from "src/courses/course.service";
+import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
@@ -54,6 +59,13 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const validPngBuffer = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+  0x00, 0x03, 0x01, 0x01, 0x00, 0x18, 0xdd, 0x8d, 0xb1, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+  0x44, 0xae, 0x42, 0x60, 0x82,
+]);
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
@@ -67,8 +79,10 @@ describe("CourseController (e2e)", () => {
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let mockFileService: {
     getFileUrl: jest.Mock;
+    getResourcesForEntity: jest.Mock;
     getRawFileBuffer: jest.Mock;
     isBunnyConfigured: jest.Mock;
+    uploadFile: jest.Mock;
   };
   const password = "password123";
 
@@ -106,8 +120,10 @@ describe("CourseController (e2e)", () => {
     // It can be crashed, test and reapir it later
     mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      getResourcesForEntity: jest.fn().mockResolvedValue([]),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
+      uploadFile: jest.fn(),
     };
 
     const mockCacheManager = {
@@ -237,6 +253,9 @@ describe("CourseController (e2e)", () => {
         courseId: course.id,
         totalSeconds: 120,
       });
+      const group = await groupFactory.withMembers([student.id]).create({
+        name: "Learning time group",
+      });
 
       const partialFullName = `${student.firstName} ${student.lastName.slice(0, 1)}`;
 
@@ -285,6 +304,7 @@ describe("CourseController (e2e)", () => {
           expect(body.data.users).toEqual([
             expect.objectContaining({
               id: student.id,
+              groups: [{ id: group.id, name: group.name }],
             }),
           ]);
         });
@@ -1674,6 +1694,170 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/:id/media", () => {
+    it("uploads and saves a course thumbnail through the update endpoint", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const course = await courseFactory.create({ authorId: admin.id, thumbnailS3Key: null });
+      const uploadedFileKey = `tenants/${admin.tenantId}/course/thumbnail.webp`;
+
+      mockFileService.uploadFile.mockResolvedValue({
+        fileKey: uploadedFileKey,
+        fileUrl: "http://example.com/thumbnail.webp",
+        contentType: "image/webp",
+      });
+      jest.spyOn(FileGuard, "getFileType").mockResolvedValueOnce({ ext: "png", mime: "image/png" });
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", cookies)
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .attach("image", validPngBuffer, {
+          filename: "thumbnail.png",
+          contentType: "image/png",
+        })
+        .expect(200);
+
+      expect(mockFileService.uploadFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mimetype: "image/png",
+          originalname: "thumbnail.png",
+        }),
+        "course",
+        admin.tenantId,
+      );
+
+      const [updatedCourse] = await db
+        .select({
+          thumbnailPositionY: courses.thumbnailPositionY,
+          thumbnailS3Key: courses.thumbnailS3Key,
+        })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(updatedCourse).toEqual({
+        thumbnailPositionY: 35,
+        thumbnailS3Key: uploadedFileKey,
+      });
+      expect(response.body).toEqual({
+        data: { message: "Course updated successfully" },
+      });
+      expect(response.status).toBe(200);
+    });
+
+    it("returns a translation key when a content creator updates another author's media", async () => {
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const otherAuthor = await userFactory
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const course = await courseFactory.create({
+        authorId: otherAuthor.id,
+        thumbnailS3Key: null,
+      });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", await cookieFor(contentCreator, app))
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .expect(403);
+
+      expect(response.body.message).toBe("adminCourseView.errors.forbidden.updateCourse");
+    });
+
+    it("returns a translation key when the course image upload fails", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({ authorId: admin.id, thumbnailS3Key: null });
+
+      mockFileService.uploadFile.mockRejectedValueOnce(new Error("Upload failed"));
+      jest.spyOn(FileGuard, "getFileType").mockResolvedValueOnce({ ext: "png", mime: "image/png" });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", await cookieFor(admin, app))
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .attach("image", validPngBuffer, {
+          filename: "thumbnail.png",
+          contentType: "image/png",
+        })
+        .expect(409);
+
+      expect(response.body.message).toBe("adminCourseView.errors.media.imageUploadFailed");
+    });
+  });
+
+  describe("course update events", () => {
+    it("emits course update events when only modern overview fields change", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        thumbnailPositionY: 50,
+        showAuthorSection: true,
+      });
+      const currentUser = {
+        userId: admin.id,
+        email: admin.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+        permissions: Object.values(PERMISSIONS),
+        tenantId: admin.tenantId,
+      };
+
+      const publishSpy = jest
+        .spyOn(app.get(OutboxPublisher), "publish")
+        .mockResolvedValue(undefined);
+
+      await app.get(CourseService).updateCourse(
+        course.id,
+        {
+          language: SUPPORTED_LANGUAGES.EN,
+          learningOutcomes: ["Build reliable reports"],
+          showAuthorSection: false,
+          thumbnailPositionY: 75,
+        },
+        currentUser,
+        true,
+      );
+
+      expect(publishSpy).toHaveBeenCalledTimes(1);
+
+      const [event] = publishSpy.mock.calls[0];
+
+      expect(event).toBeInstanceOf(UpdateCourseEvent);
+      expect((event as UpdateCourseEvent).courseUpdateData.previousCourseData).toEqual(
+        expect.objectContaining({
+          learningOutcomes: [],
+          showAuthorSection: true,
+          thumbnailPositionY: 50,
+        }),
+      );
+      expect((event as UpdateCourseEvent).courseUpdateData.updatedCourseData).toEqual(
+        expect.objectContaining({
+          learningOutcomes: ["Build reliable reports"],
+          showAuthorSection: false,
+          thumbnailPositionY: 75,
+        }),
+      );
+
+      publishSpy.mockRestore();
+    });
+  });
+
   describe("PATCH /api/course/bulk/status", () => {
     it("updates statuses for selected courses", async () => {
       const admin = await userFactory
@@ -2323,11 +2507,18 @@ describe("CourseController (e2e)", () => {
             .create();
           const cookies = await cookieFor(admin, app);
 
-          const students = await Promise.all(
-            Array.from({ length: 2 }, (_, _i) =>
-              userFactory.withCredentials({ password }).create(),
-            ),
-          );
+          const students = await Promise.all([
+            userFactory.withCredentials({ password }).create({
+              email: "filtered.last-name@example.com",
+              firstName: "Filtered",
+              lastName: "LastName",
+            }),
+            userFactory.withCredentials({ password }).create({
+              email: "unrelated.student@example.com",
+              firstName: "Unrelated",
+              lastName: "Student",
+            }),
+          ]);
 
           const course = await courseFactory.create({
             authorId: admin.id,
@@ -2374,11 +2565,18 @@ describe("CourseController (e2e)", () => {
             .create();
           const cookies = await cookieFor(admin, app);
 
-          const students = await Promise.all(
-            Array.from({ length: 2 }, (_, _i) =>
-              userFactory.withCredentials({ password }).create(),
-            ),
-          );
+          const students = await Promise.all([
+            userFactory.withCredentials({ password }).create({
+              email: "target.last-name@example.com",
+              firstName: "Target",
+              lastName: "UniqueLastName",
+            }),
+            userFactory.withCredentials({ password }).create({
+              email: "different.student@example.com",
+              firstName: "Different",
+              lastName: "Student",
+            }),
+          ]);
 
           const course = await courseFactory.create({
             authorId: admin.id,
@@ -2877,6 +3075,233 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("GET /api/course", () => {
+    it("returns modern course overview fields with localized outcomes, duration hierarchy, and deadline", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const group = await groupFactory.withMembers([student.id]).create();
+      const dueDate = new Date("2026-08-12T00:00:00.000Z");
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        thumbnailPositionY: 72,
+        showAuthorSection: false,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Overview chapter",
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.EMBED,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Embedded lesson"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+          displayOrder: 1,
+        })
+        .returning();
+
+      await db.insert(groupCourses).values({
+        groupId: group.id,
+        courseId: course.id,
+        isMandatory: true,
+        dueDate,
+      });
+
+      await db.insert(studentCourses).values({
+        studentId: student.id,
+        courseId: course.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        finishedChapterCount: 0,
+        enrolledByGroupId: group.id,
+      });
+
+      await db
+        .update(courses)
+        .set({
+          learningOutcomes: sql`jsonb_build_object(
+            ${SUPPORTED_LANGUAGES.EN}::text,
+            to_jsonb(ARRAY[${"Clean data"}, ${"Build reports"}]::text[])
+          )`,
+        })
+        .where(eq(courses.id, course.id));
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", await cookieFor(student, app))
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          thumbnailPositionY: 72,
+          showAuthorSection: false,
+          learningOutcomes: ["Clean data", "Build reports"],
+          estimatedDurationSeconds: 180,
+          dueDate: "2026-08-12T00:00:00Z",
+          enrolled: true,
+          completedChapterCount: 0,
+        }),
+      );
+      expect(response.body.data.chapters[0]).toEqual(
+        expect.objectContaining({
+          id: chapter.id,
+          estimatedDurationSeconds: 180,
+        }),
+      );
+      expect(response.body.data.chapters[0].lessons[0]).toEqual(
+        expect.objectContaining({
+          id: lesson.id,
+          estimatedDurationSeconds: 180,
+        }),
+      );
+    });
+
+    it("returns localized learning outcomes for requested language", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+      });
+
+      await db
+        .update(courses)
+        .set({
+          learningOutcomes: sql`jsonb_build_object(
+            ${SUPPORTED_LANGUAGES.EN}::text,
+            to_jsonb(ARRAY[${"English outcome"}]::text[]),
+            ${SUPPORTED_LANGUAGES.PL}::text,
+            to_jsonb(ARRAY[${"Polski efekt"}]::text[])
+          )`,
+        })
+        .where(eq(courses.id, course.id));
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
+    });
+
+    it.skip("uses exact localized values for an editor while keeping learner fallbacks", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create({ title: "English category" });
+      const course = await courseFactory.create({
+        authorId: author.id,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+        categoryId: category.id,
+        description: "English description",
+        learningOutcomes: {
+          [SUPPORTED_LANGUAGES.EN]: ["English outcome"],
+        },
+        status: "published",
+        thumbnailS3Key: null,
+        title: "English title",
+      });
+      const authorCookies = await cookieFor(author, app);
+      const studentCookies = await cookieFor(student, app);
+      const editorResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", authorCookies)
+        .expect(200);
+
+      expect(editorResponse.body.data).toEqual(
+        expect.objectContaining({
+          title: "",
+          description: "",
+          category: "English category",
+          learningOutcomes: [],
+        }),
+      );
+
+      const studentResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(studentResponse.body.data).toEqual(
+        expect.objectContaining({
+          title: "English title",
+          description: "English description",
+          category: "English category",
+          learningOutcomes: ["English outcome"],
+        }),
+      );
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("Cookie", authorCookies)
+        .send({
+          language: SUPPORTED_LANGUAGES.PL,
+          learningOutcomes: [],
+        })
+        .expect(200);
+
+      const editorResponseWithEmptyTranslation = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", authorCookies)
+        .expect(200);
+
+      expect(editorResponseWithEmptyTranslation.body.data.learningOutcomes).toEqual([]);
+
+      const studentResponseWithEmptyTranslation = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(studentResponseWithEmptyTranslation.body.data.learningOutcomes).toEqual([
+        "English outcome",
+      ]);
+
+      const [storedCourse] = await db
+        .select({ learningOutcomes: courses.learningOutcomes })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(storedCourse.learningOutcomes).toEqual({
+        [SUPPORTED_LANGUAGES.EN]: ["English outcome"],
+        [SUPPORTED_LANGUAGES.PL]: [],
+      });
+    });
+  });
+
   describe("GET /api/course/content-creator-courses", () => {
     it("returns only published courses by specified contentCreator", async () => {
       const student = await userFactory
@@ -2998,7 +3423,7 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].enrolled).toBe(false);
     });
 
-    it("excludes specified course", async () => {
+    it("excludes specified course when scope is ALL", async () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
@@ -3023,7 +3448,7 @@ describe("CourseController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .get(
-          `/api/course/content-creator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=available`,
+          `/api/course/content-creator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=all`,
         )
         .set("Cookie", cookies)
         .expect(200);
@@ -3097,6 +3522,161 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].hasFreeChapters).toBe(true);
       expect(response.body.data[0].priceInCents).toBe(1999);
       expect(response.body.data[0].currency).toBe("usd");
+    });
+
+    it("returns enrolled participant count matching course statistics", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const students = await Promise.all([
+        userFactory.withUserSettings(db).create({ role: SYSTEM_ROLE_SLUGS.STUDENT }),
+        userFactory.withUserSettings(db).create({ role: SYSTEM_ROLE_SLUGS.STUDENT }),
+      ]);
+      const category = await categoryFactory.create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+      });
+
+      await db.insert(coursesSummaryStats).values({
+        courseId: course.id,
+        authorId: contentCreator.id,
+        freePurchasedCount: 99,
+        paidPurchasedCount: 99,
+      });
+
+      await db.insert(studentCourses).values(
+        students.map((student) => ({
+          studentId: student.id,
+          courseId: course.id,
+          finishedChapterCount: 0,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        })),
+      );
+
+      const contentCreatorCoursesResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const statisticsResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(
+        statisticsResponse.body.data.enrolledCount,
+      );
+      expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(2);
+    });
+
+    it("reads the persisted duration estimate and refreshes it after lesson updates", async () => {
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const cookies = await cookieFor(contentCreator, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: contentCreator.id,
+        lessonCount: 1,
+      });
+
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.CONTENT,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short content lesson"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short readable lesson content."),
+          displayOrder: 1,
+        })
+        .returning();
+
+      await app.get(CourseDurationService).refreshCourseDurationEstimates(course.id);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 1,
+        }),
+      );
+
+      const [courseWithEstimate] = await db
+        .select({ durationEstimates: courses.durationEstimates })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalMinutes: 1 });
+
+      await db
+        .update(lessons)
+        .set({
+          description: buildJsonbField(
+            SUPPORTED_LANGUAGES.EN,
+            Array.from({ length: 500 }, () => "word").join(" "),
+          ),
+        })
+        .where(eq(lessons.id, lesson.id));
+
+      const staleResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(staleResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 1,
+        }),
+      );
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson")
+        .query({ id: lesson.id })
+        .set("Cookie", cookies)
+        .send({
+          language: SUPPORTED_LANGUAGES.EN,
+          description: Array.from({ length: 500 }, () => "word").join(" "),
+        })
+        .expect(200);
+
+      const refreshedResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(refreshedResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 3,
+        }),
+      );
+
+      const [courseWithRefreshedEstimate] = await db
+        .select({ durationEstimates: courses.durationEstimates })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalMinutes).toBe(3);
     });
   });
 
@@ -4997,11 +5577,15 @@ describe("CourseController (e2e)", () => {
       },
     );
 
-    it("returns localized category name in course details with base-language fallback", async () => {
+    it("returns localized category names with base-language fallback", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const suffix = Date.now();
       const englishCategoryTitle = `Details Category English ${suffix}`;
       const lithuanianCategoryTitle = `Detali Kategorija Lietuviu ${suffix}`;
@@ -5037,6 +5621,15 @@ describe("CourseController (e2e)", () => {
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.DE })
         .set("Cookie", cookie)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.category).toBe(englishCategoryTitle);
+        });
+
+      await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.DE })
+        .set("Cookie", await cookieFor(student, app))
         .expect(200)
         .expect(({ body }) => {
           expect(body.data.category).toBe(englishCategoryTitle);

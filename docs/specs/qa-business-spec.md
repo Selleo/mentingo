@@ -11,8 +11,8 @@ For HR and L&D teams, Q&A reduces repetitive support work. It lets teams publish
 ## Who Uses It
 
 - HR and L&D administrators publish frequently asked questions about learning programs, onboarding, or platform use.
-- Content administrators maintain localized Q&A entries and keep answers current as policies or processes change.
-- Learners browse the Q&A page to get direct answers without contacting support.
+- Administrators maintain localized Q&A entries and keep answers current as policies or processes change.
+- Learners, content creators, and trainers browse the Q&A page to get direct answers without contacting support.
 - Public visitors can read Q&A entries when the tenant has enabled public Q&A access.
 
 ## Feature Functions
@@ -34,7 +34,7 @@ Q&A helps learners find answers quickly and gives HR or L&D teams a reusable sup
 
 A learner opens the Q&A page and sees available entries for the current interface language. Each entry expands to show the answer, and a focused Q&A link can open a specific answer directly.
 
-An administrator with Q&A management access can create a new entry, choose its base language, enter the title and description, and save it. When editing, the administrator can switch languages, add a missing translation, update localized text, or remove a non-base translation. The base language cannot be removed.
+An administrator with Q&A management access can create a new entry, choose its base language, enter the title and description, and save it. When editing, the administrator can switch languages, add a missing translation, update localized text, or remove a non-base translation. The base language cannot be removed. Content creators have the same published-entry read access as other signed-in roles but cannot create, edit, translate, or delete Q&A entries.
 
 Tenant settings determine whether Q&A is available at all and whether unauthenticated visitors may access it. If public access is disabled, guests are blocked even though signed-in users can still use Q&A when the feature is enabled.
 
@@ -42,7 +42,7 @@ Tenant settings determine whether Q&A is available at all and whether unauthenti
 
 - The user-facing routes are `/qa`, `/qa/new`, and `/qa/:id`, implemented under `apps/web/app/modules/QA`.
 - The backend Q&A API lives in `apps/api/src/qa` and exposes list, detail, create, update, language add/remove, and delete workflows.
-- Reading uses `PERMISSIONS.QA_READ_PUBLIC`; management API endpoints require `PERMISSIONS.QA_MANAGE`.
+- Reading uses `PERMISSIONS.QA_READ_PUBLIC`, which is part of every signed-in system role. Management API endpoints currently require `PERMISSIONS.QA_MANAGE`; the reserved `PERMISSIONS.QA_MANAGE_OWN` grant has no user-facing ownership workflow yet and is omitted from the permissions matrix until that workflow exists.
 - The Q&A page itself is public at the route level, but `ContentAccessGuard` and backend settings enforce tenant Q&A availability and unregistered-user access.
 - Q&A changes publish activity events through the outbox-backed Q&A event handlers.
 

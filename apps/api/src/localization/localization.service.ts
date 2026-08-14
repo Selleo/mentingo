@@ -142,7 +142,16 @@ export class LocalizationService {
   }
 
   getFirstValue(fieldColumn: AnyPgColumn) {
-    return sql<string>`(SELECT value FROM jsonb_each_text(${fieldColumn}) LIMIT 1)`;
+    return sql<string>`(
+      SELECT value
+      FROM jsonb_each_text(
+        CASE
+          WHEN jsonb_typeof(${fieldColumn}) = 'object' THEN ${fieldColumn}
+          ELSE '{}'::jsonb
+        END
+      )
+      LIMIT 1
+    )`;
   }
 
   /**
@@ -162,12 +171,22 @@ export class LocalizationService {
     existingEntity: TEntity,
     updateData: TUpdateData,
     language: string,
+    allowEmpty: boolean = false,
   ): Partial<Record<TField, unknown>> {
     const result: Partial<Record<TField, unknown>> = {};
 
     localizableFields.forEach((field) => {
-      if (field in updateData && updateData[field] !== undefined)
-        result[field] = setJsonbField(existingEntity[field], language, updateData[field]);
+      if (!(field in updateData) || updateData[field] === undefined) return;
+
+      const updatedField = setJsonbField(
+        existingEntity[field],
+        language,
+        updateData[field],
+        true,
+        allowEmpty,
+      );
+
+      if (updatedField !== undefined) result[field] = updatedField;
     });
 
     return result;

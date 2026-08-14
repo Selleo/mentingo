@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import {
   ANNOUNCEMENT_FEEDS,
-  hasAnyPermission,
+  hasPermission,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   type AnnouncementFeed,
@@ -41,10 +41,10 @@ export class AnnouncementsService {
       perPage: ANNOUNCEMENTS_PAGE_SIZE,
     });
 
-    const canManageAnnouncements = hasAnyPermission(currentUser.permissions, [
-      PERMISSIONS.ANNOUNCEMENT_CREATE,
+    const canManageAllAnnouncements = hasPermission(
+      currentUser.permissions,
       PERMISSIONS.ANNOUNCEMENT_DELETE,
-    ]);
+    );
 
     return await this.announcementsRepository.getAllAnnouncements(
       language,
@@ -53,7 +53,7 @@ export class AnnouncementsService {
         perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
       },
       currentUser,
-      canManageAnnouncements,
+      canManageAllAnnouncements,
       feed,
       status,
     );

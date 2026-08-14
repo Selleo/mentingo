@@ -47,7 +47,8 @@ export const routes: (
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
-          route("progress", "modules/Statistics/Statistics.page.tsx");
+          route("dashboard", "modules/Dashboard/Home/HomeDashboard.page.tsx");
+          route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
@@ -63,7 +64,6 @@ export const routes: (
           route("courses", "modules/Admin/Courses/Courses.page.tsx", {
             index: true,
           });
-          route("analytics", "modules/Statistics/Analytics.page.tsx");
           route("envs", "modules/Admin/Envs/Envs.page.tsx");
           route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
           route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");

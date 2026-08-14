@@ -40,10 +40,10 @@ test("visitor can register a new account", async ({ cleanup, factories, withRead
 
     if (!createdUser) throw new Error(`Expected registered user ${email} to exist`);
 
-    await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/dashboard");
     await logout(page);
     await login(page, email, REGISTER_PASSWORD);
-    await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/dashboard");
   });
 });
 

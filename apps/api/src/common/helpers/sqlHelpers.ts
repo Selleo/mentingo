@@ -42,18 +42,68 @@ export function setJsonbField(
   `;
 }
 
+const stringArrayToJsonb = (value: string[]) => {
+  if (!value.length) {
+    return sql`to_jsonb(ARRAY[]::text[])`;
+  }
+
+  return sql`to_jsonb(ARRAY[${sql.join(
+    value.map((item) => sql`${item}`),
+    sql`, `,
+  )}]::text[])`;
+};
+
+export function setJsonbStringArrayField(
+  field: any,
+  key?: string | null,
+  value?: string[],
+  createMissing: boolean = true,
+) {
+  if (key == null || value === undefined) return undefined;
+  if (!key) return undefined;
+
+  const objectField = sql`
+    CASE
+      WHEN jsonb_typeof(${field}) = 'object' THEN ${field}
+      ELSE '{}'::jsonb
+    END
+  `;
+
+  return sql`
+    jsonb_set(
+      ${objectField},
+      ARRAY[${key}]::text[],
+      ${stringArrayToJsonb(value)},
+      ${createMissing}
+    )
+  `;
+}
+
 export type JsonbFieldUpdate = ReturnType<typeof setJsonbField>;
 
+export function buildJsonbField(key: string, value: string, allowEmpty?: boolean): SQL<unknown>;
+export function buildJsonbField(
+  key?: string | null,
+  value?: string | null,
+  allowEmpty?: boolean,
+): SQL<unknown> | undefined;
 export function buildJsonbField(
   key?: string | null,
   value?: string | null,
   allowEmpty: boolean = false,
-) {
+): SQL<unknown> | undefined {
   if (key == null || value === undefined) return undefined;
   if (!allowEmpty && !(key && value)) return undefined;
   if (allowEmpty && value === null) return sql`null`;
 
   return sql`json_build_object(${key}::text, ${value}::text)`;
+}
+
+export function buildJsonbStringArrayField(key?: string | null, value?: string[]) {
+  if (key == null || value === undefined) return undefined;
+  if (!key) return undefined;
+
+  return sql`jsonb_build_object(${key}::text, ${stringArrayToJsonb(value)})`;
 }
 
 export function deleteJsonbField(field: AnyPgColumn, key: string) {

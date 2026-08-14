@@ -1258,29 +1258,78 @@
     {
       "idx": 179,
       "version": "7",
-      "when": 1785153121334,
-      "tag": "0179_add_ai_mentor_configuration_tables",
+      "when": 1785344676126,
+      "tag": "0179_add_course_overview_fields_and_duration_estimates",
       "breakpoints": true
     },
     {
       "idx": 180,
       "version": "7",
-      "when": 1785153140729,
-      "tag": "0180_enable_ai_mentor_configuration_rls",
+      "when": 1785344688595,
+      "tag": "0180_backfill_course_duration_estimates",
       "breakpoints": true
     },
     {
       "idx": 181,
       "version": "7",
-      "when": 1785153988477,
-      "tag": "0181_backfill_ai_mentor_configurations",
+      "when": 1786368652108,
+      "tag": "0181_normalize_legacy_bunny_video_content_types",
       "breakpoints": true
     },
     {
       "idx": 182,
       "version": "7",
-      "when": 1785155002370,
-      "tag": "0182_drop_legacy_ai_mentor_configuration_columns",
+      "when": 1786457442266,
+      "tag": "0182_student_dashboard_practice",
+      "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1786457450866,
+      "tag": "0183_backfill_user_settings_dashboard",
+      "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1786457452466,
+      "tag": "0184_enable_practice_sessions_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1786699463386,
+      "tag": "0185_add_resource_visibility_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1786701433931,
+      "tag": "0186_add_ai_mentor_configuration_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1786701445032,
+      "tag": "0187_enable_ai_mentor_configuration_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1786701446577,
+      "tag": "0188_backfill_ai_mentor_configurations",
+      "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1786701481860,
+      "tag": "0189_drop_legacy_ai_mentor_configuration_columns",
       "breakpoints": true
     }
   ]

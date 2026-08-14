@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
+import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -144,7 +145,7 @@ export const LessonContent = ({
       ),
     );
 
-    queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
+    queryClient.invalidateQueries({ queryKey: getCourseQueryKey(course.id) });
   }, [
     lesson.type,
     lesson.lessonCompleted,

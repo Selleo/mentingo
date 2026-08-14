@@ -131,7 +131,7 @@ function Calendar({
         "h-9 w-full p-0 font-normal hover:bg-neutral-100",
       ),
       day_selected:
-        "bg-primary-700 text-contrast hover:bg-primary-600 focus:bg-primary-700 rounded-md",
+        "bg-primary-700 !text-white hover:bg-primary-600 hover:!text-white focus:bg-primary-700 focus:!text-white rounded-md",
       day_today: "bg-neutral-100 text-neutral-900 rounded-md",
       day_outside: "text-neutral-400 opacity-50",
       day_disabled: "text-neutral-300 opacity-50",

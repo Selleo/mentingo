@@ -1,4 +1,4 @@
-import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES, type AiMentorType } from "@repo/shared";
 
 import { PromptService } from "src/ai/services/prompt.service";
 import { MESSAGE_ROLE } from "src/ai/utils/ai.type";
@@ -12,12 +12,12 @@ describe("PromptService learner-name personalization", () => {
   const threadId = "11111111-1111-4111-8111-111111111111";
   const userId = "22222222-2222-4222-8222-222222222222";
 
-  const createService = () => {
+  const createService = (type: AiMentorType = AI_MENTOR_TYPE.ROLEPLAY) => {
     const aiRepository = {
       findThread: jest.fn().mockResolvedValue({ userLanguage: SUPPORTED_LANGUAGES.PL }),
       findMentorLessonByThreadId: jest.fn().mockResolvedValue({
         title: "Negocjacje",
-        type: AI_MENTOR_TYPE.ROLEPLAY,
+        type,
         name: "Klient",
         learnerFirstName: "Maciej",
         openingInstruction: null,
@@ -106,5 +106,28 @@ describe("PromptService learner-name personalization", () => {
     expect(prompt).toContain("Do not use the name in every reply");
     expect(prompt).toContain("Never infer or invent gender, titles, honorifics");
     expect(prompt).toContain("In Roleplay, remain fully in character");
+  });
+
+  it("forces the roleplay prompt when a practice thread requests it", async () => {
+    const { service } = createService(AI_MENTOR_TYPE.TEACHER);
+    const loadPrompt = jest.spyOn(service, "loadPrompt").mockImplementation(async (id) => {
+      switch (id) {
+        case "securityAndRagBlock":
+          return "SECURITY";
+        case "learnerNameAddon":
+          return "LEARNER_NAME_RULES";
+        case "roleplayPrompt":
+          return "ROLEPLAY_PROMPT";
+        default:
+          throw new Error(`Unexpected prompt: ${id}`);
+      }
+    });
+
+    await service.setSystemPrompt({ threadId, userId }, AI_MENTOR_TYPE.ROLEPLAY);
+
+    expect(loadPrompt).toHaveBeenCalledWith(
+      "roleplayPrompt",
+      expect.objectContaining({ scenario: "Rozmowa z wymagającym klientem." }),
+    );
   });
 });

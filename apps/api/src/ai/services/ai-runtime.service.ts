@@ -22,7 +22,7 @@ import {
   referencedAiJudgeConfigurationStructuredOutputSchema,
 } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
-import { aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
+import { aiJudgeJudgementSchema, generateTranslationSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
@@ -182,7 +182,14 @@ export class AiRuntimeService {
     ) {
       try {
         const luma = await this.getLumaClient();
-        return await luma.ai.generateTranslations(input);
+
+        const result = await luma.ai.generateTranslations(input);
+
+        if (!Value.Check(generateTranslationSchema, result)) {
+          throw new Error("Luma translation generation returned an invalid structured result");
+        }
+
+        return result;
       } catch (error) {
         this.logger.warn(
           `Luma translation generation failed; falling back to core translation generation: ${

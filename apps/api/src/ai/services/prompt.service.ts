@@ -2,7 +2,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
@@ -124,7 +124,7 @@ export class PromptService implements OnModuleInit {
 
     const { chunks: context } = await observe(
       async () => {
-        return this.ragService.getContext(contextInfo, lessonId);
+        return lessonId ? this.ragService.getContext(contextInfo, lessonId) : { chunks: [] };
       },
       { name: "RAG", asType: "retriever" },
     )();
@@ -137,7 +137,7 @@ export class PromptService implements OnModuleInit {
     return history;
   }
 
-  async setSystemPrompt(data: ThreadOwnershipBody) {
+  async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {
     const { userLanguage } = await this.aiRepository.findThread([
       eq(aiMentorThreads.id, data.threadId),
     ]);
@@ -149,6 +149,7 @@ export class PromptService implements OnModuleInit {
     }
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
+    const mode = mentorType ?? lesson.type;
 
     const securityAndRagBlock = await this.loadPrompt("securityAndRagBlock", {
       language: userLanguage,
@@ -170,7 +171,7 @@ export class PromptService implements OnModuleInit {
 
     let mentorPrompt: string;
 
-    if (lesson.type === AI_MENTOR_TYPE.TEACHER && lesson.teachingStyle) {
+    if (mode === AI_MENTOR_TYPE.TEACHER && lesson.teachingStyle) {
       mentorPrompt = await this.loadPrompt("teacherPrompt", {
         ...commonPromptVariables,
         taskGoal: lesson.taskGoal,
@@ -179,7 +180,7 @@ export class PromptService implements OnModuleInit {
         teachingStyle: lesson.teachingStyle,
         feedbackGuidance: lesson.feedbackGuidance ?? "",
       });
-    } else if (lesson.type === AI_MENTOR_TYPE.ROLEPLAY && lesson.difficulty) {
+    } else if (mode === AI_MENTOR_TYPE.ROLEPLAY && lesson.difficulty) {
       mentorPrompt = await this.loadPrompt("roleplayPrompt", {
         ...commonPromptVariables,
         scenario: lesson.scenario,

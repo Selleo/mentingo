@@ -65,6 +65,7 @@ import type {
   CertificateActivityRecord,
   CertificateArchiveTarget,
   CertificateExpirationWarningRecord,
+  CertificateDashboardSummary,
   CertificateNotificationRecord,
   CertificateResetUsersQuery,
   CertificateResetUsersResult,
@@ -140,6 +141,17 @@ export class CertificatesService implements OnModuleDestroy {
       this.logger.error("Error fetching certificates", error);
       throw new InternalServerErrorException("studentCertificateView.informations.failedToFetch");
     }
+  }
+
+  async getDashboardSummary(
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CertificateDashboardSummary> {
+    return this.certificateRepository.getDashboardSummary(
+      userId,
+      language,
+      addDays(new Date(), 30).toISOString(),
+    );
   }
 
   async createCertificate(userId: UUIDType, courseId: UUIDType, trx?: DatabasePg) {
@@ -804,6 +816,11 @@ export class CertificatesService implements OnModuleDestroy {
         openLabel: "Abrir plataforma",
         pageTitle: `Certificado de finalización del curso "${context.certificate.courseTitle}"`,
         pageDescription: `${context.certificate.fullName} completó "${context.certificate.courseTitle}" y obtuvo un certificado.`,
+      },
+      fr: {
+        openLabel: "Ouvrir la plateforme",
+        pageTitle: `Certificat de réussite du cours « ${context.certificate.courseTitle} »`,
+        pageDescription: `${context.certificate.fullName} a terminé le cours « ${context.certificate.courseTitle} » et obtenu un certificat.`,
       },
     } as const satisfies Record<
       SupportedLanguages,

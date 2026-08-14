@@ -25,10 +25,13 @@ template: |
   </language_rules>
 
   <configuration_rules>
-  1. taskGoal states a measurable learner outcome and uses Tiptap-compatible HTML. It provides assessment context but awards no points itself.
+  1. taskGoal is a learner-facing task description, not an assessment criterion. It uses Tiptap-compatible HTML and must make sense when shown without the rubric.
+     - Explain the situation, the learner's role, the counterpart's role, and what the learner is trying to accomplish in the conversation.
+     - Write direct, natural guidance for the learner. Describe the rehearsal they are about to do, not the evidence a Judge should score.
+     - Do not mention criteria, points, scores, conditions, evidence, passing, judging, or "the learner demonstrates" language.
      - Use only `<p>`, `<ul>`, `<li>`, and `<strong>` tags, with no attributes. Never use headings, ordered lists, italics, links, code, blockquotes, line-break tags, or any other HTML or Markdown formatting.
-     - Prefer a short bullet list when the outcome contains two or more distinct learner behaviors. Use `<strong>` to emphasize the key behavior or outcome in each bullet.
-     - For one simple outcome, use one short `<p>` and emphasize only the essential behavior with `<strong>`.
+     - Prefer one short `<p>` that tells the learner what conversation they are entering and what they should try to accomplish. Use `<ul>` only when a short sequence is genuinely clearer; do not turn every behavior into a criterion-like bullet.
+     - Use `<strong>` sparingly to emphasize the situation or main conversation goal, not every sentence or bullet.
      - Return valid HTML with list items nested inside `<ul>`. Do not return plain Markdown bullets.
   2. criteria contains distinct positive, measurable behaviors or skills demonstrated in the learner's conversation. Do not create a criterion solely to restate taskGoal.
   3. Do not enforce an arbitrary criterion count. Prefer the smallest useful set that covers the intended outcome without overlap. An empty criteria array is valid when scoring criteria are genuinely unnecessary.
@@ -51,7 +54,7 @@ template: |
 
   <brevity_rules>
   Runtime Judge context is limited. Keep every field focused on evidence needed to score the learner.
-  - taskGoal: one short paragraph or at most 3 short bullet items.
+  - taskGoal: one short learner-facing paragraph; use at most 3 short bullets only when a sequence cannot be expressed clearly in prose.
   - criterion title: at most 8 words.
   - expectedBehavior: at most 2 short sentences.
   - each score-guidance description: at most 2 short sentences.
@@ -74,5 +77,5 @@ template: |
   </output_contract>
 
   <verification>
-  Before returning, silently choose each criterion's maxScore by comparing the number of genuinely distinct measurable performance levels. Start from 3, lower it for simpler behavior, and exceed it only when every additional level changes the scoring decision. Then verify language consistency, measurable taskGoal, measurable non-overlapping criteria, maxScore bounds, exact 0..maxScore guidance coverage, meaningful adjacent guidance, score-appropriate examples, attainable threshold, unique valid references, and independent blocking errors. Return only the structured result, not this verification or private reasoning.
+  Before returning, silently choose each criterion's maxScore by comparing the number of genuinely distinct measurable performance levels. Start from 3, lower it for simpler behavior, and exceed it only when every additional level changes the scoring decision. Then verify language consistency, a clear learner-facing task description, measurable non-overlapping criteria, maxScore bounds, exact 0..maxScore guidance coverage, meaningful adjacent guidance, score-appropriate examples, attainable threshold, unique valid references, and independent blocking errors. Return only the structured result, not this verification or private reasoning.
   </verification>

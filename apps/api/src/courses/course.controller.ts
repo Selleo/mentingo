@@ -97,7 +97,12 @@ import {
   commonShowBetaCourseSchema,
   commonShowCourseSchema,
 } from "src/courses/schemas/showCourseCommon.schema";
+import { studentCourseDashboardSummarySchema } from "src/courses/schemas/studentDashboard.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
+import {
+  updateCourseMediaSchema,
+  type UpdateCourseMediaBody,
+} from "src/courses/schemas/updateCourseMedia.schema";
 import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
@@ -258,6 +263,35 @@ export class CourseController {
     const data = await this.courseService.getCoursesForUser(query, currentUserId);
 
     return new PaginatedResponse(data);
+  }
+
+  @Get("dashboard-summary")
+  @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
+  @Validate({
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    response: baseResponse(studentCourseDashboardSummarySchema),
+  })
+  async getStudentDashboardSummary(
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
+    return new BaseResponse(
+      await this.courseService.getStudentDashboardSummary(currentUserId, language),
+    );
+  }
+
+  @Post(":courseId/open")
+  @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(nullResponse()),
+  })
+  async markCourseOpened(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
+    await this.courseService.markCourseOpened(courseId, currentUserId);
+    return new BaseResponse(null);
   }
 
   @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
@@ -582,8 +616,39 @@ export class CourseController {
     return new BaseResponse(status);
   }
 
-  @Patch(":id")
+  @Patch(":id/media")
   @UseInterceptors(FileInterceptor("image"))
+  @ApiConsumes("multipart/form-data")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      {
+        type: "body",
+        schema: updateCourseMediaSchema,
+        pipes: [new ValidateMultipartPipe(updateCourseMediaSchema)],
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateCourseMedia(
+    @Param("id") id: UUIDType,
+    @Body() updateCourseMediaBody: UpdateCourseMediaBody,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    image: Express.Multer.File | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateCourseMedia(id, updateCourseMediaBody, currentUser, image);
+
+    return new BaseResponse({ message: "Course updated successfully" });
+  }
+
+  @Patch(":id")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
@@ -595,25 +660,12 @@ export class CourseController {
   async updateCourse(
     @Param("id") id: UUIDType,
     @Body() updateCourseBody: UpdateCourseBody,
-    @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
-        fileIsRequired: false,
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    image: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
     const isPlaywrightTest = request.headers["x-playwright-test"];
 
-    await this.courseService.updateCourse(
-      id,
-      updateCourseBody,
-      currentUser,
-      !!isPlaywrightTest,
-      image,
-    );
+    await this.courseService.updateCourse(id, updateCourseBody, currentUser, !!isPlaywrightTest);
 
     return new BaseResponse({ message: "Course updated successfully" });
   }

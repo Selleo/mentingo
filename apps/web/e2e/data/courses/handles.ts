@@ -146,13 +146,24 @@ export const SCORM_EXPORT_CARD_HANDLES = {
 } as const;
 
 export const COURSE_OVERVIEW_HANDLES = {
+  HERO: "course-overview-hero",
+  HERO_CONTENT: "course-overview-hero-content",
+  HERO_TITLE: "course-overview-hero-title",
   STUDENT_MODE_BUTTON: "course-overview-student-mode-button",
+  SETTINGS_BUTTON: "course-overview-settings-button",
+  EDIT_MEDIA_BUTTON: "course-overview-edit-media-button",
+  SETTINGS_DRAWER: "course-overview-settings-drawer",
+  settingsTab: (tab: string) => `course-overview-settings-tab-${tab}`,
+  AUTHOR_CARD: "course-overview-author-card",
   AUTHOR_TRANSFER_BUTTON: "course-overview-author-transfer-button",
   TRANSFER_OWNERSHIP_SELECT: "course-transfer-ownership-select",
   transferOwnershipOption: (userId: string) => `course-transfer-ownership-option-${userId}`,
   ENROLL_BUTTON: "course-overview-enroll-button",
   LOGIN_ENROLL_LINK: "course-overview-login-enroll-link",
+  ACTIONS: "course-overview-actions",
   START_LEARNING_BUTTON: "course-overview-start-learning-button",
+  DETAILS_BUTTON: "course-overview-details-button",
+  LEARNING_OUTCOMES: "course-overview-learning-outcomes",
 } as const;
 
 const reactionHandleValue = (reaction: string) => reaction.codePointAt(0)?.toString(16) ?? reaction;

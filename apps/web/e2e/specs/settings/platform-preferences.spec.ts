@@ -1,4 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
+import { COURSE_LIST_LAYOUT_VARIANT } from "~/modules/Dashboard/Settings/components/admin/courseListLayout";
 
 import { QA_SETTINGS_HANDLES } from "../../data/qa/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
@@ -55,7 +56,14 @@ test("admin can toggle course platform settings", async ({
     await openPlatformCustomizationSettings(page);
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH).click();
+
+    const nextCourseListLayout = originalSettings.modernCourseListEnabled
+      ? COURSE_LIST_LAYOUT_VARIANT.CLASSIC
+      : COURSE_LIST_LAYOUT_VARIANT.MODERN;
+
+    await page
+      .getByTestId(SETTINGS_PAGE_HANDLES.courseListLayoutOption(nextCourseListLayout))
+      .click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH).click();
 
     await expect

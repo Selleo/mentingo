@@ -76,14 +76,20 @@ describe("groupController (e2e)", () => {
         await request(app.getHttpServer()).get("/api/group/all").set("Cookie", cookies).expect(403);
       });
 
-      it("returns 403 if user is a content creator", async () => {
+      it("returns all groups if user is a content creator", async () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
           .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
+        const group = await groupFactory.create();
 
-        await request(app.getHttpServer()).get("/api/group/all").set("Cookie", cookies).expect(403);
+        const response = await request(app.getHttpServer())
+          .get("/api/group/all")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data[0].id).toBe(group.id);
       });
     });
 
@@ -216,7 +222,7 @@ describe("groupController (e2e)", () => {
           .expect(403);
       });
 
-      it("returns 403 if user is a content creator", async () => {
+      it("returns a group if user is a content creator", async () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
@@ -224,10 +230,12 @@ describe("groupController (e2e)", () => {
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
 
-        await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get(`/api/group/${group.id}`)
           .set("Cookie", cookies)
-          .expect(403);
+          .expect(200);
+
+        expect(response.body.data.id).toBe(group.id);
       });
     });
 
@@ -276,18 +284,22 @@ describe("groupController (e2e)", () => {
           .expect(403);
       });
 
-      it("returns 403 if user is a content creator", async () => {
+      it("returns user groups if user is a content creator", async () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
           .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const user = await userFactory.create();
+        const group = await groupFactory.create();
+        await db.insert(groupUsers).values({ userId: user.id, groupId: group.id });
 
-        await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get(`/api/group/user/${user.id}`)
           .set("Cookie", cookies)
-          .expect(403);
+          .expect(200);
+
+        expect(response.body.data[0].id).toBe(group.id);
       });
     });
 

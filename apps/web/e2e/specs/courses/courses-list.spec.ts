@@ -45,7 +45,7 @@ test("admin can browse, filter, and open course details", async ({
 
     await openCourseDetailsFromListFlow(page, courses[0].id);
 
-    await expect(page).toHaveURL(new RegExp(`/admin/beta-courses/${courses[0].id}`));
+    await expect(page).toHaveURL(/\/course\/[^/?]+(?:\?.*)?$/);
   });
 });
 

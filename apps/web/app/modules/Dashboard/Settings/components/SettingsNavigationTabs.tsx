@@ -12,6 +12,7 @@ import type React from "react";
 
 interface SettingsNavigationTabsProps {
   canManageSettings: boolean;
+  isSupportMode?: boolean;
   hideAccountTab?: boolean;
   children?: React.ReactNode;
   accountContent?: React.ReactNode;
@@ -23,6 +24,7 @@ interface SettingsNavigationTabsProps {
 
 export function SettingsNavigationTabs({
   canManageSettings,
+  isSupportMode = false,
   hideAccountTab = false,
   accountContent,
   integrationsContent,
@@ -50,6 +52,24 @@ export function SettingsNavigationTabs({
       : []),
     ...(canManageSettings ? adminTabs : []),
   ];
+
+  if (isSupportMode && allTabs.length === 0) {
+    return (
+      <Card id="settings-tabs" className="w-full">
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            <h4 className="h4">{t("settings.title")}</h4>
+            <p
+              className="text-sm text-muted-foreground"
+              data-testid={SETTINGS_PAGE_HANDLES.NO_AVAILABLE_SETTINGS}
+            >
+              {t("settings.supportModeNoAvailable")}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const defaultTab =
     hideAccountTab && canManageSettings ? SETTINGS_TABS.ORGANIZATION : SETTINGS_TABS.ACCOUNT;

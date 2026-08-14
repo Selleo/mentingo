@@ -2,6 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, getTableColumns, isNull, ne, type SQL, sql } from "drizzle-orm";
 
+import {
+  buildAiJudgeBlockingErrorEvaluationsSql,
+  buildAiJudgeCriterionEvaluationsSql,
+} from "src/ai/utils/ai-judge-evaluation.sql";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg, type UUIDType } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
@@ -11,7 +15,6 @@ import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiMentorLessons,
-  aiMentorJudgementBlockingErrors,
   aiMentorJudgementCriteria,
   aiMentorJudgements,
   aiMentorStudentLessonProgress,
@@ -181,44 +184,14 @@ export class LessonRepository {
               ${aiMentorStudentLessonProgress.passed},
               ${aiMentorJudgements.passed}
             ),
-            'criteria', COALESCE(
-              (
-                SELECT jsonb_agg(
-                  jsonb_build_object(
-                    'criterionId', ${aiMentorJudgementCriteria.criterionId},
-                    'title', COALESCE(
-                      NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
-                      ${localizedCriterionTitle}
-                    ),
-                    'awardedScore', ${aiMentorJudgementCriteria.awardedPoints},
-                    'maxScore', ${aiMentorJudgementCriteria.maxScoreAtJudgement},
-                    'status', ${aiMentorJudgementCriteria.status},
-                    'learnerSafeFeedback', ${aiMentorJudgementCriteria.learnerSafeFeedback}
-                  )
-                  ORDER BY ${aiMentorJudgementCriteria.createdAt}
-                )
-                FROM ${aiMentorJudgementCriteria}
-                LEFT JOIN ${aiJudgeCriteria}
-                  ON ${aiJudgeCriteria.id} = ${aiMentorJudgementCriteria.criterionId}
-                WHERE ${aiMentorJudgementCriteria.judgementId} = ${aiMentorJudgements.id}
-              ),
-              '[]'::jsonb
-            ),
-            'blockingErrors', COALESCE(
-              (
-                SELECT jsonb_agg(
-                  jsonb_build_object(
-                    'blockingErrorId', ${aiMentorJudgementBlockingErrors.blockingErrorId},
-                    'description', ${aiMentorJudgementBlockingErrors.blockingErrorDescription},
-                    'learnerSafeFeedback', ${aiMentorJudgementBlockingErrors.learnerSafeFeedback}
-                  )
-                  ORDER BY ${aiMentorJudgementBlockingErrors.createdAt}
-                )
-                FROM ${aiMentorJudgementBlockingErrors}
-                WHERE ${aiMentorJudgementBlockingErrors.judgementId} = ${aiMentorJudgements.id}
-              ),
-              '[]'::jsonb
-            ),
+            'criteria', ${buildAiJudgeCriterionEvaluationsSql(
+              aiMentorJudgements.id,
+              sql`COALESCE(
+                NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
+                ${localizedCriterionTitle}
+              )`,
+            )},
+            'blockingErrors', ${buildAiJudgeBlockingErrorEvaluationsSql(aiMentorJudgements.id)},
             'requiredScore', COALESCE(
               CASE
                 WHEN ${aiMentorStudentLessonProgress.maxScore} > 0

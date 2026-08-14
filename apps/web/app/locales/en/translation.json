@@ -1,4 +1,248 @@
 {
+  "dashboardHome": {
+    "title": "Your dashboard",
+    "subtitle": "Keep the most important learning information and actions within easy reach.",
+    "customize": "Customize dashboard",
+    "edit": {
+      "badge": "Editing",
+      "widgetsButton": "Widgets",
+      "restore": "Restore default",
+      "instructions": "Drag widgets to change their order. You can also change their width and visibility.",
+      "changeWidth": "Change width of {{title}}",
+      "drag": "Move {{title}}",
+      "widgetLibrary": "Dashboard widgets",
+      "widgetLibraryDescription": "Choose which widgets should be visible on your dashboard.",
+      "required": "Required",
+      "toggle": "Toggle {{title}}",
+      "confirm": "Yes",
+      "cancel": "No"
+    },
+    "empty": {
+      "title": "Your dashboard is empty",
+      "description": "Customize the dashboard to add the widgets that matter to you.",
+      "editDescription": "Enable at least one widget in the list above."
+    },
+    "error": {
+      "title": "We could not load the dashboard",
+      "description": "Try again in a moment.",
+      "retry": "Try again",
+      "invalidWidgetWidth": "This width is not allowed for the selected widget.",
+      "invalidWidgetLayout": "The dashboard layout contains unavailable or duplicate widgets.",
+      "requiredWidgetMissing": "A required dashboard widget is missing."
+    },
+    "widgets": {
+      "loadError": "This widget could not load its data.",
+      "trainingCompletionChartLabel": "{{completed}} of {{total}} enrollments completed, {{percentage}} percent.",
+      "deadlineRisksPage": "Page {{page}} of {{totalPages}}",
+      "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
+      "placeholderContent": "This widget is ready for its feature-specific content.",
+      "placeholderFooter": "Example widget",
+      "s_placeholder_1": { "title": "Learner widget 1" },
+      "s_placeholder_2": { "title": "Learner widget 2" },
+      "s_placeholder_3": { "title": "Learner widget 3" },
+      "loadError": "We could not load this widget.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "All courses you have started",
+          "empty": "You have no courses in progress.",
+          "nextLesson": "Next: {{title}}",
+          "openCourse": "Open course",
+          "viewAll": "{{count}} courses in progress"
+        },
+        "requiredCourse": {
+          "description": "All mandatory courses you still need to complete",
+          "empty": "You have no required courses to complete.",
+          "overdue": "Overdue",
+          "dueSoon": "Due soon",
+          "scheduled": "Upcoming",
+          "noDeadline": "No deadline",
+          "dueDate": "Due {{date}}",
+          "noDueDate": "No due date",
+          "total": "{{count}} required courses",
+          "overdueCount": "{{count}} overdue"
+        },
+        "courseCompletion": {
+          "description": "A summary of your assigned course progress",
+          "empty": "You have no assigned courses yet.",
+          "completedOfTotal": "{{completed}} of {{total}} completed",
+          "completed": "Completed",
+          "inProgress": "In progress",
+          "notStarted": "Not started"
+        },
+        "certificates": {
+          "description": "Your active certificates and upcoming expirations",
+          "empty": "You do not have any active certificates.",
+          "active": "Active certificates",
+          "expiringSoon": "Expiring within 30 days",
+          "cta": "View certificate",
+          "viewAll": "View all certificates",
+          "dialogTitle": "Your certificates",
+          "dialogDescription": "Review all active certificates you have earned.",
+          "issued": "Issued {{date}}",
+          "expires": "Expires {{date}}",
+          "noExpiry": "No expiration date",
+          "previous": "Previous",
+          "next": "Next",
+          "page": "Page {{page}} of {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Create one focused practice scenario each day",
+          "empty": "Describe a situation and practice it with AI Mentor.",
+          "emptyPrompt": "What conversation would you like to handle with more confidence?",
+          "startCta": "Start practice",
+          "continueCta": "Continue practice",
+          "feedbackCta": "View feedback",
+          "todayEyebrow": "Today's rehearsal",
+          "completedEyebrow": "Rehearsal complete",
+          "returnHint": "Your conversation is saved",
+          "privateHint": "A private place to try, adjust, and try again",
+          "status": {
+            "queued": "Your practice scenario is queued.",
+            "processing": "Your practice scenario is being prepared.",
+            "ready": "Today's practice is ready.",
+            "failed": "Scenario generation failed. Open it to retry."
+          }
+        }
+      },
+      "commonDescription": "Key information at a glance",
+      "training_completion": {
+        "title": "Training completion",
+        "description": "Completion status across all course enrollments",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started",
+        "viewAnalytics": "View analytics",
+        "empty": "No course enrollments yet.",
+        "assignCourses": "Assign courses"
+      },
+      "deadline_risks": {
+        "title": "Deadline risks",
+        "description": "Required courses that need attention",
+        "overdue": "Overdue",
+        "dueSoon": "Due soon",
+        "empty": "No deadline risks right now.",
+        "overdueTitle": "Overdue required courses",
+        "dueSoonTitle": "Required courses due soon",
+        "goToCourse": "Go to course",
+        "affected_one": "{{count}} affected learner",
+        "affected_other": "{{count}} affected learners"
+      },
+      "incomplete_courses": {
+        "title": "Incomplete courses",
+        "description": "Courses with the most incomplete enrollments",
+        "allCompleted": "All enrolled courses are completed.",
+        "noEnrollments": "No course enrollments yet.",
+        "enrollments": "enrollments",
+        "notCompleted": "{{count}} not completed"
+      },
+      "event_calendar": {
+        "title": "Event calendar",
+        "description": "Learning events and deadlines this month",
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "selectMonth": "Select month",
+        "selectYear": "Select year",
+        "selectedDay": "Selected day",
+        "upcoming": "Upcoming events",
+        "empty": "No events this month.",
+        "liveTraining": "Live training",
+        "courseDeadline": "Course deadline",
+        "weekdays": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
+      "continue_learning": { "title": "Continue learning" },
+      "required_course": { "title": "Required courses" },
+      "course_completion": { "title": "Course progress" },
+      "certificates": { "title": "Certificates" },
+      "ai_mentor_practice": {
+        "title": "AI Mentor practice",
+        "aiNotConfigured": "AI Mentor is not configured for this tenant."
+      }
+    }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Practice a real conversation.",
+      "promptEyebrow": "Set the scene",
+      "mentorPrompt": "Tell me about the conversation you want to rehearse. Who are you speaking with, what is happening, and what would you like to handle better?",
+      "scenario": "What would you like to practice?",
+      "scenarioPlaceholder": "For example: I want to practice giving constructive feedback to a colleague who missed a deadline.",
+      "scenarioHint": "Include any context that would help make the practice realistic, such as the situation, people involved, or your goal.",
+      "privateHint": "Only you can see this practice.",
+      "submit": "Create practice",
+      "suggestions": {
+        "title": "Start with an example",
+        "feedback": {
+          "label": "Give feedback",
+          "value": "I want to practice giving constructive feedback to a colleague whose work missed an important deadline."
+        },
+        "boundary": {
+          "label": "Set a boundary",
+          "value": "I want to practice setting a clear boundary when a teammate asks me to take on urgent work outside my current priorities."
+        },
+        "explanation": {
+          "label": "Explain a decision",
+          "value": "I want to practice explaining a difficult decision to someone who disagrees with it."
+        },
+        "request": {
+          "label": "Make a request",
+          "value": "I want to practice asking my manager for support with a workload that is becoming too heavy."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Set the scene",
+          "description": "Describe the moment in your own words."
+        },
+        "rehearse": {
+          "title": "Rehearse it for real",
+          "description": "Speak or type while AI Mentor plays the other person."
+        },
+        "reflect": {
+          "title": "See what worked",
+          "description": "Finish when you are ready and get focused feedback."
+        }
+      }
+    },
+    "backToDashboard": "Back to dashboard",
+    "rehearsalEyebrow": "Today's rehearsal",
+    "successGoal": "Your goal",
+    "successGoalFallback": "Handle the conversation clearly and reach a constructive next step.",
+    "viewFeedback": "View feedback",
+    "practiceAgain": "Practice again",
+    "replayLoadingTitle": "Setting up your next rehearsal",
+    "yourRole": "Your role",
+    "mentorRole": "AI Mentor role",
+    "feedback": {
+      "title": "Practice feedback",
+      "summaryTitle": "What to take forward",
+      "summaryDescription": "Use these observations to strengthen your next attempt.",
+      "scoreLabel": "Practice score",
+      "criteriaTitle": "What the Judge noticed",
+      "criterionFallback": "Criterion {{number}}",
+      "importantFeedbackTitle": "Important feedback"
+    },
+    "startHint": "Start the conversation when you are ready.",
+    "checkHint": "Finish whenever you want to see how your approach landed.",
+    "checkPractice": "Finish and reflect",
+    "practiceComplete": "Your rehearsal is complete. Your feedback is ready whenever you want to revisit it.",
+    "generating": "AI Mentor is preparing your scenario.",
+    "preparingBackgroundDescription": "Your practice is being prepared in the background. You can return to the dashboard and come back when it is ready.",
+    "failed": "We could not generate this practice scenario.",
+    "error": "We could not load this practice.",
+    "retry": "Try generation again",
+    "conversationTitle": "AI Mentor practice",
+    "mentorName": "AI Mentor",
+    "message": "Message to AI Mentor",
+    "send": "Send"
+  },
   "common": {
     "button": {
       "save": "Save",
@@ -18,7 +262,10 @@
       "edit": "Edit",
       "delete": "Delete",
       "uploading": "Uploading...",
-      "sending": "Sending..."
+      "sending": "Sending...",
+      "loading": "Loading...",
+      "previous": "Previous",
+      "next": "Next"
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",
@@ -44,7 +291,8 @@
       "de": "German",
       "lt": "Lithuanian",
       "cs": "Czech",
-      "es": "Spanish"
+      "es": "Spanish",
+      "fr": "French"
     },
     "lessonTypes": {
       "content": "Content",
@@ -808,6 +1056,10 @@
     "button": {
       "delete": "Delete"
     },
+    "deleteModal": {
+      "title": "Delete news",
+      "description": "Are you sure you want to delete this news? This action cannot be undone."
+    },
     "validation": {
       "titleRequired": "Title is required",
       "introRequired": "Introduction is required",
@@ -891,7 +1143,8 @@
       "german": "German",
       "czech": "Czech",
       "lithuanian": "Lithuanian",
-      "spanish": "Spanish"
+      "spanish": "Spanish",
+      "french": "French"
     }
   },
   "resetOnboarding": {
@@ -1525,6 +1778,7 @@
         "learning_progress": "learning progress",
         "certificate": "certificates",
         "file": "files",
+        "resource_library": "Resource Library",
         "ai": "AI features",
         "announcement": "announcements",
         "news": "news",
@@ -1548,6 +1802,7 @@
         "user_manage": "Manage users, including roles and account status.",
         "settings_read_self": "View their own profile and preference settings.",
         "settings_update_self": "Update their own profile and preference settings.",
+        "dashboard_read": "View their dashboard.",
         "settings_manage": "Manage global platform settings.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",
@@ -1585,23 +1840,24 @@
         "certificate_share": "Share certificates.",
         "certificate_render": "Generate certificate files.",
         "file_upload": "Upload files to the platform.",
-        "file_delete": "Delete uploaded files.",
+        "file_delete": "Delete files directly from platform storage.",
+        "resource_library_manage": "Manage private assets in the Resource Library.",
         "ai_use": "Use AI-powered platform features.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
         "announcement_delete": "Delete announcements.",
-        "news_read_public": "View public news posts.",
+        "news_read_public": "View available news posts.",
         "news_manage": "Create, edit, and delete all news posts.",
         "news_manage_own": "Create, edit, and delete own news posts.",
-        "article_read_public": "View public knowledge-base articles.",
+        "article_read_public": "View available knowledge-base articles.",
         "article_manage": "Create, edit, and delete all knowledge-base articles.",
         "article_manage_own": "Create, edit, and delete own knowledge-base articles.",
-        "qa_read_public": "View public Q&A entries.",
+        "qa_read_public": "View available Q&A entries.",
         "qa_manage": "Create, edit, and delete all Q&A entries.",
         "qa_manage_own": "Create, edit, and delete own Q&A entries.",
-        "report_read": "View reports.",
+        "report_read": "Download summary reports for courses within the user's permitted scope.",
         "statistics_read_self": "View own statistics.",
-        "statistics_read": "View platform-wide statistics.",
+        "statistics_read": "View aggregate course statistics within the user's permitted scope.",
         "billing_checkout": "Access billing checkout flows.",
         "billing_manage": "Manage billing settings and subscriptions.",
         "integration_key_manage": "Manage integration API keys.",
@@ -1611,7 +1867,7 @@
         "live_training_read": "View live trainings.",
         "live_training_create": "Create live trainings.",
         "live_training_update": "Edit any live training.",
-        "live_training_update_own": "Edit live trainings created by this user.",
+        "live_training_update_own": "Edit live trainings where this user is assigned as a host.",
         "live_training_delete": "Delete live trainings.",
         "live_training_delete_own": "Delete live trainings created by this user.",
         "live_training_join": "Join live training sessions.",
@@ -1920,6 +2176,7 @@
     "deadline": "Deadline",
     "selectDate": "Select date",
     "deadlineRequired": "Deadline is required for mandatory course",
+    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines.",
     "common": {
       "settings": "Settings",
       "curriculum": "Curriculum",
@@ -1955,6 +2212,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default.",
       "noMissingTranslations": "No missing translations",
       "mismatchContentLength": "The number of translations does not match the number of generated translations",
+      "invalidTranslationStructure": "The generated translation did not preserve the content structure. Please try again.",
       "translationsGeneratedSuccessfully": "Translations generated successfully",
       "lumaNotConfigured": "Luma API key is not configured.",
       "lumaBadRequest": "Luma request was invalid.",
@@ -1986,6 +2244,13 @@
         "category": "Category not found.",
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
+      },
+      "forbidden": {
+        "updateCourse": "You do not have permission to update this course."
+      },
+      "media": {
+        "imageUploadFailed": "Failed to upload the course image.",
+        "updateFailed": "Failed to update course media."
       },
       "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
@@ -3574,6 +3839,7 @@
         },
         "retakeModalTitle": "Are you sure you want to retake the lesson?",
         "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone.",
+        "retakeLoadingTitle": "Setting up your next attempt",
         "retakeAccessDenied": "You can retake this lesson only if you're enrolled in the course or you're the course author."
       }
     },
@@ -3673,6 +3939,7 @@
   },
   "settings": {
     "title": "Settings",
+    "supportModeNoAvailable": "No settings are available for this user while in support mode.",
     "buttons": {
       "cancel": "Cancel",
       "save": "Save"
@@ -3728,6 +3995,17 @@
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
+      "courseListLayout": "Course list layout",
+      "courseListLayoutDescription": "How courses are displayed to all users on the platform",
+      "courseListLayoutClassic": "Classic",
+      "courseListLayoutModern": "Modern",
+      "courseListLayoutClassicDescription": "Traditional course grid layout",
+      "courseListLayoutModernDescription": "Hero section with featured courses",
+      "courseListLayoutPreview": {
+        "continueLearning": "Continue learning",
+        "topCourses": "Top 5 courses",
+        "availableCourses": "Available courses"
+      },
       "courseDiscussions": "Enable course discussions",
       "courseDiscussionsDescription": "Allow enrolled users to view and participate in course discussion threads",
       "calendar": "Enable calendar",
@@ -4229,6 +4507,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choose asset visibility",
+      "description": "Choose the visibility for all {{count}} dropped assets.",
+      "privateInfo": "Private assets are visible only to you and administrators in the Asset Library, but remain available to students in lesson content."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choose how to display this file",
       "description": "Select how \"{{name}}\" should appear for students.",
@@ -4292,6 +4575,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
@@ -4847,7 +5150,7 @@
     },
     "errors": {
       "generic": "Could not start support mode",
-      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "targetUserRequired": "Choose an active user from the selected organization",
       "invalidSession": "Support session is invalid"
     }
   },
@@ -4879,7 +5182,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Enter as admin"
+        "impersonateUser": "Impersonate user"
       }
     },
     "activityTrend": {
@@ -4890,8 +5193,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "loading": "Loading admin users...",
-      "empty": "No active admin users found.",
+      "tabs": { "admins": "Admins", "allUsers": "All users" },
+      "loading": "Loading users...",
+      "emptyAdmins": "No active admin users found.",
+      "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
+      "emptyAllUsers": "No active users found.",
+      "searchAllUsers": "Search all users",
       "loadMore": "Load more users"
     },
     "status": {
@@ -5071,10 +5378,13 @@
       "before": "Before",
       "after": "After",
       "context": "Context",
+      "resourceName": "Resource name",
+      "resourceId": "Resource ID",
       "noMetadata": "No metadata available."
     },
     "fallbacks": {
       "unknown": "Unknown",
+      "nameUnavailable": "Name unavailable",
       "notAvailable": "n/a"
     },
     "labels": {
@@ -5136,6 +5446,7 @@
       "email": "Email",
       "action": "Action",
       "resource": "Resource",
+      "resourceName": "Resource name",
       "details": "Details",
       "showDetails": "Show details",
       "loading": "Loading activity logs...",
@@ -5176,6 +5487,146 @@
       "liveKitNotConfigured": "LiveKit is not configured.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+    }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "saveChanges": "Save changes",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "learningMode": {
+      "title": "You're taking this course in learning mode",
+      "description": "Your learning progress is being tracked. Completed lessons count toward your personal completion and course statistics.",
+      "enter": "Enter learning mode",
+      "exit": "Exit learning mode"
+    },
+    "overview": {
+      "courseSettings": "Course settings",
+      "manageCategories": "Manage categories",
+      "settingsDescription": "Manage settings for this course.",
+      "titlePlaceholder": "Enter course title...",
+      "editMedia": "Edit media",
+      "continueLearning": "Continue learning",
+      "courseDetails": "Course details",
+      "closeDetails": "Close course details",
+      "aboutCourse": "About this course",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter course description...",
+      "whatYouWillMaster": "What you'll learn",
+      "noLearningOutcomes": "No learning outcomes added yet.",
+      "learningOutcomePlaceholder": "Add a learning outcome...",
+      "addLearningOutcome": "Add learning outcome",
+      "removeLearningOutcome": "Remove learning outcome",
+      "closeSettings": "Close course settings",
+      "settingsComingSoon": "Settings coming soon",
+      "settingsIntro": "Here you'll be able to configure:",
+      "settingsStatus": "Course status (Draft/Published)",
+      "settingsPricing": "Pricing & payment options",
+      "settingsAssignments": "Assigned students & groups",
+      "settingsSequential": "Enforce sequential completion",
+      "settingsVisibility": "Course visibility settings",
+      "settingsPermissions": "Access permissions"
+    },
+    "media": {
+      "title": "Edit course media",
+      "currentImage": "Current hero image - adjust position",
+      "previewAlt": "Course hero preview",
+      "previewPosition": "Preview with current position",
+      "verticalPosition": "Vertical position",
+      "uploadImage": "Upload new hero image",
+      "dropImage": "Drop hero image here",
+      "browse": "or click to browse",
+      "imageLimit": "PNG, JPG up to 10 MB",
+      "imageRecommendation": "Recommended: 1920x820 px (21:9)",
+      "trailer": "Course trailer (optional)",
+      "dropVideo": "Drop trailer video here",
+      "videoLimit": "MP4, MOV up to 50 MB",
+      "videoRecommendation": "Recommended: 30-90 seconds",
+      "save": "Upload media"
+    },
+    "stats": {
+      "yourProgress": "Your progress",
+      "remaining": "remaining",
+      "courseFinished": "Course finished",
+      "chapterProgress_one": "{{completed}} / {{total}} chapter",
+      "chapterProgress_other": "{{completed}} / {{total}} chapters",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
+      "trackProgress": "to track your progress.",
+      "deadline": "Deadline",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "certificate": "Certificate",
+      "uponCompletion": "Upon completion",
+      "notIssuedYet": "Not issued yet",
+      "aboutAuthor": "About author"
+    },
+    "certificate": {
+      "close": "Close certificate settings",
+      "title": "Certificate settings",
+      "previewTitle": "Certificate of completion",
+      "certifies": "This certifies that",
+      "completed": "has successfully completed",
+      "signaturePlaceholder": "Signature placeholder",
+      "enable": "Enable certificate",
+      "enableDescription": "Students will receive a certificate upon course completion",
+      "fontColor": "Font color",
+      "uploadSignature": "Upload signature",
+      "uploadSignatureHint": "Click to upload signature image",
+      "signatureLimit": "PNG, JPG up to 2 MB",
+      "save": "Save certificate"
+    },
+    "deadline": {
+      "close": "Close deadline settings",
+      "title": "Deadline settings",
+      "enable": "Enable deadlines",
+      "enableDescription": "Set specific deadlines for different groups",
+      "current": "Current deadline: {{deadline}}"
+    },
+    "author": {
+      "close": "Close author settings",
+      "pictureAlt": "Author picture",
+      "showSection": "Show author section",
+      "showSectionDescription": "Display author information on course page",
+      "otherCourses": "Other courses"
+    },
+    "contents": {
+      "title": "Table of contents",
+      "statistics": "Statistics",
+      "edit": "Edit content",
+      "missingTranslationsTitle": "Missing translations",
+      "missingTranslationsDescription": "Some course content is missing a translation in the selected language.",
+      "completedChapters_one": "{{count}} completed chapter",
+      "completedChapters_other": "{{count}} completed chapters",
+      "lessons_one": "{{count}} lesson",
+      "lessons_other": "{{count}} lessons",
+      "showAllChapters": "Show all chapters ({{count}} more)",
+      "courseStatistics": "Course statistics",
+      "statisticsDescription": "Overview of student progress and engagement",
+      "totalStudents": "Total students",
+      "completionRate": "Completion rate",
+      "averageTime": "Avg. time spent",
+      "averageRating": "Avg. rating",
+      "detailedStatisticsSoon": "Detailed statistics coming soon",
+      "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
+      "status": {
+        "started": "Started",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "lessonTypes": {
+        "content": "Content",
+        "quiz": "Quiz",
+        "aiMentor": "AI Mentor",
+        "lesson": "Lesson"
+      }
     }
   }
 }

@@ -303,6 +303,11 @@ export const lessonForChapterSchema = Type.Array(
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),
     lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
+    estimatedDurationSeconds: Type.Optional(
+      Type.Number({
+        minimum: 0,
+      }),
+    ),
   }),
 );
 

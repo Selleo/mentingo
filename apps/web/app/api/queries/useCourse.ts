@@ -6,9 +6,11 @@ import { ApiClient } from "../api-client";
 import type { GetCourseResponse } from "../generated-api";
 import type { SupportedLanguages } from "@repo/shared";
 
-export const getCourseQueryKey = (id: string, language?: SupportedLanguages) => [
-  "course",
-  { id, ...(language ? { language } : {}) },
+export const COURSE_VIEW_QUERY_KEY = ["course"];
+
+export const getCourseQueryKey = (idOrSlug: string, language?: SupportedLanguages) => [
+  ...COURSE_VIEW_QUERY_KEY,
+  { id: idOrSlug, ...(language ? { language } : {}) },
 ];
 
 export const courseQueryOptions = (idOrSlug: string, language?: SupportedLanguages) =>

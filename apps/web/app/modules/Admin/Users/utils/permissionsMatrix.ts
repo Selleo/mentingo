@@ -1,4 +1,10 @@
-import type { PermissionKey } from "@repo/shared";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
+
+const HIDDEN_PERMISSION_MATRIX_ROWS = new Set<PermissionKey>([
+  PERMISSIONS.FILE_UPLOAD,
+  PERMISSIONS.FILE_DELETE,
+  PERMISSIONS.QA_MANAGE_OWN,
+]);
 
 export type PermissionMatrixRole = {
   slug: string;
@@ -20,13 +26,15 @@ export const buildPermissionMatrix = ({
   roles,
   permissionsOrder,
 }: BuildPermissionMatrixParams): PermissionMatrixRow[] => {
-  return permissionsOrder.map((permission) => ({
-    permission,
-    grants: roles.reduce<Record<string, boolean>>((acc, role) => {
-      acc[role.slug] = role.permissions.includes(permission);
-      return acc;
-    }, {}),
-  }));
+  return permissionsOrder
+    .filter((permission) => !HIDDEN_PERMISSION_MATRIX_ROWS.has(permission))
+    .map((permission) => ({
+      permission,
+      grants: roles.reduce<Record<string, boolean>>((acc, role) => {
+        acc[role.slug] = role.permissions.includes(permission);
+        return acc;
+      }, {}),
+    }));
 };
 
 type BuildPermissionsUnionParams = {

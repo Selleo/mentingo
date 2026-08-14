@@ -6,7 +6,7 @@ import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetNewsResponse, UpdateNewsBody } from "~/api/generated-api";
+import type { GetNewsResponse } from "~/api/generated-api";
 
 export type NewsFactoryRecord = GetNewsResponse["data"];
 export type NewsFactoryCreateInput = {
@@ -19,6 +19,7 @@ export type NewsFactoryCreateInput = {
 };
 
 export type NewsFactoryUpdateInput = NewsFactoryCreateInput;
+type UpdateNewsPayload = Parameters<FixtureApiClient["api"]["newsControllerUpdateNews"]>[1];
 
 const createNewsDefaults = () => {
   const suffix = randomUUID().slice(0, 8);
@@ -32,21 +33,21 @@ const createNewsDefaults = () => {
   };
 };
 
-const toUpdateNewsFormData = (
+const toUpdateNewsPayload = (
   language: SupportedLanguages,
   data: NewsFactoryUpdateInput,
-): FormData => {
-  const formData = new FormData();
-
-  formData.append("language", language);
-  if (data.title !== undefined) formData.append("title", data.title);
-  if (data.summary !== undefined) formData.append("summary", data.summary);
-  if (data.content !== undefined) formData.append("content", data.content);
-  if (data.status !== undefined) formData.append("status", data.status);
-  if (data.isPublic !== undefined) formData.append("isPublic", String(data.isPublic));
-
-  return formData;
-};
+): UpdateNewsPayload => ({
+  translations: JSON.stringify([
+    {
+      language,
+      title: data.title,
+      summary: data.summary,
+      content: data.content,
+    },
+  ]),
+  ...(data.status !== undefined ? { status: data.status } : {}),
+  ...(data.isPublic !== undefined ? { isPublic: data.isPublic } : {}),
+});
 
 export class NewsFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
@@ -77,10 +78,7 @@ export class NewsFactory {
   async update(id: string, data: NewsFactoryUpdateInput): Promise<NewsFactoryRecord> {
     const language = data.language ?? "en";
 
-    await this.apiClient.api.newsControllerUpdateNews(
-      id,
-      toUpdateNewsFormData(language, data) as unknown as UpdateNewsBody,
-    );
+    await this.apiClient.api.newsControllerUpdateNews(id, toUpdateNewsPayload(language, data));
 
     return this.getById(id, language);
   }

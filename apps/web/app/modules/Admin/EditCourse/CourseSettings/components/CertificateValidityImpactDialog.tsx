@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -37,6 +38,61 @@ export function CertificateValidityImpactDialog({
   const { activeCertificateCount = 0, immediatelyExpiringCertificateCount = 0 } = impact ?? {};
 
   const hasActiveCertificates = activeCertificateCount > 0;
+  const impactSummary = match({ hasActiveCertificates, isEnablingValidity })
+    .with({ hasActiveCertificates: true }, () => (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
+          <p className="text-sm text-neutral-700">
+            {t("adminCourseView.settings.other.activeCertificatesStat")}
+          </p>
+          <p className="text-sm font-medium text-neutral-950">{activeCertificateCount}</p>
+        </div>
+        <div className="flex items-center justify-between gap-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
+          <p className="text-sm text-neutral-700">
+            {t("adminCourseView.settings.other.immediatelyExpiringStat")}
+          </p>
+          <p className="text-sm font-medium text-neutral-950">
+            {immediatelyExpiringCertificateCount}
+          </p>
+        </div>
+      </div>
+    ))
+    .with({ hasActiveCertificates: false, isEnablingValidity: false }, () => (
+      <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
+        {t("adminCourseView.settings.other.noActiveCertificatesValidityDescription")}
+      </div>
+    ))
+    .otherwise(() => null);
+
+  const actionButtons = match(hasActiveCertificates)
+    .with(true, () => (
+      <>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full whitespace-normal sm:w-auto"
+          onClick={onFutureOnly}
+        >
+          {t("adminCourseView.settings.button.futureOnly")}
+        </Button>
+        <Button
+          type="button"
+          className="w-full whitespace-normal sm:w-auto"
+          onClick={onApplyToExisting}
+        >
+          {t("adminCourseView.settings.button.applyToExisting")}
+        </Button>
+      </>
+    ))
+    .otherwise(() => (
+      <Button type="button" className="w-full whitespace-normal sm:w-auto" onClick={onFutureOnly}>
+        {match(isEnablingValidity)
+          .with(true, () =>
+            t("adminCourseView.settings.other.enableCertificateValidityConfirmationConfirm"),
+          )
+          .otherwise(() => t("adminCourseView.settings.button.saveValidity"))}
+      </Button>
+    ));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,28 +107,7 @@ export function CertificateValidityImpactDialog({
             </DialogDescription>
           </DialogHeader>
 
-          {hasActiveCertificates ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
-                <p className="text-sm text-neutral-700">
-                  {t("adminCourseView.settings.other.activeCertificatesStat")}
-                </p>
-                <p className="text-sm font-medium text-neutral-950">{activeCertificateCount}</p>
-              </div>
-              <div className="flex items-center justify-between gap-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2">
-                <p className="text-sm text-neutral-700">
-                  {t("adminCourseView.settings.other.immediatelyExpiringStat")}
-                </p>
-                <p className="text-sm font-medium text-neutral-950">
-                  {immediatelyExpiringCertificateCount}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
-              {t("adminCourseView.settings.other.noActiveCertificatesValidityDescription")}
-            </div>
-          )}
+          {impactSummary}
 
           <DialogFooter className="gap-2 sm:flex-wrap sm:justify-end sm:space-x-0">
             <Button
@@ -83,37 +118,7 @@ export function CertificateValidityImpactDialog({
             >
               {t("common.button.cancel")}
             </Button>
-            {hasActiveCertificates ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full whitespace-normal sm:w-auto"
-                  onClick={onFutureOnly}
-                >
-                  {t("adminCourseView.settings.button.futureOnly")}
-                </Button>
-                <Button
-                  type="button"
-                  className="w-full whitespace-normal sm:w-auto"
-                  onClick={onApplyToExisting}
-                >
-                  {t("adminCourseView.settings.button.applyToExisting")}
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                className="w-full whitespace-normal sm:w-auto"
-                onClick={onFutureOnly}
-              >
-                {t(
-                  isEnablingValidity
-                    ? "adminCourseView.settings.other.enableCertificateValidityConfirmationConfirm"
-                    : "adminCourseView.settings.button.saveValidity",
-                )}
-              </Button>
-            )}
+            {actionButtons}
           </DialogFooter>
         </div>
       </DialogContent>

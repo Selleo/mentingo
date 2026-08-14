@@ -6,6 +6,7 @@ import csTranslations from "app/locales/cs/translation.json";
 import deTranslations from "app/locales/de/translation.json";
 import enTranslations from "app/locales/en/translation.json";
 import esTranslations from "app/locales/es/translation.json";
+import frTranslations from "app/locales/fr/translation.json";
 import ltTranslations from "app/locales/lt/translation.json";
 import plTranslations from "app/locales/pl/translation.json";
 
@@ -36,6 +37,9 @@ i18n.use(initReactI18next).init({
     },
     es: {
       translation: esTranslations,
+    },
+    fr: {
+      translation: frTranslations,
     },
   },
 });

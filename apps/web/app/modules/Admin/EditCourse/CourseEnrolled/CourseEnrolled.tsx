@@ -69,12 +69,17 @@ import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/Se
 type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
 
 type CourseEnrolledProps = {
+  courseId?: string;
   language?: SupportedLanguages;
 };
 
-export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement => {
+export const CourseEnrolled = ({
+  courseId: explicitCourseId,
+  language,
+}: CourseEnrolledProps): ReactElement => {
   const { t } = useTranslation();
-  const { id: courseId } = useParams();
+  const { id: routeCourseId } = useParams();
+  const courseId = explicitCourseId ?? routeCourseId;
   const { toast } = useToast();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
   const { mutateAsync: unenrollCourse } = useUnenrollCourse();
@@ -132,7 +137,6 @@ export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement 
               table,
               event,
               id: row.id,
-              idx: row.index,
               value: row.getIsSelected(),
               lastSelectedRowIndex,
               setLastSelectedRowIndex,

@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 
 import { EDIT_COURSE_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
 
@@ -40,6 +41,11 @@ type LanguageSelectorProps = {
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
   isAIConfigured: boolean;
+  hasMissingTranslations?: boolean;
+  className?: string;
+  compactOnMobile?: boolean;
+  selectTriggerClassName?: string;
+  tooltipIconClassName?: string;
 };
 
 export const CourseLanguageSelector = ({
@@ -48,6 +54,11 @@ export const CourseLanguageSelector = ({
   onChange,
   setOpenGenerateTranslationModal,
   isAIConfigured,
+  hasMissingTranslations = false,
+  className,
+  compactOnMobile,
+  selectTriggerClassName,
+  tooltipIconClassName,
 }: LanguageSelectorProps) => {
   const { t } = useTranslation();
 
@@ -68,6 +79,7 @@ export const CourseLanguageSelector = ({
   const baseLanguageTranslationKey = courseLanguages.find(
     (item) => item.key === course?.baseLanguage,
   )?.translationKey;
+  const selectedLanguage = courseLanguages.find((item) => item.key === courseLanguage);
 
   const handleLanguageChange = (key: SupportedLanguages) => {
     if (!(course?.availableLocales?.includes(key) ?? false)) {
@@ -82,36 +94,78 @@ export const CourseLanguageSelector = ({
     if (!(course && languageToDelete)) return;
 
     await deleteLanguage({ courseId: course.id, language: languageToDelete });
+
+    if (course.baseLanguage) {
+      onChange(course.baseLanguage);
+    }
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
             <span>
-              <Icon name="Info" className="h-auto w-6 cursor-default text-neutral-800" />
+              <Icon
+                name="Info"
+                className={cn("h-auto w-6 cursor-default text-neutral-800", tooltipIconClassName)}
+              />
             </span>
           </TooltipTrigger>
           <TooltipContent
             side="top"
             align="center"
-            className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+            className="max-w-xs whitespace-pre-line break-words rounded border-neutral-200 bg-white px-2 py-1 text-sm shadow-md"
           >
-            {t("adminCourseView.createLanguage.editConstraints", {
-              baseLanguage: t(baseLanguageTranslationKey ?? ""),
-            })}
-            <TooltipArrow className="fill-black" />
+            <span className="text-neutral-950">
+              {t("adminCourseView.createLanguage.editConstraints", {
+                baseLanguage: t(baseLanguageTranslationKey ?? ""),
+              })}
+            </span>
+            <TooltipArrow className="fill-white" />
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
+      {hasMissingTranslations && isAIConfigured && (
+        <Button
+          type="button"
+          size="icon"
+          aria-label={t("adminCourseView.common.generateMissingTranslations")}
+          title={t("adminCourseView.common.generateMissingTranslations")}
+          onClick={() => setOpenGenerateTranslationModal(true)}
+          variant="outline"
+          className="shrink-0 rounded-lg bg-white p-1 text-primary-700 hover:bg-white hover:text-primary-700 hover:opacity-100"
+        >
+          <Icon name="WandSparkles" className="size-5" />
+        </Button>
+      )}
+
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
         <SelectTrigger
           data-testid={EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}
-          className="min-w-[200px]"
+          className={cn("min-w-[200px]", selectTriggerClassName)}
+          aria-label={
+            compactOnMobile && selectedLanguage ? t(selectedLanguage.translationKey) : undefined
+          }
         >
-          <SelectValue />
+          {compactOnMobile && selectedLanguage ? (
+            <SelectValue>
+              <span className="flex min-w-0 items-center gap-2">
+                <Icon name={selectedLanguage.iconName} className="size-4 shrink-0" />
+                <span className="hidden truncate font-semibold sm:inline">
+                  {t(selectedLanguage.translationKey)}
+                </span>
+                {course?.baseLanguage === selectedLanguage.key && (
+                  <span className="hidden rounded bg-neutral-200 px-2 text-[11px] font-medium text-neutral-700 sm:inline">
+                    {t("adminCourseView.common.baseLanguage")}
+                  </span>
+                )}
+              </span>
+            </SelectValue>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (
@@ -165,7 +219,7 @@ export const CourseLanguageSelector = ({
           size="icon"
           type="button"
           variant="outline"
-          className="shrink-0 p-1 rounded-lg"
+          className="shrink-0 rounded-lg bg-white p-1 text-primary-700 hover:bg-white hover:text-primary-700 hover:opacity-100"
           onClick={() => {
             setLanguageToDelete(courseLanguage);
             setIsDeleteDialogOpen(true);

@@ -103,6 +103,18 @@ export const getActivityLogsColumns = (
     },
   },
   {
+    accessorKey: "resourceName",
+    header: t("activityLogsView.table.resourceName"),
+    cell: ({ row }) => (
+      <p className="max-w-64 truncate text-sm font-medium text-neutral-900">
+        {row.original.resourceName ??
+          (row.original.resourceId
+            ? t("activityLogsView.fallbacks.nameUnavailable")
+            : t("activityLogsView.fallbacks.notAvailable"))}
+      </p>
+    ),
+  },
+  {
     id: "action",
     header: t("activityLogsView.table.action"),
     cell: ({ row }) => {

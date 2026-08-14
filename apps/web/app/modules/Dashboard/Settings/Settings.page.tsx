@@ -97,6 +97,7 @@ export default function SettingsPage() {
       >
         <SettingsNavigationTabs
           canManageSettings={canManageSettings}
+          isSupportMode={isSupportMode}
           hideAccountTab={isSupportMode}
           hasConfigurationIssues={hasConfigurationIssues}
           accountContent={

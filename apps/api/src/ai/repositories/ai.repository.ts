@@ -1,8 +1,17 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
+import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TYPE, COURSE_ENROLLMENT } from "@repo/shared";
+import { and, asc, eq, getTableColumns, inArray, not, or, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
+import {
+  AI_MENTOR_PRACTICE_STATUSES,
+  type AiPracticeJudgeConfigurationGraph,
+} from "src/ai/ai-practice.types";
+import {
+  buildAiJudgeBlockingErrorEvaluationsSql,
+  buildAiJudgeCriterionEvaluationsSql,
+} from "src/ai/utils/ai-judge-evaluation.sql";
+import { getLocalizedJsonbValueSql } from "src/ai/utils/ai-judge-jsonb.sql";
 import {
   MESSAGE_ROLE,
   type MessageRole,
@@ -22,6 +31,7 @@ import {
   aiMentorJudgements,
   aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorPracticeSessions,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
   aiMentorThreadMessages,
@@ -36,13 +46,20 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
+import type {
+  AiMentorRoleplayDifficulty,
+  AiMentorTTSPreset,
+  AiMentorType,
+  AiMentorVoiceMode,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
   AiJudgeBlockingErrorJudgementWrite,
   AiJudgeCriterionJudgementWrite,
   AiJudgeJudgementWrite,
+  AiJudgePublicResult,
   AiJudgeRubricContext,
 } from "src/ai/judge-configuration/judge-configuration.types";
 import type {
@@ -103,11 +120,11 @@ export class AiRepository {
     const [lessonId] = await this.db
       .select({ lessonId: lessons.id })
       .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .where(eq(aiMentorThreads.id, threadId));
 
-    return lessonId;
+    return lessonId ?? { lessonId: null };
   }
 
   async createThread(data: ThreadBody) {
@@ -230,16 +247,26 @@ export class AiRepository {
   async findMentorLessonByThreadId(threadId: UUIDType, language: SupportedLanguages) {
     const [lesson] = await this.db
       .select({
-        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
-        type: aiMentorConfigurations.type,
+        title: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
+          ${aiMentorPracticeSessions.title}
+        )`,
+        type: sql<AiMentorType>`COALESCE(
+          ${aiMentorConfigurations.type},
+          ${AI_MENTOR_TYPE.ROLEPLAY}
+        )`,
         openingInstruction: this.localizationService.getLocalizedSqlField(
           aiMentorConfigurations.openingInstruction,
           language,
         ),
-        additionalInstructions: this.localizationService.getLocalizedSqlField(
-          aiMentorConfigurations.additionalInstructions,
-          language,
-        ),
+        additionalInstructions: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(
+            aiMentorConfigurations.additionalInstructions,
+            language,
+          )},
+          ${aiMentorPracticeSessions.instructions},
+          ''
+        )`,
         taskGoal: this.localizationService.getLocalizedSqlField(
           aiMentorTeacherConfigurations.taskGoal,
           language,
@@ -257,33 +284,53 @@ export class AiRepository {
           aiMentorTeacherConfigurations.feedbackGuidance,
           language,
         ),
-        scenario: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.scenario,
-          language,
-        ),
-        aiRole: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.aiRole,
-          language,
-        ),
-        learnerRole: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.learnerRole,
-          language,
-        ),
-        characterGoal: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.characterGoal,
-          language,
-        ),
-        difficulty: aiMentorRoleplayConfigurations.difficulty,
+        scenario: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(
+            aiMentorRoleplayConfigurations.scenario,
+            language,
+          )},
+          ${aiMentorPracticeSessions.instructions}
+        )`,
+        aiRole: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(
+            aiMentorRoleplayConfigurations.aiRole,
+            language,
+          )},
+          ${aiMentorPracticeSessions.aiMentorName},
+          'AI Mentor'
+        )`,
+        learnerRole: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(
+            aiMentorRoleplayConfigurations.learnerRole,
+            language,
+          )},
+          'Learner'
+        )`,
+        characterGoal: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(
+            aiMentorRoleplayConfigurations.characterGoal,
+            language,
+          )},
+          ${aiMentorPracticeSessions.instructions}
+        )`,
+        difficulty: sql<AiMentorRoleplayDifficulty>`COALESCE(
+          ${aiMentorRoleplayConfigurations.difficulty},
+          ${AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC}
+        )`,
         factsAndConstraints: this.localizationService.getLocalizedSqlField(
           aiMentorRoleplayConfigurations.factsAndConstraints,
           language,
         ),
-        name: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
+        name: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language)},
+          ${aiMentorPracticeSessions.aiMentorName},
+          'AI Mentor'
+        )`,
         learnerFirstName: users.firstName,
       })
       .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(
+      .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .leftJoin(
         aiMentorConfigurations,
         eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessons.id),
       )
@@ -296,46 +343,253 @@ export class AiRepository {
         eq(aiMentorRoleplayConfigurations.configurationId, aiMentorConfigurations.id),
       )
       .innerJoin(users, eq(users.id, aiMentorThreads.userId))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        aiMentorPracticeSessions,
+        eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
+      )
       .where(eq(aiMentorThreads.id, threadId));
 
     return lesson;
+  }
+
+  async findPracticeSessionByDate(userId: UUIDType, practiceDate: string) {
+    const session = await this.getPracticeSessionQuery(
+      and(
+        eq(aiMentorPracticeSessions.userId, userId),
+        eq(aiMentorPracticeSessions.practiceDate, practiceDate),
+      ),
+    );
+
+    return session[0];
+  }
+
+  async findPracticeSessionById(sessionId: UUIDType) {
+    const session = await this.getPracticeSessionQuery(eq(aiMentorPracticeSessions.id, sessionId));
+
+    return session[0];
+  }
+
+  private getPracticeSessionQuery(condition: SQL | undefined) {
+    return this.db
+      .select(this.getPracticeSessionSelection())
+      .from(aiMentorPracticeSessions)
+      .leftJoin(aiMentorThreads, eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id))
+      .leftJoin(
+        aiJudgeConfigurations,
+        eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+      )
+      .leftJoin(aiMentorJudgements, eq(aiMentorJudgements.threadId, aiMentorThreads.id))
+      .where(condition);
+  }
+
+  private getPracticeSessionSelection() {
+    const practiceCriterionTitle = sql<string>`COALESCE(
+      NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
+      ${getLocalizedJsonbValueSql(aiJudgeCriteria.title, aiMentorPracticeSessions.language)},
+      ''
+    )`;
+
+    return {
+      ...getTableColumns(aiMentorPracticeSessions),
+      threadId: aiMentorThreads.id,
+      threadStatus: sql<ThreadStatus | null>`${aiMentorThreads.status}`,
+      taskGoal: sql<string | null>`
+        ${getLocalizedJsonbValueSql(
+          aiJudgeConfigurations.taskGoal,
+          aiMentorPracticeSessions.language,
+        )}
+      `,
+      evaluation: sql<AiJudgePublicResult | null>`
+        CASE
+          WHEN ${aiMentorJudgements.id} IS NULL THEN NULL
+          ELSE jsonb_build_object(
+            'minScore', CEIL(
+              ${aiMentorJudgements.maxScore}
+              * ${aiJudgeConfigurations.passingThresholdPercent}
+              / 100.0
+            )::integer,
+            'maxScore', ${aiMentorJudgements.maxScore},
+            'score', ${aiMentorJudgements.earnedPoints},
+            'percentage', ${aiMentorJudgements.percentage},
+            'passed', ${aiMentorJudgements.passed},
+            'criteria', ${buildAiJudgeCriterionEvaluationsSql(
+              aiMentorJudgements.id,
+              practiceCriterionTitle,
+              sql`COALESCE(${aiMentorJudgementCriteria.learnerSafeFeedback}, '')`,
+            )},
+            'blockingErrors', ${buildAiJudgeBlockingErrorEvaluationsSql(aiMentorJudgements.id)}
+          )
+        END
+      `,
+    };
+  }
+
+  async createPracticeSession(
+    data: typeof aiMentorPracticeSessions.$inferInsert,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [session] = await dbInstance
+      .insert(aiMentorPracticeSessions)
+      .values(data)
+      .onConflictDoNothing({
+        target: [
+          aiMentorPracticeSessions.tenantId,
+          aiMentorPracticeSessions.userId,
+          aiMentorPracticeSessions.practiceDate,
+        ],
+      })
+      .returning();
+
+    return session;
+  }
+
+  async updatePracticeSession(
+    sessionId: UUIDType,
+    data: Partial<typeof aiMentorPracticeSessions.$inferInsert>,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [session] = await dbInstance
+      .update(aiMentorPracticeSessions)
+      .set(data)
+      .where(eq(aiMentorPracticeSessions.id, sessionId))
+      .returning();
+
+    return session;
+  }
+
+  async claimPracticeSessionForGeneration(sessionId: UUIDType) {
+    const [session] = await this.db
+      .update(aiMentorPracticeSessions)
+      .set({ status: AI_MENTOR_PRACTICE_STATUSES.PROCESSING, errorCode: null })
+      .where(
+        and(
+          eq(aiMentorPracticeSessions.id, sessionId),
+          eq(aiMentorPracticeSessions.status, AI_MENTOR_PRACTICE_STATUSES.QUEUED),
+        ),
+      )
+      .returning();
+
+    return session;
+  }
+
+  async queuePracticeSessionRetry(sessionId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [session] = await dbInstance
+      .update(aiMentorPracticeSessions)
+      .set({ status: AI_MENTOR_PRACTICE_STATUSES.QUEUED, errorCode: null })
+      .where(
+        and(
+          eq(aiMentorPracticeSessions.id, sessionId),
+          eq(aiMentorPracticeSessions.status, AI_MENTOR_PRACTICE_STATUSES.FAILED),
+        ),
+      )
+      .returning();
+
+    return session;
+  }
+
+  async insertPracticeJudgeConfigurationGraph(
+    graph: AiPracticeJudgeConfigurationGraph,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<UUIDType> {
+    const [configuration] = await dbInstance
+      .insert(aiJudgeConfigurations)
+      .values(graph.configuration)
+      .onConflictDoNothing({ target: aiJudgeConfigurations.practiceSessionId })
+      .returning({ id: aiJudgeConfigurations.id });
+
+    if (!configuration) {
+      const [existingConfiguration] = await dbInstance
+        .select({ id: aiJudgeConfigurations.id })
+        .from(aiJudgeConfigurations)
+        .where(eq(aiJudgeConfigurations.practiceSessionId, graph.configuration.practiceSessionId));
+
+      if (!existingConfiguration)
+        throw new Error("Practice AI Judge configuration was not created");
+
+      return existingConfiguration.id;
+    }
+
+    if (graph.criteria.length) await dbInstance.insert(aiJudgeCriteria).values(graph.criteria);
+    if (graph.scoreGuidance.length)
+      await dbInstance.insert(aiJudgeScoreGuidance).values(graph.scoreGuidance);
+    if (graph.blockingErrors.length)
+      await dbInstance.insert(aiJudgeBlockingErrors).values(graph.blockingErrors);
+
+    return configuration.id;
+  }
+
+  async saveGeneratedPractice(
+    sessionId: UUIDType,
+    title: string,
+    aiMentorName: string,
+    instructions: string,
+    graph: AiPracticeJudgeConfigurationGraph,
+  ) {
+    return this.db.transaction(async (trx) => {
+      await this.updatePracticeSession(sessionId, { title, aiMentorName, instructions }, trx);
+      await this.insertPracticeJudgeConfigurationGraph(graph, trx);
+    });
+  }
+
+  async resetPracticeConversation(sessionId: UUIDType) {
+    return this.db.transaction(async (trx) => {
+      await trx.delete(aiMentorThreads).where(eq(aiMentorThreads.practiceSessionId, sessionId));
+      const [session] = await trx
+        .update(aiMentorPracticeSessions)
+        .set({ status: AI_MENTOR_PRACTICE_STATUSES.READY, errorCode: null })
+        .where(eq(aiMentorPracticeSessions.id, sessionId))
+        .returning();
+
+      return session;
+    });
   }
 
   async findJudgeRubricByThreadId(
     threadId: UUIDType,
     language: SupportedLanguages,
   ): Promise<AiJudgeRubricContext | undefined> {
-    const localizedTaskGoal = this.localizationService.getLocalizedSqlField(
+    const languageSql = sql`${language}`;
+    const taskGoal = getLocalizedJsonbValueSql(
       aiJudgeConfigurations.taskGoal,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeConfigurations.taskGoal, language),
     );
-    const localizedCriterionTitle = this.localizationService.getLocalizedSqlField(
+    const criterionTitle = getLocalizedJsonbValueSql(
       aiJudgeCriteria.title,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeCriteria.title, language),
     );
-    const localizedExpectedBehavior = this.localizationService.getLocalizedSqlField(
+    const expectedBehavior = getLocalizedJsonbValueSql(
       aiJudgeCriteria.expectedBehavior,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeCriteria.expectedBehavior, language),
     );
-    const localizedGuidanceDescription = this.localizationService.getLocalizedSqlField(
+    const guidanceDescription = getLocalizedJsonbValueSql(
       aiJudgeScoreGuidance.description,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeScoreGuidance.description, language),
     );
-    const localizedGuidanceExample = this.localizationService.getLocalizedSqlField(
+    const guidanceExample = getLocalizedJsonbValueSql(
       aiJudgeScoreGuidance.example,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeScoreGuidance.example, language),
     );
-    const localizedBlockingError = this.localizationService.getLocalizedSqlField(
+    const blockingError = getLocalizedJsonbValueSql(
       aiJudgeBlockingErrors.description,
-      language,
+      languageSql,
+      this.localizationService.getLocalizedSqlField(aiJudgeBlockingErrors.description, language),
     );
 
     const [context] = await this.db
       .select({
-        lessonTitle: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        lessonTitle: sql<string>`COALESCE(
+          ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
+          ${aiMentorPracticeSessions.title},
+          'AI Mentor practice'
+        )`,
         rubric: sql<AiJudgeRubricContext["rubric"]>`
           CASE
             WHEN ${aiJudgeConfigurations.id} IS NULL
@@ -343,23 +597,23 @@ export class AiRepository {
             THEN NULL
             ELSE jsonb_build_object(
               'configurationId', ${aiJudgeConfigurations.id},
-              'taskGoal', ${localizedTaskGoal},
+              'taskGoal', ${taskGoal},
               'passingThresholdPercent', ${aiJudgeConfigurations.passingThresholdPercent},
               'criteria', COALESCE(
                 (
                   SELECT jsonb_agg(
                     jsonb_build_object(
                       'id', ${aiJudgeCriteria.id},
-                      'title', ${localizedCriterionTitle},
-                      'expectedBehavior', ${localizedExpectedBehavior},
+                      'title', ${criterionTitle},
+                      'expectedBehavior', ${expectedBehavior},
                       'maxScore', ${aiJudgeCriteria.maxScore},
                       'scoreGuidance', COALESCE(
                         (
                           SELECT jsonb_agg(
                             jsonb_build_object(
                               'score', ${aiJudgeScoreGuidance.score},
-                              'description', ${localizedGuidanceDescription},
-                              'example', NULLIF(${localizedGuidanceExample}, '')
+                              'description', ${guidanceDescription},
+                              'example', NULLIF(${guidanceExample}, '')
                             )
                             ORDER BY ${aiJudgeScoreGuidance.score}, ${aiJudgeScoreGuidance.createdAt}
                           )
@@ -381,7 +635,7 @@ export class AiRepository {
                   SELECT jsonb_agg(
                     jsonb_build_object(
                       'id', ${aiJudgeBlockingErrors.id},
-                      'description', ${localizedBlockingError}
+                      'description', ${blockingError}
                     )
                     ORDER BY ${aiJudgeBlockingErrors.createdAt}
                   )
@@ -395,13 +649,20 @@ export class AiRepository {
         `,
       })
       .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        aiMentorPracticeSessions,
+        eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
+      )
       .leftJoin(
         aiJudgeConfigurations,
-        eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
+        or(
+          eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
+          eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+        ),
       )
       .where(eq(aiMentorThreads.id, threadId));
 

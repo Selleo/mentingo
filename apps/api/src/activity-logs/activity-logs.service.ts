@@ -20,7 +20,9 @@ import { dbAls } from "src/storage/db/db-als.store";
 import { activityLogs } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
+import { ActivityLogResourceNameService } from "./activity-log-resource-name.service";
 import { ActivityLogsQueueService } from "./activity-logs.queue.service";
+import { getActivityLogMetadataResourceName } from "./utils/get-activity-log-metadata-resource-name";
 
 import type {
   ActorType,
@@ -40,6 +42,7 @@ export class ActivityLogsService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly activityLogsQueueService: ActivityLogsQueueService,
+    private readonly activityLogResourceNameService: ActivityLogResourceNameService,
   ) {}
 
   async recordActivity(payload: RecordActivityLogParams): Promise<void> {
@@ -148,9 +151,36 @@ export class ActivityLogsService {
       .where(and(...conditions));
 
     const [data, [{ totalItems }]] = await Promise.all([logSearchQuery, countQuery]);
+    const metadataResourceNames = new Map(
+      data.map((activityLog) => [
+        activityLog.id,
+        getActivityLogMetadataResourceName(activityLog.metadata, activityLog.resourceType),
+      ]),
+    );
+
+    const unresolvedResources = data.filter(
+      (activityLog) =>
+        !metadataResourceNames.get(activityLog.id) &&
+        activityLog.resourceType &&
+        activityLog.resourceId,
+    );
+
+    const resolvedResourceNames =
+      await this.activityLogResourceNameService.resolveCurrentResourceNames(unresolvedResources);
+
+    const dataWithResourceNames = data.map((activityLog) => ({
+      ...activityLog,
+      resourceName:
+        metadataResourceNames.get(activityLog.id) ??
+        this.activityLogResourceNameService.findResolvedResourceName(
+          resolvedResourceNames,
+          activityLog.resourceType,
+          activityLog.resourceId,
+        ),
+    }));
 
     return {
-      data,
+      data: dataWithResourceNames,
       pagination: { totalItems, page, perPage },
     };
   }

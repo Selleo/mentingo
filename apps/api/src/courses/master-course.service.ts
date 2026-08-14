@@ -15,6 +15,7 @@ import {
   ENTITY_TYPES,
   LESSON_TYPES,
   MASTER_COURSE_ENTITY_TYPES,
+  RESOURCE_VISIBILITY,
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
   type MasterCourseEntityType,
@@ -32,6 +33,7 @@ import {
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
 } from "src/courses/constants";
+import { CourseDurationService } from "src/courses/course-duration.service";
 import {
   SCORM_MASTER_COURSE_COPY_BATCH_SIZE,
   SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
@@ -117,6 +119,7 @@ export class MasterCourseService {
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly courseDurationService: CourseDurationService,
   ) {}
 
   async exportCourseToTenants(
@@ -361,6 +364,8 @@ export class MasterCourseService {
       params.targetCourseId,
       sourceSnapshot.chapters.length,
     );
+
+    await this.courseDurationService.refreshCourseDurationEstimates(params.targetCourseId);
   }
 
   async assertCourseContentEditable(
@@ -677,6 +682,8 @@ export class MasterCourseService {
         sourceSnapshot.chapters.length,
       );
 
+      await this.courseDurationService.refreshCourseDurationEstimates(resolvedTargetCourseId);
+
       return resolvedTargetCourseId;
     });
   }
@@ -702,6 +709,9 @@ export class MasterCourseService {
         "thumbnailS3Key",
         params.sourceSnapshot.course.thumbnailS3Key,
       ),
+      thumbnailPositionY: params.sourceSnapshot.course.thumbnailPositionY,
+      learningOutcomes: params.sourceSnapshot.course.learningOutcomes,
+      showAuthorSection: params.sourceSnapshot.course.showAuthorSection,
       status: "draft",
       hasCertificate: params.sourceSnapshot.course.hasCertificate,
       priceInCents: 0,
@@ -804,6 +814,9 @@ export class MasterCourseService {
         "thumbnailS3Key",
         course.thumbnailS3Key,
       ),
+      thumbnailPositionY: course.thumbnailPositionY,
+      learningOutcomes: course.learningOutcomes,
+      showAuthorSection: course.showAuthorSection,
       hasCertificate: course.hasCertificate,
       priceInCents: 0,
       currency: course.currency,
@@ -1343,6 +1356,7 @@ export class MasterCourseService {
     );
 
     for (const sourceConfiguration of sourceSnapshot.aiJudgeConfigurations) {
+      if (!sourceConfiguration.aiMentorLessonId) continue;
       const targetAiMentorLessonId = aiMentorMap.get(sourceConfiguration.aiMentorLessonId);
       if (!targetAiMentorLessonId) continue;
 
@@ -2512,6 +2526,7 @@ export class MasterCourseService {
         contentType: sourceResource.contentType,
         metadata: normalizeJsonb(sourceResource.metadata, {}),
         uploadedBy: params.targetAuthorId,
+        visibility: RESOURCE_VISIBILITY.HIDDEN,
         archived: false,
       };
 
@@ -2592,6 +2607,7 @@ export class MasterCourseService {
         contentType: sourceResource.contentType,
         metadata: normalizeJsonb(sourceResource.metadata, {}),
         uploadedBy: params.targetAuthorId,
+        visibility: sourceResource.visibility,
         archived: false,
       });
 

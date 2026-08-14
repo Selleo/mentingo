@@ -80,7 +80,7 @@ const LegacyCoursesView = () => {
     userId: currentUser?.id,
   });
 
-  const { data: categories, isLoading: isCategoriesLoading } = useCategories();
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories({ language });
 
   const steps = useMemo(
     () => (canUpdateLearningProgress ? studentCoursesSteps(t) : []),

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import {
   ENTITY_TYPES,
   RESOURCE_LIBRARY_ASSET_TYPE,
+  RESOURCE_VISIBILITY,
   SYSTEM_ROLE_SLUGS,
   VIDEO_EMBED_PROVIDERS,
 } from "@repo/shared";
@@ -60,6 +61,12 @@ describe("ResourceLibraryController (e2e)", () => {
       .withCredentials({ password })
       .withUserSettings(db)
       .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+
+  const createContentCreator = () =>
+    userFactory
+      .withCredentials({ password })
+      .withContentCreatorSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
 
   const createLesson = async (
     authorId: UUIDType,
@@ -355,6 +362,43 @@ describe("ResourceLibraryController (e2e)", () => {
 
       expect(relationsAfterUnlink).toHaveLength(0);
     });
+
+    it("requires ownership of an article when using ARTICLE_MANAGE_OWN", async () => {
+      const owner = await createContentCreator();
+      const otherAuthor = await createContentCreator();
+      const asset = await createResource();
+      const article = await articleFactory.create({
+        authorId: owner.id,
+        title: "Owned article",
+      });
+
+      await request(app.getHttpServer())
+        .post(`/api/resource-library/assets/${asset.id}/link`)
+        .set("Cookie", await cookieFor(otherAuthor, app))
+        .send({
+          entityId: article.id,
+          entityType: ENTITY_TYPES.ARTICLES,
+        })
+        .expect(403);
+
+      await request(app.getHttpServer())
+        .post(`/api/resource-library/assets/${asset.id}/link`)
+        .set("Cookie", await cookieFor(owner, app))
+        .send({
+          entityId: article.id,
+          entityType: ENTITY_TYPES.ARTICLES,
+        })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/resource-library/assets/${asset.id}/unlink`)
+        .set("Cookie", await cookieFor(otherAuthor, app))
+        .send({
+          entityId: article.id,
+          entityType: ENTITY_TYPES.ARTICLES,
+        })
+        .expect(403);
+    });
   });
 
   describe("resource relation sync", () => {
@@ -449,6 +493,7 @@ describe("ResourceLibraryController (e2e)", () => {
           description: { en: "uploaded.png" },
           options: {
             contextId: undefined,
+            visibility: RESOURCE_VISIBILITY.PUBLIC,
           },
           currentUser: expect.objectContaining({
             userId: admin.id,
@@ -508,6 +553,29 @@ describe("ResourceLibraryController (e2e)", () => {
       expect(JSON.stringify(updatedLesson.description)).not.toContain(asset.id);
       expect(JSON.stringify(updatedLesson.description)).toContain("Before");
       expect(JSON.stringify(updatedLesson.description)).toContain("After");
+    });
+
+    it("does not let an own-only user delete an asset attached to another author's article", async () => {
+      const owner = await createContentCreator();
+      const otherAuthor = await createContentCreator();
+      const asset = await createResource();
+      const article = await articleFactory.create({
+        authorId: otherAuthor.id,
+        title: "Other author's article",
+        content: `<p><a href="/api/articles/articles-resource/${asset.id}">Asset</a></p>`,
+      });
+
+      await db.insert(resourceEntity).values({
+        resourceId: asset.id,
+        entityId: article.id,
+        entityType: ENTITY_TYPES.ARTICLES,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/api/resource-library/assets/${asset.id}`)
+        .set("Cookie", await cookieFor(owner, app))
+        .expect(403);
     });
   });
 });

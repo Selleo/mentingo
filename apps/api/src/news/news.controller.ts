@@ -11,9 +11,10 @@ import {
   Req,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { AnyFilesInterceptor, FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
 import {
   ALLOWED_EXCEL_FILE_TYPES,
@@ -23,8 +24,10 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
+  type EditableResourceVisibility,
   FEATURES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -56,7 +59,11 @@ import {
   paginatedNewsListResponseSchema,
   uploadNewsFileResponseSchema,
 } from "./schemas/selectNews.schema";
-import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
+import {
+  UpdateNews,
+  updateNewsMultipartSchema,
+  updateNewsSchema,
+} from "./schemas/updateNews.schema";
 
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
 
@@ -181,30 +188,33 @@ export class NewsController {
   }
 
   @Patch(":id")
-  @UseInterceptors(FileInterceptor("cover"))
+  @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes("multipart/form-data")
+  @ApiBody({ schema: updateNewsMultipartSchema })
   @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
-    request: [
-      { type: "param", name: "id", schema: UUIDSchema },
-      { type: "body", schema: updateNewsSchema },
-    ],
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(createNewsResponseSchema),
   })
   @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async updateNews(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
-    @UploadedFile(
+    @UploadedFiles(
       getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    cover?: Express.Multer.File,
+    coverFiles: Express.Multer.File[] = [],
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
-    const updatedNews = await this.newsService.updateNews(id, updateNewsBody, currentUser, cover);
+    const updatedNews = await this.newsService.updateNews(
+      id,
+      updateNewsBody,
+      currentUser,
+      coverFiles,
+    );
 
     return new BaseResponse(updatedNews);
   }
@@ -289,6 +299,10 @@ export class NewsController {
         description: {
           type: "string",
         },
+        visibility: {
+          type: "string",
+          enum: [RESOURCE_VISIBILITY.PUBLIC, RESOURCE_VISIBILITY.PRIVATE],
+        },
       },
       required: ["file", "language", "title", "description"],
     },
@@ -316,6 +330,7 @@ export class NewsController {
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,
     @Body("description") description: string,
+    @Body("visibility") visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const fileData = await this.newsService.uploadFileToNews(
@@ -324,6 +339,7 @@ export class NewsController {
       language,
       title,
       description,
+      visibility,
       currentUser,
     );
 
