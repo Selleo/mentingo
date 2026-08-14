@@ -32,6 +32,12 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
+import {
+  alignTranslationItems,
+  getTranslationContext,
+  TranslationStructureError,
+  validateTranslationStructure,
+} from "src/ai/utils/translation-output";
 import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
 import { PermissionsService } from "src/permissions/permissions.service";
@@ -502,21 +508,23 @@ export class AiService {
             data: CourseTranslationType;
             metadata: string;
             context: Record<string, string | undefined>;
+            itemId: string;
           }>,
         ) => {
-          const formatted = chunk
-            .map(({ data: c, metadata, context }, i) => {
+          const preparedChunk = chunk.map((item) => ({
+            ...item,
+            context: getTranslationContext(item.metadata, item.data.base, item.context),
+          }));
+          const formatted = preparedChunk
+            .map(({ data: c, metadata, context, itemId }, i) => {
               const ctxLines = [
                 context.courseTitle && `Course: ${context.courseTitle}`,
                 context.chapterTitle && `Chapter: ${context.chapterTitle}`,
-                context.lessonTitle &&
-                  `Lesson: ${context.lessonTitle}${
-                    context.lessonDescription ? ` — ${context.lessonDescription}` : ""
-                  }`,
-                context.questionTitle &&
-                  `Question: ${context.questionTitle}${
-                    context.questionDescription ? ` — ${context.questionDescription}` : ""
-                  }`,
+                context.lessonTitle && `Lesson: ${context.lessonTitle}`,
+                context.lessonDescription && `Lesson description: ${context.lessonDescription}`,
+                context.questionTitle && `Question: ${context.questionTitle}`,
+                context.questionDescription &&
+                  `Question description: ${context.questionDescription}`,
                 context.questionOptions && `Options:\n${context.questionOptions}`,
                 context.optionText && `Option: ${context.optionText}`,
                 context.aiJudgeTaskGoal && `AI Judge task goal: ${context.aiJudgeTaskGoal}`,
@@ -531,6 +539,7 @@ export class AiService {
 
               return [
                 `ITEM ${i + 1}`,
+                `ITEM ID: ${itemId}`,
                 `METADATA: ${metadata}`,
                 ctxLines ? `CONTEXT:\n${ctxLines}` : undefined,
                 `TEXT TO TRANSLATE:\n${c.base}`,
@@ -543,7 +552,7 @@ export class AiService {
           const { jsonSchema } = await loadAiSdk();
           const schema = jsonSchema(generateTranslationSchema);
 
-          const userContent = `Return exactly ${chunk.length} translated strings as an array, same order. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`;
+          const userContent = `Return exactly ${chunk.length} strings. Each output string MUST start with the matching ITEM ID, followed by one newline and the translated text. Preserve each ITEM ID exactly. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`;
 
           const run = async () => {
             return await this.aiRuntimeService.generateTranslations(
@@ -558,7 +567,7 @@ export class AiService {
                 const openai = await this.promptService.getOpenAI();
                 const { generateObject } = await loadAiSdk();
                 const { object } = await generateObject({
-                  model: openai(OPENAI_MODELS.BASIC),
+                  model: openai(OPENAI_MODELS.TRANSLATION),
                   schema,
                   system: prompt,
                   temperature: 0,
@@ -580,10 +589,31 @@ export class AiService {
 
           const { translations } = await run();
 
-          return translations;
+          try {
+            const alignedTranslations = alignTranslationItems(
+              translations,
+              chunk.map(({ itemId }) => itemId),
+            );
+
+            alignedTranslations.forEach((translatedText, index) => {
+              validateTranslationStructure(chunk[index].data.base, translatedText);
+            });
+
+            return alignedTranslations;
+          } catch (error) {
+            const translationErrorKey =
+              error instanceof TranslationStructureError
+                ? "adminCourseView.toast.invalidTranslationStructure"
+                : "adminCourseView.toast.mismatchContentLength";
+
+            throw new BadRequestException(translationErrorKey);
+          }
         };
 
-        const chunked = _.chunk(data, chunkSize);
+        const chunked = _.chunk(
+          data.map((item, index) => ({ ...item, itemId: `translation-item-${index + 1}` })),
+          chunkSize,
+        );
 
         return Promise.all(chunked.map(translateChunk));
       },

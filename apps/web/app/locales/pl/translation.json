@@ -2427,6 +2427,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
+      "invalidTranslationStructure": "Wygenerowane tłumaczenie nie zachowało struktury treści. Spróbuj ponownie.",
       "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
       "lumaNotConfigured": "Klucz API Luma nie jest skonfigurowany.",
       "lumaBadRequest": "Żądanie do Luma było nieprawidłowe.",
