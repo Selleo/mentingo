@@ -6,6 +6,7 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   type EntityType,
+  type EditableResourceVisibility,
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
@@ -79,16 +80,21 @@ const handleVideoUpload = async ({
   fallbackUploadErrorMessage,
   uploadQueue,
   insertOnUpload,
+  visibility,
 }: {
   editor?: TiptapEditor | null;
   file: File;
   entityType: EntityType;
-  getVideoSessionForFile: (file: File) => Promise<InitVideoUploadResponse>;
+  getVideoSessionForFile: (
+    file: File,
+    visibility?: EditableResourceVisibility,
+  ) => Promise<InitVideoUploadResponse>;
   uploadVideo: (args: VideoUploadArgs) => Promise<void>;
   onVideoUploadError: (error: unknown) => void;
   fallbackUploadErrorMessage: string;
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
   insertOnUpload: boolean;
+  visibility?: EditableResourceVisibility;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "video" });
   const uploadId = queueId ?? crypto.randomUUID();
@@ -107,7 +113,7 @@ const handleVideoUpload = async ({
 
   const processVideoUpload = async () => {
     try {
-      const session = await getVideoSessionForFile(file);
+      const session = await getVideoSessionForFile(file, visibility);
       if (queueId) {
         uploadQueue?.attachUploadId(queueId, session.uploadId);
       }
@@ -180,6 +186,7 @@ const handleResourceUpload = async ({
   fallbackUploadErrorMessage,
   uploadQueue,
   insertOnUpload,
+  visibility,
 }: {
   editor?: TiptapEditor | null;
   file: File;
@@ -187,10 +194,11 @@ const handleResourceUpload = async ({
   resourceType: RichTextResourceType;
   displayModePrompt: boolean;
   askForDisplayMode: (filename: string) => Promise<RichTextResourceDisplayMode | null>;
-  uploadResourceFile: (file: File) => Promise<string>;
+  uploadResourceFile: (file: File, visibility?: EditableResourceVisibility) => Promise<string>;
   fallbackUploadErrorMessage: string;
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
   insertOnUpload: boolean;
+  visibility?: EditableResourceVisibility;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
 
@@ -211,7 +219,7 @@ const handleResourceUpload = async ({
 
   let resourceId: string;
   try {
-    resourceId = await uploadResourceFile(file);
+    resourceId = await uploadResourceFile(file, visibility);
 
     if (queueId) {
       uploadQueue?.setProgress(queueId, 100);
@@ -249,9 +257,12 @@ type VideoUploadArgs = {
 
 type BuildRichTextFileUploadHandlerArgs = {
   entityType: EntityType;
-  getVideoSessionForFile: (file: File) => Promise<InitVideoUploadResponse>;
+  getVideoSessionForFile: (
+    file: File,
+    visibility?: EditableResourceVisibility,
+  ) => Promise<InitVideoUploadResponse>;
   uploadVideo: (args: VideoUploadArgs) => Promise<void>;
-  uploadResourceFile: (file: File) => Promise<string>;
+  uploadResourceFile: (file: File, visibility?: EditableResourceVisibility) => Promise<string>;
   askForDisplayMode: (filename: string) => Promise<RichTextResourceDisplayMode | null>;
   onVideoUploadError: (error: unknown) => void;
   fallbackUploadErrorMessage: string;
@@ -330,7 +341,11 @@ export const buildRichTextFileUploadHandler = ({
   insertOnUpload = true,
   uploadQueue,
 }: BuildRichTextFileUploadHandlerArgs) => {
-  return async (file?: File, editor?: TiptapEditor | null) => {
+  return async (
+    file?: File,
+    editor?: TiptapEditor | null,
+    visibility?: EditableResourceVisibility,
+  ) => {
     if (!file) return;
 
     const { isVideo, isPresentation, isPdf, resourceType } = getFileCharacteristics(file);
@@ -346,6 +361,7 @@ export const buildRichTextFileUploadHandler = ({
         fallbackUploadErrorMessage,
         uploadQueue,
         insertOnUpload,
+        visibility,
       });
       return;
     }
@@ -361,6 +377,7 @@ export const buildRichTextFileUploadHandler = ({
       fallbackUploadErrorMessage,
       uploadQueue,
       insertOnUpload,
+      visibility,
     });
   };
 };

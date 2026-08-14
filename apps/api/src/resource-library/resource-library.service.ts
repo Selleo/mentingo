@@ -8,7 +8,9 @@ import {
 import {
   ENTITY_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   VIDEO_EMBED_PROVIDERS,
+  type ResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
 
@@ -21,6 +23,7 @@ import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
 import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { DB } from "src/storage/db/db.providers";
 
+import { NEW_ASSET_THRESHOLD_MS } from "./resource-library.constants";
 import {
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
@@ -30,9 +33,11 @@ import {
 import type {
   AssetLibraryAsset,
   LinkAssetBody,
+  BulkUpdateAssetVisibilityBody,
   ResourceLibraryAssetType,
   RichTextAssetEntityType,
   UnlinkAssetBody,
+  UpdateAssetVisibilityBody,
   UploadAssetBody,
 } from "./schemas/resource-library.schema";
 import type { Pagination, UUIDType } from "src/common";
@@ -52,6 +57,7 @@ export class ResourceLibraryService {
     search?: string;
     type?: ResourceLibraryAssetType;
     language?: SupportedLanguages;
+    currentUser: CurrentUserType;
   }): Promise<{
     data: AssetLibraryAsset[];
     pagination: Pagination;
@@ -65,6 +71,8 @@ export class ResourceLibraryService {
       search: params.search,
       type: params.type,
       language: params.language,
+      currentUserId: params.currentUser.userId,
+      isAdmin: this.canManageAllAssets(params.currentUser),
     });
 
     return {
@@ -73,6 +81,13 @@ export class ResourceLibraryService {
 
         return {
           ...asset,
+          canChangeVisibility:
+            asset.visibility !== RESOURCE_VISIBILITY.HIDDEN &&
+            (this.canManageAllAssets(params.currentUser) ||
+              asset.uploadedBy === params.currentUser.userId),
+          isNew:
+            asset.uploadedBy === params.currentUser.userId &&
+            Date.now() - new Date(asset.createdAt).getTime() < NEW_ASSET_THRESHOLD_MS,
           videoProvider:
             asset.type === "video" || videoProvider === VIDEO_EMBED_PROVIDERS.BUNNY
               ? videoProvider
@@ -87,8 +102,12 @@ export class ResourceLibraryService {
     };
   }
 
-  async getAssetUsages(resourceId: UUIDType, language?: SupportedLanguages) {
-    await this.assertAssetExists(resourceId);
+  async getAssetUsages(
+    resourceId: UUIDType,
+    language: SupportedLanguages | undefined,
+    currentUser: CurrentUserType,
+  ) {
+    await this.assertAssetAccess(resourceId, currentUser);
 
     const relationUsages = await this.resourceLibraryRepository.getAssetRelationUsages(
       resourceId,
@@ -108,7 +127,7 @@ export class ResourceLibraryService {
   }
 
   async linkAsset(resourceId: UUIDType, body: LinkAssetBody, currentUser: CurrentUserType) {
-    await this.assertAssetExists(resourceId);
+    await this.assertAssetAccess(resourceId, currentUser);
     await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 
     const relationshipType = body.relationshipType ?? RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT;
@@ -127,7 +146,7 @@ export class ResourceLibraryService {
   }
 
   async unlinkAsset(resourceId: UUIDType, body: UnlinkAssetBody, currentUser: CurrentUserType) {
-    await this.assertAssetExists(resourceId);
+    await this.assertAssetAccess(resourceId, currentUser);
     await this.assertEntityAccess(body.entityType, body.entityId, currentUser);
 
     const relationshipType = body.relationshipType ?? RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT;
@@ -163,6 +182,7 @@ export class ResourceLibraryService {
       currentUser,
       options: {
         contextId: body.contextId,
+        visibility: body.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
       },
     });
 
@@ -174,7 +194,7 @@ export class ResourceLibraryService {
   }
 
   async deleteAsset(resourceId: UUIDType, currentUser: CurrentUserType) {
-    await this.assertAssetExists(resourceId);
+    await this.assertAssetAccess(resourceId, currentUser);
 
     const references = await this.resourceLibraryRepository.getAssetEntityReferences(resourceId);
     if (references.length) {
@@ -213,6 +233,72 @@ export class ResourceLibraryService {
     };
   }
 
+  async updateAssetVisibility(
+    resourceId: UUIDType,
+    body: UpdateAssetVisibilityBody,
+    currentUser: CurrentUserType,
+  ) {
+    await this.assertCanChangeVisibility(resourceId, currentUser);
+
+    const asset = await this.resourceLibraryRepository.updateAssetVisibility(
+      resourceId,
+      body.visibility,
+    );
+
+    if (!asset) throw new NotFoundException("resourceLibrary.error.assetNotFound");
+
+    return asset;
+  }
+
+  async bulkUpdateAssetVisibility(
+    body: BulkUpdateAssetVisibilityBody,
+    currentUser: CurrentUserType,
+  ) {
+    const updatedIds: UUIDType[] = [];
+    const skippedIds: UUIDType[] = [];
+    const editableAssets: Array<{ id: UUIDType; visibility: ResourceVisibility }> = [];
+
+    for (const resourceId of [...new Set(body.resourceIds)]) {
+      const asset = await this.assertCanChangeVisibility(resourceId, currentUser);
+      if (asset.visibility === body.visibility) {
+        skippedIds.push(resourceId);
+        continue;
+      }
+      editableAssets.push(asset);
+    }
+
+    const affectedUsedAssetCount =
+      body.visibility === RESOURCE_VISIBILITY.PRIVATE
+        ? (
+            await Promise.all(
+              editableAssets.map(async (asset) => {
+                const [relationUsages, contentUsages] = await Promise.all([
+                  this.resourceLibraryRepository.getAssetRelationUsages(asset.id),
+                  this.resourceLibraryRepository.getAssetContentReferenceUsages(asset.id),
+                ]);
+                return relationUsages.length + contentUsages.length > 0;
+              }),
+            )
+          ).filter(Boolean).length
+        : 0;
+
+    if (affectedUsedAssetCount > 0 && !body.confirmUsedAssetPrivacyChange) {
+      return {
+        updatedIds,
+        skippedIds,
+        requiresConfirmation: true,
+        affectedUsedAssetCount,
+      };
+    }
+
+    for (const asset of editableAssets) {
+      await this.resourceLibraryRepository.updateAssetVisibility(asset.id, body.visibility);
+      updatedIds.push(asset.id);
+    }
+
+    return { updatedIds, skippedIds, requiresConfirmation: false, affectedUsedAssetCount };
+  }
+
   async syncLessonAssetRelations(lessonId: UUIDType) {
     const description = await this.resourceLibraryRepository.getLessonContent(lessonId);
 
@@ -247,10 +333,36 @@ export class ResourceLibraryService {
     });
   }
 
-  private async assertAssetExists(resourceId: UUIDType) {
-    const assetExists = await this.resourceLibraryRepository.assetExists(resourceId);
+  private async assertAssetAccess(resourceId: UUIDType, currentUser: CurrentUserType) {
+    const asset = await this.resourceLibraryRepository.getAsset(resourceId);
 
-    if (!assetExists) throw new NotFoundException("resourceLibrary.error.assetNotFound");
+    if (!asset || asset.archived || asset.visibility === RESOURCE_VISIBILITY.HIDDEN) {
+      throw new NotFoundException("resourceLibrary.error.assetNotFound");
+    }
+
+    if (
+      asset.visibility === RESOURCE_VISIBILITY.PRIVATE &&
+      !this.canManageAllAssets(currentUser) &&
+      asset.uploadedBy !== currentUser.userId
+    ) {
+      throw new NotFoundException("resourceLibrary.error.assetNotFound");
+    }
+
+    return asset;
+  }
+
+  private async assertCanChangeVisibility(resourceId: UUIDType, currentUser: CurrentUserType) {
+    const asset = await this.assertAssetAccess(resourceId, currentUser);
+
+    if (!this.canManageAllAssets(currentUser) && asset.uploadedBy !== currentUser.userId) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
+
+    return asset;
+  }
+
+  private canManageAllAssets(currentUser: CurrentUserType) {
+    return hasPermission(currentUser.permissions, PERMISSIONS.RESOURCE_LIBRARY_MANAGE);
   }
 
   private async assertEntityAccess(

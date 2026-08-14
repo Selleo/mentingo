@@ -29,6 +29,7 @@ import {
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
+  RESOURCE_VISIBILITY,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -115,6 +116,7 @@ import type {
   OutlookEventAvailability,
   OutlookEventSensitivity,
   AnnouncementAudience,
+  ResourceVisibility,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiMentorPracticeStatus } from "src/ai/ai-practice.types";
@@ -2250,6 +2252,10 @@ export const resources = pgTable(
     contentType: varchar("content_type", { length: 100 }).notNull(),
     metadata: jsonb("metadata").$type<ResourceMetadata>().default({}),
     uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+    visibility: varchar("visibility", { length: 20 })
+      .$type<ResourceVisibility>()
+      .notNull()
+      .default(RESOURCE_VISIBILITY.PUBLIC),
     archived,
     tenantId,
   },

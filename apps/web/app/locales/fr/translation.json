@@ -1629,6 +1629,7 @@
         "learning_progress": "progrès d'apprentissage",
         "certificate": "certificats",
         "file": "fichiers",
+        "resource_library": "Bibliothèque de ressources",
         "ai": "Fonctionnalités de l'IA",
         "announcement": "annonces",
         "news": "nouvelles",
@@ -1691,6 +1692,7 @@
         "certificate_render": "Générez des fichiers de certificat.",
         "file_upload": "Importer des fichiers sur la plateforme.",
         "file_delete": "Supprimer des fichiers directement du stockage de la plateforme.",
+        "resource_library_manage": "Gérer les ressources privées dans la bibliothèque de ressources.",
         "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
@@ -4104,6 +4106,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choisir la visibilité des ressources",
+      "description": "Choisissez la visibilité des {{count}} ressources déposées.",
+      "privateInfo": "Les ressources privées sont visibles uniquement par vous et les administrateurs dans la bibliothèque de ressources, mais restent disponibles pour les apprenants dans le contenu des leçons."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choisissez comment afficher ce fichier",
       "description": "Sélectionnez la manière dont « {{name}} » doit apparaître pour les apprenants.",
@@ -4167,6 +4174,26 @@
       "upload": "Importer un élément",
       "insert": "Insérer",
       "delete": "Supprimer",
+      "columns": {
+        "asset": "Ressource",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Privé",
+        "toggle": "Modifier la confidentialité de la ressource",
+        "select": "Sélectionner la ressource",
+        "selectAll": "Tout sélectionner",
+        "deselectAll": "Tout désélectionner",
+        "new": "Nouveau",
+        "selected": "{{count}} sélectionnés",
+        "makePublic": "Rendre public",
+        "makePrivate": "Rendre privé",
+        "confirmationTitle": "Rendre la ressource privée ?",
+        "usedWarning": "Cette ressource est utilisée dans du contenu. Elle y restera disponible, mais sera masquée des bibliothèques des autres créateurs et de l'accès direct. Continuer ?",
+        "bulkUsedWarning": "{{count}} ressources sélectionnées sont utilisées dans du contenu. Elles y resteront disponibles, mais seront masquées des bibliothèques des autres créateurs et de l'accès direct. Continuer ?",
+        "bulkSkipped": "Certaines ressources avaient déjà la visibilité sélectionnée et ont été ignorées."
+      },
       "loading": "Chargement des éléments...",
       "loadingUsages": "Chargement des utilisations...",
       "disabledUntilSaved": "Enregistrez ce contenu avant d'insérer ou de supprimer des éléments existants. Vous pouvez toujours importer un nouvel élément.",

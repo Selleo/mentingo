@@ -1764,6 +1764,7 @@
         "learning_progress": "progreso del aprendizaje",
         "certificate": "certificados",
         "file": "archivos",
+        "resource_library": "Biblioteca de recursos",
         "ai": "Funciones de IA",
         "announcement": "anuncios",
         "news": "noticias",
@@ -1826,6 +1827,7 @@
         "certificate_render": "Generar archivos de certificados.",
         "file_upload": "Subir archivos a la plataforma.",
         "file_delete": "Eliminar archivos directamente del almacenamiento de la plataforma.",
+        "resource_library_manage": "Gestionar recursos privados en la biblioteca de recursos.",
         "ai_use": "Utilice funciones de plataforma impulsadas por IA.",
         "announcement_read": "Ver anuncios.",
         "announcement_create": "Crear anuncios.",
@@ -4256,6 +4258,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Elegir visibilidad de recursos",
+      "description": "Elige la visibilidad para los {{count}} recursos soltados.",
+      "privateInfo": "Los recursos privados solo son visibles para ti y los administradores en la biblioteca de recursos, pero siguen disponibles para los estudiantes en el contenido de las lecciones."
+    },
     "uploadDisplayModeDialog": {
       "title": "Elija cómo mostrar este archivo",
       "description": "Seleccione cómo debe aparecer \"{{name}}\" para los estudiantes.",
@@ -4319,6 +4326,26 @@
       "upload": "Cargar recurso",
       "insert": "Insertar",
       "delete": "Eliminar",
+      "columns": {
+        "asset": "Recurso",
+        "actions": "Acciones"
+      },
+      "visibility": {
+        "public": "Público",
+        "private": "Privado",
+        "toggle": "Cambiar privacidad del recurso",
+        "select": "Seleccionar recurso",
+        "selectAll": "Seleccionar todo",
+        "deselectAll": "Deseleccionar todo",
+        "new": "Nuevo",
+        "selected": "{{count}} seleccionados",
+        "makePublic": "Hacer público",
+        "makePrivate": "Hacer privado",
+        "confirmationTitle": "¿Hacer privado el recurso?",
+        "usedWarning": "Este recurso se usa en contenido. Seguirá disponible allí, pero se ocultará de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkUsedWarning": "{{count}} recursos seleccionados se usan en contenido. Seguirán disponibles allí, pero se ocultarán de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkSkipped": "Algunos recursos ya tenían la visibilidad seleccionada y se omitieron."
+      },
       "loading": "Cargando recursos...",
       "loadingUsages": "Cargando usos...",
       "disabledUntilSaved": "Guarde este contenido antes de insertar o eliminar recursos existentes. La carga de un nuevo activo todavía está disponible.",

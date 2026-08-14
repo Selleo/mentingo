@@ -1,6 +1,6 @@
 import type { ResourceMetadata } from "./resource-metadata.type";
 import type { ResourceCategory, ResourceRelationshipType } from "../file.constants";
-import type { EntityType, SupportedLanguages } from "@repo/shared";
+import type { EntityType, ResourceVisibility, SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -17,6 +17,7 @@ export type CreateResourceForEntityParams = {
   description?: Partial<Record<SupportedLanguages, string>>;
   currentUser?: CurrentUserType;
   contextId?: UUIDType;
+  visibility?: ResourceVisibility;
 };
 
 export type UploadResourceParams = {
@@ -29,7 +30,11 @@ export type UploadResourceParams = {
   title?: Partial<Record<SupportedLanguages, string>>;
   description?: Partial<Record<SupportedLanguages, string>>;
   currentUser?: CurrentUserType;
-  options?: { folderIncludesResource?: boolean; contextId?: UUIDType };
+  options?: {
+    folderIncludesResource?: boolean;
+    contextId?: UUIDType;
+    visibility?: ResourceVisibility;
+  };
 };
 
 export type LocalizedResourceText = Partial<Record<SupportedLanguages, string>>;

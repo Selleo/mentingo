@@ -26,8 +26,10 @@ import {
   ALLOWED_WORD_FILE_TYPES,
   FEATURES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
+  type EditableResourceVisibility,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -440,6 +442,10 @@ export class LessonController {
         contextId: {
           type: "string",
         },
+        visibility: {
+          type: "string",
+          enum: [RESOURCE_VISIBILITY.PUBLIC, RESOURCE_VISIBILITY.PRIVATE],
+        },
       },
       required: ["file", "language", "title", "description"],
     },
@@ -484,6 +490,7 @@ export class LessonController {
     @Body("description") description: string,
     @Body("lessonId") lessonId?: UUIDType,
     @Body("contextId") contextId?: string,
+    @Body("visibility") visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
   ) {
     const fileData = await this.adminLessonsService.uploadFileToLesson(
       currentUser,
@@ -493,6 +500,7 @@ export class LessonController {
       description,
       lessonId,
       contextId,
+      visibility,
     );
 
     return new BaseResponse(fileData);

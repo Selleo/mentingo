@@ -7,7 +7,7 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { EditableResourceVisibility, SupportedLanguages } from "@repo/shared";
 
 type UploadArticleFileOptions = {
   id: string;
@@ -15,6 +15,7 @@ type UploadArticleFileOptions = {
   language: SupportedLanguages;
   title: string;
   description: string;
+  visibility?: EditableResourceVisibility;
 };
 
 export function useUploadArticleFile() {
@@ -22,16 +23,24 @@ export function useUploadArticleFile() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ id, file, language, title, description }: UploadArticleFileOptions) => {
+    mutationFn: async ({
+      id,
+      file,
+      language,
+      title,
+      description,
+      visibility,
+    }: UploadArticleFileOptions) => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("language", language);
       formData.append("title", title);
       formData.append("description", description);
+      if (visibility) formData.append("visibility", visibility);
 
       const response = await ApiClient.api.articlesControllerUploadFileToArticle(
         id,
-        { file, language, title, description },
+        { file, language, title, description, visibility },
         {
           transformRequest: () => formData,
           headers: { "Content-Type": "multipart/form-data" },

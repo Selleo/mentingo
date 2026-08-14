@@ -1,5 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ENTITY_TYPES, RESOURCE_LIBRARY_ASSET_TYPE, type SupportedLanguages } from "@repo/shared";
+import {
+  ENTITY_TYPES,
+  RESOURCE_LIBRARY_ASSET_TYPE,
+  RESOURCE_VISIBILITY,
+  type ResourceVisibility,
+  type SupportedLanguages,
+} from "@repo/shared";
 import {
   and,
   countDistinct,
@@ -58,8 +64,13 @@ export class ResourceLibraryRepository {
     search?: string;
     type?: ResourceLibraryAssetType;
     language?: SupportedLanguages;
+    currentUserId: UUIDType;
+    isAdmin: boolean;
   }) {
-    const conditions = this.getAssetConditions(params.search, params.type);
+    const conditions = this.getAssetConditions(params.search, params.type, {
+      currentUserId: params.currentUserId,
+      isAdmin: params.isAdmin,
+    });
 
     return this.db.transaction(async (trx) => {
       const assetQuery = trx
@@ -208,6 +219,34 @@ export class ResourceLibraryRepository {
       .limit(1);
 
     return Boolean(asset);
+  }
+
+  async getAsset(resourceId: UUIDType) {
+    const [asset] = await this.db
+      .select({
+        id: resources.id,
+        uploadedBy: resources.uploadedBy,
+        visibility: resources.visibility,
+        archived: resources.archived,
+      })
+      .from(resources)
+      .where(eq(resources.id, resourceId))
+      .limit(1);
+
+    return asset;
+  }
+
+  async updateAssetVisibility(
+    resourceId: UUIDType,
+    visibility: Exclude<ResourceVisibility, typeof RESOURCE_VISIBILITY.HIDDEN>,
+  ) {
+    const [asset] = await this.db
+      .update(resources)
+      .set({ visibility })
+      .where(and(eq(resources.id, resourceId), eq(resources.archived, false)))
+      .returning({ id: resources.id, visibility: resources.visibility });
+
+    return asset;
   }
 
   async entityExists(entityType: RichTextAssetEntityType, entityId: UUIDType) {
@@ -549,7 +588,11 @@ export class ResourceLibraryRepository {
     );
   }
 
-  private getAssetConditions(search?: string, type?: ResourceLibraryAssetType): SQL[] {
+  private getAssetConditions(
+    search?: string,
+    type?: ResourceLibraryAssetType,
+    access?: { currentUserId: UUIDType; isAdmin: boolean },
+  ): SQL[] {
     const richTextUsageOrUnusedAssetCondition = or(
       and(
         inArray(resourceEntity.entityType, [...RICH_TEXT_ENTITY_TYPES]),
@@ -559,6 +602,20 @@ export class ResourceLibraryRepository {
     );
 
     const conditions: SQL[] = [eq(resources.archived, false)];
+
+    if (access) {
+      const visibilityCondition = access.isAdmin
+        ? not(eq(resources.visibility, RESOURCE_VISIBILITY.HIDDEN))
+        : or(
+            eq(resources.visibility, RESOURCE_VISIBILITY.PUBLIC),
+            and(
+              eq(resources.visibility, RESOURCE_VISIBILITY.PRIVATE),
+              eq(resources.uploadedBy, access.currentUserId),
+            ),
+          );
+
+      if (visibilityCondition) conditions.push(visibilityCondition);
+    }
 
     if (richTextUsageOrUnusedAssetCondition) conditions.push(richTextUsageOrUnusedAssetCondition);
 
@@ -617,6 +674,7 @@ export class ResourceLibraryRepository {
       originalFilename,
       reference: resources.reference,
       uploadedBy: resources.uploadedBy,
+      visibility: resources.visibility,
       createdAt: sql<string>`${resources.createdAt}::text`,
       usageCount: sql<number>`count(distinct ${resourceEntity.id})::int`,
     };

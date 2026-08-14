@@ -1776,6 +1776,7 @@
         "learning_progress": "learning progress",
         "certificate": "certificates",
         "file": "files",
+        "resource_library": "Resource Library",
         "ai": "AI features",
         "announcement": "announcements",
         "news": "news",
@@ -1838,6 +1839,7 @@
         "certificate_render": "Generate certificate files.",
         "file_upload": "Upload files to the platform.",
         "file_delete": "Delete files directly from platform storage.",
+        "resource_library_manage": "Manage private assets in the Resource Library.",
         "ai_use": "Use AI-powered platform features.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
@@ -4270,6 +4272,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choose asset visibility",
+      "description": "Choose the visibility for all {{count}} dropped assets.",
+      "privateInfo": "Private assets are visible only to you and administrators in the Asset Library, but remain available to students in lesson content."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choose how to display this file",
       "description": "Select how \"{{name}}\" should appear for students.",
@@ -4333,6 +4340,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",

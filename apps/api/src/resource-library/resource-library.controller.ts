@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -46,6 +47,8 @@ import { ResourceLibraryService } from "./resource-library.service";
 import {
   assetLibraryAssetSchema,
   assetLibraryUsageSchema,
+  bulkUpdateAssetVisibilityBodySchema,
+  bulkUpdateAssetVisibilityResponseSchema,
   deleteAssetResponseSchema,
   linkAssetBodySchema,
   linkAssetResponseSchema,
@@ -54,6 +57,8 @@ import {
   unlinkAssetResponseSchema,
   uploadAssetBodySchema,
   uploadAssetResponseSchema,
+  updateAssetVisibilityBodySchema,
+  updateAssetVisibilityResponseSchema,
   type AssetLibraryAsset,
   type AssetLibraryUsage,
   type DeleteAssetResponse,
@@ -64,6 +69,8 @@ import {
   type UnlinkAssetResponse,
   type UploadAssetBody,
   type UploadAssetResponse,
+  type BulkUpdateAssetVisibilityBody,
+  type UpdateAssetVisibilityBody,
 } from "./schemas/resource-library.schema";
 
 @Controller("resource-library")
@@ -88,6 +95,7 @@ export class ResourceLibraryController {
     @Query("search") search?: string,
     @Query("type") type?: ResourceLibraryAssetType,
     @Query("language") language?: SupportedLanguages,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AssetLibraryAsset[]>> {
     const result = await this.resourceLibraryService.getAssets({
       page,
@@ -95,6 +103,7 @@ export class ResourceLibraryController {
       search,
       type,
       language,
+      currentUser: currentUser!,
     });
 
     return new PaginatedResponse(result);
@@ -112,10 +121,45 @@ export class ResourceLibraryController {
   async getAssetUsages(
     @Param("id") id: UUIDType,
     @Query("language") language?: SupportedLanguages,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<AssetLibraryUsage[]>> {
-    const usages = await this.resourceLibraryService.getAssetUsages(id, language);
+    const usages = await this.resourceLibraryService.getAssetUsages(id, language, currentUser!);
 
     return new BaseResponse(usages);
+  }
+
+  @Patch("assets/:id/visibility")
+  @RequirePermission(...RESOURCE_LIBRARY_PERMISSIONS)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: updateAssetVisibilityBodySchema },
+    ],
+    response: baseResponse(updateAssetVisibilityResponseSchema),
+  })
+  async updateAssetVisibility(
+    @Param("id") id: UUIDType,
+    @Body() body: UpdateAssetVisibilityBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(
+      await this.resourceLibraryService.updateAssetVisibility(id, body, currentUser),
+    );
+  }
+
+  @Patch("assets/visibility/bulk")
+  @RequirePermission(...RESOURCE_LIBRARY_PERMISSIONS)
+  @Validate({
+    request: [{ type: "body", schema: bulkUpdateAssetVisibilityBodySchema }],
+    response: baseResponse(bulkUpdateAssetVisibilityResponseSchema),
+  })
+  async bulkUpdateAssetVisibility(
+    @Body() body: BulkUpdateAssetVisibilityBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(
+      await this.resourceLibraryService.bulkUpdateAssetVisibility(body, currentUser),
+    );
   }
 
   @Post("assets/:id/link")

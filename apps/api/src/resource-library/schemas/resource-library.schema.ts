@@ -1,4 +1,9 @@
-import { ENTITY_TYPES, RESOURCE_LIBRARY_ASSET_TYPE, VIDEO_EMBED_PROVIDERS } from "@repo/shared";
+import {
+  ENTITY_TYPES,
+  RESOURCE_LIBRARY_ASSET_TYPE,
+  RESOURCE_VISIBILITY,
+  VIDEO_EMBED_PROVIDERS,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -7,6 +12,11 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import type { Static } from "@sinclair/typebox";
 
 export const resourceLibraryAssetTypeSchema = Type.Enum(RESOURCE_LIBRARY_ASSET_TYPE);
+export const resourceVisibilitySchema = Type.Enum(RESOURCE_VISIBILITY);
+export const editableResourceVisibilitySchema = Type.Union([
+  Type.Literal(RESOURCE_VISIBILITY.PUBLIC),
+  Type.Literal(RESOURCE_VISIBILITY.PRIVATE),
+]);
 
 export const richTextAssetEntityTypeSchema = Type.Union([
   Type.Literal(ENTITY_TYPES.LESSON),
@@ -25,6 +35,9 @@ export const assetLibraryAssetSchema = Type.Object({
   reference: Type.String(),
   videoProvider: Type.Optional(Type.Enum(VIDEO_EMBED_PROVIDERS)),
   uploadedBy: Type.Union([UUIDSchema, Type.Null()]),
+  visibility: resourceVisibilitySchema,
+  canChangeVisibility: Type.Boolean(),
+  isNew: Type.Boolean(),
   createdAt: Type.String({ format: "date-time" }),
   usageCount: Type.Number(),
 });
@@ -68,6 +81,29 @@ export const uploadAssetBodySchema = Type.Object({
   language: supportedLanguagesSchema,
   title: Type.String(),
   description: Type.String(),
+  visibility: Type.Optional(editableResourceVisibilitySchema),
+});
+
+export const updateAssetVisibilityBodySchema = Type.Object({
+  visibility: editableResourceVisibilitySchema,
+});
+
+export const updateAssetVisibilityResponseSchema = Type.Object({
+  id: UUIDSchema,
+  visibility: editableResourceVisibilitySchema,
+});
+
+export const bulkUpdateAssetVisibilityBodySchema = Type.Object({
+  resourceIds: Type.Array(UUIDSchema, { minItems: 1 }),
+  visibility: editableResourceVisibilitySchema,
+  confirmUsedAssetPrivacyChange: Type.Optional(Type.Boolean()),
+});
+
+export const bulkUpdateAssetVisibilityResponseSchema = Type.Object({
+  updatedIds: Type.Array(UUIDSchema),
+  skippedIds: Type.Array(UUIDSchema),
+  requiresConfirmation: Type.Boolean(),
+  affectedUsedAssetCount: Type.Number(),
 });
 
 export const uploadAssetResponseSchema = Type.Object({
@@ -86,6 +122,8 @@ export type RichTextAssetEntityType = Static<typeof richTextAssetEntityTypeSchem
 export type LinkAssetBody = Static<typeof linkAssetBodySchema>;
 export type UnlinkAssetBody = Static<typeof unlinkAssetBodySchema>;
 export type UploadAssetBody = Static<typeof uploadAssetBodySchema>;
+export type UpdateAssetVisibilityBody = Static<typeof updateAssetVisibilityBodySchema>;
+export type BulkUpdateAssetVisibilityBody = Static<typeof bulkUpdateAssetVisibilityBodySchema>;
 export type LinkAssetResponse = Static<typeof linkAssetResponseSchema>;
 export type UnlinkAssetResponse = Static<typeof unlinkAssetResponseSchema>;
 export type UploadAssetResponse = Static<typeof uploadAssetResponseSchema>;

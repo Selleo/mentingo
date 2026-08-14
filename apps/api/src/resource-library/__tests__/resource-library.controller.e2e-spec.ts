@@ -3,6 +3,7 @@ import { join } from "node:path";
 import {
   ENTITY_TYPES,
   RESOURCE_LIBRARY_ASSET_TYPE,
+  RESOURCE_VISIBILITY,
   SYSTEM_ROLE_SLUGS,
   VIDEO_EMBED_PROVIDERS,
 } from "@repo/shared";
@@ -492,6 +493,7 @@ describe("ResourceLibraryController (e2e)", () => {
           description: { en: "uploaded.png" },
           options: {
             contextId: undefined,
+            visibility: RESOURCE_VISIBILITY.PUBLIC,
           },
           currentUser: expect.objectContaining({
             userId: admin.id,

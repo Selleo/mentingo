@@ -68,10 +68,7 @@ export default function AiMentorPracticePage() {
             {t("aiMentorPractice.preparingBackgroundDescription")}
           </p>
           <Button asChild variant="outline" size="sm" className="shrink-0 bg-white">
-            <Link
-              data-testid={AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON}
-              to="/dashboard"
-            >
+            <Link data-testid={AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON} to="/dashboard">
               {t("common.button.goToDashboard")}
             </Link>
           </Button>

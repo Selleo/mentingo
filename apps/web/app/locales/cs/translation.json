@@ -1779,6 +1779,7 @@
         "learning_progress": "studijní postup",
         "certificate": "certifikáty",
         "file": "soubory",
+        "resource_library": "Knihovna zdrojů",
         "ai": "AI funkce",
         "announcement": "oznámení",
         "news": "novinky",
@@ -1836,6 +1837,7 @@
         "certificate_render": "Může generovat soubory certifikátů.",
         "file_upload": "Může nahrávat soubory pomocí sdílených nástrojů platformy.",
         "file_delete": "Může mazat soubory přímo z úložiště platformy.",
+        "resource_library_manage": "Může spravovat soukromé zdroje v knihovně zdrojů.",
         "ai_use": "Může používat funkce platformy využívající AI.",
         "announcement_read": "Může zobrazit oznámení.",
         "announcement_create": "Může vytvářet oznámení.",
@@ -4257,6 +4259,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Zvolte viditelnost zdrojů",
+      "description": "Zvolte viditelnost pro všech {{count}} přetažených zdrojů.",
+      "privateInfo": "Soukromé zdroje jsou v knihovně zdrojů viditelné pouze vám a správcům, ale zůstávají dostupné studentům v obsahu lekce."
+    },
     "uploadDisplayModeDialog": {
       "title": "Vyberte způsob zobrazení tohoto souboru",
       "description": "Vyberte, jak se má „{{name}}“ zobrazovat studentům.",
@@ -4320,6 +4327,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",

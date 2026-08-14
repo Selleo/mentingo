@@ -83,7 +83,7 @@ const ContentLessonForm = ({
 
   const handleFileUpload = buildRichTextFileUploadHandler({
     entityType: ENTITY_TYPES.LESSON,
-    getVideoSessionForFile: (file) =>
+    getVideoSessionForFile: (file, visibility) =>
       getSessionForFile({
         file,
         init: () =>
@@ -97,16 +97,18 @@ const ContentLessonForm = ({
             entityId: lessonToEdit?.id,
             entityType: ENTITY_TYPES.LESSON,
             linkToEntity: false,
+            visibility,
           }),
       }),
     uploadVideo,
-    uploadResourceFile: (file) =>
+    uploadResourceFile: (file, visibility) =>
       uploadResource({
         file,
         entityType: ENTITY_TYPES.LESSON,
         entityId: lessonToEdit?.id,
         contextId,
         language,
+        visibility,
       }),
     askForDisplayMode,
     onVideoUploadError: () => {

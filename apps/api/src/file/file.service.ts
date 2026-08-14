@@ -16,8 +16,10 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ENTITY_TYPES,
+  RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
   type VideoProvider,
+  type ResourceVisibility,
   type SupportedLanguages,
   type EntityType,
 } from "@repo/shared";
@@ -348,6 +350,7 @@ export class FileService {
     contextId?: UUIDType;
     relationshipType?: ResourceRelationshipType;
     linkToEntity?: boolean;
+    visibility?: ResourceVisibility;
   }) {
     const {
       entityType,
@@ -359,6 +362,7 @@ export class FileService {
       contextId,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       linkToEntity = true,
+      visibility = RESOURCE_VISIBILITY.PUBLIC,
     } = params;
 
     if (!entityId && !contextId) return undefined;
@@ -374,6 +378,7 @@ export class FileService {
         size: sizeBytes,
       },
       contextId,
+      visibility,
     });
 
     return resourceResult.resourceId;
@@ -391,6 +396,7 @@ export class FileService {
       entityType,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       linkToEntity = true,
+      visibility = RESOURCE_VISIBILITY.PUBLIC,
     } = data as VideoInitBody & { relationshipType?: ResourceRelationshipType };
 
     if (!entityId && !contextId) {
@@ -466,6 +472,7 @@ export class FileService {
       contextId,
       relationshipType,
       linkToEntity,
+      visibility,
     });
 
     return {
@@ -775,6 +782,7 @@ export class FileService {
             ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
           }),
           uploadedBy: currentUser?.userId || null,
+          visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
         })
         .returning();
 
@@ -822,6 +830,7 @@ export class FileService {
     description = {},
     currentUser,
     contextId,
+    visibility = RESOURCE_VISIBILITY.PUBLIC,
   }: CreateResourceForEntityParams) {
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
@@ -833,6 +842,7 @@ export class FileService {
           contentType,
           metadata: settingsToJSONBuildObject(metadata),
           uploadedBy: currentUser?.userId || null,
+          visibility,
         })
         .returning();
 

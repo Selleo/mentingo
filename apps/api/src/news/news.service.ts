@@ -3,7 +3,9 @@ import {
   ENTITY_TYPES,
   NEWS_STATUS,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   isSupportedLanguage,
+  type EditableResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, or, sql } from "drizzle-orm";
@@ -643,6 +645,7 @@ export class NewsService {
     language: SupportedLanguages,
     title: string,
     description: string,
+    visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
     currentUser?: CurrentUserType,
   ) {
     await this.validateManageableNews(newsId, currentUser, language);
@@ -664,7 +667,7 @@ export class NewsService {
       title: fileTitle,
       description: fileDescription,
       currentUser,
-      options: { folderIncludesResource: true },
+      options: { folderIncludesResource: true, visibility },
     });
 
     return { resourceId: fileData.resourceId };

@@ -14,6 +14,7 @@ import {
   ENTITY_TYPES,
   LESSON_TYPES,
   MASTER_COURSE_ENTITY_TYPES,
+  RESOURCE_VISIBILITY,
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
   type MasterCourseEntityType,
@@ -2445,6 +2446,7 @@ export class MasterCourseService {
         contentType: sourceResource.contentType,
         metadata: normalizeJsonb(sourceResource.metadata, {}),
         uploadedBy: params.targetAuthorId,
+        visibility: RESOURCE_VISIBILITY.HIDDEN,
         archived: false,
       };
 
@@ -2525,6 +2527,7 @@ export class MasterCourseService {
         contentType: sourceResource.contentType,
         metadata: normalizeJsonb(sourceResource.metadata, {}),
         uploadedBy: params.targetAuthorId,
+        visibility: sourceResource.visibility,
         archived: false,
       });
 

@@ -1992,6 +1992,7 @@
         "learning_progress": "postęp nauki",
         "certificate": "certyfikaty",
         "file": "pliki",
+        "resource_library": "Biblioteka zasobów",
         "ai": "funkcje AI",
         "announcement": "ogłoszenia",
         "news": "aktualności",
@@ -2054,6 +2055,7 @@
         "certificate_render": "Może generować pliki certyfikatów.",
         "file_upload": "Może przesyłać pliki na platformę.",
         "file_delete": "Może usuwać pliki bezpośrednio z pamięci platformy.",
+        "resource_library_manage": "Może zarządzać prywatnymi zasobami w Bibliotece zasobów.",
         "ai_use": "Może korzystać z funkcji platformy opartych na AI.",
         "announcement_read": "Może przeglądać ogłoszenia.",
         "announcement_create": "Może tworzyć ogłoszenia.",
@@ -4534,6 +4536,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Wybierz widoczność zasobów",
+      "description": "Wybierz widoczność dla wszystkich {{count}} przeciągniętych zasobów.",
+      "privateInfo": "Prywatne zasoby są widoczne w Bibliotece zasobów tylko dla Ciebie i administratorów, ale pozostają dostępne dla uczestników w treści lekcji."
+    },
     "uploadDisplayModeDialog": {
       "title": "Wybierz sposób wyświetlania pliku",
       "description": "Wybierz, jak plik „{{name}}” ma być widoczny dla studentów.",
@@ -4597,6 +4604,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Zasób",
+        "actions": "Akcje"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Ustawić zasób jako prywatny?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Niektóre zasoby miały już wybraną widoczność i zostały pominięte."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",

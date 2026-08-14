@@ -9,7 +9,9 @@ import {
   ARTICLE_STATUS,
   ENTITY_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   isSupportedLanguage,
+  type EditableResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
@@ -775,6 +777,7 @@ export class ArticlesService {
     language: SupportedLanguages,
     title: string,
     description: string,
+    visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
     currentUser?: CurrentUserType,
   ) {
     await this.checkEditAccess(articleId, currentUser);
@@ -796,7 +799,7 @@ export class ArticlesService {
       title: fileTitle,
       description: fileDescription,
       currentUser,
-      options: { folderIncludesResource: true },
+      options: { folderIncludesResource: true, visibility },
     });
 
     return { resourceId: fileData.resourceId };

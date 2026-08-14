@@ -1773,6 +1773,7 @@
         "learning_progress": "mokymosi pažangą",
         "certificate": "sertifikatus",
         "file": "failus",
+        "resource_library": "Išteklių biblioteka",
         "ai": "AI funkcijas",
         "announcement": "pranešimus",
         "news": "naujienas",
@@ -1830,6 +1831,7 @@
         "certificate_render": "Gali generuoti sertifikatų failus.",
         "file_upload": "Gali įkelti failus naudodamas bendrus platformos įkėlimo įrankius.",
         "file_delete": "Gali trinti failus tiesiai iš platformos saugyklos.",
+        "resource_library_manage": "Gali tvarkyti privačius išteklius išteklių bibliotekoje.",
         "ai_use": "Gali naudoti AI pagrįstas platformos funkcijas.",
         "announcement_read": "Gali peržiūrėti pranešimus.",
         "announcement_create": "Gali kurti pranešimus.",
@@ -4252,6 +4254,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Pasirinkite išteklių matomumą",
+      "description": "Pasirinkite visų {{count}} nutemptų išteklių matomumą.",
+      "privateInfo": "Privatūs ištekliai išteklių bibliotekoje matomi tik jums ir administratoriams, tačiau lieka prieinami besimokantiesiems pamokų turinyje."
+    },
     "uploadDisplayModeDialog": {
       "title": "Pasirinkite, kaip rodyti šį failą",
       "description": "Pasirinkite, kaip „{{name}}“ turėtų būti rodoma mokiniams.",
@@ -4315,6 +4322,26 @@
       "upload": "Įkelti failą",
       "insert": "Įterpti",
       "delete": "Ištrinti",
+      "columns": {
+        "asset": "Failas",
+        "actions": "Veiksmai"
+      },
+      "visibility": {
+        "public": "Viešas",
+        "private": "Privatus",
+        "toggle": "Keisti failo privatumą",
+        "select": "Pasirinkti failą",
+        "selectAll": "Pasirinkti visus",
+        "deselectAll": "Atšaukti visų pasirinkimą",
+        "new": "Naujas",
+        "selected": "Pasirinkta: {{count}}",
+        "makePublic": "Padaryti viešą",
+        "makePrivate": "Padaryti privatų",
+        "confirmationTitle": "Padaryti failą privatų?",
+        "usedWarning": "Šis failas naudojamas turinyje. Jis liks ten pasiekiamas, bet bus paslėptas nuo kitų kūrėjų bibliotekų ir tiesioginės prieigos. Tęsti?",
+        "bulkUsedWarning": "{{count}} pasirinktų failų naudojami turinyje. Jie liks ten pasiekiami, bet bus paslėpti nuo kitų kūrėjų bibliotekų ir tiesioginės prieigos. Tęsti?",
+        "bulkSkipped": "Kai kurie failai jau turėjo pasirinktą matomumą ir buvo praleisti."
+      },
       "loading": "Įkeliami failai...",
       "loadingUsages": "Įkeliami panaudojimai...",
       "disabledUntilSaved": "Išsaugokite turinį prieš įterpdami arba trindami esamus failus. Naują failą vis dar galite įkelti.",
