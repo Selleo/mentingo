@@ -5154,10 +5154,13 @@
       "before": "Przed",
       "after": "Po",
       "context": "Kontekst",
+      "resourceName": "Nazwa zasobu",
+      "resourceId": "ID zasobu",
       "noMetadata": "Brak dostępnych metadanych."
     },
     "fallbacks": {
       "unknown": "Nieznane",
+      "nameUnavailable": "Nazwa niedostępna",
       "notAvailable": "b.d."
     },
     "labels": {
@@ -5219,6 +5222,7 @@
       "email": "E-mail",
       "action": "Akcja",
       "resource": "Zasób",
+      "resourceName": "Nazwa zasobu",
       "details": "Szczegóły",
       "showDetails": "Pokaż szczegóły",
       "loading": "Ładowanie dziennika zdarzeń...",

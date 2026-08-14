@@ -4465,10 +4465,13 @@
       "before": "Před",
       "after": "Po",
       "context": "Kontext",
+      "resourceName": "Název zdroje",
+      "resourceId": "ID zdroje",
       "noMetadata": "Žádná metadata nejsou k dispozici."
     },
     "fallbacks": {
       "unknown": "Neznámé",
+      "nameUnavailable": "Název není k dispozici",
       "notAvailable": "n/a"
     },
     "labels": {
@@ -4530,6 +4533,7 @@
       "email": "E-mail",
       "action": "Akce",
       "resource": "Zdroj",
+      "resourceName": "Název zdroje",
       "details": "Detaily",
       "showDetails": "Zobrazit detaily",
       "loading": "Načítání záznamů aktivit...",

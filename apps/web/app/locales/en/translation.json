@@ -5116,10 +5116,13 @@
       "before": "Before",
       "after": "After",
       "context": "Context",
+      "resourceName": "Resource name",
+      "resourceId": "Resource ID",
       "noMetadata": "No metadata available."
     },
     "fallbacks": {
       "unknown": "Unknown",
+      "nameUnavailable": "Name unavailable",
       "notAvailable": "n/a"
     },
     "labels": {
@@ -5181,6 +5184,7 @@
       "email": "Email",
       "action": "Action",
       "resource": "Resource",
+      "resourceName": "Resource name",
       "details": "Details",
       "showDetails": "Show details",
       "loading": "Loading activity logs...",

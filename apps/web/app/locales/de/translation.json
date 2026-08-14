@@ -4457,10 +4457,13 @@
       "before": "Vorher",
       "after": "Nachher",
       "context": "Kontext",
+      "resourceName": "Ressourcenname",
+      "resourceId": "Ressourcen-ID",
       "noMetadata": "Keine Metadaten verfügbar."
     },
     "fallbacks": {
       "unknown": "Unbekannt",
+      "nameUnavailable": "Name nicht verfügbar",
       "notAvailable": "k. A."
     },
     "labels": {
@@ -4522,6 +4525,7 @@
       "email": "E-Mail",
       "action": "Aktion",
       "resource": "Ressource",
+      "resourceName": "Ressourcenname",
       "details": "Details",
       "showDetails": "Details anzeigen",
       "loading": "Aktivitätsprotokoll wird geladen...",

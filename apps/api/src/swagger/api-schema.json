@@ -59227,7 +59227,17 @@
                     }
                   ]
                 },
-                "metadata": {}
+                "metadata": {},
+                "resourceName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
               },
               "required": [
                 "id",
@@ -59239,7 +59249,8 @@
                 "actionType",
                 "resourceType",
                 "resourceId",
-                "metadata"
+                "metadata",
+                "resourceName"
               ]
             }
           },
