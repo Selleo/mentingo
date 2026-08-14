@@ -7,6 +7,7 @@ import type { ForwardedRef } from "react";
 import type { TextareaProps } from "~/components/ui/textarea";
 
 export type AutosizeTextareaProps = TextareaProps & {
+  minRows?: number;
   maxRows?: number;
 };
 
@@ -23,7 +24,7 @@ const setForwardedRef = (
 };
 
 export const AutosizeTextarea = forwardRef<HTMLTextAreaElement, AutosizeTextareaProps>(
-  ({ className, maxRows = 5, onInput, value, ...props }, forwardedRef) => {
+  ({ className, minRows = 2, maxRows = 5, onInput, value, ...props }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
     const resize = () => {
@@ -54,7 +55,7 @@ export const AutosizeTextarea = forwardRef<HTMLTextAreaElement, AutosizeTextarea
           setForwardedRef(forwardedRef, element);
         }}
         value={value}
-        rows={2}
+        rows={minRows}
         className={cn("min-h-[2.75rem] resize-none overflow-y-hidden", className)}
         onInput={(event) => {
           resize();

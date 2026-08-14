@@ -1,5 +1,5 @@
 {
-  "id": "cc203ff4-054b-48bc-bbc0-807ce72b47bf",
+  "id": "0670d2f7-1495-42f2-a21c-a0dcfb54811c",
   "prevId": "39fc0873-5f4c-4d2c-892e-c69eb93d71fe",
   "version": "7",
   "dialect": "postgresql",
@@ -370,7 +370,13 @@
           "name": "ai_mentor_lesson_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "practice_session_id": {
+          "name": "practice_session_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "task_goal": {
           "name": "task_goal",
@@ -408,6 +414,36 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "ai_judge_configurations_lesson_unique_idx": {
+          "name": "ai_judge_configurations_lesson_unique_idx",
+          "columns": [
+            {
+              "expression": "ai_mentor_lesson_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_judge_configurations_practice_session_unique_idx": {
+          "name": "ai_judge_configurations_practice_session_unique_idx",
+          "columns": [
+            {
+              "expression": "practice_session_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -417,6 +453,19 @@
           "tableTo": "ai_mentor_lessons",
           "columnsFrom": [
             "ai_mentor_lesson_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ai_judge_configurations_practice_session_id_ai_mentor_practice_sessions_id_fk": {
+          "name": "ai_judge_configurations_practice_session_id_ai_mentor_practice_sessions_id_fk",
+          "tableFrom": "ai_judge_configurations",
+          "tableTo": "ai_mentor_practice_sessions",
+          "columnsFrom": [
+            "practice_session_id"
           ],
           "columnsTo": [
             "id"
@@ -439,15 +488,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ai_judge_configurations_ai_mentor_lesson_id_unique": {
-          "name": "ai_judge_configurations_ai_mentor_lesson_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "ai_mentor_lesson_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.ai_judge_criteria": {
       "name": "ai_judge_criteria",
@@ -1280,6 +1321,184 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.ai_mentor_practice_sessions": {
+      "name": "ai_mentor_practice_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "practice_date": {
+          "name": "practice_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "language": {
+          "name": "language",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ai_mentor_name": {
+          "name": "ai_mentor_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "instructions": {
+          "name": "instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'queued'"
+        },
+        "error_code": {
+          "name": "error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_mentor_practice_sessions_tenant_id_idx": {
+          "name": "ai_mentor_practice_sessions_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_mentor_practice_sessions_daily_unique_idx": {
+          "name": "ai_mentor_practice_sessions_daily_unique_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "practice_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ai_mentor_practice_sessions_status_idx": {
+          "name": "ai_mentor_practice_sessions_status_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ai_mentor_practice_sessions_user_id_users_id_fk": {
+          "name": "ai_mentor_practice_sessions_user_id_users_id_fk",
+          "tableFrom": "ai_mentor_practice_sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ai_mentor_practice_sessions_tenant_id_tenants_id_fk": {
+          "name": "ai_mentor_practice_sessions_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_mentor_practice_sessions",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.ai_mentor_student_lesson_progress": {
       "name": "ai_mentor_student_lesson_progress",
       "schema": "",
@@ -1546,7 +1765,13 @@
           "name": "ai_mentor_lesson_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "practice_session_id": {
+          "name": "practice_session_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -1585,6 +1810,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "ai_mentor_threads_practice_session_unique_idx": {
+          "name": "ai_mentor_threads_practice_session_unique_idx",
+          "columns": [
+            {
+              "expression": "practice_session_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -1607,6 +1847,19 @@
           "tableTo": "ai_mentor_lessons",
           "columnsFrom": [
             "ai_mentor_lesson_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ai_mentor_threads_practice_session_id_ai_mentor_practice_sessions_id_fk": {
+          "name": "ai_mentor_threads_practice_session_id_ai_mentor_practice_sessions_id_fk",
+          "tableFrom": "ai_mentor_threads",
+          "tableTo": "ai_mentor_practice_sessions",
+          "columnsFrom": [
+            "practice_session_id"
           ],
           "columnsTo": [
             "id"
@@ -11833,13 +12086,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "visibility": {
-          "name": "visibility",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'public'"
-        },
         "archived": {
           "name": "archived",
           "type": "boolean",
@@ -13516,6 +13762,12 @@
         "enrolled_by_group_id": {
           "name": "enrolled_by_group_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_opened_at": {
+          "name": "last_opened_at",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },

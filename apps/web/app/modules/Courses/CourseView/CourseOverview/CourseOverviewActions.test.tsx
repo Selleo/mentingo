@@ -54,9 +54,11 @@ vi.mock("../../context/CourseAccessProvider", () => ({
 
 const renderActions = ({
   onContinueLearning = vi.fn(),
+  onEnrollmentCompleted = vi.fn(),
   onToggleLearningMode = vi.fn(),
 }: {
   onContinueLearning?: () => void;
+  onEnrollmentCompleted?: () => void;
   onToggleLearningMode?: () => void;
 } = {}) =>
   renderWith().render(
@@ -68,6 +70,7 @@ const renderActions = ({
             <CourseOverviewActions
               isTogglingLearningMode={false}
               onContinueLearning={onContinueLearning}
+              onEnrollmentCompleted={onEnrollmentCompleted}
               onOpenDetails={vi.fn()}
               onToggleLearningMode={onToggleLearningMode}
             />
@@ -133,6 +136,19 @@ describe("CourseOverviewActions", () => {
     await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON));
 
     expect(onContinueLearning).toHaveBeenCalledOnce();
+  });
+
+  it("notifies the overview after enrollment succeeds", async () => {
+    const user = userEvent.setup();
+    const onEnrollmentCompleted = vi.fn();
+    currentUser = { id: "user-1" };
+
+    renderActions({ onEnrollmentCompleted });
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON));
+
+    expect(enrollCourse).toHaveBeenCalledWith({ id: "course-1" });
+    expect(onEnrollmentCompleted).toHaveBeenCalledOnce();
   });
 
   it("keeps course actions available on small screens", () => {

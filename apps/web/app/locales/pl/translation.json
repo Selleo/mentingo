@@ -1,6 +1,251 @@
 {
+  "dashboardHome": {
+    "title": "Twój dashboard",
+    "subtitle": "Najważniejsze informacje i działania związane z nauką zawsze pod ręką.",
+    "customize": "Dostosuj dashboard",
+    "edit": {
+      "badge": "Edycja",
+      "widgetsButton": "Widżety",
+      "restore": "Przywróć domyślne",
+      "instructions": "Przeciągaj kafelki, aby zmienić ich kolejność. Możesz też zmieniać ich szerokość i widoczność.",
+      "changeWidth": "Zmień szerokość kafelka {{title}}",
+      "drag": "Przenieś kafelek {{title}}",
+      "widgetLibrary": "Kafelki dashboardu",
+      "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne na Twoim dashboardzie.",
+      "required": "Wymagany",
+      "toggle": "Przełącz kafelek {{title}}",
+      "confirm": "Tak",
+      "cancel": "Nie"
+    },
+    "empty": {
+      "title": "Twój dashboard jest pusty",
+      "description": "Dostosuj dashboard i dodaj najważniejsze dla Ciebie kafelki.",
+      "editDescription": "Włącz co najmniej jeden kafelek z powyższej listy."
+    },
+    "error": {
+      "invalidWidgetLayout": "Układ dashboardu zawiera niedostępne lub zduplikowane kafelki.",
+      "requiredWidgetMissing": "Brakuje wymaganego kafelka dashboardu.",
+      "title": "Nie udało się wczytać dashboardu",
+      "description": "Spróbuj ponownie za chwilę.",
+      "retry": "Spróbuj ponownie",
+      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka."
+    },
+    "widgets": {
+      "loadError": "Nie udało się wczytać danych tego kafelka.",
+      "trainingCompletionChartLabel": "Ukończono {{completed}} z {{total}} przypisań, {{percentage}} procent.",
+      "deadlineRisksPage": "Strona {{page}} z {{totalPages}}",
+      "placeholderDescription": "Widżet pulpitu przygotowany pod dedykowany widok danych",
+      "placeholderContent": "Ten widżet jest gotowy na treść właściwą dla swojej funkcji.",
+      "placeholderFooter": "Przykładowy widżet",
+      "s_placeholder_1": { "title": "Widżet uczestnika 1" },
+      "s_placeholder_2": { "title": "Widżet uczestnika 2" },
+      "s_placeholder_3": { "title": "Widżet uczestnika 3" },
+      "loadError": "Nie udało się wczytać tego kafelka.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Wszystkie rozpoczęte przez Ciebie kursy",
+          "empty": "Nie masz rozpoczętych kursów.",
+          "nextLesson": "Następna lekcja: {{title}}",
+          "openCourse": "Otwórz kurs",
+          "viewAll": "Kursy w trakcie: {{count}}"
+        },
+        "requiredCourse": {
+          "description": "Wszystkie nieukończone kursy obowiązkowe",
+          "empty": "Nie masz kursów obowiązkowych do ukończenia.",
+          "overdue": "Po terminie",
+          "dueSoon": "Termin wkrótce",
+          "scheduled": "Nadchodzący",
+          "noDeadline": "Bez terminu",
+          "dueDate": "Termin: {{date}}",
+          "noDueDate": "Brak terminu",
+          "total": "Kursy obowiązkowe: {{count}}",
+          "overdueCount": "Po terminie: {{count}}"
+        },
+        "courseCompletion": {
+          "description": "Podsumowanie postępu przypisanych kursów",
+          "empty": "Nie masz jeszcze przypisanych kursów.",
+          "completedOfTotal": "Ukończono {{completed}} z {{total}}",
+          "completed": "Ukończone",
+          "inProgress": "W trakcie",
+          "notStarted": "Nierozpoczęte"
+        },
+        "certificates": {
+          "description": "Aktywne certyfikaty i nadchodzące wygaśnięcia",
+          "empty": "Nie masz aktywnych certyfikatów.",
+          "active": "Aktywne certyfikaty",
+          "expiringSoon": "Wygasa w ciągu 30 dni",
+          "cta": "Zobacz certyfikat",
+          "viewAll": "Zobacz wszystkie certyfikaty",
+          "dialogTitle": "Twoje certyfikaty",
+          "dialogDescription": "Przejrzyj wszystkie zdobyte aktywne certyfikaty.",
+          "issued": "Wydano: {{date}}",
+          "expires": "Wygasa: {{date}}",
+          "noExpiry": "Bezterminowy",
+          "previous": "Poprzednia",
+          "next": "Następna",
+          "page": "Strona {{page}} z {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Codziennie utwórz jeden scenariusz treningowy",
+          "empty": "Opisz sytuację i przećwicz ją z Mentorem AI.",
+          "emptyPrompt": "Jaką rozmowę chcesz przeprowadzić z większą pewnością?",
+          "startCta": "Rozpocznij trening",
+          "continueCta": "Kontynuuj trening",
+          "feedbackCta": "Zobacz informację zwrotną",
+          "todayEyebrow": "Dzisiejsza próba",
+          "completedEyebrow": "Próba zakończona",
+          "returnHint": "Rozmowa jest zapisana",
+          "privateHint": "Prywatne miejsce na próby i poprawki",
+          "status": {
+            "queued": "Scenariusz czeka na przygotowanie.",
+            "processing": "Scenariusz jest przygotowywany.",
+            "ready": "Dzisiejszy trening jest gotowy.",
+            "failed": "Nie udało się wygenerować scenariusza. Otwórz go, aby ponowić."
+          }
+        }
+      },
+      "commonDescription": "Najważniejsze informacje w jednym miejscu",
+      "training_completion": {
+        "title": "Realizacja szkoleń",
+        "description": "Stan realizacji wszystkich przypisań do kursów",
+        "completed": "Ukończone",
+        "inProgress": "W trakcie",
+        "notStarted": "Nierozpoczęte",
+        "viewAnalytics": "Zobacz analitykę",
+        "empty": "Nie ma jeszcze żadnych przypisań do kursów.",
+        "assignCourses": "Przypisz kursy"
+      },
+      "deadline_risks": {
+        "title": "Ryzyka terminów",
+        "description": "Wymagane kursy, które wymagają uwagi",
+        "overdue": "Po terminie",
+        "dueSoon": "Zbliża się termin",
+        "empty": "Brak zagrożonych terminów.",
+        "overdueTitle": "Wymagane kursy po terminie",
+        "dueSoonTitle": "Wymagane kursy ze zbliżającym się terminem",
+        "goToCourse": "Przejdź do kursu",
+        "affected_one": "{{count}} uczestnik",
+        "affected_few": "{{count}} uczestników",
+        "affected_many": "{{count}} uczestników",
+        "affected_other": "{{count}} uczestnika"
+      },
+      "incomplete_courses": {
+        "title": "Nieukończone kursy",
+        "description": "Kursy z największą liczbą nieukończonych przypisań",
+        "allCompleted": "Wszystkie przypisane kursy są ukończone.",
+        "noEnrollments": "Nie ma jeszcze żadnych przypisań do kursów.",
+        "enrollments": "przypisań",
+        "notCompleted": "Nieukończone: {{count}}"
+      },
+      "event_calendar": {
+        "title": "Kalendarz wydarzeń",
+        "description": "Wydarzenia edukacyjne i terminy w tym miesiącu",
+        "previousMonth": "Poprzedni miesiąc",
+        "nextMonth": "Następny miesiąc",
+        "selectMonth": "Wybierz miesiąc",
+        "selectYear": "Wybierz rok",
+        "selectedDay": "Wybrany dzień",
+        "upcoming": "Nadchodzące wydarzenia",
+        "empty": "Brak wydarzeń w tym miesiącu.",
+        "liveTraining": "Szkolenie live",
+        "courseDeadline": "Termin kursu",
+        "weekdays": {
+          "mon": "Pn",
+          "tue": "Wt",
+          "wed": "Śr",
+          "thu": "Cz",
+          "fri": "Pt",
+          "sat": "So",
+          "sun": "Nd"
+        }
+      },
+      "continue_learning": { "title": "Kontynuuj naukę" },
+      "required_course": { "title": "Kursy obowiązkowe" },
+      "course_completion": { "title": "Postęp kursów" },
+      "certificates": { "title": "Certyfikaty" },
+      "ai_mentor_practice": {
+        "title": "Ćwiczenia z Mentorem AI",
+        "aiNotConfigured": "Mentor AI nie jest skonfigurowany dla tej organizacji."
+      }
+    }
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Przećwicz prawdziwą rozmowę.",
+      "promptEyebrow": "Ustaw scenę",
+      "mentorPrompt": "Opowiedz mi o rozmowie, którą chcesz przećwiczyć. Z kim rozmawiasz, co się dzieje i co chcesz zrobić lepiej?",
+      "scenario": "Co chcesz przećwiczyć?",
+      "scenarioPlaceholder": "Na przykład: Chcę przećwiczyć udzielanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał terminu.",
+      "scenarioHint": "Dodaj kontekst, który pomoże stworzyć realistyczne ćwiczenie, np. sytuację, osoby lub cel.",
+      "privateHint": "Tylko Ty widzisz ten trening.",
+      "submit": "Utwórz trening",
+      "suggestions": {
+        "title": "Zacznij od przykładu",
+        "feedback": {
+          "label": "Przekaż informację zwrotną",
+          "value": "Chcę przećwiczyć przekazanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał ważnego terminu."
+        },
+        "boundary": {
+          "label": "Postaw granicę",
+          "value": "Chcę przećwiczyć wyznaczenie jasnej granicy, gdy współpracownik prosi mnie o pilne zadanie poza ustalonymi priorytetami."
+        },
+        "explanation": {
+          "label": "Wyjaśnij decyzję",
+          "value": "Chcę przećwiczyć wyjaśnienie trudnej decyzji osobie, która się z nią nie zgadza."
+        },
+        "request": {
+          "label": "Przedstaw prośbę",
+          "value": "Chcę przećwiczyć poproszenie przełożonego o wsparcie przy zbyt dużym obciążeniu pracą."
+        }
+      },
+      "steps": {
+        "setScene": { "title": "Ustaw scenę", "description": "Opisz sytuację własnymi słowami." },
+        "rehearse": {
+          "title": "Przećwicz ją naprawdę",
+          "description": "Mów lub pisz, a Mentor AI zagra drugą osobę."
+        },
+        "reflect": {
+          "title": "Sprawdź, co zadziałało",
+          "description": "Zakończ, gdy będziesz gotowy, i otrzymaj konkretną informację zwrotną."
+        }
+      }
+    },
+    "backToDashboard": "Wróć do panelu",
+    "rehearsalEyebrow": "Dzisiejsza próba",
+    "successGoal": "Twój cel",
+    "successGoalFallback": "Poprowadź rozmowę jasno i ustal konstruktywny kolejny krok.",
+    "viewFeedback": "Zobacz informację zwrotną",
+    "practiceAgain": "Przećwicz ponownie",
+    "replayLoadingTitle": "Przygotowujemy kolejną próbę",
+    "yourRole": "Twoja rola",
+    "mentorRole": "Rola Mentora AI",
+    "feedback": {
+      "title": "Informacja zwrotna z ćwiczenia",
+      "summaryTitle": "Co warto wykorzystać dalej",
+      "summaryDescription": "Wykorzystaj te obserwacje, aby wzmocnić kolejną próbę.",
+      "scoreLabel": "Wynik ćwiczenia",
+      "criteriaTitle": "Co zauważył Sędzia AI",
+      "criterionFallback": "Kryterium {{number}}",
+      "importantFeedbackTitle": "Ważna informacja zwrotna"
+    },
+    "startHint": "Rozpocznij rozmowę, gdy będziesz gotowy.",
+    "checkHint": "Zakończ w dowolnym momencie, aby sprawdzić swoje podejście.",
+    "checkPractice": "Zakończ i podsumuj",
+    "practiceComplete": "Próba została zakończona. Możesz wrócić do informacji zwrotnej w dowolnym momencie.",
+    "generating": "Mentor AI przygotowuje Twój scenariusz.",
+    "preparingBackgroundDescription": "Twój trening jest przygotowywany w tle. Możesz wrócić do Panelu głównego i wrócić tutaj, gdy będzie gotowy.",
+    "failed": "Nie udało się wygenerować scenariusza treningowego.",
+    "error": "Nie udało się wczytać treningu.",
+    "retry": "Spróbuj wygenerować ponownie",
+    "conversationTitle": "Trening z Mentorem AI",
+    "mentorName": "Mentor AI",
+    "message": "Wiadomość do Mentora AI",
+    "send": "Wyślij"
+  },
   "common": {
     "button": {
+      "previous": "Poprzednia",
+      "next": "Następna",
       "save": "Zapisz",
       "saving": "Zapisywanie...",
       "delete": "Usuń",
@@ -19,7 +264,8 @@
       "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
-      "sending": "Wysyłanie..."
+      "sending": "Wysyłanie...",
+      "loading": "Ładowanie..."
     },
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
@@ -1770,6 +2016,7 @@
         "user_manage": "Może zarządzać użytkownikami, w tym rolami i statusem kont.",
         "settings_read_self": "Może przeglądać własne ustawienia profilu i preferencji.",
         "settings_update_self": "Może aktualizować własne ustawienia profilu i preferencji.",
+        "dashboard_read": "Może wyświetlać swój dashboard.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",
@@ -2182,6 +2429,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
+      "invalidTranslationStructure": "Wygenerowane tłumaczenie nie zachowało struktury treści. Spróbuj ponownie.",
       "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
       "lumaNotConfigured": "Klucz API Luma nie jest skonfigurowany.",
       "lumaBadRequest": "Żądanie do Luma było nieprawidłowe.",
@@ -3593,6 +3841,7 @@
         },
         "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
         "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć.",
+        "retakeLoadingTitle": "Przygotowujemy kolejną próbę",
         "retakeAccessDenied": "Możesz powtórzyć tę lekcję tylko, jeśli jesteś zapisany/a na kurs lub jesteś autorem/autorką kursu."
       }
     },
@@ -3788,6 +4037,17 @@
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
+      "courseListLayout": "Układ listy kursów",
+      "courseListLayoutDescription": "Sposób wyświetlania kursów wszystkim użytkownikom platformy",
+      "courseListLayoutClassic": "Klasyczny",
+      "courseListLayoutModern": "Nowoczesny",
+      "courseListLayoutClassicDescription": "Tradycyjny układ siatki kursów",
+      "courseListLayoutModernDescription": "Sekcja hero z wyróżnionymi kursami",
+      "courseListLayoutPreview": {
+        "continueLearning": "Kontynuuj naukę",
+        "topCourses": "Top 5 kursów",
+        "availableCourses": "Dostępne kursy"
+      },
       "courseDiscussions": "Włącz dyskusje w kursach",
       "courseDiscussionsDescription": "Pozwól zapisanym użytkownikom przeglądać i prowadzić dyskusje w kursach",
       "calendar": "Włącz kalendarz",
@@ -4921,10 +5181,13 @@
       "before": "Przed",
       "after": "Po",
       "context": "Kontekst",
+      "resourceName": "Nazwa zasobu",
+      "resourceId": "ID zasobu",
       "noMetadata": "Brak dostępnych metadanych."
     },
     "fallbacks": {
       "unknown": "Nieznane",
+      "nameUnavailable": "Nazwa niedostępna",
       "notAvailable": "b.d."
     },
     "labels": {
@@ -4986,6 +5249,7 @@
       "email": "E-mail",
       "action": "Akcja",
       "resource": "Zasób",
+      "resourceName": "Nazwa zasobu",
       "details": "Szczegóły",
       "showDetails": "Pokaż szczegóły",
       "loading": "Ładowanie dziennika zdarzeń...",
@@ -5054,7 +5318,7 @@
       "aboutCourse": "O tym kursie",
       "description": "Opis",
       "descriptionPlaceholder": "Wprowadź opis kursu...",
-      "whatYouWillMaster": "Co opanujesz",
+      "whatYouWillMaster": "Czego się nauczysz",
       "noLearningOutcomes": "Nie dodano jeszcze efektów nauki.",
       "learningOutcomePlaceholder": "Dodaj efekt nauki...",
       "addLearningOutcome": "Dodaj efekt nauki",

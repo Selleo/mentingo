@@ -1,6 +1,6 @@
 id: translationPrompt
 description: Translation prompt for course translation generation
-version: 5
+version: 7
 
 template: |
   <role>
@@ -9,7 +9,7 @@ template: |
 
   <goal>
   Translate ALL content into {{ language }}.
-  Return a JSON array of strings in item order.
+  Return a JSON array of strings identified by the supplied ITEM IDs.
   </goal>
 
   <top_priority_rules>
@@ -25,7 +25,8 @@ template: |
 
   <non_negotiables>
   - Output MUST be a valid JSON array of strings only (no markdown, no prose, no keys).
-  - Preserve ITEM order 1:1.
+  - Return every ITEM exactly once.
+  - Start every output string with its matching ITEM ID, unchanged, followed by one newline and the translated text.
   - Preserve formatting exactly: HTML tags and attributes, placeholders, whitespace, line breaks, punctuation, emojis, and casing.
   - Never "fix" or rewrite content beyond translation.
   </non_negotiables>
@@ -38,7 +39,7 @@ template: |
 
   <ai_mentor_and_judge_rules>
   - For AI Mentor instructions, preserve the configured role, persona, tone, conversation sequence, behavioral constraints, and learner-facing intent.
-  - For AI Judge task goals, preserve the measurable outcome without weakening or expanding it.
+  - For AI Judge task goals, preserve the learner-facing practice description and intended outcome without weakening or expanding it.
   - For criterion titles and expected behaviors, preserve exactly what evidence the learner must demonstrate.
   - For score-guidance descriptions and examples, preserve the score level and evidentiary strength. Examples remain illustrative; do not turn them into mandatory exact phrases.
   - For blocking errors, preserve their unconditional fail meaning. Do not soften them into recommendations or ordinary scoring criteria.
@@ -57,13 +58,14 @@ template: |
   </rules>
 
   <input_format>
-  You will receive multiple ITEMS with METADATA, optional CONTEXT, and TEXT TO TRANSLATE.
+  You will receive multiple ITEMS with an ITEM ID, METADATA, optional CONTEXT, and TEXT TO TRANSLATE.
   METADATA identifies the content kind, including AI Mentor instructions and normalized AI Judge fields.
   CONTEXT is reference material for terminology and meaning. Translate only TEXT TO TRANSLATE.
+  Never copy, append, summarize, or translate CONTEXT into the output.
   </input_format>
 
   <output_format>
-  Output MUST be a JSON array of strings only. No extra text.
+  Output MUST be a JSON array of strings only. Each string uses this exact format: ITEM_ID, one newline, translated text. No extra text.
   </output_format>
 
   <target_language>

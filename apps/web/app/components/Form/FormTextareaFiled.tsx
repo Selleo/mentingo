@@ -1,6 +1,7 @@
 import { FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { cn } from "~/lib/utils";
 
 import type { InputHTMLAttributes } from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
@@ -15,6 +16,7 @@ export const FormTextareaField = <T extends FieldValues>({
   control,
   name,
   label,
+  className,
   ...props
 }: FormTextareaFieldProps<T>) => {
   return (
@@ -35,7 +37,10 @@ export const FormTextareaField = <T extends FieldValues>({
                 {...field}
                 {...props}
                 id={name}
-                className="placeholder:body-base h-[164px] resize-none placeholder:text-neutral-600"
+                className={cn(
+                  "placeholder:body-base h-[164px] resize-none placeholder:text-neutral-600",
+                  className,
+                )}
               />
             </FormControl>
             <FormMessage />

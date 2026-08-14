@@ -234,6 +234,7 @@ export interface CurrentUserResponse {
       | "live_training.start"
       | "live_training.end"
       | "live_training.statistics"
+      | "dashboard.read"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -516,12 +517,48 @@ export interface GetUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_event_calendar"
+              | "a_training_completion"
+              | "a_incomplete_courses"
+              | "a_deadline_risks"
+              | "s_continue_learning"
+              | "s_event_calendar"
+              | "s_required_course"
+              | "s_course_completion"
+              | "s_certificates"
+              | "s_ai_mentor_practice";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_event_calendar"
+              | "a_training_completion"
+              | "a_incomplete_courses"
+              | "a_deadline_risks"
+              | "s_continue_learning"
+              | "s_event_calendar"
+              | "s_required_course"
+              | "s_course_completion"
+              | "s_certificates"
+              | "s_ai_mentor_practice";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -534,12 +571,48 @@ export type UpdateUserSettingsBody =
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
+      dashboard?: {
+        widgets: {
+          id:
+            | "a_event_calendar"
+            | "a_training_completion"
+            | "a_incomplete_courses"
+            | "a_deadline_risks"
+            | "s_continue_learning"
+            | "s_event_calendar"
+            | "s_required_course"
+            | "s_course_completion"
+            | "s_certificates"
+            | "s_ai_mentor_practice";
+          /** @min 0 */
+          order: number;
+          width: 1 | 2;
+        }[];
+      };
     }
   | {
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
+      dashboard?: {
+        widgets: {
+          id:
+            | "a_event_calendar"
+            | "a_training_completion"
+            | "a_incomplete_courses"
+            | "a_deadline_risks"
+            | "s_continue_learning"
+            | "s_event_calendar"
+            | "s_required_course"
+            | "s_course_completion"
+            | "s_certificates"
+            | "s_ai_mentor_practice";
+          /** @min 0 */
+          order: number;
+          width: 1 | 2;
+        }[];
+      };
       adminNewUserNotification?: boolean;
       adminFinishedCourseNotification?: boolean;
       configWarningDismissed?: boolean;
@@ -552,16 +625,86 @@ export interface UpdateUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_event_calendar"
+              | "a_training_completion"
+              | "a_incomplete_courses"
+              | "a_deadline_risks"
+              | "s_continue_learning"
+              | "s_event_calendar"
+              | "s_required_course"
+              | "s_course_completion"
+              | "s_certificates"
+              | "s_ai_mentor_practice";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
+        dashboard: {
+          widgets: {
+            id:
+              | "a_event_calendar"
+              | "a_training_completion"
+              | "a_incomplete_courses"
+              | "a_deadline_risks"
+              | "s_continue_learning"
+              | "s_event_calendar"
+              | "s_required_course"
+              | "s_course_completion"
+              | "s_certificates"
+              | "s_ai_mentor_practice";
+            /** @min 0 */
+            order: number;
+            width: 1 | 2;
+          }[];
+        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
+}
+
+export interface GetAvailableDashboardWidgetsResponse {
+  data: (
+    | "a_event_calendar"
+    | "a_training_completion"
+    | "a_incomplete_courses"
+    | "a_deadline_risks"
+    | "s_continue_learning"
+    | "s_event_calendar"
+    | "s_required_course"
+    | "s_course_completion"
+    | "s_certificates"
+    | "s_ai_mentor_practice"
+  )[];
+}
+
+export interface GetDefaultDashboardWidgetsResponse {
+  data: {
+    id:
+      | "a_event_calendar"
+      | "a_training_completion"
+      | "a_incomplete_courses"
+      | "a_deadline_risks"
+      | "s_continue_learning"
+      | "s_event_calendar"
+      | "s_required_course"
+      | "s_course_completion"
+      | "s_certificates"
+      | "s_ai_mentor_practice";
+    /** @min 0 */
+    order: number;
+    width: 1 | 2;
+  }[];
 }
 
 export interface UpdateAdminNewUserNotificationResponse {
@@ -570,6 +713,24 @@ export interface UpdateAdminNewUserNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_event_calendar"
+          | "a_training_completion"
+          | "a_incomplete_courses"
+          | "a_deadline_risks"
+          | "s_continue_learning"
+          | "s_event_calendar"
+          | "s_required_course"
+          | "s_course_completion"
+          | "s_certificates"
+          | "s_ai_mentor_practice";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -979,6 +1140,24 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_event_calendar"
+          | "a_training_completion"
+          | "a_incomplete_courses"
+          | "a_deadline_risks"
+          | "s_continue_learning"
+          | "s_event_calendar"
+          | "s_required_course"
+          | "s_course_completion"
+          | "s_certificates"
+          | "s_ai_mentor_practice";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -991,6 +1170,24 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_event_calendar"
+          | "a_training_completion"
+          | "a_incomplete_courses"
+          | "a_deadline_risks"
+          | "s_continue_learning"
+          | "s_event_calendar"
+          | "s_required_course"
+          | "s_course_completion"
+          | "s_certificates"
+          | "s_ai_mentor_practice";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1216,6 +1413,24 @@ export interface UpdateConfigWarningDismissedResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
+    dashboard: {
+      widgets: {
+        id:
+          | "a_event_calendar"
+          | "a_training_completion"
+          | "a_incomplete_courses"
+          | "a_deadline_risks"
+          | "s_continue_learning"
+          | "s_event_calendar"
+          | "s_required_course"
+          | "s_course_completion"
+          | "s_certificates"
+          | "s_ai_mentor_practice";
+        /** @min 0 */
+        order: number;
+        width: 1 | 2;
+      }[];
+    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1304,6 +1519,56 @@ export interface GetStatsResponse {
       answerCount: number;
     };
   };
+}
+
+export interface GetDashboardTrainingCompletionResponse {
+  data: {
+    completed: number;
+    inProgress: number;
+    notStarted: number;
+    total: number;
+    percentage: number;
+  };
+}
+
+export interface GetDashboardDeadlineRiskSummaryResponse {
+  data: {
+    overdueCount: number;
+    dueSoonCount: number;
+  };
+}
+
+export interface GetDashboardIncompleteCoursesResponse {
+  data: {
+    hasEnrollments: boolean;
+    courses: {
+      id: string;
+      title: string;
+      total: number;
+      overdue: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+    }[];
+  };
+}
+
+export interface GetDashboardDeadlineRisksResponse {
+  data: {
+    id: string;
+    title: string;
+    students: {
+      id: string;
+      name: string;
+      dueDate: string;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetUsersResponse {
@@ -1878,6 +2143,44 @@ export interface GetStudentCoursesResponse {
     perPage: number;
   };
   appliedFilters?: object;
+}
+
+export interface GetStudentDashboardSummaryResponse {
+  data: {
+    continueLearningCourses: {
+      /** @format uuid */
+      courseId: string;
+      slug: string;
+      title: string;
+      thumbnailUrl: string | null;
+      completedChapterCount: number;
+      courseChapterCount: number;
+      lesson: {
+        /** @format uuid */
+        id: string;
+        title: string | null;
+      } | null;
+    }[];
+    requiredCourses: {
+      /** @format uuid */
+      courseId: string;
+      slug: string;
+      title: string;
+      dueDate: string | null;
+      urgency: "overdue" | "dueSoon" | "scheduled" | "noDeadline";
+    }[];
+    completion: {
+      total: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+      percentage: number;
+    };
+  };
+}
+
+export interface MarkCourseOpenedResponse {
+  data: null;
 }
 
 export interface GetStudentsWithEnrollmentDateResponse {
@@ -5623,6 +5926,21 @@ export interface GetAllCertificatesResponse {
   appliedFilters?: object;
 }
 
+export interface GetDashboardSummaryResponse {
+  data: {
+    activeCount: number;
+    expiringSoon: {
+      /** @format uuid */
+      certificateId: string;
+      /** @format uuid */
+      courseId: string;
+      courseSlug: string;
+      courseTitle: string;
+      expiresAt: string;
+    } | null;
+  };
+}
+
 export type GetCertificateResponse = {
   /** @format uuid */
   id: string;
@@ -5716,12 +6034,211 @@ export interface ResetCourseCertificatesResponse {
   affectedUserCount: number;
 }
 
+export interface GetTodayPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  } | null;
+}
+
+export interface CreatePracticeBody {
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @minLength 1
+   * @maxLength 3000
+   */
+  scenario: string;
+}
+
+export interface CreatePracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface GetPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface RetryPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface ReplayPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
 export interface GetThreadResponse {
   data: {
     /** @format uuid */
     id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
+    aiMentorLessonId: string | null;
+    practiceSessionId: string | null;
     /** @format uuid */
     userId: string;
     userLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -8167,6 +8684,7 @@ export interface GetActivityLogsResponse {
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
+    resourceName: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -8823,6 +9341,19 @@ export interface GetEventsResponse {
           };
     }[];
   };
+}
+
+export interface GetDashboardEventsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    /** @format uuid */
+    targetId: string;
+    title: string;
+    startsAt: string;
+    allDay: boolean;
+  }[];
 }
 
 export interface GetEventDetailsResponse {
@@ -9670,6 +10201,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetAvailableDashboardWidgets
+     * @request GET:/api/settings/dashboard
+     */
+    settingsControllerGetAvailableDashboardWidgets: (params: RequestParams = {}) =>
+      this.request<GetAvailableDashboardWidgetsResponse, any>({
+        path: `/api/settings/dashboard`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetDefaultDashboardWidgets
+     * @request GET:/api/settings/dashboard/default
+     */
+    settingsControllerGetDefaultDashboardWidgets: (params: RequestParams = {}) =>
+      this.request<GetDefaultDashboardWidgetsResponse, any>({
+        path: `/api/settings/dashboard/default`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateAdminNewUserNotification
      * @request PATCH:/api/settings/admin/new-user-notification
      */
@@ -10321,6 +10880,88 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetStatsResponse, any>({
         path: `/api/statistics/stats`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardTrainingCompletion
+     * @request GET:/api/statistics/dashboard/training-completion
+     */
+    statisticsControllerGetDashboardTrainingCompletion: (params: RequestParams = {}) =>
+      this.request<GetDashboardTrainingCompletionResponse, any>({
+        path: `/api/statistics/dashboard/training-completion`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRiskSummary
+     * @request GET:/api/statistics/dashboard/deadline-risks/summary
+     */
+    statisticsControllerGetDashboardDeadlineRiskSummary: (params: RequestParams = {}) =>
+      this.request<GetDashboardDeadlineRiskSummaryResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks/summary`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardIncompleteCourses
+     * @request GET:/api/statistics/dashboard/incomplete-courses
+     */
+    statisticsControllerGetDashboardIncompleteCourses: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardIncompleteCoursesResponse, any>({
+        path: `/api/statistics/dashboard/incomplete-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRisks
+     * @request GET:/api/statistics/dashboard/deadline-risks
+     */
+    statisticsControllerGetDashboardDeadlineRisks: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "overdue" | "dueSoon";
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardDeadlineRisksResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks`,
         method: "GET",
         query: query,
         format: "json",
@@ -11065,6 +11706,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/get-student-courses`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetStudentDashboardSummary
+     * @request GET:/api/course/dashboard-summary
+     */
+    courseControllerGetStudentDashboardSummary: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetStudentDashboardSummaryResponse, any>({
+        path: `/api/course/dashboard-summary`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerMarkCourseOpened
+     * @request POST:/api/course/{courseId}/open
+     */
+    courseControllerMarkCourseOpened: (courseId: string, params: RequestParams = {}) =>
+      this.request<MarkCourseOpenedResponse, any>({
+        path: `/api/course/${courseId}/open`,
+        method: "POST",
         format: "json",
         ...params,
       }),
@@ -13010,6 +13686,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CertificatesControllerGetDashboardSummary
+     * @request GET:/api/certificates/dashboard-summary
+     */
+    certificatesControllerGetDashboardSummary: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardSummaryResponse, any>({
+        path: `/api/certificates/dashboard-summary`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CertificatesControllerGetCertificate
      * @request GET:/api/certificates/certificate
      */
@@ -13195,6 +13892,78 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/certificates/share-image`,
         method: "GET",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetTodayPractice
+     * @request GET:/api/ai/practice/today
+     */
+    aiControllerGetTodayPractice: (params: RequestParams = {}) =>
+      this.request<GetTodayPracticeResponse, any>({
+        path: `/api/ai/practice/today`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerCreatePractice
+     * @request POST:/api/ai/practice
+     */
+    aiControllerCreatePractice: (data: CreatePracticeBody, params: RequestParams = {}) =>
+      this.request<CreatePracticeResponse, any>({
+        path: `/api/ai/practice`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetPractice
+     * @request GET:/api/ai/practice/{id}
+     */
+    aiControllerGetPractice: (id: string, params: RequestParams = {}) =>
+      this.request<GetPracticeResponse, any>({
+        path: `/api/ai/practice/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerRetryPractice
+     * @request POST:/api/ai/practice/{id}/retry
+     */
+    aiControllerRetryPractice: (id: string, params: RequestParams = {}) =>
+      this.request<RetryPracticeResponse, any>({
+        path: `/api/ai/practice/${id}/retry`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerReplayPractice
+     * @request POST:/api/ai/practice/{id}/replay
+     */
+    aiControllerReplayPractice: (id: string, params: RequestParams = {}) =>
+      this.request<ReplayPracticeResponse, any>({
+        path: `/api/ai/practice/${id}/replay`,
+        method: "POST",
+        format: "json",
         ...params,
       }),
 
@@ -16831,6 +17600,33 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetEventsResponse, any>({
         path: `/api/calendar/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CalendarControllerGetDashboardEvents
+     * @request GET:/api/calendar/dashboard/events
+     */
+    calendarControllerGetDashboardEvents: (
+      query?: {
+        /** @minLength 1 */
+        start?: string;
+        /** @minLength 1 */
+        end?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @minLength 1 */
+        timezone?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardEventsResponse, any>({
+        path: `/api/calendar/dashboard/events`,
         method: "GET",
         query: query,
         format: "json",

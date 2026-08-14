@@ -4,9 +4,15 @@ import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCours
 import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
+import { Label } from "~/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { cn } from "~/lib/utils";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 import { SettingItem } from "../SettingItem";
+
+import { COURSE_LIST_LAYOUT_VARIANT } from "./courseListLayout";
+import { CourseListLayoutPreview } from "./CourseListLayoutPreview";
 
 import type { GlobalSettings } from "../../types";
 
@@ -28,6 +34,10 @@ export default function CoursesAccessibilityPreferences({
   const isLiveTrainingDisableBlocked =
     globalSettings.liveTrainingEnabled && trainerRoleUserCount > 0;
 
+  const currentLayout = globalSettings.modernCourseListEnabled
+    ? COURSE_LIST_LAYOUT_VARIANT.MODERN
+    : COURSE_LIST_LAYOUT_VARIANT.CLASSIC;
+
   const handleCoursesAccessibilityChange = () => {
     changeUnregisteredUserCoursesAccessibility();
   };
@@ -42,14 +52,63 @@ export default function CoursesAccessibilityPreferences({
         onCheckedChange={handleCoursesAccessibilityChange}
         testId={SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH}
       />
-      <SettingItem
-        id="modernCourseList"
-        label={t("adminPreferences.field.modernCourseList")}
-        description={t("adminPreferences.field.modernCourseListDescription")}
-        checked={globalSettings.modernCourseListEnabled}
-        onCheckedChange={toggleModernCourseList}
-        testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
-      />
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <p className="body-base-md">{t("adminPreferences.field.courseListLayout")}</p>
+          <p className="body-sm-md text-muted-foreground">
+            {t("adminPreferences.field.courseListLayoutDescription")}
+          </p>
+        </div>
+        <RadioGroup
+          value={currentLayout}
+          onValueChange={(val) => {
+            if (val !== currentLayout) toggleModernCourseList();
+          }}
+          className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:justify-center"
+        >
+          {Object.values(COURSE_LIST_LAYOUT_VARIANT).map((layout) => {
+            const isSelected = currentLayout === layout;
+            const title =
+              layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
+                ? t("adminPreferences.field.courseListLayoutClassic")
+                : t("adminPreferences.field.courseListLayoutModern");
+            const description =
+              layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
+                ? t("adminPreferences.field.courseListLayoutClassicDescription")
+                : t("adminPreferences.field.courseListLayoutModernDescription");
+
+            return (
+              <Label key={layout} htmlFor={layout} className="w-full cursor-pointer sm:flex-1">
+                <div
+                  className={cn(
+                    "rounded-lg border-2 bg-white p-3 transition-all hover:border-primary-200 hover:bg-primary-50/30",
+                    {
+                      "border-primary-600 bg-primary-100 ring-1 ring-primary-200": isSelected,
+                      "border-neutral-200": !isSelected,
+                    },
+                  )}
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="mb-1 text-base font-bold">{title}</p>
+                      <p className="text-sm text-muted-foreground">{description}</p>
+                    </div>
+                    <RadioGroupItem
+                      value={layout}
+                      id={layout}
+                      data-testid={SETTINGS_PAGE_HANDLES.courseListLayoutOption(layout)}
+                      className={cn("mt-0.5 size-5 shrink-0 border-neutral-300 bg-white", {
+                        "border-primary-700 text-primary-700": isSelected,
+                      })}
+                    />
+                  </div>
+                  <CourseListLayoutPreview type={layout} />
+                </div>
+              </Label>
+            );
+          })}
+        </RadioGroup>
+      </div>
       <SettingItem
         id="courseDiscussions"
         label={t("adminPreferences.field.courseDiscussions")}

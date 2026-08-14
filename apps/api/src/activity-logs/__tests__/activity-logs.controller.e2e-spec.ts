@@ -6,6 +6,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { activityLogs } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
@@ -18,6 +19,7 @@ describe("ActivityLogsController (e2e)", () => {
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let courseFactory: ReturnType<typeof createCourseFactory>;
 
   const password = "password123";
 
@@ -27,6 +29,7 @@ describe("ActivityLogsController (e2e)", () => {
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
+    courseFactory = createCourseFactory(db);
   }, 30000);
 
   afterAll(async () => {
@@ -86,6 +89,52 @@ describe("ActivityLogsController (e2e)", () => {
     expect(response.body.data[0]).toHaveProperty("createdAt");
     expect(response.body.data[0]).toHaveProperty("actorEmail", admin.email);
     expect(response.body.data[0]).toHaveProperty("metadata");
+  });
+
+  it("returns event-time or current resource names for course activity", async () => {
+    const admin = await userFactory
+      .withCredentials({ password })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ title: "Current course title" });
+
+    const [metadataFreeLog, eventTimeLog] = await db
+      .insert(activityLogs)
+      .values([
+        {
+          actorId: admin.id,
+          actorEmail: admin.email,
+          actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+          actionType: ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE,
+          resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+          resourceId: course.id,
+          metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE },
+        },
+        {
+          actorId: admin.id,
+          actorEmail: admin.email,
+          actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+          actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+          resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+          resourceId: course.id,
+          metadata: {
+            operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+            after: { title: "Event-time course title" },
+          },
+        },
+      ])
+      .returning({ id: activityLogs.id });
+
+    const response = await request(app.getHttpServer())
+      .get("/api/activity-logs")
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+    const logsById = new Map<string, { id: string; resourceName: string | null }>(
+      response.body.data.map((log: { id: string; resourceName: string | null }) => [log.id, log]),
+    );
+
+    expect(logsById.get(metadataFreeLog.id)?.resourceName).toBe("Current course title");
+    expect(logsById.get(eventTimeLog.id)?.resourceName).toBe("Event-time course title");
   });
 
   it("includes logs created on the to date", async () => {

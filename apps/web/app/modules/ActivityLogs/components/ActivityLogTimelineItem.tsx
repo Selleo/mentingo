@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ChevronDown } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { cn } from "~/lib/utils";
@@ -17,6 +18,7 @@ type ActivityLogTimelineItemProps = {
 };
 
 export const ActivityLogTimelineItem = ({ item }: ActivityLogTimelineItemProps) => {
+  const { t } = useTranslation();
   const createdAt = useMemo(() => new Date(item.createdAt), [item.createdAt]);
   const actionConfig = getActivityLogActionConfig(item.actionType);
   const ActionIcon = actionConfig.icon;
@@ -60,8 +62,18 @@ export const ActivityLogTimelineItem = ({ item }: ActivityLogTimelineItemProps) 
           <AccordionContent className="-mt-px px-0 pb-0 pt-0">
             <div className="rounded-b-[1.75rem] border border-t-0 border-neutral-200 bg-neutral-50 px-5 py-5">
               <div className="mb-4 text-sm text-neutral-500">
-                <span className="font-medium text-neutral-700">ID:</span>{" "}
-                <span className="text-neutral-900">{item.resourceId ?? "n/a"}</span>
+                <span className="font-medium text-neutral-700">
+                  {t("activityLogsView.details.resourceName")}:
+                </span>{" "}
+                <span className="text-neutral-900">
+                  {item.resourceName ?? t("activityLogsView.fallbacks.nameUnavailable")}
+                </span>
+                <span className="ml-4 font-medium text-neutral-700">
+                  {t("activityLogsView.details.resourceId")}:
+                </span>{" "}
+                <span className="text-neutral-900">
+                  {item.resourceId ?? t("activityLogsView.fallbacks.notAvailable")}
+                </span>
               </div>
 
               <ActivityLogMetadata metadata={item.metadata} />

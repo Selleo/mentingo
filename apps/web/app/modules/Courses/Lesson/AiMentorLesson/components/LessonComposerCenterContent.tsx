@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
+import { cn } from "~/lib/utils";
 import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
 import type { ChangeEvent } from "react";
@@ -10,6 +11,7 @@ type LessonComposerCenterContentProps = {
   input: string;
   placeholder: string;
   voiceLevel: number;
+  compact?: boolean;
   onInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: () => void;
   textInputTestId?: string;
@@ -20,6 +22,7 @@ export function LessonComposerCenterContent({
   input,
   placeholder,
   voiceLevel,
+  compact = false,
   onInputChange,
   onSubmit,
   textInputTestId,
@@ -50,7 +53,8 @@ export function LessonComposerCenterContent({
             <AutosizeTextarea
               data-testid={textInputTestId}
               value={input}
-              maxRows={5}
+              minRows={compact ? 1 : 2}
+              maxRows={compact ? 3 : 5}
               onChange={onInputChange}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
@@ -59,7 +63,10 @@ export function LessonComposerCenterContent({
                 }
               }}
               placeholder={placeholder}
-              className="h-auto min-h-0 w-full max-w-full overflow-x-hidden border-none bg-transparent px-0 py-1.5 text-base font-normal text-gray-600 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
+              className={cn(
+                "h-auto w-full max-w-full overflow-x-hidden border-none bg-transparent px-0 py-1.5 text-base font-normal text-gray-600 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50",
+                compact && "min-h-[2.25rem] py-1 text-sm",
+              )}
             />
           </motion.div>
         )}

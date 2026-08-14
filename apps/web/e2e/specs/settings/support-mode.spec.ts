@@ -46,7 +46,7 @@ test("support-mode user does not see account settings and lands on organization 
       await enterSupportModeFromListFlow(page, tenant.id);
 
       await expect(page.getByTestId(SUPPORT_MODE_HANDLES.BANNER)).toBeVisible();
-      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/courses$`));
+      await expect(page).toHaveURL(new RegExp(`^${escapeRegExp(supportOrigin)}/dashboard$`));
 
       await page.goto(`${supportOrigin}/settings`);
 

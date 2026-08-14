@@ -43,7 +43,7 @@ export default function CertificateStatCard({
       disabled={!isInteractive}
       onClick={isInteractive ? onOpen : undefined}
       className={cn(
-        "relative h-full w-full overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-lg",
+        "relative h-full w-full overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-sm",
         {
           "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success-500 focus-visible:ring-offset-2":
             isInteractive,

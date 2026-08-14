@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, type SQL } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -79,11 +79,29 @@ export class AiJudgeConfigurationRepository {
 
   async getConfigurationGraph(configurationId: UUIDType, dbInstance: DatabasePg = this.db) {
     const [configuration] = await dbInstance
-      .select()
+      .select({
+        id: aiJudgeConfigurations.id,
+        aiMentorLessonId: aiJudgeConfigurations.aiMentorLessonId,
+        taskGoal: aiJudgeConfigurations.taskGoal,
+        passingThresholdPercent: aiJudgeConfigurations.passingThresholdPercent,
+        tenantId: aiJudgeConfigurations.tenantId,
+        createdAt: aiJudgeConfigurations.createdAt,
+        updatedAt: aiJudgeConfigurations.updatedAt,
+      })
       .from(aiJudgeConfigurations)
-      .where(eq(aiJudgeConfigurations.id, configurationId));
+      .where(
+        and(
+          eq(aiJudgeConfigurations.id, configurationId),
+          isNotNull(aiJudgeConfigurations.aiMentorLessonId),
+        ),
+      );
 
-    if (!configuration) return undefined;
+    if (!configuration?.aiMentorLessonId) return undefined;
+
+    const lessonConfiguration = {
+      ...configuration,
+      aiMentorLessonId: configuration.aiMentorLessonId,
+    };
 
     const criteria = await dbInstance
       .select()
@@ -106,7 +124,7 @@ export class AiJudgeConfigurationRepository {
       .where(eq(aiJudgeBlockingErrors.configurationId, configurationId))
       .orderBy(asc(aiJudgeBlockingErrors.createdAt));
 
-    return { configuration, criteria, scoreGuidance, blockingErrors };
+    return { configuration: lessonConfiguration, criteria, scoreGuidance, blockingErrors };
   }
 
   async getConfigurationsForCourse(courseId: UUIDType) {
@@ -222,7 +240,7 @@ export class AiJudgeConfigurationRepository {
     configurationId: UUIDType,
     language: SupportedLanguages,
   ): Promise<AiJudgeConfigurationLanguageRead[]> {
-    return this.db
+    const rows = await this.db
       .select({
         id: aiJudgeConfigurations.id,
         aiMentorLessonId: aiJudgeConfigurations.aiMentorLessonId,
@@ -233,7 +251,16 @@ export class AiJudgeConfigurationRepository {
         passingThresholdPercent: aiJudgeConfigurations.passingThresholdPercent,
       })
       .from(aiJudgeConfigurations)
-      .where(eq(aiJudgeConfigurations.id, configurationId));
+      .where(
+        and(
+          eq(aiJudgeConfigurations.id, configurationId),
+          isNotNull(aiJudgeConfigurations.aiMentorLessonId),
+        ),
+      );
+
+    return rows.flatMap((row) =>
+      row.aiMentorLessonId ? [{ ...row, aiMentorLessonId: row.aiMentorLessonId }] : [],
+    );
   }
 
   async getCriteriaInLanguage(

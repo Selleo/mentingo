@@ -45,7 +45,7 @@ describe("CourseWhatYouWillLearn", () => {
 
   it("does not render for students when the course has no learning outcomes", () => {
     const { container } = renderWith().render(
-      <CourseWhatYouWillLearn courseOutcomes={[]} language="en" />,
+      <CourseWhatYouWillLearn courseOutcomes={[]} idOrSlug="course-1" language="en" />,
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -53,10 +53,14 @@ describe("CourseWhatYouWillLearn", () => {
 
   it("renders read-only learning outcomes for students", () => {
     renderWith().render(
-      <CourseWhatYouWillLearn courseOutcomes={["Clean data", "Build dashboards"]} language="en" />,
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Clean data", "Build dashboards"]}
+        language="en"
+        idOrSlug="course-1"
+      />,
     );
 
-    expect(screen.getByText("What you'll master")).toBeInTheDocument();
+    expect(screen.getByText("What you'll learn")).toBeInTheDocument();
     expect(screen.getByText("Clean data")).toBeInTheDocument();
     expect(screen.getByText("Build dashboards")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add learning outcome" })).not.toBeInTheDocument();
@@ -67,7 +71,9 @@ describe("CourseWhatYouWillLearn", () => {
     mockedIsAdminExperience = true;
     mockedCourse = createCourse();
 
-    renderWith().render(<CourseWhatYouWillLearn courseOutcomes={[]} language="pl" />);
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={[]} idOrSlug="course-1" language="pl" />,
+    );
 
     await user.click(screen.getByRole("button", { name: "Add learning outcome" }));
 
@@ -84,6 +90,7 @@ describe("CourseWhatYouWillLearn", () => {
           language: "pl",
           learningOutcomes: ["Nowy efekt nauki"],
         },
+        courseOverviewCache: { idOrSlug: "course-1", language: "pl" },
       });
     });
   });
@@ -94,7 +101,11 @@ describe("CourseWhatYouWillLearn", () => {
     mockedCourse = createCourse({ learningOutcomes: ["Existing outcome"] });
 
     renderWith().render(
-      <CourseWhatYouWillLearn courseOutcomes={["Existing outcome"]} language="en" />,
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Existing outcome"]}
+        language="en"
+        idOrSlug="course-1"
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "Existing outcome" }));
@@ -109,7 +120,11 @@ describe("CourseWhatYouWillLearn", () => {
     mockedCourse = createCourse({ learningOutcomes: ["Existing outcome"] });
 
     renderWith().render(
-      <CourseWhatYouWillLearn courseOutcomes={["Existing outcome"]} language="en" />,
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Existing outcome"]}
+        language="en"
+        idOrSlug="course-1"
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "Existing outcome" }));
@@ -126,6 +141,7 @@ describe("CourseWhatYouWillLearn", () => {
           language: "en",
           learningOutcomes: ["Updated outcome"],
         },
+        courseOverviewCache: { idOrSlug: "course-1", language: "en" },
       });
     });
   });
@@ -139,6 +155,7 @@ describe("CourseWhatYouWillLearn", () => {
       <CourseWhatYouWillLearn
         courseOutcomes={["Outcome to remove", "Outcome to keep"]}
         language="en"
+        idOrSlug="course-1"
       />,
     );
 
@@ -151,6 +168,7 @@ describe("CourseWhatYouWillLearn", () => {
           language: "en",
           learningOutcomes: ["Outcome to keep"],
         },
+        courseOverviewCache: { idOrSlug: "course-1", language: "en" },
       });
     });
   });
@@ -161,7 +179,11 @@ describe("CourseWhatYouWillLearn", () => {
     mockedCourse = createCourse({ learningOutcomes: ["Outcome to clear"] });
 
     renderWith().render(
-      <CourseWhatYouWillLearn courseOutcomes={["Outcome to clear"]} language="en" />,
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Outcome to clear"]}
+        language="en"
+        idOrSlug="course-1"
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "Outcome to clear" }));
@@ -175,6 +197,7 @@ describe("CourseWhatYouWillLearn", () => {
           language: "en",
           learningOutcomes: [],
         },
+        courseOverviewCache: { idOrSlug: "course-1", language: "en" },
       });
     });
   });
@@ -187,7 +210,9 @@ describe("CourseWhatYouWillLearn", () => {
     );
     mockedCourse = createCourse({ learningOutcomes: outcomes });
 
-    renderWith().render(<CourseWhatYouWillLearn courseOutcomes={outcomes} language="en" />);
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={outcomes} idOrSlug="course-1" language="en" />,
+    );
 
     expect(screen.getByText("5/5")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add learning outcome" })).toBeDisabled();

@@ -1276,6 +1276,7 @@ export class MasterCourseService {
     );
 
     for (const sourceConfiguration of sourceSnapshot.aiJudgeConfigurations) {
+      if (!sourceConfiguration.aiMentorLessonId) continue;
       const targetAiMentorLessonId = aiMentorMap.get(sourceConfiguration.aiMentorLessonId);
       if (!targetAiMentorLessonId) continue;
 

@@ -65,11 +65,11 @@ test("visitor can log in from the magic link email", async ({
     const magicLinkUrl = new URL(magicLink);
 
     await page.goto(`${magicLinkUrl.pathname}${magicLinkUrl.search}`);
-    await page.waitForURL("/courses");
-    await expect(page).toHaveURL("/courses");
+    await page.waitForURL("/dashboard");
+    await expect(page).toHaveURL("/dashboard");
 
     await logout(page);
     await login(page, email, INITIAL_PASSWORD);
-    await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/dashboard");
   });
 });

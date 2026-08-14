@@ -53,7 +53,7 @@ test("admin can enable MFA and verify it on login", async ({
   await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
   await submitMfaTokenFlow(workspace.page);
 
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/courses`);
+  await expect(workspace.page).toHaveURL(`${workspace.origin}/dashboard`);
 
   await logout(workspace.page, { origin: workspace.origin });
   await login(workspace.page, email, INITIAL_PASSWORD, { origin: workspace.origin });
@@ -63,5 +63,5 @@ test("admin can enable MFA and verify it on login", async ({
   await fillMfaTokenFlow(workspace.page, generateTotpToken(secret));
   await submitMfaTokenFlow(workspace.page);
 
-  await expect(workspace.page).toHaveURL(`${workspace.origin}/courses`);
+  await expect(workspace.page).toHaveURL(`${workspace.origin}/dashboard`);
 });

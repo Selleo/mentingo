@@ -1,4 +1,5 @@
 import { Outlet } from "@remix-run/react";
+import { useEffect } from "react";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
@@ -19,7 +20,9 @@ export const clientLoader = async () => {
 export default function AuthLayout() {
   const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
-  setHasVerifiedMFA(false);
+  useEffect(() => {
+    setHasVerifiedMFA(false);
+  }, [setHasVerifiedMFA]);
 
   return (
     <main className="flex min-h-screen w-screen items-center justify-center">

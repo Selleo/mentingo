@@ -15,5 +15,5 @@ export const passwordValidationRules = {
   hasSpecialChar: /[!@#$%^&*()_+\-=[\]{};:'",.<>?]/,
 };
 
-export const LOGIN_REDIRECT_URL = "/courses";
+export const LOGIN_REDIRECT_URL = "/dashboard";
 export const REQUIRED_PASSWORD_CHANGE_URL = "/auth/change-password";
