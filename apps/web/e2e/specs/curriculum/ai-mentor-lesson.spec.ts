@@ -184,9 +184,9 @@ test("admin can create and preview an AI mentor lesson", async ({
 
     await openExistingLessonFlow(page, chapter.id, lessonId);
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
-    await expect(page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_SCENARIO_INPUT)).toHaveValue(
-      "Practice a concise discovery conversation.",
-    );
+    await expect(
+      page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_SCENARIO_INPUT).locator(".ProseMirror"),
+    ).toHaveValue("Practice a concise discovery conversation.");
     await page.getByRole("button", { name: "Cancel" }).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
@@ -229,12 +229,14 @@ test("admin can save and reopen complete Teacher and AI Judge configurations", a
     await page.getByRole("radio", { name: /Teacher/ }).click();
     await page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT)
+      .locator(".ProseMirror")
       .fill("Teach a structured discovery conversation.");
     await page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_EXPERTISE_INPUT)
       .fill("Sales discovery coach");
     await page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONTENT_SCOPE_INPUT)
+      .locator(".ProseMirror")
       .fill("SPIN discovery questions and relevant next steps.");
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_APPLY_BUTTON).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
@@ -250,7 +252,9 @@ test("admin can save and reopen complete Teacher and AI Judge configurations", a
     await openExistingLessonFlow(page, chapter.id, lessonId);
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
     await expect(
-      page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT),
+      page
+        .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT)
+        .locator(".ProseMirror"),
     ).toHaveValue("Teach a structured discovery conversation.");
     await expect(
       page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_EXPERTISE_INPUT),

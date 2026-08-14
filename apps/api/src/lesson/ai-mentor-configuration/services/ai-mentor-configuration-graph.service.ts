@@ -94,12 +94,16 @@ export class AiMentorConfigurationGraphService {
       if (graph.configuration.type !== data.type)
         throw new BadRequestException("aiMentorConfiguration.errors.typeMismatch");
 
-      await this.aiMentorConfigurationRepository.updateConfigurationRootTranslations(
-        configurationId,
-        language,
-        data,
-        transaction,
-      );
+      const hasRootTranslations =
+        data.openingInstruction !== undefined || data.additionalInstructions !== undefined;
+
+      if (hasRootTranslations)
+        await this.aiMentorConfigurationRepository.updateConfigurationRootTranslations(
+          configurationId,
+          language,
+          data,
+          transaction,
+        );
 
       const subtype =
         data.type === AI_MENTOR_TYPE.TEACHER
