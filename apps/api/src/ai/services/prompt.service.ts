@@ -6,6 +6,7 @@ import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
+import { match } from "ts-pattern";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { MessageService } from "src/ai/services/message.service";
@@ -169,30 +170,37 @@ export class PromptService implements OnModuleInit {
       securityAndRagBlock,
     };
 
-    let mentorPrompt: string;
+    const mentorPrompt = await match(mode)
+      .with(AI_MENTOR_TYPE.TEACHER, async () => {
+        if (!lesson.teachingStyle)
+          throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
 
-    if (mode === AI_MENTOR_TYPE.TEACHER && lesson.teachingStyle) {
-      mentorPrompt = await this.loadPrompt("teacherPrompt", {
-        ...commonPromptVariables,
-        taskGoal: lesson.taskGoal,
-        expertise: lesson.expertise,
-        contentScope: lesson.contentScope,
-        teachingStyle: lesson.teachingStyle,
-        feedbackGuidance: lesson.feedbackGuidance ?? "",
+        return this.loadPrompt("teacherPrompt", {
+          ...commonPromptVariables,
+          taskGoal: lesson.taskGoal,
+          expertise: lesson.expertise,
+          contentScope: lesson.contentScope,
+          teachingStyle: lesson.teachingStyle,
+          feedbackGuidance: lesson.feedbackGuidance ?? "",
+        });
+      })
+      .with(AI_MENTOR_TYPE.ROLEPLAY, async () => {
+        if (!lesson.difficulty)
+          throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+
+        return this.loadPrompt("roleplayPrompt", {
+          ...commonPromptVariables,
+          scenario: lesson.scenario,
+          aiRole: lesson.aiRole,
+          learnerRole: lesson.learnerRole,
+          characterGoal: lesson.characterGoal,
+          difficulty: lesson.difficulty,
+          factsAndConstraints: lesson.factsAndConstraints ?? "",
+        });
+      })
+      .otherwise(() => {
+        throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
       });
-    } else if (mode === AI_MENTOR_TYPE.ROLEPLAY && lesson.difficulty) {
-      mentorPrompt = await this.loadPrompt("roleplayPrompt", {
-        ...commonPromptVariables,
-        scenario: lesson.scenario,
-        aiRole: lesson.aiRole,
-        learnerRole: lesson.learnerRole,
-        characterGoal: lesson.characterGoal,
-        difficulty: lesson.difficulty,
-        factsAndConstraints: lesson.factsAndConstraints ?? "",
-      });
-    } else {
-      throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
-    }
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
 

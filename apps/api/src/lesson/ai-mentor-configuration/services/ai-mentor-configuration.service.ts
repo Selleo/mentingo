@@ -86,8 +86,7 @@ export class AiMentorConfigurationService {
     );
     await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
 
-    const context =
-      await this.aiMentorConfigurationRepository.findCourseAuthoringContext(courseId);
+    const context = await this.aiMentorConfigurationRepository.findCourseAuthoringContext(courseId);
     if (!context) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     return context;
@@ -153,9 +152,7 @@ export class AiMentorConfigurationService {
     };
   }
 
-  private async getLessonContext(
-    lessonId: UUIDType,
-  ): Promise<AiMentorLessonContext> {
+  private async getLessonContext(lessonId: UUIDType): Promise<AiMentorLessonContext> {
     const context = await this.aiMentorConfigurationRepository.findLessonContext(lessonId);
 
     if (!context) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
@@ -212,7 +209,7 @@ export class AiMentorConfigurationService {
   ) {
     return {
       id: graph.configuration.id,
-      aiMentorLessonId: graph.configuration.aiMentorLessonId,
+      aiMentorLessonId: context.aiMentorLessonId,
       needsConfiguration: needsAiMentorConfiguration(graph, context.baseLanguage),
       hasMissingTranslations: hasMissingAiMentorConfigurationTranslations(
         graph,

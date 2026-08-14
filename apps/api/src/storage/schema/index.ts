@@ -967,16 +967,30 @@ export const aiMentorConfigurations = pgTable(
   {
     ...id,
     ...timestamps,
-    aiMentorLessonId: uuid("ai_mentor_lesson_id")
-      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-      .notNull()
-      .unique(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
     type: structuredAiMentorTypeEnum("type").$type<AiMentorType>().notNull(),
     openingInstruction: jsonb("opening_instruction").$type<LocalizedText>(),
     additionalInstructions: jsonb("additional_instructions").$type<LocalizedText>(),
     tenantId,
   },
-  withTenantIdIndex("ai_mentor_configurations"),
+  withTenantIdIndex("ai_mentor_configurations", (table) => ({
+    lessonUniqueIdx: uniqueIndex("ai_mentor_configurations_lesson_unique_idx").on(
+      table.aiMentorLessonId,
+    ),
+    practiceSessionUniqueIdx: uniqueIndex(
+      "ai_mentor_configurations_practice_session_unique_idx",
+    ).on(table.practiceSessionId),
+    sourceCheck: check(
+      "ai_mentor_configurations_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
 );
 
 export const aiMentorTeacherConfigurations = pgTable(
@@ -1064,7 +1078,7 @@ export const aiMentorPracticeSessions = pgTable(
     language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
     title: text("title"),
     aiMentorName: text("ai_mentor_name"),
-    instructions: text("instructions").notNull(),
+    scenario: text("scenario").notNull(),
     status: varchar("status", { length: 20 })
       .$type<AiMentorPracticeStatus>()
       .notNull()

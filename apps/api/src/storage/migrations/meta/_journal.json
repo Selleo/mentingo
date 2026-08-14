@@ -1331,6 +1331,13 @@
       "when": 1786701481860,
       "tag": "0189_drop_legacy_ai_mentor_configuration_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1786702180244,
+      "tag": "0190_use_ai_mentor_configuration_for_practice",
+      "breakpoints": true
     }
   ]
 }

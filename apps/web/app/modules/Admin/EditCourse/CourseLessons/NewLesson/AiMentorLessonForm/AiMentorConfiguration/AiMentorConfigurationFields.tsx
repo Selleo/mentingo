@@ -7,10 +7,10 @@ import { useTranslation } from "react-i18next";
 import { AiMentorFineTuneConfigurationFields } from "./AiMentorFineTuneConfigurationFields";
 import { AiMentorRoleplayConfigurationFields } from "./AiMentorRoleplayConfigurationFields";
 import { AiMentorTeacherConfigurationFields } from "./AiMentorTeacherConfigurationFields";
-import { ConfigurationChoiceCards } from "./fields/AiMentorConfigurationFieldInputs";
+import { ConfigurationChoiceCards } from "./fields/ConfigurationChoiceCards";
 
 import type { AiMentorConfigurationDraft } from "./aiMentorConfiguration.types";
-import type { Choice } from "./fields/AiMentorConfigurationFieldInputs";
+import type { Choice } from "./fields/ConfigurationChoiceCards";
 
 type AiMentorConfigurationFieldsProps = {
   canEditStructure: boolean;

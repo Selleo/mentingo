@@ -1,12 +1,10 @@
 import { AI_MENTOR_TEACHING_STYLE, AI_MENTOR_TYPE, type AiMentorTeachingStyle } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
-import {
-  ConfigurationChoiceCards,
-  ConfigurationTextField,
-} from "./fields/AiMentorConfigurationFieldInputs";
+import { ConfigurationTextField } from "./fields/AiMentorConfigurationFieldInputs";
+import { ConfigurationChoiceCards } from "./fields/ConfigurationChoiceCards";
 
-import type { Choice } from "./fields/AiMentorConfigurationFieldInputs";
+import type { Choice } from "./fields/ConfigurationChoiceCards";
 
 type AiMentorTeacherConfigurationFieldsProps = {
   canEditStructure: boolean;

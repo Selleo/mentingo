@@ -1,11 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TYPE, COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, not, or, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
 import {
   AI_MENTOR_PRACTICE_STATUSES,
   type AiPracticeJudgeConfigurationGraph,
+  type AiPracticeMentorConfigurationGraph,
 } from "src/ai/ai-practice.types";
 import {
   buildAiJudgeBlockingErrorEvaluationsSql,
@@ -46,13 +47,7 @@ import {
   users,
 } from "src/storage/schema";
 
-import type {
-  AiMentorRoleplayDifficulty,
-  AiMentorTTSPreset,
-  AiMentorType,
-  AiMentorVoiceMode,
-  SupportedLanguages,
-} from "@repo/shared";
+import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
@@ -251,22 +246,15 @@ export class AiRepository {
           ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
           ${aiMentorPracticeSessions.title}
         )`,
-        type: sql<AiMentorType>`COALESCE(
-          ${aiMentorConfigurations.type},
-          ${AI_MENTOR_TYPE.ROLEPLAY}
-        )`,
+        type: aiMentorConfigurations.type,
         openingInstruction: this.localizationService.getLocalizedSqlField(
           aiMentorConfigurations.openingInstruction,
           language,
         ),
-        additionalInstructions: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(
-            aiMentorConfigurations.additionalInstructions,
-            language,
-          )},
-          ${aiMentorPracticeSessions.instructions},
-          ''
-        )`,
+        additionalInstructions: this.localizationService.getLocalizedSqlField(
+          aiMentorConfigurations.additionalInstructions,
+          language,
+        ),
         taskGoal: this.localizationService.getLocalizedSqlField(
           aiMentorTeacherConfigurations.taskGoal,
           language,
@@ -284,39 +272,23 @@ export class AiRepository {
           aiMentorTeacherConfigurations.feedbackGuidance,
           language,
         ),
-        scenario: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(
-            aiMentorRoleplayConfigurations.scenario,
-            language,
-          )},
-          ${aiMentorPracticeSessions.instructions}
-        )`,
-        aiRole: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(
-            aiMentorRoleplayConfigurations.aiRole,
-            language,
-          )},
-          ${aiMentorPracticeSessions.aiMentorName},
-          'AI Mentor'
-        )`,
-        learnerRole: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(
-            aiMentorRoleplayConfigurations.learnerRole,
-            language,
-          )},
-          'Learner'
-        )`,
-        characterGoal: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(
-            aiMentorRoleplayConfigurations.characterGoal,
-            language,
-          )},
-          ${aiMentorPracticeSessions.instructions}
-        )`,
-        difficulty: sql<AiMentorRoleplayDifficulty>`COALESCE(
-          ${aiMentorRoleplayConfigurations.difficulty},
-          ${AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC}
-        )`,
+        scenario: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.scenario,
+          language,
+        ),
+        aiRole: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.aiRole,
+          language,
+        ),
+        learnerRole: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.learnerRole,
+          language,
+        ),
+        characterGoal: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.characterGoal,
+          language,
+        ),
+        difficulty: aiMentorRoleplayConfigurations.difficulty,
         factsAndConstraints: this.localizationService.getLocalizedSqlField(
           aiMentorRoleplayConfigurations.factsAndConstraints,
           language,
@@ -331,8 +303,15 @@ export class AiRepository {
       .from(aiMentorThreads)
       .leftJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .leftJoin(
+        aiMentorPracticeSessions,
+        eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
+      )
+      .leftJoin(
         aiMentorConfigurations,
-        eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessons.id),
+        or(
+          eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessons.id),
+          eq(aiMentorConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
+        ),
       )
       .leftJoin(
         aiMentorTeacherConfigurations,
@@ -346,10 +325,6 @@ export class AiRepository {
       .leftJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .leftJoin(courses, eq(courses.id, chapters.courseId))
-      .leftJoin(
-        aiMentorPracticeSessions,
-        eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
-      )
       .where(eq(aiMentorThreads.id, threadId));
 
     return lesson;
@@ -521,16 +496,43 @@ export class AiRepository {
     return configuration.id;
   }
 
+  async insertPracticeMentorConfigurationGraph(
+    graph: AiPracticeMentorConfigurationGraph,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<UUIDType> {
+    const [configuration] = await dbInstance
+      .insert(aiMentorConfigurations)
+      .values(graph.configuration)
+      .onConflictDoNothing({ target: aiMentorConfigurations.practiceSessionId })
+      .returning({ id: aiMentorConfigurations.id });
+
+    if (!configuration) {
+      const [existingConfiguration] = await dbInstance
+        .select({ id: aiMentorConfigurations.id })
+        .from(aiMentorConfigurations)
+        .where(eq(aiMentorConfigurations.practiceSessionId, graph.configuration.practiceSessionId));
+
+      if (!existingConfiguration)
+        throw new Error("Practice AI Mentor configuration was not created");
+
+      return existingConfiguration.id;
+    }
+
+    await dbInstance.insert(aiMentorRoleplayConfigurations).values(graph.roleplayConfiguration);
+    return configuration.id;
+  }
+
   async saveGeneratedPractice(
     sessionId: UUIDType,
     title: string,
     aiMentorName: string,
-    instructions: string,
-    graph: AiPracticeJudgeConfigurationGraph,
+    mentorGraph: AiPracticeMentorConfigurationGraph,
+    judgeGraph: AiPracticeJudgeConfigurationGraph,
   ) {
     return this.db.transaction(async (trx) => {
-      await this.updatePracticeSession(sessionId, { title, aiMentorName, instructions }, trx);
-      await this.insertPracticeJudgeConfigurationGraph(graph, trx);
+      await this.updatePracticeSession(sessionId, { title, aiMentorName }, trx);
+      await this.insertPracticeMentorConfigurationGraph(mentorGraph, trx);
+      await this.insertPracticeJudgeConfigurationGraph(judgeGraph, trx);
     });
   }
 
