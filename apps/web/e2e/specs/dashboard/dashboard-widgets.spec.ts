@@ -75,7 +75,16 @@ test.describe("student dashboard widgets", () => {
   test("shows the student's calendar event", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
       await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR, [
-        { path: "/api/calendar/dashboard/events", body: [dashboardEvent] },
+        {
+          path: "/api/calendar/dashboard/events",
+          query: { view: "all" },
+          body: [dashboardEvent],
+        },
+        {
+          path: "/api/calendar/dashboard/events",
+          query: { view: "upcoming" },
+          body: [],
+        },
       ]);
 
       await page.goto("/dashboard");
@@ -158,7 +167,16 @@ test.describe("admin dashboard widgets", () => {
   test("shows the admin event calendar event", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
       await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR, [
-        { path: "/api/calendar/dashboard/events", body: [dashboardEvent] },
+        {
+          path: "/api/calendar/dashboard/events",
+          query: { view: "all" },
+          body: [dashboardEvent],
+        },
+        {
+          path: "/api/calendar/dashboard/events",
+          query: { view: "upcoming" },
+          body: [],
+        },
       ]);
 
       await page.goto("/dashboard");

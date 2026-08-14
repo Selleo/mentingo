@@ -4,6 +4,7 @@ type DashboardWidgetMockResponse = {
   path: string;
   body: unknown;
   method?: "GET" | "POST";
+  query?: Record<string, string>;
 };
 
 const fulfillJson = async (route: Route, body: unknown) => {
@@ -21,7 +22,8 @@ export async function mockDashboardWidget(
 ) {
   await page.route("**/api/**", async (route) => {
     const request = route.request();
-    const path = new URL(request.url()).pathname;
+    const url = new URL(request.url());
+    const path = url.pathname;
 
     if (request.method() === "GET" && path === "/api/settings") {
       await fulfillJson(route, {
@@ -42,7 +44,11 @@ export async function mockDashboardWidget(
 
     const response = responses.find(
       (candidate) =>
-        candidate.path === path && (candidate.method ?? "GET") === request.method(),
+        candidate.path === path &&
+        (candidate.method ?? "GET") === request.method() &&
+        Object.entries(candidate.query ?? {}).every(
+          ([key, value]) => url.searchParams.get(key) === value,
+        ),
     );
 
     if (response) {

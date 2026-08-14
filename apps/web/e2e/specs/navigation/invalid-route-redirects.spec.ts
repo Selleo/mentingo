@@ -17,11 +17,6 @@ const FORBIDDEN_ROUTE_REDIRECT_CASES: ForbiddenRouteRedirectCase[] = [
   {
     role: USER_ROLE.student,
     title: "student",
-    path: "/admin/analytics",
-  },
-  {
-    role: USER_ROLE.student,
-    title: "student",
     path: "/admin/promotion-codes",
   },
   {

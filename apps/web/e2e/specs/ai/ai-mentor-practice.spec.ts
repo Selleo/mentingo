@@ -107,10 +107,7 @@ const installDashboardAndPracticeMocks = async (page: Page) => {
       return;
     }
 
-    if (
-      request.method() === "GET" &&
-      path === `/api/ai/practice/${PRACTICE_ID}`
-    ) {
+    if (request.method() === "GET" && path === `/api/ai/practice/${PRACTICE_ID}`) {
       await fulfillJson(route, {
         ...readyPractice,
         status: "queued",
@@ -152,9 +149,7 @@ test("student can start a practice from the dashboard and see background prepara
 
     await expect(page).toHaveURL(new RegExp(`/ai-mentor/practice/${PRACTICE_ID}$`));
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.PREPARING_STATE)).toBeVisible();
-    await expect(
-      page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON),
-    ).toBeVisible();
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON)).toBeVisible();
     await expect(mockState.getCreatedScenario()).toEqual({
       language: "en",
       scenario: "I want to practice asking my manager for help with an overloaded workload.",
@@ -236,7 +231,11 @@ test("student can review practice feedback and start the practice again", async 
 
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONVERSATION)).toBeVisible();
     await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.TASK_BUTTON).click();
-    await expect(page.getByText("Explain the workload impact and agree on a practical next step.")).toBeVisible();
+    await expect(
+      page.getByText("Explain the workload impact and agree on a practical next step."),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
 
     await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CHECK_BUTTON).click();
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON)).toBeVisible();

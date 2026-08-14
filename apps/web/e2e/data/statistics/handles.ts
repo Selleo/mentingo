@@ -37,13 +37,3 @@ export const COURSE_STATISTICS_HANDLES = {
     "course-statistics-lesson-preview-task-description-button",
   LESSON_PREVIEW_RESULT_BUTTON: "course-statistics-lesson-preview-result-button",
 } as const;
-
-export const ADMIN_STATISTICS_HANDLES = {
-  PAGE: "admin-statistics-page",
-  DOWNLOAD_REPORT_BUTTON: "admin-statistics-download-report-button",
-  MOST_POPULAR_COURSES_CHART: "admin-statistics-most-popular-courses-chart",
-  COURSE_COMPLETION_CHART: "admin-statistics-course-completion-chart",
-  FREEMIUM_CONVERSION_CHART: "admin-statistics-freemium-conversion-chart",
-  ENROLLMENT_CHART: "admin-statistics-enrollment-chart",
-  AVERAGE_QUIZ_SCORE_CHART: "admin-statistics-average-quiz-score-chart",
-} as const;
