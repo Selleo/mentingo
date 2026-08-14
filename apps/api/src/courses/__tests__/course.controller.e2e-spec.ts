@@ -13,7 +13,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -41,6 +41,7 @@ import {
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  settings,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -182,6 +183,25 @@ describe("CourseController (e2e)", () => {
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
   });
+
+  const setFeaturedCourseId = async (courseId: string) => {
+    await db
+      .update(settings)
+      .set({
+        settings: sql`${settings.settings} || jsonb_build_object('featuredCourseId', to_jsonb(${courseId}::text))`,
+      })
+      .where(isNull(settings.userId));
+  };
+
+  const getFeaturedCourseId = async () => {
+    const [globalSettings] = await db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return (globalSettings?.settings as { featuredCourseId?: string | null } | undefined)
+      ?.featuredCourseId;
+  };
 
   describe("course statistics after student deletion", () => {
     it("excludes soft-deleted students from statistics endpoints", async () => {
@@ -1858,6 +1878,57 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/:id status", () => {
+    it("clears the featured course when it becomes unpublished", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(course.id);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
+    });
+
+    it("keeps the featured course when another course changes status", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const featuredCourse = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      const otherCourse = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(featuredCourse.id);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${otherCourse.id}`)
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBe(featuredCourse.id);
+    });
+  });
+
   describe("PATCH /api/course/bulk/status", () => {
     it("updates statuses for selected courses", async () => {
       const admin = await userFactory
@@ -1906,6 +1977,38 @@ describe("CourseController (e2e)", () => {
 
       expect(updatedCourses).toHaveLength(2);
       expect(updatedCourses.every((course) => course.status === "private")).toBe(true);
+    });
+
+    it("clears the featured course when a bulk status update unpublishes it", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const coursesToUpdate = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.PUBLISHED,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.PUBLISHED,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      await setFeaturedCourseId(coursesToUpdate[0].id);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({
+          ids: coursesToUpdate.map((course) => course.id),
+          status: COURSE_STATUSES.PRIVATE,
+        })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
     });
 
     it("allows a content creator to update only their own courses", async () => {
@@ -2219,6 +2322,27 @@ describe("CourseController (e2e)", () => {
       expect(deletedCourse).toHaveLength(0);
     });
 
+    it("clears a stale featured-course reference when deleting a draft course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(course.id);
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/deleteCourse/${course.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
+    });
+
     it.each([COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE])(
       "rejects deleting a %s course",
       async (status) => {
@@ -2284,6 +2408,35 @@ describe("CourseController (e2e)", () => {
       const deletedCourses = await db.select().from(courses).where(inArray(courses.id, courseIds));
 
       expect(deletedCourses).toHaveLength(0);
+    });
+
+    it("clears a stale featured-course reference when deleting multiple draft courses", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const draftCourses = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      await setFeaturedCourseId(draftCourses[0].id);
+
+      await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: draftCourses.map((course) => course.id) })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
     });
 
     it("rejects deleting a selection that includes a private course", async () => {

@@ -3596,6 +3596,16 @@
         "moreInfo": "Więcej informacji",
         "info": "Info"
       },
+      "featuredCourse": {
+        "label": "Wyróżniony kurs",
+        "none": "Wybierz wyróżniony kurs",
+        "search": "Szukaj opublikowanych kursów...",
+        "empty": "Nie znaleziono opublikowanych kursów",
+        "clear": "Wyczyść wyróżniony kurs",
+        "loadMore": "Załaduj więcej kursów",
+        "updated": "Wyróżniony kurs został zaktualizowany",
+        "updateFailed": "Nie udało się zaktualizować wyróżnionego kursu"
+      },
       "lessonsCount_one": "{{count}} lekcja",
       "lessonsCount_few": "{{count}} lekcje",
       "lessonsCount_many": "{{count}} lekcji",

@@ -25,7 +25,11 @@ import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
-import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  buildJsonbFieldWithMultipleEntries,
+  deleteJsonbField,
+  setJsonbField,
+} from "src/common/helpers/sqlHelpers";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { EnvService } from "src/env/services/env.service";
 import { UpdateSettingsEvent } from "src/events";
@@ -955,6 +959,73 @@ export class SettingsService {
     });
 
     return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalFeaturedCourse(
+    featuredCourseId: UUIDType | null,
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    if (featuredCourseId) {
+      const [course] = await this.db
+        .select({ id: courses.id, status: courses.status })
+        .from(courses)
+        .where(eq(courses.id, featuredCourseId));
+
+      if (!course || course.status !== "published") {
+        throw new BadRequestException("common.toast.somethingWentWrong");
+      }
+    }
+
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: featuredCourseId
+          ? setJsonbField(settings.settings, "featuredCourseId", featuredCourseId)
+          : deleteJsonbField(settings.settings, "featuredCourseId"),
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async clearFeaturedCourseIfMatches(
+    courseId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    await dbInstance
+      .update(settings)
+      .set({ settings: sql`${settings.settings} - 'featuredCourseId'` })
+      .where(
+        and(isNull(settings.userId), eq(sql`${settings.settings}->>'featuredCourseId'`, courseId)),
+      );
+  }
+
+  public async clearFeaturedCoursesIfMatches(
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    if (!courseIds.length) return;
+
+    await dbInstance
+      .update(settings)
+      .set({ settings: sql`${settings.settings} - 'featuredCourseId'` })
+      .where(
+        and(
+          isNull(settings.userId),
+          inArray(sql<string>`${settings.settings}->>'featuredCourseId'`, courseIds),
+        ),
+      );
   }
 
   public async updateGlobalCourseDiscussionsEnabled(
@@ -2093,6 +2164,7 @@ export class SettingsService {
         : JSON.parse(settings.loginPageFiles ?? "[]"),
       userEmailTriggers: settings.userEmailTriggers ?? DEFAULT_GLOBAL_SETTINGS.userEmailTriggers,
       ageLimit: settings.ageLimit ?? null,
+      featuredCourseId: settings.featuredCourseId ?? DEFAULT_GLOBAL_SETTINGS.featuredCourseId,
     };
   }
 

@@ -27,6 +27,7 @@ import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
 import {
   and,
+  asc,
   between,
   count,
   countDistinct,
@@ -170,6 +171,7 @@ import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  PublishedCourseLookupResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
   CourseOwnershipBody,
@@ -1307,6 +1309,51 @@ export class CourseService {
     });
   }
 
+  async getPublishedCourseLookup(query: {
+    title?: string;
+    page?: number;
+    perPage?: number;
+    language: SupportedLanguages;
+  }): Promise<{ data: PublishedCourseLookupResponse; pagination: Pagination }> {
+    const { title, page = 1, perPage = 20, language } = query;
+
+    return this.db.transaction(async (trx) => {
+      const localizedTitle = this.localizationService.getLocalizedSqlField(courses.title, language);
+      const conditions = [eq(courses.status, COURSE_STATUSES.PUBLISHED)];
+
+      if (title?.trim()) {
+        conditions.push(
+          this.localizationService.getLocalizedFieldSearchCondition(
+            courses.title,
+            `%${title.trim()}%`,
+            language,
+          ),
+        );
+      }
+
+      const data = await addPagination(
+        trx
+          .select({ id: courses.id, title: localizedTitle })
+          .from(courses)
+          .where(and(...conditions))
+          .orderBy(asc(localizedTitle))
+          .$dynamic(),
+        page,
+        perPage,
+      );
+
+      const [{ totalItems }] = await trx
+        .select({ totalItems: count() })
+        .from(courses)
+        .where(and(...conditions));
+
+      return {
+        data,
+        pagination: { totalItems, page, perPage },
+      };
+    });
+  }
+
   async getCourse(
     idOrSlug: UUIDType | string,
     userId: UUIDType,
@@ -2382,6 +2429,10 @@ export class CourseService {
           throw new ConflictException("Failed to update course");
         }
 
+        if (updatedCourse.status !== COURSE_STATUSES.PUBLISHED) {
+          await this.settingsService.clearFeaturedCourseIfMatches(id, trx);
+        }
+
         if (!isPlaywrightTest && isStripeConfigured) {
           // --- create stripe product if it doesn't exist yet ---
           if (!updatedCourse.stripeProductId) {
@@ -2532,6 +2583,10 @@ export class CourseService {
         .update(courses)
         .set({ status: body.status })
         .where(inArray(courses.id, courseIdsToUpdate));
+
+      if (body.status !== COURSE_STATUSES.PUBLISHED) {
+        await this.settingsService.clearFeaturedCoursesIfMatches(courseIdsToUpdate, trx);
+      }
 
       const courseUpdateData = await processInBatches(
         snapshots,
@@ -3518,6 +3573,7 @@ export class CourseService {
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
+      await this.settingsService.clearFeaturedCourseIfMatches(id, trx);
 
       if (isLumaConfigured) {
         await this.lumaService
@@ -3600,6 +3656,7 @@ export class CourseService {
       await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
       await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
       await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
+      await this.settingsService.clearFeaturedCoursesIfMatches(ids, trx);
 
       const deletedCourses = await trx.delete(courses).where(inArray(courses.id, ids)).returning();
 

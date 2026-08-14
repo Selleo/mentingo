@@ -1123,5 +1123,69 @@ describe("SettingsController (e2e)", () => {
           .expect(401);
       });
     });
+
+    describe("PATCH /api/settings/admin/featured-course", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings", "courses", "categories", "users"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings", "courses", "categories", "users"]);
+      });
+
+      it("should set and clear a published featured course", async () => {
+        const course = await courseFactory.create({ authorId: adminUser.id, status: "published" });
+
+        const setResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/featured-course")
+          .set("Cookie", adminCookies)
+          .send({ featuredCourseId: course.id })
+          .expect(200);
+
+        expect(setResponse.body.data.featuredCourseId).toBe(course.id);
+
+        const clearResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/featured-course")
+          .set("Cookie", adminCookies)
+          .send({ featuredCourseId: null })
+          .expect(200);
+
+        expect(clearResponse.body.data.featuredCourseId).toBeNull();
+      });
+
+      it("should reject an unpublished course", async () => {
+        const course = await courseFactory.create({ authorId: adminUser.id, status: "draft" });
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/featured-course")
+          .set("Cookie", adminCookies)
+          .send({ featuredCourseId: course.id })
+          .expect(400);
+      });
+
+      it("should restrict the setting to admins", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/featured-course")
+          .set("Cookie", nonAdminCookies)
+          .send({ featuredCourseId: null })
+          .expect(403);
+      });
+    });
   });
 });
