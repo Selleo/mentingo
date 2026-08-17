@@ -592,7 +592,7 @@ export class CourseService {
       .where(
         and(
           eq(groupUsers.userId, userId),
-          or(eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED), isNull(studentCourses.id)),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(studentCourses.completedAt),
           eq(groupCourses.isMandatory, true),
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
