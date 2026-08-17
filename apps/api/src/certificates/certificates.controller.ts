@@ -114,10 +114,10 @@ export class CertificatesController {
     @Query("language") language: SupportedLanguages,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
-    @CurrentUser("userId") userId?: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<PaginatedResponse<AllCertificatesResponse>> {
     const data = await this.certificatesService.getAllCertificates({
-      userId: userId!,
+      userId,
       page,
       perPage,
       language,
