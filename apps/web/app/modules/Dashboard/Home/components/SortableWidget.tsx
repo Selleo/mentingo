@@ -11,13 +11,13 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import { DashboardWidgetShell } from "./DashboardWidgetShell";
 
 import type { DashboardLayoutItem, DashboardWidgetSize } from "../types";
-import type { DashboardWidgetId } from "@repo/shared";
+import type { DashboardWidgetType } from "@repo/shared";
 import type { Transition } from "motion/react";
 
 type SortableWidgetProps = {
   widget: DashboardLayoutItem;
   isEditing: boolean;
-  onSizeChange: (id: DashboardWidgetId, size: DashboardWidgetSize) => void;
+  onSizeChange: (id: DashboardWidgetType, size: DashboardWidgetSize) => void;
 };
 
 const WIDGET_LAYOUT_TRANSITION: Transition = {

@@ -126,7 +126,7 @@ test.describe("role-specific dashboard default layouts", () => {
         );
         await expect
           .poll(() => visibleWidgetTitles(page))
-          .resolves.toEqual(expectedWidgets.map((widget) => titleByType[widget.type]));
+          .toEqual(expectedWidgets.map((widget) => titleByType[widget.type]));
       });
     });
   }

@@ -62,7 +62,6 @@ import {
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
-  dashboardWidgetsJSONContentSchema,
   dashboardSettingsResponseSchema,
   globalSettingsJSONSchema,
   loginPageResourceResponseSchema,
@@ -94,7 +93,6 @@ import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
   AdminSettingsJSONContentSchema,
-  DashboardWidgetsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
   DashboardSettingsResponseSchema,
@@ -196,17 +194,6 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<DashboardSettingsResponseSchema>> {
     return new BaseResponse(await this.settingsService.resetDashboardSettings(userId, body));
-  }
-
-  @Get("dashboard/default")
-  @RequirePermission(PERMISSIONS.DASHBOARD_READ)
-  @Validate({
-    response: baseResponse(dashboardWidgetsJSONContentSchema),
-  })
-  async getDefaultDashboardWidgets(
-    @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<DashboardWidgetsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getDefaultDashboardWidgets(userId));
   }
 
   @Patch("admin/new-user-notification")

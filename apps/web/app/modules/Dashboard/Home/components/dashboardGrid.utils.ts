@@ -3,7 +3,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { dashboardSizeToSpan } from "../types";
 
 import type { DashboardLayoutItem } from "../types";
-import type { DashboardWidgetId } from "@repo/shared";
+import type { DashboardWidgetType } from "@repo/shared";
 
 export const DASHBOARD_DROP_PLACEMENTS = {
   BEFORE: "before",
@@ -14,7 +14,7 @@ export type DropPlacement =
   (typeof DASHBOARD_DROP_PLACEMENTS)[keyof typeof DASHBOARD_DROP_PLACEMENTS];
 
 export type DashboardGridPlacement = {
-  id: DashboardWidgetId;
+  id: DashboardWidgetType;
   column: number;
   row: number;
   columns: number;
@@ -95,8 +95,8 @@ export const getDashboardDropPlacement = (
  */
 export const reorderDashboardWidgets = (
   widgets: DashboardLayoutItem[],
-  activeId: DashboardWidgetId,
-  overId: DashboardWidgetId,
+  activeId: DashboardWidgetType,
+  overId: DashboardWidgetType,
   placement?: DropPlacement,
 ): DashboardLayoutItem[] => {
   const previousIndex = widgets.findIndex((widget) => widget.id === activeId);
@@ -135,8 +135,8 @@ export const reorderDashboardWidgets = (
 export const projectDashboardDragPreview = (
   initialWidgets: DashboardLayoutItem[],
   currentWidgets: DashboardLayoutItem[],
-  activeId: DashboardWidgetId,
-  overId: DashboardWidgetId,
+  activeId: DashboardWidgetType,
+  overId: DashboardWidgetType,
   placement?: DropPlacement,
 ): { widgets: DashboardLayoutItem[]; hasChanged: boolean } => {
   const projectedWidgets = reorderDashboardWidgets(initialWidgets, activeId, overId, placement);

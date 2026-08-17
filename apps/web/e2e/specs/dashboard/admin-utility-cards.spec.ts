@@ -126,7 +126,7 @@ test.describe("admin dashboard utility cards", () => {
                 pageNumber === "1"
                   ? [group("group-1", "Sales", "Alex Learner")]
                   : [group("group-2", "Support", "Morgan Learner", "dueSoon")],
-              pagination: { totalItems: 21, page: Number(pageNumber), perPage: 20 },
+              pagination: { totalItems: 2, page: Number(pageNumber), perPage: 1 },
             });
             return true;
           }
@@ -143,6 +143,16 @@ test.describe("admin dashboard utility cards", () => {
       await dialog.getByRole("combobox", { name: "Status" }).click();
       await page.getByRole("option", { name: "Overdue" }).click();
       await dialog.getByRole("searchbox", { name: "Search groups or learners" }).fill("Sales");
+      await expect
+        .poll(() =>
+          requests.some(
+            (request) =>
+              request.pathname.endsWith(`/courses/${COURSE_ONE}/groups`) &&
+              request.searchParams.get("urgency") === "overdue" &&
+              request.searchParams.get("search") === "Sales",
+          ),
+        )
+        .toBe(true);
       await expect(dialog.getByText("Sales")).toBeVisible();
       await dialog.getByRole("button", { name: "Learners" }).click();
 
@@ -154,9 +164,9 @@ test.describe("admin dashboard utility cards", () => {
               request.searchParams.get("urgency") === "overdue" &&
               request.searchParams.get("search") === "Sales" &&
               request.searchParams.get("sortBy") === "studentCount" &&
-              request.searchParams.get("sortDirection") === "asc" &&
+              request.searchParams.get("sortDirection") === "desc" &&
               request.searchParams.get("page") === "1" &&
-              request.searchParams.get("perPage") === "20",
+              request.searchParams.get("perPage") === "1",
           ),
         )
         .toBe(true);
@@ -174,7 +184,7 @@ test.describe("admin dashboard utility cards", () => {
           request.searchParams.get("page") === "2",
       );
       expect(paginatedGroupRequest?.searchParams.get("language")).toBe("en");
-      expect(paginatedGroupRequest?.searchParams.get("perPage")).toBe("20");
+      expect(paginatedGroupRequest?.searchParams.get("perPage")).toBe("1");
 
       await widgetCard.getByRole("button", { name: /sort/ }).click();
       await page.getByRole("menuitemradio", { name: "Least urgent first" }).click();
@@ -330,8 +340,8 @@ test.describe("admin dashboard utility cards", () => {
       const chart = card.getByRole("img", { name: "4 of 7 enrollments completed, 57 percent." });
       await expect(chart).toBeVisible();
       await expect(card.getByText("57%", { exact: true })).toBeVisible();
-      const sector = card.locator(".recharts-pie-sector").first();
-      await sector.hover();
+      const chartSurface = card.locator("svg.recharts-surface");
+      await chartSurface.hover({ position: { x: 220, y: 128 } });
       await expect(card.getByText("Completed", { exact: true })).toBeVisible();
     });
   });
@@ -425,8 +435,9 @@ test.describe("admin dashboard utility cards", () => {
       const tasks = [
         { id: "todo-1", title: "Review inbox", completed: false, position: 0 },
         { id: "todo-2", title: "Prepare agenda", completed: false, position: 1 },
+        { id: "todo-3", title: "Archive notes", completed: true, position: 2 },
       ];
-      let nextId = 3;
+      let nextId = 4;
       let reorderPayload: unknown;
       await dashboardMocks(page, [widget(DASHBOARD_WIDGET_TYPES.TODO_LIST)], async (route, url) => {
         const request = route.request();
@@ -452,6 +463,11 @@ test.describe("admin dashboard utility cards", () => {
           await wrapped(route, tasks[index]);
           return true;
         }
+        if (request.method() === "DELETE" && index >= 0) {
+          tasks.splice(index, 1);
+          await wrapped(route, null);
+          return true;
+        }
         if (request.method() === "PUT" && url.pathname === "/api/todo-tasks/order") {
           reorderPayload = request.postDataJSON();
           await wrapped(route, tasks);
@@ -465,20 +481,27 @@ test.describe("admin dashboard utility cards", () => {
       await card.getByPlaceholder("Add a task").fill("Send follow-up");
       await card.getByRole("button", { name: "Add task" }).click();
       await expect(card.getByText("Send follow-up")).toBeVisible();
-      await card.getByRole("button", { name: "Toggle Review inbox" }).click();
-      await expect(card.getByText("Review inbox")).toHaveClass(/line-through/);
 
-      const row = card.getByText("Review inbox", { exact: true }).locator("..");
-      await row.getByRole("button", { name: "Edit task" }).click();
-      await row.locator("input").fill("Review the inbox");
-      await row.locator("input").press("Enter");
-      await expect(card.getByText("Review the inbox")).toBeVisible();
       const reorder = card.getByRole("button", { name: "Reorder task" });
       await reorder.first().focus();
       await page.keyboard.press("Space");
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("Space");
       await expect.poll(() => reorderPayload).toBeDefined();
+
+      await card.getByRole("button", { name: "Toggle Review inbox" }).click();
+      await expect(card.getByText("Review inbox")).toHaveClass(/line-through/);
+
+      const row = card.getByText("Review inbox", { exact: true }).locator("..");
+      await row.getByRole("button", { name: "Edit task" }).click();
+      const titleInput = card.locator("input").last();
+      await expect(titleInput).toBeVisible();
+      await titleInput.fill("Review the inbox");
+      await titleInput.press("Enter");
+      await expect(card.getByText("Review the inbox")).toBeVisible();
+      const followUpRow = card.getByText("Send follow-up", { exact: true }).locator("..");
+      await followUpRow.getByRole("button", { name: "Delete task" }).click();
+      await expect(card.getByText("Send follow-up")).toHaveCount(0);
       await page.reload();
       await expect(
         page.locator("article").filter({ hasText: "To-do list" }).getByText("Review the inbox"),

@@ -43,6 +43,12 @@
       "requiredWidgetMissing": "Un widget obligatoire est manquant.",
       "staleLayout": "Votre tableau de bord a été mis à jour ailleurs. Actualisez la page et réessayez."
     },
+    "toast": {
+      "layoutSaved": "Les modifications du tableau de bord ont été enregistrées.",
+      "layoutSaveError": "Impossible d’enregistrer les modifications du tableau de bord.",
+      "layoutReset": "La disposition par défaut du tableau de bord a été restaurée.",
+      "layoutResetError": "Impossible de restaurer la disposition par défaut du tableau de bord."
+    },
     "widgets": {
       "loadError": "Impossible de charger ce widget.",
       "trainingCompletionChartLabel": "{{completed}} inscriptions sur {{total}} terminées, soit {{percentage}} %.",
@@ -202,9 +208,24 @@
         "toggle": "Basculer {{title}}",
         "edit": "Modifier la tâche",
         "delete": "Supprimer la tâche",
-        "reorder": "Réordonner la tâche"
+        "reorder": "Réordonner la tâche",
+        "toast": {
+          "createSuccess": "Tâche ajoutée.",
+          "createError": "Impossible d’ajouter la tâche.",
+          "updateSuccess": "Tâche mise à jour.",
+          "updateError": "Impossible de mettre à jour la tâche.",
+          "deleteSuccess": "Tâche supprimée.",
+          "deleteError": "Impossible de supprimer la tâche.",
+          "reorderSuccess": "Ordre des tâches enregistré.",
+          "reorderError": "Impossible d’enregistrer l’ordre des tâches."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Vous pouvez avoir jusqu’à 100 tâches.",
+    "notFound": "Cette tâche n’existe plus.",
+    "invalidOrder": "L’ordre des tâches n’est plus à jour. Actualisez la page et réessayez."
   },
   "aiMentorPractice": {
     "form": {

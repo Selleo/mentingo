@@ -1,5 +1,3 @@
-import { BadRequestException } from "@nestjs/common";
-
 import { TodoTasksRepository } from "./todo-tasks.repository";
 
 describe("TodoTasksRepository", () => {
@@ -14,36 +12,37 @@ describe("TodoTasksRepository", () => {
   };
 
   const createRepository = (tasks = [activeTask, completedTask]) => {
-    const where = jest.fn().mockResolvedValue(tasks);
+    const orderBy = jest.fn().mockResolvedValue(tasks);
+    const where = jest.fn().mockReturnValue({ orderBy });
     const from = jest.fn().mockReturnValue({ where });
+    const updateWhere = jest.fn().mockResolvedValue(undefined);
+    const set = jest.fn().mockReturnValue({ where: updateWhere });
+    const update = jest.fn().mockReturnValue({ set });
+    const transaction = jest.fn(async (callback) => callback({ update }));
     const db = {
       select: jest.fn().mockReturnValue({ from }),
-      transaction: jest.fn(),
+      transaction,
     };
-    return { repository: new TodoTasksRepository(db as never), db, where };
+    const repository: TodoTasksRepository = Reflect.construct(TodoTasksRepository, [db]);
+    return { repository, set, transaction };
   };
 
-  it("rejects an order that omits one of the user's tasks", async () => {
-    const { repository, db } = createRepository();
+  it("persists the validated order supplied by the service", async () => {
+    const { repository, set, transaction } = createRepository();
 
-    await expect(
-      repository.reorder(userId, {
-        activeTaskIds: [activeTask.id],
-        completedTaskIds: [],
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-    expect(db.transaction).not.toHaveBeenCalled();
-  });
+    await repository.reorder(userId, {
+      activeTaskIds: [activeTask.id],
+      completedTaskIds: [completedTask.id],
+    });
 
-  it("rejects moving tasks between active and completed sections", async () => {
-    const { repository, db } = createRepository();
-
-    await expect(
-      repository.reorder(userId, {
-        activeTaskIds: [],
-        completedTaskIds: [activeTask.id, completedTask.id],
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-    expect(db.transaction).not.toHaveBeenCalled();
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenNthCalledWith(1, {
+      position: 0,
+      updatedAt: expect.any(String),
+    });
+    expect(set).toHaveBeenNthCalledWith(2, {
+      position: 0,
+      updatedAt: expect.any(String),
+    });
   });
 });

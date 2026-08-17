@@ -11,6 +11,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetDashboardDeadlineRiskGroupsResponse } from "../generated-api";
+import type { InfiniteData } from "@tanstack/react-query";
 
 export type DashboardDeadlineRiskGroup = GetDashboardDeadlineRiskGroupsResponse["data"][number];
 
@@ -32,9 +33,22 @@ export function useDashboardDeadlineRiskGroups(
     sortDirection: DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
     ...filters,
   };
+  const queryKey = [
+    "dashboard",
+    "deadline-risk-groups",
+    courseId,
+    language,
+    normalizedFilters,
+  ] as const;
 
-  return useInfiniteQuery({
-    queryKey: ["dashboard", "deadline-risk-groups", courseId, language, normalizedFilters],
+  return useInfiniteQuery<
+    GetDashboardDeadlineRiskGroupsResponse,
+    Error,
+    InfiniteData<GetDashboardDeadlineRiskGroupsResponse>,
+    typeof queryKey,
+    number
+  >({
+    queryKey,
     enabled: enabled && Boolean(courseId),
     initialPageParam: 1,
     placeholderData: (previousData, previousQuery) =>

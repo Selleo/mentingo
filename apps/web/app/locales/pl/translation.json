@@ -43,6 +43,12 @@
       "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
       "staleLayout": "Układ panelu został zmieniony w innym miejscu. Odśwież stronę i spróbuj ponownie."
     },
+    "toast": {
+      "layoutSaved": "Zmiany w dashboardzie zostały zapisane.",
+      "layoutSaveError": "Nie udało się zapisać zmian w dashboardzie.",
+      "layoutReset": "Przywrócono domyślny układ dashboardu.",
+      "layoutResetError": "Nie udało się przywrócić domyślnego układu dashboardu."
+    },
     "widgets": {
       "loadError": "Nie udało się wczytać danych tego kafelka.",
       "trainingCompletionChartLabel": "Ukończono {{completed}} z {{total}} przypisań, {{percentage}} procent.",
@@ -200,9 +206,24 @@
         "toggle": "Przełącz {{title}}",
         "edit": "Edytuj zadanie",
         "delete": "Usuń zadanie",
-        "reorder": "Zmień kolejność zadania"
+        "reorder": "Zmień kolejność zadania",
+        "toast": {
+          "createSuccess": "Dodano zadanie.",
+          "createError": "Nie udało się dodać zadania.",
+          "updateSuccess": "Zaktualizowano zadanie.",
+          "updateError": "Nie udało się zaktualizować zadania.",
+          "deleteSuccess": "Usunięto zadanie.",
+          "deleteError": "Nie udało się usunąć zadania.",
+          "reorderSuccess": "Zapisano kolejność zadań.",
+          "reorderError": "Nie udało się zapisać kolejności zadań."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Możesz mieć maksymalnie 100 zadań.",
+    "notFound": "To zadanie już nie istnieje.",
+    "invalidOrder": "Kolejność zadań jest nieaktualna. Odśwież stronę i spróbuj ponownie."
   },
   "aiMentorPractice": {
     "form": {

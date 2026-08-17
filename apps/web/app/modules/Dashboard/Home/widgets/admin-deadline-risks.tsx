@@ -3,7 +3,7 @@ import {
   DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS,
   DASHBOARD_DEADLINE_RISK_TYPES,
   DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
-  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_TYPES,
   type DashboardDeadlineRiskGroupSortField,
   type DashboardDeadlineRiskUrgencyOrder,
 } from "@repo/shared";
@@ -17,7 +17,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { ArrowDownUp, ChevronDown, ChevronRight } from "lucide-react";
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDashboardDeadlineRiskCourses } from "~/api/queries/useDashboardDeadlineRiskCourses";
@@ -77,6 +77,59 @@ const DEADLINE_RISK_FILTERS = {
 
 type DeadlineRiskFilter = (typeof DEADLINE_RISK_FILTERS)[keyof typeof DEADLINE_RISK_FILTERS];
 
+const DEADLINE_RISK_DIALOG_ACTIONS = {
+  SELECT_COURSE: "select-course",
+  SET_SEARCH: "set-search",
+  SET_URGENCY: "set-urgency",
+  SET_SORTING: "set-sorting",
+  SET_EXPANDED: "set-expanded",
+  RESET: "reset",
+} as const;
+
+type DeadlineRiskDialogState = {
+  selectedCourseId: string | null;
+  search: string;
+  urgency: DeadlineRiskFilter;
+  sorting: SortingState;
+  expanded: ExpandedState;
+};
+
+type DeadlineRiskDialogAction =
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE; courseId: string }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH; search: string }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY; urgency: DeadlineRiskFilter }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING; sorting: SortingState }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED; expanded: ExpandedState }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.RESET };
+
+const createInitialDeadlineRiskDialogState = (): DeadlineRiskDialogState => ({
+  selectedCourseId: null,
+  search: "",
+  urgency: DEADLINE_RISK_FILTERS.ALL,
+  sorting: [{ id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE, desc: false }],
+  expanded: {},
+});
+
+function deadlineRiskDialogReducer(
+  state: DeadlineRiskDialogState,
+  action: DeadlineRiskDialogAction,
+): DeadlineRiskDialogState {
+  switch (action.type) {
+    case DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE:
+      return { ...createInitialDeadlineRiskDialogState(), selectedCourseId: action.courseId };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH:
+      return { ...state, search: action.search };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY:
+      return { ...state, urgency: action.urgency, expanded: {} };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING:
+      return { ...state, sorting: action.sorting, expanded: {} };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED:
+      return { ...state, expanded: action.expanded };
+    case DEADLINE_RISK_DIALOG_ACTIONS.RESET:
+      return createInitialDeadlineRiskDialogState();
+  }
+}
+
 function isDeadlineRiskFilter(value: string): value is DeadlineRiskFilter {
   return Object.values(DEADLINE_RISK_FILTERS).some((filter) => filter === value);
 }
@@ -96,28 +149,26 @@ function isDeadlineRiskUrgencyOrder(value: string): value is DashboardDeadlineRi
 export function WidgetAdminDeadlineRisks() {
   const { t, i18n } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const [urgencyOrder, setUrgencyOrder] = useState(
+  const [urgencyOrder, setUrgencyOrder] = useState<DashboardDeadlineRiskUrgencyOrder>(
     DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
   );
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [groupSearch, setGroupSearch] = useState("");
-  const [groupUrgency, setGroupUrgency] = useState<DeadlineRiskFilter>(DEADLINE_RISK_FILTERS.ALL);
-  const [groupSorting, setGroupSorting] = useState<SortingState>([
-    { id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE, desc: false },
-  ]);
-  const [expandedGroups, setExpandedGroups] = useState<ExpandedState>({});
-  const debouncedGroupSearch = useDebounce(groupSearch.trim(), 300);
+  const [dialogState, dispatchDialog] = useReducer(
+    deadlineRiskDialogReducer,
+    undefined,
+    createInitialDeadlineRiskDialogState,
+  );
+  const debouncedGroupSearch = useDebounce(dialogState.search.trim(), 300);
   const coursesScrollRef = useRef<HTMLDivElement>(null);
   const groupsScrollRef = useRef<HTMLDivElement>(null);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS];
-  const activeGroupSort = groupSorting[0];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS];
+  const activeGroupSort = dialogState.sorting[0];
   const groupSortBy =
     activeGroupSort && isDeadlineRiskGroupSortField(activeGroupSort.id)
       ? activeGroupSort.id
       : DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE;
   const coursesQuery = useDashboardDeadlineRiskCourses(language, urgencyOrder);
-  const groupsQuery = useDashboardDeadlineRiskGroups(selectedCourseId, language, {
-    urgency: groupUrgency === DEADLINE_RISK_FILTERS.ALL ? undefined : groupUrgency,
+  const groupsQuery = useDashboardDeadlineRiskGroups(dialogState.selectedCourseId, language, {
+    urgency: dialogState.urgency === DEADLINE_RISK_FILTERS.ALL ? undefined : dialogState.urgency,
     search: debouncedGroupSearch || undefined,
     sortBy: groupSortBy,
     sortDirection: activeGroupSort?.desc
@@ -132,7 +183,7 @@ export function WidgetAdminDeadlineRisks() {
     () => groupsQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [groupsQuery.data],
   );
-  const selectedCourse = courses.find((course) => course.id === selectedCourseId);
+  const selectedCourse = courses.find((course) => course.id === dialogState.selectedCourseId);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }),
     [i18n.language],
@@ -201,16 +252,27 @@ export function WidgetAdminDeadlineRisks() {
     getRowId: (group) => group.id,
     manualFiltering: true,
     manualSorting: true,
-    onExpandedChange: setExpandedGroups,
-    onSortingChange: setGroupSorting,
+    onExpandedChange: (updater) => {
+      const expanded = typeof updater === "function" ? updater(dialogState.expanded) : updater;
+      dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED, expanded });
+    },
+    onSortingChange: (updater) => {
+      const sorting = typeof updater === "function" ? updater(dialogState.sorting) : updater;
+      dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING, sorting });
+    },
     state: {
-      expanded: expandedGroups,
-      sorting: groupSorting,
+      expanded: dialogState.expanded,
+      sorting: dialogState.sorting,
       globalFilter: debouncedGroupSearch,
       columnFilters:
-        groupUrgency === DEADLINE_RISK_FILTERS.ALL
+        dialogState.urgency === DEADLINE_RISK_FILTERS.ALL
           ? []
-          : [{ id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY, value: groupUrgency }],
+          : [
+              {
+                id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY,
+                value: dialogState.urgency,
+              },
+            ],
     },
   });
   const loadNextCoursesPage = () => {
@@ -300,7 +362,12 @@ export function WidgetAdminDeadlineRisks() {
                   <button
                     key={course.id}
                     type="button"
-                    onClick={() => setSelectedCourseId(course.id)}
+                    onClick={() =>
+                      dispatchDialog({
+                        type: DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE,
+                        courseId: course.id,
+                      })
+                    }
                     className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 text-left transition-colors hover:border-primary-200 hover:bg-primary-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
                     aria-label={`${course.title}, ${t(`dashboardHome.widgets.deadline_risks.${course.urgency}`)}`}
                   >
@@ -319,11 +386,6 @@ export function WidgetAdminDeadlineRisks() {
                   </button>
                 ))}
               </div>
-              {coursesQuery.isFetchingNextPage && (
-                <p className="details mt-3 text-center text-neutral-500">
-                  {t("common.button.loading")}
-                </p>
-              )}
             </div>
           )}
         </DashboardWidgetContent>
@@ -333,13 +395,7 @@ export function WidgetAdminDeadlineRisks() {
         open={Boolean(selectedCourse)}
         onOpenChange={(open) => {
           if (open) return;
-          setSelectedCourseId(null);
-          setGroupSearch("");
-          setGroupUrgency(DEADLINE_RISK_FILTERS.ALL);
-          setGroupSorting([
-            { id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE, desc: false },
-          ]);
-          setExpandedGroups({});
+          dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.RESET });
         }}
       >
         <DialogContent
@@ -358,16 +414,26 @@ export function WidgetAdminDeadlineRisks() {
           <div className="grid shrink-0 gap-2 border-b border-neutral-100 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_11rem]">
             <Input
               type="search"
-              value={groupSearch}
-              onChange={(event) => setGroupSearch(event.target.value)}
+              value={dialogState.search}
+              onChange={(event) =>
+                dispatchDialog({
+                  type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH,
+                  search: event.target.value,
+                })
+              }
               placeholder={t("dashboardHome.widgets.deadline_risks.searchGroups")}
               aria-label={t("dashboardHome.widgets.deadline_risks.searchGroups")}
               className="h-9"
             />
             <Select
-              value={groupUrgency}
+              value={dialogState.urgency}
               onValueChange={(value) => {
-                if (isDeadlineRiskFilter(value)) setGroupUrgency(value);
+                if (isDeadlineRiskFilter(value)) {
+                  dispatchDialog({
+                    type: DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY,
+                    urgency: value,
+                  });
+                }
               }}
             >
               <SelectTrigger
@@ -505,11 +571,6 @@ export function WidgetAdminDeadlineRisks() {
                       </TableBody>
                     </Table>
                   </div>
-                )}
-                {groupsQuery.isFetchingNextPage && (
-                  <p className="details mt-3 text-center text-neutral-500">
-                    {t("common.button.loading")}
-                  </p>
                 )}
               </>
             )}

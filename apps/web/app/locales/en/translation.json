@@ -43,6 +43,12 @@
       "requiredWidgetMissing": "A required dashboard widget is missing.",
       "staleLayout": "Your dashboard was updated elsewhere. Refresh and try again."
     },
+    "toast": {
+      "layoutSaved": "Dashboard changes saved.",
+      "layoutSaveError": "We could not save the dashboard changes.",
+      "layoutReset": "The default dashboard layout was restored.",
+      "layoutResetError": "We could not restore the default dashboard layout."
+    },
     "widgets": {
       "loadError": "This widget could not load its data.",
       "trainingCompletionChartLabel": "{{completed}} of {{total}} enrollments completed, {{percentage}} percent.",
@@ -198,9 +204,24 @@
         "toggle": "Toggle {{title}}",
         "edit": "Edit task",
         "delete": "Delete task",
-        "reorder": "Reorder task"
+        "reorder": "Reorder task",
+        "toast": {
+          "createSuccess": "Task added.",
+          "createError": "We could not add the task.",
+          "updateSuccess": "Task updated.",
+          "updateError": "We could not update the task.",
+          "deleteSuccess": "Task deleted.",
+          "deleteError": "We could not delete the task.",
+          "reorderSuccess": "Task order saved.",
+          "reorderError": "We could not save the task order."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "You can have up to 100 tasks.",
+    "notFound": "This task no longer exists.",
+    "invalidOrder": "The task order is no longer current. Refresh and try again."
   },
   "aiMentorPractice": {
     "form": {

@@ -1,4 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import {
@@ -9,6 +13,9 @@ import {
 import { queryClient } from "../queryClient";
 
 export function useDeleteTodoTask() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
   return useMutation({
     mutationFn: async (id: string) => {
       return ApiClient.api.todoTasksControllerRemove(id);
@@ -23,10 +30,21 @@ export function useDeleteTodoTask() {
 
       return { previous };
     },
-    onError: (_error, _id, context) => {
+    onSuccess: () => {
+      toast({ description: t("dashboardHome.widgets.todoTasks.toast.deleteSuccess") });
+    },
+    onError: (error, _id, context) => {
       if (context?.previous) {
         queryClient.setQueryData(todoTasksQueryKey, context.previous);
       }
+      toast({
+        variant: "destructive",
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("dashboardHome.widgets.todoTasks.toast.deleteError"),
+        ),
+      });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: todoTasksQueryKey }),
   });

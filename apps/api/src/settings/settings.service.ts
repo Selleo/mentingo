@@ -10,7 +10,6 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
-  DASHBOARD_WIDGETS,
   DASHBOARD_DEFAULT_LAYOUTS,
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_CATALOG,
@@ -21,7 +20,6 @@ import {
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
   FEATURE_SETTINGS_KEYS,
-  DASHBOARD_WIDGET_IDS,
 } from "@repo/shared";
 import { and, asc, count, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -67,7 +65,6 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   DEFAULT_ADMIN_SETTINGS,
-  DEFAULT_DASHBOARD_SETTINGS,
   DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "./constants/settings.constants";
@@ -88,8 +85,6 @@ import type {
   UserEmailTriggersSchema,
   UploadFilesToLoginPageBody,
   LoginPageResourceResponseBody,
-  DashboardWidgetsJSONContentSchema,
-  DashboardWidgetsIdsJSONContentSchema,
   DashboardSettingsResponseSchema,
 } from "./schemas/settings.schema";
 import type {
@@ -107,8 +102,6 @@ import type {
   AllowedQASettings,
   SupportedLanguages,
   PermissionKey,
-  DashboardWidgetId,
-  LegacyDashboardWidgetDefinition,
   DashboardWidgetType,
   DashboardWidgetDefinition,
   DashboardLayoutWidget,
@@ -647,7 +640,7 @@ export class SettingsService {
     dbInstance: DatabasePg = this.db,
   ): Promise<SettingsJSONContentSchema> {
     const [row] = await dbInstance
-      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings} - 'dashboard'` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -657,21 +650,7 @@ export class SettingsService {
       throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const dashboard = userSettings.dashboard ?? {
-      widgets: await this.getDefaultDashboardWidgets(userId),
-    };
-    const widgets = dashboard.widgets ?? (await this.getDefaultDashboardWidgets(userId));
-    const widgetIds = widgets.map((widget) => widget.id);
-    const validIds = await this.filterDashboardWidgets(userId, widgetIds);
-    const returnedWidgets = widgets.filter((widget) => validIds.includes(widget.id));
-
-    return {
-      ...userSettings,
-      dashboard: {
-        ...dashboard,
-        widgets: returnedWidgets,
-      },
-    };
+    return userSettings;
   }
 
   public async getDashboardSettings(userId: UUIDType): Promise<DashboardSettingsResponseSchema> {
@@ -852,19 +831,22 @@ export class SettingsService {
 
   private readDashboardLayout(value: unknown): DashboardSettings | null {
     if (!value || typeof value !== "object") return null;
-    const dashboard = value as Record<string, unknown>;
+    if (!("schemaVersion" in value) || !("revision" in value) || !("widgets" in value)) {
+      return null;
+    }
+    const dashboard = value;
     const rawWidgets = dashboard.widgets;
 
     if (
       dashboard.schemaVersion === DASHBOARD_SCHEMA_VERSION &&
       typeof dashboard.revision === "number" &&
       Array.isArray(rawWidgets) &&
-      rawWidgets.every((widget) => this.isDashboardLayoutWidget(widget))
+      rawWidgets.every(this.isDashboardLayoutWidget)
     ) {
       return {
         schemaVersion: DASHBOARD_SCHEMA_VERSION,
         revision: dashboard.revision,
-        widgets: rawWidgets as DashboardLayoutWidget[],
+        widgets: rawWidgets,
       };
     }
 
@@ -883,8 +865,8 @@ export class SettingsService {
 
     for (const widget of source.widgets) {
       if (!available.has(widget.type) || seen.has(widget.type)) continue;
-      const definition = DASHBOARD_WIDGET_CATALOG[widget.type] as DashboardWidgetDefinition;
-      const size = definition.allowedSizes.includes(widget.size)
+      const definition = DASHBOARD_WIDGET_CATALOG[widget.type];
+      const size = definition.allowedSizes.some((allowedSize) => allowedSize === widget.size)
         ? widget.size
         : definition.defaultSize;
       widgets.push({ type: widget.type, size, visible: widget.visible });
@@ -952,7 +934,8 @@ export class SettingsService {
 
   private isDashboardLayoutWidget(value: unknown): value is DashboardLayoutWidget {
     if (!value || typeof value !== "object") return false;
-    const widget = value as Record<string, unknown>;
+    if (!("type" in value) || !("size" in value) || !("visible" in value)) return false;
+    const widget = value;
     return (
       typeof widget.type === "string" &&
       typeof widget.size === "string" &&
@@ -965,50 +948,8 @@ export class SettingsService {
     userId: UUIDType,
     updatedSettings: UpdateSettingsBody,
   ): Promise<SettingsJSONContentSchema> {
-    let normalizedUpdatedSettings = updatedSettings;
-
-    if (updatedSettings.dashboard) {
-      const submittedWidgets = updatedSettings.dashboard.widgets;
-      const widgetIds = submittedWidgets.map((widget) => widget.id);
-      const uniqueWidgetIds = new Set(widgetIds);
-      const availableWidgetIds = await this.getAvailableDashboardWidgets(userId);
-      const availableWidgetIdSet = new Set(availableWidgetIds);
-
-      if (
-        uniqueWidgetIds.size !== widgetIds.length ||
-        widgetIds.some((widgetId) => !availableWidgetIdSet.has(widgetId))
-      ) {
-        throw new BadRequestException("dashboardHome.error.invalidWidgetLayout");
-      }
-
-      const requiredWidgetIds = availableWidgetIds.filter(
-        (widgetId) => DASHBOARD_WIDGETS[widgetId].alwaysVisible,
-      );
-
-      if (requiredWidgetIds.some((widgetId) => !uniqueWidgetIds.has(widgetId))) {
-        throw new BadRequestException("dashboardHome.error.requiredWidgetMissing");
-      }
-
-      updatedSettings.dashboard.widgets.forEach((widget) => {
-        const allowedWidths: readonly number[] = DASHBOARD_WIDGETS[widget.id].allowedWidths;
-
-        if (!allowedWidths.includes(widget.width)) {
-          throw new BadRequestException("dashboardHome.error.invalidWidgetWidth");
-        }
-      });
-
-      normalizedUpdatedSettings = {
-        ...updatedSettings,
-        dashboard: {
-          widgets: [...submittedWidgets]
-            .sort((first, second) => first.order - second.order)
-            .map((widget, order) => ({ ...widget, order })),
-        },
-      };
-    }
-
     const [row] = await this.db
-      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
+      .select({ settings: sql<Record<string, unknown>>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -1020,7 +961,7 @@ export class SettingsService {
 
     const mergedSettings = {
       ...currentSettings,
-      ...normalizedUpdatedSettings,
+      ...updatedSettings,
     };
 
     const [{ settings: newUserSettings }] = await this.db
@@ -1029,63 +970,11 @@ export class SettingsService {
         settings: settingsToJSONBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: sql<UserSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<UserSettingsJSONContentSchema>`${settings.settings} - 'dashboard'`,
+      });
 
     return newUserSettings;
-  }
-
-  private async filterDashboardWidgets(
-    userId: UUIDType,
-    widgetIds: DashboardWidgetsIdsJSONContentSchema,
-  ): Promise<DashboardWidgetsIdsJSONContentSchema> {
-    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
-    const userRoles = new Set(roleSlugs);
-    const userPermissions = new Set(permissions);
-    const globalSettings = await this.getPublicGlobalSettings();
-    const aiConfigured = await this.envService.getAIConfigured();
-
-    const isValidWidgetId = (id: DashboardWidgetId) =>
-      Object.prototype.hasOwnProperty.call(DASHBOARD_WIDGETS, id);
-
-    return widgetIds.filter((widgetId) => {
-      if (!isValidWidgetId(widgetId)) return false;
-
-      const widgetDefinition: LegacyDashboardWidgetDefinition = DASHBOARD_WIDGETS[widgetId];
-      const { allowedRoles, requiredFeature, requiredPermissions, requiresAiConfigured } =
-        widgetDefinition;
-
-      if (
-        requiredFeature &&
-        !(globalSettings as unknown as Record<string, unknown>)[
-          FEATURE_SETTINGS_KEYS[requiredFeature]
-        ]
-      )
-        return false;
-      if (requiresAiConfigured && !aiConfigured.enabled) return false;
-      if (
-        requiredPermissions &&
-        !requiredPermissions.every((permission) => userPermissions.has(permission))
-      )
-        return false;
-
-      if (!allowedRoles) return true;
-
-      return allowedRoles.some((role: SystemRoleSlug) => userRoles.has(role));
-    });
-  }
-
-  public async getAvailableDashboardWidgets(
-    userId: UUIDType,
-  ): Promise<DashboardWidgetsIdsJSONContentSchema> {
-    return await this.filterDashboardWidgets(userId, Object.values(DASHBOARD_WIDGET_IDS));
-  }
-
-  public async getDefaultDashboardWidgets(
-    userId: UUIDType,
-  ): Promise<DashboardWidgetsJSONContentSchema> {
-    const widgetIds = DEFAULT_DASHBOARD_SETTINGS.widgets.map((widget) => widget.id);
-    const validIds = await this.filterDashboardWidgets(userId, widgetIds);
-    return DEFAULT_DASHBOARD_SETTINGS.widgets.filter((widget) => validIds.includes(widget.id));
   }
 
   public async updateGlobalUnregisteredUserCoursesAccessibility(

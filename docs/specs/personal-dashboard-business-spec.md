@@ -53,7 +53,7 @@ Array order is display order. The dashboard subdocument also carries `schemaVers
 
 There is no global Save or Cancel action and no drag-instruction banner. Layout edit mode exposes card order, size, visibility, and reset controls; **Done** only exits layout editing because the changes are already saved. Reset uses confirmation and persists the current permission-aware defaults through `POST /api/settings/dashboard/reset`.
 
-Because the semantic grid had not shipped to production, schema version 2 intentionally treats both legacy width-based layouts and the obsolete staging-only schema version 1 as unset. Those users receive the current role-specific default instead of carrying removed widgets or outdated sizes forward. No database backfill is required; the version 2 layout is persisted on the next dashboard change or explicit reset. Once a version 2 layout exists, temporarily inaccessible widgets remain preserved in storage so permission changes do not erase the user's choices.
+Because the semantic grid had not shipped to production, schema version 2 treats every incompatible stored layout as unset. Those users immediately receive the current role-specific default without having to reset or save it themselves. No database backfill is required; the version 2 layout is persisted on the next dashboard change. Once a version 2 layout exists, temporarily inaccessible widgets remain preserved in storage so permission changes do not erase the user's choices.
 
 ## Card behavior
 

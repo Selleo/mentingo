@@ -24,6 +24,12 @@ type GetAssetLibraryColumnsParams = {
   t: TFunction;
 };
 
+export const ASSET_LIBRARY_COLUMN_IDS = {
+  SELECT: "select",
+  ASSET: "asset",
+  ACTIONS: "actions",
+} as const;
+
 export const getAssetLibraryColumns = ({
   canDelete,
   canInsert,
@@ -34,7 +40,7 @@ export const getAssetLibraryColumns = ({
   t,
 }: GetAssetLibraryColumnsParams): ColumnDef<ResourceLibraryAsset>[] => [
   {
-    id: "select",
+    id: ASSET_LIBRARY_COLUMN_IDS.SELECT,
     header: ({ table }) => {
       const hasSelectableRows = table.getRowModel().rows.some((row) => row.getCanSelect());
 
@@ -58,7 +64,7 @@ export const getAssetLibraryColumns = ({
     size: 44,
   },
   {
-    id: "asset",
+    id: ASSET_LIBRARY_COLUMN_IDS.ASSET,
     header: () => t("richText.assetLibrary.columns.asset"),
     cell: ({ row }) => {
       const asset = row.original;
@@ -92,7 +98,7 @@ export const getAssetLibraryColumns = ({
     },
   },
   {
-    id: "actions",
+    id: ASSET_LIBRARY_COLUMN_IDS.ACTIONS,
     header: () => t("richText.assetLibrary.columns.actions"),
     cell: ({ row }) => {
       const asset = row.original;

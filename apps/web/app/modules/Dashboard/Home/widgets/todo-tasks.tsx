@@ -1,6 +1,7 @@
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { DASHBOARD_WIDGET_SIZES } from "@repo/shared";
 import { Check, GripVertical, ListTodo, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -146,7 +147,11 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
   );
 }
 
-export function WidgetTodoTasks({ widgetSize = "2x2" }: { widgetSize?: DashboardWidgetSize }) {
+export function WidgetTodoTasks({
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+}: {
+  widgetSize?: DashboardWidgetSize;
+}) {
   const { t } = useTranslation();
   const { data: tasks = [], isLoading, isError, refetch } = useTodoTasks(true);
   const { mutateAsync: createTask, isPending: isCreating } = useCreateTodoTask();
@@ -155,7 +160,7 @@ export function WidgetTodoTasks({ widgetSize = "2x2" }: { widgetSize?: Dashboard
   const { mutateAsync: reorderTasks } = useReorderTodoTasks();
   const [newTask, setNewTask] = useState("");
   const metadata = DASHBOARD_WIDGET_REGISTRY[TODO_TASKS_WIDGET_ID];
-  const isCompact = widgetSize === "2x1";
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.TWO_BY_ONE;
   const activeTasks = tasks.filter((task) => !task.completed);
   const completedTasks = tasks.filter((task) => task.completed);
 

@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   DASHBOARD_CALENDAR_VIEWS,
-  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_TYPES,
 } from "@repo/shared";
 import { endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from "date-fns";
 import { SquareArrowRightEnter } from "lucide-react";
@@ -155,7 +155,7 @@ export function WidgetEventCalendar() {
 
   const selectedEvents = events.filter((event) => isSameDay(new Date(event.startsAt), selectedDay));
   const eventDays = useMemo(() => events.map((event) => new Date(event.startsAt)), [events]);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR];
 
   function openEventDialog(eventId: string) {
     setSelectedEvent(eventId);
@@ -242,7 +242,6 @@ export function WidgetEventCalendar() {
                   row: "flex min-h-0 w-full",
                   cell: "min-h-0 flex-1 p-0 text-center text-xs",
                   day: "h-full w-full p-0 text-xs",
-                  day_button: "h-full w-full p-0 text-xs",
                 }}
               />
               <Separator orientation="vertical" className="h-full" />

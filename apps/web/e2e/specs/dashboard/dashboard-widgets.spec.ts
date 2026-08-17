@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+import { DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
@@ -60,7 +60,7 @@ const dashboardEvent = {
 test.describe("student dashboard widgets", () => {
   test("shows the continue learning course and progress", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, [
         { path: "/api/course/dashboard-summary", body: studentSummary },
       ]);
 
@@ -77,7 +77,7 @@ test.describe("student dashboard widgets", () => {
 
   test("shows the student's calendar event", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, [
         {
           path: "/api/calendar/dashboard/events",
           query: { view: "all" },
@@ -102,7 +102,7 @@ test.describe("student dashboard widgets", () => {
 
   test("shows required course urgency and due-date data", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, [
         { path: "/api/course/dashboard-summary", body: studentSummary },
       ]);
 
@@ -119,7 +119,7 @@ test.describe("student dashboard widgets", () => {
 
   test("shows the student's course completion totals", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION, [
         { path: "/api/course/dashboard-summary", body: studentSummary },
       ]);
 
@@ -178,7 +178,7 @@ test.describe("student dashboard widgets", () => {
 test.describe("admin dashboard widgets", () => {
   test("shows the admin event calendar event", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, [
         {
           path: "/api/calendar/dashboard/events",
           query: { view: "all" },
@@ -203,7 +203,7 @@ test.describe("admin dashboard widgets", () => {
 
   test("shows training completion totals", async ({ withReadonlyPage }) => {
     await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-      await mockDashboardWidget(page, DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION, [
+      await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION, [
         {
           path: "/api/statistics/dashboard/training-completion",
           body: {

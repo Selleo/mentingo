@@ -43,6 +43,12 @@
       "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas.",
       "staleLayout": "Jūsų skydelis buvo atnaujintas kitur. Atnaujinkite puslapį ir bandykite dar kartą."
     },
+    "toast": {
+      "layoutSaved": "Skydelio pakeitimai išsaugoti.",
+      "layoutSaveError": "Nepavyko išsaugoti skydelio pakeitimų.",
+      "layoutReset": "Atkurtas numatytasis skydelio išdėstymas.",
+      "layoutResetError": "Nepavyko atkurti numatytojo skydelio išdėstymo."
+    },
     "widgets": {
       "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
       "trainingCompletionChartLabel": "Užbaigta {{completed}} iš {{total}} priskyrimų, {{percentage}} procentų.",
@@ -198,9 +204,24 @@
         "toggle": "Perjungti {{title}}",
         "edit": "Redaguoti užduotį",
         "delete": "Ištrinti užduotį",
-        "reorder": "Pakeisti užduoties tvarką"
+        "reorder": "Pakeisti užduoties tvarką",
+        "toast": {
+          "createSuccess": "Užduotis pridėta.",
+          "createError": "Nepavyko pridėti užduoties.",
+          "updateSuccess": "Užduotis atnaujinta.",
+          "updateError": "Nepavyko atnaujinti užduoties.",
+          "deleteSuccess": "Užduotis ištrinta.",
+          "deleteError": "Nepavyko ištrinti užduoties.",
+          "reorderSuccess": "Užduočių tvarka išsaugota.",
+          "reorderError": "Nepavyko išsaugoti užduočių tvarkos."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Galite turėti iki 100 užduočių.",
+    "notFound": "Šios užduoties nebėra.",
+    "invalidOrder": "Užduočių tvarka pasikeitė. Atnaujinkite puslapį ir bandykite dar kartą."
   },
   "aiMentorPractice": {
     "form": {

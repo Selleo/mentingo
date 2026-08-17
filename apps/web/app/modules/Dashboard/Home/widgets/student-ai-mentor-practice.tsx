@@ -2,7 +2,7 @@ import { useChat, type UIMessage } from "@ai-sdk/react";
 import { Link } from "@remix-run/react";
 import {
   AI_MENTOR_PRACTICE_STATUSES,
-  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_TYPES,
   createTextUiMessage,
   getUiMessageText,
   toUiMessageRole,
@@ -223,7 +223,7 @@ export function WidgetStudentAiMentorPractice() {
   const [message, setMessage] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const placeholders = useMemo(() => PRACTICE_SUGGESTIONS.map(({ valueKey }) => t(valueKey)), [t]);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE];
   const threadId = data?.threadId ?? "";
   const { data: persistedMessages, isLoading: isMessagesLoading } = useCurrentThreadMessages({
     isThreadLoading: !threadId,

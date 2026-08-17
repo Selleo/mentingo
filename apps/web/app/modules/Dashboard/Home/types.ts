@@ -1,31 +1,20 @@
-import type { DashboardWidgetId, DashboardWidgetType } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES } from "@repo/shared";
+
+import type { DashboardWidgetSize, DashboardWidgetType } from "@repo/shared";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 
 export type DashboardWidgetIconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
 
 export type DashboardLayoutItem = {
-  id: DashboardWidgetId;
-  type?: DashboardWidgetType | string;
+  id: DashboardWidgetType;
   size?: DashboardWidgetSize;
   allowedSizes?: DashboardWidgetSize[];
   visible?: boolean;
   order: number;
 };
 
-export const DASHBOARD_WIDGET_SIZES = {
-  ONE_BY_ONE: "1x1",
-  TWO_BY_ONE: "2x1",
-  ONE_BY_TWO: "1x2",
-  TWO_BY_TWO: "2x2",
-  THREE_BY_TWO: "3x2",
-  FOUR_BY_ONE: "4x1",
-  FOUR_BY_TWO: "4x2",
-  FOUR_BY_THREE: "4x3",
-} as const;
-
-export type DashboardWidgetSize =
-  (typeof DASHBOARD_WIDGET_SIZES)[keyof typeof DASHBOARD_WIDGET_SIZES];
+export type { DashboardWidgetSize } from "@repo/shared";
 
 export const dashboardSizeToSpan = (size: DashboardWidgetSize | undefined) => {
   switch (size) {

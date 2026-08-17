@@ -21,12 +21,12 @@ import { CreateTodoTaskBody, ReorderTodoTasksBody, UpdateTodoTaskBody } from "./
 @UseGuards(PermissionsGuard)
 @RequirePermission(PERMISSIONS.TODO_TASK_MANAGE_SELF)
 export class TodoTasksController {
-  constructor(private readonly service: TodoTasksService) {}
+  constructor(private readonly todoTasksService: TodoTasksService) {}
 
   @Get()
   @Validate({ response: baseResponse(todoTaskListSchema) })
   async list(@CurrentUser("userId") userId: UUIDType) {
-    return new BaseResponse(await this.service.list(userId));
+    return new BaseResponse(await this.todoTasksService.list(userId));
   }
 
   @Post()
@@ -35,7 +35,7 @@ export class TodoTasksController {
     response: baseResponse(todoTaskSchema),
   })
   async create(@Body() body: CreateTodoTaskBody, @CurrentUser("userId") userId: UUIDType) {
-    return new BaseResponse(await this.service.create(userId, body));
+    return new BaseResponse(await this.todoTasksService.create(userId, body));
   }
 
   @Patch(":id")
@@ -51,13 +51,13 @@ export class TodoTasksController {
     @Body() body: UpdateTodoTaskBody,
     @CurrentUser("userId") userId: UUIDType,
   ) {
-    return new BaseResponse(await this.service.update(userId, id, body));
+    return new BaseResponse(await this.todoTasksService.update(userId, id, body));
   }
 
   @Delete(":id")
   @Validate({ request: [{ type: "param", name: "id", schema: UUIDSchema }] })
   async remove(@Param("id") id: UUIDType, @CurrentUser("userId") userId: UUIDType) {
-    await this.service.remove(userId, id);
+    await this.todoTasksService.remove(userId, id);
     return new BaseResponse({ deleted: true });
   }
 
@@ -67,6 +67,6 @@ export class TodoTasksController {
     response: baseResponse(todoTaskListSchema),
   })
   async reorder(@Body() body: ReorderTodoTasksBody, @CurrentUser("userId") userId: UUIDType) {
-    return new BaseResponse(await this.service.reorder(userId, body));
+    return new BaseResponse(await this.todoTasksService.reorder(userId, body));
   }
 }

@@ -1,5 +1,9 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS, STUDENT_COURSE_URGENCY } from "@repo/shared";
+import {
+  DASHBOARD_WIDGET_SIZES,
+  DASHBOARD_WIDGET_TYPES,
+  STUDENT_COURSE_URGENCY,
+} from "@repo/shared";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -20,15 +24,15 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import type { DashboardWidgetSize } from "../types";
 
 export function WidgetStudentRequiredCourse({
-  widgetSize = "2x1",
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
 }: {
   widgetSize?: DashboardWidgetSize;
 }) {
   const { t, i18n } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES];
   const courses = data?.requiredCourses ?? [];
-  const isCompact = widgetSize === "2x1";
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.TWO_BY_ONE;
   const overdueCount = courses.filter(
     (course) => course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
   ).length;

@@ -36,7 +36,7 @@ import { SortableWidget } from "./SortableWidget";
 import { DashboardWidgetIcon } from "./WidgetCard";
 
 import type { DashboardLayoutItem } from "../types";
-import type { DashboardWidgetId, DashboardWidgetSize } from "@repo/shared";
+import type { DashboardWidgetSize, DashboardWidgetType } from "@repo/shared";
 
 type DashboardGridProps = {
   widgets: DashboardLayoutItem[];
@@ -72,10 +72,10 @@ type DashboardDragState = {
   previewWidgets: DashboardLayoutItem[] | null;
   widgetsAtDragStart: DashboardLayoutItem[] | null;
   hasDragOrderChanged: boolean;
-  lastOverId: DashboardWidgetId | null;
+  lastOverId: DashboardWidgetType | null;
   lastDropPlacement: DropPlacement | null;
   appliedDropTarget: {
-    id: DashboardWidgetId;
+    id: DashboardWidgetType;
     placement: DropPlacement | null;
   } | null;
   initialDroppableRects: Parameters<CollisionDetection>[0]["droppableRects"] | null;
@@ -88,7 +88,7 @@ type DashboardGridRefs = {
 
 export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: DashboardGridProps) {
   const { t } = useTranslation();
-  const [activeId, setActiveId] = useState<DashboardWidgetId | null>(null);
+  const [activeId, setActiveId] = useState<DashboardWidgetType | null>(null);
   const [activeWidgetSize, setActiveWidgetSize] = useState<ActiveWidgetSize | null>(null);
   const [previewWidgets, setPreviewWidgets] = useState<DashboardLayoutItem[] | null>(null);
   const dashboardRefs = useRef<DashboardGridRefs>({
@@ -149,7 +149,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
       });
       const [pointerCollision] = pointerCollisions;
       if (pointerCollision) {
-        const pointerCollisionId = pointerCollision.id as DashboardWidgetId;
+        const pointerCollisionId = pointerCollision.id as DashboardWidgetType;
         const previousPlacement =
           dashboardRefs.current.dragState.lastOverId === pointerCollisionId
             ? dashboardRefs.current.dragState.lastDropPlacement
@@ -179,7 +179,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
     });
     const [keyboardCollision] = keyboardCollisions;
     if (keyboardCollision) {
-      dashboardRefs.current.dragState.lastOverId = keyboardCollision.id as DashboardWidgetId;
+      dashboardRefs.current.dragState.lastOverId = keyboardCollision.id as DashboardWidgetType;
       dashboardRefs.current.dragState.lastDropPlacement = null;
     }
 
@@ -188,7 +188,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
 
   /** Captures the starting layout and geometry used by the drag preview. */
   const handleDragStart = ({ active }: DragStartEvent) => {
-    setActiveId(active.id as DashboardWidgetId);
+    setActiveId(active.id as DashboardWidgetType);
     const initialPreview = sortedWidgets.map((widget) => ({ ...widget }));
     setPreviewWidgets(initialPreview);
     dashboardRefs.current.dragState.previewWidgets = initialPreview;
@@ -207,7 +207,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
   const updateDragPreview = ({ active, over }: DragOverEvent | DragMoveEvent) => {
     if (!over) return;
 
-    const overId = over.id as DashboardWidgetId;
+    const overId = over.id as DashboardWidgetType;
     const dropPlacement = dashboardRefs.current.dragState.lastDropPlacement;
     const previousAppliedTarget = dashboardRefs.current.dragState.appliedDropTarget;
     if (previousAppliedTarget?.id === overId && previousAppliedTarget.placement === dropPlacement) {
@@ -238,7 +238,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
       const projectedPreview = projectDashboardDragPreview(
         initialWidgets,
         currentWidgets,
-        active.id as DashboardWidgetId,
+        active.id as DashboardWidgetType,
         overId,
         dropPlacement ?? undefined,
       );
@@ -286,7 +286,7 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
   };
 
   /** Applies an explicit semantic size selected from the server-provided catalog. */
-  const handleSizeChange = (id: DashboardWidgetId, size: DashboardWidgetSize) => {
+  const handleSizeChange = (id: DashboardWidgetType, size: DashboardWidgetSize) => {
     onWidgetsChange(
       widgets.map((widget) =>
         widget.id === id && widget.allowedSizes?.includes(size) ? { ...widget, size } : widget,

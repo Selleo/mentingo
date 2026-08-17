@@ -1,4 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import {
@@ -10,6 +14,9 @@ import {
 import { queryClient } from "../queryClient";
 
 export function useUpdateTodoTask() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
   return useMutation({
     mutationFn: async ({ id, ...body }: TodoTaskUpdateInput) => {
       return ApiClient.api.todoTasksControllerUpdate(id, body);
@@ -24,10 +31,21 @@ export function useUpdateTodoTask() {
 
       return { previous };
     },
-    onError: (_error, _input, context) => {
+    onSuccess: () => {
+      toast({ description: t("dashboardHome.widgets.todoTasks.toast.updateSuccess") });
+    },
+    onError: (error, _input, context) => {
       if (context?.previous) {
         queryClient.setQueryData(todoTasksQueryKey, context.previous);
       }
+      toast({
+        variant: "destructive",
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("dashboardHome.widgets.todoTasks.toast.updateError"),
+        ),
+      });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: todoTasksQueryKey }),
   });

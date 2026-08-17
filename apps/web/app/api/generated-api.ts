@@ -518,48 +518,12 @@ export interface GetUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
-        dashboard: {
-          widgets: {
-            id:
-              | "a_event_calendar"
-              | "a_training_completion"
-              | "a_incomplete_courses"
-              | "a_deadline_risks"
-              | "s_continue_learning"
-              | "s_event_calendar"
-              | "s_required_course"
-              | "s_course_completion"
-              | "s_certificates"
-              | "s_ai_mentor_practice";
-            /** @min 0 */
-            order: number;
-            width: 1 | 2;
-          }[];
-        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
-        dashboard: {
-          widgets: {
-            id:
-              | "a_event_calendar"
-              | "a_training_completion"
-              | "a_incomplete_courses"
-              | "a_deadline_risks"
-              | "s_continue_learning"
-              | "s_event_calendar"
-              | "s_required_course"
-              | "s_course_completion"
-              | "s_certificates"
-              | "s_ai_mentor_practice";
-            /** @min 0 */
-            order: number;
-            width: 1 | 2;
-          }[];
-        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -572,48 +536,12 @@ export type UpdateUserSettingsBody =
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
-      dashboard?: {
-        widgets: {
-          id:
-            | "a_event_calendar"
-            | "a_training_completion"
-            | "a_incomplete_courses"
-            | "a_deadline_risks"
-            | "s_continue_learning"
-            | "s_event_calendar"
-            | "s_required_course"
-            | "s_course_completion"
-            | "s_certificates"
-            | "s_ai_mentor_practice";
-          /** @min 0 */
-          order: number;
-          width: 1 | 2;
-        }[];
-      };
     }
   | {
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
-      dashboard?: {
-        widgets: {
-          id:
-            | "a_event_calendar"
-            | "a_training_completion"
-            | "a_incomplete_courses"
-            | "a_deadline_risks"
-            | "s_continue_learning"
-            | "s_event_calendar"
-            | "s_required_course"
-            | "s_course_completion"
-            | "s_certificates"
-            | "s_ai_mentor_practice";
-          /** @min 0 */
-          order: number;
-          width: 1 | 2;
-        }[];
-      };
       adminNewUserNotification?: boolean;
       adminFinishedCourseNotification?: boolean;
       configWarningDismissed?: boolean;
@@ -626,48 +554,12 @@ export interface UpdateUserSettingsResponse {
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
-        dashboard: {
-          widgets: {
-            id:
-              | "a_event_calendar"
-              | "a_training_completion"
-              | "a_incomplete_courses"
-              | "a_deadline_risks"
-              | "s_continue_learning"
-              | "s_event_calendar"
-              | "s_required_course"
-              | "s_course_completion"
-              | "s_certificates"
-              | "s_ai_mentor_practice";
-            /** @min 0 */
-            order: number;
-            width: 1 | 2;
-          }[];
-        };
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
-        dashboard: {
-          widgets: {
-            id:
-              | "a_event_calendar"
-              | "a_training_completion"
-              | "a_incomplete_courses"
-              | "a_deadline_risks"
-              | "s_continue_learning"
-              | "s_event_calendar"
-              | "s_required_course"
-              | "s_course_completion"
-              | "s_certificates"
-              | "s_ai_mentor_practice";
-            /** @min 0 */
-            order: number;
-            width: 1 | 2;
-          }[];
-        };
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -815,49 +707,12 @@ export interface ResetDashboardSettingsResponse {
   };
 }
 
-export interface GetDefaultDashboardWidgetsResponse {
-  data: {
-    id:
-      | "a_event_calendar"
-      | "a_training_completion"
-      | "a_incomplete_courses"
-      | "a_deadline_risks"
-      | "s_continue_learning"
-      | "s_event_calendar"
-      | "s_required_course"
-      | "s_course_completion"
-      | "s_certificates"
-      | "s_ai_mentor_practice";
-    /** @min 0 */
-    order: number;
-    width: 1 | 2;
-  }[];
-}
-
 export interface UpdateAdminNewUserNotificationResponse {
   data: {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
-    dashboard: {
-      widgets: {
-        id:
-          | "a_event_calendar"
-          | "a_training_completion"
-          | "a_incomplete_courses"
-          | "a_deadline_risks"
-          | "s_continue_learning"
-          | "s_event_calendar"
-          | "s_required_course"
-          | "s_course_completion"
-          | "s_certificates"
-          | "s_ai_mentor_practice";
-        /** @min 0 */
-        order: number;
-        width: 1 | 2;
-      }[];
-    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1267,24 +1122,6 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
-    dashboard: {
-      widgets: {
-        id:
-          | "a_event_calendar"
-          | "a_training_completion"
-          | "a_incomplete_courses"
-          | "a_deadline_risks"
-          | "s_continue_learning"
-          | "s_event_calendar"
-          | "s_required_course"
-          | "s_course_completion"
-          | "s_certificates"
-          | "s_ai_mentor_practice";
-        /** @min 0 */
-        order: number;
-        width: 1 | 2;
-      }[];
-    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1297,24 +1134,6 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
-    dashboard: {
-      widgets: {
-        id:
-          | "a_event_calendar"
-          | "a_training_completion"
-          | "a_incomplete_courses"
-          | "a_deadline_risks"
-          | "s_continue_learning"
-          | "s_event_calendar"
-          | "s_required_course"
-          | "s_course_completion"
-          | "s_certificates"
-          | "s_ai_mentor_practice";
-        /** @min 0 */
-        order: number;
-        width: 1 | 2;
-      }[];
-    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1540,24 +1359,6 @@ export interface UpdateConfigWarningDismissedResponse {
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
-    dashboard: {
-      widgets: {
-        id:
-          | "a_event_calendar"
-          | "a_training_completion"
-          | "a_incomplete_courses"
-          | "a_deadline_risks"
-          | "s_continue_learning"
-          | "s_event_calendar"
-          | "s_required_course"
-          | "s_course_completion"
-          | "s_certificates"
-          | "s_ai_mentor_practice";
-        /** @min 0 */
-        order: number;
-        width: 1 | 2;
-      }[];
-    };
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -10529,20 +10330,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetDefaultDashboardWidgets
-     * @request GET:/api/settings/dashboard/default
-     */
-    settingsControllerGetDefaultDashboardWidgets: (params: RequestParams = {}) =>
-      this.request<GetDefaultDashboardWidgetsResponse, any>({
-        path: `/api/settings/dashboard/default`,
-        method: "GET",
         format: "json",
         ...params,
       }),

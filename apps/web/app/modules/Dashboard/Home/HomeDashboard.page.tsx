@@ -1,5 +1,6 @@
+import { DASHBOARD_WIDGET_SIZES } from "@repo/shared";
 import { LayoutGrid, Settings2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { P, match } from "ts-pattern";
 
@@ -20,7 +21,6 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import { useToast } from "~/components/ui/use-toast";
 import Loader from "~/modules/common/Loader/Loader";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -47,8 +47,7 @@ const createLayout = (
   const catalogByType = new Map(catalog.map((entry) => [entry.type, entry]));
 
   return widgets.map((widget, order) => ({
-    id: widget.type as DashboardLayoutItem["id"],
-    type: widget.type,
+    id: widget.type,
     size: widget.size,
     visible: widget.visible,
     allowedSizes: catalogByType.get(widget.type)?.allowedSizes,
@@ -59,7 +58,7 @@ const createLayout = (
 const cloneLayout = (widgets: DashboardLayoutItem[]): DashboardLayoutItem[] =>
   widgets.map((widget) => ({ ...widget }));
 
-const widgetKey = (widget: DashboardLayoutItem) => widget.type ?? widget.id;
+const widgetKey = (widget: DashboardLayoutItem) => widget.id;
 
 /**
  * The grid only receives visible widgets. Merge its reordered list back into
@@ -92,7 +91,6 @@ const mergeVisibleLayout = (
 
 export default function HomeDashboardPage() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const [savedWidgets, setSavedWidgets] = useState<DashboardLayoutItem[]>([]);
   const [draftWidgets, setDraftWidgets] = useState<DashboardLayoutItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -105,114 +103,51 @@ export default function HomeDashboardPage() {
     isError,
     refetch: refetchDashboardSettings,
   } = useDashboardSettings();
-  const { mutateAsync: updateDashboardSettings } = useUpdateDashboardSettings();
-  const { mutateAsync: resetDashboardSettings, isPending: isRestoringDefault } =
+  const { mutate: updateDashboardSettings } = useUpdateDashboardSettings();
+  const { mutate: resetDashboardSettings, isPending: isRestoringDefault } =
     useResetDashboardSettings();
-  const layoutQueue = useRef(Promise.resolve());
-  const revisionRef = useRef(0);
-  const draftWidgetsRef = useRef<DashboardLayoutItem[]>([]);
-  const lastConfirmedLayout = useRef<DashboardLayoutItem[]>([]);
 
   const visibleLayout = (isEditing ? draftWidgets : savedWidgets).filter(
     (widget) => widget.visible !== false,
   );
   useEffect(() => {
-    if (!dashboardSettings || isEditing) return;
-    revisionRef.current = dashboardSettings.layout.revision;
+    if (!dashboardSettings) return;
     const userLayout = createLayout(dashboardSettings.layout.widgets, dashboardSettings.catalog);
-    draftWidgetsRef.current = cloneLayout(userLayout);
     setSavedWidgets(userLayout);
     setDraftWidgets(cloneLayout(userLayout));
-    lastConfirmedLayout.current = userLayout;
-  }, [dashboardSettings, isEditing]);
+  }, [dashboardSettings]);
 
   const handleStartEditing = () => setIsEditing(true);
 
-  const persistLayout = useCallback(
-    (nextWidgets: DashboardLayoutItem[]) => {
-      const mergedWidgets = mergeVisibleLayout(draftWidgetsRef.current, nextWidgets);
-      const normalizedWidgets = mergedWidgets.map((widget, order) => ({
-        ...widget,
-        order,
-      }));
-      draftWidgetsRef.current = normalizedWidgets;
-      setDraftWidgets(normalizedWidgets);
-      setSavedWidgets(normalizedWidgets);
-      layoutQueue.current = layoutQueue.current
-        .catch(() => undefined)
-        .then(async () => {
-          try {
-            const response = await updateDashboardSettings({
-              expectedRevision: revisionRef.current,
-              widgets: normalizedWidgets.map((widget) => ({
-                type: (widget.type ?? widget.id) as DashboardWidgetType,
-                size: widget.size ?? "1x1",
-                visible: widget.visible ?? true,
-              })),
-            });
-            revisionRef.current = response.layout.revision;
-            const confirmedLayout = createLayout(response.layout.widgets, response.catalog);
-            lastConfirmedLayout.current = confirmedLayout;
-            draftWidgetsRef.current = cloneLayout(confirmedLayout);
-            setSavedWidgets(confirmedLayout);
-            setDraftWidgets(cloneLayout(confirmedLayout));
-          } catch (error) {
-            const status = (error as { response?: { status?: number } }).response?.status;
-            if (status === 409) {
-              const refreshed = await refetchDashboardSettings();
-              const nextRevision = refreshed.data?.layout.revision;
-              if (nextRevision !== undefined) {
-                try {
-                  const response = await updateDashboardSettings({
-                    expectedRevision: nextRevision,
-                    widgets: normalizedWidgets.map((widget) => ({
-                      type: (widget.type ?? widget.id) as DashboardWidgetType,
-                      size: widget.size ?? "1x1",
-                      visible: widget.visible ?? true,
-                    })),
-                  });
-                  revisionRef.current = response.layout.revision;
-                  const confirmedLayout = createLayout(response.layout.widgets, response.catalog);
-                  lastConfirmedLayout.current = confirmedLayout;
-                  draftWidgetsRef.current = cloneLayout(confirmedLayout);
-                  setSavedWidgets(confirmedLayout);
-                  setDraftWidgets(cloneLayout(confirmedLayout));
-                  return;
-                } catch {
-                  // Fall through to the confirmed server layout below.
-                }
-              }
-            }
-            const confirmed = lastConfirmedLayout.current;
-            draftWidgetsRef.current = cloneLayout(confirmed);
-            setSavedWidgets(confirmed);
-            setDraftWidgets(cloneLayout(confirmed));
-          }
-        });
-    },
-    [refetchDashboardSettings, updateDashboardSettings],
-  );
+  const persistLayout = (nextWidgets: DashboardLayoutItem[]) => {
+    const normalizedWidgets = mergeVisibleLayout(draftWidgets, nextWidgets).map(
+      (widget, order) => ({ ...widget, order }),
+    );
+    setDraftWidgets(normalizedWidgets);
+    setSavedWidgets(normalizedWidgets);
+    updateDashboardSettings({
+      expectedRevision: dashboardSettings?.layout.revision ?? 0,
+      widgets: normalizedWidgets.map((widget) => ({
+        type: widget.id,
+        size: widget.size ?? DASHBOARD_WIDGET_SIZES.ONE_BY_ONE,
+        visible: widget.visible ?? true,
+      })),
+    });
+  };
 
   const handleRestoreDefault = async () => {
     setIsRestoreConfirmOpen(true);
   };
 
-  const confirmRestoreDefault = async () => {
+  const confirmRestoreDefault = () => {
     setIsRestoreConfirmOpen(false);
-    try {
-      const response = await resetDashboardSettings(revisionRef.current);
-      revisionRef.current = response.layout.revision;
-      const layout = createLayout(response.layout.widgets, response.catalog);
-      draftWidgetsRef.current = cloneLayout(layout);
-      setSavedWidgets(layout);
-      setDraftWidgets(layout);
-      lastConfirmedLayout.current = layout;
-    } catch {
-      toast({
-        variant: "destructive",
-        description: t("common.toast.somethingWentWrong"),
-      });
-    }
+    resetDashboardSettings(dashboardSettings?.layout.revision ?? 0, {
+      onSuccess: (response) => {
+        const layout = createLayout(response.layout.widgets, response.catalog);
+        setSavedWidgets(layout);
+        setDraftWidgets(cloneLayout(layout));
+      },
+    });
   };
 
   return (
@@ -291,7 +226,7 @@ export default function HomeDashboardPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.button.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void confirmRestoreDefault()}>
+            <AlertDialogAction onClick={confirmRestoreDefault}>
               {t("dashboardHome.edit.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -112,8 +112,8 @@ export class CertificatesController {
   })
   async getDashboardCertificates(
     @Query("language") language: SupportedLanguages,
-    @Query("page") page?: number,
-    @Query("perPage") perPage?: number,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<PaginatedResponse<AllCertificatesResponse>> {
     const data = await this.certificatesService.getAllCertificates({

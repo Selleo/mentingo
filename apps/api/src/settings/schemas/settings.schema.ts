@@ -3,8 +3,6 @@ import {
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
-  DASHBOARD_WIDGET_IDS,
-  DASHBOARD_WIDGET_WIDTHS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -64,18 +62,6 @@ export const globalSettingsJSONSchema = Type.Object({
   loginPageFiles: Type.Array(Type.String()),
 });
 
-export const dashboardWidgetsIdsJSONContentSchema = Type.Array(Type.Enum(DASHBOARD_WIDGET_IDS));
-
-export const dashboardWidgetsJSONContentSchema = Type.Array(
-  Type.Object({
-    id: Type.Enum(DASHBOARD_WIDGET_IDS),
-    order: Type.Integer({ minimum: 0 }),
-    width: Type.Enum(DASHBOARD_WIDGET_WIDTHS),
-  }),
-);
-
-export const dashboardDefaultLayoutJSONContentSchema = dashboardWidgetsJSONContentSchema;
-
 export const dashboardLayoutWidgetSchema = Type.Object({
   type: Type.Enum(DASHBOARD_WIDGET_TYPES),
   size: Type.Enum(DASHBOARD_WIDGET_SIZES),
@@ -103,9 +89,6 @@ export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
   MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
-  dashboard: Type.Object({
-    widgets: dashboardWidgetsJSONContentSchema,
-  }),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
@@ -143,10 +126,6 @@ export type LoginPageResourceResponseBody = Static<typeof loginPageResourceRespo
 
 export type UploadFilesToLoginPageBody = Static<typeof uploadFilesToLoginPageSchema>;
 
-export type DashboardWidgetsJSONContentSchema = Static<typeof dashboardWidgetsJSONContentSchema>;
-export type DashboardWidgetsIdsJSONContentSchema = Static<
-  typeof dashboardWidgetsIdsJSONContentSchema
->;
 export type DashboardLayoutWidgetSchema = Static<typeof dashboardLayoutWidgetSchema>;
 export type DashboardSettingsSchema = Static<typeof dashboardSettingsSchema>;
 export type DashboardWidgetCatalogEntrySchema = Static<typeof dashboardWidgetCatalogEntrySchema>;

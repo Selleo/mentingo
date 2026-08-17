@@ -43,6 +43,12 @@
       "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado.",
       "staleLayout": "Tu panel se actualizó en otro lugar. Actualiza la página e inténtalo de nuevo."
     },
+    "toast": {
+      "layoutSaved": "Los cambios del panel se guardaron.",
+      "layoutSaveError": "No pudimos guardar los cambios del panel.",
+      "layoutReset": "Se restauró el diseño predeterminado del panel.",
+      "layoutResetError": "No pudimos restaurar el diseño predeterminado del panel."
+    },
     "widgets": {
       "loadError": "No se pudieron cargar los datos de este widget.",
       "trainingCompletionChartLabel": "{{completed}} de {{total}} inscripciones completadas, {{percentage}} por ciento.",
@@ -124,7 +130,17 @@
         "toggle": "Alternar {{title}}",
         "edit": "Editar tarea",
         "delete": "Eliminar tarea",
-        "reorder": "Reordenar tarea"
+        "reorder": "Reordenar tarea",
+        "toast": {
+          "createSuccess": "Tarea añadida.",
+          "createError": "No pudimos añadir la tarea.",
+          "updateSuccess": "Tarea actualizada.",
+          "updateError": "No pudimos actualizar la tarea.",
+          "deleteSuccess": "Tarea eliminada.",
+          "deleteError": "No pudimos eliminar la tarea.",
+          "reorderSuccess": "Orden de tareas guardado.",
+          "reorderError": "No pudimos guardar el orden de las tareas."
+        }
       },
       "commonDescription": "Información clave de un vistazo",
       "training_completion": {
@@ -201,6 +217,11 @@
         "aiNotConfigured": "Mentor IA no está configurado para esta organización."
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Puedes tener hasta 100 tareas.",
+    "notFound": "Esta tarea ya no existe.",
+    "invalidOrder": "El orden de las tareas ya no está actualizado. Actualiza la página e inténtalo de nuevo."
   },
   "aiMentorPractice": {
     "form": {

@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import type { DashboardWidgetType } from "@repo/shared";
 
 type DashboardWidgetMockResponse = {
   path: string;
@@ -17,27 +18,13 @@ const fulfillJson = async (route: Route, body: unknown) => {
 
 export async function mockDashboardWidget(
   page: Page,
-  widgetId: string,
+  widgetType: DashboardWidgetType,
   responses: DashboardWidgetMockResponse[],
 ) {
-  const canonicalWidgetType = (() => {
-    const mapping: Record<string, string> = {
-      a_event_calendar: "event_calendar",
-      s_event_calendar: "event_calendar",
-      a_training_completion: "training_completion",
-      a_deadline_risks: "deadline_risks",
-      s_continue_learning: "continue_learning",
-      s_required_course: "required_courses",
-      s_course_completion: "course_completion",
-      s_certificates: "certificates",
-      s_ai_mentor_practice: "ai_mentor_practice",
-    };
-    return mapping[widgetId] ?? widgetId;
-  })();
   const semanticLayout =
-    canonicalWidgetType === "event_calendar"
+    widgetType === "event_calendar"
       ? { size: "4x2", allowedSizes: ["4x2", "4x3"], defaultSize: "4x2" }
-      : canonicalWidgetType === "deadline_risks"
+      : widgetType === "deadline_risks"
         ? { size: "2x1", allowedSizes: ["2x1", "2x2", "3x2"], defaultSize: "2x1" }
         : { size: "2x1", allowedSizes: ["2x1", "2x2"], defaultSize: "2x1" };
 
@@ -51,9 +38,6 @@ export async function mockDashboardWidget(
         language: "en",
         isMFAEnabled: false,
         MFASecret: null,
-        dashboard: {
-          widgets: [{ id: widgetId, order: 0, width: 2 }],
-        },
       });
       return;
     }
@@ -63,9 +47,9 @@ export async function mockDashboardWidget(
         layout: {
           schemaVersion: 2,
           revision: 0,
-          widgets: [{ type: canonicalWidgetType, size: semanticLayout.size, visible: true }],
+          widgets: [{ type: widgetType, size: semanticLayout.size, visible: true }],
         },
-        catalog: [{ type: canonicalWidgetType, ...semanticLayout }],
+        catalog: [{ type: widgetType, ...semanticLayout }],
       });
       return;
     }

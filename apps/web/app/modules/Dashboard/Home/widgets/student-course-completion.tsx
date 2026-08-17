@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 import { Label, Pie, PieChart } from "recharts";
 
@@ -25,15 +25,15 @@ const STATUS_STYLES = [
 ] as const;
 
 export function WidgetStudentCourseCompletion({
-  widgetSize = "1x1",
+  widgetSize = DASHBOARD_WIDGET_SIZES.ONE_BY_ONE,
 }: {
   widgetSize?: DashboardWidgetSize;
 }) {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION];
   const completion = data?.completion;
-  const isCompact = widgetSize === "1x1";
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.ONE_BY_ONE;
   const chartConfig = {
     completed: {
       label: t("dashboardHome.widgets.studentTiles.courseCompletion.completed"),

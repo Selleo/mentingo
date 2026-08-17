@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -19,15 +19,15 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import type { DashboardWidgetSize } from "../types";
 
 export function WidgetStudentContinueLearning({
-  widgetSize = "2x1",
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
 }: {
   widgetSize?: DashboardWidgetSize;
 }) {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING];
   const courses = data?.continueLearningCourses ?? [];
-  const isCompact = widgetSize === "2x1";
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.TWO_BY_ONE;
 
   return (
     <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING}>

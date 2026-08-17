@@ -22,7 +22,7 @@ import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
-import { getAssetLibraryColumns } from "./assetLibrary.columns";
+import { ASSET_LIBRARY_COLUMN_IDS, getAssetLibraryColumns } from "./assetLibrary.columns";
 
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
 
@@ -109,8 +109,8 @@ export const AssetLibraryAssetList = ({
                   <TableHead
                     key={header.id}
                     className={cn({
-                      "w-11": header.id === "select",
-                      "w-40 text-right": header.id === "actions",
+                      "w-11": header.id === ASSET_LIBRARY_COLUMN_IDS.SELECT,
+                      "w-40 text-right": header.id === ASSET_LIBRARY_COLUMN_IDS.ACTIONS,
                     })}
                   >
                     {header.isPlaceholder
@@ -132,8 +132,8 @@ export const AssetLibraryAssetList = ({
                   <TableCell
                     key={cell.id}
                     className={cn("min-w-0 px-3 py-3", {
-                      "w-11": cell.column.id === "select",
-                      "w-40": cell.column.id === "actions",
+                      "w-11": cell.column.id === ASSET_LIBRARY_COLUMN_IDS.SELECT,
+                      "w-40": cell.column.id === ASSET_LIBRARY_COLUMN_IDS.ACTIONS,
                     })}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

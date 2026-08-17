@@ -48,6 +48,12 @@
       "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena.",
       "staleLayout": "Váš dashboard byl aktualizován jinde. Obnovte stránku a zkuste to znovu."
     },
+    "toast": {
+      "layoutSaved": "Změny dashboardu byly uloženy.",
+      "layoutSaveError": "Změny dashboardu se nepodařilo uložit.",
+      "layoutReset": "Výchozí rozložení dashboardu bylo obnoveno.",
+      "layoutResetError": "Výchozí rozložení dashboardu se nepodařilo obnovit."
+    },
     "widgets": {
       "loadError": "Data tohoto widgetu se nepodařilo načíst.",
       "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
@@ -204,9 +210,24 @@
         "toggle": "Přepnout {{title}}",
         "edit": "Upravit úkol",
         "delete": "Smazat úkol",
-        "reorder": "Změnit pořadí úkolu"
+        "reorder": "Změnit pořadí úkolu",
+        "toast": {
+          "createSuccess": "Úkol byl přidán.",
+          "createError": "Úkol se nepodařilo přidat.",
+          "updateSuccess": "Úkol byl aktualizován.",
+          "updateError": "Úkol se nepodařilo aktualizovat.",
+          "deleteSuccess": "Úkol byl odstraněn.",
+          "deleteError": "Úkol se nepodařilo odstranit.",
+          "reorderSuccess": "Pořadí úkolů bylo uloženo.",
+          "reorderError": "Pořadí úkolů se nepodařilo uložit."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Můžete mít maximálně 100 úkolů.",
+    "notFound": "Tento úkol již neexistuje.",
+    "invalidOrder": "Pořadí úkolů již není aktuální. Obnovte stránku a zkuste to znovu."
   },
   "aiMentorPractice": {
     "form": {

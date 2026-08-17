@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 import { Label, Pie, PieChart } from "recharts";
 
@@ -27,7 +27,7 @@ const STATUS_STYLES = [
 ] as const;
 
 export function WidgetAdminTrainingCompletion({
-  widgetSize = "2x2",
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
 }: {
   widgetSize?: DashboardWidgetSize;
 }) {
@@ -35,8 +35,8 @@ export function WidgetAdminTrainingCompletion({
   const { data: stats, isLoading, isError, refetch } = useDashboardTrainingCompletion();
   const total = stats?.total ?? 0;
   const percentage = stats?.percentage ?? 0;
-  const isCompact = widgetSize === "1x1";
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION];
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.ONE_BY_ONE;
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION];
   const chartConfig = {
     completed: {
       label: t("dashboardHome.widgets.training_completion.completed"),

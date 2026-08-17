@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { queryClient } from "~/api/queryClient";
@@ -16,14 +17,35 @@ export function useUpdateDashboardSettings() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (body: { expectedRevision: number; widgets: DashboardLayoutSetting[] }) => {
-      return (await ApiClient.api.settingsControllerUpdateDashboardSettings(body)).data.data;
+      try {
+        return (await ApiClient.api.settingsControllerUpdateDashboardSettings(body)).data.data;
+      } catch (error) {
+        if (!isAxiosError(error) || error.response?.status !== 409) throw error;
+
+        const refreshedSettings = await queryClient.fetchQuery(dashboardSettingsQueryOptions);
+        return (
+          await ApiClient.api.settingsControllerUpdateDashboardSettings({
+            ...body,
+            expectedRevision: refreshedSettings.layout.revision,
+          })
+        ).data.data;
+      }
     },
-    onSuccess: (data) => queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data),
-    onError: (error) =>
+    onSuccess: (data) => {
+      queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data);
+      toast({ description: t("dashboardHome.toast.layoutSaved") });
+    },
+    onError: (error) => {
+      void queryClient.invalidateQueries({ queryKey: dashboardSettingsQueryOptions.queryKey });
       toast({
         variant: "destructive",
-        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
-      }),
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("dashboardHome.toast.layoutSaveError"),
+        ),
+      });
+    },
   });
 }
 
@@ -35,11 +57,18 @@ export function useResetDashboardSettings() {
       return (await ApiClient.api.settingsControllerResetDashboardSettings({ expectedRevision }))
         .data.data;
     },
-    onSuccess: (data) => queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data);
+      toast({ description: t("dashboardHome.toast.layoutReset") });
+    },
     onError: (error) =>
       toast({
         variant: "destructive",
-        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("dashboardHome.toast.layoutResetError"),
+        ),
       }),
   });
 }

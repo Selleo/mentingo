@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+import { DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import {
   Award,
   BookOpen,
@@ -23,70 +23,63 @@ import { WidgetStudentRequiredCourse } from "./widgets/student-required-course";
 import { WidgetTodoTasks } from "./widgets/todo-tasks";
 
 import type { DashboardWidgetModule } from "./types";
-import type { DashboardWidgetId } from "@repo/shared";
+import type { DashboardWidgetType } from "@repo/shared";
 
-export const TODO_TASKS_WIDGET_ID = DASHBOARD_WIDGET_TYPES.TODO_LIST as DashboardWidgetId;
+export const TODO_TASKS_WIDGET_ID = DASHBOARD_WIDGET_TYPES.TODO_LIST;
 
-export type DashboardWidgetRegistry = Record<string, DashboardWidgetModule>;
+export type DashboardWidgetRegistry = Record<DashboardWidgetType, DashboardWidgetModule>;
 
 export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetRegistry = {
-  [DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION]: {
+  [DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION]: {
     titleKey: "dashboardHome.widgets.training_completion.title",
     descriptionKey: "dashboardHome.widgets.training_completion.description",
     icon: TrendingUp,
     iconClassName: "text-primary-700",
     component: WidgetAdminTrainingCompletion,
   },
-  [DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS]: {
+  [DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS]: {
     titleKey: "dashboardHome.widgets.deadline_risks.title",
     descriptionKey: "dashboardHome.widgets.deadline_risks.description",
     icon: CircleAlert,
     iconClassName: "text-primary-700",
     component: WidgetAdminDeadlineRisks,
   },
-  [DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR]: {
+  [DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR]: {
     titleKey: "dashboardHome.widgets.event_calendar.title",
     descriptionKey: "dashboardHome.widgets.event_calendar.description",
     icon: CalendarDays,
     iconClassName: "text-primary-700",
     component: WidgetEventCalendar,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR]: {
-    titleKey: "dashboardHome.widgets.event_calendar.title",
-    descriptionKey: "dashboardHome.widgets.event_calendar.description",
-    icon: CalendarDays,
-    iconClassName: "text-primary-700",
-    component: WidgetEventCalendar,
-  },
-  [DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING]: {
+  [DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING]: {
     titleKey: "dashboardHome.widgets.continue_learning.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.continueLearning.description",
     icon: BookOpen,
     iconClassName: "text-primary-700",
     component: WidgetStudentContinueLearning,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE]: {
+  [DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES]: {
     titleKey: "dashboardHome.widgets.required_course.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.requiredCourse.description",
     icon: GraduationCap,
     iconClassName: "text-primary-700",
     component: WidgetStudentRequiredCourse,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION]: {
+  [DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION]: {
     titleKey: "dashboardHome.widgets.course_completion.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.courseCompletion.description",
     icon: ClipboardCheck,
     iconClassName: "text-primary-700",
     component: WidgetStudentCourseCompletion,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES]: {
+  [DASHBOARD_WIDGET_TYPES.CERTIFICATES]: {
     titleKey: "dashboardHome.widgets.certificates.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.certificates.description",
     icon: Award,
     iconClassName: "text-primary-700",
     component: WidgetStudentCertificates,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE]: {
+  [DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE]: {
     titleKey: "dashboardHome.widgets.ai_mentor_practice.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.aiMentorPractice.description",
     icon: AiMentor,
@@ -100,22 +93,3 @@ export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetRegistry = {
     component: WidgetTodoTasks,
   },
 };
-
-// Canonical semantic identifiers returned by the dashboard catalog. Legacy IDs
-// remain above only so old saved layouts can render during migration.
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION];
-DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.CERTIFICATES] =
-  DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES];

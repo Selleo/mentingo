@@ -78,7 +78,7 @@ describe("SettingsService dashboard normalization", () => {
     expect(readDashboardLayout.call(service, obsoleteLayout)).toBeNull();
   });
 
-  it("maps legacy Calendar and Deadline Risks sizes to their current catalog defaults", () => {
+  it("maps unsupported Calendar and Deadline Risks sizes to their current catalog defaults", () => {
     const storedLayout: DashboardSettings = {
       schemaVersion: DASHBOARD_SCHEMA_VERSION,
       revision: 1,

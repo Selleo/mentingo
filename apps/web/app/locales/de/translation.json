@@ -43,6 +43,12 @@
       "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig.",
       "staleLayout": "Ihr Dashboard wurde an anderer Stelle aktualisiert. Aktualisieren Sie die Seite und versuchen Sie es erneut."
     },
+    "toast": {
+      "layoutSaved": "Dashboard-Änderungen wurden gespeichert.",
+      "layoutSaveError": "Die Dashboard-Änderungen konnten nicht gespeichert werden.",
+      "layoutReset": "Das Standard-Dashboard-Layout wurde wiederhergestellt.",
+      "layoutResetError": "Das Standard-Dashboard-Layout konnte nicht wiederhergestellt werden."
+    },
     "widgets": {
       "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
       "trainingCompletionChartLabel": "{{completed}} von {{total}} Zuweisungen abgeschlossen, {{percentage}} Prozent.",
@@ -198,9 +204,24 @@
         "toggle": "{{title}} umschalten",
         "edit": "Aufgabe bearbeiten",
         "delete": "Aufgabe löschen",
-        "reorder": "Aufgabe neu ordnen"
+        "reorder": "Aufgabe neu ordnen",
+        "toast": {
+          "createSuccess": "Aufgabe hinzugefügt.",
+          "createError": "Die Aufgabe konnte nicht hinzugefügt werden.",
+          "updateSuccess": "Aufgabe aktualisiert.",
+          "updateError": "Die Aufgabe konnte nicht aktualisiert werden.",
+          "deleteSuccess": "Aufgabe gelöscht.",
+          "deleteError": "Die Aufgabe konnte nicht gelöscht werden.",
+          "reorderSuccess": "Aufgabenreihenfolge gespeichert.",
+          "reorderError": "Die Aufgabenreihenfolge konnte nicht gespeichert werden."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Sie können bis zu 100 Aufgaben haben.",
+    "notFound": "Diese Aufgabe existiert nicht mehr.",
+    "invalidOrder": "Die Aufgabenreihenfolge ist nicht mehr aktuell. Aktualisieren Sie die Seite und versuchen Sie es erneut."
   },
   "aiMentorPractice": {
     "form": {

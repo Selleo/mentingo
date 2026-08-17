@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { Award } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,7 +23,7 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import type { DashboardWidgetSize } from "../types";
 
 export function WidgetStudentCertificates({
-  widgetSize = "2x2",
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
 }: {
   widgetSize?: DashboardWidgetSize;
 }) {
@@ -37,8 +37,8 @@ export function WidgetStudentCertificates({
     (typeof certificates)[number] | null
   >(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES];
-  const isCompact = widgetSize === "2x1";
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.CERTIFICATES];
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.TWO_BY_ONE;
   const { data, isLoading, isError, isFetching, refetch } = useDashboardCertificates(page, true);
   const { data: globalSettings } = useGlobalSettings();
   const hasMore = Boolean(

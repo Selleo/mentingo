@@ -45,19 +45,15 @@ export function WidgetPickerDialog({
     if (!isVisible) {
       onWidgetsChange(
         savedWidgets
-          .map((widget) =>
-            (widget.type ?? widget.id) === id ? { ...widget, visible: false } : widget,
-          )
+          .map((widget) => (widget.id === id ? { ...widget, visible: false } : widget))
           .map((widget, order) => ({ ...widget, order })),
       );
       return;
     }
-    const existingWidget = savedWidgets.find((widget) => (widget.type ?? widget.id) === id);
+    const existingWidget = savedWidgets.find((widget) => widget.id === id);
     if (existingWidget) {
       onWidgetsChange(
-        savedWidgets.map((widget) =>
-          (widget.type ?? widget.id) === id ? { ...widget, visible: true } : widget,
-        ),
+        savedWidgets.map((widget) => (widget.id === id ? { ...widget, visible: true } : widget)),
       );
       return;
     }
@@ -67,8 +63,7 @@ export function WidgetPickerDialog({
     onWidgetsChange([
       ...savedWidgets,
       {
-        id: id as never,
-        type: id,
+        id,
         order: savedWidgets.length,
         size: definition.defaultSize,
         allowedSizes: definition.allowedSizes,
@@ -93,7 +88,7 @@ export function WidgetPickerDialog({
             const entry = DASHBOARD_WIDGET_REGISTRY[widgetId];
             if (!entry) return null;
             const isVisible = savedWidgets.some(
-              (widget) => (widget.type ?? widget.id) === widgetId && widget.visible !== false,
+              (widget) => widget.id === widgetId && widget.visible !== false,
             );
             const Icon = entry.icon;
             const switchId = `dashboard-widget-${widgetId}`;
