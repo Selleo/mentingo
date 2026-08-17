@@ -23,16 +23,6 @@ const renderPrompt = (template: string) =>
   });
 
 describe("AI Mentor conversation prompts", () => {
-  it("limits standalone practice metadata generation to title and counterpart name", () => {
-    const prompt = promptTemplates.aiMentorPracticeContentGenerator.template;
-
-    expect(prompt).toContain("concise AI Mentor display name");
-    expect(prompt).toContain("aiMentorName");
-    expect(prompt).toContain("The learner request describes the practice");
-    expect(prompt).toContain("only title and aiMentorName");
-    expect(prompt).not.toContain("instructions");
-  });
-
   it("keeps roleplay conversational without coaching or parroting the brief", () => {
     const prompt = renderPrompt(promptTemplates.roleplayPrompt.template);
 

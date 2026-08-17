@@ -18,10 +18,6 @@ describe("AiPracticeService", () => {
       criteria: [],
       blockingErrors: [],
     };
-    const content = {
-      title: "Delivery deadline negotiation",
-      aiMentorName: "Jordan, delivery lead",
-    };
     const mentorConfiguration = {
       type: AI_MENTOR_TYPE.ROLEPLAY,
       scenario: "A customer calls about an important delivery that may be late.",
@@ -55,16 +51,12 @@ describe("AiPracticeService", () => {
     const mentorGenerator = {
       generate: jest.fn().mockResolvedValue(mentorConfiguration),
     };
-    const contentGenerator = {
-      generate: jest.fn().mockResolvedValue(content),
-    };
     const aiService = {
       getPracticeThreadWithSetup: jest.fn().mockResolvedValue(undefined),
     };
     const service = new AiPracticeService(
       repository as never,
       {} as never,
-      contentGenerator as never,
       mentorGenerator as unknown as AiMentorConfigurationGeneratorService,
       judgeGenerator as unknown as AiJudgeConfigurationGeneratorService,
       aiService as never,
@@ -80,7 +72,7 @@ describe("AiPracticeService", () => {
       configurationType: AI_MENTOR_TYPE.ROLEPLAY,
       language: "en",
       lessonContext: {
-        title: content.title,
+        title: scenario,
         taskDescription: scenario,
       },
       mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
@@ -90,7 +82,7 @@ describe("AiPracticeService", () => {
     expect(judgeGenerator.generate).toHaveBeenCalledWith({
       language: "en",
       lessonContext: {
-        title: content.title,
+        title: scenario,
         taskDescription: scenario,
         aiMentorConfiguration: mentorConfiguration,
       },
@@ -99,8 +91,8 @@ describe("AiPracticeService", () => {
     });
     expect(repository.saveGeneratedPractice).toHaveBeenCalledWith(
       sessionId,
-      content.title,
-      content.aiMentorName,
+      scenario,
+      mentorConfiguration.aiRole,
       expect.objectContaining({
         configuration: expect.objectContaining({
           practiceSessionId: sessionId,
@@ -156,7 +148,6 @@ describe("AiPracticeService", () => {
     };
     const service = new AiPracticeService(
       repository as never,
-      {} as never,
       {} as never,
       {} as never,
       {} as never,

@@ -49,13 +49,6 @@ export const welcomePromptSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const aiMentorPracticeContentGeneratorSchema = Type.Object(
-  {
-    language: Type.String({ minLength: 1 }),
-  },
-  { additionalProperties: false },
-);
-
 export const securityAndRagBlockSchema = Type.Object({
   language: Type.String(),
 });
@@ -117,7 +110,6 @@ export const PROMPT_MAP = {
   teacherPrompt: teacherPromptSchema,
   summaryPrompt: summaryPromptSchema,
   welcomePrompt: welcomePromptSchema,
-  aiMentorPracticeContentGenerator: aiMentorPracticeContentGeneratorSchema,
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,

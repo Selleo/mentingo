@@ -20,7 +20,6 @@ import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
@@ -39,7 +38,6 @@ export class AiPracticeService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly aiPracticeQueueService: AiPracticeQueueService,
-    private readonly aiPracticeContentGeneratorService: AiPracticeContentGeneratorService,
     private readonly aiMentorConfigurationGeneratorService: AiMentorConfigurationGeneratorService,
     private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiService: AiService,
@@ -144,17 +142,15 @@ export class AiPracticeService {
     if (!claimed) return;
 
     try {
-      const content = await this.aiPracticeContentGeneratorService.generate({
-        language: session.language,
-        learnerRequest: session.scenario,
-      });
+      const title = session.scenario.slice(0, 160).trim();
+      const lessonContext = {
+        title,
+        taskDescription: session.scenario,
+      };
       const mentorConfiguration = await this.aiMentorConfigurationGeneratorService.generate({
         configurationType: AI_MENTOR_TYPE.ROLEPLAY,
         language: session.language,
-        lessonContext: {
-          title: content.title,
-          taskDescription: session.scenario,
-        },
+        lessonContext,
         mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
         brief: session.scenario,
       });
@@ -164,8 +160,7 @@ export class AiPracticeService {
       const judgeConfiguration = await this.aiJudgeConfigurationGeneratorService.generate({
         language: session.language,
         lessonContext: {
-          title: content.title,
-          taskDescription: session.scenario,
+          ...lessonContext,
           aiMentorConfiguration: mentorConfiguration,
         },
         mode: AI_JUDGE_GENERATION_MODE.CREATE,
@@ -174,8 +169,8 @@ export class AiPracticeService {
 
       await this.aiRepository.saveGeneratedPractice(
         session.id,
-        content.title,
-        content.aiMentorName,
+        title,
+        mentorConfiguration.aiRole.slice(0, 120).trim(),
         buildAiPracticeMentorConfiguration(session.id, mentorConfiguration, session.language),
         buildAiPracticeJudgeConfiguration(session.id, judgeConfiguration, session.language),
       );

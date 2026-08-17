@@ -11,7 +11,6 @@ import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configurati
 import { AiMentorConfigurationValidatorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-validator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { RagRepository } from "src/ai/repositories/rag.repository";
-import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
@@ -37,7 +36,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiMentorConfigurationGeneratorService,
     AiMentorConfigurationGenerationWorkflowService,
     AiMentorConfigurationValidatorService,
-    AiPracticeContentGeneratorService,
     ChatService,
     AiRuntimeService,
     AiService,

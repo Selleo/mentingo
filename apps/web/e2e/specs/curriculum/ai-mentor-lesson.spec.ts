@@ -186,7 +186,7 @@ test("admin can create and preview an AI mentor lesson", async ({
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
     await expect(
       page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_SCENARIO_INPUT).locator(".ProseMirror"),
-    ).toHaveValue("Practice a concise discovery conversation.");
+    ).toContainText("Practice a concise discovery conversation.");
     await page.getByRole("button", { name: "Cancel" }).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
@@ -255,7 +255,7 @@ test("admin can save and reopen complete Teacher and AI Judge configurations", a
       page
         .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT)
         .locator(".ProseMirror"),
-    ).toHaveValue("Teach a structured discovery conversation.");
+    ).toContainText("Teach a structured discovery conversation.");
     await expect(
       page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_EXPERTISE_INPUT),
     ).toHaveValue("Sales discovery coach");
