@@ -128,6 +128,7 @@ import type {
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
 const GLOBAL_SETTINGS_NOT_FOUND_MESSAGE = "common.toast.globalSettingsNotFound";
+const USER_SETTINGS_NOT_FOUND_MESSAGE = "settings.toast.error.userSettingsNotFound";
 
 export const SETTINGS_IMAGE_ASSET = {
   PLATFORM_LOGO: "platform-logo",
@@ -653,7 +654,7 @@ export class SettingsService {
     const userSettings = row?.settings;
 
     if (!userSettings) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const dashboard = userSettings.dashboard ?? {
@@ -673,11 +674,6 @@ export class SettingsService {
     };
   }
 
-  /**
-   * Returns the permission-filtered catalog and the current user's normalized dashboard layout.
-   * The legacy settings endpoint above intentionally remains available while clients migrate to
-   * the semantic layout contract.
-   */
   public async getDashboardSettings(userId: UUIDType): Promise<DashboardSettingsResponseSchema> {
     const [row] = await this.db
       .select({ settings: sql<Record<string, unknown>>`${settings.settings}` })
@@ -685,7 +681,7 @@ export class SettingsService {
       .where(eq(settings.userId, userId));
 
     if (!row) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const catalog = await this.getDashboardCatalog(userId);
@@ -714,7 +710,7 @@ export class SettingsService {
         .for("update");
 
       if (!row) {
-        throw new NotFoundException("User settings not found");
+        throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
       }
 
       const currentLayout = this.readDashboardLayout(row.settings.dashboard);
@@ -760,7 +756,7 @@ export class SettingsService {
         .for("update");
 
       if (!row) {
-        throw new NotFoundException("User settings not found");
+        throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
       }
 
       const currentLayout = this.readDashboardLayout(row.settings.dashboard);
@@ -1019,7 +1015,7 @@ export class SettingsService {
     const currentSettings = row?.settings;
 
     if (!currentSettings) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const mergedSettings = {
@@ -1148,7 +1144,7 @@ export class SettingsService {
       .where(eq(settings.userId, userId));
 
     if (!userSetting) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
     const current = userSetting.adminNewUserNotification === "true";
 
@@ -1821,7 +1817,7 @@ export class SettingsService {
       .where(eq(settings.userId, userId));
 
     if (!currentUserSettings) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const [{ settings: updatedUserSettings }] = await this.db
@@ -1853,7 +1849,7 @@ export class SettingsService {
       .where(eq(settings.userId, userId));
 
     if (!currentUserSettings) {
-      throw new NotFoundException("User settings not found");
+      throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const [{ settings: updatedUserSettings }] = await this.db
@@ -2025,7 +2021,7 @@ export class SettingsService {
       .from(settings)
       .where(eq(settings.userId, userId));
 
-    if (!existingSettings) throw new NotFoundException("User settings not found");
+    if (!existingSettings) throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
 
     const [{ settings: updatedUserSettings }] = await this.db
       .update(settings)

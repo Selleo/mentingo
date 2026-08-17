@@ -35,11 +35,13 @@
     },
     "error": {
       "invalidWidgetLayout": "Układ dashboardu zawiera niedostępne lub zduplikowane kafelki.",
+      "invalidWidgetSize": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
       "requiredWidgetMissing": "Brakuje wymaganego kafelka dashboardu.",
       "title": "Nie udało się wczytać dashboardu",
       "description": "Spróbuj ponownie za chwilę.",
       "retry": "Spróbuj ponownie",
-      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka."
+      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
+      "staleLayout": "Układ panelu został zmieniony w innym miejscu. Odśwież stronę i spróbuj ponownie."
     },
     "widgets": {
       "loadError": "Nie udało się wczytać danych tego kafelka.",
@@ -3992,6 +3994,9 @@
       "settings": "Ustawienia"
     },
     "toast": {
+      "error": {
+        "userSettingsNotFound": "Nie znaleziono ustawień użytkownika"
+      },
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",

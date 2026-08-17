@@ -39,7 +39,9 @@
       "retry": "Try again",
       "invalidWidgetWidth": "This width is not allowed for the selected widget.",
       "invalidWidgetLayout": "The dashboard layout contains unavailable or duplicate widgets.",
-      "requiredWidgetMissing": "A required dashboard widget is missing."
+      "invalidWidgetSize": "This size is not allowed for the selected widget.",
+      "requiredWidgetMissing": "A required dashboard widget is missing.",
+      "staleLayout": "Your dashboard was updated elsewhere. Refresh and try again."
     },
     "widgets": {
       "loadError": "This widget could not load its data.",
@@ -3754,7 +3756,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Global settings not found"
+        "globalNotFound": "Global settings not found",
+        "userSettingsNotFound": "User settings not found"
       },
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",

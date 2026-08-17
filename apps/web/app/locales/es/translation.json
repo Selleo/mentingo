@@ -35,11 +35,13 @@
     },
     "error": {
       "invalidWidgetLayout": "El diseño del panel contiene widgets no disponibles o duplicados.",
+      "invalidWidgetSize": "Este tamaño no está permitido para el widget seleccionado.",
       "requiredWidgetMissing": "Falta un widget obligatorio del panel.",
       "title": "No se pudo cargar el panel",
       "description": "Vuelve a intentarlo en unos instantes.",
       "retry": "Intentar de nuevo",
-      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado."
+      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado.",
+      "staleLayout": "Tu panel se actualizó en otro lugar. Actualiza la página e inténtalo de nuevo."
     },
     "widgets": {
       "loadError": "No se pudieron cargar los datos de este widget.",
@@ -3741,7 +3743,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Configuración global no encontrada"
+        "globalNotFound": "Configuración global no encontrada",
+        "userSettingsNotFound": "No se encontró la configuración del usuario"
       },
       "qaSettingUpdatedSuccessfully": "La configuración de control de calidad se actualizó correctamente",
       "ageLimitUpdatedSuccessfully": "Límite de edad actualizado correctamente",

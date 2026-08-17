@@ -35,11 +35,13 @@
     },
     "error": {
       "invalidWidgetLayout": "Skydelio išdėstyme yra nepasiekiamų arba pasikartojančių valdiklių.",
+      "invalidWidgetSize": "Pasirinktam valdikliui šis dydis neleidžiamas.",
       "requiredWidgetMissing": "Trūksta privalomo skydelio valdiklio.",
       "title": "Nepavyko įkelti skydelio",
       "description": "Po akimirkos bandykite dar kartą.",
       "retry": "Bandyti dar kartą",
-      "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas."
+      "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas.",
+      "staleLayout": "Jūsų skydelis buvo atnaujintas kitur. Atnaujinkite puslapį ir bandykite dar kartą."
     },
     "widgets": {
       "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
@@ -3755,7 +3757,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Bendrieji nustatymai nerasta"
+        "globalNotFound": "Bendrieji nustatymai nerasta",
+        "userSettingsNotFound": "Naudotojo nustatymai nerasti"
       },
       "qaSettingUpdatedSuccessfully": "QA nustatymai sėkmingai atnaujinti",
       "ageLimitUpdatedSuccessfully": "Amžiaus riba sėkmingai atnaujinta",

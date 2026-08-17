@@ -40,11 +40,13 @@
     },
     "error": {
       "invalidWidgetLayout": "Rozložení dashboardu obsahuje nedostupné nebo duplicitní widgety.",
+      "invalidWidgetSize": "Tato velikost není pro vybraný widget povolena.",
       "requiredWidgetMissing": "Chybí povinný widget dashboardu.",
       "title": "Dashboard se nepodařilo načíst",
       "description": "Zkuste to za chvíli znovu.",
       "retry": "Zkusit znovu",
-      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena."
+      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena.",
+      "staleLayout": "Váš dashboard byl aktualizován jinde. Obnovte stránku a zkuste to znovu."
     },
     "widgets": {
       "loadError": "Data tohoto widgetu se nepodařilo načíst.",
@@ -3760,7 +3762,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Globální nastavení nenalezeno"
+        "globalNotFound": "Globální nastavení nenalezeno",
+        "userSettingsNotFound": "Nastavení uživatele nebylo nalezeno"
       },
       "qaSettingUpdatedSuccessfully": "Nastavení QA bylo úspěšně aktualizováno",
       "ageLimitUpdatedSuccessfully": "Věkový limit byl úspěšně aktualizován",

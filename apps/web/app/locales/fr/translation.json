@@ -39,7 +39,9 @@
       "retry": "Réessayer",
       "invalidWidgetWidth": "Cette largeur n'est pas autorisée pour le widget sélectionné.",
       "invalidWidgetLayout": "La disposition du tableau de bord contient des widgets indisponibles ou en double.",
-      "requiredWidgetMissing": "Un widget obligatoire est manquant."
+      "invalidWidgetSize": "Cette taille n'est pas autorisée pour le widget sélectionné.",
+      "requiredWidgetMissing": "Un widget obligatoire est manquant.",
+      "staleLayout": "Votre tableau de bord a été mis à jour ailleurs. Actualisez la page et réessayez."
     },
     "widgets": {
       "loadError": "Impossible de charger ce widget.",
@@ -3743,7 +3745,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Paramètres globaux introuvables"
+        "globalNotFound": "Paramètres globaux introuvables",
+        "userSettingsNotFound": "Paramètres utilisateur introuvables"
       },
       "qaSettingUpdatedSuccessfully": "Paramètres d'assurance qualité mis à jour avec succès",
       "ageLimitUpdatedSuccessfully": "Limite d'âge mise à jour avec succès",

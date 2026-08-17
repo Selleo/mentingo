@@ -35,11 +35,13 @@
     },
     "error": {
       "invalidWidgetLayout": "Das Dashboard-Layout enthält nicht verfügbare oder doppelte Widgets.",
+      "invalidWidgetSize": "Diese Größe ist für das ausgewählte Widget nicht zulässig.",
       "requiredWidgetMissing": "Ein erforderliches Dashboard-Widget fehlt.",
       "title": "Dashboard konnte nicht geladen werden",
       "description": "Versuchen Sie es gleich noch einmal.",
       "retry": "Erneut versuchen",
-      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig."
+      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig.",
+      "staleLayout": "Ihr Dashboard wurde an anderer Stelle aktualisiert. Aktualisieren Sie die Seite und versuchen Sie es erneut."
     },
     "widgets": {
       "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
@@ -3752,7 +3754,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Globale Einstellungen nicht gefunden"
+        "globalNotFound": "Globale Einstellungen nicht gefunden",
+        "userSettingsNotFound": "Benutzereinstellungen nicht gefunden"
       },
       "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
