@@ -792,15 +792,15 @@ export class SettingsService {
     const { permissions } = await this.permissionsService.getUserAccess(userId);
     const userPermissions = new Set(permissions);
     const globalSettings = await this.getPublicGlobalSettings();
-    const globalSettingsRecord = globalSettings as unknown as Record<string, unknown>;
     const aiConfigured = await this.envService.getAIConfigured();
-    const definitions = Object.values(DASHBOARD_WIDGET_CATALOG) as DashboardWidgetDefinition[];
+    const definitions: readonly DashboardWidgetDefinition[] =
+      Object.values(DASHBOARD_WIDGET_CATALOG);
 
     return definitions
       .filter((definition) => {
         if (
           definition.requiredFeature &&
-          !globalSettingsRecord[FEATURE_SETTINGS_KEYS[definition.requiredFeature]]
+          !globalSettings[FEATURE_SETTINGS_KEYS[definition.requiredFeature]]
         ) {
           return false;
         }
