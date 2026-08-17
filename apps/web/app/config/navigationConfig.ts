@@ -84,12 +84,6 @@ export const getNavigationConfig = (
               },
             ] as NavigationItem[])
           : []),
-        {
-          label: t("navigationSideBar.calendar"),
-          path: "calendar",
-          iconName: "Calendar",
-          testId: NAVIGATION_HANDLES.CALENDAR_LINK,
-        },
       ],
     },
     ...(isAnyContentFeatureEnabled

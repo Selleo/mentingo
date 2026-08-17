@@ -1303,6 +1303,20 @@
       "when": 1786699463386,
       "tag": "0185_add_resource_visibility_column",
       "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1786954617885,
+      "tag": "0186_add_todo_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1786954904690,
+      "tag": "0187_enable_todo_tasks_rls",
+      "breakpoints": true
     }
   ]
 }

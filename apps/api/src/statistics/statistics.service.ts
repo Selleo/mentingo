@@ -20,6 +20,8 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 import type {
   CourseStudentsStatsByMonth,
   DashboardDeadlineRiskCourse,
+  DashboardDeadlineRiskCourseSummary,
+  DashboardDeadlineRiskGroup,
   DashboardDeadlineRiskSummary,
   DashboardDeadlineRiskType,
   DashboardIncompleteCourses,
@@ -27,7 +29,13 @@ import type {
   StatsByMonth,
   UserStats,
 } from "./schemas/userStats.schema";
-import type { SupportedLanguages } from "@repo/shared";
+import type {
+  DashboardDeadlineRiskType as SharedDashboardDeadlineRiskType,
+  DashboardDeadlineRiskGroupSortField,
+  DashboardDeadlineRiskSortDirection,
+  DashboardDeadlineRiskUrgencyOrder,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -187,6 +195,66 @@ export class StatisticsService {
       data: [...courses.values()],
       pagination: { totalItems, page, perPage },
     };
+  }
+
+  async getDashboardDeadlineRiskCourseSummaries(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+    urgencyOrder: DashboardDeadlineRiskUrgencyOrder,
+    page: number,
+    perPage: number,
+  ): Promise<{
+    data: DashboardDeadlineRiskCourseSummary[];
+    pagination: { totalItems: number; page: number; perPage: number };
+  }> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { data, totalItems } =
+      await this.statisticsRepository.getDashboardDeadlineRiskCourseSummaries(
+        ownerUserId,
+        language,
+        urgencyOrder,
+        page,
+        perPage,
+      );
+    const coursesWithThumbnails = await Promise.all(
+      data.map(async ({ thumbnailUrl, ...course }) => ({
+        ...course,
+        thumbnailUrl: thumbnailUrl
+          ? await this.fileService.getFileUrl(thumbnailUrl, { quality: IMAGE_QUALITY.SM })
+          : null,
+      })),
+    );
+
+    return { data: coursesWithThumbnails, pagination: { totalItems, page, perPage } };
+  }
+
+  async getDashboardDeadlineRiskGroups(
+    currentUser: CurrentUserType,
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    urgency: SharedDashboardDeadlineRiskType | undefined,
+    search: string | undefined,
+    sortBy: DashboardDeadlineRiskGroupSortField,
+    sortDirection: DashboardDeadlineRiskSortDirection,
+    page: number,
+    perPage: number,
+  ): Promise<{
+    data: DashboardDeadlineRiskGroup[];
+    pagination: { totalItems: number; page: number; perPage: number };
+  }> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { data, totalItems } = await this.statisticsRepository.getDashboardDeadlineRiskGroups(
+      ownerUserId,
+      courseId,
+      language,
+      urgency,
+      search?.trim() || undefined,
+      sortBy,
+      sortDirection,
+      page,
+      perPage,
+    );
+    return { data, pagination: { totalItems, page, perPage } };
   }
 
   private getDashboardOwnerUserId(currentUser: CurrentUserType): UUIDType | undefined {

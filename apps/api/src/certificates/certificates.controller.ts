@@ -100,6 +100,32 @@ export class CertificatesController {
     return new BaseResponse(await this.certificatesService.getDashboardSummary(userId, language));
   }
 
+  @Get("dashboard")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
+  @Validate({
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+    ],
+    response: paginatedResponse(allCertificatesSchema),
+  })
+  async getDashboardCertificates(
+    @Query("language") language: SupportedLanguages,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
+    @CurrentUser("userId") userId?: UUIDType,
+  ): Promise<PaginatedResponse<AllCertificatesResponse>> {
+    const data = await this.certificatesService.getAllCertificates({
+      userId: userId!,
+      page,
+      perPage,
+      language,
+      sort: "createdAt",
+    });
+    return new PaginatedResponse(data);
+  }
+
   @Get("certificate")
   @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
   @Validate({

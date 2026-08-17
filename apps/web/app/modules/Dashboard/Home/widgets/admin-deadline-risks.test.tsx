@@ -1,98 +1,76 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
 import { WidgetAdminDeadlineRisks } from "./admin-deadline-risks";
 
-const { detailsQueryState } = vi.hoisted(() => ({
-  detailsQueryState: {
-    type: "overdue",
-    enabled: false,
-  },
-}));
-
-vi.mock("~/api/queries/useDashboardDeadlineRiskSummary", () => ({
-  useDashboardDeadlineRiskSummary: () => ({
+vi.mock("~/api/queries/useDashboardDeadlineRiskCourses", () => ({
+  useDashboardDeadlineRiskCourses: () => ({
     data: {
-      overdueCount: 2,
-      dueSoonCount: 3,
+      pages: [
+        {
+          data: [
+            {
+              id: "course-1",
+              title: "Security basics",
+              thumbnailUrl: null,
+              overdueCount: 1,
+              dueSoonCount: 0,
+              nearestDueDate: "2026-07-20T00:00:00.000Z",
+              urgency: "overdue",
+            },
+          ],
+        },
+      ],
     },
     isLoading: false,
     isError: false,
     refetch: vi.fn(),
+    hasNextPage: false,
   }),
 }));
 
-vi.mock("~/api/queries/useDashboardDeadlineRisks", () => ({
-  useDashboardDeadlineRisks: (params: { type: string }, enabled: boolean) => {
-    detailsQueryState.type = params.type;
-    detailsQueryState.enabled = enabled;
-
-    return {
-      data: {
-        data: [
-          {
-            id: "course-1",
-            title: "Security basics",
-            students: [
-              {
-                id: "student-1",
-                name: "Alex Example",
-                dueDate: "2026-07-20T00:00:00.000Z",
-              },
-            ],
-          },
-        ],
-        pagination: {
-          totalItems: 1,
-          page: 1,
-          perPage: 20,
+vi.mock("~/api/queries/useDashboardDeadlineRiskGroups", () => ({
+  useDashboardDeadlineRiskGroups: () => ({
+    data: {
+      pages: [
+        {
+          data: [
+            {
+              id: "group-1",
+              name: "Sales",
+              dueDate: "2026-07-20T00:00:00.000Z",
+              urgency: "overdue",
+              studentCount: 1,
+              students: [{ id: "student-1", name: "Alex Example" }],
+            },
+          ],
         },
-      },
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    };
-  },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+    hasNextPage: false,
+  }),
 }));
 
 describe("WidgetAdminDeadlineRisks", () => {
-  afterEach(() => {
-    detailsQueryState.type = "overdue";
-    detailsQueryState.enabled = false;
-  });
-
-  it("keeps the due-soon risk type after closing its details", async () => {
+  it("shows courses directly and expands learners grouped by deadline assignment", async () => {
     const user = userEvent.setup();
-
     renderWith().render(
       <MemoryRouter>
         <WidgetAdminDeadlineRisks />
       </MemoryRouter>,
     );
 
-    await user.click(screen.getByRole("button", { name: /3 Due soon/ }));
+    await user.click(screen.getByRole("button", { name: /Security basics, Overdue/ }));
 
-    expect(screen.getByRole("heading", { name: "Required courses due soon" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Go to course" })).toHaveAttribute(
-      "href",
-      "/course/course-1?tab=Statistics",
-    );
-    expect(detailsQueryState).toEqual({
-      type: "dueSoon",
-      enabled: true,
-    });
-
-    await user.click(screen.getByRole("button", { name: "Close" }));
-
-    await waitFor(() => {
-      expect(detailsQueryState).toEqual({
-        type: "dueSoon",
-        enabled: false,
-      });
-    });
+    expect(screen.getByRole("heading", { name: "Security basics" })).toBeVisible();
+    await user.click(screen.getByText("Sales"));
+    expect(screen.getByText("Alex Example")).toBeVisible();
   });
 });

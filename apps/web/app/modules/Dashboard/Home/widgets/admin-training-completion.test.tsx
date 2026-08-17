@@ -20,8 +20,8 @@ vi.mock("recharts", () => ({
     strokeWidth,
   }: {
     children: React.ReactNode;
-    innerRadius: number;
-    outerRadius: number;
+    innerRadius: number | string;
+    outerRadius: number | string;
     strokeWidth: number;
   }) => (
     <svg
@@ -70,11 +70,11 @@ describe("WidgetAdminTrainingCompletion", () => {
     expect(screen.getByText("4/7")).toBeVisible();
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-inner-radius",
-      "50",
+      "55%",
     );
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-outer-radius",
-      "90",
+      "94%",
     );
     expect(screen.getByTestId("training-completion-donut")).toHaveAttribute(
       "data-stroke-width",

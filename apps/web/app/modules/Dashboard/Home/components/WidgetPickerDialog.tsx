@@ -1,8 +1,6 @@
-import { DASHBOARD_WIDGETS, type DashboardWidgetId } from "@repo/shared";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -19,10 +17,12 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import { DashboardWidgetIcon } from "./WidgetCard";
 
 import type { DashboardLayoutItem } from "../types";
+import type { DashboardWidgetType } from "@repo/shared";
+import type { DashboardCatalogEntry } from "~/api/queries/useDashboardSettings";
 
 type WidgetPickerDialogProps = {
   open: boolean;
-  availableWidgets: DashboardWidgetId[];
+  availableWidgets: DashboardCatalogEntry[];
   savedWidgets: DashboardLayoutItem[];
   onOpenChange: (open: boolean) => void;
   onWidgetsChange: (widgets: DashboardLayoutItem[]) => void;
@@ -41,23 +41,38 @@ export function WidgetPickerDialog({
 }: WidgetPickerDialogProps) {
   const { t } = useTranslation();
 
-  const handleVisibilityChange = (id: DashboardWidgetId, isVisible: boolean) => {
+  const handleVisibilityChange = (id: DashboardWidgetType, isVisible: boolean) => {
     if (!isVisible) {
       onWidgetsChange(
         savedWidgets
-          .filter((widget) => widget.id !== id)
+          .map((widget) =>
+            (widget.type ?? widget.id) === id ? { ...widget, visible: false } : widget,
+          )
           .map((widget, order) => ({ ...widget, order })),
       );
       return;
     }
+    const existingWidget = savedWidgets.find((widget) => (widget.type ?? widget.id) === id);
+    if (existingWidget) {
+      onWidgetsChange(
+        savedWidgets.map((widget) =>
+          (widget.type ?? widget.id) === id ? { ...widget, visible: true } : widget,
+        ),
+      );
+      return;
+    }
 
-    const definition = DASHBOARD_WIDGETS[id];
+    const definition = availableWidgets.find((widget) => widget.type === id);
+    if (!definition) return;
     onWidgetsChange([
       ...savedWidgets,
       {
-        id,
+        id: id as never,
+        type: id,
         order: savedWidgets.length,
-        width: definition.defaultWidth,
+        size: definition.defaultSize,
+        allowedSizes: definition.allowedSizes,
+        visible: true,
       },
     ]);
   };
@@ -73,10 +88,13 @@ export function WidgetPickerDialog({
         </DialogHeader>
 
         <div className="grid min-h-0 grid-cols-1 gap-3 overflow-y-auto px-6 py-5">
-          {availableWidgets.map((widgetId) => {
+          {availableWidgets.map((definition) => {
+            const widgetId = definition.type;
             const entry = DASHBOARD_WIDGET_REGISTRY[widgetId];
-            const definition = DASHBOARD_WIDGETS[widgetId];
-            const isVisible = savedWidgets.some((widget) => widget.id === widgetId);
+            if (!entry) return null;
+            const isVisible = savedWidgets.some(
+              (widget) => (widget.type ?? widget.id) === widgetId && widget.visible !== false,
+            );
             const Icon = entry.icon;
             const switchId = `dashboard-widget-${widgetId}`;
 
@@ -96,11 +114,6 @@ export function WidgetPickerDialog({
                       <label htmlFor={switchId} className="body-sm-md block text-neutral-950">
                         {t(entry.titleKey)}
                       </label>
-                      {definition.alwaysVisible && (
-                        <Badge className="w-fit px-1.5 py-0.5 text-[11px]" variant="notStarted">
-                          {t("dashboardHome.edit.required")}
-                        </Badge>
-                      )}
                     </div>
                     <p className="body-sm mt-0.5 text-neutral-600">{t(entry.descriptionKey)}</p>
                   </div>
@@ -108,8 +121,7 @@ export function WidgetPickerDialog({
 
                 <Switch
                   id={switchId}
-                  checked={isVisible || definition.alwaysVisible}
-                  disabled={definition.alwaysVisible}
+                  checked={isVisible}
                   onCheckedChange={(checked) => handleVisibilityChange(widgetId, checked)}
                   aria-label={t("dashboardHome.edit.toggle", { title: t(entry.titleKey) })}
                 />

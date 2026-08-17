@@ -1,5 +1,8 @@
 import {
   ALLOWED_AGE_LIMITS,
+  DASHBOARD_SCHEMA_VERSION,
+  DASHBOARD_WIDGET_SIZES,
+  DASHBOARD_WIDGET_TYPES,
   DASHBOARD_WIDGET_IDS,
   DASHBOARD_WIDGET_WIDTHS,
   SUPPORTED_LANGUAGES,
@@ -73,6 +76,29 @@ export const dashboardWidgetsJSONContentSchema = Type.Array(
 
 export const dashboardDefaultLayoutJSONContentSchema = dashboardWidgetsJSONContentSchema;
 
+export const dashboardLayoutWidgetSchema = Type.Object({
+  type: Type.Enum(DASHBOARD_WIDGET_TYPES),
+  size: Type.Enum(DASHBOARD_WIDGET_SIZES),
+  visible: Type.Boolean(),
+});
+
+export const dashboardSettingsSchema = Type.Object({
+  schemaVersion: Type.Literal(DASHBOARD_SCHEMA_VERSION),
+  revision: Type.Integer({ minimum: 0 }),
+  widgets: Type.Array(dashboardLayoutWidgetSchema),
+});
+
+export const dashboardWidgetCatalogEntrySchema = Type.Object({
+  type: Type.Enum(DASHBOARD_WIDGET_TYPES),
+  allowedSizes: Type.Array(Type.Enum(DASHBOARD_WIDGET_SIZES), { minItems: 1 }),
+  defaultSize: Type.Enum(DASHBOARD_WIDGET_SIZES),
+});
+
+export const dashboardSettingsResponseSchema = Type.Object({
+  layout: dashboardSettingsSchema,
+  catalog: Type.Array(dashboardWidgetCatalogEntrySchema),
+});
+
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
@@ -121,6 +147,10 @@ export type DashboardWidgetsJSONContentSchema = Static<typeof dashboardWidgetsJS
 export type DashboardWidgetsIdsJSONContentSchema = Static<
   typeof dashboardWidgetsIdsJSONContentSchema
 >;
+export type DashboardLayoutWidgetSchema = Static<typeof dashboardLayoutWidgetSchema>;
+export type DashboardSettingsSchema = Static<typeof dashboardSettingsSchema>;
+export type DashboardWidgetCatalogEntrySchema = Static<typeof dashboardWidgetCatalogEntrySchema>;
+export type DashboardSettingsResponseSchema = Static<typeof dashboardSettingsResponseSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;

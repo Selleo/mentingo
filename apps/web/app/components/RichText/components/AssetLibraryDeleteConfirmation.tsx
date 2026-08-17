@@ -47,7 +47,9 @@ const renderUsagesContent = ({
             key={`${usage.entityType}-${usage.entityId}`}
             className="flex items-center justify-between gap-3 border-b border-neutral-100 px-3 py-2 last:border-b-0"
           >
-            <span className="truncate text-sm text-neutral-900">{usage.title}</span>
+            <span className="min-w-0 flex-1 truncate text-sm text-neutral-900" title={usage.title}>
+              {usage.title}
+            </span>
             <span className="shrink-0 text-xs text-neutral-600">
               {t(`richText.assetLibrary.entities.${usage.entityType}`)}
             </span>
@@ -74,6 +76,7 @@ export const AssetLibraryDeleteConfirmation = ({
   onConfirm,
 }: AssetLibraryDeleteConfirmationProps) => {
   const { t } = useTranslation();
+  const assetDisplayName = getAssetDisplayName(asset);
 
   return (
     <div className="flex flex-col gap-4">
@@ -88,9 +91,9 @@ export const AssetLibraryDeleteConfirmation = ({
         {t("common.button.back")}
       </Button>
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
-        <p className="text-sm font-semibold text-red-900">
+        <p className="truncate text-sm font-semibold text-red-900" title={assetDisplayName}>
           {t("richText.assetLibrary.deleteConfirmation.title", {
-            name: getAssetDisplayName(asset),
+            name: assetDisplayName,
           })}
         </p>
         <p className="mt-1 text-sm text-red-800">

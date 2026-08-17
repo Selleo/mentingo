@@ -2,7 +2,11 @@ import { AI_MENTOR_PRACTICE_STATUSES } from "@repo/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { queryClient } from "~/api/queryClient";
+
 import { ApiClient } from "../api-client";
+
+import { getAiMentorPracticeQueryKey } from "./useAiMentorPractice";
 
 export const getAiMentorPracticeTodayQueryKey = (
   utcDate: string = new Date().toISOString().slice(0, 10),
@@ -28,7 +32,13 @@ export function useAiMentorPracticeToday() {
     queryKey: getAiMentorPracticeTodayQueryKey(utcDate),
     queryFn: async () => {
       const response = await ApiClient.api.aiControllerGetTodayPractice();
-      return response.data.data;
+      const practice = response.data.data;
+
+      if (practice) {
+        queryClient.setQueryData(getAiMentorPracticeQueryKey(practice.id), practice);
+      }
+
+      return practice;
     },
     refetchInterval: (query) => {
       const status = query.state.data?.status;

@@ -21,11 +21,8 @@ import {
   sortableKeyboardCoordinates,
   type SortingStrategy,
 } from "@dnd-kit/sortable";
-import { DASHBOARD_WIDGETS, type DashboardWidgetId, type DashboardWidgetWidth } from "@repo/shared";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "~/lib/utils";
 
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
@@ -36,8 +33,10 @@ import {
   type DropPlacement,
 } from "./dashboardGrid.utils";
 import { SortableWidget } from "./SortableWidget";
+import { DashboardWidgetIcon } from "./WidgetCard";
 
 import type { DashboardLayoutItem } from "../types";
+import type { DashboardWidgetId, DashboardWidgetSize } from "@repo/shared";
 
 type DashboardGridProps = {
   widgets: DashboardLayoutItem[];
@@ -286,23 +285,17 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
     resetDragState();
   };
 
-  /** Cycles a widget through the widths allowed by its shared definition. */
-  const handleWidthChange = (id: DashboardWidgetId) => {
+  /** Applies an explicit semantic size selected from the server-provided catalog. */
+  const handleSizeChange = (id: DashboardWidgetId, size: DashboardWidgetSize) => {
     onWidgetsChange(
-      widgets.map((widget) => {
-        if (widget.id !== id) return widget;
-
-        const allowedWidths: readonly DashboardWidgetWidth[] = DASHBOARD_WIDGETS[id].allowedWidths;
-        const currentIndex = allowedWidths.indexOf(widget.width);
-        const nextWidth = allowedWidths[(currentIndex + 1) % allowedWidths.length];
-
-        return { ...widget, width: nextWidth ?? widget.width };
-      }),
+      widgets.map((widget) =>
+        widget.id === id && widget.allowedSizes?.includes(size) ? { ...widget, size } : widget,
+      ),
     );
   };
 
   return (
-    <div className="min-w-0 overflow-x-clip">
+    <div className="min-w-0 overflow-x-clip [container-type:inline-size]">
       {sortedWidgets.length === 0 ? (
         <DashboardEmpty isEditing={isEditing} />
       ) : (
@@ -324,14 +317,14 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
               ref={(element) => {
                 dashboardRefs.current.grid = element;
               }}
-              className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:gap-6"
+              className="grid min-w-0 auto-rows-[calc((100cqw-1rem)/2)] grid-cols-2 gap-4 md:auto-rows-[calc((100cqw-3rem)/4)] md:grid-cols-4 xl:auto-rows-[calc((100cqw-7rem)/8)] xl:grid-cols-8 2xl:auto-rows-[calc((100cqw-10.5rem)/8)] 2xl:gap-6"
             >
               {displayedWidgets.map((widget) => (
                 <SortableWidget
                   key={widget.id}
                   widget={widget}
                   isEditing={isEditing}
-                  onWidthChange={handleWidthChange}
+                  onSizeChange={handleSizeChange}
                 />
               ))}
             </div>
@@ -340,28 +333,20 @@ export function DashboardGrid({ widgets, isEditing, onWidgetsChange }: Dashboard
           <DragOverlay adjustScale={false} modifiers={OVERLAY_MODIFIERS}>
             {activeEntry && ActiveIcon && (
               <div
-                className="pointer-events-none max-w-[calc(100vw-2rem)] rotate-1 overflow-hidden rounded-lg border-2 border-primary-300 bg-white opacity-95 shadow-xl"
+                className="pointer-events-none max-w-[calc(100vw-2rem)] rotate-[0.4deg] overflow-hidden rounded-lg border border-primary-200 bg-white opacity-95 shadow-xl"
                 style={{
                   width: activeWidgetSize?.width,
                   height: activeWidgetSize?.height,
                 }}
                 aria-hidden="true"
               >
-                <div className="flex h-full items-start gap-3 p-5">
-                  <span
-                    className={cn(
-                      "flex size-10 shrink-0 items-center justify-center rounded-lg",
-                      activeEntry.iconContainerClassName,
-                    )}
-                  >
-                    <ActiveIcon
-                      className={cn("size-5", activeEntry.iconClassName)}
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span className="body-lg-md min-w-0 truncate pt-2 text-neutral-950">
-                    {t(activeEntry.titleKey)}
-                  </span>
+                <div className="flex h-full flex-col">
+                  <div className="flex min-h-14 items-center gap-2 border-b border-neutral-100 px-4 py-2.5">
+                    <DashboardWidgetIcon icon={ActiveIcon} />
+                    <span className="body-sm-md min-w-0 truncate text-neutral-950">
+                      {t(activeEntry.titleKey)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

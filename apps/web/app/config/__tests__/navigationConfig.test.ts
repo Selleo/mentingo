@@ -1,6 +1,5 @@
 import { PERMISSIONS } from "@repo/shared";
 
-import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
@@ -48,18 +47,12 @@ describe("findMatchingRoute", () => {
 describe("getNavigationConfig", () => {
   const translate = ((key: string) => key) as never;
 
-  it("should always include the calendar navigation item", () => {
+  it("keeps calendar available through its protected route without a sidebar item", () => {
     const config = getNavigationConfig(translate, false, false, false, false);
 
     const courseItems = config[0].items;
 
-    expect(courseItems).toContainEqual(
-      expect.objectContaining({
-        path: "calendar",
-        iconName: "Calendar",
-        testId: NAVIGATION_HANDLES.CALENDAR_LINK,
-      }),
-    );
+    expect(courseItems).not.toContainEqual(expect.objectContaining({ path: "calendar" }));
   });
 });
 

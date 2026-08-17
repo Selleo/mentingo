@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
@@ -100,14 +101,17 @@ export const AssetLibraryAssetList = ({
   return (
     <TooltipProvider>
       <div className="overflow-hidden rounded-md border border-neutral-200 [&>div]:max-h-[430px]">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className={header.id === "actions" ? "text-right" : undefined}
+                    className={cn({
+                      "w-11": header.id === "select",
+                      "w-40 text-right": header.id === "actions",
+                    })}
                   >
                     {header.isPlaceholder
                       ? null
@@ -125,7 +129,13 @@ export const AssetLibraryAssetList = ({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-3 py-3">
+                  <TableCell
+                    key={cell.id}
+                    className={cn("min-w-0 px-3 py-3", {
+                      "w-11": cell.column.id === "select",
+                      "w-40": cell.column.id === "actions",
+                    })}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

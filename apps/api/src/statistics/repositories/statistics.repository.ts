@@ -1,6 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, DASHBOARD_DEADLINE_RISK_TYPES, PERMISSIONS } from "@repo/shared";
-import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
+import {
+  COURSE_ENROLLMENT,
+  DASHBOARD_DEADLINE_RISK_TYPES,
+  DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS,
+  DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS,
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+  PERMISSIONS,
+} from "@repo/shared";
+import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
@@ -11,6 +18,8 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   groupCourses,
+  groups,
+  groupUsers,
   lessons,
   quizAttempts,
   studentChapterProgress,
@@ -21,7 +30,14 @@ import {
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type {
+  DashboardDeadlineRiskType as SharedDashboardDeadlineRiskType,
+  DashboardDeadlineRiskGroupSortField,
+  DashboardDeadlineRiskSortDirection,
+  DashboardDeadlineRiskUrgencyOrder,
+  SupportedLanguages,
+} from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { NextLesson } from "src/lesson/lesson.schema";
@@ -349,6 +365,179 @@ export class StatisticsRepository {
     const [rows, [total]] = await Promise.all([rowsQuery, totalQuery]);
 
     return { rows, totalItems: total?.count ?? 0 };
+  }
+
+  async getDashboardDeadlineRiskCourseSummaries(
+    ownerUserId: UUIDType | undefined,
+    language: SupportedLanguages,
+    urgencyOrder: DashboardDeadlineRiskUrgencyOrder,
+    page: number,
+    perPage: number,
+  ) {
+    const overdueCondition = sql`${groupCourses.dueDate} < NOW()`;
+    const dueSoonCondition = and(
+      sql`${groupCourses.dueDate} >= NOW()`,
+      sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
+    );
+    const commonCondition = and(
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
+      eq(groupCourses.isMandatory, true),
+      sql`${groupCourses.dueDate} IS NOT NULL`,
+      sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
+      ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+    );
+    const urgencyRank = sql`CASE WHEN COUNT(*) FILTER (WHERE ${overdueCondition}) > 0 THEN ${
+      urgencyOrder === DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT ? 0 : 1
+    } ELSE ${urgencyOrder === DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT ? 1 : 0} END`;
+    const query = this.db
+      .select({
+        id: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        thumbnailUrl: courses.thumbnailS3Key,
+        overdueCount: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${overdueCondition})::INTEGER`,
+        dueSoonCount: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${dueSoonCondition})::INTEGER`,
+        nearestDueDate: sql<string>`MIN(${groupCourses.dueDate})::TEXT`,
+        urgency: sql<SharedDashboardDeadlineRiskType>`CASE WHEN COUNT(*) FILTER (WHERE ${overdueCondition}) > 0 THEN 'overdue' ELSE 'dueSoon' END`,
+      })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupUsers.userId, studentCourses.studentId),
+        ),
+      )
+      .innerJoin(users, and(eq(users.id, groupUsers.userId), isNull(users.deletedAt)))
+      .where(commonCondition)
+      .groupBy(courses.id, courses.title, courses.thumbnailS3Key)
+      .orderBy(urgencyRank, asc(sql`MIN(${groupCourses.dueDate})`), asc(courses.id))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+    const totalQuery = this.db
+      .select({ count: sql<number>`COUNT(DISTINCT ${courses.id})::INTEGER` })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupUsers.userId, studentCourses.studentId),
+        ),
+      )
+      .innerJoin(users, and(eq(users.id, groupUsers.userId), isNull(users.deletedAt)))
+      .where(commonCondition);
+    const [data, [total]] = await Promise.all([query, totalQuery]);
+    return { data, totalItems: total?.count ?? 0 };
+  }
+
+  async getDashboardDeadlineRiskGroups(
+    ownerUserId: UUIDType | undefined,
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    urgency: SharedDashboardDeadlineRiskType | undefined,
+    search: string | undefined,
+    sortBy: DashboardDeadlineRiskGroupSortField,
+    sortDirection: DashboardDeadlineRiskSortDirection,
+    page: number,
+    perPage: number,
+  ) {
+    const localizedGroupName = this.localizationService.getLocalizedSqlField(
+      groups.name,
+      language,
+      groups,
+    );
+    const studentName = sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`;
+    const commonCondition = and(
+      eq(courses.id, courseId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
+      eq(groupCourses.isMandatory, true),
+      sql`${groupCourses.dueDate} IS NOT NULL`,
+      sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
+      urgency === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE
+        ? sql`${groupCourses.dueDate} < NOW()`
+        : undefined,
+      urgency === DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON
+        ? sql`${groupCourses.dueDate} >= NOW()`
+        : undefined,
+      search
+        ? or(
+            sql`${localizedGroupName} ILIKE ${`%${search}%`}`,
+            sql`${studentName} ILIKE ${`%${search}%`}`,
+          )
+        : undefined,
+      ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+    );
+    const urgencySort = sql<number>`CASE WHEN ${groupCourses.dueDate} < NOW() THEN 0 ELSE 1 END`;
+    let sortExpression: SQL = sql`${groupCourses.dueDate}`;
+    switch (sortBy) {
+      case DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.NAME:
+        sortExpression = localizedGroupName;
+        break;
+      case DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY:
+        sortExpression = urgencySort;
+        break;
+      case DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.STUDENT_COUNT:
+        sortExpression = sql<number>`COUNT(DISTINCT ${users.id})`;
+        break;
+      case DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE:
+      default:
+        sortExpression = sql`${groupCourses.dueDate}`;
+        break;
+    }
+    const orderedExpression =
+      sortDirection === DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.DESC
+        ? desc(sortExpression)
+        : asc(sortExpression);
+    const query = this.db
+      .select({
+        id: groups.id,
+        name: localizedGroupName,
+        dueDate: sql<string>`${groupCourses.dueDate}::TEXT`,
+        urgency: sql<SharedDashboardDeadlineRiskType>`CASE WHEN ${groupCourses.dueDate} < NOW() THEN 'overdue' ELSE 'dueSoon' END`,
+        studentCount: sql<number>`COUNT(DISTINCT ${users.id})::INTEGER`,
+        students: sql<
+          Array<{ id: string; name: string }>
+        >`jsonb_agg(DISTINCT jsonb_build_object('id', ${users.id}, 'name', ${studentName}))`,
+      })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupUsers.userId, studentCourses.studentId),
+        ),
+      )
+      .innerJoin(users, and(eq(users.id, groupUsers.userId), isNull(users.deletedAt)))
+      .where(commonCondition)
+      .groupBy(groups.id, groupCourses.id)
+      .orderBy(orderedExpression, asc(groups.id))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+    const totalQuery = this.db
+      .select({ count: sql<number>`COUNT(DISTINCT ${groupCourses.id})::INTEGER` })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupUsers.userId, studentCourses.studentId),
+        ),
+      )
+      .innerJoin(users, and(eq(users.id, groupUsers.userId), isNull(users.deletedAt)))
+      .where(commonCondition);
+    const [data, [total]] = await Promise.all([query, totalQuery]);
+    return { data, totalItems: total?.count ?? 0 };
   }
 
   async getConversionAfterFreemiumLesson(userId?: UUIDType) {

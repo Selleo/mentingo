@@ -69,11 +69,13 @@ export const getAssetLibraryColumns = ({
           <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-neutral-100">
             <AssetTypeIcon type={asset.type} />
           </span>
-          <div className="min-w-0">
-            <p className="flex truncate text-sm font-medium text-neutral-950">
-              <span className="truncate">{getAssetDisplayName(asset)}</span>
+          <div className="min-w-0 flex-1">
+            <p className="flex min-w-0 items-center text-sm font-medium text-neutral-950">
+              <span className="min-w-0 flex-1 truncate" title={getAssetDisplayName(asset)}>
+                {getAssetDisplayName(asset)}
+              </span>
               {asset.isNew && (
-                <span className="ml-2 rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-semibold text-primary-800">
+                <span className="ml-2 shrink-0 rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-semibold text-primary-800">
                   {t("richText.assetLibrary.visibility.new")}
                 </span>
               )}

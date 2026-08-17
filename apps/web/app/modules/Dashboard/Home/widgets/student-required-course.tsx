@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSummary";
+import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
 
 import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
@@ -16,11 +17,18 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
-export function WidgetStudentRequiredCourse() {
+import type { DashboardWidgetSize } from "../types";
+
+export function WidgetStudentRequiredCourse({
+  widgetSize = "2x1",
+}: {
+  widgetSize?: DashboardWidgetSize;
+}) {
   const { t, i18n } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE];
   const courses = data?.requiredCourses ?? [];
+  const isCompact = widgetSize === "2x1";
   const overdueCount = courses.filter(
     (course) => course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
   ).length;
@@ -33,7 +41,7 @@ export function WidgetStudentRequiredCourse() {
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
       />
-      <DashboardWidgetContent>
+      <DashboardWidgetContent className={isCompact ? "p-2" : "p-3"}>
         {isLoading || isError ? (
           <DashboardWidgetQueryState
             isLoading={isLoading}
@@ -41,17 +49,23 @@ export function WidgetStudentRequiredCourse() {
             onRetry={() => void refetch()}
           />
         ) : courses.length === 0 ? (
-          <div className="flex min-h-32 items-center justify-center text-center text-neutral-600">
+          <div
+            className={cn(
+              "flex h-full items-center justify-center text-center text-neutral-600",
+              !isCompact && "min-h-32",
+            )}
+          >
             {t("dashboardHome.widgets.studentTiles.requiredCourse.empty")}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className={isCompact ? "space-y-2" : "space-y-3"}>
             {courses.map((course) => (
               <Link
                 key={course.courseId}
                 to={`/course/${course.slug}`}
                 className={cn(
-                  "group flex min-h-24 items-center gap-3 rounded-lg border p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  isCompact ? "min-h-0 gap-2 p-2" : "min-h-24 gap-3 p-3",
                   {
                     "border-error-100 bg-error-50 hover:border-error-300 focus-visible:ring-error-300":
                       course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
@@ -63,6 +77,17 @@ export function WidgetStudentRequiredCourse() {
                   },
                 )}
               >
+                <img
+                  src={course.thumbnailUrl || DefaultPhotoCourse}
+                  alt=""
+                  className={cn(
+                    "shrink-0 rounded-md object-cover",
+                    isCompact ? "h-10 w-12" : "h-14 w-20",
+                  )}
+                  onError={(event) => {
+                    event.currentTarget.src = DefaultPhotoCourse;
+                  }}
+                />
                 <div className="min-w-0 flex-1">
                   <span
                     className={cn("details font-medium text-neutral-500", {
@@ -72,7 +97,12 @@ export function WidgetStudentRequiredCourse() {
                   >
                     {t(`dashboardHome.widgets.studentTiles.requiredCourse.${course.urgency}`)}
                   </span>
-                  <h3 className="body-sm-md mt-0.5 line-clamp-2 text-neutral-950">
+                  <h3
+                    className={cn(
+                      "body-sm-md mt-0.5 text-neutral-950",
+                      isCompact ? "line-clamp-1" : "line-clamp-2",
+                    )}
+                  >
                     {course.title}
                   </h3>
                   <p className="details mt-1 text-neutral-500">
@@ -94,7 +124,7 @@ export function WidgetStudentRequiredCourse() {
           </div>
         )}
       </DashboardWidgetContent>
-      {courses.length > 0 && (
+      {courses.length > 0 && !isCompact && (
         <DashboardWidgetFooter>
           <div className="flex items-center justify-between gap-3">
             <span>

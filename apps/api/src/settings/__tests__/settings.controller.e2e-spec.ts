@@ -1,4 +1,8 @@
-import { DASHBOARD_WIDGET_IDS, DASHBOARD_WIDGET_WIDTHS } from "@repo/shared";
+import {
+  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_TYPES,
+  DASHBOARD_WIDGET_WIDTHS,
+} from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -413,13 +417,14 @@ describe("SettingsController (e2e)", () => {
           .set("Cookie", testCookies)
           .expect(200);
 
-        expect(response.body.data).toEqual([
-          DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING,
-          DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR,
-          DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE,
-          DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION,
-          DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES,
-          DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE,
+        expect(response.body.data.catalog.map(({ type }: { type: string }) => type)).toEqual([
+          DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+          DASHBOARD_WIDGET_TYPES.TODO_LIST,
+          DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+          DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+          DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES,
+          DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION,
+          DASHBOARD_WIDGET_TYPES.CERTIFICATES,
         ]);
       });
 

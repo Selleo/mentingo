@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
-import { WidgetAdminEventCalendar } from "./admin-event-calendar";
+import { WidgetEventCalendar } from "./event-calendar";
 
 import type { GetDashboardEventsResponse } from "~/api/generated-api";
 
@@ -36,7 +36,7 @@ const createLiveTrainingEvent = (id: string, title: string, startsAt: string): C
   allDay: false,
 });
 
-describe("WidgetAdminEventCalendar", () => {
+describe("WidgetEventCalendar", () => {
   afterEach(() => {
     calendarEvents.length = 0;
   });
@@ -52,7 +52,7 @@ describe("WidgetAdminEventCalendar", () => {
 
     renderWith({ withQuery: true }).render(
       <MemoryRouter>
-        <WidgetAdminEventCalendar />
+        <WidgetEventCalendar />
       </MemoryRouter>,
     );
 
@@ -78,7 +78,7 @@ describe("WidgetAdminEventCalendar", () => {
 
     renderWith({ withQuery: true }).render(
       <MemoryRouter>
-        <WidgetAdminEventCalendar />
+        <WidgetEventCalendar />
       </MemoryRouter>,
     );
 
@@ -104,10 +104,11 @@ describe("WidgetAdminEventCalendar", () => {
       within(upcomingSection!).queryByRole("button", { name: /Selected day training/ }),
     ).toBeNull();
     expect(upcomingSection?.parentElement).toHaveClass(
+      "min-h-0",
+      "self-stretch",
       "overflow-y-auto",
-      "lg:max-h-none",
-      "lg:[contain:size]",
     );
+    expect(upcomingSection?.parentElement).not.toHaveClass("lg:[contain:size]");
 
     expect(screen.getByRole("button", { name: "Previous month" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Next month" })).toBeVisible();
@@ -121,7 +122,7 @@ describe("WidgetAdminEventCalendar", () => {
     expect(yearSelect).toHaveValue(String(selectedDayStart.getFullYear() + 1));
     await user.selectOptions(yearSelect, String(selectedDayStart.getFullYear()));
     expect(screen.getAllByRole("gridcell")).toHaveLength(42);
-    expect(screen.getByRole("article")).toHaveClass("h-full", "sm:max-h-[27rem]");
+    expect(screen.getByRole("article")).toHaveClass("h-full", "min-h-0");
     expect(screen.getByRole("article")).not.toHaveClass("lg:h-auto");
 
     const upcomingDayButton = screen.getByRole("gridcell", {

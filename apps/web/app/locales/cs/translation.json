@@ -7,8 +7,19 @@
       "badge": "Úpravy",
       "widgetsButton": "Widgety",
       "restore": "Obnovit výchozí",
-      "instructions": "Přetažením widgetů změníte jejich pořadí. Můžete také změnit šířku a viditelnost.",
-      "changeWidth": "Změnit šířku {{title}}",
+      "restoreConfirm": "Obnovit výchozí rozložení widgetů? Vaše aktuální uspořádání bude nahrazeno.",
+      "changeSize": "Změnit velikost {{title}}",
+      "sizeTitle": "Velikost widgetu",
+      "sizes": {
+        "1x1": "Kompaktní",
+        "2x1": "Široký",
+        "1x2": "Vysoký",
+        "2x2": "Velký",
+        "3x2": "Rozšířený",
+        "4x1": "Extra široký",
+        "4x2": "Výrazný",
+        "4x3": "Výrazný vysoký"
+      },
       "drag": "Přesunout {{title}}",
       "widgetLibrary": "Widgety dashboardu",
       "widgetLibraryDescription": "Vyberte widgety, které mají být na dashboardu viditelné.",
@@ -97,9 +108,7 @@
           "startCta": "Zahájit trénink",
           "continueCta": "Pokračovat v tréninku",
           "feedbackCta": "Zobrazit zpětnou vazbu",
-          "todayEyebrow": "Dnešní nácvik",
           "completedEyebrow": "Nácvik dokončen",
-          "returnHint": "Váš rozhovor je uložen",
           "privateHint": "Soukromé místo pro zkoušení a zlepšování",
           "status": {
             "queued": "Scénář čeká.",
@@ -123,6 +132,19 @@
       "deadline_risks": {
         "title": "Rizika termínů",
         "description": "Povinné kurzy vyžadující pozornost",
+        "sort": "Řadit",
+        "sortMostUrgent": "Nejnaléhavější první",
+        "sortLeastUrgent": "Nejméně naléhavé první",
+        "student": "Účastník",
+        "group": "Skupina",
+        "learners": "Účastníci",
+        "deadline": "Termín",
+        "status": "Stav",
+        "searchStudents": "Hledat účastníky",
+        "searchGroups": "Hledat skupiny nebo účastníky",
+        "allStatuses": "Všechny stavy",
+        "studentsEmpty": "Žádní dotčení účastníci.",
+        "groupsEmpty": "Žádné dotčené skupiny.",
         "overdue": "Po termínu",
         "dueSoon": "Termín se blíží",
         "empty": "Aktuálně žádná rizika termínů.",
@@ -170,6 +192,17 @@
       "ai_mentor_practice": {
         "title": "Cvičení s AI Mentorem",
         "aiNotConfigured": "AI Mentor není pro tohoto tenanta nakonfigurován."
+      },
+      "todoTasks": {
+        "title": "Seznam úkolů",
+        "description": "Malé úkoly pro váš pracovní den",
+        "empty": "Zatím žádné úkoly. Přidejte jeden níže.",
+        "placeholder": "Přidat úkol",
+        "add": "Přidat úkol",
+        "toggle": "Přepnout {{title}}",
+        "edit": "Upravit úkol",
+        "delete": "Smazat úkol",
+        "reorder": "Změnit pořadí úkolu"
       }
     }
   },
@@ -1804,6 +1837,7 @@
         "settings_read_self": "Může zobrazit vlastní nastavení profilu a předvoleb.",
         "settings_update_self": "Může aktualizovat vlastní nastavení profilu a předvoleb.",
         "dashboard_read": "Může zobrazit svůj dashboard.",
+        "todo_task_manage_self": "Může vytvářet a spravovat vlastní úkoly.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",

@@ -7,8 +7,19 @@
       "badge": "Editing",
       "widgetsButton": "Widgets",
       "restore": "Restore default",
-      "instructions": "Drag widgets to change their order. You can also change their width and visibility.",
-      "changeWidth": "Change width of {{title}}",
+      "restoreConfirm": "Restore the default widget layout? Your current arrangement will be replaced.",
+      "changeSize": "Change size of {{title}}",
+      "sizeTitle": "Widget size",
+      "sizes": {
+        "1x1": "Compact",
+        "2x1": "Wide",
+        "1x2": "Tall",
+        "2x2": "Large",
+        "3x2": "Expanded",
+        "4x1": "Extra wide",
+        "4x2": "Feature",
+        "4x3": "Tall feature"
+      },
       "drag": "Move {{title}}",
       "widgetLibrary": "Dashboard widgets",
       "widgetLibraryDescription": "Choose which widgets should be visible on your dashboard.",
@@ -92,9 +103,7 @@
           "startCta": "Start practice",
           "continueCta": "Continue practice",
           "feedbackCta": "View feedback",
-          "todayEyebrow": "Today's rehearsal",
           "completedEyebrow": "Rehearsal complete",
-          "returnHint": "Your conversation is saved",
           "privateHint": "A private place to try, adjust, and try again",
           "status": {
             "queued": "Your practice scenario is queued.",
@@ -118,6 +127,19 @@
       "deadline_risks": {
         "title": "Deadline risks",
         "description": "Required courses that need attention",
+        "sort": "Sort",
+        "sortMostUrgent": "Most urgent first",
+        "sortLeastUrgent": "Least urgent first",
+        "student": "Student",
+        "group": "Group",
+        "learners": "Learners",
+        "deadline": "Deadline",
+        "status": "Status",
+        "searchStudents": "Search learners",
+        "searchGroups": "Search groups or learners",
+        "allStatuses": "All statuses",
+        "studentsEmpty": "No affected learners.",
+        "groupsEmpty": "No affected groups.",
         "overdue": "Overdue",
         "dueSoon": "Due soon",
         "empty": "No deadline risks right now.",
@@ -164,6 +186,17 @@
       "ai_mentor_practice": {
         "title": "AI Mentor practice",
         "aiNotConfigured": "AI Mentor is not configured for this tenant."
+      },
+      "todoTasks": {
+        "title": "To-do list",
+        "description": "Small tasks for your workday",
+        "empty": "No tasks yet. Add one below.",
+        "placeholder": "Add a task",
+        "add": "Add task",
+        "toggle": "Toggle {{title}}",
+        "edit": "Edit task",
+        "delete": "Delete task",
+        "reorder": "Reorder task"
       }
     }
   },
@@ -1801,6 +1834,7 @@
         "settings_read_self": "View their own profile and preference settings.",
         "settings_update_self": "Update their own profile and preference settings.",
         "dashboard_read": "View their dashboard.",
+        "todo_task_manage_self": "Create and manage their own to-do tasks.",
         "settings_manage": "Manage global platform settings.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",

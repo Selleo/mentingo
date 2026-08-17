@@ -14,6 +14,7 @@ import {
   Res,
   Query,
   Header,
+  Post,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -61,8 +62,8 @@ import {
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
-  dashboardWidgetsIdsJSONContentSchema,
   dashboardWidgetsJSONContentSchema,
+  dashboardSettingsResponseSchema,
   globalSettingsJSONSchema,
   loginPageResourceResponseSchema,
   settingsJSONContentSchema,
@@ -84,15 +85,19 @@ import {
   UpdateAgeLimitBody,
   updateLiveTrainingMaxParallelSessionsSchema,
   UpdateLiveTrainingMaxParallelSessionsBody,
+  updateDashboardSettingsBodySchema,
+  resetDashboardSettingsBodySchema,
+  UpdateDashboardSettingsBody,
+  ResetDashboardSettingsBody,
 } from "./schemas/update-settings.schema";
 import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
   AdminSettingsJSONContentSchema,
-  DashboardWidgetsIdsJSONContentSchema,
   DashboardWidgetsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
+  DashboardSettingsResponseSchema,
 } from "./schemas/settings.schema";
 
 @Controller("settings")
@@ -157,12 +162,40 @@ export class SettingsController {
   @Get("dashboard")
   @RequirePermission(PERMISSIONS.DASHBOARD_READ)
   @Validate({
-    response: baseResponse(dashboardWidgetsIdsJSONContentSchema),
+    response: baseResponse(dashboardSettingsResponseSchema),
   })
-  async getAvailableDashboardWidgets(
+  async getDashboardSettings(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<DashboardWidgetsIdsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getAvailableDashboardWidgets(userId));
+  ): Promise<BaseResponse<DashboardSettingsResponseSchema>> {
+    return new BaseResponse(await this.settingsService.getDashboardSettings(userId));
+  }
+
+  @Put("dashboard")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.DASHBOARD_READ, PERMISSIONS.SETTINGS_UPDATE_SELF)
+  @Validate({
+    request: [{ type: "body", schema: updateDashboardSettingsBodySchema }],
+    response: baseResponse(dashboardSettingsResponseSchema),
+  })
+  async updateDashboardSettings(
+    @Body() body: UpdateDashboardSettingsBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<DashboardSettingsResponseSchema>> {
+    return new BaseResponse(await this.settingsService.updateDashboardSettings(userId, body));
+  }
+
+  @Post("dashboard/reset")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.DASHBOARD_READ, PERMISSIONS.SETTINGS_UPDATE_SELF)
+  @Validate({
+    request: [{ type: "body", schema: resetDashboardSettingsBodySchema }],
+    response: baseResponse(dashboardSettingsResponseSchema),
+  })
+  async resetDashboardSettings(
+    @Body() body: ResetDashboardSettingsBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<DashboardSettingsResponseSchema>> {
+    return new BaseResponse(await this.settingsService.resetDashboardSettings(userId, body));
   }
 
   @Get("dashboard/default")

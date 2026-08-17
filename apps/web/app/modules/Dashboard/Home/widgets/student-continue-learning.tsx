@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSummary";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { cn } from "~/lib/utils";
 
 import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
@@ -15,11 +16,18 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
-export function WidgetStudentContinueLearning() {
+import type { DashboardWidgetSize } from "../types";
+
+export function WidgetStudentContinueLearning({
+  widgetSize = "2x1",
+}: {
+  widgetSize?: DashboardWidgetSize;
+}) {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useStudentDashboardSummary();
   const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING];
   const courses = data?.continueLearningCourses ?? [];
+  const isCompact = widgetSize === "2x1";
 
   return (
     <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING}>
@@ -29,7 +37,7 @@ export function WidgetStudentContinueLearning() {
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
       />
-      <DashboardWidgetContent>
+      <DashboardWidgetContent className={isCompact ? "p-2" : "p-3"}>
         {isLoading || isError ? (
           <DashboardWidgetQueryState
             isLoading={isLoading}
@@ -37,11 +45,16 @@ export function WidgetStudentContinueLearning() {
             onRetry={() => void refetch()}
           />
         ) : courses.length === 0 ? (
-          <div className="flex min-h-32 items-center justify-center text-center text-neutral-600">
+          <div
+            className={cn(
+              "flex h-full items-center justify-center text-center text-neutral-600",
+              !isCompact && "min-h-32",
+            )}
+          >
             {t("dashboardHome.widgets.studentTiles.continueLearning.empty")}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className={isCompact ? "space-y-2" : "space-y-3"}>
             {courses.map((course) => {
               const progress =
                 course.courseChapterCount > 0
@@ -55,12 +68,17 @@ export function WidgetStudentContinueLearning() {
                 <Link
                   key={course.courseId}
                   to={destination}
-                  className="group grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-neutral-100 p-3 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+                  className={cn(
+                    "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300",
+                    isCompact
+                      ? "grid-cols-[3rem_minmax(0,1fr)_auto] gap-2 p-2"
+                      : "grid-cols-[5rem_minmax(0,1fr)_auto] gap-3 p-3",
+                  )}
                 >
                   <img
                     src={course.thumbnailUrl || DefaultPhotoCourse}
                     alt=""
-                    className="h-14 w-20 rounded-md object-cover"
+                    className={cn("rounded-md object-cover", isCompact ? "h-10 w-12" : "h-14 w-20")}
                     onError={(event) => {
                       event.currentTarget.src = DefaultPhotoCourse;
                     }}
@@ -74,19 +92,26 @@ export function WidgetStudentContinueLearning() {
                         {progress}%
                       </span>
                     </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                    <div
+                      className={cn(
+                        "h-1.5 overflow-hidden rounded-full bg-neutral-100",
+                        isCompact ? "mt-1.5" : "mt-2",
+                      )}
+                    >
                       <div
                         className="h-full rounded-full bg-primary-500"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <p className="details mt-1.5 line-clamp-1 text-neutral-500">
-                      {course.lesson?.title
-                        ? t("dashboardHome.widgets.studentTiles.continueLearning.nextLesson", {
-                            title: course.lesson.title,
-                          })
-                        : t("dashboardHome.widgets.studentTiles.continueLearning.openCourse")}
-                    </p>
+                    {!isCompact && (
+                      <p className="details mt-1.5 line-clamp-1 text-neutral-500">
+                        {course.lesson?.title
+                          ? t("dashboardHome.widgets.studentTiles.continueLearning.nextLesson", {
+                              title: course.lesson.title,
+                            })
+                          : t("dashboardHome.widgets.studentTiles.continueLearning.openCourse")}
+                      </p>
+                    )}
                   </div>
                   <ChevronRight
                     className="size-4 text-neutral-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary-700"

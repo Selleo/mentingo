@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -10,6 +11,9 @@ import {
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
   DASHBOARD_WIDGETS,
+  DASHBOARD_DEFAULT_LAYOUTS,
+  DASHBOARD_SCHEMA_VERSION,
+  DASHBOARD_WIDGET_CATALOG,
   ENTITY_TYPES,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
@@ -86,12 +90,15 @@ import type {
   LoginPageResourceResponseBody,
   DashboardWidgetsJSONContentSchema,
   DashboardWidgetsIdsJSONContentSchema,
+  DashboardSettingsResponseSchema,
 } from "./schemas/settings.schema";
 import type {
   AllowedAgeLimit,
   AllowedCurrency,
   UpdateMFAEnforcedRolesRequest,
   UpdateSettingsBody,
+  UpdateDashboardSettingsBody,
+  ResetDashboardSettingsBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
@@ -101,7 +108,11 @@ import type {
   SupportedLanguages,
   PermissionKey,
   DashboardWidgetId,
+  LegacyDashboardWidgetDefinition,
+  DashboardWidgetType,
   DashboardWidgetDefinition,
+  DashboardLayoutWidget,
+  DashboardSettings,
   SystemRoleSlug,
 } from "@repo/shared";
 import type { Request, Response } from "express";
@@ -662,6 +673,298 @@ export class SettingsService {
     };
   }
 
+  /**
+   * Returns the permission-filtered catalog and the current user's normalized dashboard layout.
+   * The legacy settings endpoint above intentionally remains available while clients migrate to
+   * the semantic layout contract.
+   */
+  public async getDashboardSettings(userId: UUIDType): Promise<DashboardSettingsResponseSchema> {
+    const [row] = await this.db
+      .select({ settings: sql<Record<string, unknown>>`${settings.settings}` })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!row) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const catalog = await this.getDashboardCatalog(userId);
+    const storedLayout = this.readDashboardLayout(row.settings.dashboard);
+    const layout = this.normalizeDashboardLayout(
+      storedLayout,
+      catalog,
+      await this.getDefaultDashboardLayout(userId),
+    );
+
+    return { layout, catalog };
+  }
+
+  public async updateDashboardSettings(
+    userId: UUIDType,
+    body: UpdateDashboardSettingsBody,
+  ): Promise<DashboardSettingsResponseSchema> {
+    const catalog = await this.getDashboardCatalog(userId);
+    this.validateDashboardWidgets(body.widgets, catalog);
+
+    await this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .select({ settings: sql<Record<string, unknown>>`${settings.settings}` })
+        .from(settings)
+        .where(eq(settings.userId, userId))
+        .for("update");
+
+      if (!row) {
+        throw new NotFoundException("User settings not found");
+      }
+
+      const currentLayout = this.readDashboardLayout(row.settings.dashboard);
+      const currentRevision = currentLayout?.revision ?? 0;
+
+      if (currentRevision !== body.expectedRevision) {
+        throw new ConflictException("dashboardHome.error.staleLayout");
+      }
+
+      const widgets = this.mergeInaccessibleDashboardWidgets(currentLayout, body.widgets, catalog);
+      const nextLayout: DashboardSettings = {
+        schemaVersion: DASHBOARD_SCHEMA_VERSION,
+        revision: currentRevision + 1,
+        widgets,
+      };
+
+      const nextSettings = {
+        ...row.settings,
+        dashboard: nextLayout,
+      };
+
+      await tx
+        .update(settings)
+        .set({ settings: settingsToJSONBuildObject(nextSettings) })
+        .where(eq(settings.userId, userId));
+    });
+
+    return this.getDashboardSettings(userId);
+  }
+
+  public async resetDashboardSettings(
+    userId: UUIDType,
+    body: ResetDashboardSettingsBody,
+  ): Promise<DashboardSettingsResponseSchema> {
+    const defaults = await this.getDefaultDashboardLayout(userId);
+    const catalog = await this.getDashboardCatalog(userId);
+
+    await this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .select({ settings: sql<Record<string, unknown>>`${settings.settings}` })
+        .from(settings)
+        .where(eq(settings.userId, userId))
+        .for("update");
+
+      if (!row) {
+        throw new NotFoundException("User settings not found");
+      }
+
+      const currentLayout = this.readDashboardLayout(row.settings.dashboard);
+      const currentRevision = currentLayout?.revision ?? 0;
+
+      if (currentRevision !== body.expectedRevision) {
+        throw new ConflictException("dashboardHome.error.staleLayout");
+      }
+
+      const widgets = this.mergeInaccessibleDashboardWidgets(
+        currentLayout,
+        defaults.widgets,
+        catalog,
+      );
+      const nextLayout: DashboardSettings = {
+        schemaVersion: DASHBOARD_SCHEMA_VERSION,
+        revision: currentRevision + 1,
+        widgets,
+      };
+
+      await tx
+        .update(settings)
+        .set({ settings: settingsToJSONBuildObject({ ...row.settings, dashboard: nextLayout }) })
+        .where(eq(settings.userId, userId));
+    });
+
+    return this.getDashboardSettings(userId);
+  }
+
+  private async getDashboardCatalog(
+    userId: UUIDType,
+  ): Promise<DashboardSettingsResponseSchema["catalog"]> {
+    const { permissions } = await this.permissionsService.getUserAccess(userId);
+    const userPermissions = new Set(permissions);
+    const globalSettings = await this.getPublicGlobalSettings();
+    const globalSettingsRecord = globalSettings as unknown as Record<string, unknown>;
+    const aiConfigured = await this.envService.getAIConfigured();
+    const definitions = Object.values(DASHBOARD_WIDGET_CATALOG) as DashboardWidgetDefinition[];
+
+    return definitions
+      .filter((definition) => {
+        if (
+          definition.requiredFeature &&
+          !globalSettingsRecord[FEATURE_SETTINGS_KEYS[definition.requiredFeature]]
+        ) {
+          return false;
+        }
+
+        if (definition.requiresAiConfigured && !aiConfigured.enabled) {
+          return false;
+        }
+
+        if (
+          definition.requiredPermissions &&
+          !definition.requiredPermissions.every((permission) => userPermissions.has(permission))
+        ) {
+          return false;
+        }
+
+        return (
+          !definition.anyPermissions ||
+          definition.anyPermissions.some((permission) => userPermissions.has(permission))
+        );
+      })
+      .map((definition) => ({
+        type: definition.type,
+        allowedSizes: [...definition.allowedSizes],
+        defaultSize: definition.defaultSize,
+      }));
+  }
+
+  private async getDefaultDashboardLayout(userId: UUIDType): Promise<DashboardSettings> {
+    const { roleSlugs } = await this.permissionsService.getUserAccess(userId);
+    const roleSet = new Set(roleSlugs);
+    const rolePriority: readonly SystemRoleSlug[] = [
+      SYSTEM_ROLE_SLUGS.ADMIN,
+      SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+      SYSTEM_ROLE_SLUGS.TRAINER,
+      SYSTEM_ROLE_SLUGS.STUDENT,
+    ];
+    const primaryRole = rolePriority.find((roleSlug) => roleSet.has(roleSlug));
+    const defaultWidgets = primaryRole ? DASHBOARD_DEFAULT_LAYOUTS[primaryRole] : [];
+
+    return {
+      schemaVersion: DASHBOARD_SCHEMA_VERSION,
+      revision: 0,
+      widgets: defaultWidgets.map((widget) => ({
+        ...widget,
+        visible: true,
+      })),
+    };
+  }
+
+  private readDashboardLayout(value: unknown): DashboardSettings | null {
+    if (!value || typeof value !== "object") return null;
+    const dashboard = value as Record<string, unknown>;
+    const rawWidgets = dashboard.widgets;
+
+    if (
+      dashboard.schemaVersion === DASHBOARD_SCHEMA_VERSION &&
+      typeof dashboard.revision === "number" &&
+      Array.isArray(rawWidgets) &&
+      rawWidgets.every((widget) => this.isDashboardLayoutWidget(widget))
+    ) {
+      return {
+        schemaVersion: DASHBOARD_SCHEMA_VERSION,
+        revision: dashboard.revision,
+        widgets: rawWidgets as DashboardLayoutWidget[],
+      };
+    }
+
+    return null;
+  }
+
+  private normalizeDashboardLayout(
+    storedLayout: DashboardSettings | null,
+    catalog: DashboardSettingsResponseSchema["catalog"],
+    defaults: DashboardSettings,
+  ): DashboardSettings {
+    const available = new Set(catalog.map((entry) => entry.type));
+    const source = storedLayout ?? defaults;
+    const widgets: DashboardLayoutWidget[] = [];
+    const seen = new Set<DashboardWidgetType>();
+
+    for (const widget of source.widgets) {
+      if (!available.has(widget.type) || seen.has(widget.type)) continue;
+      const definition = DASHBOARD_WIDGET_CATALOG[widget.type] as DashboardWidgetDefinition;
+      const size = definition.allowedSizes.includes(widget.size)
+        ? widget.size
+        : definition.defaultSize;
+      widgets.push({ type: widget.type, size, visible: widget.visible });
+      seen.add(widget.type);
+    }
+
+    for (const widget of defaults.widgets) {
+      if (!available.has(widget.type) || seen.has(widget.type)) continue;
+      widgets.push(widget);
+      seen.add(widget.type);
+    }
+
+    return {
+      schemaVersion: DASHBOARD_SCHEMA_VERSION,
+      revision: source.revision,
+      widgets,
+    };
+  }
+
+  /**
+   * The effective layout intentionally omits widgets the actor cannot currently access. Keep
+   * those canonical entries in storage during autosaves so a later permission change restores
+   * the user's previous choice instead of silently replacing it with a default.
+   */
+  private mergeInaccessibleDashboardWidgets(
+    currentLayout: DashboardSettings | null,
+    requestedWidgets: readonly DashboardLayoutWidget[],
+    catalog: DashboardSettingsResponseSchema["catalog"],
+  ): DashboardLayoutWidget[] {
+    if (!currentLayout) return requestedWidgets.map((widget) => ({ ...widget }));
+
+    const available = new Set(catalog.map((entry) => entry.type));
+    const inaccessible = currentLayout.widgets
+      .map((widget, index) => ({ widget, index }))
+      .filter(({ widget }) => !available.has(widget.type));
+    const merged = requestedWidgets.map((widget) => ({ ...widget }));
+
+    for (const { widget, index } of inaccessible) {
+      merged.splice(Math.min(index, merged.length), 0, { ...widget });
+    }
+
+    return merged;
+  }
+
+  private validateDashboardWidgets(
+    widgets: readonly DashboardLayoutWidget[],
+    catalog: DashboardSettingsResponseSchema["catalog"],
+  ): void {
+    const catalogByType = new Map(catalog.map((entry) => [entry.type, entry]));
+    const seen = new Set<DashboardWidgetType>();
+
+    for (const widget of widgets) {
+      if (seen.has(widget.type) || !catalogByType.has(widget.type)) {
+        throw new BadRequestException("dashboardHome.error.invalidWidgetLayout");
+      }
+
+      const definition = catalogByType.get(widget.type);
+      if (!definition?.allowedSizes.includes(widget.size)) {
+        throw new BadRequestException("dashboardHome.error.invalidWidgetSize");
+      }
+
+      seen.add(widget.type);
+    }
+  }
+
+  private isDashboardLayoutWidget(value: unknown): value is DashboardLayoutWidget {
+    if (!value || typeof value !== "object") return false;
+    const widget = value as Record<string, unknown>;
+    return (
+      typeof widget.type === "string" &&
+      typeof widget.size === "string" &&
+      typeof widget.visible === "boolean" &&
+      Object.prototype.hasOwnProperty.call(DASHBOARD_WIDGET_CATALOG, widget.type)
+    );
+  }
+
   public async updateUserSettings(
     userId: UUIDType,
     updatedSettings: UpdateSettingsBody,
@@ -751,11 +1054,17 @@ export class SettingsService {
     return widgetIds.filter((widgetId) => {
       if (!isValidWidgetId(widgetId)) return false;
 
-      const widgetDefinition: DashboardWidgetDefinition = DASHBOARD_WIDGETS[widgetId];
+      const widgetDefinition: LegacyDashboardWidgetDefinition = DASHBOARD_WIDGETS[widgetId];
       const { allowedRoles, requiredFeature, requiredPermissions, requiresAiConfigured } =
         widgetDefinition;
 
-      if (requiredFeature && !globalSettings[FEATURE_SETTINGS_KEYS[requiredFeature]]) return false;
+      if (
+        requiredFeature &&
+        !(globalSettings as unknown as Record<string, unknown>)[
+          FEATURE_SETTINGS_KEYS[requiredFeature]
+        ]
+      )
+        return false;
       if (requiresAiConfigured && !aiConfigured.enabled) return false;
       if (
         requiredPermissions &&

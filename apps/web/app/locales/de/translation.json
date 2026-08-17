@@ -7,8 +7,19 @@
       "badge": "Bearbeitung",
       "widgetsButton": "Widgets",
       "restore": "Standard wiederherstellen",
-      "instructions": "Ziehen Sie Widgets, um ihre Reihenfolge zu ändern. Breite und Sichtbarkeit lassen sich ebenfalls anpassen.",
-      "changeWidth": "Breite von {{title}} ändern",
+      "restoreConfirm": "Standard-Widget-Layout wiederherstellen? Ihre aktuelle Anordnung wird ersetzt.",
+      "changeSize": "Größe von {{title}} ändern",
+      "sizeTitle": "Widget-Größe",
+      "sizes": {
+        "1x1": "Kompakt",
+        "2x1": "Breit",
+        "1x2": "Hoch",
+        "2x2": "Groß",
+        "3x2": "Erweitert",
+        "4x1": "Extra breit",
+        "4x2": "Hervorgehoben",
+        "4x3": "Hoch hervorgehoben"
+      },
       "drag": "{{title}} verschieben",
       "widgetLibrary": "Dashboard-Widgets",
       "widgetLibraryDescription": "Wählen Sie die Widgets aus, die auf Ihrem Dashboard sichtbar sein sollen.",
@@ -92,9 +103,7 @@
           "startCta": "Übung starten",
           "continueCta": "Übung fortsetzen",
           "feedbackCta": "Feedback ansehen",
-          "todayEyebrow": "Heutige Probe",
           "completedEyebrow": "Probe abgeschlossen",
-          "returnHint": "Dein Gespräch ist gespeichert",
           "privateHint": "Ein privater Ort zum Ausprobieren und Verbessern",
           "status": {
             "queued": "Dein Szenario wartet.",
@@ -118,6 +127,19 @@
       "deadline_risks": {
         "title": "Terminrisiken",
         "description": "Pflichtkurse, die Aufmerksamkeit benötigen",
+        "sort": "Sortieren",
+        "sortMostUrgent": "Dringendste zuerst",
+        "sortLeastUrgent": "Weniger dringende zuerst",
+        "student": "Teilnehmer",
+        "group": "Gruppe",
+        "learners": "Teilnehmer",
+        "deadline": "Frist",
+        "status": "Status",
+        "searchStudents": "Teilnehmer suchen",
+        "searchGroups": "Gruppen oder Teilnehmer suchen",
+        "allStatuses": "Alle Status",
+        "studentsEmpty": "Keine betroffenen Teilnehmer.",
+        "groupsEmpty": "Keine betroffenen Gruppen.",
         "overdue": "Überfällig",
         "dueSoon": "Bald fällig",
         "empty": "Derzeit keine Terminrisiken.",
@@ -164,6 +186,17 @@
       "ai_mentor_practice": {
         "title": "KI-Mentor-Übung",
         "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
+      },
+      "todoTasks": {
+        "title": "Aufgabenliste",
+        "description": "Kleine Aufgaben für deinen Arbeitstag",
+        "empty": "Noch keine Aufgaben. Füge unten eine hinzu.",
+        "placeholder": "Aufgabe hinzufügen",
+        "add": "Aufgabe hinzufügen",
+        "toggle": "{{title}} umschalten",
+        "edit": "Aufgabe bearbeiten",
+        "delete": "Aufgabe löschen",
+        "reorder": "Aufgabe neu ordnen"
       }
     }
   },
@@ -1799,6 +1832,7 @@
         "settings_read_self": "Eigene Profil- und Präferenzeinstellungen anzeigen.",
         "settings_update_self": "Eigene Profil- und Präferenzeinstellungen aktualisieren.",
         "dashboard_read": "Das eigene Dashboard anzeigen.",
+        "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",

@@ -7,8 +7,19 @@
       "badge": "Edycja",
       "widgetsButton": "Widżety",
       "restore": "Przywróć domyślne",
-      "instructions": "Przeciągaj kafelki, aby zmienić ich kolejność. Możesz też zmieniać ich szerokość i widoczność.",
-      "changeWidth": "Zmień szerokość kafelka {{title}}",
+      "restoreConfirm": "Przywrócić domyślny układ widżetów? Obecny układ zostanie zastąpiony.",
+      "changeSize": "Zmień rozmiar kafelka {{title}}",
+      "sizeTitle": "Rozmiar kafelka",
+      "sizes": {
+        "1x1": "Kompaktowy",
+        "2x1": "Szeroki",
+        "1x2": "Wysoki",
+        "2x2": "Duży",
+        "3x2": "Rozszerzony",
+        "4x1": "Bardzo szeroki",
+        "4x2": "Wyróżniony",
+        "4x3": "Wyróżniony wysoki"
+      },
       "drag": "Przenieś kafelek {{title}}",
       "widgetLibrary": "Kafelki dashboardu",
       "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne na Twoim dashboardzie.",
@@ -92,9 +103,7 @@
           "startCta": "Rozpocznij trening",
           "continueCta": "Kontynuuj trening",
           "feedbackCta": "Zobacz informację zwrotną",
-          "todayEyebrow": "Dzisiejsza próba",
           "completedEyebrow": "Próba zakończona",
-          "returnHint": "Rozmowa jest zapisana",
           "privateHint": "Prywatne miejsce na próby i poprawki",
           "status": {
             "queued": "Scenariusz czeka na przygotowanie.",
@@ -118,6 +127,19 @@
       "deadline_risks": {
         "title": "Ryzyka terminów",
         "description": "Wymagane kursy, które wymagają uwagi",
+        "sort": "Sortuj",
+        "sortMostUrgent": "Najpilniejsze najpierw",
+        "sortLeastUrgent": "Najmniej pilne najpierw",
+        "student": "Uczestnik",
+        "group": "Grupa",
+        "learners": "Uczestnicy",
+        "deadline": "Termin",
+        "status": "Status",
+        "searchStudents": "Szukaj uczestników",
+        "searchGroups": "Szukaj grup lub uczestników",
+        "allStatuses": "Wszystkie statusy",
+        "studentsEmpty": "Brak uczestników wymagających uwagi.",
+        "groupsEmpty": "Brak grup wymagających uwagi.",
         "overdue": "Po terminie",
         "dueSoon": "Zbliża się termin",
         "empty": "Brak zagrożonych terminów.",
@@ -166,6 +188,17 @@
       "ai_mentor_practice": {
         "title": "Ćwiczenia z Mentorem AI",
         "aiNotConfigured": "Mentor AI nie jest skonfigurowany dla tej organizacji."
+      },
+      "todoTasks": {
+        "title": "Lista zadań",
+        "description": "Małe zadania na dziś",
+        "empty": "Brak zadań. Dodaj pierwsze poniżej.",
+        "placeholder": "Dodaj zadanie",
+        "add": "Dodaj zadanie",
+        "toggle": "Przełącz {{title}}",
+        "edit": "Edytuj zadanie",
+        "delete": "Usuń zadanie",
+        "reorder": "Zmień kolejność zadania"
       }
     }
   },
@@ -2017,6 +2050,7 @@
         "settings_read_self": "Może przeglądać własne ustawienia profilu i preferencji.",
         "settings_update_self": "Może aktualizować własne ustawienia profilu i preferencji.",
         "dashboard_read": "Może wyświetlać swój dashboard.",
+        "todo_task_manage_self": "Może tworzyć i zarządzać własnymi zadaniami.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",

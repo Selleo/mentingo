@@ -1,14 +1,25 @@
 {
   "dashboardHome": {
-    "title": "Tu panel",
+    "title": "Tu dashboard",
     "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
     "customize": "Personalizar panel",
     "edit": {
       "badge": "Edición",
       "widgetsButton": "Widgets",
       "restore": "Restaurar valores",
-      "instructions": "Arrastra los widgets para cambiar su orden. También puedes cambiar su ancho y visibilidad.",
-      "changeWidth": "Cambiar el ancho de {{title}}",
+      "restoreConfirm": "¿Restaurar el diseño predeterminado de los widgets? Se reemplazará tu organización actual.",
+      "changeSize": "Cambiar el tamaño de {{title}}",
+      "sizeTitle": "Tamaño del widget",
+      "sizes": {
+        "1x1": "Compacto",
+        "2x1": "Ancho",
+        "1x2": "Alto",
+        "2x2": "Grande",
+        "3x2": "Ampliado",
+        "4x1": "Extra ancho",
+        "4x2": "Destacado",
+        "4x3": "Destacado alto"
+      },
       "drag": "Mover {{title}}",
       "widgetLibrary": "Widgets del panel",
       "widgetLibraryDescription": "Elige los widgets visibles en tu panel.",
@@ -92,9 +103,7 @@
           "startCta": "Iniciar práctica",
           "continueCta": "Continuar práctica",
           "feedbackCta": "Ver comentarios",
-          "todayEyebrow": "Ensayo de hoy",
           "completedEyebrow": "Ensayo completado",
-          "returnHint": "Tu conversación está guardada",
           "privateHint": "Un espacio privado para probar y mejorar",
           "status": {
             "queued": "Tu escenario está en cola.",
@@ -103,6 +112,17 @@
             "failed": "La generación falló. Ábrela para reintentar."
           }
         }
+      },
+      "todoTasks": {
+        "title": "Lista de tareas",
+        "description": "Pequeñas tareas para tu jornada",
+        "empty": "Aún no hay tareas. Añade una abajo.",
+        "placeholder": "Añadir una tarea",
+        "add": "Añadir tarea",
+        "toggle": "Alternar {{title}}",
+        "edit": "Editar tarea",
+        "delete": "Eliminar tarea",
+        "reorder": "Reordenar tarea"
       },
       "commonDescription": "Información clave de un vistazo",
       "training_completion": {
@@ -118,6 +138,19 @@
       "deadline_risks": {
         "title": "Riesgos de plazos",
         "description": "Cursos obligatorios que requieren atención",
+        "sort": "Ordenar",
+        "sortMostUrgent": "Más urgentes primero",
+        "sortLeastUrgent": "Menos urgentes primero",
+        "student": "Alumno",
+        "group": "Grupo",
+        "learners": "Alumnos",
+        "deadline": "Fecha límite",
+        "status": "Estado",
+        "searchStudents": "Buscar alumnos",
+        "searchGroups": "Buscar grupos o alumnos",
+        "allStatuses": "Todos los estados",
+        "studentsEmpty": "No hay alumnos afectados.",
+        "groupsEmpty": "No hay grupos afectados.",
         "overdue": "Vencido",
         "dueSoon": "Próximo a vencer",
         "empty": "No hay riesgos de plazos ahora.",
@@ -1789,6 +1822,7 @@
         "settings_read_self": "Ver su propio perfil y configuración de preferencias.",
         "settings_update_self": "Actualice su propio perfil y configuración de preferencias.",
         "dashboard_read": "Ver su panel de control.",
+        "todo_task_manage_self": "Crear y gestionar sus propias tareas.",
         "settings_manage": "Administrar la configuración global de la plataforma.",
         "env_read_public": "Ver los valores de configuración del entorno público.",
         "env_manage": "Administrar los valores de configuración del entorno.",
