@@ -11,7 +11,6 @@ const CONTINUE_LESSON_ID = "22222222-2222-4222-8222-222222222222";
 const REQUIRED_COURSE_ID = "33333333-3333-4333-8333-333333333333";
 const CERTIFICATE_ID = "44444444-4444-4444-8444-444444444444";
 const DEADLINE_COURSE_ID = "66666666-6666-4666-8666-666666666666";
-const DEADLINE_STUDENT_ID = "77777777-7777-4777-8777-777777777777";
 const EVENT_ID = "55555555-5555-4555-8555-555555555555";
 
 const studentSummary = {
@@ -229,7 +228,9 @@ test.describe("admin dashboard widgets", () => {
     });
   });
 
-  test("shows deadline courses and opens linked students", async ({ withReadonlyPage }) => {
+  test("shows deadline courses and expands learners in a linked group", async ({
+    withReadonlyPage,
+  }) => {
     await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
       await mockDashboardWidget(page, DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, [
         {
@@ -250,14 +251,21 @@ test.describe("admin dashboard widgets", () => {
           },
         },
         {
-          path: `/api/statistics/dashboard/deadline-risks/courses/${DEADLINE_COURSE_ID}/students`,
+          path: `/api/statistics/dashboard/deadline-risks/courses/${DEADLINE_COURSE_ID}/groups`,
           body: {
             data: [
               {
-                id: DEADLINE_STUDENT_ID,
-                name: "Taylor Student",
+                id: "77777777-7777-4777-8777-777777777777",
+                name: "Customer success cohort",
                 dueDate: "2026-08-20T00:00:00.000Z",
                 urgency: "overdue",
+                studentCount: 1,
+                students: [
+                  {
+                    id: "88888888-8888-4888-8888-888888888888",
+                    name: "Taylor Student",
+                  },
+                ],
               },
             ],
             pagination: { totalItems: 1, page: 1, perPage: 20 },
@@ -272,6 +280,7 @@ test.describe("admin dashboard widgets", () => {
       await expect(widget.getByRole("heading", { name: "Deadline risks" })).toBeVisible();
       await expect(widget.getByRole("button", { name: /Customer onboarding/ })).toBeVisible();
       await widget.getByRole("button", { name: /Customer onboarding/ }).click();
+      await page.getByText("Customer success cohort").click();
       await expect(page.getByText("Taylor Student")).toBeVisible();
     });
   });

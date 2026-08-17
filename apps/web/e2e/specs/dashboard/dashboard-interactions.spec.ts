@@ -434,7 +434,7 @@ test("admin can drill into deadline courses, sort urgency, load more, and keep t
   withReadonlyPage,
 }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-    let studentPage = 1;
+    let groupPage = 1;
     await installDashboardMocks(page, {
       widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, "2x1")],
       catalog: [
@@ -495,29 +495,43 @@ test("admin can drill into deadline courses, sort urgency, load more, and keep t
           });
           return true;
         }
-        if (url.pathname.endsWith("/students")) {
-          studentPage = Number(url.searchParams.get("page") ?? "1");
-          const students =
-            studentPage === 1
+        if (url.pathname.endsWith("/groups")) {
+          groupPage = Number(url.searchParams.get("page") ?? "1");
+          const groups =
+            groupPage === 1
               ? [
                   {
                     id: "77777777-7777-4777-8777-777777777777",
-                    name: "Taylor Student",
+                    name: "Sales cohort",
                     dueDate: "2026-08-01T00:00:00.000Z",
                     urgency: "overdue",
+                    studentCount: 1,
+                    students: [
+                      {
+                        id: "88888888-8888-4888-8888-888888888888",
+                        name: "Taylor Student",
+                      },
+                    ],
                   },
                 ]
               : [
                   {
                     id: "77777777-7777-4777-8777-777777777778",
-                    name: "Morgan Student",
+                    name: "Support cohort",
                     dueDate: "2026-08-05T00:00:00.000Z",
                     urgency: "overdue",
+                    studentCount: 1,
+                    students: [
+                      {
+                        id: "88888888-8888-4888-8888-888888888889",
+                        name: "Morgan Student",
+                      },
+                    ],
                   },
                 ];
           await fulfillRawJson(route, {
-            data: students,
-            pagination: { totalItems: 2, page: studentPage, perPage: 1 },
+            data: groups,
+            pagination: { totalItems: 21, page: groupPage, perPage: 20 },
           });
           return true;
         }
@@ -528,8 +542,6 @@ test("admin can drill into deadline courses, sort urgency, load more, and keep t
     await page.goto("/dashboard");
     const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS);
     await expect(widget.getByText("Overdue course")).toBeVisible();
-    await widget.getByRole("button", { name: /sort/i }).click();
-    await expect(widget.getByText("Due soon course")).toBeVisible();
 
     const coursesScrollContainer = widget.locator("div.h-full.min-h-0.overflow-y-auto");
     await coursesScrollContainer.evaluate((element) => {
@@ -538,19 +550,29 @@ test("admin can drill into deadline courses, sort urgency, load more, and keep t
     });
     await expect(widget.getByText("Another overdue course")).toBeVisible();
 
+    await widget.getByRole("button", { name: /sort/i }).click();
+    await page.getByRole("menuitemradio", { name: "Least urgent first" }).click();
+    await expect(widget.getByText("Due soon course")).toBeVisible();
+    await expect(widget.getByText("Overdue course")).toHaveCount(0);
+
     await widget.getByRole("button", { name: /Due soon course/ }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
+    await dialog.getByText("Sales cohort").click();
     await expect(dialog).toContainText("Taylor Student");
     await dialog.click({ position: { x: 20, y: 20 } });
     await expect(dialog).toBeVisible();
     await expect(dialog).not.toHaveCSS("overflow-x", "visible");
 
-    const studentLoadMore = dialog.getByRole("button", { name: /load more/i });
-    await expect(studentLoadMore).toBeVisible();
-    await studentLoadMore.click();
+    const groupsScrollContainer = dialog.locator("div.min-h-0.flex-1.overflow-y-auto");
+    await groupsScrollContainer.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+      element.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+    await expect(dialog.getByText("Support cohort")).toBeVisible();
+    await dialog.getByText("Support cohort").click();
     await expect(dialog).toContainText("Morgan Student");
-    expect(studentPage).toBe(2);
+    expect(groupPage).toBe(2);
   });
 });
 
