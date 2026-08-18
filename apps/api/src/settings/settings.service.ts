@@ -680,6 +680,7 @@ export class SettingsService {
   ): Promise<DashboardSettingsResponseSchema> {
     const catalog = await this.getDashboardCatalog(userId);
     this.validateDashboardWidgets(body.widgets, catalog);
+    const defaults = await this.getDefaultDashboardLayout(userId);
 
     await this.db.transaction(async (tx) => {
       const [row] = await tx
@@ -699,7 +700,12 @@ export class SettingsService {
         throw new ConflictException("dashboardHome.error.staleLayout");
       }
 
-      const widgets = this.mergeInaccessibleDashboardWidgets(currentLayout, body.widgets, catalog);
+      const widgets = this.mergeInaccessibleDashboardWidgets(
+        currentLayout,
+        body.widgets,
+        catalog,
+        defaults,
+      );
       const nextLayout: DashboardSettings = {
         schemaVersion: DASHBOARD_SCHEMA_VERSION,
         revision: currentRevision + 1,
@@ -749,6 +755,7 @@ export class SettingsService {
         currentLayout,
         defaults.widgets,
         catalog,
+        defaults,
       );
       const nextLayout: DashboardSettings = {
         schemaVersion: DASHBOARD_SCHEMA_VERSION,
@@ -802,6 +809,7 @@ export class SettingsService {
       })
       .map((definition) => ({
         type: definition.type,
+        alwaysVisible: definition.alwaysVisible,
         allowedSizes: [...definition.allowedSizes],
         defaultSize: definition.defaultSize,
       }));
@@ -869,13 +877,20 @@ export class SettingsService {
       const size = definition.allowedSizes.some((allowedSize) => allowedSize === widget.size)
         ? widget.size
         : definition.defaultSize;
-      widgets.push({ type: widget.type, size, visible: widget.visible });
+      widgets.push({
+        type: widget.type,
+        size,
+        visible: definition.alwaysVisible || widget.visible,
+      });
       seen.add(widget.type);
     }
 
     for (const widget of defaults.widgets) {
       if (!available.has(widget.type) || seen.has(widget.type)) continue;
-      widgets.push(widget);
+      widgets.push({
+        ...widget,
+        visible: DASHBOARD_WIDGET_CATALOG[widget.type].alwaysVisible || widget.visible,
+      });
       seen.add(widget.type);
     }
 
@@ -895,17 +910,38 @@ export class SettingsService {
     currentLayout: DashboardSettings | null,
     requestedWidgets: readonly DashboardLayoutWidget[],
     catalog: DashboardSettingsResponseSchema["catalog"],
+    defaults: DashboardSettings,
   ): DashboardLayoutWidget[] {
-    if (!currentLayout) return requestedWidgets.map((widget) => ({ ...widget }));
-
     const available = new Set(catalog.map((entry) => entry.type));
-    const inaccessible = currentLayout.widgets
+    const inaccessible = (currentLayout?.widgets ?? [])
       .map((widget, index) => ({ widget, index }))
       .filter(({ widget }) => !available.has(widget.type));
-    const merged = requestedWidgets.map((widget) => ({ ...widget }));
+    const merged = requestedWidgets.map((widget) => {
+      const definition = DASHBOARD_WIDGET_CATALOG[widget.type];
+      return { ...widget, visible: definition.alwaysVisible || widget.visible };
+    });
 
     for (const { widget, index } of inaccessible) {
       merged.splice(Math.min(index, merged.length), 0, { ...widget });
+    }
+
+    for (const entry of catalog) {
+      if (!entry.alwaysVisible || merged.some((widget) => widget.type === entry.type)) continue;
+
+      const fallback =
+        currentLayout?.widgets.find((widget) => widget.type === entry.type) ??
+        defaults.widgets.find((widget) => widget.type === entry.type);
+      const defaultIndex = defaults.widgets.findIndex((widget) => widget.type === entry.type);
+      const restoredWidget = {
+        type: entry.type,
+        size: fallback?.size ?? entry.defaultSize,
+        visible: true,
+      };
+      merged.splice(
+        defaultIndex >= 0 ? Math.min(defaultIndex, merged.length) : merged.length,
+        0,
+        restoredWidget,
+      );
     }
 
     return merged;

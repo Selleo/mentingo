@@ -248,7 +248,7 @@ export function WidgetEventCalendar() {
               <div className="min-h-0 min-w-0 self-stretch overflow-y-auto p-2">
                 {selectedEvents.length > 0 && (
                   <section className="mb-4">
-                    <h3 className="body-sm-md mb-2 flex h-8 items-center text-neutral-950">
+                    <h3 className="body-sm-md mb-2 flex h-8 items-center pl-3 text-neutral-950">
                       {t("dashboardHome.widgets.event_calendar.selectedDay")}
                     </h3>
                     <CalendarEventList
@@ -260,7 +260,7 @@ export function WidgetEventCalendar() {
                   </section>
                 )}
                 <section>
-                  <h3 className="body-sm-md mb-2 flex h-8 items-center text-neutral-950">
+                  <h3 className="body-sm-md mb-2 flex h-8 items-center pl-3 text-neutral-950">
                     {t("dashboardHome.widgets.event_calendar.upcoming")}
                   </h3>
                   {isUpcomingEventsError ? (
@@ -270,7 +270,7 @@ export function WidgetEventCalendar() {
                       onRetry={() => void refetchUpcomingEvents()}
                     />
                   ) : upcomingEvents.length === 0 ? (
-                    <p className="text-neutral-500">
+                    <p className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-500">
                       {t("dashboardHome.widgets.event_calendar.empty")}
                     </p>
                   ) : (

@@ -12,6 +12,7 @@ export type DashboardLayoutSetting = {
 
 export type DashboardCatalogEntry = {
   type: DashboardWidgetType;
+  alwaysVisible: boolean;
   allowedSizes: DashboardWidgetSize[];
   defaultSize: DashboardWidgetSize;
 };

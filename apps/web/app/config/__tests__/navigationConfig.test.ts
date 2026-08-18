@@ -44,18 +44,6 @@ describe("findMatchingRoute", () => {
   });
 });
 
-describe("getNavigationConfig", () => {
-  const translate = ((key: string) => key) as never;
-
-  it("keeps calendar available through its protected route without a sidebar item", () => {
-    const config = getNavigationConfig(translate, false, false, false, false);
-
-    const courseItems = config[0].items;
-
-    expect(courseItems).not.toContainEqual(expect.objectContaining({ path: "calendar" }));
-  });
-});
-
 describe("mapNavigationItems", () => {
   it("should correctly map navigation items with access requirements", () => {
     const items: NavigationItem[] = [

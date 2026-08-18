@@ -38,6 +38,8 @@ export type DashboardWidgetSize =
 
 export type DashboardWidgetDefinition = {
   type: DashboardWidgetType;
+  /** Required widgets are always visible and cannot be disabled by the user. */
+  alwaysVisible: boolean;
   allowedSizes: readonly DashboardWidgetSize[];
   defaultSize: DashboardWidgetSize;
   requiredPermissions?: readonly PermissionKey[];
@@ -67,6 +69,7 @@ export type DashboardSettings = {
 export const DASHBOARD_WIDGET_CATALOG = {
   [DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE]: {
     type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+    alwaysVisible: false,
     allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_TWO, DASHBOARD_WIDGET_SIZES.THREE_BY_TWO],
     defaultSize: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
     requiredPermissions: [PERMISSIONS.AI_USE],
@@ -74,6 +77,7 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.TODO_LIST]: {
     type: DASHBOARD_WIDGET_TYPES.TODO_LIST,
+    alwaysVisible: false,
     allowedSizes: [
       DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
       DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -84,6 +88,7 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR]: {
     type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+    alwaysVisible: true,
     allowedSizes: [DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO, DASHBOARD_WIDGET_SIZES.FOUR_BY_THREE],
     defaultSize: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
     requiredPermissions: [PERMISSIONS.CALENDAR_READ],
@@ -91,6 +96,7 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS]: {
     type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
+    alwaysVisible: false,
     allowedSizes: [
       DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
       DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -101,12 +107,14 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION]: {
     type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+    alwaysVisible: false,
     allowedSizes: [DASHBOARD_WIDGET_SIZES.ONE_BY_ONE, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO],
     defaultSize: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
     requiredPermissions: [PERMISSIONS.STATISTICS_READ],
   },
   [DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING]: {
     type: DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+    alwaysVisible: false,
     allowedSizes: [
       DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
       DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -117,6 +125,7 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES]: {
     type: DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES,
+    alwaysVisible: false,
     allowedSizes: [
       DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
       DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -127,12 +136,14 @@ export const DASHBOARD_WIDGET_CATALOG = {
   },
   [DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION]: {
     type: DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION,
+    alwaysVisible: false,
     allowedSizes: [DASHBOARD_WIDGET_SIZES.ONE_BY_ONE, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO],
     defaultSize: DASHBOARD_WIDGET_SIZES.ONE_BY_ONE,
     requiredPermissions: [PERMISSIONS.COURSE_READ_ASSIGNED],
   },
   [DASHBOARD_WIDGET_TYPES.CERTIFICATES]: {
     type: DASHBOARD_WIDGET_TYPES.CERTIFICATES,
+    alwaysVisible: false,
     allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_ONE, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO],
     defaultSize: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
     requiredPermissions: [PERMISSIONS.CERTIFICATE_READ],

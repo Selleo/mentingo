@@ -20665,6 +20665,9 @@
                         }
                       ]
                     },
+                    "alwaysVisible": {
+                      "type": "boolean"
+                    },
                     "allowedSizes": {
                       "minItems": 1,
                       "type": "array",
@@ -20744,6 +20747,7 @@
                   },
                   "required": [
                     "type",
+                    "alwaysVisible",
                     "allowedSizes",
                     "defaultSize"
                   ]
@@ -21026,6 +21030,9 @@
                         }
                       ]
                     },
+                    "alwaysVisible": {
+                      "type": "boolean"
+                    },
                     "allowedSizes": {
                       "minItems": 1,
                       "type": "array",
@@ -21105,6 +21112,7 @@
                   },
                   "required": [
                     "type",
+                    "alwaysVisible",
                     "allowedSizes",
                     "defaultSize"
                   ]
@@ -21294,6 +21302,9 @@
                         }
                       ]
                     },
+                    "alwaysVisible": {
+                      "type": "boolean"
+                    },
                     "allowedSizes": {
                       "minItems": 1,
                       "type": "array",
@@ -21373,6 +21384,7 @@
                   },
                   "required": [
                     "type",
+                    "alwaysVisible",
                     "allowedSizes",
                     "defaultSize"
                   ]

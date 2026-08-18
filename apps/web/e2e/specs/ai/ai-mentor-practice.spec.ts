@@ -1,3 +1,5 @@
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../data/ai-mentor-practice/handles";
@@ -84,7 +86,27 @@ const installDashboardAndPracticeMocks = async (page: Page) => {
     }
 
     if (request.method() === "GET" && path === "/api/settings/dashboard") {
-      await fulfillJson(route, ["s_ai_mentor_practice"]);
+      await fulfillJson(route, {
+        layout: {
+          schemaVersion: 2,
+          revision: 0,
+          widgets: [
+            {
+              type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+              size: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+              visible: true,
+            },
+          ],
+        },
+        catalog: [
+          {
+            type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+            alwaysVisible: false,
+            allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_TWO, DASHBOARD_WIDGET_SIZES.THREE_BY_TWO],
+            defaultSize: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+          },
+        ],
+      });
       return;
     }
 

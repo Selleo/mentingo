@@ -37,6 +37,8 @@ On narrow screens below the `md` breakpoint, saved semantic sizes remain the use
 
 Every card shares the same compact shell: organization-color icon, title, divider, fixed overflow behavior, and an optional top-right navigation icon. Navigation icons stay visually stable on hover; they do not slide or gain a competing hover container. The drag preview reuses this header treatment instead of showing a separate icon badge.
 
+Calendar is a required card whenever the user has calendar access and the tenant calendar feature is enabled. It remains visible in the dashboard and appears in the widget library with a disabled switch and a **Required** label; users can still reorder or resize it within its supported calendar sizes, but cannot hide it.
+
 ## Personalization and persistence
 
 `GET /api/settings/dashboard` returns the user's normalized layout and permission-filtered catalog. Each saved item contains:
@@ -46,6 +48,8 @@ type: canonical widget type
 size: 1x1 | 2x1 | 1x2 | 2x2
 visible: boolean
 ```
+
+Catalog entries also indicate whether a widget is always visible. The API normalizes required widgets to `visible: true` and restores an omitted required widget during saves, so the rule is enforced even if an older client submits an incomplete layout.
 
 Array order is display order. The dashboard subdocument also carries `schemaVersion: 2` and a monotonic `revision`.
 

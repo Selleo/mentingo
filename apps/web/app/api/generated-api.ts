@@ -598,6 +598,7 @@ export interface GetDashboardSettingsResponse {
         | "required_courses"
         | "course_completion"
         | "certificates";
+      alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
       defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
@@ -656,6 +657,7 @@ export interface UpdateDashboardSettingsResponse {
         | "required_courses"
         | "course_completion"
         | "certificates";
+      alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
       defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
@@ -700,6 +702,7 @@ export interface ResetDashboardSettingsResponse {
         | "required_courses"
         | "course_completion"
         | "certificates";
+      alwaysVisible: boolean;
       /** @minItems 1 */
       allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
       defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";

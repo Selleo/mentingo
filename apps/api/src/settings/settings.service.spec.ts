@@ -9,6 +9,7 @@ import {
 
 import { SettingsService } from "./settings.service";
 
+import type { DashboardSettingsResponseSchema } from "./schemas/settings.schema";
 import type { DashboardSettings } from "@repo/shared";
 
 describe("SettingsService dashboard normalization", () => {
@@ -114,11 +115,13 @@ describe("SettingsService dashboard normalization", () => {
     const catalog = [
       {
         type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+        alwaysVisible: true,
         allowedSizes: [DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO, DASHBOARD_WIDGET_SIZES.FOUR_BY_THREE],
         defaultSize: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
       },
       {
         type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
+        alwaysVisible: false,
         allowedSizes: [
           DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
           DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -151,6 +154,63 @@ describe("SettingsService dashboard normalization", () => {
       {
         type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
         size: DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
+        visible: true,
+      },
+    ]);
+  });
+
+  it("keeps required widgets visible and restores an omitted required widget", () => {
+    const service = Object.create(SettingsService.prototype) as SettingsService;
+    const normalize = (
+      service as unknown as {
+        normalizeDashboardLayout: (
+          stored: DashboardSettings | null,
+          catalog: DashboardSettingsResponseSchema["catalog"],
+          defaults: DashboardSettings,
+        ) => DashboardSettings;
+      }
+    ).normalizeDashboardLayout;
+    const catalog = [
+      {
+        type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+        alwaysVisible: true,
+        allowedSizes: [DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO],
+        defaultSize: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
+      },
+    ];
+    const defaults: DashboardSettings = {
+      schemaVersion: DASHBOARD_SCHEMA_VERSION,
+      revision: 0,
+      widgets: [
+        {
+          type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+          size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
+          visible: true,
+        },
+      ],
+    };
+
+    expect(
+      normalize.call(
+        service,
+        {
+          schemaVersion: DASHBOARD_SCHEMA_VERSION,
+          revision: 3,
+          widgets: [
+            {
+              type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+              size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
+              visible: false,
+            },
+          ],
+        },
+        catalog,
+        defaults,
+      ).widgets,
+    ).toEqual([
+      {
+        type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+        size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
         visible: true,
       },
     ]);

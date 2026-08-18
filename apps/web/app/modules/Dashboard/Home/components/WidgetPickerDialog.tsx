@@ -1,6 +1,8 @@
+import { DASHBOARD_WIDGET_CATALOG, type DashboardWidgetType } from "@repo/shared";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -17,7 +19,6 @@ import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 import { DashboardWidgetIcon } from "./WidgetCard";
 
 import type { DashboardLayoutItem } from "../types";
-import type { DashboardWidgetType } from "@repo/shared";
 import type { DashboardCatalogEntry } from "~/api/queries/useDashboardSettings";
 
 type WidgetPickerDialogProps = {
@@ -42,6 +43,10 @@ export function WidgetPickerDialog({
   const { t } = useTranslation();
 
   const handleVisibilityChange = (id: DashboardWidgetType, isVisible: boolean) => {
+    const definition = availableWidgets.find((widget) => widget.type === id);
+    const isAlwaysVisible = definition?.alwaysVisible ?? DASHBOARD_WIDGET_CATALOG[id].alwaysVisible;
+    if (!definition || isAlwaysVisible) return;
+
     if (!isVisible) {
       onWidgetsChange(
         savedWidgets
@@ -58,8 +63,6 @@ export function WidgetPickerDialog({
       return;
     }
 
-    const definition = availableWidgets.find((widget) => widget.type === id);
-    if (!definition) return;
     onWidgetsChange([
       ...savedWidgets,
       {
@@ -72,6 +75,9 @@ export function WidgetPickerDialog({
     ]);
   };
 
+  const isRequiredWidget = (widget: DashboardCatalogEntry) =>
+    widget.alwaysVisible ?? DASHBOARD_WIDGET_CATALOG[widget.type].alwaysVisible;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent variant="mobileDrawer" className="flex flex-col sm:!max-w-2xl">
@@ -83,46 +89,55 @@ export function WidgetPickerDialog({
         </DialogHeader>
 
         <div className="grid min-h-0 grid-cols-1 gap-3 overflow-y-auto px-6 py-5">
-          {availableWidgets.map((definition) => {
-            const widgetId = definition.type;
-            const entry = DASHBOARD_WIDGET_REGISTRY[widgetId];
-            if (!entry) return null;
-            const isVisible = savedWidgets.some(
-              (widget) => widget.id === widgetId && widget.visible !== false,
-            );
-            const Icon = entry.icon;
-            const switchId = `dashboard-widget-${widgetId}`;
+          {[...availableWidgets]
+            .sort((left, right) => Number(isRequiredWidget(right)) - Number(isRequiredWidget(left)))
+            .map((definition) => {
+              const widgetId = definition.type;
+              const entry = DASHBOARD_WIDGET_REGISTRY[widgetId];
+              if (!entry) return null;
+              const isAlwaysVisible = isRequiredWidget(definition);
+              const isVisible = savedWidgets.some(
+                (widget) => widget.id === widgetId && widget.visible !== false,
+              );
+              const Icon = entry.icon;
+              const switchId = `dashboard-widget-${widgetId}`;
 
-            return (
-              <div
-                key={widgetId}
-                className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 p-4"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <DashboardWidgetIcon
-                    icon={Icon}
-                    iconClassName={entry.iconClassName}
-                    iconContainerClassName={entry.iconContainerClassName}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <label htmlFor={switchId} className="body-sm-md block text-neutral-950">
-                        {t(entry.titleKey)}
-                      </label>
+              return (
+                <div
+                  key={widgetId}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 p-4"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <DashboardWidgetIcon
+                      icon={Icon}
+                      iconClassName={entry.iconClassName}
+                      iconContainerClassName={entry.iconContainerClassName}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label htmlFor={switchId} className="body-sm-md block text-neutral-950">
+                          {t(entry.titleKey)}
+                        </label>
+                        {isAlwaysVisible && (
+                          <Badge className="px-1.5 py-0.5 text-[11px]" variant="notStarted">
+                            {t("dashboardHome.edit.required")}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="body-sm mt-0.5 text-neutral-600">{t(entry.descriptionKey)}</p>
                     </div>
-                    <p className="body-sm mt-0.5 text-neutral-600">{t(entry.descriptionKey)}</p>
                   </div>
-                </div>
 
-                <Switch
-                  id={switchId}
-                  checked={isVisible}
-                  onCheckedChange={(checked) => handleVisibilityChange(widgetId, checked)}
-                  aria-label={t("dashboardHome.edit.toggle", { title: t(entry.titleKey) })}
-                />
-              </div>
-            );
-          })}
+                  <Switch
+                    id={switchId}
+                    checked={isVisible || isAlwaysVisible}
+                    disabled={isAlwaysVisible}
+                    onCheckedChange={(checked) => handleVisibilityChange(widgetId, checked)}
+                    aria-label={t("dashboardHome.edit.toggle", { title: t(entry.titleKey) })}
+                  />
+                </div>
+              );
+            })}
         </div>
 
         <DialogFooter className="min-h-0 px-6 py-5 gap-2">

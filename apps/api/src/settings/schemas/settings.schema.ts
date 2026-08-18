@@ -76,6 +76,7 @@ export const dashboardSettingsSchema = Type.Object({
 
 export const dashboardWidgetCatalogEntrySchema = Type.Object({
   type: Type.Enum(DASHBOARD_WIDGET_TYPES),
+  alwaysVisible: Type.Boolean(),
   allowedSizes: Type.Array(Type.Enum(DASHBOARD_WIDGET_SIZES), { minItems: 1 }),
   defaultSize: Type.Enum(DASHBOARD_WIDGET_SIZES),
 });
