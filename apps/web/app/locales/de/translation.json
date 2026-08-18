@@ -236,15 +236,15 @@
       "suggestions": {
         "title": "Mit einem Beispiel starten",
         "delayedOrder": {
-          "label": "Eine verspätete Bestellung klären",
+          "label": "Kunde verlangt eine Rückerstattung für eine verspätete Bestellung",
           "value": "Ein Kunde verlangt wegen einer verspäteten Bestellung sein Geld zurück. Die Lieferung einer Kaffeemaschine als Geburtstagsgeschenk wurde in 2–3 Tagen versprochen, aber nach sechs Tagen ist das Paket noch nicht angekommen. Der Kunde fordert sofort eine Rückerstattung und einen zusätzlichen Rabatt und droht mit einer negativen Bewertung. Das Paket ist bereits beim Kurier und kommt wahrscheinlich morgen, aber ich kann weder die Lieferzeit garantieren noch mehr als 10 % Rabatt anbieten. Ich möchte den Kunden beruhigen, nichts Unmögliches versprechen und eine sinnvolle Lösung anbieten."
         },
         "orderMistake": {
-          "label": "Einen Bestellfehler korrigieren",
+          "label": "Ich habe einen Fehler in der Kundenbestellung gemacht",
           "value": "Ich habe 120 statt 20 Packungen Klimaanlagenfilter bestellt. Das Lager hat die Bestellung bereits auf Paletten zusammengestellt und für die Abholung vorbereitet. Wenn sie versendet wird, erhält der Kunde 100 Packungen zu viel und wir müssen eine Rücksendung organisieren. Ich weiß nicht, ob ich zuerst den Versand stoppen, das Lager kontaktieren, meine Führungskraft informieren oder den Kunden benachrichtigen soll."
         },
         "sensitiveData": {
-          "label": "Kundendaten schützen",
+          "label": "Kunde bittet mich um Daten, die ich nicht weitergeben sollte",
           "value": "Ein regelmäßiger Geschäftskunde nennt den Firmennamen und die Bestellnummer und verlangt die Lieferadresse sowie die Telefonnummer der bestellenden Person. Die anrufende Person ist nicht als Kontakt hinterlegt und ich kann nicht prüfen, ob sie tatsächlich dort arbeitet. Sie drängt auf die sofortige Herausgabe der Daten. Ich möchte helfen, ohne Datenschutzregeln zu verletzen."
         }
       },

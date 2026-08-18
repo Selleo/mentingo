@@ -236,15 +236,15 @@
       "suggestions": {
         "title": "Start with an example",
         "delayedOrder": {
-          "label": "Handle a delayed order",
+          "label": "Customer demands a refund for a delayed order",
           "value": "A customer wants a refund because an order was delayed. They ordered a coffee machine for a birthday gift. Delivery was promised in 2–3 days, but six days have passed and the parcel has not arrived. The customer is upset, demands an immediate refund and an extra discount, and threatens a negative review. The parcel is with the courier and will probably arrive tomorrow, but I cannot guarantee the delivery time or offer more than a 10% discount. I want to calm the customer, avoid overpromising, and offer a sensible solution."
         },
         "orderMistake": {
-          "label": "Correct an order mistake",
+          "label": "I made a mistake in the customer's order",
           "value": "I entered 120 packages of air-conditioning filters instead of 20. The warehouse has already picked and packed the order on pallets for collection today. If it ships, the customer will receive 100 packages too many and we will need to arrange a return. I am unsure whether to stop the shipment, contact the warehouse first, tell my manager, or inform the customer."
         },
         "sensitiveData": {
-          "label": "Protect customer data",
+          "label": "Customer asks me for data I should not share",
           "value": "A regular business customer gave the company name and order number, then asked for the delivery address and phone number of the person who placed the order. They said they urgently need to contact that person, but they are not listed as the order contact and I cannot verify that they work for the company. They insist that we are colleagues and need the information immediately. I want to help without disclosing personal data improperly."
         }
       },

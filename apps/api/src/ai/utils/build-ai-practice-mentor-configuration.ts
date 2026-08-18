@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 
 import { AI_MENTOR_TYPE } from "@repo/shared";
 
-import type { LocalizedText, SupportedLanguages } from "@repo/shared";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+
+import type { SupportedLanguages } from "@repo/shared";
 import type { AiPracticeMentorConfigurationGraph } from "src/ai/ai-practice.types";
 import type { UUIDType } from "src/common";
 import type { AiMentorRoleplayConfigurationContent } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
@@ -13,9 +15,8 @@ export function buildAiPracticeMentorConfiguration(
   language: SupportedLanguages,
 ): AiPracticeMentorConfigurationGraph {
   const configurationId = randomUUID() as UUIDType;
-  const localize = (value: string): LocalizedText => ({ [language]: value });
-  const localizeOptional = (value?: string | null): LocalizedText | null =>
-    value == null ? null : localize(value);
+  const localize = (value: string) => buildJsonbField(language, value);
+  const localizeOptional = (value?: string | null) => (value == null ? undefined : localize(value));
 
   return {
     configuration: {

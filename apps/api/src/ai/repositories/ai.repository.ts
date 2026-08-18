@@ -49,6 +49,7 @@ import {
 
 import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
   AiJudgeBlockingErrorJudgementWrite,
@@ -240,61 +241,41 @@ export class AiRepository {
   }
 
   async findMentorLessonByThreadId(threadId: UUIDType, language: SupportedLanguages) {
+    const localizedFieldWithFallback = (field: AnyPgColumn) => sql<string>`COALESCE(
+      NULLIF(${this.localizationService.getLocalizedSqlField(field, language)}, ''),
+      ${this.localizationService.getFirstValue(field)},
+      ''
+    )`;
+
     const [lesson] = await this.db
       .select({
         title: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(lessons.title, language)},
-          ${aiMentorPracticeSessions.title}
+          NULLIF(${this.localizationService.getLocalizedSqlField(lessons.title, language)}, ''),
+          ${aiMentorPracticeSessions.title},
+          'AI Mentor practice'
         )`,
         type: aiMentorConfigurations.type,
-        openingInstruction: this.localizationService.getLocalizedSqlField(
-          aiMentorConfigurations.openingInstruction,
-          language,
-        ),
-        additionalInstructions: this.localizationService.getLocalizedSqlField(
+        openingInstruction: localizedFieldWithFallback(aiMentorConfigurations.openingInstruction),
+        additionalInstructions: localizedFieldWithFallback(
           aiMentorConfigurations.additionalInstructions,
-          language,
         ),
-        taskGoal: this.localizationService.getLocalizedSqlField(
-          aiMentorTeacherConfigurations.taskGoal,
-          language,
-        ),
-        expertise: this.localizationService.getLocalizedSqlField(
-          aiMentorTeacherConfigurations.expertise,
-          language,
-        ),
-        contentScope: this.localizationService.getLocalizedSqlField(
-          aiMentorTeacherConfigurations.contentScope,
-          language,
-        ),
+        taskGoal: localizedFieldWithFallback(aiMentorTeacherConfigurations.taskGoal),
+        expertise: localizedFieldWithFallback(aiMentorTeacherConfigurations.expertise),
+        contentScope: localizedFieldWithFallback(aiMentorTeacherConfigurations.contentScope),
         teachingStyle: aiMentorTeacherConfigurations.teachingStyle,
-        feedbackGuidance: this.localizationService.getLocalizedSqlField(
+        feedbackGuidance: localizedFieldWithFallback(
           aiMentorTeacherConfigurations.feedbackGuidance,
-          language,
         ),
-        scenario: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.scenario,
-          language,
-        ),
-        aiRole: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.aiRole,
-          language,
-        ),
-        learnerRole: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.learnerRole,
-          language,
-        ),
-        characterGoal: this.localizationService.getLocalizedSqlField(
-          aiMentorRoleplayConfigurations.characterGoal,
-          language,
-        ),
+        scenario: localizedFieldWithFallback(aiMentorRoleplayConfigurations.scenario),
+        aiRole: localizedFieldWithFallback(aiMentorRoleplayConfigurations.aiRole),
+        learnerRole: localizedFieldWithFallback(aiMentorRoleplayConfigurations.learnerRole),
+        characterGoal: localizedFieldWithFallback(aiMentorRoleplayConfigurations.characterGoal),
         difficulty: aiMentorRoleplayConfigurations.difficulty,
-        factsAndConstraints: this.localizationService.getLocalizedSqlField(
+        factsAndConstraints: localizedFieldWithFallback(
           aiMentorRoleplayConfigurations.factsAndConstraints,
-          language,
         ),
         name: sql<string>`COALESCE(
-          ${this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language)},
+          NULLIF(${this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language)}, ''),
           ${aiMentorPracticeSessions.aiMentorName},
           'AI Mentor'
         )`,

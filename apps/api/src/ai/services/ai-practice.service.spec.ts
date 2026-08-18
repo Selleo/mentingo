@@ -99,8 +99,8 @@ describe("AiPracticeService", () => {
           type: AI_MENTOR_TYPE.ROLEPLAY,
         }),
         roleplayConfiguration: expect.objectContaining({
-          scenario: { en: mentorConfiguration.scenario },
-          aiRole: { en: mentorConfiguration.aiRole },
+          scenario: expect.objectContaining({ queryChunks: expect.any(Array) }),
+          aiRole: expect.objectContaining({ queryChunks: expect.any(Array) }),
         }),
       }),
       expect.objectContaining({

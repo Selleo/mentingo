@@ -8,6 +8,7 @@ import {
   useResetDashboardSettings,
   useUpdateDashboardSettings,
 } from "~/api/mutations/useUpdateDashboardSettings";
+import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useDashboardSettings } from "~/api/queries/useDashboardSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import {
@@ -96,13 +97,16 @@ export default function HomeDashboardPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isWidgetPickerOpen, setIsWidgetPickerOpen] = useState(false);
   const [isRestoreConfirmOpen, setIsRestoreConfirmOpen] = useState(false);
+  const [hydratedUserId, setHydratedUserId] = useState<string>();
 
+  const { data: currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
+  const userId = currentUser?.id;
   const {
     data: dashboardSettings,
     isLoading,
     isError,
     refetch: refetchDashboardSettings,
-  } = useDashboardSettings();
+  } = useDashboardSettings(userId);
   const { mutate: updateDashboardSettings } = useUpdateDashboardSettings();
   const { mutate: resetDashboardSettings, isPending: isRestoringDefault } =
     useResetDashboardSettings();
@@ -111,11 +115,12 @@ export default function HomeDashboardPage() {
     (widget) => widget.visible !== false,
   );
   useEffect(() => {
-    if (!dashboardSettings) return;
+    if (!dashboardSettings || !userId) return;
     const userLayout = createLayout(dashboardSettings.layout.widgets, dashboardSettings.catalog);
     setSavedWidgets(userLayout);
     setDraftWidgets(cloneLayout(userLayout));
-  }, [dashboardSettings]);
+    setHydratedUserId(userId);
+  }, [dashboardSettings, userId]);
 
   const handleStartEditing = () => setIsEditing(true);
 
@@ -150,6 +155,9 @@ export default function HomeDashboardPage() {
     });
   };
 
+  const isLayoutHydrated = Boolean(dashboardSettings && userId && hydratedUserId === userId);
+  const isDashboardLoading = isCurrentUserLoading || isLoading || (!isError && !isLayoutHydrated);
+
   return (
     <PageWrapper className="min-w-0">
       <div className="mx-auto w-full max-w-[1600px] space-y-6">
@@ -182,7 +190,7 @@ export default function HomeDashboardPage() {
         </header>
 
         <div>
-          {match([isLoading, isError])
+          {match([isDashboardLoading, isError])
             .with([true, P._], () => (
               <div className="flex min-h-80 items-center justify-center">
                 <Loader />

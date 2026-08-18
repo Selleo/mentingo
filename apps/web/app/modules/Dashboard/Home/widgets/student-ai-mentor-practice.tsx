@@ -319,7 +319,7 @@ export function WidgetStudentAiMentorPractice({
   };
 
   const isActive = data?.threadStatus === "active";
-  const scenarioMaxRows = Math.max(1, dashboardSizeToSpan(widgetSize).rows);
+  const scenarioMaxRows = Math.min(2, Math.max(1, dashboardSizeToSpan(widgetSize).rows));
   const lastMessage = messages[messages.length - 1];
   const showChatLoader =
     isSending &&

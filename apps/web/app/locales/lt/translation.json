@@ -236,15 +236,15 @@
       "suggestions": {
         "title": "Pradėkite nuo pavyzdžio",
         "delayedOrder": {
-          "label": "Išspręsti vėluojančio užsakymo problemą",
+          "label": "Klientas reikalauja grąžinti pinigus už vėluojantį užsakymą",
           "value": "Klientas reikalauja grąžinti pinigus dėl vėluojančio užsakymo. Kavos aparato, skirto gimtadienio dovanai, pristatymas turėjo trukti 2–3 dienas, tačiau praėjo šešios dienos ir siunta dar neatvyko. Klientas piktinasi, reikalauja grąžinimo ir papildomos nuolaidos bei grasina neigiamu atsiliepimu. Siunta jau perduota kurjeriui ir tikriausiai atvyks rytoj, bet negaliu garantuoti laiko ar pasiūlyti didesnės nei 10 % nuolaidos. Noriu nuraminti klientą, nežadėti per daug ir pasiūlyti tinkamą sprendimą."
         },
         "orderMistake": {
-          "label": "Ištaisyti užsakymo klaidą",
+          "label": "Padariau klaidą kliento užsakyme",
           "value": "Užsakyme įrašiau 120 oro kondicionierių filtrų pakuočių vietoje 20. Sandėlis jau sukomplektavo ir supakavo užsakymą ant palečių kurjerio paėmimui. Išsiuntus klientas gautų 100 pakuočių per daug, todėl reikėtų organizuoti grąžinimą. Nežinau, ar pirmiausia stabdyti siuntimą, susisiekti su sandėliu, informuoti vadovą ar klientą."
         },
         "sensitiveData": {
-          "label": "Apsaugoti kliento duomenis",
+          "label": "Klientas prašo duomenų, kurių neturėčiau atskleisti",
           "value": "Nuolatinis verslo klientas pateikė įmonės pavadinimą ir užsakymo numerį, tada paprašė pristatymo adreso ir užsakymą pateikusio asmens telefono numerio. Skambinantis asmuo nėra nurodytas kaip užsakymo kontaktas, todėl negaliu patikrinti, ar jis iš tikrųjų dirba įmonėje. Jis spaudžia informaciją pateikti nedelsiant. Noriu padėti nepažeisdamas duomenų apsaugos taisyklių."
         }
       },

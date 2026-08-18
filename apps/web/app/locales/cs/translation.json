@@ -242,15 +242,15 @@
       "suggestions": {
         "title": "Začněte příkladem",
         "delayedOrder": {
-          "label": "Vyřešit zpožděnou objednávku",
+          "label": "Zákazník požaduje vrácení peněz za opožděnou objednávku",
           "value": "Zákazník požaduje vrácení peněz kvůli zpožděné objednávce. Kávovar jako narozeninový dárek měl být doručen za 2–3 dny, ale po šesti dnech zásilka stále nedorazila. Zákazník požaduje okamžité vrácení peněz a další slevu a hrozí negativní recenzí. Zásilka je u kurýra a pravděpodobně dorazí zítra, ale nemohu zaručit čas doručení ani nabídnout slevu vyšší než 10 %. Chci zákazníka uklidnit, nic neslibovat nad rámec možností a nabídnout rozumné řešení."
         },
         "orderMistake": {
-          "label": "Opravit chybu v objednávce",
+          "label": "Udělal jsem chybu v objednávce zákazníka",
           "value": "Do objednávky jsem zadal 120 balení filtrů do klimatizace místo 20. Sklad už objednávku zkompletoval, zabalil na palety a připravil k vyzvednutí kurýrem. Pokud odešle, zákazník dostane o 100 balení více a budeme organizovat vrácení. Nevím, zda nejdříve zastavit odeslání, kontaktovat sklad, informovat vedoucího nebo zákazníka."
         },
         "sensitiveData": {
-          "label": "Chránit údaje zákazníka",
+          "label": "Zákazník po mně chce údaje, které nemám sdílet",
           "value": "Pravidelný firemní zákazník uvedl název firmy a číslo objednávky a požádal o doručovací adresu a telefon osoby, která objednávku zadala. Není uveden jako kontakt objednávky a nemohu ověřit, zda ve firmě skutečně pracuje. Naléhá, že informace potřebuje ihned. Chci pomoci, aniž bych porušil pravidla ochrany osobních údajů."
         }
       },

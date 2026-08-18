@@ -238,15 +238,15 @@
       "suggestions": {
         "title": "Zacznij od przykładu",
         "delayedOrder": {
-          "label": "Opóźnione zamówienie",
+          "label": "Klient żąda zwrotu pieniędzy za opóźnione zamówienie",
           "value": "Klient żąda zwrotu pieniędzy za opóźnione zamówienie. Zamówił ekspres do kawy za 1 800 zł jako prezent urodzinowy. Dostawa miała zająć 2–3 dni, ale minęło już 6 dni i przesyłka nadal nie dotarła. Klient jest bardzo poirytowany, żąda natychmiastowego zwrotu pieniędzy i dodatkowego rabatu oraz grozi negatywną opinią. W systemie widzę, że paczka jest już u kuriera i prawdopodobnie dotrze jutro, ale nie mogę zagwarantować konkretnej godziny dostawy ani przyznać rabatu większego niż 10%. Chcę uspokoić klienta, nie obiecać za dużo i zaproponować mu sensowne rozwiązanie."
         },
         "orderMistake": {
-          "label": "Błąd w zamówieniu",
+          "label": "Popełniłem błąd w zamówieniu klienta",
           "value": "Popełniłem błąd w zamówieniu klienta: wpisałem 120 opakowań filtrów do klimatyzacji zamiast 20. Magazyn zdążył już skompletować zamówienie, zapakować je na palety i przygotować do odbioru przez kuriera. Jeśli przesyłka wyjedzie, klient dostanie o 100 opakowań za dużo i będziemy musieli organizować ich zwrot. Nie wiem, czy najpierw zatrzymać wysyłkę, skontaktować się z magazynem, zgłosić sprawę przełożonemu czy poinformować klienta."
         },
         "sensitiveData": {
-          "label": "Dane klienta",
+          "label": "Klient prosi mnie o dane, których nie powinienem udostępnić",
           "value": "Klient z firmy, która regularnie składa u nas zamówienia, podał nazwę firmy i numer zamówienia, a następnie poprosił o adres dostawy i numer telefonu osoby składającej zamówienie. Nie jest wskazany jako kontakt przy zamówieniu i nie mogę potwierdzić, czy rzeczywiście pracuje w tej firmie. Naciska, twierdząc, że jesteśmy z jednej firmy i potrzebuje tych informacji od razu. Chcę pomóc klientowi bez naruszenia zasad ochrony danych."
         }
       },
