@@ -2,6 +2,7 @@ import { useLocation } from "@remix-run/react";
 import { useEffect } from "react";
 
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
+import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 export function useNavigationTracker() {
@@ -15,7 +16,7 @@ export function useNavigationTracker() {
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const isAuthRoute = location.pathname.startsWith("/auth");
-  const isRootRoute = location.pathname === "/";
+  const isRootRoute = location.pathname === LOGIN_REDIRECT_URL;
 
   useEffect(() => {
     if (currentUser || isAuthRoute || isRootRoute) return;
