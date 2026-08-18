@@ -235,28 +235,32 @@ test.describe("dashboard layout persistence", () => {
       await page.getByRole("button", { name: "Widgets" }).click();
       const calendarToggle = page.getByRole("switch", { name: "Toggle Event calendar" });
       await expect(calendarToggle).toBeChecked();
-      await calendarToggle.click();
+      await expect(calendarToggle).toBeDisabled();
+      const trainingToggle = page.getByRole("switch", { name: "Toggle Training completion" });
+      await expect(trainingToggle).toBeChecked();
+      await trainingToggle.click();
       await expect.poll(() => state.updates.length).toBeGreaterThan(2);
       await expect
         .poll(
           () =>
             state
               .getWidgets()
-              .find((widget) => widget.type === DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR)?.visible,
+              .find((widget) => widget.type === DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION)
+              ?.visible,
         )
         .toBe(false);
       await expect(page.getByRole("button", { name: /^Save$/i })).toHaveCount(0);
       await page.getByRole("button", { name: "Close" }).last().click();
 
       await page.reload();
-      await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR)).toHaveCount(0);
-      const persistedTrainingWidget = page.getByTestId(
-        DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION,
-      );
-      await expect(persistedTrainingWidget).toBeVisible();
+      await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR)).toBeVisible();
+      await expect(
+        page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION),
+      ).toHaveCount(0);
+      const persistedCalendarWidget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR);
       const persistedHitbox = page
         .locator('[data-dashboard-widget-hitbox="true"]')
-        .filter({ has: persistedTrainingWidget });
+        .filter({ has: persistedCalendarWidget });
       await expect(persistedHitbox).toHaveAttribute("style", /grid-row: span 2/);
     });
   });
