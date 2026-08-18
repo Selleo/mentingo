@@ -17,10 +17,10 @@ import { aiMentorThreads } from "src/storage/schema";
 import type { OnModuleInit } from "@nestjs/common";
 import type { promptId } from "@repo/prompts";
 import type { Static } from "@sinclair/typebox";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
 import type { CompiledTemplate } from "src/ai/utils/prompt.type";
-import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()

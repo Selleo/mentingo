@@ -23,7 +23,6 @@ import {
 } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
-import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
@@ -46,6 +45,7 @@ import type {
   PcmChunkMeta,
   SupportedLanguages,
 } from "@repo/shared";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { SendTTSTriggerBody, StartAudioBody } from "src/audio/types/audio.types";
 import type { ExternalAudioSession } from "src/audio/types/external-audio-session.types";
 import type { ExternalAudioStartResult } from "src/audio/types/external-audio.types";
@@ -654,11 +654,7 @@ export class ExternalAudioService {
       return;
     }
 
-    this.realtimePublisher.emitToRoom(
-      VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA,
-      sessionId,
-      payload,
-    );
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA, sessionId, payload);
   }
 
   private emitMentorResponseCompleted(
