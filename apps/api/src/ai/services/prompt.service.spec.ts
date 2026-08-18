@@ -125,4 +125,44 @@ describe("PromptService learner-name personalization", () => {
       ]),
     );
   });
+
+  it("adds learner delivery timing as a separate voice system message", async () => {
+    const { service } = createService();
+    jest.spyOn(service, "loadPrompt").mockImplementation(async (id) => {
+      switch (id) {
+        case "voiceMentorAddon":
+          return "VOICE_MENTOR_ADDON";
+        case "voiceMentorTimingAddon":
+          return "VOICE_MENTOR_TIMING_ADDON";
+        default:
+          throw new Error(`Unexpected prompt: ${id}`);
+      }
+    });
+
+    const prompt = await service.buildPrompt(
+      threadId,
+      "Slow answer",
+      true,
+      undefined,
+      false,
+      {
+        elapsedMs: 5400,
+        speechMs: 4200,
+        pauseCount: 2,
+        longestPauseMs: 700,
+        averagePauseMs: 350,
+        segmentCount: 3,
+        wordCount: 14,
+        wordsPerMinute: 200,
+        timingPrecision: "word",
+      },
+    );
+
+    expect(prompt).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ content: "VOICE_MENTOR_ADDON" }),
+        expect.objectContaining({ content: "VOICE_MENTOR_TIMING_ADDON" }),
+      ]),
+    );
+  });
 });

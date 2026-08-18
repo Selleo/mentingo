@@ -143,6 +143,7 @@ export class AiService {
           isVoiceMentor,
           data.id,
           data.voiceTurnWasInterrupted,
+          data.voiceDeliveryContext,
         );
 
         const generationConfig = isVoiceMentor

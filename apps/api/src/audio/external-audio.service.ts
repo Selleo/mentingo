@@ -23,6 +23,7 @@ import {
 } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
@@ -347,6 +348,8 @@ export class ExternalAudioService {
       return;
     }
 
+    const voiceDeliveryContext = this.resolveVoiceDeliveryContext(payload.data.timing);
+
     session.activeTurnId = payload.jobId ?? null;
     const voiceTurnWasInterrupted = session.pendingInterruption;
     session.pendingInterruption = false;
@@ -371,6 +374,7 @@ export class ExternalAudioService {
             content: text,
             voiceSessionId: sessionId,
             voiceTurnWasInterrupted,
+            voiceDeliveryContext,
             abortSignal: abortController.signal,
           },
           OPENAI_MODELS.BASIC,
@@ -520,6 +524,59 @@ export class ExternalAudioService {
         session.activeMentorStream = null;
       }
     }
+  }
+
+  private resolveVoiceDeliveryContext(
+    timing: MentorTranscriptionPayload["data"]["timing"],
+  ): AiVoiceDeliveryContext | undefined {
+    if (!timing) {
+      return undefined;
+    }
+
+    const requiredValues = [
+      timing.elapsedMs,
+      timing.speechMs,
+      timing.pauseCount,
+      timing.longestPauseMs,
+      timing.segmentCount,
+      timing.wordCount,
+    ];
+    if (requiredValues.some((value) => this.toNonNegativeInteger(value) === undefined)) {
+      return undefined;
+    }
+
+    const timingPrecision = timing.timingPrecision?.trim();
+    if (!timingPrecision) {
+      return undefined;
+    }
+
+    return {
+      elapsedMs: this.toNonNegativeInteger(timing.elapsedMs) as number,
+      speechMs: this.toNonNegativeInteger(timing.speechMs) as number,
+      pauseCount: this.toNonNegativeInteger(timing.pauseCount) as number,
+      longestPauseMs: this.toNonNegativeInteger(timing.longestPauseMs) as number,
+      averagePauseMs: this.toOptionalNonNegativeInteger(timing.averagePauseMs),
+      segmentCount: this.toNonNegativeInteger(timing.segmentCount) as number,
+      wordCount: this.toNonNegativeInteger(timing.wordCount) as number,
+      wordsPerMinute: this.toOptionalNonNegativeInteger(timing.wordsPerMinute),
+      timingPrecision,
+    };
+  }
+
+  private toNonNegativeInteger(value: unknown): number | undefined {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return undefined;
+    }
+
+    return Math.max(0, Math.trunc(value));
+  }
+
+  private toOptionalNonNegativeInteger(value: unknown): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    return this.toNonNegativeInteger(value) ?? null;
   }
 
   private shouldFlushMentorDeltaChunk(chunk: string): boolean {
