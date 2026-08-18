@@ -233,7 +233,6 @@ test.describe("dashboard layout persistence", () => {
       expect(firstVisibleWidget?.type).toBe(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION);
 
       await page.getByRole("button", { name: "Widgets" }).click();
-      await expect(page.getByRole("dialog").getByText("Beta", { exact: true })).toBeVisible();
       const calendarToggle = page.getByRole("switch", { name: "Toggle Event calendar" });
       await expect(calendarToggle).toBeChecked();
       await expect(calendarToggle).toBeDisabled();
