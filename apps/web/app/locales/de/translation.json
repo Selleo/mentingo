@@ -235,21 +235,17 @@
       "submit": "Übung erstellen",
       "suggestions": {
         "title": "Mit einem Beispiel starten",
-        "feedback": {
-          "label": "Feedback geben",
-          "value": "Ich möchte üben, einem Kollegen konstruktives Feedback zu einer wichtigen verpassten Frist zu geben."
+        "delayedOrder": {
+          "label": "Kunde verlangt eine Rückerstattung für eine verspätete Bestellung",
+          "value": "Ein Kunde verlangt wegen einer verspäteten Bestellung sein Geld zurück. Die Lieferung einer Kaffeemaschine als Geburtstagsgeschenk wurde in 2–3 Tagen versprochen, aber nach sechs Tagen ist das Paket noch nicht angekommen. Der Kunde fordert sofort eine Rückerstattung und einen zusätzlichen Rabatt und droht mit einer negativen Bewertung. Das Paket ist bereits beim Kurier und kommt wahrscheinlich morgen, aber ich kann weder die Lieferzeit garantieren noch mehr als 10 % Rabatt anbieten. Ich möchte den Kunden beruhigen, nichts Unmögliches versprechen und eine sinnvolle Lösung anbieten."
         },
-        "boundary": {
-          "label": "Eine Grenze setzen",
-          "value": "Ich möchte üben, eine klare Grenze zu setzen, wenn ein Teammitglied mich um dringende Arbeit außerhalb meiner aktuellen Prioritäten bittet."
+        "orderMistake": {
+          "label": "Ich habe einen Fehler in der Kundenbestellung gemacht",
+          "value": "Ich habe 120 statt 20 Packungen Klimaanlagenfilter bestellt. Das Lager hat die Bestellung bereits auf Paletten zusammengestellt und für die Abholung vorbereitet. Wenn sie versendet wird, erhält der Kunde 100 Packungen zu viel und wir müssen eine Rücksendung organisieren. Ich weiß nicht, ob ich zuerst den Versand stoppen, das Lager kontaktieren, meine Führungskraft informieren oder den Kunden benachrichtigen soll."
         },
-        "explanation": {
-          "label": "Eine Entscheidung erklären",
-          "value": "Ich möchte üben, jemandem, der anderer Meinung ist, eine schwierige Entscheidung zu erklären."
-        },
-        "request": {
-          "label": "Eine Bitte äußern",
-          "value": "Ich möchte üben, meine Führungskraft bei einer zu hohen Arbeitsbelastung um Unterstützung zu bitten."
+        "sensitiveData": {
+          "label": "Kunde bittet mich um Daten, die ich nicht weitergeben sollte",
+          "value": "Ein regelmäßiger Geschäftskunde nennt den Firmennamen und die Bestellnummer und verlangt die Lieferadresse sowie die Telefonnummer der bestellenden Person. Die anrufende Person ist nicht als Kontakt hinterlegt und ich kann nicht prüfen, ob sie tatsächlich dort arbeitet. Sie drängt auf die sofortige Herausgabe der Daten. Ich möchte helfen, ohne Datenschutzregeln zu verletzen."
         }
       },
       "steps": {
@@ -361,8 +357,10 @@
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
       "threadMustBeActive": "Der Thread muss aktiv sein.",
+      "aiMentorConfigurationIncomplete": "Die Konfiguration des KI-Mentors ist unvollständig.",
       "aiJudgeConfigurationMissing": "Die Konfiguration der Abschlussbedingungen fehlt.",
-      "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
+      "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
     },
     "loader": {
       "textSequence": {
@@ -2686,6 +2684,235 @@
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Verhalten des KI-Mentors",
+          "emptyDescription": "Legen Sie fest, wie die KI den Lernenden anleiten oder mit ihm interagieren soll.",
+          "baseLanguageRequired": "Konfigurieren Sie das Verhalten des KI-Mentors zuerst in der Basissprache des Kurses.",
+          "incompleteDescription": "Für diese Konfiguration fehlen noch einige Angaben.",
+          "configureManually": "Manuell konfigurieren",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "dialogTitle": "KI-Mentor konfigurieren",
+          "dialogDescription": "Wählen Sie einen Modus und definieren Sie das gewünschte Lernerlebnis.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Verhalten feinabstimmen (optional)",
+          "translationModeTitle": "Übersetzungsmodus",
+          "translationModeDescription": "Übersetzen Sie hier die Textfelder. Modus, Lehrstil und Schwierigkeitsgrad werden in der Basissprache verwaltet.",
+          "structureLockedTooltip": "Die Struktur des KI-Mentors kann nur in der Basissprache geändert werden.",
+          "applyConfiguration": "Konfiguration übernehmen",
+          "saveConfiguration": "Konfiguration speichern",
+          "saveTranslation": "Übersetzung speichern",
+          "configurationSaved": "KI-Mentor-Konfiguration gespeichert.",
+          "translationSaved": "KI-Mentor-Übersetzung gespeichert.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor-Modus",
+            "teacher": {
+              "label": "Lehrer",
+              "description": "Erklärt Konzepte und begleitet Übungen."
+            },
+            "roleplay": {
+              "label": "Rollenspiel",
+              "description": "Übernimmt eine Rolle in einem Übungsszenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Mit einem Szenario beginnen",
+            "scenarioSimulation": {
+              "taskDescription": "Üben Sie, den Bedarf eines Softwarekunden zu ermitteln und ein passendes Angebot vorzuschlagen.",
+              "aiRole": "Potenzieller Softwarekunde",
+              "learnerRole": "Vertriebsmitarbeiter",
+              "characterGoal": "Einen Anbieter wählen, der Termin-, Budget- und Kommunikationsanforderungen erfüllt.",
+              "factsAndConstraints": "Die Anwendung muss innerhalb von drei Monaten fertig sein. Das Budget ist begrenzt, und eine klare, regelmäßige Kommunikation ist erforderlich.",
+              "openingInstruction": "Stellen Sie sich als Kunde vor, der Softwareanbieter bewertet, und fragen Sie, wie der Lernende helfen kann."
+            },
+            "problemSolving": {
+              "taskDescription": "Üben Sie den konstruktiven Umgang mit dem Wunsch eines Mitarbeiters nach einer Gehaltserhöhung.",
+              "aiRole": "Mitarbeiter mit Gehaltswunsch",
+              "learnerRole": "Führungskraft",
+              "characterGoal": "Gehört werden und eine glaubwürdige Alternative oder einen Folgeplan vereinbaren.",
+              "factsAndConstraints": "Der Mitarbeiter hat zuletzt wichtige Beiträge geleistet, aber das Unternehmen hat derzeit kein Budget für Gehaltserhöhungen.",
+              "openingInstruction": "Beginnen Sie mit Ihren jüngsten Beiträgen und bitten Sie um ein Gespräch über eine Gehaltserhöhung."
+            },
+            "creativeTask": {
+              "taskDescription": "Entwickeln und verfeinern Sie eine originelle Idee für einen neuen Kundenservice.",
+              "taskGoal": "Helfen Sie dem Lernenden, eine originelle Serviceidee zu entwickeln und zu verfeinern.",
+              "expertise": "Coach für Serviceinnovation",
+              "feedbackGuidance": "Fördern Sie Originalität und praktischen Nutzen. Stellen Sie gezielte Rückfragen und weisen Sie auf wichtige Lücken hin, ohne die Idee zu übernehmen.",
+              "openingInstruction": "Bitten Sie den Lernenden, seine erste Serviceidee vorzustellen und zu erklären, wem sie helfen soll."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Lernen Sie praktische Zeitmanagementmethoden und planen Sie deren Anwendung im Arbeitsalltag.",
+              "taskGoal": "Helfen Sie dem Lernenden, praktische Zeitmanagementmethoden zu verstehen und anzuwenden.",
+              "expertise": "Zeitmanagement-Coach",
+              "feedbackGuidance": "Korrigieren Sie Missverständnisse behutsam und verbinden Sie das Feedback mit einer konkreten, realistischen Anwendung am Arbeitsplatz.",
+              "openingInstruction": "Stellen Sie eine praktische Zeitmanagementmethode vor und fragen Sie dann, wie der Lernende seine Arbeit derzeit organisiert."
+            }
+          },
+          "taskGoal": {
+            "label": "Aufgabenziel",
+            "placeholder": "Was soll der Lehrer erklären oder üben helfen?"
+          },
+          "expertise": {
+            "label": "Fachgebiet",
+            "placeholder": "Zum Beispiel: Trainer für DSGVO-Compliance"
+          },
+          "contentScope": {
+            "label": "Inhaltsrahmen",
+            "placeholder": "Was darf der Lehrer behandeln und was soll er vermeiden?"
+          },
+          "teachingStyle": {
+            "label": "Lehrstil",
+            "explain_and_practice": {
+              "label": "Erklären und üben",
+              "description": "Klar erklären und anschließend mit Übungen festigen."
+            },
+            "guided_discovery": {
+              "label": "Geführtes Entdecken",
+              "description": "Den Lernenden schrittweise zu Schlussfolgerungen führen."
+            },
+            "socratic": {
+              "label": "Sokratisch",
+              "description": "Mit gezielten Fragen das Denken vertiefen."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback-Vorgaben",
+            "placeholder": "Wie soll der Lehrer korrigieren oder bestärken?"
+          },
+          "scenario": {
+            "label": "Szenario",
+            "placeholder": "Beschreiben Sie die Übungssituation."
+          },
+          "aiRole": { "label": "Rolle der KI", "placeholder": "Zum Beispiel: Zögernder Kunde" },
+          "learnerRole": {
+            "label": "Rolle des Lernenden",
+            "placeholder": "Zum Beispiel: Vertriebsmitarbeiter"
+          },
+          "characterGoal": {
+            "label": "Ziel der KI-Figur",
+            "placeholder": "Was möchte die KI-Figur erreichen?"
+          },
+          "difficulty": {
+            "label": "Schwierigkeitsgrad",
+            "cooperative": {
+              "label": "Kooperativ",
+              "description": "Hilfsbereit und bereit, das Gespräch voranzubringen."
+            },
+            "realistic": {
+              "label": "Realistisch",
+              "description": "Natürlicher Widerstand und glaubwürdige Reaktionen."
+            },
+            "challenging": {
+              "label": "Anspruchsvoll",
+              "description": "Deutlicher Widerstand, der eine starke Reaktion verlangt."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakten und Einschränkungen",
+            "placeholder": "Budgets, Fristen, Richtlinien oder unveränderliche Fakten."
+          },
+          "openingInstruction": {
+            "label": "Eröffnungsanweisung",
+            "placeholder": "Wie soll die einmalige Begrüßung beginnen?"
+          },
+          "additionalInstructions": {
+            "label": "Zusätzliche Anweisungen",
+            "placeholder": "Ergänzen Sie besonderes Verhalten, das oben nicht abgedeckt ist."
+          },
+          "typeChange": {
+            "title": "Mentor-Modus ändern?",
+            "description": "Beim Wechsel zu {{type}} werden die modusspezifischen Felder geleert. Eröffnungs- und Zusatzanweisungen bleiben erhalten."
+          },
+          "validation": {
+            "required": "Dieses Feld ist erforderlich.",
+            "configurationRequired": "Konfigurieren Sie das Verhalten des KI-Mentors, bevor Sie die Lektion speichern."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentor-Modus",
+          "createWithAi": "Mit KI erstellen",
+          "improveWithAi": "Mit KI verbessern",
+          "checkQualityWithAi": "Qualität mit KI prüfen",
+          "aiAssistance": "KI-Unterstützung",
+          "create": {
+            "title": "KI-Mentor-Verhalten mit KI erstellen",
+            "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.",
+            "fieldLabel": "Welches Szenario soll die KI vorbereiten?",
+            "fieldDescription": "Die KI erstellt einen vollständigen Arbeitsentwurf des Szenarios für den ausgewählten Modus.",
+            "placeholder": "Beschreiben Sie die Situation, die Beteiligten und das Gesprächsziel…",
+            "submit": "Entwurf erstellen"
+          },
+          "improve": {
+            "title": "KI-Mentor-Verhalten mit KI verbessern",
+            "description": "KI verwendet die aktuelle ungespeicherte Konfiguration und ihren Modus.",
+            "fieldLabel": "Was soll die KI am Szenario ändern?",
+            "fieldDescription": "Beschreiben Sie, was realistischer, stimmiger oder konkreter werden soll. Der ausgewählte Modus bleibt unverändert.",
+            "placeholder": "Beschreiben Sie die gewünschte Änderung…",
+            "submit": "Entwurf verbessern"
+          },
+          "progressTitle": "Entwurf wird vorbereitet",
+          "progressDescription": "KI erstellt und prüft die Konfiguration.",
+          "readyTitle": "Entwurf bereit zur Prüfung",
+          "revisionTitle": "Entwurf benötigt Ihre Entscheidung",
+          "failedTitle": "Entwurf konnte nicht erstellt werden",
+          "cancel": "Generierung abbrechen",
+          "revise": "Entwurf überarbeiten",
+          "review": "Konfiguration prüfen",
+          "progressLabel": "Fortschritt der KI-Mentor-Generierung",
+          "stages": {
+            "draft": "Entwurf erstellen",
+            "qualityCheck": "Qualitätsprüfung",
+            "ready": "Bereit"
+          },
+          "status": {
+            "drafting": "Konfiguration wird erstellt",
+            "evaluating": "Konfigurationsqualität wird geprüft",
+            "revising": "Entwurf wird verbessert",
+            "awaiting_revision": "Qualitätsprüfung benötigt Ihre Entscheidung",
+            "completed": "Konfiguration ist bereit",
+            "requires_review": "Entwurf benötigt Ihre Entscheidung",
+            "failed": "Generierung konnte nicht abgeschlossen werden",
+            "cancelled": "Generierung abgebrochen"
+          },
+          "statusDescription": {
+            "drafting": "Das Mentor-Verhalten für den ausgewählten Modus wird vorbereitet.",
+            "evaluating": "Es wird geprüft, ob das Verhalten klar, vollständig und konsistent ist.",
+            "revising": "Die letzten Korrekturen der Qualitätsprüfung werden angewendet.",
+            "awaiting_revision": "Prüfen Sie die Hinweise vor einem weiteren Versuch.",
+            "completed": "Der Entwurf hat die Qualitätsprüfung bestanden.",
+            "requires_review": "Der letzte Entwurf wurde für Ihre Entscheidung beibehalten.",
+            "failed": "Versuchen Sie es erneut oder konfigurieren Sie das Mentor-Verhalten manuell.",
+            "cancelled": "Es wurden keine Konfigurationsänderungen angewendet."
+          },
+          "attempt": "Entwurf {{attempt}} von {{maxAttempts}}",
+          "currentDraft": "Aktueller Entwurf",
+          "qualityCheckLabel": "Qualitätsprüfung",
+          "qualityDecisionTitle": "{{count}} Verbesserungen vorgeschlagen",
+          "qualityDecisionDescription": "Prüfen Sie die Vorschläge oder fahren Sie mit dieser Konfiguration fort.",
+          "suggestedImprovements": "Vorgeschlagene Verbesserungen",
+          "applyImprovements": "Überarbeiten",
+          "useCurrentDraft": "Weiter",
+          "reviewExactChanges": "Änderungen durch KI ({{count}})",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "showMoreFindings": "{{count}} weitere Hinweise anzeigen",
+          "showFewerFindings": "Weniger Hinweise anzeigen",
+          "review": {
+            "currentDraftTitle": "Aktuellen Entwurf prüfen",
+            "currentDraftDescription": "Dieser Entwurf enthält noch Qualitätsvorschläge. Prüfen Sie ihn vor der Anwendung.",
+            "requiresReviewTitle": "Generierte Konfiguration prüfen",
+            "requiresReviewDescription": "KI hat den letzten Entwurf für Ihre endgültige Entscheidung beibehalten."
+          },
+          "quality": {
+            "title": "Qualität mit KI prüfen",
+            "resultTitle": "Qualitätsprüfung",
+            "description": "KI prüft die aktuelle ungespeicherte Konfiguration, ohne sie zu ändern.",
+            "checking": "Aktuelle Konfiguration wird geprüft…",
+            "checkingDescription": "Modus, Hinweise, Einschränkungen und Gesprächsverhalten werden geprüft.",
+            "hasFindings": "Prüfen Sie die Hinweise oder lassen Sie die Konfiguration anhand des Feedbacks von KI verbessern.",
+            "passed": "Keine Änderungen erforderlich. Sie können weiter bearbeiten oder speichern.",
+            "improve": "Mit KI verbessern"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Abschlussbedingungen",
           "configured": "Konfiguriert",
@@ -2695,6 +2922,7 @@
           "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
           "configureWithAi": "Mit KI konfigurieren",
           "createWithAi": "Mit KI erstellen",
+          "aiMentorConfigurationRequiredTooltip": "Konfigurieren Sie zuerst das Verhalten des AI Mentors, bevor Sie Abschlussbedingungen mit KI erstellen.",
           "improveWithAi": "Mit KI verbessern",
           "checkQualityWithAi": "Qualität mit KI prüfen",
           "checkingQuality": "Qualität wird geprüft...",

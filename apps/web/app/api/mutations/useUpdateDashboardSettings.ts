@@ -7,14 +7,19 @@ import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorM
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
+import { useCurrentUser } from "../queries/useCurrentUser";
 import {
   dashboardSettingsQueryOptions,
+  getDashboardSettingsQueryKey,
   type DashboardLayoutSetting,
 } from "../queries/useDashboardSettings";
 
 export function useUpdateDashboardSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { data: currentUser } = useCurrentUser();
+  const userId = currentUser?.id;
+
   return useMutation({
     mutationFn: async (body: { expectedRevision: number; widgets: DashboardLayoutSetting[] }) => {
       try {
@@ -22,7 +27,11 @@ export function useUpdateDashboardSettings() {
       } catch (error) {
         if (!isAxiosError(error) || error.response?.status !== 409) throw error;
 
-        const refreshedSettings = await queryClient.fetchQuery(dashboardSettingsQueryOptions);
+        if (!userId) throw error;
+
+        const refreshedSettings = await queryClient.fetchQuery(
+          dashboardSettingsQueryOptions(userId),
+        );
         return (
           await ApiClient.api.settingsControllerUpdateDashboardSettings({
             ...body,
@@ -32,11 +41,13 @@ export function useUpdateDashboardSettings() {
       }
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data);
+      if (userId) queryClient.setQueryData(getDashboardSettingsQueryKey(userId), data);
       toast({ description: t("dashboardHome.toast.layoutSaved") });
     },
     onError: (error) => {
-      void queryClient.invalidateQueries({ queryKey: dashboardSettingsQueryOptions.queryKey });
+      if (userId) {
+        void queryClient.invalidateQueries({ queryKey: getDashboardSettingsQueryKey(userId) });
+      }
       toast({
         variant: "destructive",
         description: getTranslatedApiErrorMessage(
@@ -52,13 +63,16 @@ export function useUpdateDashboardSettings() {
 export function useResetDashboardSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { data: currentUser } = useCurrentUser();
+  const userId = currentUser?.id;
+
   return useMutation({
     mutationFn: async (expectedRevision: number) => {
       return (await ApiClient.api.settingsControllerResetDashboardSettings({ expectedRevision }))
         .data.data;
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(dashboardSettingsQueryOptions.queryKey, data);
+      if (userId) queryClient.setQueryData(getDashboardSettingsQueryKey(userId), data);
       toast({ description: t("dashboardHome.toast.layoutReset") });
     },
     onError: (error) =>

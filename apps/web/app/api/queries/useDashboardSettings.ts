@@ -28,14 +28,21 @@ export type DashboardSettingsResponse = {
   catalog: DashboardCatalogEntry[];
 };
 
-export const dashboardSettingsQueryOptions = queryOptions({
-  queryKey: ["dashboard", "settings"],
-  queryFn: async () => {
-    const response = await ApiClient.api.settingsControllerGetDashboardSettings();
-    return response.data.data;
-  },
-});
+export const getDashboardSettingsQueryKey = (userId: string) =>
+  ["dashboard", "settings", userId] as const;
 
-export function useDashboardSettings() {
-  return useQuery(dashboardSettingsQueryOptions);
+export const dashboardSettingsQueryOptions = (userId: string) =>
+  queryOptions({
+    queryKey: getDashboardSettingsQueryKey(userId),
+    queryFn: async () => {
+      const response = await ApiClient.api.settingsControllerGetDashboardSettings();
+      return response.data.data;
+    },
+  });
+
+export function useDashboardSettings(userId?: string) {
+  return useQuery({
+    ...dashboardSettingsQueryOptions(userId ?? ""),
+    enabled: Boolean(userId),
+  });
 }

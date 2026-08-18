@@ -29,6 +29,9 @@ import {
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TEACHING_STYLE,
+  AI_MENTOR_TYPE,
   RESOURCE_VISIBILITY,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
@@ -116,6 +119,9 @@ import type {
   OutlookEventAvailability,
   OutlookEventSensitivity,
   AnnouncementAudience,
+  AiMentorRoleplayDifficulty,
+  AiMentorTeachingStyle,
+  AiMentorType,
   ResourceVisibility,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
@@ -933,19 +939,101 @@ export const aiMentorLessons = pgTable(
     lessonId: uuid("lesson_id")
       .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
-    aiMentorInstructions: jsonb("ai_mentor_instructions")
-      .$type<LocalizedText>()
-      .default({})
-      .notNull(),
     name: jsonb("name").$type<LocalizedText>().default({}).notNull(),
     avatarReference: varchar("avatar_reference", { length: 500 }),
-    type: text("type").notNull().default("roleplay"),
     voiceMode: text("voice_mode").notNull().default("preset"),
     ttsPreset: text("tts_preset").notNull().default("male"),
     customTtsReference: jsonb("custom_tts_reference"),
     tenantId,
   },
   withTenantIdIndex("ai_mentor_lessons"),
+);
+
+export const structuredAiMentorTypeEnum = pgEnum(
+  "structured_ai_mentor_type",
+  Object.values(AI_MENTOR_TYPE) as [string, ...string[]],
+);
+export const aiMentorTeachingStyleEnum = pgEnum(
+  "ai_mentor_teaching_style",
+  Object.values(AI_MENTOR_TEACHING_STYLE) as [string, ...string[]],
+);
+export const aiMentorRoleplayDifficultyEnum = pgEnum(
+  "ai_mentor_roleplay_difficulty",
+  Object.values(AI_MENTOR_ROLEPLAY_DIFFICULTY) as [string, ...string[]],
+);
+
+export const aiMentorConfigurations = pgTable(
+  "ai_mentor_configurations",
+  {
+    ...id,
+    ...timestamps,
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
+    type: structuredAiMentorTypeEnum("type").$type<AiMentorType>().notNull(),
+    openingInstruction: jsonb("opening_instruction").$type<LocalizedText>(),
+    additionalInstructions: jsonb("additional_instructions").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_configurations", (table) => ({
+    lessonUniqueIdx: uniqueIndex("ai_mentor_configurations_lesson_unique_idx").on(
+      table.aiMentorLessonId,
+    ),
+    practiceSessionUniqueIdx: uniqueIndex(
+      "ai_mentor_configurations_practice_session_unique_idx",
+    ).on(table.practiceSessionId),
+    sourceCheck: check(
+      "ai_mentor_configurations_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
+);
+
+export const aiMentorTeacherConfigurations = pgTable(
+  "ai_mentor_teacher_configurations",
+  {
+    ...id,
+    ...timestamps,
+    configurationId: uuid("configuration_id")
+      .references(() => aiMentorConfigurations.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    taskGoal: jsonb("task_goal").$type<LocalizedText>().default({}).notNull(),
+    expertise: jsonb("expertise").$type<LocalizedText>().default({}).notNull(),
+    contentScope: jsonb("content_scope").$type<LocalizedText>().default({}).notNull(),
+    teachingStyle: aiMentorTeachingStyleEnum("teaching_style")
+      .$type<AiMentorTeachingStyle>()
+      .notNull(),
+    feedbackGuidance: jsonb("feedback_guidance").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_teacher_configurations"),
+);
+
+export const aiMentorRoleplayConfigurations = pgTable(
+  "ai_mentor_roleplay_configurations",
+  {
+    ...id,
+    ...timestamps,
+    configurationId: uuid("configuration_id")
+      .references(() => aiMentorConfigurations.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    scenario: jsonb("scenario").$type<LocalizedText>().default({}).notNull(),
+    aiRole: jsonb("ai_role").$type<LocalizedText>().default({}).notNull(),
+    learnerRole: jsonb("learner_role").$type<LocalizedText>().default({}).notNull(),
+    characterGoal: jsonb("character_goal").$type<LocalizedText>().default({}).notNull(),
+    difficulty: aiMentorRoleplayDifficultyEnum("difficulty")
+      .$type<AiMentorRoleplayDifficulty>()
+      .notNull(),
+    factsAndConstraints: jsonb("facts_and_constraints").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_roleplay_configurations"),
 );
 
 export const aiMentorThreads = pgTable(
@@ -990,7 +1078,7 @@ export const aiMentorPracticeSessions = pgTable(
     language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
     title: text("title"),
     aiMentorName: text("ai_mentor_name"),
-    instructions: text("instructions").notNull(),
+    scenario: text("scenario").notNull(),
     status: varchar("status", { length: 20 })
       .$type<AiMentorPracticeStatus>()
       .notNull()

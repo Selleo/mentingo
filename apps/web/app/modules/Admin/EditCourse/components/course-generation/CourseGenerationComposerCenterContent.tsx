@@ -13,6 +13,7 @@ type CourseGenerationComposerCenterContentProps = {
   inputTestId?: string;
   ariaLabel?: string;
   onFocusChange?: (focused: boolean) => void;
+  maxRows?: number;
 };
 
 export function CourseGenerationComposerCenterContent({
@@ -25,6 +26,7 @@ export function CourseGenerationComposerCenterContent({
   inputTestId,
   ariaLabel,
   onFocusChange,
+  maxRows = 4,
 }: CourseGenerationComposerCenterContentProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -42,7 +44,7 @@ export function CourseGenerationComposerCenterContent({
     const resize = () => {
       el.style.height = "auto";
       const lineHeight = Number.parseFloat(window.getComputedStyle(el).lineHeight) || 20;
-      const maxHeight = lineHeight * 4;
+      const maxHeight = lineHeight * maxRows;
       el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
       el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
     };
@@ -53,10 +55,10 @@ export function CourseGenerationComposerCenterContent({
     return () => {
       el.removeEventListener("input", resize);
     };
-  }, [input, isVoiceMode]);
+  }, [input, isVoiceMode, maxRows]);
 
   return (
-    <motion.div layout transition={layoutTransition} className="relative min-w-0">
+    <motion.div layout transition={layoutTransition} className="relative min-h-0 min-w-0">
       <AnimatePresence initial={false} mode="wait">
         {isVoiceMode ? (
           <motion.div
@@ -78,7 +80,7 @@ export function CourseGenerationComposerCenterContent({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={layoutTransition}
-            className="relative"
+            className="relative min-h-0"
           >
             <textarea
               data-testid={inputTestId}

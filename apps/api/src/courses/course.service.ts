@@ -90,11 +90,11 @@ import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
 import { AiJudgeConfigurationTranslationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-translation.service";
+import { AiMentorLessonTranslationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
-import { AiMentorLessonTranslationService } from "src/lesson/services/aiMentorLessonTranslation.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { LumaService } from "src/luma/luma.service";
@@ -116,7 +116,10 @@ import {
   coursesSummaryStats,
   groups,
   groupUsers,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
+  aiMentorTeacherConfigurations,
   lessonLearningTime,
   lessons,
   questionAnswerOptions,
@@ -1747,14 +1750,20 @@ export class CourseService {
 
     if (hasMissingCourseFields) return true;
 
-    const missingJudgeFields =
-      await this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+    const [missingMentorFields, missingJudgeFields] = await Promise.all([
+      this.aiMentorLessonTranslationService.getMissingTranslations(
         id,
         language,
         courseInRequestedLanguage.baseLanguage,
-      );
+      ),
+      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        id,
+        language,
+        courseInRequestedLanguage.baseLanguage,
+      ),
+    ]);
 
-    return missingJudgeFields.length > 0;
+    return missingMentorFields.length > 0 || missingJudgeFields.length > 0;
   }
 
   async getContentCreatorCourses({
@@ -4895,9 +4904,58 @@ export class CourseService {
           .update(aiMentorLessons)
           .set({
             name: deleteJsonbField(aiMentorLessons.name, language),
-            aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
           })
           .where(inArray(aiMentorLessons.lessonId, lessonIds));
+
+        const aiMentorConfigurationIds = trx
+          .select({ id: aiMentorConfigurations.id })
+          .from(aiMentorConfigurations)
+          .innerJoin(
+            aiMentorLessons,
+            eq(aiMentorLessons.id, aiMentorConfigurations.aiMentorLessonId),
+          )
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
+
+        await trx
+          .update(aiMentorConfigurations)
+          .set({
+            openingInstruction: deleteJsonbField(
+              aiMentorConfigurations.openingInstruction,
+              language,
+            ),
+            additionalInstructions: deleteJsonbField(
+              aiMentorConfigurations.additionalInstructions,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorConfigurations.id, aiMentorConfigurationIds));
+
+        await trx
+          .update(aiMentorTeacherConfigurations)
+          .set({
+            taskGoal: deleteJsonbField(aiMentorTeacherConfigurations.taskGoal, language),
+            expertise: deleteJsonbField(aiMentorTeacherConfigurations.expertise, language),
+            contentScope: deleteJsonbField(aiMentorTeacherConfigurations.contentScope, language),
+            feedbackGuidance: deleteJsonbField(
+              aiMentorTeacherConfigurations.feedbackGuidance,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorTeacherConfigurations.configurationId, aiMentorConfigurationIds));
+
+        await trx
+          .update(aiMentorRoleplayConfigurations)
+          .set({
+            scenario: deleteJsonbField(aiMentorRoleplayConfigurations.scenario, language),
+            aiRole: deleteJsonbField(aiMentorRoleplayConfigurations.aiRole, language),
+            learnerRole: deleteJsonbField(aiMentorRoleplayConfigurations.learnerRole, language),
+            characterGoal: deleteJsonbField(aiMentorRoleplayConfigurations.characterGoal, language),
+            factsAndConstraints: deleteJsonbField(
+              aiMentorRoleplayConfigurations.factsAndConstraints,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorRoleplayConfigurations.configurationId, aiMentorConfigurationIds));
 
         const aiJudgeConfigurationRows = await trx
           .select({ id: aiJudgeConfigurations.id })
@@ -5526,14 +5584,6 @@ export class CourseService {
             hasValue: Boolean(lesson.aiMentor?.name?.length),
             baseValue: baseLesson?.aiMentor?.name,
             field: aiMentorLessons.name,
-            idColumn: aiMentorLessons.lessonId,
-          };
-
-          yield {
-            id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
-            baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
-            field: aiMentorLessons.aiMentorInstructions,
             idColumn: aiMentorLessons.lessonId,
           };
         }

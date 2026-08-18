@@ -1317,6 +1317,27 @@
       "when": 1786954904690,
       "tag": "0187_enable_todo_tasks_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1787048641457,
+      "tag": "0188_add_ai_mentor_configuration_and_practice_support",
+      "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1787048686633,
+      "tag": "0189_backfill_ai_mentor_configurations_and_enable_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1787048771824,
+      "tag": "0190_drop_legacy_ai_mentor_configuration_columns",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,14 @@
+id: aiMentorConfigurationGeneratorCreate
+description: Create-mode instructions for AI Mentor configuration generation
+version: 1
+
+template: |
+  <generation_mode>
+  Create the first complete configuration from the creator brief and lesson context for the immutable creator-selected type.
+  </generation_mode>
+
+  <mode_rules>
+  - Fill every required type-specific field.
+  - Do not return questions, placeholders, TODOs, or type recommendations.
+  - When context is underspecified, make conservative assumptions that remain easy to review.
+  </mode_rules>

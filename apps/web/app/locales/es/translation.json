@@ -361,8 +361,10 @@
     "error": {
       "somethingWentWrong": "¡Ups! Algo salió mal.",
       "threadMustBeActive": "El hilo debe estar activo.",
+      "aiMentorConfigurationIncomplete": "La configuración de AI Mentor está incompleta.",
       "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
-      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
+      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },
     "loader": {
       "textSequence": {
@@ -2676,6 +2678,186 @@
           "customTTSReference": "Ingrese el ID de referencia TTS personalizado...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Comportamiento del mentor de IA",
+          "emptyDescription": "Elige cómo debe guiar la IA al alumno o interactuar con él.",
+          "baseLanguageRequired": "Configura primero el comportamiento del mentor de IA en el idioma base del curso.",
+          "incompleteDescription": "Faltan algunos datos para completar esta configuración.",
+          "configureManually": "Configurar manualmente",
+          "reviewConfiguration": "Revisar configuración",
+          "dialogTitle": "Configurar mentor de IA",
+          "dialogDescription": "Elige un modo y define la experiencia que tendrán los alumnos.",
+          "optional": "(opcional)",
+          "fineTuneBehavior": "Ajustar comportamiento (opcional)",
+          "translationModeTitle": "Modo de traducción",
+          "translationModeDescription": "Traduce aquí los campos de texto. El modo, el estilo de enseñanza y la dificultad se gestionan en el idioma base.",
+          "structureLockedTooltip": "La estructura del mentor de IA solo puede cambiarse en el idioma base.",
+          "applyConfiguration": "Aplicar configuración",
+          "saveConfiguration": "Guardar configuración",
+          "saveTranslation": "Guardar traducción",
+          "configurationSaved": "Configuración del mentor de IA guardada.",
+          "translationSaved": "Traducción del mentor de IA guardada.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Modo del mentor",
+            "teacher": {
+              "label": "Profesor",
+              "description": "Explica conceptos y guía la práctica."
+            },
+            "roleplay": {
+              "label": "Juego de roles",
+              "description": "Actúa como participante en un escenario de práctica."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Empezar desde un escenario",
+            "scenarioSimulation": {
+              "taskDescription": "Practica cómo descubrir las necesidades de un cliente de software y proponer una oferta acorde a sus restricciones.",
+              "aiRole": "Cliente potencial de servicios de software",
+              "learnerRole": "Representante de ventas",
+              "characterGoal": "Elegir un proveedor que cumpla los requisitos de plazo, presupuesto y comunicación.",
+              "factsAndConstraints": "La aplicación debe estar lista en tres meses. El presupuesto es limitado y se requiere una comunicación clara y regular.",
+              "openingInstruction": "Preséntate como un cliente que evalúa proveedores de software y pregunta cómo puede ayudarte el alumno."
+            },
+            "problemSolving": {
+              "taskDescription": "Practica cómo gestionar de forma constructiva la solicitud de aumento salarial de un empleado.",
+              "aiRole": "Empleado que solicita un aumento",
+              "learnerRole": "Responsable de equipo",
+              "characterGoal": "Ser escuchado y acordar una alternativa creíble o un plan de seguimiento.",
+              "factsAndConstraints": "El empleado ha realizado aportaciones importantes recientemente, pero la empresa no dispone actualmente de presupuesto para aumentos salariales.",
+              "openingInstruction": "Empieza explicando tus aportaciones recientes y pide hablar sobre un aumento salarial."
+            },
+            "creativeTask": {
+              "taskDescription": "Desarrolla y mejora una idea original para un nuevo servicio al cliente.",
+              "taskGoal": "Ayuda al alumno a desarrollar y mejorar una idea de servicio original.",
+              "expertise": "Coach de innovación de servicios",
+              "feedbackGuidance": "Fomenta la originalidad y el valor práctico. Haz preguntas de seguimiento concretas y señala carencias importantes sin apropiarte de la idea.",
+              "openingInstruction": "Invita al alumno a compartir su idea inicial de servicio y a quién ayudaría."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Aprende técnicas prácticas de gestión del tiempo y planifica cómo aplicar una en el trabajo.",
+              "taskGoal": "Ayuda al alumno a comprender y aplicar técnicas prácticas de gestión del tiempo.",
+              "expertise": "Coach de gestión del tiempo",
+              "feedbackGuidance": "Corrige los malentendidos con suavidad y conecta los comentarios con una aplicación concreta y realista en el trabajo.",
+              "openingInstruction": "Presenta una técnica práctica de gestión del tiempo y pregunta después cómo organiza actualmente su trabajo el alumno."
+            }
+          },
+          "taskGoal": {
+            "label": "Objetivo de la tarea",
+            "placeholder": "¿Qué debe ayudar a comprender o practicar el profesor?"
+          },
+          "expertise": {
+            "label": "Especialidad",
+            "placeholder": "Por ejemplo: formador en cumplimiento del RGPD"
+          },
+          "contentScope": {
+            "label": "Alcance del contenido",
+            "placeholder": "¿Qué puede tratar el profesor y qué debe evitar?"
+          },
+          "teachingStyle": {
+            "label": "Estilo de enseñanza",
+            "explain_and_practice": {
+              "label": "Explicar y practicar",
+              "description": "Explicar con claridad y reforzar con práctica."
+            },
+            "guided_discovery": {
+              "label": "Descubrimiento guiado",
+              "description": "Guiar al alumno paso a paso hasta las conclusiones."
+            },
+            "socratic": {
+              "label": "Socrático",
+              "description": "Usar preguntas concretas para profundizar el razonamiento."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Pautas de feedback",
+            "placeholder": "¿Cómo debe corregir o reforzar el profesor al alumno?"
+          },
+          "scenario": {
+            "label": "Escenario",
+            "placeholder": "Describe la situación que practicará el alumno."
+          },
+          "aiRole": { "label": "Rol de la IA", "placeholder": "Por ejemplo: cliente indeciso" },
+          "learnerRole": {
+            "label": "Rol del alumno",
+            "placeholder": "Por ejemplo: representante de ventas"
+          },
+          "characterGoal": {
+            "label": "Objetivo del personaje de IA",
+            "placeholder": "¿Qué intenta conseguir el personaje de IA?"
+          },
+          "difficulty": {
+            "label": "Dificultad",
+            "cooperative": {
+              "label": "Cooperativa",
+              "description": "Colabora y ayuda a que la conversación avance."
+            },
+            "realistic": {
+              "label": "Realista",
+              "description": "Resistencia natural y reacciones creíbles."
+            },
+            "challenging": {
+              "label": "Difícil",
+              "description": "Resistencia firme que exige una respuesta sólida."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Hechos y restricciones",
+            "placeholder": "Añade presupuestos, plazos, políticas o hechos que deben mantenerse."
+          },
+          "openingInstruction": {
+            "label": "Instrucción de apertura",
+            "placeholder": "¿Cómo debe empezar el mensaje de bienvenida inicial?"
+          },
+          "additionalInstructions": {
+            "label": "Instrucciones adicionales",
+            "placeholder": "Añade comportamientos excepcionales no cubiertos arriba."
+          },
+          "typeChange": {
+            "title": "¿Cambiar el modo del mentor?",
+            "description": "Al cambiar a {{type}} se borrarán los campos específicos del modo actual. Se conservarán las instrucciones de apertura y adicionales."
+          },
+          "validation": {
+            "required": "Este campo es obligatorio.",
+            "configurationRequired": "Configura el comportamiento del mentor de IA antes de guardar la lección."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Modo del mentor",
+          "createWithAi": "Crear con IA",
+          "improveWithAi": "Mejorar con IA",
+          "checkQualityWithAi": "Comprobar calidad con IA",
+          "create": {
+            "title": "Crear el comportamiento del mentor de IA con IA",
+            "description": "Elige el modo del mentor y describe la experiencia que quieres crear.",
+            "fieldLabel": "¿Qué escenario debe preparar la IA?",
+            "fieldDescription": "La IA devolverá un borrador de trabajo completo del escenario para el modo seleccionado.",
+            "placeholder": "Por ejemplo: un responsable gestionando una conversación difícil.",
+            "submit": "Generar borrador"
+          },
+          "improve": {
+            "title": "Mejorar el comportamiento del mentor de IA con IA",
+            "description": "La IA usa la configuración actual sin guardar y su modo seleccionado.",
+            "fieldLabel": "¿Qué debe cambiar la IA en el escenario?",
+            "fieldDescription": "Describe qué debe ser más realista, coherente o concreto. El modo seleccionado no cambiará.",
+            "placeholder": "Por ejemplo: hacer el escenario más realista y añadir restricciones claras.",
+            "submit": "Mejorar borrador"
+          },
+          "progressTitle": "Preparando el borrador",
+          "progressDescription": "La IA está generando y comprobando la configuración.",
+          "readyTitle": "Borrador listo para revisar",
+          "revisionTitle": "El borrador necesita una decisión",
+          "failedTitle": "No se pudo generar el borrador",
+          "cancel": "Cancelar generación",
+          "revise": "Revisar borrador",
+          "review": "Revisar configuración",
+          "quality": {
+            "title": "Comprobar calidad con IA",
+            "description": "La IA revisa la configuración actual sin guardarla ni cambiarla.",
+            "checking": "Comprobando la configuración actual…",
+            "improve": "Mejorar con IA"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Condiciones de finalización",
           "configured": "Configurado",
@@ -2685,6 +2867,7 @@
           "summary": "{{criteria}} criterios · {{score}} puntos totales · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
           "configureWithAi": "Configurar con IA",
           "createWithAi": "Crear con IA",
+          "aiMentorConfigurationRequiredTooltip": "Configura primero el comportamiento del Mentor de IA antes de crear las condiciones de finalización con IA.",
           "improveWithAi": "Mejorar con IA",
           "checkQualityWithAi": "Comprobar la calidad con IA",
           "checkingQuality": "Comprobando la calidad...",

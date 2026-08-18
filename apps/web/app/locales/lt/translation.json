@@ -235,21 +235,17 @@
       "submit": "Sukurti praktiką",
       "suggestions": {
         "title": "Pradėkite nuo pavyzdžio",
-        "feedback": {
-          "label": "Pateikti atsiliepimą",
-          "value": "Noriu praktikuoti konstruktyvaus atsiliepimo pateikimą kolegai, kuris nesilaikė svarbaus termino."
+        "delayedOrder": {
+          "label": "Klientas reikalauja grąžinti pinigus už vėluojantį užsakymą",
+          "value": "Klientas reikalauja grąžinti pinigus dėl vėluojančio užsakymo. Kavos aparato, skirto gimtadienio dovanai, pristatymas turėjo trukti 2–3 dienas, tačiau praėjo šešios dienos ir siunta dar neatvyko. Klientas piktinasi, reikalauja grąžinimo ir papildomos nuolaidos bei grasina neigiamu atsiliepimu. Siunta jau perduota kurjeriui ir tikriausiai atvyks rytoj, bet negaliu garantuoti laiko ar pasiūlyti didesnės nei 10 % nuolaidos. Noriu nuraminti klientą, nežadėti per daug ir pasiūlyti tinkamą sprendimą."
         },
-        "boundary": {
-          "label": "Nustatyti ribą",
-          "value": "Noriu praktikuoti aiškios ribos nustatymą, kai komandos narys prašo skubiai imtis darbo, neatitinkančio dabartinių prioritetų."
+        "orderMistake": {
+          "label": "Padariau klaidą kliento užsakyme",
+          "value": "Užsakyme įrašiau 120 oro kondicionierių filtrų pakuočių vietoje 20. Sandėlis jau sukomplektavo ir supakavo užsakymą ant palečių kurjerio paėmimui. Išsiuntus klientas gautų 100 pakuočių per daug, todėl reikėtų organizuoti grąžinimą. Nežinau, ar pirmiausia stabdyti siuntimą, susisiekti su sandėliu, informuoti vadovą ar klientą."
         },
-        "explanation": {
-          "label": "Paaiškinti sprendimą",
-          "value": "Noriu praktikuoti sudėtingo sprendimo paaiškinimą žmogui, kuris su juo nesutinka."
-        },
-        "request": {
-          "label": "Pateikti prašymą",
-          "value": "Noriu praktikuoti prašymą vadovui padėti, kai darbo krūvis tampa per didelis."
+        "sensitiveData": {
+          "label": "Klientas prašo duomenų, kurių neturėčiau atskleisti",
+          "value": "Nuolatinis verslo klientas pateikė įmonės pavadinimą ir užsakymo numerį, tada paprašė pristatymo adreso ir užsakymą pateikusio asmens telefono numerio. Skambinantis asmuo nėra nurodytas kaip užsakymo kontaktas, todėl negaliu patikrinti, ar jis iš tikrųjų dirba įmonėje. Jis spaudžia informaciją pateikti nedelsiant. Noriu padėti nepažeisdamas duomenų apsaugos taisyklių."
         }
       },
       "steps": {
@@ -361,8 +357,10 @@
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko.",
       "threadMustBeActive": "Pokalbio gija turi būti aktyvi.",
+      "aiMentorConfigurationIncomplete": "AI mentoriaus konfigūracija yra neužbaigta.",
       "aiJudgeConfigurationMissing": "Trūksta baigimo sąlygų konfigūracijos.",
-      "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
+      "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
     },
     "loader": {
       "textSequence": {
@@ -2685,6 +2683,235 @@
           "customTTSReference": "Įveskite tinkintą TTS nuorodos ID...",
           "aiMentorTypes": "Mentorė"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "AI mentoriaus elgsena",
+          "emptyDescription": "Pasirinkite, kaip AI turėtų padėti besimokančiajam ar su juo bendrauti.",
+          "baseLanguageRequired": "Pirmiausia sukonfigūruokite AI mentoriaus elgseną pagrindine kurso kalba.",
+          "incompleteDescription": "Šiai konfigūracijai dar trūksta kelių duomenų.",
+          "configureManually": "Konfigūruoti rankiniu būdu",
+          "reviewConfiguration": "Peržiūrėti konfigūraciją",
+          "dialogTitle": "AI mentoriaus konfigūracija",
+          "dialogDescription": "Pasirinkite režimą ir apibrėžkite besimokančiojo patirtį.",
+          "optional": "(neprivaloma)",
+          "fineTuneBehavior": "Patikslinti elgseną (neprivaloma)",
+          "translationModeTitle": "Vertimo režimas",
+          "translationModeDescription": "Čia išverskite teksto laukus. Režimas, mokymo stilius ir sudėtingumas valdomi pagrindine kalba.",
+          "structureLockedTooltip": "AI mentoriaus struktūrą galima keisti tik pagrindine kurso kalba.",
+          "applyConfiguration": "Taikyti konfigūraciją",
+          "saveConfiguration": "Išsaugoti konfigūraciją",
+          "saveTranslation": "Išsaugoti vertimą",
+          "configurationSaved": "AI mentoriaus konfigūracija išsaugota.",
+          "translationSaved": "AI mentoriaus vertimas išsaugotas.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentoriaus režimas",
+            "teacher": {
+              "label": "Mokytojas",
+              "description": "Paaiškina sąvokas ir vadovauja praktikai."
+            },
+            "roleplay": {
+              "label": "Vaidmenų žaidimas",
+              "description": "Atlieka dalyvio vaidmenį praktiniame scenarijuje."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Pradėti nuo scenarijaus",
+            "scenarioSimulation": {
+              "taskDescription": "Praktikuokite programinės įrangos kliento poreikių nustatymą ir jo apribojimus atitinkančio pasiūlymo pateikimą.",
+              "aiRole": "Potencialus programinės įrangos klientas",
+              "learnerRole": "Pardavimo atstovas",
+              "characterGoal": "Pasirinkti tiekėją, atitinkantį termino, biudžeto ir komunikacijos reikalavimus.",
+              "factsAndConstraints": "Programa turi būti parengta per tris mėnesius. Biudžetas ribotas, o aiškus ir reguliarus bendravimas yra būtinas.",
+              "openingInstruction": "Prisistatykite kaip programinės įrangos tiekėjus vertinantis klientas ir paklauskite, kaip besimokantysis gali padėti."
+            },
+            "problemSolving": {
+              "taskDescription": "Praktikuokite konstruktyvų pokalbį su atlyginimo padidinimo prašančiu darbuotoju.",
+              "aiRole": "Atlyginimo padidinimo prašantis darbuotojas",
+              "learnerRole": "Vadovas",
+              "characterGoal": "Būti išgirstam ir susitarti dėl patikimos alternatyvos ar tolesnio plano.",
+              "factsAndConstraints": "Darbuotojas pastaruoju metu reikšmingai prisidėjo, tačiau įmonė šiuo metu neturi biudžeto atlyginimų didinimui.",
+              "openingInstruction": "Pradėkite papasakodami apie savo pastarojo meto indėlį ir paprašykite aptarti atlyginimo padidinimą."
+            },
+            "creativeTask": {
+              "taskDescription": "Sukurkite ir patobulinkite originalią naujos klientų paslaugos idėją.",
+              "taskGoal": "Padėkite besimokančiajam sukurti ir patobulinti originalią paslaugos idėją.",
+              "expertise": "Paslaugų inovacijų treneris",
+              "feedbackGuidance": "Skatinkite originalumą ir praktinę vertę. Užduokite tikslius papildomus klausimus ir nurodykite svarbias spragas neperimdami idėjos.",
+              "openingInstruction": "Pakvieskite besimokantįjį pristatyti pradinę paslaugos idėją ir paaiškinti, kam ji padėtų."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Išmokite praktinių laiko valdymo metodų ir suplanuokite, kaip vieną jų pritaikyti darbe.",
+              "taskGoal": "Padėkite besimokančiajam suprasti ir taikyti praktinius laiko valdymo metodus.",
+              "expertise": "Laiko valdymo treneris",
+              "feedbackGuidance": "Švelniai taisykite klaidingą supratimą ir susiekite grįžtamąjį ryšį su konkrečiu, realistišku pritaikymu darbe.",
+              "openingInstruction": "Pristatykite vieną praktinį laiko valdymo metodą, tada paklauskite, kaip besimokantysis šiuo metu organizuoja savo darbą."
+            }
+          },
+          "taskGoal": {
+            "label": "Užduoties tikslas",
+            "placeholder": "Ką Mokytojas turėtų padėti suprasti ar išmokti?"
+          },
+          "expertise": {
+            "label": "Kompetencija",
+            "placeholder": "Pavyzdžiui: BDAR atitikties treneris"
+          },
+          "contentScope": {
+            "label": "Turinio apimtis",
+            "placeholder": "Ką Mokytojas gali aptarti ir ko turėtų vengti?"
+          },
+          "teachingStyle": {
+            "label": "Mokymo stilius",
+            "explain_and_practice": {
+              "label": "Paaiškinti ir praktikuoti",
+              "description": "Aiškiai paaiškinti, tada įtvirtinti praktika."
+            },
+            "guided_discovery": {
+              "label": "Vadovaujamas atradimas",
+              "description": "Žingsnis po žingsnio padėti besimokančiajam padaryti išvadas."
+            },
+            "socratic": {
+              "label": "Sokratiškas",
+              "description": "Tiksliniais klausimais gilinti samprotavimą."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Grįžtamojo ryšio gairės",
+            "placeholder": "Kaip Mokytojas turėtų taisyti ar paskatinti besimokantįjį?"
+          },
+          "scenario": {
+            "label": "Scenarijus",
+            "placeholder": "Aprašykite situaciją, kurią besimokantysis praktikuos."
+          },
+          "aiRole": { "label": "AI vaidmuo", "placeholder": "Pavyzdžiui: abejojantis klientas" },
+          "learnerRole": {
+            "label": "Besimokančiojo vaidmuo",
+            "placeholder": "Pavyzdžiui: pardavimo atstovas"
+          },
+          "characterGoal": {
+            "label": "DI personažo tikslas",
+            "placeholder": "Ko siekia AI personažas?"
+          },
+          "difficulty": {
+            "label": "Sudėtingumas",
+            "cooperative": {
+              "label": "Bendradarbiaujantis",
+              "description": "Padeda ir noriai skatina pokalbį judėti pirmyn."
+            },
+            "realistic": {
+              "label": "Realistiškas",
+              "description": "Natūralus pasipriešinimas ir įtikinamos reakcijos."
+            },
+            "challenging": {
+              "label": "Sudėtingas",
+              "description": "Tvirtas pasipriešinimas, reikalaujantis gero atsako."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Faktai ir apribojimai",
+            "placeholder": "Pridėkite biudžetus, terminus, taisykles ar faktus, kurie negali keistis."
+          },
+          "openingInstruction": {
+            "label": "Pradžios instrukcija",
+            "placeholder": "Kaip turėtų prasidėti vienkartinis pasveikinimas?"
+          },
+          "additionalInstructions": {
+            "label": "Papildomos instrukcijos",
+            "placeholder": "Pridėkite išskirtinę elgseną, kurios neapima aukščiau esantys laukai."
+          },
+          "typeChange": {
+            "title": "Keisti Mentoriaus režimą?",
+            "description": "Perjungus į {{type}}, dabartinio režimo laukai bus išvalyti. Pradžios ir papildomos instrukcijos bus išsaugotos."
+          },
+          "validation": {
+            "required": "Šis laukas privalomas.",
+            "configurationRequired": "Prieš išsaugodami pamoką sukonfigūruokite AI mentoriaus elgseną."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentoriaus režimas",
+          "createWithAi": "Kurti su DI",
+          "improveWithAi": "Tobulinti su DI",
+          "checkQualityWithAi": "Patikrinti kokybę su DI",
+          "aiAssistance": "DI pagalba",
+          "create": {
+            "title": "Sukurti DI mentoriaus elgesį su DI",
+            "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.",
+            "fieldLabel": "Kokį scenarijų turėtų paruošti DI?",
+            "fieldDescription": "DI pateiks išsamią pasirinkto režimo scenarijaus darbinę versiją.",
+            "placeholder": "Aprašykite situaciją, dalyvius ir pokalbio tikslą…",
+            "submit": "Generuoti juodraštį"
+          },
+          "improve": {
+            "title": "Pagerinti DI mentoriaus elgesį su DI",
+            "description": "DI naudoja dabartinę neišsaugotą konfigūraciją ir jos režimą.",
+            "fieldLabel": "Ką DI turėtų pakeisti scenarijuje?",
+            "fieldDescription": "Aprašykite, kas turėtų būti realistiškiau, nuosekliau ar konkrečiau. Pasirinktas režimas nesikeis.",
+            "placeholder": "Aprašykite norimą pakeitimą…",
+            "submit": "Pagerinti juodraštį"
+          },
+          "progressTitle": "Ruošiamas juodraštis",
+          "progressDescription": "DI generuoja ir tikrina konfigūraciją.",
+          "readyTitle": "Juodraštis paruoštas peržiūrai",
+          "revisionTitle": "Juodraščiui reikia jūsų sprendimo",
+          "failedTitle": "Nepavyko sugeneruoti juodraščio",
+          "cancel": "Atšaukti generavimą",
+          "revise": "Taisyti juodraštį",
+          "review": "Peržiūrėti konfigūraciją",
+          "progressLabel": "DI mentoriaus generavimo eiga",
+          "stages": {
+            "draft": "Generuojamas juodraštis",
+            "qualityCheck": "Kokybės patikra",
+            "ready": "Paruošta"
+          },
+          "status": {
+            "drafting": "Generuojama konfigūracija",
+            "evaluating": "Tikrinama konfigūracijos kokybė",
+            "revising": "Tobulinamas juodraštis",
+            "awaiting_revision": "Kokybės patikrai reikia jūsų sprendimo",
+            "completed": "Konfigūracija paruošta",
+            "requires_review": "Juodraščiui reikia jūsų sprendimo",
+            "failed": "Generavimo nepavyko užbaigti",
+            "cancelled": "Generavimas atšauktas"
+          },
+          "statusDescription": {
+            "drafting": "Ruošiamas mentoriaus elgesys pasirinktam režimui.",
+            "evaluating": "Tikrinama, ar elgesys aiškus, išsamus ir nuoseklus.",
+            "revising": "Taikomi naujausi kokybės patikros pataisymai.",
+            "awaiting_revision": "Peržiūrėkite pastabas prieš kitą generavimo bandymą.",
+            "completed": "Juodraštis išlaikė kokybės patikrą.",
+            "requires_review": "Naujausias juodraštis paliktas jūsų sprendimui.",
+            "failed": "Bandykite dar kartą arba konfigūruokite mentoriaus elgesį rankiniu būdu.",
+            "cancelled": "Konfigūracijos pakeitimai nebuvo pritaikyti."
+          },
+          "attempt": "Juodraštis {{attempt}} iš {{maxAttempts}}",
+          "currentDraft": "Dabartinis juodraštis",
+          "qualityCheckLabel": "Kokybės patikra",
+          "qualityDecisionTitle": "Siūlomi patobulinimai: {{count}}",
+          "qualityDecisionDescription": "Peržiūrėkite pasiūlymus arba tęskite su šia konfigūracija.",
+          "suggestedImprovements": "Siūlomi patobulinimai",
+          "applyImprovements": "Taisyti",
+          "useCurrentDraft": "Tęsti",
+          "reviewExactChanges": "DI pakeitimai ({{count}})",
+          "reviewConfiguration": "Peržiūrėti konfigūraciją",
+          "showMoreFindings": "Rodyti dar {{count}} pastabų",
+          "showFewerFindings": "Rodyti mažiau pastabų",
+          "review": {
+            "currentDraftTitle": "Peržiūrėti dabartinį juodraštį",
+            "currentDraftDescription": "Šiame juodraštyje dar yra kokybės pasiūlymų. Peržiūrėkite jį prieš pritaikydami.",
+            "requiresReviewTitle": "Peržiūrėti sugeneruotą konfigūraciją",
+            "requiresReviewDescription": "DI paliko naujausią juodraštį jūsų galutiniam sprendimui."
+          },
+          "quality": {
+            "title": "Patikrinti kokybę su DI",
+            "resultTitle": "Kokybės patikra",
+            "description": "DI tikrina dabartinę neišsaugotą konfigūraciją jos nekeisdamas.",
+            "checking": "Tikrinama dabartinė konfigūracija…",
+            "checkingDescription": "Tikrinamas režimas, gairės, apribojimai ir pokalbio elgesys.",
+            "hasFindings": "Peržiūrėkite pastabas arba leiskite DI patobulinti konfigūraciją pagal jas.",
+            "passed": "Pakeitimų nereikia. Galite toliau redaguoti arba išsaugoti konfigūraciją.",
+            "improve": "Pagerinti su DI"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Baigimo sąlygos",
           "configured": "Sukonfigūruota",
@@ -2694,6 +2921,7 @@
           "summary": "{{criteria}} kriterijai · iš viso {{score}} taškų · {{threshold}} % išlaikymui · {{blockingErrors}} blokuojančios klaidos",
           "configureWithAi": "Konfigūruoti su AI",
           "createWithAi": "Kurti su DI",
+          "aiMentorConfigurationRequiredTooltip": "Pirmiausia sukonfigūruokite DI mentoriaus elgseną, tada kurkite užbaigimo sąlygas su DI.",
           "improveWithAi": "Tobulinti su DI",
           "checkQualityWithAi": "Patikrinti kokybę su DI",
           "checkingQuality": "Tikrinama kokybė...",

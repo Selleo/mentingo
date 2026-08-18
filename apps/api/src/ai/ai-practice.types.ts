@@ -6,6 +6,8 @@ import type {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiJudgeScoreGuidance,
+  aiMentorConfigurations,
+  aiMentorRoleplayConfigurations,
 } from "src/storage/schema";
 
 export { AI_MENTOR_PRACTICE_STATUSES } from "@repo/shared";
@@ -47,4 +49,39 @@ export type AiPracticeJudgeConfigurationGraph = {
       description?: LocalizedText | SQL<unknown>;
     }
   >;
+};
+
+export type AiPracticeMentorConfigurationGraph = {
+  configuration: Omit<
+    typeof aiMentorConfigurations.$inferInsert,
+    | "id"
+    | "tenantId"
+    | "aiMentorLessonId"
+    | "practiceSessionId"
+    | "openingInstruction"
+    | "additionalInstructions"
+  > & {
+    id: UUIDType;
+    practiceSessionId: UUIDType;
+    openingInstruction?: LocalizedText | SQL<unknown> | null;
+    additionalInstructions?: LocalizedText | SQL<unknown> | null;
+  };
+  roleplayConfiguration: Omit<
+    typeof aiMentorRoleplayConfigurations.$inferInsert,
+    | "id"
+    | "tenantId"
+    | "configurationId"
+    | "scenario"
+    | "aiRole"
+    | "learnerRole"
+    | "characterGoal"
+    | "factsAndConstraints"
+  > & {
+    configurationId: UUIDType;
+    scenario: LocalizedText | SQL<unknown>;
+    aiRole: LocalizedText | SQL<unknown>;
+    learnerRole: LocalizedText | SQL<unknown>;
+    characterGoal: LocalizedText | SQL<unknown>;
+    factsAndConstraints?: LocalizedText | SQL<unknown> | null;
+  };
 };

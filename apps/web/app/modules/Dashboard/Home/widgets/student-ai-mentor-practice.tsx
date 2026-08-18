@@ -2,6 +2,7 @@ import { useChat, type UIMessage } from "@ai-sdk/react";
 import { Link } from "@remix-run/react";
 import {
   AI_MENTOR_PRACTICE_STATUSES,
+  DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
   createTextUiMessage,
   getUiMessageText,
@@ -22,6 +23,7 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { AiMentorReplayLoader } from "~/components/AiMentorReplayLoader";
 import { Icon } from "~/components/Icon";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { CourseGenerationComposerCenterContent } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerCenterContent";
 import { AiMentorPracticeMessages } from "~/modules/AiMentorPractice/components/AiMentorPracticeMessages";
@@ -45,26 +48,24 @@ import {
   DashboardWidgetContent,
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
+import { dashboardSizeToSpan } from "../types";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
 import type { GetThreadMessagesResponse } from "~/api/generated-api";
+import type { DashboardWidgetSize } from "~/modules/Dashboard/Home/types";
 
 const PRACTICE_SUGGESTIONS = [
   {
-    labelKey: "aiMentorPractice.form.suggestions.feedback.label",
-    valueKey: "aiMentorPractice.form.suggestions.feedback.value",
+    labelKey: "aiMentorPractice.form.suggestions.delayedOrder.label",
+    valueKey: "aiMentorPractice.form.suggestions.delayedOrder.value",
   },
   {
-    labelKey: "aiMentorPractice.form.suggestions.boundary.label",
-    valueKey: "aiMentorPractice.form.suggestions.boundary.value",
+    labelKey: "aiMentorPractice.form.suggestions.orderMistake.label",
+    valueKey: "aiMentorPractice.form.suggestions.orderMistake.value",
   },
   {
-    labelKey: "aiMentorPractice.form.suggestions.explanation.label",
-    valueKey: "aiMentorPractice.form.suggestions.explanation.value",
-  },
-  {
-    labelKey: "aiMentorPractice.form.suggestions.request.label",
-    valueKey: "aiMentorPractice.form.suggestions.request.value",
+    labelKey: "aiMentorPractice.form.suggestions.sensitiveData.label",
+    valueKey: "aiMentorPractice.form.suggestions.sensitiveData.value",
   },
 ] as const;
 
@@ -77,6 +78,7 @@ type ScenarioComposerProps = {
   onScenarioChange: (value: string) => void;
   onSubmit: () => void;
   scenario: string;
+  maxRows?: number;
 };
 
 function ScenarioComposer({
@@ -88,13 +90,14 @@ function ScenarioComposer({
   onScenarioChange,
   onSubmit,
   scenario,
+  maxRows,
 }: ScenarioComposerProps) {
   const { t } = useTranslation();
 
   return (
     <form
       className={cn(
-        "rounded-xl border border-neutral-200 bg-white p-2 shadow-sm",
+        "min-h-0 min-w-0 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm",
         compact && "rounded-lg",
       )}
       onSubmit={(event) => {
@@ -102,7 +105,7 @@ function ScenarioComposer({
         onSubmit();
       }}
     >
-      <div className="grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-end gap-2">
+      <div className="grid min-h-0 min-w-0 grid-cols-[2rem_minmax(0,1fr)_2rem] items-end gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -132,9 +135,6 @@ function ScenarioComposer({
               >
                 <span className="min-w-0">
                   <span className="body-sm-md block text-neutral-900">{t(labelKey)}</span>
-                  <span className="details mt-0.5 block line-clamp-2 text-neutral-500">
-                    {t(valueKey)}
-                  </span>
                 </span>
               </DropdownMenuItem>
             ))}
@@ -151,6 +151,7 @@ function ScenarioComposer({
           onFocusChange={onFocusChange}
           inputTestId={inputTestId}
           ariaLabel={t("aiMentorPractice.form.scenario")}
+          maxRows={maxRows}
         />
 
         <Button
@@ -214,7 +215,11 @@ function ConversationComposer({
   );
 }
 
-export function WidgetStudentAiMentorPractice() {
+export function WidgetStudentAiMentorPractice({
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+}: {
+  widgetSize?: DashboardWidgetSize;
+}) {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const language = useLanguageStore((state) => state.language);
@@ -316,6 +321,7 @@ export function WidgetStudentAiMentorPractice() {
   };
 
   const isActive = data?.threadStatus === "active";
+  const scenarioMaxRows = Math.min(2, Math.max(1, dashboardSizeToSpan(widgetSize).rows));
   const lastMessage = messages[messages.length - 1];
   const showChatLoader =
     isSending &&
@@ -325,6 +331,18 @@ export function WidgetStudentAiMentorPractice() {
     <DashboardWidgetCard testId={AI_MENTOR_PRACTICE_HANDLES.WIDGET} className="h-full">
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
+        titleBadge={
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="uppercase">
+                  Beta
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{t("studentLessonView.tooltip.beta")}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        }
         icon={metadata.icon}
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
@@ -360,7 +378,7 @@ export function WidgetStudentAiMentorPractice() {
             </div>
             <div className="mt-auto w-full">
               <ScenarioComposer
-                compact={false}
+                compact={scenarioMaxRows === 1}
                 currentPlaceholder={
                   placeholders[placeholderIndex] ?? t("aiMentorPractice.form.scenarioPlaceholder")
                 }
@@ -370,6 +388,7 @@ export function WidgetStudentAiMentorPractice() {
                 onScenarioChange={setScenario}
                 onFocusChange={setIsScenarioFocused}
                 onSubmit={() => void handleCreate()}
+                maxRows={scenarioMaxRows}
               />
             </div>
           </div>

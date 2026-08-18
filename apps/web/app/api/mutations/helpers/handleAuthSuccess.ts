@@ -1,4 +1,5 @@
 import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
+import { getDashboardSettingsQueryKey } from "~/api/queries/useDashboardSettings";
 
 import { userSettingsQueryOptions } from "../../queries/useUserSettings";
 import { queryClient } from "../../queryClient";
@@ -38,11 +39,15 @@ export async function handleAuthSuccess({
     roleSlugs: user.roleSlugs ?? [],
   };
 
+  queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
   setLoggedIn(true);
   setCurrentUser(normalizedUser);
   setHasVerifiedMFA(!normalizedUser.shouldVerifyMFA);
 
-  await queryClient.invalidateQueries(currentUserQueryOptions);
-  queryClient.invalidateQueries(userSettingsQueryOptions);
-  queryClient.invalidateQueries(mfaSetupQueryOptions);
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: currentUserQueryOptions.queryKey }),
+    queryClient.invalidateQueries({ queryKey: getDashboardSettingsQueryKey(normalizedUser.id) }),
+    queryClient.invalidateQueries({ queryKey: userSettingsQueryOptions.queryKey }),
+    queryClient.invalidateQueries({ queryKey: mfaSetupQueryOptions.queryKey }),
+  ]);
 }

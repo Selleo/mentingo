@@ -26,6 +26,7 @@ type AiJudgeConfigurationCardBaseProps = {
   isPersisted: boolean;
   isLoading?: boolean;
   isSaving?: boolean;
+  isAiMentorConfigured: boolean;
   onConfigureWithAi?: (mode: AiJudgeGenerationMode) => void;
   onValidateConfiguration?: (value: AiJudgeConfigurationDraft) => Promise<AiJudgeValidationResult>;
   onImproveWithAi?: (
@@ -57,6 +58,7 @@ export const AiJudgeConfigurationCard = ({
   isPersisted,
   isLoading = false,
   isSaving = false,
+  isAiMentorConfigured,
   onConfigureWithAi,
   editorOpen,
   onEditorOpenChange,
@@ -79,7 +81,14 @@ export const AiJudgeConfigurationCard = ({
   const editorButtonLabelKey = isConfigured
     ? "adminCourseView.curriculum.lesson.aiJudge.editAssessment"
     : "adminCourseView.curriculum.lesson.aiJudge.configureManually";
-  const isAiActionDisabled = language !== baseLanguage || isLoading;
+  const isAiActionDisabled = language !== baseLanguage || isLoading || !isAiMentorConfigured;
+  let aiActionTooltipKey: string | undefined;
+
+  if (language !== baseLanguage)
+    aiActionTooltipKey = "adminCourseView.curriculum.lesson.aiJudge.structureLockedTooltip";
+  else if (!isAiMentorConfigured)
+    aiActionTooltipKey =
+      "adminCourseView.curriculum.lesson.aiJudge.aiMentorConfigurationRequiredTooltip";
 
   return (
     <>
@@ -130,13 +139,13 @@ export const AiJudgeConfigurationCard = ({
                       </Button>
                     </span>
                   </TooltipTrigger>
-                  {language !== baseLanguage && (
+                  {aiActionTooltipKey && (
                     <TooltipContent
                       side="top"
                       align="center"
                       className="max-w-xs rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {t("adminCourseView.curriculum.lesson.aiJudge.structureLockedTooltip")}
+                      {t(aiActionTooltipKey)}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   )}

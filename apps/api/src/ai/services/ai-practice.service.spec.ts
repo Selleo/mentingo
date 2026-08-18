@@ -1,11 +1,13 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_CONFIGURATION_GENERATION_MODE, AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "src/ai/mentor-configuration-generation/ai-mentor-configuration-generation.constants";
 
 import { AiPracticeService } from "./ai-practice.service";
 
 import type { GeneratedAiJudgeConfiguration } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import type { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
+import type { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
 
 describe("AiPracticeService", () => {
   it("generates the practice Judge configuration once without semantic validation", async () => {
@@ -17,17 +19,17 @@ describe("AiPracticeService", () => {
       criteria: [],
       blockingErrors: [],
     };
-    const content = {
-      title: "Delivery deadline negotiation",
-      aiMentorName: "Jordan, delivery lead",
-      instructions: [
-        "AI Mentor role: Customer concerned about a delayed delivery.",
-        "Learner role: Account manager negotiating a delivery date.",
-        "Situation: A customer calls after learning that an important delivery may be late.",
-        "Learner goal: Agree on a realistic next step while preserving trust.",
-        "Opening context: The customer has just joined the call and asks for an explanation.",
-      ].join("\n"),
-    };
+    const mentorConfiguration = {
+      type: AI_MENTOR_TYPE.ROLEPLAY,
+      scenario: "A customer calls about an important delivery that may be late.",
+      aiRole: "Customer concerned about a delayed delivery",
+      learnerRole: "Account manager",
+      characterGoal: "Get a credible recovery plan and protect the customer's deadline.",
+      difficulty: "realistic",
+      factsAndConstraints: null,
+      openingInstruction: "Ask the account manager to explain the delay.",
+      additionalInstructions: null,
+    } as const;
     const repository = {
       findPracticeSessionById: jest.fn().mockResolvedValue({
         id: sessionId,
@@ -35,7 +37,7 @@ describe("AiPracticeService", () => {
         practiceDate: "2026-08-06",
         language: "en",
         title: null,
-        instructions: scenario,
+        scenario,
         status: "queued",
         errorCode: null,
         threadId: null,
@@ -44,11 +46,11 @@ describe("AiPracticeService", () => {
       saveGeneratedPractice: jest.fn().mockResolvedValue(undefined),
       updatePracticeSession: jest.fn().mockResolvedValue(undefined),
     };
-    const generator = {
+    const judgeGenerator = {
       generate: jest.fn().mockResolvedValue(configuration),
     };
-    const contentGenerator = {
-      generate: jest.fn().mockResolvedValue(content),
+    const mentorGenerator = {
+      generate: jest.fn().mockResolvedValue(mentorConfiguration),
     };
     const aiService = {
       getPracticeThreadWithSetup: jest.fn().mockResolvedValue(undefined),
@@ -56,8 +58,8 @@ describe("AiPracticeService", () => {
     const service = new AiPracticeService(
       repository as never,
       {} as never,
-      contentGenerator as never,
-      generator as unknown as AiJudgeConfigurationGeneratorService,
+      mentorGenerator as unknown as AiMentorConfigurationGeneratorService,
+      judgeGenerator as unknown as AiJudgeConfigurationGeneratorService,
       aiService as never,
       {} as never,
     );
@@ -67,23 +69,42 @@ describe("AiPracticeService", () => {
       sessionId,
     });
 
-    expect(generator.generate).toHaveBeenCalledTimes(1);
-    expect(generator.generate).toHaveBeenCalledWith({
+    expect(mentorGenerator.generate).toHaveBeenCalledWith({
+      configurationType: AI_MENTOR_TYPE.ROLEPLAY,
       language: "en",
       lessonContext: {
-        title: content.title,
-        taskDescription: content.instructions,
-        aiMentorInstructions: content.instructions,
-        aiMentorType: AI_MENTOR_TYPE.ROLEPLAY,
+        title: scenario,
+        taskDescription: scenario,
+      },
+      mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
+      brief: scenario,
+      generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
+    });
+    expect(judgeGenerator.generate).toHaveBeenCalledTimes(1);
+    expect(judgeGenerator.generate).toHaveBeenCalledWith({
+      language: "en",
+      lessonContext: {
+        title: scenario,
+        taskDescription: scenario,
+        aiMentorConfiguration: mentorConfiguration,
       },
       mode: AI_JUDGE_GENERATION_MODE.CREATE,
-      brief: content.instructions,
+      brief: scenario,
     });
     expect(repository.saveGeneratedPractice).toHaveBeenCalledWith(
       sessionId,
-      content.title,
-      content.aiMentorName,
-      content.instructions,
+      scenario,
+      mentorConfiguration.aiRole,
+      expect.objectContaining({
+        configuration: expect.objectContaining({
+          practiceSessionId: sessionId,
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+        }),
+        roleplayConfiguration: expect.objectContaining({
+          scenario: expect.objectContaining({ queryChunks: expect.any(Array) }),
+          aiRole: expect.objectContaining({ queryChunks: expect.any(Array) }),
+        }),
+      }),
       expect.objectContaining({
         configuration: expect.objectContaining({ practiceSessionId: sessionId }),
       }),
@@ -93,22 +114,19 @@ describe("AiPracticeService", () => {
       practiceSessionId: sessionId,
       userId: "00000000-0000-0000-0000-000000000002",
       userLanguage: "en",
-      practiceInstructions: content.instructions,
     });
   });
 
-  it("replays a completed practice with the same generated instructions", async () => {
+  it("replays a completed practice with its persisted structured configuration", async () => {
     const sessionId = "00000000-0000-0000-0000-000000000001";
     const userId = "00000000-0000-0000-0000-000000000002";
-    const instructions =
-      "AI Mentor role: Concerned customer.\nOpening context: Ask for an explanation.";
     const session = {
       id: sessionId,
       userId,
       practiceDate: "2026-08-06",
       language: "en",
       title: "Delivery deadline negotiation",
-      instructions,
+      scenario: "Practice negotiating a delivery deadline with a customer.",
       status: "ready",
       errorCode: null,
       threadId: "00000000-0000-0000-0000-000000000004",
@@ -149,7 +167,6 @@ describe("AiPracticeService", () => {
       practiceSessionId: sessionId,
       userId,
       userLanguage: "en",
-      practiceInstructions: instructions,
     });
     expect(replayed.threadStatus).toBe("active");
     expect(replayed.evaluation).toBeNull();

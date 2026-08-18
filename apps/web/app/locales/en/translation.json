@@ -235,21 +235,17 @@
       "submit": "Create practice",
       "suggestions": {
         "title": "Start with an example",
-        "feedback": {
-          "label": "Give feedback",
-          "value": "I want to practice giving constructive feedback to a colleague whose work missed an important deadline."
+        "delayedOrder": {
+          "label": "Customer demands a refund for a delayed order",
+          "value": "A customer wants a refund because an order was delayed. They ordered a coffee machine for a birthday gift. Delivery was promised in 2–3 days, but six days have passed and the parcel has not arrived. The customer is upset, demands an immediate refund and an extra discount, and threatens a negative review. The parcel is with the courier and will probably arrive tomorrow, but I cannot guarantee the delivery time or offer more than a 10% discount. I want to calm the customer, avoid overpromising, and offer a sensible solution."
         },
-        "boundary": {
-          "label": "Set a boundary",
-          "value": "I want to practice setting a clear boundary when a teammate asks me to take on urgent work outside my current priorities."
+        "orderMistake": {
+          "label": "I made a mistake in the customer's order",
+          "value": "I entered 120 packages of air-conditioning filters instead of 20. The warehouse has already picked and packed the order on pallets for collection today. If it ships, the customer will receive 100 packages too many and we will need to arrange a return. I am unsure whether to stop the shipment, contact the warehouse first, tell my manager, or inform the customer."
         },
-        "explanation": {
-          "label": "Explain a decision",
-          "value": "I want to practice explaining a difficult decision to someone who disagrees with it."
-        },
-        "request": {
-          "label": "Make a request",
-          "value": "I want to practice asking my manager for support with a workload that is becoming too heavy."
+        "sensitiveData": {
+          "label": "Customer asks me for data I should not share",
+          "value": "A regular business customer gave the company name and order number, then asked for the delivery address and phone number of the person who placed the order. They said they urgently need to contact that person, but they are not listed as the order contact and I cannot verify that they work for the company. They insist that we are colleagues and need the information immediately. I want to help without disclosing personal data improperly."
         }
       },
       "steps": {
@@ -361,8 +357,10 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong.",
       "threadMustBeActive": "The thread must be active.",
+      "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
-      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
+      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },
     "loader": {
       "textSequence": {
@@ -2688,6 +2686,238 @@
           "customTTSReference": "Enter custom TTS reference ID...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "AI Mentor behavior",
+          "emptyDescription": "Choose how the AI should guide or interact with the learner.",
+          "baseLanguageRequired": "Configure AI Mentor behavior in the course base language before translating it.",
+          "incompleteDescription": "This configuration needs a few details before it can be edited or translated.",
+          "configureManually": "Configure manually",
+          "reviewConfiguration": "Review configuration",
+          "dialogTitle": "Configure AI Mentor",
+          "dialogDescription": "Choose a mode and define the behavior learners should experience.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Fine-tune behavior (optional)",
+          "translationModeTitle": "Translation mode",
+          "translationModeDescription": "Translate the text fields here. Mode, teaching style, and difficulty are managed in the course base language.",
+          "structureLockedTooltip": "AI Mentor structure can only be changed in the course base language.",
+          "applyConfiguration": "Apply configuration",
+          "saveConfiguration": "Save configuration",
+          "saveTranslation": "Save translation",
+          "configurationSaved": "AI Mentor configuration saved.",
+          "translationSaved": "AI Mentor translation saved.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor mode",
+            "teacher": {
+              "label": "Teacher",
+              "description": "Explains concepts and guides practice."
+            },
+            "roleplay": {
+              "label": "Roleplay",
+              "description": "Acts as a participant in a practice scenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Start from a scenario",
+            "scenarioSimulation": {
+              "taskDescription": "Practice discovering a software client's needs and proposing an offer that fits their constraints.",
+              "aiRole": "Prospective software client",
+              "learnerRole": "Sales representative",
+              "characterGoal": "Choose a supplier who can meet the timeline, budget, and communication requirements.",
+              "factsAndConstraints": "The application must be ready within three months. The budget is limited, and clear, regular communication is required.",
+              "openingInstruction": "Introduce yourself as a client evaluating software suppliers and ask how the learner can help."
+            },
+            "problemSolving": {
+              "taskDescription": "Practice handling an employee's salary increase request constructively.",
+              "aiRole": "Employee requesting a salary increase",
+              "learnerRole": "Manager",
+              "characterGoal": "Be heard and reach a credible alternative or follow-up plan.",
+              "factsAndConstraints": "The employee has made meaningful recent contributions, but the company currently has no budget for salary increases.",
+              "openingInstruction": "Open by explaining your recent contributions and asking to discuss a salary increase."
+            },
+            "creativeTask": {
+              "taskDescription": "Develop and refine an original idea for a new customer service.",
+              "taskGoal": "Help the learner develop and refine an original service idea.",
+              "expertise": "Service innovation coach",
+              "feedbackGuidance": "Encourage originality and practical value. Ask focused follow-up questions and point out important gaps without taking over the idea.",
+              "openingInstruction": "Invite the learner to share their initial service idea and who it would help."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Learn practical time-management techniques and plan how to apply one at work.",
+              "taskGoal": "Help the learner understand and apply practical time-management techniques.",
+              "expertise": "Time-management coach",
+              "feedbackGuidance": "Correct misconceptions gently and connect feedback to a concrete, realistic workplace application.",
+              "openingInstruction": "Introduce one practical time-management technique, then ask how the learner currently organizes their work."
+            }
+          },
+          "taskGoal": {
+            "label": "Task goal",
+            "placeholder": "What should the Teacher help the learner understand or practice?"
+          },
+          "expertise": {
+            "label": "Expertise",
+            "placeholder": "For example: GDPR compliance trainer"
+          },
+          "contentScope": {
+            "label": "Content scope",
+            "placeholder": "What may the Teacher cover, and what should it avoid?"
+          },
+          "teachingStyle": {
+            "label": "Teaching style",
+            "explain_and_practice": {
+              "label": "Explain and practice",
+              "description": "Explain clearly, then reinforce with practice."
+            },
+            "guided_discovery": {
+              "label": "Guided discovery",
+              "description": "Help the learner reach conclusions step by step."
+            },
+            "socratic": {
+              "label": "Socratic",
+              "description": "Use focused questions to deepen reasoning."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback guidance",
+            "placeholder": "How should the Teacher correct or reinforce the learner?"
+          },
+          "scenario": {
+            "label": "Scenario",
+            "placeholder": "Describe the situation the learner will practice."
+          },
+          "aiRole": {
+            "label": "AI role",
+            "placeholder": "For example: Hesitant customer"
+          },
+          "learnerRole": {
+            "label": "Learner role",
+            "placeholder": "For example: Sales representative"
+          },
+          "characterGoal": {
+            "label": "AI character goal",
+            "placeholder": "What is the AI character trying to achieve?"
+          },
+          "difficulty": {
+            "label": "Difficulty",
+            "cooperative": {
+              "label": "Cooperative",
+              "description": "Helpful and willing to move the conversation forward."
+            },
+            "realistic": {
+              "label": "Realistic",
+              "description": "Natural resistance and believable reactions."
+            },
+            "challenging": {
+              "label": "Challenging",
+              "description": "Firm resistance that requires a strong response."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Facts and constraints",
+            "placeholder": "Add budgets, deadlines, policies, authority, or facts that must remain true."
+          },
+          "openingInstruction": {
+            "label": "Opening instruction",
+            "placeholder": "How should the one-time welcome message begin?"
+          },
+          "additionalInstructions": {
+            "label": "Additional instructions",
+            "placeholder": "Add exceptional behavior not covered by the fields above."
+          },
+          "typeChange": {
+            "title": "Change Mentor mode?",
+            "description": "Switching to {{type}} clears the current mode-specific fields. Opening and additional instructions are preserved."
+          },
+          "validation": {
+            "required": "This field is required.",
+            "configurationRequired": "Configure AI Mentor behavior before saving the lesson."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentor mode",
+          "createWithAi": "Create with AI",
+          "improveWithAi": "Improve with AI",
+          "checkQualityWithAi": "Check quality with AI",
+          "aiAssistance": "AI assistance",
+          "create": {
+            "title": "Create AI Mentor behavior with AI",
+            "description": "Choose the Mentor mode, then describe the experience you want to create.",
+            "fieldLabel": "What scenario should AI prepare?",
+            "fieldDescription": "AI will return a complete working draft of the scenario for the selected mode. Review it before applying it.",
+            "placeholder": "For example: a manager handling a difficult feedback conversation.",
+            "submit": "Generate draft"
+          },
+          "improve": {
+            "title": "Improve AI Mentor behavior with AI",
+            "description": "AI uses the current unsaved configuration and its selected mode.",
+            "fieldLabel": "What should AI change in the scenario?",
+            "fieldDescription": "Describe what should become more realistic, coherent, or specific. The selected mode stays unchanged.",
+            "placeholder": "For example: make the scenario more realistic and add clearer constraints.",
+            "submit": "Improve draft"
+          },
+          "progressTitle": "Preparing your draft",
+          "progressDescription": "AI is generating and checking the configuration.",
+          "readyTitle": "Draft ready for review",
+          "revisionTitle": "Draft needs your decision",
+          "failedTitle": "Could not generate a draft",
+          "cancel": "Cancel generation",
+          "revise": "Revise draft",
+          "review": "Review configuration",
+          "progressLabel": "AI Mentor generation progress",
+          "stages": {
+            "draft": "Generating draft",
+            "qualityCheck": "Quality check",
+            "ready": "Ready"
+          },
+          "status": {
+            "drafting": "Generating the configuration",
+            "evaluating": "Checking configuration quality",
+            "revising": "Improving the draft",
+            "awaiting_revision": "Quality check needs your decision",
+            "completed": "Configuration is ready",
+            "requires_review": "Draft requires your decision",
+            "failed": "Generation could not be completed",
+            "cancelled": "Generation cancelled"
+          },
+          "statusDescription": {
+            "drafting": "Preparing the Mentor behavior for the selected mode.",
+            "evaluating": "Checking whether the behavior is clear, complete, and consistent.",
+            "revising": "Applying the latest quality-check corrections.",
+            "awaiting_revision": "Review the findings before starting another generation attempt.",
+            "completed": "The draft passed the quality check.",
+            "requires_review": "The latest draft was kept so you can decide what to change.",
+            "failed": "Try again or configure the Mentor behavior manually.",
+            "cancelled": "No configuration changes were applied."
+          },
+          "attempt": "Draft {{attempt}} of {{maxAttempts}}",
+          "currentDraft": "Current draft",
+          "qualityCheckLabel": "Quality check",
+          "qualityDecisionTitle": "{{count}} improvements suggested",
+          "qualityDecisionDescription": "Review the suggestions or continue with this configuration.",
+          "suggestedImprovements": "Suggested improvements",
+          "applyImprovements": "Revise",
+          "useCurrentDraft": "Continue",
+          "reviewExactChanges": "What AI changed ({{count}})",
+          "reviewConfiguration": "Review configuration",
+          "showMoreFindings": "Show {{count}} more findings",
+          "showFewerFindings": "Show fewer findings",
+          "review": {
+            "currentDraftTitle": "Review the current draft",
+            "currentDraftDescription": "This draft still has quality suggestions. Review it before applying it.",
+            "requiresReviewTitle": "Review the generated configuration",
+            "requiresReviewDescription": "AI kept the latest draft so you can make the final decision."
+          },
+          "quality": {
+            "title": "Check quality with AI",
+            "resultTitle": "Quality check",
+            "description": "AI reviews the current unsaved configuration without changing it.",
+            "checking": "Checking the current configuration…",
+            "checkingDescription": "Reviewing the selected mode, guidance, constraints, and conversation behavior.",
+            "hasFindings": "Review the findings or let AI improve the configuration using this feedback.",
+            "passed": "No changes are required. You can continue editing or save the configuration.",
+            "improve": "Improve with AI"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Completion conditions",
           "configured": "Configured",
@@ -2697,6 +2927,7 @@
           "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
           "configureWithAi": "Configure with AI",
           "createWithAi": "Create with AI",
+          "aiMentorConfigurationRequiredTooltip": "Configure AI Mentor behavior before creating completion conditions with AI.",
           "improveWithAi": "Improve with AI",
           "checkQualityWithAi": "Check quality with AI",
           "checkingQuality": "Checking quality...",

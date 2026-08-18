@@ -1,9 +1,4 @@
-import {
-  AI_MENTOR_TTS_PRESET,
-  AI_MENTOR_TYPE,
-  AI_MENTOR_VOICE_MODE,
-  SUPPORTED_LANGUAGES,
-} from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
@@ -17,6 +12,7 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { aiJudgeConfigurationInputSchema } from "./ai-judge-configuration/ai-judge-configuration.schema";
+import { aiMentorConfigurationContentSchema } from "./ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 import { LESSON_TYPES } from "./lesson.type";
 
 import type { Static } from "@sinclair/typebox";
@@ -81,8 +77,6 @@ const lessonQuizSchema = Type.Object({
 export const aiMentorLessonSchema = Type.Object({
   id: UUIDSchema,
   lessonId: UUIDSchema,
-  aiMentorInstructions: Type.String(),
-  type: Type.Enum(AI_MENTOR_TYPE),
   name: Type.String(),
   avatarReference: Type.Union([Type.String(), Type.Null()]),
   voiceMode: Type.Enum(AI_MENTOR_VOICE_MODE),
@@ -140,9 +134,8 @@ export const createAiMentorLessonSchema = Type.Intersect([
   Type.Object({
     chapterId: UUIDSchema,
     displayOrder: Type.Optional(Type.Number()),
-    aiMentorInstructions: Type.String(),
+    aiMentorConfiguration: aiMentorConfigurationContentSchema,
     aiJudgeConfiguration: aiJudgeConfigurationInputSchema,
-    type: Type.Enum(AI_MENTOR_TYPE),
     name: Type.Optional(Type.String()),
     voiceMode: Type.Optional(Type.Enum(AI_MENTOR_VOICE_MODE)),
     ttsPreset: Type.Optional(Type.Enum(AI_MENTOR_TTS_PRESET)),
@@ -150,7 +143,12 @@ export const createAiMentorLessonSchema = Type.Intersect([
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Intersect([
-  Type.Omit(createAiMentorLessonSchema, ["chapterId", "displayOrder", "aiJudgeConfiguration"]),
+  Type.Omit(createAiMentorLessonSchema, [
+    "chapterId",
+    "displayOrder",
+    "aiMentorConfiguration",
+    "aiJudgeConfiguration",
+  ]),
   Type.Object({
     language: supportedLanguagesSchema,
   }),

@@ -8,7 +8,7 @@ template: |
   </role>
 
   <goal>
-  Return one complete structured configuration in {{language}} that can be reviewed and edited by a course creator. Generate only the assessment configuration; never rewrite the lesson task description, AI Mentor instructions, Mentor type, resources, or publication state.
+  Return one complete structured configuration in {{language}} that can be reviewed and edited by a course creator. Generate only the assessment configuration; never rewrite the lesson task description, structured AI Mentor configuration, resources, or publication state.
   </goal>
 
   <instruction_priority_and_security>
