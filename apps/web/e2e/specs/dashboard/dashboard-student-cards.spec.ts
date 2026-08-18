@@ -399,6 +399,7 @@ test.describe("learner AI Mentor practice card", () => {
 
         const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
         await expect(widget).toBeVisible();
+        await expect(widget.getByText("Beta", { exact: true })).toBeVisible();
         await expect(widget).toContainText(
           status === AI_MENTOR_PRACTICE_STATUSES.QUEUED
             ? "Your practice scenario is queued."

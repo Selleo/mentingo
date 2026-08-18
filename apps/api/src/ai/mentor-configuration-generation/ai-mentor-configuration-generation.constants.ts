@@ -6,13 +6,14 @@ import {
 import type { promptId } from "@repo/prompts";
 
 export const AI_MENTOR_CONFIGURATION_GENERATION_MODE_PROMPT_ID = {
-  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE]:
-    "aiMentorConfigurationGeneratorCreate",
-  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.IMPROVE]:
-    "aiMentorConfigurationGeneratorImprove",
-  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.REPAIR]:
-    "aiMentorConfigurationGeneratorRepair",
+  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE]: "aiMentorConfigurationGeneratorCreate",
+  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.IMPROVE]: "aiMentorConfigurationGeneratorImprove",
+  [AI_MENTOR_CONFIGURATION_GENERATION_MODE.REPAIR]: "aiMentorConfigurationGeneratorRepair",
 } as const satisfies Record<AiMentorConfigurationGenerationMode, promptId>;
+
+export const AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE = {
+  STANDALONE_PRACTICE: "standalone_practice",
+} as const;
 
 export const AI_MENTOR_CONFIGURATION_GENERATION_FAILURE_MESSAGE =
   "AI Mentor configuration generation failed";

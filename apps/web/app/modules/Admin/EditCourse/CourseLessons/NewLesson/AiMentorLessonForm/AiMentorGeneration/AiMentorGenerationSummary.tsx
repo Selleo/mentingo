@@ -10,25 +10,36 @@ import type {
   AiMentorQualityFinding,
 } from "./aiMentorGeneration.types";
 
-const FIELD_LABELS: Record<string, string> = {
-  additionalInstructions: "Additional instructions",
-  aiRole: "AI role",
-  characterGoal: "Character goal",
-  contentScope: "Content scope",
-  difficulty: "Difficulty",
-  expertise: "Expertise",
-  factsAndConstraints: "Facts and constraints",
-  feedbackGuidance: "Feedback guidance",
-  learnerRole: "Learner role",
-  openingInstruction: "Opening instruction",
-  scenario: "Scenario",
-  taskGoal: "Task goal",
-  teachingStyle: "Teaching style",
+const FIELD_LABEL_KEYS: Record<string, string> = {
+  additionalInstructions:
+    "adminCourseView.curriculum.lesson.aiMentorConfiguration.additionalInstructions.label",
+  aiRole: "adminCourseView.curriculum.lesson.aiMentorConfiguration.aiRole.label",
+  characterGoal: "adminCourseView.curriculum.lesson.aiMentorConfiguration.characterGoal.label",
+  contentScope: "adminCourseView.curriculum.lesson.aiMentorConfiguration.contentScope.label",
+  difficulty: "adminCourseView.curriculum.lesson.aiMentorConfiguration.difficulty.label",
+  expertise: "adminCourseView.curriculum.lesson.aiMentorConfiguration.expertise.label",
+  factsAndConstraints:
+    "adminCourseView.curriculum.lesson.aiMentorConfiguration.factsAndConstraints.label",
+  feedbackGuidance:
+    "adminCourseView.curriculum.lesson.aiMentorConfiguration.feedbackGuidance.label",
+  learnerRole: "adminCourseView.curriculum.lesson.aiMentorConfiguration.learnerRole.label",
+  openingInstruction:
+    "adminCourseView.curriculum.lesson.aiMentorConfiguration.openingInstruction.label",
+  scenario: "adminCourseView.curriculum.lesson.aiMentorConfiguration.scenario.label",
+  taskGoal: "adminCourseView.curriculum.lesson.aiMentorConfiguration.taskGoal.label",
+  teachingStyle: "adminCourseView.curriculum.lesson.aiMentorConfiguration.teachingStyle.label",
 };
 
-const formatFieldName = (field: string) => {
-  const knownLabel = FIELD_LABELS[field];
-  if (knownLabel) return knownLabel;
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const formatReferenceLabel = (reference: string, label: string) => {
+  if (label.startsWith("AI ") || reference[0] === reference[0]?.toUpperCase()) return label;
+  return label.charAt(0).toLowerCase() + label.slice(1);
+};
+
+const formatFieldName = (field: string, t: (key: string) => string) => {
+  const translationKey = FIELD_LABEL_KEYS[field];
+  if (translationKey) return t(translationKey);
 
   const words = field
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -38,13 +49,18 @@ const formatFieldName = (field: string) => {
   return label.replace(/^Ai\b/, "AI");
 };
 
-export const humanizeAiMentorFieldReferences = (text: string) =>
-  Object.entries(FIELD_LABELS)
-    .filter(([field]) => /[A-Z]/.test(field))
-    .reduce(
-      (result, [field, label]) => result.replace(new RegExp(`\\b${field}\\b`, "g"), label),
-      text,
-    );
+export const humanizeAiMentorFieldReferences = (text: string, t: (key: string) => string) =>
+  Object.entries(FIELD_LABEL_KEYS).reduce((result, [field, translationKey]) => {
+    const label = t(translationKey);
+    return result
+      .replace(new RegExp(`\\b${field}\\b`, "g"), (reference) =>
+        formatReferenceLabel(reference, label),
+      )
+      .replace(
+        new RegExp(`\\b${escapeRegExp(field.replace(/([a-z])([A-Z])/g, "$1 $2"))}\\b`, "gi"),
+        (reference) => formatReferenceLabel(reference, label),
+      );
+  }, text);
 
 export const AiMentorGenerationDraftSummary = ({ draft }: { draft: AiMentorGeneratedDraft }) => {
   const { t } = useTranslation();
@@ -68,6 +84,8 @@ export const AiMentorGenerationFindingList = ({
 }: {
   findings: AiMentorQualityFinding[];
 }) => {
+  const { t } = useTranslation();
+
   if (findings.length === 0) return null;
 
   return (
@@ -79,16 +97,16 @@ export const AiMentorGenerationFindingList = ({
         >
           <div className="flex items-start gap-2">
             <p className="min-w-0 flex-1 text-sm font-medium text-neutral-900">
-              {humanizeAiMentorFieldReferences(finding.message)}
+              {humanizeAiMentorFieldReferences(finding.message, t)}
             </p>
             {finding.field && (
               <span className="shrink-0 rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-semibold text-neutral-600">
-                {formatFieldName(finding.field)}
+                {formatFieldName(finding.field, t)}
               </span>
             )}
           </div>
           <p className="mt-1 text-sm leading-5 text-neutral-600">
-            {humanizeAiMentorFieldReferences(finding.correction)}
+            {humanizeAiMentorFieldReferences(finding.correction, t)}
           </p>
         </li>
       ))}
@@ -125,7 +143,7 @@ export const AiMentorGenerationChangeDisclosure = ({
         {visibleChanges.map((change, index) => (
           <section key={`${change.field}-${index}`} className="py-3">
             <p className="mb-2 text-sm font-semibold text-neutral-900">
-              {formatFieldName(change.field)}
+              {formatFieldName(change.field, t)}
             </p>
             <InlineTextDiff before={change.before ?? ""} after={change.after ?? ""} />
           </section>

@@ -1,4 +1,8 @@
-import { DASHBOARD_WIDGET_CATALOG, type DashboardWidgetType } from "@repo/shared";
+import {
+  DASHBOARD_WIDGET_CATALOG,
+  DASHBOARD_WIDGET_TYPES,
+  type DashboardWidgetType,
+} from "@repo/shared";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +17,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Switch } from "~/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
@@ -118,6 +123,20 @@ export function WidgetPickerDialog({
                         <label htmlFor={switchId} className="body-sm-md block text-neutral-950">
                           {t(entry.titleKey)}
                         </label>
+                        {widgetId === DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Badge variant="secondary" className="uppercase">
+                                  Beta
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom">
+                                {t("studentLessonView.tooltip.beta")}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                         {isAlwaysVisible && (
                           <Badge className="px-1.5 py-0.5 text-[11px]" variant="notStarted">
                             {t("dashboardHome.edit.required")}

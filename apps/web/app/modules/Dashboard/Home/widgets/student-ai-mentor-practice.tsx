@@ -23,6 +23,7 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { AiMentorReplayLoader } from "~/components/AiMentorReplayLoader";
 import { Icon } from "~/components/Icon";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { CourseGenerationComposerCenterContent } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerCenterContent";
 import { AiMentorPracticeMessages } from "~/modules/AiMentorPractice/components/AiMentorPracticeMessages";
@@ -329,6 +331,18 @@ export function WidgetStudentAiMentorPractice({
     <DashboardWidgetCard testId={AI_MENTOR_PRACTICE_HANDLES.WIDGET} className="h-full">
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
+        titleBadge={
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="uppercase">
+                  Beta
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{t("studentLessonView.tooltip.beta")}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        }
         icon={metadata.icon}
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}

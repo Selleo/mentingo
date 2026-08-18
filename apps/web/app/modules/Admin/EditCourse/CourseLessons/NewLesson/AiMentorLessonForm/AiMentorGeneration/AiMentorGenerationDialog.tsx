@@ -1,5 +1,5 @@
 import { AI_MENTOR_CONFIGURATION_GENERATION_STATUS, AI_MENTOR_TYPE } from "@repo/shared";
-import { AlertCircle, CircleAlert } from "lucide-react";
+import { AlertCircle, CircleAlert, Drama, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -37,6 +37,12 @@ import type {
 } from "./aiMentorGeneration.types";
 import type { AiMentorConfigurationDraft } from "../AiMentorConfiguration/aiMentorConfiguration.types";
 import type { AiMentorType } from "@repo/shared";
+import type { LucideIcon } from "lucide-react";
+
+const AI_MENTOR_GENERATION_TYPE_ICONS: Record<AiMentorType, LucideIcon> = {
+  [AI_MENTOR_TYPE.ROLEPLAY]: Drama,
+  [AI_MENTOR_TYPE.TEACHER]: GraduationCap,
+};
 
 type AiMentorGenerationDialogProps = {
   open: boolean;
@@ -108,30 +114,44 @@ export const AiMentorGenerationDialog = ({
             }}
             className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
           >
-            {[AI_MENTOR_TYPE.TEACHER, AI_MENTOR_TYPE.ROLEPLAY].map((type) => (
-              <label
-                key={type}
-                htmlFor={`ai-mentor-generation-${type}`}
-                className={cn("flex cursor-pointer items-start gap-3 rounded-lg border p-3", {
-                  "border-primary-600 bg-primary-50": selectedType === type,
-                  "border-neutral-200": selectedType !== type,
-                })}
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">
-                    {t(
-                      `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.label`,
+            {[AI_MENTOR_TYPE.ROLEPLAY, AI_MENTOR_TYPE.TEACHER].map((type) => {
+              const TypeIcon = AI_MENTOR_GENERATION_TYPE_ICONS[type];
+
+              return (
+                <label
+                  key={type}
+                  htmlFor={`ai-mentor-generation-${type}`}
+                  className={cn("flex cursor-pointer items-start gap-3 rounded-lg border p-3", {
+                    "border-primary-600 bg-primary-50": selectedType === type,
+                    "border-neutral-200": selectedType !== type,
+                  })}
+                >
+                  <span
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700",
+                      {
+                        "bg-primary-100 text-primary-700": selectedType === type,
+                      },
                     )}
+                  >
+                    <TypeIcon className="size-5" aria-hidden="true" />
                   </span>
-                  <span className="mt-1 block text-xs text-neutral-600">
-                    {t(
-                      `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.description`,
-                    )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">
+                      {t(
+                        `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.label`,
+                      )}
+                    </span>
+                    <span className="mt-1 block text-xs text-neutral-600">
+                      {t(
+                        `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.description`,
+                      )}
+                    </span>
                   </span>
-                </span>
-                <RadioGroupItem id={`ai-mentor-generation-${type}`} value={type} />
-              </label>
-            ))}
+                  <RadioGroupItem id={`ai-mentor-generation-${type}`} value={type} />
+                </label>
+              );
+            })}
           </RadioGroup>
         </div>
       )}

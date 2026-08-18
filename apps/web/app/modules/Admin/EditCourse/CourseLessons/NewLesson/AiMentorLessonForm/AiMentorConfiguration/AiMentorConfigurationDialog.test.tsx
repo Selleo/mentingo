@@ -65,7 +65,7 @@ describe("AiMentorConfigurationDialog", () => {
       "Support representative",
     );
     await user.type(
-      screen.getByRole("textbox", { name: "Character goal" }),
+      screen.getByRole("textbox", { name: "AI character goal" }),
       "Understand the charge",
     );
     await user.click(screen.getByRole("button", { name: "Apply configuration" }));

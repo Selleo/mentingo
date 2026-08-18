@@ -2789,7 +2789,7 @@
             "placeholder": "Zum Beispiel: Vertriebsmitarbeiter"
           },
           "characterGoal": {
-            "label": "Ziel der Figur",
+            "label": "Ziel der KI-Figur",
             "placeholder": "Was möchte die KI-Figur erreichen?"
           },
           "difficulty": {
@@ -2837,16 +2837,16 @@
           "create": {
             "title": "KI-Mentor-Verhalten mit KI erstellen",
             "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.",
-            "fieldLabel": "Was soll die KI erstellen?",
-            "fieldDescription": "KI erstellt einen vollständigen Entwurf für den ausgewählten Modus.",
-            "placeholder": "Beschreiben Sie das gewünschte Verhalten…",
+            "fieldLabel": "Welches Szenario soll die KI vorbereiten?",
+            "fieldDescription": "Die KI erstellt einen vollständigen Arbeitsentwurf des Szenarios für den ausgewählten Modus.",
+            "placeholder": "Beschreiben Sie die Situation, die Beteiligten und das Gesprächsziel…",
             "submit": "Entwurf erstellen"
           },
           "improve": {
             "title": "KI-Mentor-Verhalten mit KI verbessern",
             "description": "KI verwendet die aktuelle ungespeicherte Konfiguration und ihren Modus.",
-            "fieldLabel": "Was soll die KI verbessern?",
-            "fieldDescription": "Der ausgewählte Modus bleibt unverändert.",
+            "fieldLabel": "Was soll die KI am Szenario ändern?",
+            "fieldDescription": "Beschreiben Sie, was realistischer, stimmiger oder konkreter werden soll. Der ausgewählte Modus bleibt unverändert.",
             "placeholder": "Beschreiben Sie die gewünschte Änderung…",
             "submit": "Entwurf verbessern"
           },

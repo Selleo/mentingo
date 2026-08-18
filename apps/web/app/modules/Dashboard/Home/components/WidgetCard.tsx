@@ -13,6 +13,7 @@ type WidgetCardProps = {
 
 type DashboardWidgetHeaderProps = {
   title: string;
+  titleBadge?: ReactNode;
   description?: string;
   icon: DashboardWidgetIconComponent;
   showIcon?: boolean;
@@ -74,6 +75,7 @@ export function DashboardWidgetIcon({
 
 export function DashboardWidgetHeader({
   title,
+  titleBadge,
   description,
   icon,
   showIcon = true,
@@ -93,7 +95,10 @@ export function DashboardWidgetHeader({
         />
       )}
       <div className="min-w-0 flex-1">
-        <h2 className="body-sm-md truncate text-neutral-950">{title}</h2>
+        <div className="flex min-w-0 items-center gap-2">
+          <h2 className="body-sm-md min-w-0 truncate text-neutral-950">{title}</h2>
+          {titleBadge}
+        </div>
         {description && <p className="details truncate text-neutral-500">{description}</p>}
       </div>
       {headerAction && !isEditing && (

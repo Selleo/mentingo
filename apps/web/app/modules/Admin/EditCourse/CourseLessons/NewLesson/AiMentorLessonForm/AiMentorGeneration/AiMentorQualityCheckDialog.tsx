@@ -105,10 +105,10 @@ export const AiMentorQualityCheckDialog = ({
                   {visibleIssues.map((issue, index) => (
                     <li key={`${issue.code}-${index}`} className="px-4 py-3">
                       <p className="text-sm font-medium text-neutral-900">
-                        {humanizeAiMentorFieldReferences(issue.message)}
+                        {humanizeAiMentorFieldReferences(issue.message, t)}
                       </p>
                       <p className="mt-1 text-sm leading-5 text-neutral-600">
-                        {humanizeAiMentorFieldReferences(issue.correction)}
+                        {humanizeAiMentorFieldReferences(issue.correction, t)}
                       </p>
                     </li>
                   ))}

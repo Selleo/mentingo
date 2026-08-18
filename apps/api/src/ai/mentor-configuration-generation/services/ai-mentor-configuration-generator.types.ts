@@ -1,3 +1,4 @@
+import type { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "../ai-mentor-configuration-generation.constants";
 import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 import type {
   AiMentorConfigurationDraft,
@@ -13,6 +14,7 @@ type AiMentorConfigurationGeneratorContext = {
   lessonContext: AiMentorGenerationLessonContext;
   brief?: string;
   creatorInstruction?: string;
+  generationPurpose?: (typeof AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE)[keyof typeof AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE];
 };
 
 export type CreateAiMentorConfigurationDraftInput = AiMentorConfigurationGeneratorContext & {

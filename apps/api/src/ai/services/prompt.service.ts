@@ -163,6 +163,7 @@ export class PromptService implements OnModuleInit {
 
     const commonPromptVariables = {
       lessonTitle: lesson.title,
+      language: userLanguage,
       name: lesson.name,
       openingInstruction: lesson.openingInstruction ?? "",
       additionalInstructions: lesson.additionalInstructions ?? "",

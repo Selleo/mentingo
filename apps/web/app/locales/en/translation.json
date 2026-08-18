@@ -2794,7 +2794,7 @@
             "placeholder": "For example: Sales representative"
           },
           "characterGoal": {
-            "label": "Character goal",
+            "label": "AI character goal",
             "placeholder": "What is the AI character trying to achieve?"
           },
           "difficulty": {
@@ -2842,16 +2842,16 @@
           "create": {
             "title": "Create AI Mentor behavior with AI",
             "description": "Choose the Mentor mode, then describe the experience you want to create.",
-            "fieldLabel": "What should AI create?",
-            "fieldDescription": "AI will return a complete draft for the selected mode. You review it before applying it.",
-            "placeholder": "For example: help new managers practise a difficult feedback conversation.",
+            "fieldLabel": "What scenario should AI prepare?",
+            "fieldDescription": "AI will return a complete working draft of the scenario for the selected mode. Review it before applying it.",
+            "placeholder": "For example: a manager handling a difficult feedback conversation.",
             "submit": "Generate draft"
           },
           "improve": {
             "title": "Improve AI Mentor behavior with AI",
             "description": "AI uses the current unsaved configuration and its selected mode.",
-            "fieldLabel": "What should AI improve?",
-            "fieldDescription": "Describe the result you want. The selected mode stays unchanged.",
+            "fieldLabel": "What should AI change in the scenario?",
+            "fieldDescription": "Describe what should become more realistic, coherent, or specific. The selected mode stays unchanged.",
             "placeholder": "For example: make the scenario more realistic and add clearer constraints.",
             "submit": "Improve draft"
           },

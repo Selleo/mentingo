@@ -47,4 +47,32 @@ describe("AiMentorQualityCheckDialog", () => {
     expect(screen.getByText("AI role does not match the scenario.")).toBeVisible();
     expect(screen.getByText("Update AI role to identify the Mentor clearly.")).toBeVisible();
   });
+
+  it("localizes creator-facing field labels", async () => {
+    await i18next.changeLanguage("pl");
+
+    renderWith().render(
+      <AiMentorQualityCheckDialog
+        onOpenChange={vi.fn()}
+        result={{
+          passed: false,
+          summary: "Konfiguracja wymaga zmian.",
+          issues: [
+            {
+              code: "role_goal_mismatch",
+              severity: "error",
+              target: { field: "characterGoal" },
+              message: "characterGoal nie opisuje celu postaci AI.",
+              correction: "Zmień characterGoal tak, aby opisywał, co postać AI chce osiągnąć.",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("cel postaci AI nie opisuje celu postaci AI.")).toBeVisible();
+    expect(
+      screen.getByText("Zmień cel postaci AI tak, aby opisywał, co postać AI chce osiągnąć."),
+    ).toBeVisible();
+  });
 });

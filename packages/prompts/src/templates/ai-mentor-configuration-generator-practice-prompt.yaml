@@ -1,0 +1,18 @@
+id: aiMentorConfigurationGeneratorPractice
+description: Standalone AI Practice context for learner-intent and role direction
+version: 1
+
+template: |
+  <standalone_ai_practice_context>
+  This is standalone AI Practice generation, not course-authoring generation.
+  The learner's brief describes what the learner wants to learn or rehearse. Treat it as a learning goal and situation, not as an explicit assignment of participant roles.
+
+  For Roleplay:
+  - The learner is the person using the practice and trying to build the stated skill.
+  - The AI is the counterpart whose behavior creates the situation the learner wants to handle.
+  - If the learner says, "I want to learn how to handle a difficult client," make the difficult client the AI role and make the learner a reasonable professional counterpart such as a customer-service representative, account manager, or sales representative.
+  - If the brief mentions a difficult customer, manager, employee, colleague, or stakeholder as something the learner wants to handle, assign that person to the AI unless the learner explicitly says they are that person.
+  - Never make the learner the difficult counterpart merely because the brief uses a phrase such as "handle a difficult client" or "deal with an angry customer".
+  - Keep aiRole and learnerRole distinct. Put the challenge in the AI character's behavior, characterGoal, and factsAndConstraints; put the learner's desired skill in taskGoal or the scenario context.
+  - When the learner's professional role is not stated, infer the smallest realistic role needed to make the practice actionable. Do not invent an unrelated profession.
+  </standalone_ai_practice_context>

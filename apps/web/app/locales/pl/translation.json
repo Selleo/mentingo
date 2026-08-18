@@ -3015,7 +3015,7 @@
             "placeholder": "Na przykład: przedstawiciel handlowy"
           },
           "characterGoal": {
-            "label": "Cel postaci",
+            "label": "Cel postaci AI",
             "placeholder": "Co postać AI próbuje osiągnąć?"
           },
           "difficulty": {
@@ -3061,42 +3061,42 @@
           "checkQualityWithAi": "Sprawdź jakość z AI",
           "aiAssistance": "Pomoc AI",
           "create": {
-            "title": "Utwórz zachowanie AI Mentora z AI",
-            "description": "Wybierz tryb Mentora, a następnie opisz oczekiwane doświadczenie.",
-            "fieldLabel": "Co ma utworzyć AI?",
-            "fieldDescription": "AI zwróci kompletny szkic dla wybranego trybu.",
-            "placeholder": "Opisz oczekiwane zachowanie…",
-            "submit": "Wygeneruj szkic"
+            "title": "Przygotuj scenariusz AI Mentora z AI",
+            "description": "Wybierz tryb Mentora, a następnie opisz sytuację, uczestników i cel rozmowy.",
+            "fieldLabel": "Jaki scenariusz ma przygotować AI?",
+            "fieldDescription": "AI przygotuje kompletną wersję roboczą scenariusza w wybranym trybie. Przejrzysz ją przed zastosowaniem.",
+            "placeholder": "Opisz sytuację, uczestników i cel rozmowy…",
+            "submit": "Wygeneruj wersję roboczą"
           },
           "improve": {
-            "title": "Ulepsz zachowanie AI Mentora z AI",
+            "title": "Ulepsz scenariusz AI Mentora z AI",
             "description": "AI używa bieżącej, niezapisanej konfiguracji i jej trybu.",
-            "fieldLabel": "Co ma ulepszyć AI?",
-            "fieldDescription": "Wybrany tryb pozostaje bez zmian.",
-            "placeholder": "Opisz oczekiwaną zmianę…",
-            "submit": "Ulepsz szkic"
+            "fieldLabel": "Co ma zmienić AI w scenariuszu?",
+            "fieldDescription": "Opisz, co ma być bardziej realistyczne, spójne lub konkretne. Wybrany tryb pozostanie bez zmian.",
+            "placeholder": "Np. uczyń scenariusz bardziej realistycznym i dodaj wyraźniejsze ograniczenia…",
+            "submit": "Ulepsz wersję roboczą"
           },
-          "progressTitle": "Przygotowywanie szkicu",
+          "progressTitle": "Przygotowywanie wersji roboczej",
           "progressDescription": "AI generuje i sprawdza konfigurację.",
-          "readyTitle": "Szkic gotowy do przeglądu",
-          "revisionTitle": "Szkic wymaga decyzji",
-          "failedTitle": "Nie udało się wygenerować szkicu",
+          "readyTitle": "Wersja robocza gotowa do przeglądu",
+          "revisionTitle": "Wersja robocza wymaga decyzji",
+          "failedTitle": "Nie udało się wygenerować wersji roboczej",
           "cancel": "Anuluj generowanie",
-          "revise": "Popraw szkic",
+          "revise": "Popraw wersję roboczą",
           "review": "Przejrzyj konfigurację",
           "progressLabel": "Postęp generowania konfiguracji AI Mentora",
           "stages": {
-            "draft": "Generowanie szkicu",
+            "draft": "Generowanie wersji roboczej",
             "qualityCheck": "Kontrola jakości",
             "ready": "Gotowe"
           },
           "status": {
             "drafting": "Generowanie konfiguracji",
             "evaluating": "Sprawdzanie jakości konfiguracji",
-            "revising": "Ulepszanie szkicu",
+            "revising": "Ulepszanie wersji roboczej",
             "awaiting_revision": "Kontrola jakości wymaga decyzji",
             "completed": "Konfiguracja jest gotowa",
-            "requires_review": "Szkic wymaga decyzji",
+            "requires_review": "Wersja robocza wymaga decyzji",
             "failed": "Nie udało się ukończyć generowania",
             "cancelled": "Generowanie anulowane"
           },
@@ -3105,13 +3105,13 @@
             "evaluating": "Sprawdzanie, czy zachowanie jest jasne, kompletne i spójne.",
             "revising": "Wprowadzanie poprawek z ostatniej kontroli jakości.",
             "awaiting_revision": "Przejrzyj uwagi przed rozpoczęciem kolejnej próby.",
-            "completed": "Szkic przeszedł kontrolę jakości.",
-            "requires_review": "Zachowano najnowszy szkic, aby umożliwić podjęcie decyzji.",
+            "completed": "Wersja robocza przeszła kontrolę jakości.",
+            "requires_review": "Zachowano najnowszą wersję roboczą, aby umożliwić podjęcie decyzji.",
             "failed": "Spróbuj ponownie lub skonfiguruj zachowanie Mentora ręcznie.",
             "cancelled": "Nie zastosowano żadnych zmian konfiguracji."
           },
-          "attempt": "Szkic {{attempt}} z {{maxAttempts}}",
-          "currentDraft": "Bieżący szkic",
+          "attempt": "Wersja robocza {{attempt}} z {{maxAttempts}}",
+          "currentDraft": "Bieżąca wersja robocza",
           "qualityCheckLabel": "Kontrola jakości",
           "qualityDecisionTitle": "Sugerowane ulepszenia: {{count}}",
           "qualityDecisionDescription": "Przejrzyj sugestie lub kontynuuj z tą konfiguracją.",
@@ -3123,10 +3123,10 @@
           "showMoreFindings": "Pokaż więcej uwag: {{count}}",
           "showFewerFindings": "Pokaż mniej uwag",
           "review": {
-            "currentDraftTitle": "Przejrzyj bieżący szkic",
-            "currentDraftDescription": "Szkic nadal ma sugestie jakościowe. Przejrzyj go przed zastosowaniem.",
+            "currentDraftTitle": "Przejrzyj bieżącą wersję roboczą",
+            "currentDraftDescription": "Wersja robocza nadal ma sugestie jakościowe. Przejrzyj ją przed zastosowaniem.",
             "requiresReviewTitle": "Przejrzyj wygenerowaną konfigurację",
-            "requiresReviewDescription": "AI zachowało najnowszy szkic, aby umożliwić podjęcie ostatecznej decyzji."
+            "requiresReviewDescription": "AI zachowało najnowszą wersję roboczą, aby umożliwić podjęcie ostatecznej decyzji."
           },
           "quality": {
             "title": "Sprawdź jakość z AI",

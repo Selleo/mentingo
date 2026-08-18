@@ -2788,7 +2788,7 @@
             "placeholder": "Pavyzdžiui: pardavimo atstovas"
           },
           "characterGoal": {
-            "label": "Personažo tikslas",
+            "label": "DI personažo tikslas",
             "placeholder": "Ko siekia AI personažas?"
           },
           "difficulty": {
@@ -2836,16 +2836,16 @@
           "create": {
             "title": "Sukurti DI mentoriaus elgesį su DI",
             "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.",
-            "fieldLabel": "Ką DI turėtų sukurti?",
-            "fieldDescription": "DI pateiks visą pasirinkto režimo juodraštį.",
-            "placeholder": "Aprašykite norimą elgesį…",
+            "fieldLabel": "Kokį scenarijų turėtų paruošti DI?",
+            "fieldDescription": "DI pateiks išsamią pasirinkto režimo scenarijaus darbinę versiją.",
+            "placeholder": "Aprašykite situaciją, dalyvius ir pokalbio tikslą…",
             "submit": "Generuoti juodraštį"
           },
           "improve": {
             "title": "Pagerinti DI mentoriaus elgesį su DI",
             "description": "DI naudoja dabartinę neišsaugotą konfigūraciją ir jos režimą.",
-            "fieldLabel": "Ką DI turėtų pagerinti?",
-            "fieldDescription": "Pasirinktas režimas nesikeičia.",
+            "fieldLabel": "Ką DI turėtų pakeisti scenarijuje?",
+            "fieldDescription": "Aprašykite, kas turėtų būti realistiškiau, nuosekliau ar konkrečiau. Pasirinktas režimas nesikeis.",
             "placeholder": "Aprašykite norimą pakeitimą…",
             "submit": "Pagerinti juodraštį"
           },

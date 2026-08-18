@@ -2783,7 +2783,7 @@
             "placeholder": "Por ejemplo: representante de ventas"
           },
           "characterGoal": {
-            "label": "Objetivo del personaje",
+            "label": "Objetivo del personaje de IA",
             "placeholder": "¿Qué intenta conseguir el personaje de IA?"
           },
           "difficulty": {
@@ -2830,16 +2830,16 @@
           "create": {
             "title": "Crear el comportamiento del mentor de IA con IA",
             "description": "Elige el modo del mentor y describe la experiencia que quieres crear.",
-            "fieldLabel": "¿Qué debe crear la IA?",
-            "fieldDescription": "La IA devolverá un borrador completo para el modo seleccionado.",
-            "placeholder": "Por ejemplo: ayudar a nuevos responsables a practicar una conversación difícil.",
+            "fieldLabel": "¿Qué escenario debe preparar la IA?",
+            "fieldDescription": "La IA devolverá un borrador de trabajo completo del escenario para el modo seleccionado.",
+            "placeholder": "Por ejemplo: un responsable gestionando una conversación difícil.",
             "submit": "Generar borrador"
           },
           "improve": {
             "title": "Mejorar el comportamiento del mentor de IA con IA",
             "description": "La IA usa la configuración actual sin guardar y su modo seleccionado.",
-            "fieldLabel": "¿Qué debe mejorar la IA?",
-            "fieldDescription": "Describe el resultado deseado. El modo seleccionado no cambiará.",
+            "fieldLabel": "¿Qué debe cambiar la IA en el escenario?",
+            "fieldDescription": "Describe qué debe ser más realista, coherente o concreto. El modo seleccionado no cambiará.",
             "placeholder": "Por ejemplo: hacer el escenario más realista y añadir restricciones claras.",
             "submit": "Mejorar borrador"
           },

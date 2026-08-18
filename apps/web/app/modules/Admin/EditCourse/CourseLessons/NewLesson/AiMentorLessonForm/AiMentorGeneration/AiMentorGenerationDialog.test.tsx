@@ -56,7 +56,10 @@ describe("AiMentorGenerationDialog", () => {
     await user.click(screen.getByRole("radio", { name: /Roleplay/ }));
     expect(onSelectedTypeChange).toHaveBeenCalledWith(AI_MENTOR_TYPE.ROLEPLAY);
 
-    await user.type(screen.getByRole("textbox", { name: "What should AI create?" }), "Teach GDPR.");
+    await user.type(
+      screen.getByRole("textbox", { name: "What scenario should AI prepare?" }),
+      "Teach GDPR.",
+    );
     await user.click(screen.getByRole("button", { name: "Generate draft" }));
 
     expect(onGenerate).toHaveBeenCalledWith({
@@ -64,6 +67,23 @@ describe("AiMentorGenerationDialog", () => {
       brief: "Teach GDPR.",
       configurationType: AI_MENTOR_TYPE.TEACHER,
     });
+  });
+
+  it("puts Roleplay first and shows the selected mode choices", () => {
+    renderWith().render(
+      <AiMentorGenerationDialog
+        open
+        onOpenChange={vi.fn()}
+        mode={AI_MENTOR_GENERATION_MODE.CREATE}
+        selectedType={AI_MENTOR_TYPE.ROLEPLAY}
+        onSelectedTypeChange={vi.fn()}
+        onGenerate={vi.fn()}
+      />,
+    );
+
+    const choices = screen.getAllByRole("radio");
+    expect(choices[0]).toHaveAccessibleName(/^Roleplay/);
+    expect(choices[1]).toHaveAccessibleName(/^Teacher/);
   });
 
   it("matches the quality-decision and review steps used by completion conditions", async () => {

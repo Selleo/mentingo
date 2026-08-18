@@ -8,6 +8,8 @@ import {
 
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 
+import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "../ai-mentor-configuration-generation.constants";
+
 import { AiMentorConfigurationGeneratorService } from "./ai-mentor-configuration-generator.service";
 
 import type { PromptService } from "src/ai/services/prompt.service";
@@ -60,7 +62,11 @@ describe("AiMentorConfigurationGeneratorService", () => {
     } as never);
     const promptService = {
       loadPrompt: jest.fn(async (id: string) =>
-        id === "aiMentorConfigurationGeneratorBase" ? "BASE" : `MODE:${id}`,
+        id === "aiMentorConfigurationGeneratorBase"
+          ? "BASE"
+          : id === "aiMentorConfigurationGeneratorPractice"
+            ? "The learner's brief describes what the learner wants to practise"
+            : `MODE:${id}`,
       ),
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
@@ -120,6 +126,27 @@ describe("AiMentorConfigurationGeneratorService", () => {
       currentConfiguration,
     });
     expect(result).toEqual({ type: AI_MENTOR_TYPE.ROLEPLAY, ...roleplayFields });
+  });
+
+  it("adds learner-intent role direction for standalone practice generation", async () => {
+    const { generateText, promptService, service } = createService(roleplayFields);
+
+    await service.generate({
+      mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
+      configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      brief: "I want to learn how to handle a difficult client.",
+      generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
+    });
+
+    expect(promptService.loadPrompt).toHaveBeenCalledWith(
+      "aiMentorConfigurationGeneratorPractice",
+      {},
+    );
+    expect(generateText.mock.calls[0][0].system).toContain(
+      "The learner's brief describes what the learner wants to practise",
+    );
   });
 
   it("rejects model output that tries to return a type", async () => {

@@ -8,6 +8,7 @@ import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 
 import {
+  AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE,
   AI_MENTOR_CONFIGURATION_GENERATION_MODE_PROMPT_ID,
   AI_MENTOR_CONFIGURATION_GENERATOR_REASONING_EFFORT,
 } from "../ai-mentor-configuration-generation.constants";
@@ -29,16 +30,14 @@ import type { AiMentorConfigurationContent } from "src/lesson/ai-mentor-configur
 
 @Injectable()
 export class AiMentorConfigurationGeneratorService {
-  constructor(
-    private readonly promptService: PromptService,
-  ) {}
+  constructor(private readonly promptService: PromptService) {}
 
   async generate(
     input: GenerateAiMentorConfigurationDraftInput,
   ): Promise<AiMentorConfigurationContent> {
     return observe(
       async () => {
-        const [basePrompt, modePrompt] = await Promise.all([
+        const [basePrompt, modePrompt, purposePrompt] = await Promise.all([
           this.promptService.loadPrompt("aiMentorConfigurationGeneratorBase", {
             language: input.language,
           }),
@@ -46,14 +45,15 @@ export class AiMentorConfigurationGeneratorService {
             AI_MENTOR_CONFIGURATION_GENERATION_MODE_PROMPT_ID[input.mode],
             {},
           ),
+          input.generationPurpose === AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE
+            ? this.promptService.loadPrompt("aiMentorConfigurationGeneratorPractice", {})
+            : Promise.resolve(""),
         ]);
-        const system = `${basePrompt}\n\n${modePrompt}`;
+        const system = [basePrompt, modePrompt, purposePrompt].filter(Boolean).join("\n\n");
         const prompt = this.buildPrompt(input);
         const configuration =
           input.configurationType === AI_MENTOR_TYPE.TEACHER
-            ? attachAiMentorTeacherConfiguration(
-                await this.generateTeacherFields(system, prompt),
-              )
+            ? attachAiMentorTeacherConfiguration(await this.generateTeacherFields(system, prompt))
             : attachAiMentorRoleplayConfiguration(
                 await this.generateRoleplayFields(system, prompt),
               );

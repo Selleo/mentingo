@@ -18,6 +18,7 @@ import {
 } from "src/ai/ai-practice.types";
 import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
+import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "src/ai/mentor-configuration-generation/ai-mentor-configuration-generation.constants";
 import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
@@ -153,6 +154,7 @@ export class AiPracticeService {
         lessonContext,
         mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
         brief: session.scenario,
+        generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
       });
       if (mentorConfiguration.type !== AI_MENTOR_TYPE.ROLEPLAY)
         throw new Error("Practice AI Mentor generator returned a non-roleplay configuration");

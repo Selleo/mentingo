@@ -11,6 +11,7 @@ export const judgePromptSchema = Type.Object({
 
 const commonAiMentorPromptProperties = {
   lessonTitle: Type.String(),
+  language: Type.String(),
   securityAndRagBlock: Type.String(),
   name: Type.String(),
   openingInstruction: Type.String(),
@@ -121,6 +122,7 @@ export const PROMPT_MAP = {
   aiJudgeConfigurationValidator: aiJudgeConfigurationValidatorSchema,
   aiMentorConfigurationGeneratorBase: aiMentorConfigurationGeneratorBaseSchema,
   aiMentorConfigurationGeneratorCreate: aiMentorConfigurationGeneratorModeSchema,
+  aiMentorConfigurationGeneratorPractice: Type.Object({}, { additionalProperties: false }),
   aiMentorConfigurationGeneratorImprove: aiMentorConfigurationGeneratorModeSchema,
   aiMentorConfigurationGeneratorRepair: aiMentorConfigurationGeneratorModeSchema,
   aiMentorConfigurationValidator: aiMentorConfigurationValidatorSchema,

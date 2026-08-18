@@ -4,6 +4,7 @@ import Handlebars from "handlebars";
 const renderPrompt = (template: string) =>
   Handlebars.compile(template)({
     name: "Alex",
+    language: "pl",
     lessonTitle: "Supplier discovery call",
     scenario: "Supplier discovery call",
     aiRole: "Prospective client",
@@ -27,6 +28,8 @@ describe("AI Mentor conversation prompts", () => {
     const prompt = renderPrompt(promptTemplates.roleplayPrompt.template);
 
     expect(prompt).toContain("character direction privately");
+    expect(prompt).toContain("Speak entirely in the configured conversation language");
+    expect(prompt).toContain("natural Polish case endings");
     expect(prompt).toContain("Do not quote them, summarize them, convert them into a checklist");
     expect(prompt).toContain("Make one meaningful conversational move per turn");
     expect(prompt).toContain("Ask at most one focused question per turn");

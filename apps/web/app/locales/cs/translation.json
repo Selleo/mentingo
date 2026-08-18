@@ -2794,7 +2794,7 @@
             "placeholder": "Například: obchodní zástupce"
           },
           "characterGoal": {
-            "label": "Cíl postavy",
+            "label": "Cíl postavy AI",
             "placeholder": "Čeho se postava AI snaží dosáhnout?"
           },
           "difficulty": {
@@ -2842,16 +2842,16 @@
           "create": {
             "title": "Vytvořit chování AI Mentora pomocí AI",
             "description": "Vyberte režim mentora a popište požadovaný zážitek.",
-            "fieldLabel": "Co má AI vytvořit?",
-            "fieldDescription": "AI vrátí úplný návrh pro vybraný režim.",
-            "placeholder": "Popište požadované chování…",
+            "fieldLabel": "Jaký scénář má AI připravit?",
+            "fieldDescription": "AI připraví kompletní pracovní návrh scénáře pro vybraný režim.",
+            "placeholder": "Popište situaci, účastníky a cíl rozhovoru…",
             "submit": "Vygenerovat návrh"
           },
           "improve": {
             "title": "Vylepšit chování AI Mentora pomocí AI",
             "description": "AI používá aktuální neuloženou konfiguraci a její režim.",
-            "fieldLabel": "Co má AI vylepšit?",
-            "fieldDescription": "Vybraný režim zůstává beze změny.",
+            "fieldLabel": "Co má AI ve scénáři změnit?",
+            "fieldDescription": "Popište, co má být realističtější, soudržnější nebo konkrétnější. Vybraný režim zůstane beze změny.",
             "placeholder": "Popište požadovanou změnu…",
             "submit": "Vylepšit návrh"
           },

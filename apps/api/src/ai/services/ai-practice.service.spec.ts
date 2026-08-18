@@ -1,6 +1,7 @@
 import { AI_MENTOR_CONFIGURATION_GENERATION_MODE, AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "src/ai/mentor-configuration-generation/ai-mentor-configuration-generation.constants";
 
 import { AiPracticeService } from "./ai-practice.service";
 
@@ -77,6 +78,7 @@ describe("AiPracticeService", () => {
       },
       mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
       brief: scenario,
+      generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
     });
     expect(judgeGenerator.generate).toHaveBeenCalledTimes(1);
     expect(judgeGenerator.generate).toHaveBeenCalledWith({
