@@ -1,3 +1,11 @@
+<a name="v4.17.1"></a>
+
+## [v4.17.1] - 18.08.2026
+
+### Bug Fixes:
+
+- prevent dashboard redirect loops after session refresh ([#1902](https://github.com/Selleo/mentingo/issues/1902))
+
 <a name="v4.17.0"></a>
 
 ## [v4.17.0] - 18.08.2026
@@ -29,6 +37,10 @@
 - take students directly to the first lesson after enrolling in a course ([#1881](https://github.com/Selleo/mentingo/issues/1881))
 
 - improve design for changing course list layout ([#1420](https://github.com/Selleo/mentingo/issues/1420)) ([#1735](https://github.com/Selleo/mentingo/issues/1735))
+
+### Documentation:
+
+- update changelog for version v4.17.0
 
 <a name="v4.16.0"></a>
 
@@ -3164,7 +3176,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.17.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.17.1...HEAD
+[v4.17.1]: https://github.com/Selleo/mentingo/compare/v4.17.0...v4.17.1
 [v4.17.0]: https://github.com/Selleo/mentingo/compare/v4.16.0...v4.17.0
 [v4.16.0]: https://github.com/Selleo/mentingo/compare/v4.15.0...v4.16.0
 [v4.15.0]: https://github.com/Selleo/mentingo/compare/v4.14.1...v4.15.0
