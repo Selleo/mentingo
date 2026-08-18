@@ -1,6 +1,7 @@
 import type { Page, Route } from "@playwright/test";
+import type { DashboardWidgetSize } from "@repo/shared";
 
-export type DashboardLayoutSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+export type DashboardLayoutSize = DashboardWidgetSize;
 
 export type DashboardLayoutWidget = {
   type: string;

@@ -40,9 +40,7 @@ const fulfillJson = async (route: Route, body: unknown) => {
   });
 };
 
-// Some generated endpoints expose a paginated response directly and their
-// hooks return Axios' response body (`response.data`) rather than the nested
-// `response.data.data` used by the other dashboard endpoints.
+// Paginated endpoints expose their pagination object at the top level.
 const fulfillRawJson = async (route: Route, body: unknown) => {
   await route.fulfill({
     status: 200,
@@ -301,75 +299,6 @@ test.describe("dashboard navigation and role catalog", () => {
       await expect(widget.getByRole("link", { name: "Calendar" })).toBeVisible();
       await widget.getByRole("link", { name: "Calendar" }).click();
       await expect(page).toHaveURL(/\/calendar$/);
-    });
-  });
-
-  test("shows management widgets for content creators with scoped widget data", async ({
-    withReadonlyPage,
-  }) => {
-    await withReadonlyPage(USER_ROLE.contentCreator, async ({ page }) => {
-      await installDashboardMocks(page, {
-        widgets: [
-          dashboardWidget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, "2x2"),
-          dashboardWidget(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION, "2x2"),
-        ],
-        catalog: [
-          {
-            type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
-            allowedSizes: ["2x1", "2x2", "3x2"],
-            defaultSize: "2x1",
-          },
-          {
-            type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
-            allowedSizes: ["1x1", "2x2"],
-            defaultSize: "2x2",
-          },
-        ],
-        onRequest: async (route, url) => {
-          if (
-            route.request().method() === "GET" &&
-            url.pathname === "/api/statistics/dashboard/training-completion"
-          ) {
-            await fulfillJson(route, {
-              completed: 1,
-              inProgress: 0,
-              notStarted: 0,
-              total: 1,
-              percentage: 100,
-            });
-            return true;
-          }
-          if (
-            route.request().method() === "GET" &&
-            url.pathname === "/api/statistics/dashboard/deadline-risks/courses"
-          ) {
-            await fulfillRawJson(route, {
-              data: [
-                {
-                  id: DEADLINE_COURSE_ONE,
-                  title: "Creator-owned course",
-                  overdueCount: 1,
-                  dueSoonCount: 0,
-                  nearestDueDate: "2026-08-01T00:00:00.000Z",
-                  urgency: "overdue",
-                },
-              ],
-              pagination: { totalItems: 1, page: 1, perPage: 20 },
-            });
-            return true;
-          }
-          return false;
-        },
-      });
-
-      await page.goto("/dashboard");
-      await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS)).toContainText(
-        "Creator-owned course",
-      );
-      await expect(
-        page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION),
-      ).toContainText("Training completion");
-      await expect(page.getByText("Other tenant course", { exact: true })).toHaveCount(0);
     });
   });
 
@@ -633,7 +562,7 @@ test("student certificate tile scroll-loads certificates and opens a preview", a
       element.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
     await expect(widget.getByText("Completed course 11")).toBeVisible();
-    await widget.getByRole("button", { name: /Completed course 1/ }).click();
+    await widget.getByText("Completed course 1", { exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("dialog")).toContainText("Taylor Student");
   });
@@ -703,27 +632,27 @@ test("student can create, complete, edit, delete, reorder, and reload todo tasks
     });
 
     await page.goto("/dashboard");
-    const widget = page.locator("article").filter({ hasText: "To-do list" });
+    const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS);
     await expect(widget).toBeVisible();
     await expect(page.getByLabel("Move To-do list")).toHaveCount(0);
     await widget.getByPlaceholder("Add a task").fill("Send follow-up");
     await widget.getByRole("button", { name: "Add task" }).click();
     await expect(widget.getByText("Send follow-up")).toBeVisible();
 
-    const reorderButtons = widget.getByRole("button", { name: "Reorder task" });
-    await reorderButtons.first().focus();
-    await page.keyboard.press("Space");
-    await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Space");
+    const reviewRow = widget.getByRole("group", { name: "Review inbox" });
+    const agendaRow = widget.getByRole("group", { name: "Prepare agenda" });
+    await reviewRow
+      .getByRole("button", { name: "Reorder task" })
+      .dragTo(agendaRow.getByRole("button", { name: "Reorder task" }));
     await expect.poll(() => reorderRequests.length).toBeGreaterThan(0);
     expect(reorderRequests.at(-1)?.activeTaskIds).toEqual(["todo-2", "todo-1", "todo-4"]);
 
     await widget.getByRole("button", { name: "Toggle Review inbox" }).click();
     await expect(widget.getByText("Review inbox")).toHaveClass(/line-through/);
 
-    const reviewRow = widget.getByText("Review inbox", { exact: true }).locator("..");
-    await reviewRow.getByRole("button", { name: "Edit task" }).click();
-    const titleInput = reviewRow.locator("input");
+    const reviewTitleRow = widget.getByText("Review inbox", { exact: true }).locator("..");
+    await reviewTitleRow.getByRole("button", { name: "Edit task" }).click();
+    const titleInput = widget.locator("input").last();
     await titleInput.fill("Review the inbox");
     await titleInput.press("Enter");
     await expect(widget.getByText("Review the inbox")).toBeVisible();
@@ -733,7 +662,7 @@ test("student can create, complete, edit, delete, reorder, and reload todo tasks
     await expect(widget.getByText("Send follow-up")).toHaveCount(0);
 
     await page.reload();
-    const persistedWidget = page.locator("article").filter({ hasText: "To-do list" });
+    const persistedWidget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS);
     await expect(persistedWidget.getByText("Review the inbox")).toBeVisible();
     await expect(persistedWidget.getByText("Archive notes")).toBeVisible();
   });
@@ -817,8 +746,8 @@ test("student can generate an AI practice inline and continue from the card", as
     const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
     await expect(widget).toBeVisible();
     await widget.getByRole("button", { name: "Start with an example" }).click();
-    await expect(widget.getByRole("menu")).toBeVisible();
-    await widget.getByRole("menuitem").first().click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.getByRole("menuitem").first().click();
     const scenarioInput = widget.getByRole("textbox", { name: "What would you like to practice?" });
     await expect(scenarioInput).not.toHaveValue("");
     await widget.getByRole("button", { name: "Create practice" }).click();

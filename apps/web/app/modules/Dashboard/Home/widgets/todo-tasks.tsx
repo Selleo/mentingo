@@ -15,6 +15,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -215,7 +216,7 @@ export function WidgetTodoTasks({
   );
 
   return (
-    <DashboardWidgetCard>
+    <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.TODO_TASKS}>
       <DashboardWidgetHeader
         title={t(metadata?.titleKey ?? "dashboardHome.widgets.todoTasks.title")}
         icon={metadata?.icon ?? ListTodo}

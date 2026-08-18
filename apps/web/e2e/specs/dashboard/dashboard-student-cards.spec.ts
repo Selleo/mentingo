@@ -331,7 +331,12 @@ test.describe("learner dashboard card contracts", () => {
           }
           if (route.request().method() === "GET" && url.pathname === "/api/auth/current-user") {
             await fulfillJson(route, {
-              data: { id: USER_ID, roleSlugs: ["student"], permissions: [] },
+              data: {
+                id: USER_ID,
+                roleSlugs: ["student"],
+                permissions: ["dashboard.read"],
+                onboardingStatus: { settings: true },
+              },
             });
             return true;
           }
@@ -550,7 +555,12 @@ test.describe("learner certificates card", () => {
         onRequest: async (route, url) => {
           if (route.request().method() === "GET" && url.pathname === "/api/auth/current-user") {
             await fulfillJson(route, {
-              data: { id: USER_ID, roleSlugs: ["student"], permissions: [] },
+              data: {
+                id: USER_ID,
+                roleSlugs: ["student"],
+                permissions: ["dashboard.read"],
+                onboardingStatus: { settings: true },
+              },
             });
             return true;
           }
@@ -583,7 +593,7 @@ test.describe("learner certificates card", () => {
       await expect(page.getByText("Taylor Student")).toBeVisible();
 
       await page.keyboard.press("Escape");
-      const scrollArea = widget.locator("div.overflow-y-auto");
+      const scrollArea = widget.locator("div.h-full.min-h-0.space-y-2.overflow-y-auto");
       await scrollArea.evaluate((element) => {
         element.scrollTop = element.scrollHeight;
         element.dispatchEvent(new Event("scroll", { bubbles: true }));
@@ -607,7 +617,12 @@ test.describe("learner certificates card", () => {
         onRequest: async (route, url) => {
           if (route.request().method() === "GET" && url.pathname === "/api/auth/current-user") {
             await fulfillJson(route, {
-              data: { id: USER_ID, roleSlugs: ["student"], permissions: [] },
+              data: {
+                id: USER_ID,
+                roleSlugs: ["student"],
+                permissions: ["dashboard.read"],
+                onboardingStatus: { settings: true },
+              },
             });
             return true;
           }

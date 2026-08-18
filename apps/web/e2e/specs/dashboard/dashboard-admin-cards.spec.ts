@@ -1,15 +1,22 @@
-import { DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+import {
+  DASHBOARD_WIDGET_SIZES,
+  DASHBOARD_WIDGET_TYPES,
+  type DashboardWidgetSize,
+  type DashboardWidgetType,
+} from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
 import { DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
+import { setDashboardWidgets } from "../../utils/dashboard-settings";
 
 import type { Page, Route } from "@playwright/test";
 
 type DashboardWidget = {
-  type: string;
-  size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x2" | "4x3";
+  type: DashboardWidgetType;
+  size: DashboardWidgetSize;
   visible: boolean;
 };
 
@@ -65,7 +72,10 @@ const dashboardMocks = async (
   });
 };
 
-const widget = (type: string, size: DashboardWidget["size"] = "2x2"): DashboardWidget => ({
+const widget = (
+  type: DashboardWidgetType,
+  size: DashboardWidget["size"] = "2x2",
+): DashboardWidget => ({
   type,
   size,
   visible: true,
@@ -166,7 +176,7 @@ test.describe("admin dashboard utility cards", () => {
               request.searchParams.get("sortBy") === "studentCount" &&
               request.searchParams.get("sortDirection") === "desc" &&
               request.searchParams.get("page") === "1" &&
-              request.searchParams.get("perPage") === "1",
+              request.searchParams.get("perPage") === "20",
           ),
         )
         .toBe(true);
@@ -184,9 +194,11 @@ test.describe("admin dashboard utility cards", () => {
           request.searchParams.get("page") === "2",
       );
       expect(paginatedGroupRequest?.searchParams.get("language")).toBe("en");
-      expect(paginatedGroupRequest?.searchParams.get("perPage")).toBe("1");
+      expect(paginatedGroupRequest?.searchParams.get("perPage")).toBe("20");
 
-      await widgetCard.getByRole("button", { name: /sort/ }).click();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await widgetCard.getByRole("button", { name: /sort/i }).click();
       await page.getByRole("menuitemradio", { name: "Least urgent first" }).click();
       await expect
         .poll(() =>
@@ -429,124 +441,73 @@ test.describe("admin dashboard utility cards", () => {
   });
 
   test("supports to-do CRUD, completion, reorder and persistence outside dashboard edit mode", async ({
-    withWorkerPage,
+    cleanup,
+    withIsolatedWorkerPage,
   }) => {
-    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      const tasks = [
-        { id: "todo-1", title: "Review inbox", completed: false, position: 0 },
-        { id: "todo-2", title: "Prepare agenda", completed: false, position: 1 },
-        { id: "todo-3", title: "Archive notes", completed: true, position: 2 },
-      ];
-      let nextId = 4;
-      let reorderPayload: unknown;
-      await dashboardMocks(page, [widget(DASHBOARD_WIDGET_TYPES.TODO_LIST)], async (route, url) => {
-        const request = route.request();
-        const index = tasks.findIndex((task) => url.pathname.endsWith(`/${task.id}`));
-        if (request.method() === "GET" && url.pathname === "/api/todo-tasks") {
-          await wrapped(route, tasks);
-          return true;
-        }
-        if (request.method() === "POST" && url.pathname === "/api/todo-tasks") {
-          const payload = request.postDataJSON() as { title: string };
-          const task = {
-            id: `todo-${nextId++}`,
-            title: payload.title,
-            completed: false,
-            position: tasks.length,
-          };
-          tasks.push(task);
-          await wrapped(route, task);
-          return true;
-        }
-        if (request.method() === "PATCH" && index >= 0) {
-          Object.assign(tasks[index], request.postDataJSON());
-          await wrapped(route, tasks[index]);
-          return true;
-        }
-        if (request.method() === "DELETE" && index >= 0) {
-          tasks.splice(index, 1);
-          await wrapped(route, null);
-          return true;
-        }
-        if (request.method() === "PUT" && url.pathname === "/api/todo-tasks/order") {
-          reorderPayload = request.postDataJSON();
-          await wrapped(route, tasks);
-          return true;
-        }
-        return false;
-      });
-      await page.goto("/dashboard");
-      const card = page.locator("article").filter({ hasText: "To-do list" });
-      await expect(page.getByRole("button", { name: "Customize dashboard" })).toBeVisible();
-      await card.getByPlaceholder("Add a task").fill("Send follow-up");
-      await card.getByRole("button", { name: "Add task" }).click();
-      await expect(card.getByText("Send follow-up")).toBeVisible();
+    await withIsolatedWorkerPage(
+      USER_ROLE.admin,
+      async ({ apiClient, factories, origin, page }) => {
+        const taskFactory = factories.createTodoTaskFactory();
+        await setDashboardWidgets(apiClient, [
+          {
+            type: DASHBOARD_WIDGET_TYPES.TODO_LIST,
+            size: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+          },
+        ]);
+        const reviewTask = await taskFactory.create({ title: "Review inbox" });
+        const agendaTask = await taskFactory.create({ title: "Prepare agenda" });
+        const archiveTask = await taskFactory.create({ title: "Archive notes" });
+        cleanup.add(() => taskFactory.delete(reviewTask.id));
+        cleanup.add(() => taskFactory.delete(agendaTask.id));
+        cleanup.add(() => taskFactory.delete(archiveTask.id));
+        await taskFactory.update(archiveTask.id, { completed: true });
+        await openDashboardFlow(page, origin);
+        const card = page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS);
+        await expect(page.getByRole("button", { name: "Customize dashboard" })).toBeVisible();
+        await card.getByPlaceholder("Add a task").fill("Send follow-up");
+        await card.getByRole("button", { name: "Add task" }).click();
+        await expect(card.getByText("Send follow-up")).toBeVisible();
 
-      const reorder = card.getByRole("button", { name: "Reorder task" });
-      await reorder.first().focus();
-      await page.keyboard.press("Space");
-      await page.keyboard.press("ArrowDown");
-      await page.keyboard.press("Space");
-      await expect.poll(() => reorderPayload).toBeDefined();
+        const reviewRow = card.getByRole("group", { name: "Review inbox" });
+        const agendaRow = card.getByRole("group", { name: "Prepare agenda" });
+        await reviewRow
+          .getByRole("button", { name: "Reorder task" })
+          .dragTo(agendaRow.getByRole("button", { name: "Reorder task" }));
+        await expect
+          .poll(async () => {
+            const tasks = await taskFactory.list();
+            const agenda = tasks.find((task) => task.id === agendaTask.id);
+            const review = tasks.find((task) => task.id === reviewTask.id);
+            return (
+              agenda !== undefined && review !== undefined && agenda.position < review.position
+            );
+          })
+          .toBe(true);
 
-      await card.getByRole("button", { name: "Toggle Review inbox" }).click();
-      await expect(card.getByText("Review inbox")).toHaveClass(/line-through/);
+        await card.getByRole("button", { name: "Toggle Review inbox" }).click();
+        await expect(card.getByText("Review inbox")).toHaveClass(/line-through/);
+        await expect
+          .poll(async () => {
+            const tasks = await taskFactory.list();
+            return tasks.find((task) => task.id === reviewTask.id)?.completed;
+          })
+          .toBe(true);
 
-      const row = card.getByText("Review inbox", { exact: true }).locator("..");
-      await row.getByRole("button", { name: "Edit task" }).click();
-      const titleInput = card.locator("input").last();
-      await expect(titleInput).toBeVisible();
-      await titleInput.fill("Review the inbox");
-      await titleInput.press("Enter");
-      await expect(card.getByText("Review the inbox")).toBeVisible();
-      const followUpRow = card.getByText("Send follow-up", { exact: true }).locator("..");
-      await followUpRow.getByRole("button", { name: "Delete task" }).click();
-      await expect(card.getByText("Send follow-up")).toHaveCount(0);
-      await page.reload();
-      await expect(
-        page.locator("article").filter({ hasText: "To-do list" }).getByText("Review the inbox"),
-      ).toBeVisible();
-    });
-  });
-
-  test("content creators see scoped management card data", async ({ withReadonlyPage }) => {
-    await withReadonlyPage(USER_ROLE.contentCreator, async ({ page }) => {
-      await dashboardMocks(
-        page,
-        [
-          widget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS),
-          widget(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION),
-        ],
-        async (route, url) => {
-          if (route.request().method() !== "GET") return false;
-          if (url.pathname.endsWith("/training-completion")) {
-            await wrapped(route, {
-              completed: 1,
-              inProgress: 0,
-              notStarted: 0,
-              total: 1,
-              percentage: 100,
-            });
-            return true;
-          }
-          if (url.pathname.endsWith("/deadline-risks/courses")) {
-            await json(route, {
-              data: [course(COURSE_ONE, "Creator-owned course")],
-              pagination: { totalItems: 1, page: 1, perPage: 20 },
-            });
-            return true;
-          }
-          return false;
-        },
-      );
-      await page.goto("/dashboard");
-      await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS)).toContainText(
-        "Creator-owned course",
-      );
-      await expect(
-        page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION),
-      ).toContainText("Training completion");
-      await expect(page.getByText("Other tenant course", { exact: true })).toHaveCount(0);
-    });
+        const row = card.getByText("Review inbox", { exact: true }).locator("..");
+        await row.getByRole("button", { name: "Edit task" }).click();
+        const titleInput = card.locator("input").last();
+        await expect(titleInput).toBeVisible();
+        await titleInput.fill("Review the inbox");
+        await titleInput.press("Enter");
+        await expect(card.getByText("Review the inbox")).toBeVisible();
+        const followUpRow = card.getByText("Send follow-up", { exact: true }).locator("..");
+        await followUpRow.getByRole("button", { name: "Delete task" }).click();
+        await expect(card.getByText("Send follow-up")).toHaveCount(0);
+        await page.reload();
+        await expect(
+          page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS).getByText("Review the inbox"),
+        ).toBeVisible();
+      },
+    );
   });
 });

@@ -4,6 +4,7 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { expect, test } from "../../fixtures/test.fixture";
 import { mockDashboardLayout } from "../../flows/dashboard/mock-dashboard-layout.flow";
+import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 
 import type {
   DashboardLayoutCatalogEntry,
@@ -83,8 +84,6 @@ const visibleWidgetTitles = async (page: Parameters<typeof mockDashboardLayout>[
   page.locator('[data-dashboard-widget-hitbox="true"] h2').allTextContents();
 
 test.describe("role-specific dashboard default layouts", () => {
-  test.describe.configure({ mode: "serial" });
-
   for (const [roleSlug, expectedWidgets] of Object.entries(roleDefaults)) {
     if (roleSlug === SYSTEM_ROLE_SLUGS.TRAINER) continue;
     const role = roleSlug as UserRole;
@@ -134,6 +133,7 @@ test.describe("role-specific dashboard default layouts", () => {
 
 test("trainer restores the trainer default profile", async ({ createIsolatedWorkspace }) => {
   const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
+  await workspace.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
   const trainer = await workspace.createTenantUserWithPasswordAndRole({
     role: SYSTEM_ROLE_SLUGS.TRAINER as UserRole,
   });
@@ -144,7 +144,7 @@ test("trainer restores the trainer default profile", async ({ createIsolatedWork
     catalog: catalogFor(expectedWidgets),
   });
 
-  await trainer.page.goto("/dashboard");
+  await openDashboardFlow(trainer.page, trainer.origin);
   await trainer.page.getByRole("button", { name: "Customize dashboard" }).click();
   await trainer.page.getByRole("button", { name: "Widgets" }).click();
   await trainer.page.getByRole("button", { name: "Restore default" }).click();

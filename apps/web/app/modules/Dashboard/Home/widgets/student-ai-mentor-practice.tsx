@@ -318,109 +318,106 @@ export function WidgetStudentAiMentorPractice() {
     !(lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0);
 
   return (
-    <div data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET} className="h-full">
-      <DashboardWidgetCard>
-        <DashboardWidgetHeader
-          title={t(metadata.titleKey)}
-          icon={metadata.icon}
-          iconClassName={metadata.iconClassName}
-          iconContainerClassName={metadata.iconContainerClassName}
-          headerAction={
-            data ? (
-              <Link
-                to={`/ai-mentor/practice/${data.id}`}
-                className="inline-flex size-8 items-center justify-center rounded-md text-primary-800 transition-[color,transform] duration-75 hover:text-primary-950 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
-                aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
-                title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
-              >
-                <SquareArrowRightEnter className="size-4" aria-hidden="true" />
-              </Link>
-            ) : undefined
-          }
-        />
-        <DashboardWidgetContent className="relative flex min-h-0 flex-col !overflow-hidden">
-          {isLoading || isError ? (
-            <DashboardWidgetQueryState
-              isLoading={isLoading}
-              isError={isError}
-              onRetry={() => void refetch()}
+    <DashboardWidgetCard testId={AI_MENTOR_PRACTICE_HANDLES.WIDGET} className="h-full">
+      <DashboardWidgetHeader
+        title={t(metadata.titleKey)}
+        icon={metadata.icon}
+        iconClassName={metadata.iconClassName}
+        iconContainerClassName={metadata.iconContainerClassName}
+        headerAction={
+          data ? (
+            <Link
+              to={`/ai-mentor/practice/${data.id}`}
+              className="inline-flex size-8 items-center justify-center rounded-md text-primary-800 transition-[color,transform] duration-75 hover:text-primary-950 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
+              aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
+              title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
+            >
+              <SquareArrowRightEnter className="size-4" aria-hidden="true" />
+            </Link>
+          ) : undefined
+        }
+      />
+      <DashboardWidgetContent className="relative flex min-h-0 flex-col !overflow-hidden">
+        {isLoading || isError ? (
+          <DashboardWidgetQueryState
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={() => void refetch()}
+          />
+        ) : !data ? (
+          <div className="flex min-h-0 flex-1 flex-col justify-between gap-4 p-4 sm:p-5">
+            <div className="max-w-2xl">
+              <p className="body-base-md text-neutral-950">
+                {t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
+              </p>
+              <p className="body-sm mt-1 text-neutral-500">
+                {t("aiMentorPractice.form.scenarioHint")}
+              </p>
+            </div>
+            <div className="mt-auto w-full">
+              <ScenarioComposer
+                compact={false}
+                currentPlaceholder={
+                  placeholders[placeholderIndex] ?? t("aiMentorPractice.form.scenarioPlaceholder")
+                }
+                isPending={isCreating}
+                scenario={scenario}
+                onScenarioChange={setScenario}
+                onFocusChange={setIsScenarioFocused}
+                onSubmit={() => void handleCreate()}
+              />
+            </div>
+          </div>
+        ) : data.status === AI_MENTOR_PRACTICE_STATUSES.QUEUED ||
+          data.status === AI_MENTOR_PRACTICE_STATUSES.PROCESSING ? (
+          <AiMentorReplayLoader
+            text={t(`dashboardHome.widgets.studentTiles.aiMentorPractice.status.${data.status}`)}
+            className="py-5"
+          />
+        ) : data.status === AI_MENTOR_PRACTICE_STATUSES.FAILED ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center">
+            <p className="body-sm text-neutral-600">
+              {t("dashboardHome.widgets.studentTiles.aiMentorPractice.status.failed")}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isRetrying}
+              onClick={() => void retryPractice(data.id)}
+            >
+              {isRetrying ? t("common.button.loading") : t("aiMentorPractice.retry")}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="shrink-0 border-b border-neutral-100 px-4 py-2.5">
+              <p className="body-sm-md truncate text-neutral-900">
+                {data.title ?? t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
+              </p>
+            </div>
+
+            <AiMentorPracticeMessages
+              messages={messages}
+              isMessagesLoading={isMessagesLoading}
+              showChatLoader={showChatLoader}
+              aiMentorName={data.aiMentorName ?? t("aiMentorPractice.mentorName")}
+              messagesContainerRef={messagesContainerRef}
             />
-          ) : !data ? (
-            <div className="flex min-h-0 flex-1 flex-col justify-between gap-4 p-4 sm:p-5">
-              <div className="max-w-2xl">
-                <p className="body-base-md text-neutral-950">
-                  {t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
-                </p>
-                <p className="body-sm mt-1 text-neutral-500">
-                  {t("aiMentorPractice.form.scenarioHint")}
-                </p>
-              </div>
-              <div className="mt-auto w-full">
-                <ScenarioComposer
-                  compact={false}
-                  currentPlaceholder={
-                    placeholders[placeholderIndex] ?? t("aiMentorPractice.form.scenarioPlaceholder")
-                  }
-                  isPending={isCreating}
-                  scenario={scenario}
-                  onScenarioChange={setScenario}
-                  onFocusChange={setIsScenarioFocused}
-                  onSubmit={() => void handleCreate()}
+
+            {isActive && (
+              <div className="shrink-0 border-t border-neutral-100 bg-neutral-50/70 px-3 py-2.5">
+                <ConversationComposer
+                  disabled={isSending}
+                  message={message}
+                  onMessageChange={setMessage}
+                  onSubmit={handleSend}
                 />
               </div>
-            </div>
-          ) : data.status === AI_MENTOR_PRACTICE_STATUSES.QUEUED ||
-            data.status === AI_MENTOR_PRACTICE_STATUSES.PROCESSING ? (
-            <AiMentorReplayLoader
-              text={t(`dashboardHome.widgets.studentTiles.aiMentorPractice.status.${data.status}`)}
-              className="py-5"
-            />
-          ) : data.status === AI_MENTOR_PRACTICE_STATUSES.FAILED ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center">
-              <p className="body-sm text-neutral-600">
-                {t("dashboardHome.widgets.studentTiles.aiMentorPractice.status.failed")}
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isRetrying}
-                onClick={() => void retryPractice(data.id)}
-              >
-                {isRetrying ? t("common.button.loading") : t("aiMentorPractice.retry")}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex min-h-0 flex-1 flex-col">
-              <div className="shrink-0 border-b border-neutral-100 px-4 py-2.5">
-                <p className="body-sm-md truncate text-neutral-900">
-                  {data.title ??
-                    t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
-                </p>
-              </div>
-
-              <AiMentorPracticeMessages
-                messages={messages}
-                isMessagesLoading={isMessagesLoading}
-                showChatLoader={showChatLoader}
-                aiMentorName={data.aiMentorName ?? t("aiMentorPractice.mentorName")}
-                messagesContainerRef={messagesContainerRef}
-              />
-
-              {isActive && (
-                <div className="shrink-0 border-t border-neutral-100 bg-neutral-50/70 px-3 py-2.5">
-                  <ConversationComposer
-                    disabled={isSending}
-                    message={message}
-                    onMessageChange={setMessage}
-                    onSubmit={handleSend}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </DashboardWidgetContent>
-      </DashboardWidgetCard>
-    </div>
+            )}
+          </div>
+        )}
+      </DashboardWidgetContent>
+    </DashboardWidgetCard>
   );
 }

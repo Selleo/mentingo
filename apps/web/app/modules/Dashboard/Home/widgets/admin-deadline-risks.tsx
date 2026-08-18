@@ -209,6 +209,7 @@ export function WidgetAdminDeadlineRisks() {
       {
         accessorKey: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.STUDENT_COUNT,
         header: t("dashboardHome.widgets.deadline_risks.learners"),
+        sortDescFirst: true,
         cell: ({ row }) => (
           <span className="tabular-nums text-neutral-600">{row.original.studentCount}</span>
         ),
