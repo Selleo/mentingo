@@ -576,27 +576,30 @@ export class CourseService {
       .select({
         courseId: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        dueDate: sql<string | null>`${groupCourses.dueDate}`,
+        thumbnailS3Key: courses.thumbnailS3Key,
+        dueDate: sql<string | null>`MIN(${groupCourses.dueDate})::TEXT`,
       })
-      .from(studentCourses)
-      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
-      .innerJoin(
-        groupCourses,
+      .from(groupUsers)
+      .innerJoin(groupCourses, eq(groupCourses.groupId, groupUsers.groupId))
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .leftJoin(
+        studentCourses,
         and(
-          eq(groupCourses.courseId, studentCourses.courseId),
-          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          eq(studentCourses.studentId, groupUsers.userId),
+          eq(studentCourses.courseId, groupCourses.courseId),
         ),
       )
       .where(
         and(
-          eq(studentCourses.studentId, userId),
+          eq(groupUsers.userId, userId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(studentCourses.completedAt),
           eq(groupCourses.isMandatory, true),
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(groupCourses.dueDate, courses.title)
+      .groupBy(courses.id)
+      .orderBy(sql`MIN(${groupCourses.dueDate}) NULLS LAST`, courses.title)
       .limit(STUDENT_DASHBOARD_LIMITS.REQUIRED_COURSES);
 
     const [completion] = await this.db
@@ -679,23 +682,29 @@ export class CourseService {
     );
     const now = Date.now();
     const dueSoonBoundary = addDays(new Date(now), 7).getTime();
-
-    const total = completion?.total ?? 0;
-    const completed = completion?.completed ?? 0;
-
-    return {
-      continueLearningCourses,
-      requiredCourses: requiredCourses.map((course) => {
+    const requiredDashboardCourses = await Promise.all(
+      requiredCourses.map(async (course) => {
         const urgency = getRequiredCourseUrgency(course.dueDate, now, dueSoonBoundary);
 
         return {
           courseId: course.courseId,
           slug: slugs.get(course.courseId) ?? course.courseId,
           title: course.title,
+          thumbnailUrl: course.thumbnailS3Key
+            ? await this.getSignedCourseThumbnailUrl(course.thumbnailS3Key)
+            : null,
           dueDate: course.dueDate,
           urgency,
         };
       }),
+    );
+
+    const total = completion?.total ?? 0;
+    const completed = completion?.completed ?? 0;
+
+    return {
+      continueLearningCourses,
+      requiredCourses: requiredDashboardCourses,
       completion: {
         total,
         completed,
@@ -3003,12 +3012,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-                PERMISSIONS.COURSE_UPDATE,
-                PERMISSIONS.COURSE_UPDATE_OWN,
-              ]),
-            ),
+            ne(users.id, course.authorId),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -3050,12 +3054,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-                PERMISSIONS.COURSE_UPDATE,
-                PERMISSIONS.COURSE_UPDATE_OWN,
-              ]),
-            ),
+            ne(users.id, course.authorId),
             isNull(studentCourses.id),
           ),
         )

@@ -25,6 +25,7 @@ export const continueLearningCourseSchema = Type.Object({
 
 export const requiredDashboardCourseSchema = Type.Object({
   ...dashboardCourseBaseSchema.properties,
+  thumbnailUrl: Type.Union([Type.String(), Type.Null()]),
   dueDate: Type.Union([Type.String(), Type.Null()]),
   urgency: Type.Enum(STUDENT_COURSE_URGENCY),
 });

@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
+export const getAiMentorPracticeQueryKey = (id: string) => ["aiMentorPractice", id] as const;
+
 export function useAiMentorPractice(id: string) {
   return useQuery({
-    queryKey: ["aiMentorPractice", id],
+    queryKey: getAiMentorPracticeQueryKey(id),
     queryFn: async () => {
       const response = await ApiClient.api.aiControllerGetPractice(id);
       return response.data.data;

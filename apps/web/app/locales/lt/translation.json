@@ -7,8 +7,19 @@
       "badge": "Redagavimas",
       "widgetsButton": "Valdikliai",
       "restore": "Atkurti numatytuosius",
-      "instructions": "Vilkite valdiklius, kad pakeistumėte jų tvarką. Taip pat galite keisti plotį ir matomumą.",
-      "changeWidth": "Keisti {{title}} plotį",
+      "restoreConfirm": "Atkurti numatytąjį valdiklių išdėstymą? Dabartinis išdėstymas bus pakeistas.",
+      "changeSize": "Keisti {{title}} dydį",
+      "sizeTitle": "Valdiklio dydis",
+      "sizes": {
+        "1x1": "Kompaktiškas",
+        "2x1": "Platus",
+        "1x2": "Aukštas",
+        "2x2": "Didelis",
+        "3x2": "Išplėstas",
+        "4x1": "Ypač platus",
+        "4x2": "Išskirtinis",
+        "4x3": "Aukštas išskirtinis"
+      },
       "drag": "Perkelti {{title}}",
       "widgetLibrary": "Skydelio valdikliai",
       "widgetLibraryDescription": "Pasirinkite skydelyje matomus valdiklius.",
@@ -24,11 +35,19 @@
     },
     "error": {
       "invalidWidgetLayout": "Skydelio išdėstyme yra nepasiekiamų arba pasikartojančių valdiklių.",
+      "invalidWidgetSize": "Pasirinktam valdikliui šis dydis neleidžiamas.",
       "requiredWidgetMissing": "Trūksta privalomo skydelio valdiklio.",
       "title": "Nepavyko įkelti skydelio",
       "description": "Po akimirkos bandykite dar kartą.",
       "retry": "Bandyti dar kartą",
-      "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas."
+      "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas.",
+      "staleLayout": "Jūsų skydelis buvo atnaujintas kitur. Atnaujinkite puslapį ir bandykite dar kartą."
+    },
+    "toast": {
+      "layoutSaved": "Skydelio pakeitimai išsaugoti.",
+      "layoutSaveError": "Nepavyko išsaugoti skydelio pakeitimų.",
+      "layoutReset": "Atkurtas numatytasis skydelio išdėstymas.",
+      "layoutResetError": "Nepavyko atkurti numatytojo skydelio išdėstymo."
     },
     "widgets": {
       "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
@@ -92,9 +111,7 @@
           "startCta": "Pradėti praktiką",
           "continueCta": "Tęsti praktiką",
           "feedbackCta": "Peržiūrėti atsiliepimą",
-          "todayEyebrow": "Šiandienos repeticija",
           "completedEyebrow": "Repeticija baigta",
-          "returnHint": "Jūsų pokalbis išsaugotas",
           "privateHint": "Privati vieta bandyti ir tobulėti",
           "status": {
             "queued": "Scenarijus laukia.",
@@ -118,6 +135,19 @@
       "deadline_risks": {
         "title": "Terminų rizikos",
         "description": "Privalomi kursai, kuriems reikia dėmesio",
+        "sort": "Rikiuoti",
+        "sortMostUrgent": "Skubiausi pirmiausia",
+        "sortLeastUrgent": "Mažiausiai skubūs pirmiausia",
+        "student": "Dalyvis",
+        "group": "Grupė",
+        "learners": "Dalyviai",
+        "deadline": "Terminas",
+        "status": "Būsena",
+        "searchStudents": "Ieškoti dalyvių",
+        "searchGroups": "Ieškoti grupių arba dalyvių",
+        "allStatuses": "Visos būsenos",
+        "studentsEmpty": "Nėra paveiktų dalyvių.",
+        "groupsEmpty": "Nėra paveiktų grupių.",
         "overdue": "Pavėluota",
         "dueSoon": "Terminas artėja",
         "empty": "Šiuo metu terminų rizikų nėra.",
@@ -164,8 +194,34 @@
       "ai_mentor_practice": {
         "title": "DI mentoriaus praktika",
         "aiNotConfigured": "DI mentorius nesukonfigūruotas šiai organizacijai."
+      },
+      "todoTasks": {
+        "title": "Užduočių sąrašas",
+        "description": "Mažos dienos užduotys",
+        "empty": "Užduočių dar nėra. Pridėkite pirmąją žemiau.",
+        "placeholder": "Pridėti užduotį",
+        "add": "Pridėti užduotį",
+        "toggle": "Perjungti {{title}}",
+        "edit": "Redaguoti užduotį",
+        "delete": "Ištrinti užduotį",
+        "reorder": "Pakeisti užduoties tvarką",
+        "toast": {
+          "createSuccess": "Užduotis pridėta.",
+          "createError": "Nepavyko pridėti užduoties.",
+          "updateSuccess": "Užduotis atnaujinta.",
+          "updateError": "Nepavyko atnaujinti užduoties.",
+          "deleteSuccess": "Užduotis ištrinta.",
+          "deleteError": "Nepavyko ištrinti užduoties.",
+          "reorderSuccess": "Užduočių tvarka išsaugota.",
+          "reorderError": "Nepavyko išsaugoti užduočių tvarkos."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Galite turėti iki 100 užduočių.",
+    "notFound": "Šios užduoties nebėra.",
+    "invalidOrder": "Užduočių tvarka pasikeitė. Atnaujinkite puslapį ir bandykite dar kartą."
   },
   "aiMentorPractice": {
     "form": {
@@ -1798,6 +1854,7 @@
         "settings_read_self": "Gali peržiūrėti savo profilio ir nuostatų nustatymus.",
         "settings_update_self": "Gali atnaujinti savo profilio ir nuostatų nustatymus.",
         "dashboard_read": "Gali peržiūrėti savo prietaisų skydelį.",
+        "todo_task_manage_self": "Gali kurti ir tvarkyti savo užduotis.",
         "settings_manage": "Gali valdyti bendruosius platformos nustatymus.",
         "env_read_public": "Gali peržiūrėti viešas aplinkos konfigūracijos reikšmes.",
         "env_manage": "Gali valdyti aplinkos konfigūracijos reikšmes.",
@@ -3721,7 +3778,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Bendrieji nustatymai nerasta"
+        "globalNotFound": "Bendrieji nustatymai nerasta",
+        "userSettingsNotFound": "Naudotojo nustatymai nerasti"
       },
       "qaSettingUpdatedSuccessfully": "QA nustatymai sėkmingai atnaujinti",
       "ageLimitUpdatedSuccessfully": "Amžiaus riba sėkmingai atnaujinta",

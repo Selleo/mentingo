@@ -19,6 +19,7 @@ The feature is not a standalone learner page. It appears inside authoring flows 
 
 - Open an asset-library dialog from rich-text authoring contexts.
 - Search and paginate existing assets for the current authoring language.
+- Keep long asset and usage names within the library layout by truncating them while preserving the full value as native hover text.
 - Upload a supported file into the library from the editor workflow.
 - Choose one public or private visibility for every batch dropped directly into a rich-text editor.
 - Keep personal assets private so other creators cannot discover or reuse them, while retaining delivery through the content where they are embedded.

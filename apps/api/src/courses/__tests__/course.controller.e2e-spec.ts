@@ -3941,6 +3941,39 @@ describe("CourseController (e2e)", () => {
           expect(groupCourse.dueDate?.toISOString()).toBe(dueDate.toISOString());
         });
 
+        it("enrolls a course manager in an assigned group unless they authored the course", async () => {
+          const author = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const courseManager = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: author.id,
+            categoryId: category.id,
+            status: "published",
+          });
+          const group = await groupFactory.withMembers([author.id, courseManager.id]).create();
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group.id, isMandatory: true, dueDate: null }] })
+            .set("Cookie", await cookieFor(author, app))
+            .expect(201);
+
+          const enrollments = await db
+            .select({ studentId: studentCourses.studentId })
+            .from(studentCourses)
+            .where(eq(studentCourses.courseId, course.id));
+
+          expect(enrollments).toEqual([{ studentId: courseManager.id }]);
+        });
+
         it("creates a course due-date calendar event visible to students in the group", async () => {
           const admin = await userFactory
             .withCredentials({ password })

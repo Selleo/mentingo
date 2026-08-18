@@ -51,7 +51,7 @@ export const AssetLibraryVisibilityConfirmationDialog = ({
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isPending}>
-              {t("common.cancel")}
+              {t("common.button.cancel")}
             </Button>
           </DialogClose>
           <Button disabled={isPending} onClick={onConfirm}>

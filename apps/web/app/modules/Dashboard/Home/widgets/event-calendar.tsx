@@ -1,14 +1,17 @@
+import { Link } from "@remix-run/react";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   DASHBOARD_CALENDAR_VIEWS,
-  DASHBOARD_WIDGET_IDS,
+  DASHBOARD_WIDGET_TYPES,
 } from "@repo/shared";
 import { endOfMonth, endOfWeek, format, isSameDay, startOfMonth, startOfWeek } from "date-fns";
+import { SquareArrowRightEnter } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDashboardEventCalendar } from "~/api/queries/useDashboardEventCalendar";
 import { Calendar } from "~/components/ui/calendar";
+import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 import { CalendarEventDetailsDialog } from "~/modules/Calendar/components/CalendarEventDetailsDialog";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -30,54 +33,100 @@ type CalendarEvent = GetDashboardEventsResponse["data"][number];
 type CalendarEventListProps = {
   events: CalendarEvent[];
   highlighted?: boolean;
+  showDateIcon?: boolean;
   openDialog: (eventId: string) => void;
 };
 
-function CalendarEventList({ events, highlighted = false, openDialog }: CalendarEventListProps) {
+function CalendarEventList({
+  events,
+  highlighted = false,
+  showDateIcon = false,
+  openDialog,
+}: CalendarEventListProps) {
   const { t, i18n } = useTranslation();
 
   return (
     <div className="space-y-2">
-      {events.map((event) => (
-        <button
-          key={event.id}
-          onClick={() => openDialog(event.id)}
-          className={cn(
-            "block w-full text-left rounded-lg border border-neutral-100 p-3 transition-colors hover:border-primary-200 hover:bg-primary-50",
-            highlighted && "bg-primary-50",
-          )}
-        >
-          <p className="body-sm-md line-clamp-1 text-neutral-950">{event.title}</p>
-          <p className="details mt-0.5 text-neutral-500">
-            {t(
-              event.sourceType === CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING
-                ? "dashboardHome.widgets.event_calendar.liveTraining"
-                : "dashboardHome.widgets.event_calendar.courseDeadline",
+      {events.map((event) => {
+        const startsAt = new Date(event.startsAt);
+        const eventType = t(
+          event.sourceType === CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING
+            ? "dashboardHome.widgets.event_calendar.liveTraining"
+            : "dashboardHome.widgets.event_calendar.courseDeadline",
+        );
+
+        return (
+          <button
+            key={event.id}
+            type="button"
+            onClick={() => openDialog(event.id)}
+            className={cn(
+              "w-full rounded-lg border border-neutral-100 p-3 text-left transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2",
+              highlighted && "bg-primary-50",
+              showDateIcon && "flex items-start gap-3",
             )}
-            {" · "}
-            {new Intl.DateTimeFormat(i18n.language, {
-              day: "numeric",
-              month: "short",
-              hour: event.allDay ? undefined : "2-digit",
-              minute: event.allDay ? undefined : "2-digit",
-            }).format(new Date(event.startsAt))}
-          </p>
-        </button>
-      ))}
+          >
+            {showDateIcon && (
+              <span
+                className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-primary-200 bg-white text-center shadow-sm"
+                aria-hidden="true"
+              >
+                <span className="bg-primary-700 px-1 py-0.5 text-[9px] font-semibold uppercase leading-3 tracking-wide text-white">
+                  {new Intl.DateTimeFormat(i18n.language, { month: "short" }).format(startsAt)}
+                </span>
+                <span className="flex flex-1 items-center justify-center text-sm font-semibold text-neutral-950">
+                  {new Intl.DateTimeFormat(i18n.language, { day: "numeric" }).format(startsAt)}
+                </span>
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              {showDateIcon && (
+                <span className="block text-[10px] font-semibold uppercase leading-4 tracking-wide text-neutral-500">
+                  {eventType}
+                </span>
+              )}
+              <span
+                className={cn("body-sm-md block text-neutral-950", {
+                  "mt-0.5 line-clamp-2": showDateIcon,
+                  "line-clamp-1": !showDateIcon,
+                })}
+              >
+                {event.title}
+              </span>
+              {!showDateIcon && (
+                <span className="details mt-0.5 block truncate text-neutral-500">
+                  {eventType}
+                  {" · "}
+                  {new Intl.DateTimeFormat(i18n.language, {
+                    day: "numeric",
+                    month: "short",
+                    hour: event.allDay ? undefined : "2-digit",
+                    minute: event.allDay ? undefined : "2-digit",
+                  }).format(startsAt)}
+                </span>
+              )}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-export function WidgetAdminEventCalendar() {
+export function WidgetEventCalendar() {
   const { t, i18n } = useTranslation();
-  const [eventDialogOpen, setEventDialogOpen] = useState<boolean>(false);
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-  const language = useLanguageStore((state) => state.language);
-  const currentYear = new Date().getFullYear();
+
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState(new Date());
+  const [eventDialogOpen, setEventDialogOpen] = useState<boolean>(false);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+
+  const language = useLanguageStore((state) => state.language);
+
+  const currentYear = new Date().getFullYear();
   const rangeStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
   const rangeEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
+
   const {
     data: events = [],
     isLoading: isAllEventsLoading,
@@ -90,6 +139,7 @@ export function WidgetAdminEventCalendar() {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     view: DASHBOARD_CALENDAR_VIEWS.ALL,
   });
+
   const {
     data: upcomingEvents = [],
     isError: isUpcomingEventsError,
@@ -102,9 +152,10 @@ export function WidgetAdminEventCalendar() {
     view: DASHBOARD_CALENDAR_VIEWS.UPCOMING,
     selectedDate: format(selectedDay, "yyyy-MM-dd"),
   });
+
   const selectedEvents = events.filter((event) => isSameDay(new Date(event.startsAt), selectedDay));
   const eventDays = useMemo(() => events.map((event) => new Date(event.startsAt)), [events]);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR];
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR];
 
   function openEventDialog(eventId: string) {
     setSelectedEvent(eventId);
@@ -118,16 +169,26 @@ export function WidgetAdminEventCalendar() {
 
   return (
     <>
-      <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR}>
+      <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR} className="w-full">
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}
           iconClassName={metadata.iconClassName}
           iconContainerClassName={metadata.iconContainerClassName}
+          headerAction={
+            <Link
+              to="/calendar"
+              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-primary-700 active:scale-95 active:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
+              aria-label={t("navigationSideBar.calendar")}
+              title={t("navigationSideBar.calendar")}
+            >
+              <SquareArrowRightEnter className="size-4" aria-hidden="true" />
+            </Link>
+          }
         />
-        <DashboardWidgetContent className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.8fr)] lg:overflow-hidden px-5 pb-5 md:px-6 md:pb-6">
+        <DashboardWidgetContent className="!overflow-y-hidden grid grid-cols-[minmax(0,3fr)_1px_minmax(0,2fr)] items-stretch">
           {isAllEventsLoading || isAllEventsError ? (
-            <div className="lg:col-span-2">
+            <div>
               <DashboardWidgetQueryState
                 isLoading={isAllEventsLoading}
                 isError={isAllEventsError}
@@ -163,33 +224,43 @@ export function WidgetAdminEventCalendar() {
                   labelMonthDropdown: () => t("dashboardHome.widgets.event_calendar.selectMonth"),
                   labelYearDropdown: () => t("dashboardHome.widgets.event_calendar.selectYear"),
                 }}
-                className="mx-auto w-full max-w-none"
+                className="h-full min-w-0 !w-full max-w-none overflow-hidden p-2"
                 classNames={{
-                  months: "w-full",
-                  month: "w-full space-y-4 rounded-none border-0 bg-transparent p-0 shadow-none",
-                  caption: "relative flex items-center justify-center pt-1",
-                  caption_dropdowns: "order-2 flex items-center justify-center gap-2",
-                  dropdown_month: "order-1 w-auto max-w-[8rem]",
-                  dropdown_year: "order-2 w-auto max-w-[6rem]",
-                  nav_button_previous: "absolute left-0",
-                  nav_button_next: "absolute right-0",
+                  months: "h-full w-full",
+                  month:
+                    "flex h-full w-full flex-col rounded-none border-0 bg-transparent p-0 shadow-none",
+                  caption: "relative flex h-8 shrink-0 items-center justify-center",
+                  caption_dropdowns: "order-2 flex items-center justify-center gap-1",
+                  nav_button:
+                    "inline-flex size-7 items-center justify-center rounded-md border-0 bg-transparent p-0 text-neutral-500 shadow-none hover:bg-neutral-100 hover:text-neutral-950",
+                  nav_button_previous: "absolute left-0 top-0.5",
+                  nav_button_next: "absolute right-0 top-0.5",
+                  table: "flex min-h-0 flex-1 flex-col pt-3",
+                  head_row: "flex h-6 w-full shrink-0 items-center",
+                  head_cell: "flex-1 text-center text-[0.7rem] font-medium text-neutral-500",
+                  tbody: "grid min-h-0 flex-1 grid-rows-6",
+                  row: "flex min-h-0 w-full",
+                  cell: "min-h-0 flex-1 p-0 text-center text-xs",
+                  day: "h-full w-full p-0 text-xs",
                 }}
               />
-              <div className="max-h-52 min-h-0 overflow-y-auto border-t pt-4 lg:max-h-none lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0 lg:[contain:size]">
+              <Separator orientation="vertical" className="h-full" />
+              <div className="min-h-0 min-w-0 self-stretch overflow-y-auto p-2">
                 {selectedEvents.length > 0 && (
-                  <section className="mb-5">
-                    <h3 className="body-sm-md mb-3 text-neutral-950">
+                  <section className="mb-4">
+                    <h3 className="body-sm-md mb-2 flex h-8 items-center pl-3 text-neutral-950">
                       {t("dashboardHome.widgets.event_calendar.selectedDay")}
                     </h3>
                     <CalendarEventList
                       events={selectedEvents}
                       highlighted
+                      showDateIcon
                       openDialog={openEventDialog}
                     />
                   </section>
                 )}
                 <section>
-                  <h3 className="body-sm-md mb-3 text-neutral-950">
+                  <h3 className="body-sm-md mb-2 flex h-8 items-center pl-3 text-neutral-950">
                     {t("dashboardHome.widgets.event_calendar.upcoming")}
                   </h3>
                   {isUpcomingEventsError ? (
@@ -199,11 +270,15 @@ export function WidgetAdminEventCalendar() {
                       onRetry={() => void refetchUpcomingEvents()}
                     />
                   ) : upcomingEvents.length === 0 ? (
-                    <p className="text-neutral-500">
+                    <p className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-500">
                       {t("dashboardHome.widgets.event_calendar.empty")}
                     </p>
                   ) : (
-                    <CalendarEventList events={upcomingEvents} openDialog={openEventDialog} />
+                    <CalendarEventList
+                      events={upcomingEvents}
+                      showDateIcon
+                      openDialog={openEventDialog}
+                    />
                   )}
                 </section>
               </div>

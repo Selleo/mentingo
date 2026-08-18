@@ -56,7 +56,7 @@ export type CreateWorkspaceContext = (
   options?: WorkspaceContextOptions,
 ) => Promise<WorkspaceContextHandle>;
 export type CreateWorkspacePage = (options?: WorkspaceContextOptions) => Promise<PageHandle>;
-type CreateIsolatedWorkspace = (options?: {
+export type CreateIsolatedWorkspace = (options?: {
   role?: UserRole;
   tenant?: TenantFactoryCreateInput;
 }) => Promise<IsolatedWorkspaceHandle>;
@@ -85,6 +85,7 @@ export type IsolatedWorkspaceHandle = {
 export type TenantUserHandle = {
   apiClient: FixtureApiClient;
   context: BrowserContext;
+  origin: string;
   page: Page;
   user: UserFactoryRecord;
 };
@@ -687,6 +688,7 @@ export const test = mergedFixture.extend<
         return {
           apiClient: userApiClient,
           context: userContext,
+          origin: workspaceOrigin,
           page: userPage,
           user: await userFactory.getById(userRegisterResponse.data.data.id),
         };

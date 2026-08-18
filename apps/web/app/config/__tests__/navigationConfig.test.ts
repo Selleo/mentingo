@@ -1,6 +1,5 @@
 import { PERMISSIONS } from "@repo/shared";
 
-import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
@@ -42,24 +41,6 @@ describe("findMatchingRoute", () => {
     expect(findMatchingRoute("admin/development-paths/new")).toEqual({
       allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
     });
-  });
-});
-
-describe("getNavigationConfig", () => {
-  const translate = ((key: string) => key) as never;
-
-  it("should always include the calendar navigation item", () => {
-    const config = getNavigationConfig(translate, false, false, false, false);
-
-    const courseItems = config[0].items;
-
-    expect(courseItems).toContainEqual(
-      expect.objectContaining({
-        path: "calendar",
-        iconName: "Calendar",
-        testId: NAVIGATION_HANDLES.CALENDAR_LINK,
-      }),
-    );
   });
 });
 

@@ -15,6 +15,7 @@ type LessonComposerCenterContentProps = {
   onInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: () => void;
   textInputTestId?: string;
+  ariaLabel?: string;
 };
 
 export function LessonComposerCenterContent({
@@ -26,6 +27,7 @@ export function LessonComposerCenterContent({
   onInputChange,
   onSubmit,
   textInputTestId,
+  ariaLabel,
 }: LessonComposerCenterContentProps) {
   return (
     <div className="flex w-full flex-col min-w-0">
@@ -52,6 +54,7 @@ export function LessonComposerCenterContent({
           >
             <AutosizeTextarea
               data-testid={textInputTestId}
+              aria-label={ariaLabel}
               value={input}
               minRows={compact ? 1 : 2}
               maxRows={compact ? 3 : 5}

@@ -1,7 +1,8 @@
 import {
   ALLOWED_AGE_LIMITS,
-  DASHBOARD_WIDGET_IDS,
-  DASHBOARD_WIDGET_WIDTHS,
+  DASHBOARD_SCHEMA_VERSION,
+  DASHBOARD_WIDGET_SIZES,
+  DASHBOARD_WIDGET_TYPES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -61,25 +62,34 @@ export const globalSettingsJSONSchema = Type.Object({
   loginPageFiles: Type.Array(Type.String()),
 });
 
-export const dashboardWidgetsIdsJSONContentSchema = Type.Array(Type.Enum(DASHBOARD_WIDGET_IDS));
+export const dashboardLayoutWidgetSchema = Type.Object({
+  type: Type.Enum(DASHBOARD_WIDGET_TYPES),
+  size: Type.Enum(DASHBOARD_WIDGET_SIZES),
+  visible: Type.Boolean(),
+});
 
-export const dashboardWidgetsJSONContentSchema = Type.Array(
-  Type.Object({
-    id: Type.Enum(DASHBOARD_WIDGET_IDS),
-    order: Type.Integer({ minimum: 0 }),
-    width: Type.Enum(DASHBOARD_WIDGET_WIDTHS),
-  }),
-);
+export const dashboardSettingsSchema = Type.Object({
+  schemaVersion: Type.Literal(DASHBOARD_SCHEMA_VERSION),
+  revision: Type.Integer({ minimum: 0 }),
+  widgets: Type.Array(dashboardLayoutWidgetSchema),
+});
 
-export const dashboardDefaultLayoutJSONContentSchema = dashboardWidgetsJSONContentSchema;
+export const dashboardWidgetCatalogEntrySchema = Type.Object({
+  type: Type.Enum(DASHBOARD_WIDGET_TYPES),
+  alwaysVisible: Type.Boolean(),
+  allowedSizes: Type.Array(Type.Enum(DASHBOARD_WIDGET_SIZES), { minItems: 1 }),
+  defaultSize: Type.Enum(DASHBOARD_WIDGET_SIZES),
+});
+
+export const dashboardSettingsResponseSchema = Type.Object({
+  layout: dashboardSettingsSchema,
+  catalog: Type.Array(dashboardWidgetCatalogEntrySchema),
+});
 
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
   MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
-  dashboard: Type.Object({
-    widgets: dashboardWidgetsJSONContentSchema,
-  }),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
@@ -117,10 +127,10 @@ export type LoginPageResourceResponseBody = Static<typeof loginPageResourceRespo
 
 export type UploadFilesToLoginPageBody = Static<typeof uploadFilesToLoginPageSchema>;
 
-export type DashboardWidgetsJSONContentSchema = Static<typeof dashboardWidgetsJSONContentSchema>;
-export type DashboardWidgetsIdsJSONContentSchema = Static<
-  typeof dashboardWidgetsIdsJSONContentSchema
->;
+export type DashboardLayoutWidgetSchema = Static<typeof dashboardLayoutWidgetSchema>;
+export type DashboardSettingsSchema = Static<typeof dashboardSettingsSchema>;
+export type DashboardWidgetCatalogEntrySchema = Static<typeof dashboardWidgetCatalogEntrySchema>;
+export type DashboardSettingsResponseSchema = Static<typeof dashboardSettingsResponseSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;

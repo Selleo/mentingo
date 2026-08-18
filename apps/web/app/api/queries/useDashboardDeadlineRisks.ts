@@ -3,9 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetDashboardDeadlineRisksResponse } from "../generated-api";
-import type { SupportedLanguages } from "@repo/shared";
-
-export type DashboardDeadlineRiskType = "overdue" | "dueSoon";
+import type { DashboardDeadlineRiskType, SupportedLanguages } from "@repo/shared";
 
 type DashboardDeadlineRisksParams = {
   language: SupportedLanguages;

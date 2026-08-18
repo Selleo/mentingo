@@ -1,6 +1,8 @@
 import { cn } from "~/lib/utils";
 
-import type { LucideIcon } from "lucide-react";
+import { useDashboardEditMode } from "../dashboardEditContext";
+
+import type { DashboardWidgetIconComponent } from "../types";
 import type { ReactNode } from "react";
 
 type WidgetCardProps = {
@@ -12,14 +14,15 @@ type WidgetCardProps = {
 type DashboardWidgetHeaderProps = {
   title: string;
   description?: string;
-  icon: LucideIcon;
+  icon: DashboardWidgetIconComponent;
   showIcon?: boolean;
   iconClassName?: string;
   iconContainerClassName?: string;
+  headerAction?: ReactNode;
 };
 
 type DashboardWidgetIconProps = {
-  icon: LucideIcon;
+  icon: DashboardWidgetIconComponent;
   iconClassName?: string;
   iconContainerClassName?: string;
 };
@@ -39,7 +42,7 @@ export function DashboardWidgetCard({ children, className, testId }: WidgetCardP
     <article
       data-testid={testId}
       className={cn(
-        "flex h-full sm:max-h-[27rem] flex-col overflow-hidden rounded-lg bg-white drop-shadow-card",
+        "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-white drop-shadow-card",
         className,
       )}
     >
@@ -56,11 +59,15 @@ export function DashboardWidgetIcon({
   return (
     <div
       className={cn(
-        "flex size-10 shrink-0 items-center justify-center rounded-lg text-primary-700 bg-primary-50",
+        "flex size-8 shrink-0 items-center justify-center text-primary-700",
         iconContainerClassName,
       )}
     >
-      <Icon className={cn("size-5", iconClassName)} aria-hidden="true" />
+      <Icon
+        className={cn("size-[18px] text-primary-700", iconClassName)}
+        strokeWidth={1.8}
+        aria-hidden="true"
+      />
     </div>
   );
 }
@@ -69,12 +76,15 @@ export function DashboardWidgetHeader({
   title,
   description,
   icon,
-  showIcon = false,
+  showIcon = true,
   iconClassName,
   iconContainerClassName,
+  headerAction,
 }: DashboardWidgetHeaderProps) {
+  const isEditing = useDashboardEditMode();
+
   return (
-    <header className="flex min-w-0 items-center gap-3 px-5 py-5 md:px-6 md:py-6">
+    <header className="flex min-h-14 items-center gap-2 border-b border-neutral-100 px-4 py-2.5">
       {showIcon && (
         <DashboardWidgetIcon
           icon={icon}
@@ -82,10 +92,13 @@ export function DashboardWidgetHeader({
           iconContainerClassName={iconContainerClassName}
         />
       )}
-      <div className="min-w-0">
-        <h2 className="body-lg-md truncate text-neutral-950">{title}</h2>
+      <div className="min-w-0 flex-1">
+        <h2 className="body-sm-md truncate text-neutral-950">{title}</h2>
         {description && <p className="details truncate text-neutral-500">{description}</p>}
       </div>
+      {headerAction && !isEditing && (
+        <div className="flex shrink-0 items-center">{headerAction}</div>
+      )}
     </header>
   );
 }
@@ -93,10 +106,7 @@ export function DashboardWidgetHeader({
 export function DashboardWidgetContent({ children, className }: DashboardWidgetCardProps) {
   return (
     <div
-      className={cn(
-        "body-sm min-h-0 flex-1 overflow-y-auto px-5 pb-5 text-neutral-700 md:px-6 md:pb-6",
-        className,
-      )}
+      className={cn("body-sm min-h-0 w-full flex-1 overflow-y-auto text-neutral-700", className)}
     >
       {children}
     </div>

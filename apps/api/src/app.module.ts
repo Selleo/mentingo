@@ -80,6 +80,7 @@ import { StudentLessonProgressModule } from "./studentLessonProgress/studentLess
 import { SuperAdminModule } from "./super-admin/super-admin.module";
 import { SupportModeModule } from "./support-mode/support-mode.module";
 import { TestConfigModule } from "./test-config/test-config.module";
+import { TodoTasksModule } from "./todo-tasks/todo-tasks.module";
 import { UserModule } from "./user/user.module";
 
 import type { RedisClient } from "src/redis";
@@ -185,6 +186,7 @@ import type { RedisClient } from "src/redis";
     LumaModule,
     LiveTrainingModule,
     CalendarModule,
+    TodoTasksModule,
   ],
   controllers: [],
   providers: [

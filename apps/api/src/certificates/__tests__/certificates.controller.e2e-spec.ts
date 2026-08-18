@@ -1595,4 +1595,45 @@ describe("CertificatesController (e2e)", () => {
       });
     });
   });
+
+  describe("GET /api/certificates/dashboard", () => {
+    it("returns only certificates owned by the authenticated user", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const otherStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        title: "Dashboard certificate course",
+        authorId: admin.id,
+        categoryId: category.id,
+        thumbnailS3Key: null,
+        hasCertificate: true,
+      });
+
+      await db.insert(certificates).values([
+        { userId: student.id, courseId: course.id },
+        { userId: otherStudent.id, courseId: course.id },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/certificates/dashboard")
+        .set("Cookie", cookies)
+        .query({ language: "en" })
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].userId).toBe(student.id);
+      expect(response.body.pagination.totalItems).toBe(1);
+    });
+  });
 });

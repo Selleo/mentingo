@@ -24,6 +24,12 @@ type GetAssetLibraryColumnsParams = {
   t: TFunction;
 };
 
+export const ASSET_LIBRARY_COLUMN_IDS = {
+  SELECT: "select",
+  ASSET: "asset",
+  ACTIONS: "actions",
+} as const;
+
 export const getAssetLibraryColumns = ({
   canDelete,
   canInsert,
@@ -34,7 +40,7 @@ export const getAssetLibraryColumns = ({
   t,
 }: GetAssetLibraryColumnsParams): ColumnDef<ResourceLibraryAsset>[] => [
   {
-    id: "select",
+    id: ASSET_LIBRARY_COLUMN_IDS.SELECT,
     header: ({ table }) => {
       const hasSelectableRows = table.getRowModel().rows.some((row) => row.getCanSelect());
 
@@ -58,7 +64,7 @@ export const getAssetLibraryColumns = ({
     size: 44,
   },
   {
-    id: "asset",
+    id: ASSET_LIBRARY_COLUMN_IDS.ASSET,
     header: () => t("richText.assetLibrary.columns.asset"),
     cell: ({ row }) => {
       const asset = row.original;
@@ -69,11 +75,13 @@ export const getAssetLibraryColumns = ({
           <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-neutral-100">
             <AssetTypeIcon type={asset.type} />
           </span>
-          <div className="min-w-0">
-            <p className="flex truncate text-sm font-medium text-neutral-950">
-              <span className="truncate">{getAssetDisplayName(asset)}</span>
+          <div className="min-w-0 flex-1">
+            <p className="flex min-w-0 items-center text-sm font-medium text-neutral-950">
+              <span className="min-w-0 flex-1 truncate" title={getAssetDisplayName(asset)}>
+                {getAssetDisplayName(asset)}
+              </span>
               {asset.isNew && (
-                <span className="ml-2 rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-semibold text-primary-800">
+                <span className="ml-2 shrink-0 rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-semibold text-primary-800">
                   {t("richText.assetLibrary.visibility.new")}
                 </span>
               )}
@@ -90,7 +98,7 @@ export const getAssetLibraryColumns = ({
     },
   },
   {
-    id: "actions",
+    id: ASSET_LIBRARY_COLUMN_IDS.ACTIONS,
     header: () => t("richText.assetLibrary.columns.actions"),
     cell: ({ row }) => {
       const asset = row.original;
