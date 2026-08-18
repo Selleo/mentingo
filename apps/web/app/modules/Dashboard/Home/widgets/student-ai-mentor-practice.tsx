@@ -71,6 +71,7 @@ const PRACTICE_SUGGESTIONS = [
 type ScenarioComposerProps = {
   compact: boolean;
   currentPlaceholder: string;
+  inputTestId?: string;
   isPending: boolean;
   onFocusChange: (focused: boolean) => void;
   onScenarioChange: (value: string) => void;
@@ -81,6 +82,7 @@ type ScenarioComposerProps = {
 function ScenarioComposer({
   compact,
   currentPlaceholder,
+  inputTestId,
   isPending,
   onFocusChange,
   onScenarioChange,
@@ -147,6 +149,7 @@ function ScenarioComposer({
           onInputChange={onScenarioChange}
           onSubmit={onSubmit}
           onFocusChange={onFocusChange}
+          inputTestId={inputTestId}
           ariaLabel={t("aiMentorPractice.form.scenario")}
         />
 
@@ -155,6 +158,7 @@ function ScenarioComposer({
           size="icon"
           className="size-8 rounded-lg"
           disabled={!scenario.trim() || isPending}
+          data-testid={AI_MENTOR_PRACTICE_HANDLES.SUBMIT_BUTTON}
           aria-label={t("aiMentorPractice.form.submit")}
         >
           <Icon name="Send" className="size-4" />
@@ -360,6 +364,7 @@ export function WidgetStudentAiMentorPractice() {
                 currentPlaceholder={
                   placeholders[placeholderIndex] ?? t("aiMentorPractice.form.scenarioPlaceholder")
                 }
+                inputTestId={AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT}
                 isPending={isCreating}
                 scenario={scenario}
                 onScenarioChange={setScenario}
