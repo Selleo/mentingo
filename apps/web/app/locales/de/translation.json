@@ -235,21 +235,17 @@
       "submit": "Übung erstellen",
       "suggestions": {
         "title": "Mit einem Beispiel starten",
-        "feedback": {
-          "label": "Feedback geben",
-          "value": "Ich möchte üben, einem Kollegen konstruktives Feedback zu einer wichtigen verpassten Frist zu geben."
+        "delayedOrder": {
+          "label": "Eine verspätete Bestellung klären",
+          "value": "Ein Kunde verlangt wegen einer verspäteten Bestellung sein Geld zurück. Die Lieferung einer Kaffeemaschine als Geburtstagsgeschenk wurde in 2–3 Tagen versprochen, aber nach sechs Tagen ist das Paket noch nicht angekommen. Der Kunde fordert sofort eine Rückerstattung und einen zusätzlichen Rabatt und droht mit einer negativen Bewertung. Das Paket ist bereits beim Kurier und kommt wahrscheinlich morgen, aber ich kann weder die Lieferzeit garantieren noch mehr als 10 % Rabatt anbieten. Ich möchte den Kunden beruhigen, nichts Unmögliches versprechen und eine sinnvolle Lösung anbieten."
         },
-        "boundary": {
-          "label": "Eine Grenze setzen",
-          "value": "Ich möchte üben, eine klare Grenze zu setzen, wenn ein Teammitglied mich um dringende Arbeit außerhalb meiner aktuellen Prioritäten bittet."
+        "orderMistake": {
+          "label": "Einen Bestellfehler korrigieren",
+          "value": "Ich habe 120 statt 20 Packungen Klimaanlagenfilter bestellt. Das Lager hat die Bestellung bereits auf Paletten zusammengestellt und für die Abholung vorbereitet. Wenn sie versendet wird, erhält der Kunde 100 Packungen zu viel und wir müssen eine Rücksendung organisieren. Ich weiß nicht, ob ich zuerst den Versand stoppen, das Lager kontaktieren, meine Führungskraft informieren oder den Kunden benachrichtigen soll."
         },
-        "explanation": {
-          "label": "Eine Entscheidung erklären",
-          "value": "Ich möchte üben, jemandem, der anderer Meinung ist, eine schwierige Entscheidung zu erklären."
-        },
-        "request": {
-          "label": "Eine Bitte äußern",
-          "value": "Ich möchte üben, meine Führungskraft bei einer zu hohen Arbeitsbelastung um Unterstützung zu bitten."
+        "sensitiveData": {
+          "label": "Kundendaten schützen",
+          "value": "Ein regelmäßiger Geschäftskunde nennt den Firmennamen und die Bestellnummer und verlangt die Lieferadresse sowie die Telefonnummer der bestellenden Person. Die anrufende Person ist nicht als Kontakt hinterlegt und ich kann nicht prüfen, ob sie tatsächlich dort arbeitet. Sie drängt auf die sofortige Herausgabe der Daten. Ich möchte helfen, ohne Datenschutzregeln zu verletzen."
         }
       },
       "steps": {

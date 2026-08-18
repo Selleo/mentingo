@@ -17,6 +17,12 @@ export function useCreateAiMentorPractice() {
     onSuccess: (practice) => {
       queryClient.setQueryData(getAiMentorPracticeTodayQueryKey(), practice);
       queryClient.setQueryData(getAiMentorPracticeQueryKey(practice.id), practice);
+      void queryClient.invalidateQueries({
+        queryKey: getAiMentorPracticeTodayQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: getAiMentorPracticeQueryKey(practice.id),
+      });
     },
   });
 }

@@ -237,21 +237,17 @@
       "submit": "Utwórz trening",
       "suggestions": {
         "title": "Zacznij od przykładu",
-        "feedback": {
-          "label": "Przekaż informację zwrotną",
-          "value": "Chcę przećwiczyć przekazanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał ważnego terminu."
+        "delayedOrder": {
+          "label": "Opóźnione zamówienie",
+          "value": "Klient żąda zwrotu pieniędzy za opóźnione zamówienie. Zamówił ekspres do kawy za 1 800 zł jako prezent urodzinowy. Dostawa miała zająć 2–3 dni, ale minęło już 6 dni i przesyłka nadal nie dotarła. Klient jest bardzo poirytowany, żąda natychmiastowego zwrotu pieniędzy i dodatkowego rabatu oraz grozi negatywną opinią. W systemie widzę, że paczka jest już u kuriera i prawdopodobnie dotrze jutro, ale nie mogę zagwarantować konkretnej godziny dostawy ani przyznać rabatu większego niż 10%. Chcę uspokoić klienta, nie obiecać za dużo i zaproponować mu sensowne rozwiązanie."
         },
-        "boundary": {
-          "label": "Postaw granicę",
-          "value": "Chcę przećwiczyć wyznaczenie jasnej granicy, gdy współpracownik prosi mnie o pilne zadanie poza ustalonymi priorytetami."
+        "orderMistake": {
+          "label": "Błąd w zamówieniu",
+          "value": "Popełniłem błąd w zamówieniu klienta: wpisałem 120 opakowań filtrów do klimatyzacji zamiast 20. Magazyn zdążył już skompletować zamówienie, zapakować je na palety i przygotować do odbioru przez kuriera. Jeśli przesyłka wyjedzie, klient dostanie o 100 opakowań za dużo i będziemy musieli organizować ich zwrot. Nie wiem, czy najpierw zatrzymać wysyłkę, skontaktować się z magazynem, zgłosić sprawę przełożonemu czy poinformować klienta."
         },
-        "explanation": {
-          "label": "Wyjaśnij decyzję",
-          "value": "Chcę przećwiczyć wyjaśnienie trudnej decyzji osobie, która się z nią nie zgadza."
-        },
-        "request": {
-          "label": "Przedstaw prośbę",
-          "value": "Chcę przećwiczyć poproszenie przełożonego o wsparcie przy zbyt dużym obciążeniu pracą."
+        "sensitiveData": {
+          "label": "Dane klienta",
+          "value": "Klient z firmy, która regularnie składa u nas zamówienia, podał nazwę firmy i numer zamówienia, a następnie poprosił o adres dostawy i numer telefonu osoby składającej zamówienie. Nie jest wskazany jako kontakt przy zamówieniu i nie mogę potwierdzić, czy rzeczywiście pracuje w tej firmie. Naciska, twierdząc, że jesteśmy z jednej firmy i potrzebuje tych informacji od razu. Chcę pomóc klientowi bez naruszenia zasad ochrony danych."
         }
       },
       "steps": {

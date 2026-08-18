@@ -235,21 +235,17 @@
       "submit": "Sukurti praktiką",
       "suggestions": {
         "title": "Pradėkite nuo pavyzdžio",
-        "feedback": {
-          "label": "Pateikti atsiliepimą",
-          "value": "Noriu praktikuoti konstruktyvaus atsiliepimo pateikimą kolegai, kuris nesilaikė svarbaus termino."
+        "delayedOrder": {
+          "label": "Išspręsti vėluojančio užsakymo problemą",
+          "value": "Klientas reikalauja grąžinti pinigus dėl vėluojančio užsakymo. Kavos aparato, skirto gimtadienio dovanai, pristatymas turėjo trukti 2–3 dienas, tačiau praėjo šešios dienos ir siunta dar neatvyko. Klientas piktinasi, reikalauja grąžinimo ir papildomos nuolaidos bei grasina neigiamu atsiliepimu. Siunta jau perduota kurjeriui ir tikriausiai atvyks rytoj, bet negaliu garantuoti laiko ar pasiūlyti didesnės nei 10 % nuolaidos. Noriu nuraminti klientą, nežadėti per daug ir pasiūlyti tinkamą sprendimą."
         },
-        "boundary": {
-          "label": "Nustatyti ribą",
-          "value": "Noriu praktikuoti aiškios ribos nustatymą, kai komandos narys prašo skubiai imtis darbo, neatitinkančio dabartinių prioritetų."
+        "orderMistake": {
+          "label": "Ištaisyti užsakymo klaidą",
+          "value": "Užsakyme įrašiau 120 oro kondicionierių filtrų pakuočių vietoje 20. Sandėlis jau sukomplektavo ir supakavo užsakymą ant palečių kurjerio paėmimui. Išsiuntus klientas gautų 100 pakuočių per daug, todėl reikėtų organizuoti grąžinimą. Nežinau, ar pirmiausia stabdyti siuntimą, susisiekti su sandėliu, informuoti vadovą ar klientą."
         },
-        "explanation": {
-          "label": "Paaiškinti sprendimą",
-          "value": "Noriu praktikuoti sudėtingo sprendimo paaiškinimą žmogui, kuris su juo nesutinka."
-        },
-        "request": {
-          "label": "Pateikti prašymą",
-          "value": "Noriu praktikuoti prašymą vadovui padėti, kai darbo krūvis tampa per didelis."
+        "sensitiveData": {
+          "label": "Apsaugoti kliento duomenis",
+          "value": "Nuolatinis verslo klientas pateikė įmonės pavadinimą ir užsakymo numerį, tada paprašė pristatymo adreso ir užsakymą pateikusio asmens telefono numerio. Skambinantis asmuo nėra nurodytas kaip užsakymo kontaktas, todėl negaliu patikrinti, ar jis iš tikrųjų dirba įmonėje. Jis spaudžia informaciją pateikti nedelsiant. Noriu padėti nepažeisdamas duomenų apsaugos taisyklių."
         }
       },
       "steps": {
