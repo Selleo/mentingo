@@ -1,4 +1,11 @@
-import { PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS,
+  DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS,
+  DASHBOARD_DEADLINE_RISK_TYPES,
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 
 import { StatisticsService } from "./statistics.service";
 
@@ -46,6 +53,14 @@ describe("StatisticsService dashboard statistics", () => {
         },
       ],
       totalItems: 1,
+    }),
+    getDashboardDeadlineRiskCourseSummaries: jest.fn().mockResolvedValue({
+      data: [],
+      totalItems: 0,
+    }),
+    getDashboardDeadlineRiskGroups: jest.fn().mockResolvedValue({
+      data: [],
+      totalItems: 0,
     }),
   });
 
@@ -109,7 +124,7 @@ describe("StatisticsService dashboard statistics", () => {
     const details = await service.getDashboardDeadlineRisks(
       currentUser,
       SUPPORTED_LANGUAGES.EN,
-      "overdue",
+      DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE,
       1,
       20,
     );
@@ -130,5 +145,52 @@ describe("StatisticsService dashboard statistics", () => {
       ],
       pagination: { totalItems: 1, page: 1, perPage: 20 },
     });
+  });
+
+  it("scopes deadline-risk drill-downs to content creator-owned courses", async () => {
+    const statisticsRepository = createStatisticsRepository();
+    const service = new StatisticsService(statisticsRepository as never, {} as never, {} as never);
+    const contentCreator = {
+      ...currentUser,
+      permissions: [PERMISSIONS.COURSE_UPDATE_OWN],
+    };
+
+    await service.getDashboardDeadlineRiskCourseSummaries(
+      contentCreator,
+      SUPPORTED_LANGUAGES.EN,
+      DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
+      1,
+      20,
+    );
+    await service.getDashboardDeadlineRiskGroups(
+      contentCreator,
+      "00000000-0000-0000-0000-000000000004",
+      SUPPORTED_LANGUAGES.EN,
+      DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE,
+      "Ada",
+      DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE,
+      DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
+      1,
+      20,
+    );
+
+    expect(statisticsRepository.getDashboardDeadlineRiskCourseSummaries).toHaveBeenCalledWith(
+      contentCreator.userId,
+      SUPPORTED_LANGUAGES.EN,
+      DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
+      1,
+      20,
+    );
+    expect(statisticsRepository.getDashboardDeadlineRiskGroups).toHaveBeenCalledWith(
+      contentCreator.userId,
+      "00000000-0000-0000-0000-000000000004",
+      SUPPORTED_LANGUAGES.EN,
+      DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE,
+      "Ada",
+      DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE,
+      DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
+      1,
+      20,
+    );
   });
 });

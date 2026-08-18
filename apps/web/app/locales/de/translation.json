@@ -7,8 +7,19 @@
       "badge": "Bearbeitung",
       "widgetsButton": "Widgets",
       "restore": "Standard wiederherstellen",
-      "instructions": "Ziehen Sie Widgets, um ihre Reihenfolge zu ändern. Breite und Sichtbarkeit lassen sich ebenfalls anpassen.",
-      "changeWidth": "Breite von {{title}} ändern",
+      "restoreConfirm": "Standard-Widget-Layout wiederherstellen? Ihre aktuelle Anordnung wird ersetzt.",
+      "changeSize": "Größe von {{title}} ändern",
+      "sizeTitle": "Widget-Größe",
+      "sizes": {
+        "1x1": "Kompakt",
+        "2x1": "Breit",
+        "1x2": "Hoch",
+        "2x2": "Groß",
+        "3x2": "Erweitert",
+        "4x1": "Extra breit",
+        "4x2": "Hervorgehoben",
+        "4x3": "Hoch hervorgehoben"
+      },
       "drag": "{{title}} verschieben",
       "widgetLibrary": "Dashboard-Widgets",
       "widgetLibraryDescription": "Wählen Sie die Widgets aus, die auf Ihrem Dashboard sichtbar sein sollen.",
@@ -24,11 +35,19 @@
     },
     "error": {
       "invalidWidgetLayout": "Das Dashboard-Layout enthält nicht verfügbare oder doppelte Widgets.",
+      "invalidWidgetSize": "Diese Größe ist für das ausgewählte Widget nicht zulässig.",
       "requiredWidgetMissing": "Ein erforderliches Dashboard-Widget fehlt.",
       "title": "Dashboard konnte nicht geladen werden",
       "description": "Versuchen Sie es gleich noch einmal.",
       "retry": "Erneut versuchen",
-      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig."
+      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig.",
+      "staleLayout": "Ihr Dashboard wurde an anderer Stelle aktualisiert. Aktualisieren Sie die Seite und versuchen Sie es erneut."
+    },
+    "toast": {
+      "layoutSaved": "Dashboard-Änderungen wurden gespeichert.",
+      "layoutSaveError": "Die Dashboard-Änderungen konnten nicht gespeichert werden.",
+      "layoutReset": "Das Standard-Dashboard-Layout wurde wiederhergestellt.",
+      "layoutResetError": "Das Standard-Dashboard-Layout konnte nicht wiederhergestellt werden."
     },
     "widgets": {
       "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
@@ -92,9 +111,7 @@
           "startCta": "Übung starten",
           "continueCta": "Übung fortsetzen",
           "feedbackCta": "Feedback ansehen",
-          "todayEyebrow": "Heutige Probe",
           "completedEyebrow": "Probe abgeschlossen",
-          "returnHint": "Dein Gespräch ist gespeichert",
           "privateHint": "Ein privater Ort zum Ausprobieren und Verbessern",
           "status": {
             "queued": "Dein Szenario wartet.",
@@ -118,6 +135,19 @@
       "deadline_risks": {
         "title": "Terminrisiken",
         "description": "Pflichtkurse, die Aufmerksamkeit benötigen",
+        "sort": "Sortieren",
+        "sortMostUrgent": "Dringendste zuerst",
+        "sortLeastUrgent": "Weniger dringende zuerst",
+        "student": "Teilnehmer",
+        "group": "Gruppe",
+        "learners": "Teilnehmer",
+        "deadline": "Frist",
+        "status": "Status",
+        "searchStudents": "Teilnehmer suchen",
+        "searchGroups": "Gruppen oder Teilnehmer suchen",
+        "allStatuses": "Alle Status",
+        "studentsEmpty": "Keine betroffenen Teilnehmer.",
+        "groupsEmpty": "Keine betroffenen Gruppen.",
         "overdue": "Überfällig",
         "dueSoon": "Bald fällig",
         "empty": "Derzeit keine Terminrisiken.",
@@ -164,8 +194,34 @@
       "ai_mentor_practice": {
         "title": "KI-Mentor-Übung",
         "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
+      },
+      "todoTasks": {
+        "title": "Aufgabenliste",
+        "description": "Kleine Aufgaben für deinen Arbeitstag",
+        "empty": "Noch keine Aufgaben. Füge unten eine hinzu.",
+        "placeholder": "Aufgabe hinzufügen",
+        "add": "Aufgabe hinzufügen",
+        "toggle": "{{title}} umschalten",
+        "edit": "Aufgabe bearbeiten",
+        "delete": "Aufgabe löschen",
+        "reorder": "Aufgabe neu ordnen",
+        "toast": {
+          "createSuccess": "Aufgabe hinzugefügt.",
+          "createError": "Die Aufgabe konnte nicht hinzugefügt werden.",
+          "updateSuccess": "Aufgabe aktualisiert.",
+          "updateError": "Die Aufgabe konnte nicht aktualisiert werden.",
+          "deleteSuccess": "Aufgabe gelöscht.",
+          "deleteError": "Die Aufgabe konnte nicht gelöscht werden.",
+          "reorderSuccess": "Aufgabenreihenfolge gespeichert.",
+          "reorderError": "Die Aufgabenreihenfolge konnte nicht gespeichert werden."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Sie können bis zu 100 Aufgaben haben.",
+    "notFound": "Diese Aufgabe existiert nicht mehr.",
+    "invalidOrder": "Die Aufgabenreihenfolge ist nicht mehr aktuell. Aktualisieren Sie die Seite und versuchen Sie es erneut."
   },
   "aiMentorPractice": {
     "form": {
@@ -1801,6 +1857,7 @@
         "settings_read_self": "Eigene Profil- und Präferenzeinstellungen anzeigen.",
         "settings_update_self": "Eigene Profil- und Präferenzeinstellungen aktualisieren.",
         "dashboard_read": "Das eigene Dashboard anzeigen.",
+        "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
@@ -3950,7 +4007,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Globale Einstellungen nicht gefunden"
+        "globalNotFound": "Globale Einstellungen nicht gefunden",
+        "userSettingsNotFound": "Benutzereinstellungen nicht gefunden"
       },
       "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef } from "react";
 
 import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
@@ -11,6 +11,8 @@ type CourseGenerationComposerCenterContentProps = {
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   inputTestId?: string;
+  ariaLabel?: string;
+  onFocusChange?: (focused: boolean) => void;
 };
 
 export function CourseGenerationComposerCenterContent({
@@ -21,10 +23,13 @@ export function CourseGenerationComposerCenterContent({
   onInputChange,
   onSubmit,
   inputTestId,
+  ariaLabel,
+  onFocusChange,
 }: CourseGenerationComposerCenterContentProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const shouldReduceMotion = useReducedMotion();
   const layoutTransition = {
-    duration: 0.24,
+    duration: shouldReduceMotion ? 0 : 0.24,
     ease: "easeInOut" as const,
   };
 
@@ -79,7 +84,10 @@ export function CourseGenerationComposerCenterContent({
               data-testid={inputTestId}
               ref={textareaRef}
               value={input}
+              aria-label={ariaLabel}
               onChange={(event) => onInputChange(event.target.value)}
+              onFocus={() => onFocusChange?.(true)}
+              onBlur={() => onFocusChange?.(false)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
@@ -100,16 +108,18 @@ export function CourseGenerationComposerCenterContent({
                     transition={{ duration: 0.2 }}
                     className="block w-full overflow-hidden whitespace-pre-wrap break-words text-sm leading-6 text-neutral-500"
                   >
-                    {currentPlaceholder.split("").map((char, index) => (
-                      <motion.span
-                        key={`${char}-${index}`}
-                        initial={{ opacity: 0, x: -2 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.16, delay: index * 0.018 }}
-                      >
-                        {char}
-                      </motion.span>
-                    ))}
+                    {shouldReduceMotion
+                      ? currentPlaceholder
+                      : currentPlaceholder.split("").map((char, index) => (
+                          <motion.span
+                            key={`${char}-${index}`}
+                            initial={{ opacity: 0, x: -2 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.16, delay: index * 0.018 }}
+                          >
+                            {char}
+                          </motion.span>
+                        ))}
                   </motion.span>
                 </AnimatePresence>
               </div>

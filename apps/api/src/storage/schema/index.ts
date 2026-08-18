@@ -1969,6 +1969,28 @@ export const certificates = pgTable(
   })),
 );
 
+export const todoTasks = pgTable(
+  "todo_tasks",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    title: varchar("title", { length: 200 }).notNull(),
+    position: integer("position").notNull().default(0),
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("todo_tasks", (table) => ({
+    userPositionIdx: index("todo_tasks_user_position_idx").on(
+      table.userId,
+      table.completedAt,
+      table.position,
+    ),
+  })),
+);
+
 export const announcements = pgTable(
   "announcements",
   {

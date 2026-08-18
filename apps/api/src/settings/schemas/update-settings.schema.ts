@@ -4,6 +4,7 @@ import { Type } from "@sinclair/typebox";
 import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
 import {
+  dashboardLayoutWidgetSchema,
   adminSettingsJSONContentSchema,
   studentSettingsJSONContentSchema,
 } from "./settings.schema";
@@ -16,6 +17,15 @@ export type AllowedAgeLimit = (typeof ALLOWED_AGE_LIMITS)[number];
 export const updateSettingsBodySchema = Type.Partial(
   Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
 );
+
+export const updateDashboardSettingsBodySchema = Type.Object({
+  expectedRevision: Type.Integer({ minimum: 0 }),
+  widgets: Type.Array(dashboardLayoutWidgetSchema),
+});
+
+export const resetDashboardSettingsBodySchema = Type.Object({
+  expectedRevision: Type.Integer({ minimum: 0 }),
+});
 
 export const updateMFAEnforcedRolesSchema = Type.Record(
   Type.String({ minLength: 1 }),
@@ -48,6 +58,8 @@ export const updateLiveTrainingMaxParallelSessionsSchema = Type.Object({
 });
 
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
+export type UpdateDashboardSettingsBody = Static<typeof updateDashboardSettingsBodySchema>;
+export type ResetDashboardSettingsBody = Static<typeof resetDashboardSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
 export type UpdateGlobalColorSchemaBody = Static<typeof updateGlobalColorSchema>;

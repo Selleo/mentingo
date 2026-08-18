@@ -1,14 +1,25 @@
 {
   "dashboardHome": {
-    "title": "Tu panel",
+    "title": "Tu dashboard",
     "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
     "customize": "Personalizar panel",
     "edit": {
       "badge": "Edición",
       "widgetsButton": "Widgets",
       "restore": "Restaurar valores",
-      "instructions": "Arrastra los widgets para cambiar su orden. También puedes cambiar su ancho y visibilidad.",
-      "changeWidth": "Cambiar el ancho de {{title}}",
+      "restoreConfirm": "¿Restaurar el diseño predeterminado de los widgets? Se reemplazará tu organización actual.",
+      "changeSize": "Cambiar el tamaño de {{title}}",
+      "sizeTitle": "Tamaño del widget",
+      "sizes": {
+        "1x1": "Compacto",
+        "2x1": "Ancho",
+        "1x2": "Alto",
+        "2x2": "Grande",
+        "3x2": "Ampliado",
+        "4x1": "Extra ancho",
+        "4x2": "Destacado",
+        "4x3": "Destacado alto"
+      },
       "drag": "Mover {{title}}",
       "widgetLibrary": "Widgets del panel",
       "widgetLibraryDescription": "Elige los widgets visibles en tu panel.",
@@ -24,11 +35,19 @@
     },
     "error": {
       "invalidWidgetLayout": "El diseño del panel contiene widgets no disponibles o duplicados.",
+      "invalidWidgetSize": "Este tamaño no está permitido para el widget seleccionado.",
       "requiredWidgetMissing": "Falta un widget obligatorio del panel.",
       "title": "No se pudo cargar el panel",
       "description": "Vuelve a intentarlo en unos instantes.",
       "retry": "Intentar de nuevo",
-      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado."
+      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado.",
+      "staleLayout": "Tu panel se actualizó en otro lugar. Actualiza la página e inténtalo de nuevo."
+    },
+    "toast": {
+      "layoutSaved": "Los cambios del panel se guardaron.",
+      "layoutSaveError": "No pudimos guardar los cambios del panel.",
+      "layoutReset": "Se restauró el diseño predeterminado del panel.",
+      "layoutResetError": "No pudimos restaurar el diseño predeterminado del panel."
     },
     "widgets": {
       "loadError": "No se pudieron cargar los datos de este widget.",
@@ -92,9 +111,7 @@
           "startCta": "Iniciar práctica",
           "continueCta": "Continuar práctica",
           "feedbackCta": "Ver comentarios",
-          "todayEyebrow": "Ensayo de hoy",
           "completedEyebrow": "Ensayo completado",
-          "returnHint": "Tu conversación está guardada",
           "privateHint": "Un espacio privado para probar y mejorar",
           "status": {
             "queued": "Tu escenario está en cola.",
@@ -102,6 +119,27 @@
             "ready": "La práctica de hoy está lista.",
             "failed": "La generación falló. Ábrela para reintentar."
           }
+        }
+      },
+      "todoTasks": {
+        "title": "Lista de tareas",
+        "description": "Pequeñas tareas para tu jornada",
+        "empty": "Aún no hay tareas. Añade una abajo.",
+        "placeholder": "Añadir una tarea",
+        "add": "Añadir tarea",
+        "toggle": "Alternar {{title}}",
+        "edit": "Editar tarea",
+        "delete": "Eliminar tarea",
+        "reorder": "Reordenar tarea",
+        "toast": {
+          "createSuccess": "Tarea añadida.",
+          "createError": "No pudimos añadir la tarea.",
+          "updateSuccess": "Tarea actualizada.",
+          "updateError": "No pudimos actualizar la tarea.",
+          "deleteSuccess": "Tarea eliminada.",
+          "deleteError": "No pudimos eliminar la tarea.",
+          "reorderSuccess": "Orden de tareas guardado.",
+          "reorderError": "No pudimos guardar el orden de las tareas."
         }
       },
       "commonDescription": "Información clave de un vistazo",
@@ -118,6 +156,19 @@
       "deadline_risks": {
         "title": "Riesgos de plazos",
         "description": "Cursos obligatorios que requieren atención",
+        "sort": "Ordenar",
+        "sortMostUrgent": "Más urgentes primero",
+        "sortLeastUrgent": "Menos urgentes primero",
+        "student": "Alumno",
+        "group": "Grupo",
+        "learners": "Alumnos",
+        "deadline": "Fecha límite",
+        "status": "Estado",
+        "searchStudents": "Buscar alumnos",
+        "searchGroups": "Buscar grupos o alumnos",
+        "allStatuses": "Todos los estados",
+        "studentsEmpty": "No hay alumnos afectados.",
+        "groupsEmpty": "No hay grupos afectados.",
         "overdue": "Vencido",
         "dueSoon": "Próximo a vencer",
         "empty": "No hay riesgos de plazos ahora.",
@@ -166,6 +217,11 @@
         "aiNotConfigured": "Mentor IA no está configurado para esta organización."
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Puedes tener hasta 100 tareas.",
+    "notFound": "Esta tarea ya no existe.",
+    "invalidOrder": "El orden de las tareas ya no está actualizado. Actualiza la página e inténtalo de nuevo."
   },
   "aiMentorPractice": {
     "form": {
@@ -1791,6 +1847,7 @@
         "settings_read_self": "Ver su propio perfil y configuración de preferencias.",
         "settings_update_self": "Actualice su propio perfil y configuración de preferencias.",
         "dashboard_read": "Ver su panel de control.",
+        "todo_task_manage_self": "Crear y gestionar sus propias tareas.",
         "settings_manage": "Administrar la configuración global de la plataforma.",
         "env_read_public": "Ver los valores de configuración del entorno público.",
         "env_manage": "Administrar los valores de configuración del entorno.",
@@ -3890,7 +3947,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Configuración global no encontrada"
+        "globalNotFound": "Configuración global no encontrada",
+        "userSettingsNotFound": "No se encontró la configuración del usuario"
       },
       "qaSettingUpdatedSuccessfully": "La configuración de control de calidad se actualizó correctamente",
       "ageLimitUpdatedSuccessfully": "Límite de edad actualizado correctamente",

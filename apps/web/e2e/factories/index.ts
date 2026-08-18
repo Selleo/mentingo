@@ -8,6 +8,7 @@ import { LiveTrainingFactory } from "./live-training.factory";
 import { NewsFactory } from "./news.factory";
 import { QAFactory } from "./qa.factory";
 import { TenantFactory } from "./tenant.factory";
+import { TodoTaskFactory } from "./todo-task.factory";
 import { UserFactory } from "./user.factory";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -23,6 +24,7 @@ export type FixtureFactories = {
   createNewsFactory: () => NewsFactory;
   createQAFactory: () => QAFactory;
   createTenantFactory: () => TenantFactory;
+  createTodoTaskFactory: () => TodoTaskFactory;
   createUserFactory: () => UserFactory;
 };
 
@@ -37,6 +39,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
   let newsFactory: NewsFactory | undefined;
   let qaFactory: QAFactory | undefined;
   let tenantFactory: TenantFactory | undefined;
+  let todoTaskFactory: TodoTaskFactory | undefined;
   let userFactory: UserFactory | undefined;
 
   return {
@@ -80,6 +83,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
       tenantFactory ??= new TenantFactory(apiClient);
       return tenantFactory;
     },
+    createTodoTaskFactory: () => {
+      todoTaskFactory ??= new TodoTaskFactory(apiClient);
+      return todoTaskFactory;
+    },
     createUserFactory: () => {
       userFactory ??= new UserFactory(apiClient);
       return userFactory;
@@ -96,4 +103,5 @@ export { GroupFactory } from "./group.factory";
 export { NewsFactory } from "./news.factory";
 export { QAFactory } from "./qa.factory";
 export { TenantFactory } from "./tenant.factory";
+export { TodoTaskFactory } from "./todo-task.factory";
 export { UserFactory } from "./user.factory";

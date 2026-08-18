@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 import { Label, Pie, PieChart } from "recharts";
 
@@ -13,25 +13,30 @@ import { DashboardWidgetQueryState } from "../components/DashboardWidgetQuerySta
 import {
   DashboardWidgetCard,
   DashboardWidgetContent,
-  DashboardWidgetFooter,
   DashboardWidgetHeader,
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
+import type { DashboardWidgetSize } from "../types";
 import type { ChartConfig } from "~/components/ui/chart";
 
 const STATUS_STYLES = [
-  { key: "completed", color: "bg-success-500", fill: "var(--color-completed)" },
-  { key: "inProgress", color: "bg-warning-500", fill: "var(--color-inProgress)" },
-  { key: "notStarted", color: "bg-neutral-300", fill: "var(--color-notStarted)" },
+  { key: "completed", fill: "var(--color-completed)" },
+  { key: "inProgress", fill: "var(--color-inProgress)" },
+  { key: "notStarted", fill: "var(--color-notStarted)" },
 ] as const;
 
-export function WidgetAdminTrainingCompletion() {
+export function WidgetAdminTrainingCompletion({
+  widgetSize = DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+}: {
+  widgetSize?: DashboardWidgetSize;
+}) {
   const { t } = useTranslation();
   const { data: stats, isLoading, isError, refetch } = useDashboardTrainingCompletion();
   const total = stats?.total ?? 0;
   const percentage = stats?.percentage ?? 0;
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION];
+  const isCompact = widgetSize === DASHBOARD_WIDGET_SIZES.ONE_BY_ONE;
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION];
   const chartConfig = {
     completed: {
       label: t("dashboardHome.widgets.training_completion.completed"),
@@ -53,14 +58,17 @@ export function WidgetAdminTrainingCompletion() {
   }));
 
   return (
-    <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION}>
+    <DashboardWidgetCard
+      className="relative !overflow-visible hover:z-10 focus-within:z-10"
+      testId={DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION}
+    >
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
         icon={metadata.icon}
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
       />
-      <DashboardWidgetContent className="flex flex-col items-center justify-center gap-6">
+      <DashboardWidgetContent className="flex min-h-0 flex-col items-center justify-center !overflow-visible p-0">
         {isLoading || isError ? (
           <DashboardWidgetQueryState
             isLoading={isLoading}
@@ -88,7 +96,10 @@ export function WidgetAdminTrainingCompletion() {
                 total,
                 percentage,
               })}
-              className="aspect-square size-48 shrink-0"
+              className={cn(
+                "aspect-square h-full max-h-64 w-auto max-w-full shrink-0",
+                isCompact && "max-h-24",
+              )}
             >
               <PieChart accessibilityLayer>
                 <ChartTooltip
@@ -99,8 +110,8 @@ export function WidgetAdminTrainingCompletion() {
                   data={chartData}
                   dataKey="value"
                   nameKey="status"
-                  innerRadius={50}
-                  outerRadius={90}
+                  innerRadius="55%"
+                  outerRadius="94%"
                   stroke="var(--background)"
                   strokeWidth={4}
                   startAngle={90}
@@ -119,18 +130,20 @@ export function WidgetAdminTrainingCompletion() {
                         >
                           <tspan
                             x={viewBox.cx}
-                            y={(viewBox.cy ?? 0) - 8}
-                            className="h4 fill-neutral-950"
+                            y={(viewBox.cy ?? 0) + (isCompact ? 5 : -8)}
+                            className={cn("fill-neutral-950", isCompact ? "body-base-md" : "h4")}
                           >
                             {percentage}%
                           </tspan>
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy ?? 0) + 16}
-                            className="details fill-neutral-500"
-                          >
-                            {stats?.completed}/{total}
-                          </tspan>
+                          {!isCompact && (
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy ?? 0) + 16}
+                              className="details fill-neutral-500"
+                            >
+                              {stats?.completed}/{total}
+                            </tspan>
+                          )}
                         </text>
                       );
                     }}
@@ -141,16 +154,6 @@ export function WidgetAdminTrainingCompletion() {
           </>
         )}
       </DashboardWidgetContent>
-      <DashboardWidgetFooter>
-        <div className="flex justify-between flex-wrap gap-x-3 gap-y-1 text-sm text-neutral-500">
-          {STATUS_STYLES.map(({ key, color }) => (
-            <div key={key} className="flex items-center gap-1.5">
-              <span className={cn("size-2 rounded-full bg-success-500", color)} />
-              {t(`dashboardHome.widgets.training_completion.${key}`)}
-            </div>
-          ))}
-        </div>
-      </DashboardWidgetFooter>
     </DashboardWidgetCard>
   );
 }

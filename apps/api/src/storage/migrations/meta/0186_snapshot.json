@@ -1,5 +1,5 @@
 {
-  "id": "b5066cb9-6a12-498f-b7a9-6ab6a4b65481",
+  "id": "37ff0baa-50b6-4106-9dc7-7e91f2e36aa6",
   "prevId": "96f12e07-daef-47d5-b6e3-8631513edda5",
   "version": "7",
   "dialect": "postgresql",
@@ -744,120 +744,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
-    },
-    "public.ai_mentor_configurations": {
-      "name": "ai_mentor_configurations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "ai_mentor_lesson_id": {
-          "name": "ai_mentor_lesson_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "structured_ai_mentor_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "opening_instruction": {
-          "name": "opening_instruction",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "additional_instructions": {
-          "name": "additional_instructions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "ai_mentor_configurations_tenant_id_idx": {
-          "name": "ai_mentor_configurations_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "ai_mentor_configurations_ai_mentor_lesson_id_ai_mentor_lessons_id_fk": {
-          "name": "ai_mentor_configurations_ai_mentor_lesson_id_ai_mentor_lessons_id_fk",
-          "tableFrom": "ai_mentor_configurations",
-          "tableTo": "ai_mentor_lessons",
-          "columnsFrom": [
-            "ai_mentor_lesson_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "ai_mentor_configurations_tenant_id_tenants_id_fk": {
-          "name": "ai_mentor_configurations_tenant_id_tenants_id_fk",
-          "tableFrom": "ai_mentor_configurations",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ai_mentor_configurations_ai_mentor_lesson_id_unique": {
-          "name": "ai_mentor_configurations_ai_mentor_lesson_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "ai_mentor_lesson_id"
-          ]
-        }
-      }
     },
     "public.ai_mentor_judgement_blocking_errors": {
       "name": "ai_mentor_judgement_blocking_errors",
@@ -1613,142 +1499,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.ai_mentor_roleplay_configurations": {
-      "name": "ai_mentor_roleplay_configurations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "configuration_id": {
-          "name": "configuration_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "scenario": {
-          "name": "scenario",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "ai_role": {
-          "name": "ai_role",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "learner_role": {
-          "name": "learner_role",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "character_goal": {
-          "name": "character_goal",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "difficulty": {
-          "name": "difficulty",
-          "type": "ai_mentor_roleplay_difficulty",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "facts_and_constraints": {
-          "name": "facts_and_constraints",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "ai_mentor_roleplay_configurations_tenant_id_idx": {
-          "name": "ai_mentor_roleplay_configurations_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "ai_mentor_roleplay_configurations_configuration_id_ai_mentor_configurations_id_fk": {
-          "name": "ai_mentor_roleplay_configurations_configuration_id_ai_mentor_configurations_id_fk",
-          "tableFrom": "ai_mentor_roleplay_configurations",
-          "tableTo": "ai_mentor_configurations",
-          "columnsFrom": [
-            "configuration_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "ai_mentor_roleplay_configurations_tenant_id_tenants_id_fk": {
-          "name": "ai_mentor_roleplay_configurations_tenant_id_tenants_id_fk",
-          "tableFrom": "ai_mentor_roleplay_configurations",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ai_mentor_roleplay_configurations_configuration_id_unique": {
-          "name": "ai_mentor_roleplay_configurations_configuration_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "configuration_id"
-          ]
-        }
-      }
-    },
     "public.ai_mentor_student_lesson_progress": {
       "name": "ai_mentor_student_lesson_progress",
       "schema": "",
@@ -1866,135 +1616,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
-    },
-    "public.ai_mentor_teacher_configurations": {
-      "name": "ai_mentor_teacher_configurations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "configuration_id": {
-          "name": "configuration_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "task_goal": {
-          "name": "task_goal",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "expertise": {
-          "name": "expertise",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "content_scope": {
-          "name": "content_scope",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "teaching_style": {
-          "name": "teaching_style",
-          "type": "ai_mentor_teaching_style",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "feedback_guidance": {
-          "name": "feedback_guidance",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "ai_mentor_teacher_configurations_tenant_id_idx": {
-          "name": "ai_mentor_teacher_configurations_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "ai_mentor_teacher_configurations_configuration_id_ai_mentor_configurations_id_fk": {
-          "name": "ai_mentor_teacher_configurations_configuration_id_ai_mentor_configurations_id_fk",
-          "tableFrom": "ai_mentor_teacher_configurations",
-          "tableTo": "ai_mentor_configurations",
-          "columnsFrom": [
-            "configuration_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "ai_mentor_teacher_configurations_tenant_id_tenants_id_fk": {
-          "name": "ai_mentor_teacher_configurations_tenant_id_tenants_id_fk",
-          "tableFrom": "ai_mentor_teacher_configurations",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ai_mentor_teacher_configurations_configuration_id_unique": {
-          "name": "ai_mentor_teacher_configurations_configuration_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "configuration_id"
-          ]
-        }
-      }
     },
     "public.ai_mentor_thread_messages": {
       "name": "ai_mentor_thread_messages",
@@ -15230,6 +14851,139 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.todo_tasks": {
+      "name": "todo_tasks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "todo_tasks_tenant_id_idx": {
+          "name": "todo_tasks_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "todo_tasks_user_position_idx": {
+          "name": "todo_tasks_user_position_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "completed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "todo_tasks_user_id_users_id_fk": {
+          "name": "todo_tasks_user_id_users_id_fk",
+          "tableFrom": "todo_tasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "todo_tasks_tenant_id_tenants_id_fk": {
+          "name": "todo_tasks_tenant_id_tenants_id_fk",
+          "tableFrom": "todo_tasks",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.user_announcements": {
       "name": "user_announcements",
       "schema": "",
@@ -15864,24 +15618,6 @@
     }
   },
   "enums": {
-    "public.ai_mentor_roleplay_difficulty": {
-      "name": "ai_mentor_roleplay_difficulty",
-      "schema": "public",
-      "values": [
-        "cooperative",
-        "realistic",
-        "challenging"
-      ]
-    },
-    "public.ai_mentor_teaching_style": {
-      "name": "ai_mentor_teaching_style",
-      "schema": "public",
-      "values": [
-        "explain_and_practice",
-        "guided_discovery",
-        "socratic"
-      ]
-    },
     "public.article_status": {
       "name": "article_status",
       "schema": "public",
@@ -15957,14 +15693,6 @@
         "passed",
         "failed",
         "unknown"
-      ]
-    },
-    "public.structured_ai_mentor_type": {
-      "name": "structured_ai_mentor_type",
-      "schema": "public",
-      "values": [
-        "teacher",
-        "roleplay"
       ]
     }
   },

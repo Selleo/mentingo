@@ -5,7 +5,7 @@ import { useCertificate } from "~/api/queries/useCertificates";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
+import { CertificatePreviewModal } from "~/modules/Profile/Certificates/CertificatePreviewModal";
 import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 import CertificateStatCard from "./CourseStatBar/CertificateStatCard";
@@ -54,7 +54,6 @@ const CourseCertificate = ({ courseId }: CourseCertificateProps) => {
   const { studentName, courseName, formattedDate, formattedExpiryDate } = certificateInfo;
 
   const handleOpenCertificatePreview = () => setCertificatePreview(true);
-  const handleCloseCertificatePreview = () => setCertificatePreview(false);
 
   if (!course?.hasCertificate || !isEffectiveStudentExperience) return null;
 
@@ -68,33 +67,20 @@ const CourseCertificate = ({ courseId }: CourseCertificateProps) => {
         onOpen={handleOpenCertificatePreview}
       />
 
-      {isCertificatePreviewOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
-          onClick={handleCloseCertificatePreview}
-          onKeyDown={(event) => {
-            if (event.key === "Escape" || event.key === "Enter") handleCloseCertificatePreview();
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <div role="presentation" onClick={(event) => event.stopPropagation()}>
-            <CertificatePreview
-              certificateId={certificate?.id}
-              studentName={studentName}
-              courseName={courseName}
-              completionDate={formattedDate}
-              expiryDate={formattedExpiryDate || undefined}
-              onClose={handleCloseCertificatePreview}
-              platformLogo={globalSettings?.platformLogoS3Key}
-              certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
-              certificateSignatureUrl={certificate?.certificateSignatureUrl}
-              initialColor={certificate?.certificateFontColor}
-              showShareButton={Boolean(certificate?.id)}
-            />
-          </div>
-        </div>
-      )}
+      <CertificatePreviewModal
+        open={isCertificatePreviewOpen}
+        onOpenChange={setCertificatePreview}
+        certificateId={certificate?.id}
+        studentName={studentName}
+        courseName={courseName}
+        completionDate={formattedDate}
+        expiryDate={formattedExpiryDate || undefined}
+        platformLogo={globalSettings?.platformLogoS3Key}
+        certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
+        certificateSignatureUrl={certificate?.certificateSignatureUrl}
+        initialColor={certificate?.certificateFontColor}
+        showShareButton={Boolean(certificate?.id)}
+      />
     </>
   );
 };

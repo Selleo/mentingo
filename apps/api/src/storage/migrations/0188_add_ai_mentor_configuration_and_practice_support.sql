@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS "ai_mentor_configurations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"ai_mentor_lesson_id" uuid NOT NULL,
+	"ai_mentor_lesson_id" uuid,
+	"practice_session_id" uuid,
 	"type" "structured_ai_mentor_type" NOT NULL,
 	"opening_instruction" jsonb,
 	"additional_instructions" jsonb,
-	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL,
-	CONSTRAINT "ai_mentor_configurations_ai_mentor_lesson_id_unique" UNIQUE("ai_mentor_lesson_id")
+	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "ai_mentor_roleplay_configurations" (
@@ -57,8 +57,15 @@ CREATE TABLE IF NOT EXISTS "ai_mentor_teacher_configurations" (
 	CONSTRAINT "ai_mentor_teacher_configurations_configuration_id_unique" UNIQUE("configuration_id")
 );
 --> statement-breakpoint
+ALTER TABLE "ai_mentor_practice_sessions" RENAME COLUMN "instructions" TO "scenario";--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "ai_mentor_configurations" ADD CONSTRAINT "ai_mentor_configurations_ai_mentor_lesson_id_ai_mentor_lessons_id_fk" FOREIGN KEY ("ai_mentor_lesson_id") REFERENCES "public"."ai_mentor_lessons"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "ai_mentor_configurations" ADD CONSTRAINT "ai_mentor_configurations_practice_session_id_ai_mentor_practice_sessions_id_fk" FOREIGN KEY ("practice_session_id") REFERENCES "public"."ai_mentor_practice_sessions"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -94,5 +101,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "ai_mentor_configurations_tenant_id_idx" ON "ai_mentor_configurations" USING btree ("tenant_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_mentor_configurations_lesson_unique_idx" ON "ai_mentor_configurations" USING btree ("ai_mentor_lesson_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_mentor_configurations_practice_session_unique_idx" ON "ai_mentor_configurations" USING btree ("practice_session_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "ai_mentor_roleplay_configurations_tenant_id_idx" ON "ai_mentor_roleplay_configurations" USING btree ("tenant_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "ai_mentor_teacher_configurations_tenant_id_idx" ON "ai_mentor_teacher_configurations" USING btree ("tenant_id");
