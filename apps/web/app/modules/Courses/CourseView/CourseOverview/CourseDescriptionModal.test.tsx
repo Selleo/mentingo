@@ -33,7 +33,7 @@ describe("CourseDescriptionModal", () => {
       />,
     );
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toHaveClass("flex", "max-h-[90dvh]");
 
     await user.keyboard("{Escape}");
 
