@@ -311,7 +311,13 @@ export class ExternalAudioService {
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
         const stream = await this.aiService.streamMessage(
-          { threadId: session.threadId, content: text, voiceSessionId: sessionId },
+          {
+            threadId: session.threadId,
+            content: text,
+            lessonId: session.lessonId,
+            voiceSessionId: sessionId,
+            voiceTurnId: payload.jobId,
+          },
           OPENAI_MODELS.BASIC,
           session.currentUser,
           true,

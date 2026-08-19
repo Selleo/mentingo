@@ -24,6 +24,10 @@ import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
+import {
+  AI_MENTOR_TRACE_FLOWS,
+  buildAiMentorTraceAttributes,
+} from "src/ai/utils/ai-mentor-trace-context";
 import { generateTranslationSchema } from "src/ai/utils/ai.schema";
 import {
   MESSAGE_ROLE,
@@ -96,9 +100,15 @@ export class AiService {
     return observe(
       async () =>
         propagateAttributes(
-          {
-            userId: dbAls.getStore()?.tenantId,
-          },
+          buildAiMentorTraceAttributes({
+            sessionId: data.lessonId,
+            userId: data.userId,
+            tenantId: dbAls.getStore()?.tenantId,
+            flow: AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
+            operation: "thread-setup",
+            channel: "text",
+            lessonId: data.lessonId,
+          }),
           async () => {
             try {
               const threadData = await this.threadService.createThreadIfNoneExist(data);
@@ -107,16 +117,29 @@ export class AiService {
                 return { data: threadData.thread };
               }
 
-              return propagateAttributes({ sessionId: threadData.thread.id }, async () => {
-                const systemPrompt = await this.promptService.setSystemPrompt({
+              return propagateAttributes(
+                buildAiMentorTraceAttributes({
+                  sessionId: threadData.thread.id,
+                  userId: data.userId,
+                  tenantId: dbAls.getStore()?.tenantId,
+                  flow: AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
+                  operation: "thread-setup",
+                  channel: "text",
                   threadId: threadData.thread.id,
-                  userId: threadData.thread.userId,
-                });
+                  lessonId: data.lessonId,
+                  aiMentorLessonId: threadData.thread.aiMentorLessonId ?? undefined,
+                }),
+                async () => {
+                  const systemPrompt = await this.promptService.setSystemPrompt({
+                    threadId: threadData.thread.id,
+                    userId: threadData.thread.userId,
+                  });
 
-                await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
+                  await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
 
-                return { data: threadData.thread };
-              });
+                  return { data: threadData.thread };
+                },
+              );
             } catch (error) {
               updateActiveObservation({
                 level: "ERROR",
@@ -136,10 +159,15 @@ export class AiService {
     userLanguage: SupportedLanguages;
   }) {
     return propagateAttributes(
-      {
+      buildAiMentorTraceAttributes({
         sessionId: data.practiceSessionId,
-        metadata: { practiceSessionId: data.practiceSessionId },
-      },
+        userId: data.userId,
+        tenantId: dbAls.getStore()?.tenantId,
+        flow: AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE,
+        operation: "thread-setup",
+        channel: "text",
+        practiceSessionId: data.practiceSessionId,
+      }),
       async () => {
         const existingThread = await this.aiRepository.findThread([
           eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
@@ -162,7 +190,19 @@ export class AiService {
           },
           AI_MENTOR_TYPE.ROLEPLAY,
         );
-        await this.sendWelcomeMessage(thread.id, systemPrompt);
+        await propagateAttributes(
+          buildAiMentorTraceAttributes({
+            sessionId: thread.id,
+            userId: data.userId,
+            tenantId: dbAls.getStore()?.tenantId,
+            flow: AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE,
+            operation: "thread-setup",
+            channel: "text",
+            threadId: thread.id,
+            practiceSessionId: data.practiceSessionId,
+          }),
+          () => this.sendWelcomeMessage(thread.id, systemPrompt),
+        );
 
         return thread;
       },
@@ -181,15 +221,22 @@ export class AiService {
         const sessionId = data.voiceSessionId ?? thread.practiceSessionId ?? data.threadId;
 
         return propagateAttributes(
-          {
+          buildAiMentorTraceAttributes({
             sessionId,
-            userId: currentUser.tenantId,
-            metadata: {
-              threadId: data.threadId,
-              ...(thread.practiceSessionId && { practiceSessionId: thread.practiceSessionId }),
-              ...(data.voiceSessionId && { voiceSessionId: data.voiceSessionId }),
-            },
-          },
+            userId: currentUser.userId,
+            tenantId: currentUser.tenantId,
+            flow: thread.practiceSessionId
+              ? AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE
+              : AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
+            operation: "chat",
+            channel: isVoiceMentor ? "voice" : "text",
+            threadId: data.threadId,
+            lessonId: data.lessonId,
+            aiMentorLessonId: thread.aiMentorLessonId ?? undefined,
+            practiceSessionId: thread.practiceSessionId ?? undefined,
+            voiceSessionId: data.voiceSessionId,
+            voiceTurnId: data.voiceTurnId,
+          }),
           async () => {
             await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
@@ -352,14 +399,19 @@ export class AiService {
     const judged = await observe(
       async () =>
         propagateAttributes(
-          {
+          buildAiMentorTraceAttributes({
             sessionId: thread.practiceSessionId ?? data.threadId,
-            userId: dbAls.getStore()?.tenantId,
-            metadata: {
-              threadId: data.threadId,
-              ...(thread.practiceSessionId && { practiceSessionId: thread.practiceSessionId }),
-            },
-          },
+            userId: thread.userId,
+            tenantId: dbAls.getStore()?.tenantId,
+            flow: thread.practiceSessionId
+              ? AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE
+              : AI_MENTOR_TRACE_FLOWS.COURSE_LESSON,
+            operation: "evaluation",
+            channel: "text",
+            threadId: data.threadId,
+            aiMentorLessonId: thread.aiMentorLessonId ?? undefined,
+            practiceSessionId: thread.practiceSessionId ?? undefined,
+          }),
           () => this.judgeService.runJudge(data, viewer),
         ),
       { name: "Thread Evaluator", asType: "evaluator" },
