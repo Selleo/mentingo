@@ -16,7 +16,7 @@ import useCertificatePDF from "./useCertificatePDF";
 import type { CertificateKind } from "./certificateKind";
 import type { CertificateColorTheme } from "./certificateTheme";
 
-interface CertificatePreviewProps {
+export interface CertificatePreviewProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;

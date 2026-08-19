@@ -1,4 +1,300 @@
 {
+  "dashboardHome": {
+    "title": "Your dashboard",
+    "subtitle": "Keep the most important learning information and actions within easy reach.",
+    "customize": "Customize dashboard",
+    "edit": {
+      "badge": "Editing",
+      "widgetsButton": "Widgets",
+      "restore": "Restore default",
+      "restoreConfirm": "Restore the default widget layout? Your current arrangement will be replaced.",
+      "changeSize": "Change size of {{title}}",
+      "sizeTitle": "Widget size",
+      "sizes": {
+        "1x1": "Compact",
+        "2x1": "Wide",
+        "1x2": "Tall",
+        "2x2": "Large",
+        "3x2": "Expanded",
+        "4x1": "Extra wide",
+        "4x2": "Feature",
+        "4x3": "Tall feature"
+      },
+      "drag": "Move {{title}}",
+      "widgetLibrary": "Dashboard widgets",
+      "widgetLibraryDescription": "Choose which widgets should be visible on your dashboard.",
+      "required": "Required",
+      "toggle": "Toggle {{title}}",
+      "confirm": "Yes",
+      "cancel": "No"
+    },
+    "empty": {
+      "title": "Your dashboard is empty",
+      "description": "Customize the dashboard to add the widgets that matter to you.",
+      "editDescription": "Enable at least one widget in the list above."
+    },
+    "error": {
+      "title": "We could not load the dashboard",
+      "description": "Try again in a moment.",
+      "retry": "Try again",
+      "invalidWidgetWidth": "This width is not allowed for the selected widget.",
+      "invalidWidgetLayout": "The dashboard layout contains unavailable or duplicate widgets.",
+      "invalidWidgetSize": "This size is not allowed for the selected widget.",
+      "requiredWidgetMissing": "A required dashboard widget is missing.",
+      "staleLayout": "Your dashboard was updated elsewhere. Refresh and try again."
+    },
+    "toast": {
+      "layoutSaved": "Dashboard changes saved.",
+      "layoutSaveError": "We could not save the dashboard changes.",
+      "layoutReset": "The default dashboard layout was restored.",
+      "layoutResetError": "We could not restore the default dashboard layout."
+    },
+    "widgets": {
+      "loadError": "This widget could not load its data.",
+      "trainingCompletionChartLabel": "{{completed}} of {{total}} enrollments completed, {{percentage}} percent.",
+      "deadlineRisksPage": "Page {{page}} of {{totalPages}}",
+      "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
+      "placeholderContent": "This widget is ready for its feature-specific content.",
+      "placeholderFooter": "Example widget",
+      "s_placeholder_1": { "title": "Learner widget 1" },
+      "s_placeholder_2": { "title": "Learner widget 2" },
+      "s_placeholder_3": { "title": "Learner widget 3" },
+      "loadError": "We could not load this widget.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "All courses you have started",
+          "empty": "You have no courses in progress.",
+          "nextLesson": "Next: {{title}}",
+          "openCourse": "Open course",
+          "viewAll": "{{count}} courses in progress"
+        },
+        "requiredCourse": {
+          "description": "All mandatory courses you still need to complete",
+          "empty": "You have no required courses to complete.",
+          "overdue": "Overdue",
+          "dueSoon": "Due soon",
+          "scheduled": "Upcoming",
+          "noDeadline": "No deadline",
+          "dueDate": "Due {{date}}",
+          "noDueDate": "No due date",
+          "total": "{{count}} required courses",
+          "overdueCount": "{{count}} overdue"
+        },
+        "courseCompletion": {
+          "description": "A summary of your assigned course progress",
+          "empty": "You have no assigned courses yet.",
+          "completedOfTotal": "{{completed}} of {{total}} completed",
+          "completed": "Completed",
+          "inProgress": "In progress",
+          "notStarted": "Not started"
+        },
+        "certificates": {
+          "description": "Your active certificates and upcoming expirations",
+          "empty": "You do not have any active certificates.",
+          "active": "Active certificates",
+          "expiringSoon": "Expiring within 30 days",
+          "cta": "View certificate",
+          "viewAll": "View all certificates",
+          "dialogTitle": "Your certificates",
+          "dialogDescription": "Review all active certificates you have earned.",
+          "issued": "Issued {{date}}",
+          "expires": "Expires {{date}}",
+          "noExpiry": "No expiration date",
+          "previous": "Previous",
+          "next": "Next",
+          "page": "Page {{page}} of {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Create one focused practice scenario each day",
+          "empty": "Describe a situation and practice it with AI Mentor.",
+          "emptyPrompt": "What conversation would you like to handle with more confidence?",
+          "startCta": "Start practice",
+          "continueCta": "Continue practice",
+          "feedbackCta": "View feedback",
+          "completedEyebrow": "Rehearsal complete",
+          "privateHint": "A private place to try, adjust, and try again",
+          "status": {
+            "queued": "Your practice scenario is queued.",
+            "processing": "Your practice scenario is being prepared.",
+            "ready": "Today's practice is ready.",
+            "failed": "Scenario generation failed. Open it to retry."
+          }
+        }
+      },
+      "commonDescription": "Key information at a glance",
+      "training_completion": {
+        "title": "Training completion",
+        "description": "Completion status across all course enrollments",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started",
+        "viewAnalytics": "View analytics",
+        "empty": "No course enrollments yet.",
+        "assignCourses": "Assign courses"
+      },
+      "deadline_risks": {
+        "title": "Deadline risks",
+        "description": "Required courses that need attention",
+        "sort": "Sort",
+        "sortMostUrgent": "Most urgent first",
+        "sortLeastUrgent": "Least urgent first",
+        "student": "Student",
+        "group": "Group",
+        "learners": "Learners",
+        "deadline": "Deadline",
+        "status": "Status",
+        "searchStudents": "Search learners",
+        "searchGroups": "Search groups or learners",
+        "allStatuses": "All statuses",
+        "studentsEmpty": "No affected learners.",
+        "groupsEmpty": "No affected groups.",
+        "overdue": "Overdue",
+        "dueSoon": "Due soon",
+        "empty": "No deadline risks right now.",
+        "overdueTitle": "Overdue required courses",
+        "dueSoonTitle": "Required courses due soon",
+        "goToCourse": "Go to course",
+        "affected_one": "{{count}} affected learner",
+        "affected_other": "{{count}} affected learners"
+      },
+      "incomplete_courses": {
+        "title": "Incomplete courses",
+        "description": "Courses with the most incomplete enrollments",
+        "allCompleted": "All enrolled courses are completed.",
+        "noEnrollments": "No course enrollments yet.",
+        "enrollments": "enrollments",
+        "notCompleted": "{{count}} not completed"
+      },
+      "event_calendar": {
+        "title": "Event calendar",
+        "description": "Learning events and deadlines this month",
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "selectMonth": "Select month",
+        "selectYear": "Select year",
+        "selectedDay": "Selected day",
+        "upcoming": "Upcoming events",
+        "empty": "No events this month.",
+        "liveTraining": "Live training",
+        "courseDeadline": "Course deadline",
+        "weekdays": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
+      "continue_learning": { "title": "Continue learning" },
+      "required_course": { "title": "Required courses" },
+      "course_completion": { "title": "Course progress" },
+      "certificates": { "title": "Certificates" },
+      "ai_mentor_practice": {
+        "title": "AI Mentor practice",
+        "aiNotConfigured": "AI Mentor is not configured for this tenant."
+      },
+      "todoTasks": {
+        "title": "To-do list",
+        "description": "Small tasks for your workday",
+        "empty": "No tasks yet. Add one below.",
+        "placeholder": "Add a task",
+        "add": "Add task",
+        "toggle": "Toggle {{title}}",
+        "edit": "Edit task",
+        "delete": "Delete task",
+        "reorder": "Reorder task",
+        "toast": {
+          "createSuccess": "Task added.",
+          "createError": "We could not add the task.",
+          "updateSuccess": "Task updated.",
+          "updateError": "We could not update the task.",
+          "deleteSuccess": "Task deleted.",
+          "deleteError": "We could not delete the task.",
+          "reorderSuccess": "Task order saved.",
+          "reorderError": "We could not save the task order."
+        }
+      }
+    }
+  },
+  "todoTasks": {
+    "limitReached": "You can have up to 100 tasks.",
+    "notFound": "This task no longer exists.",
+    "invalidOrder": "The task order is no longer current. Refresh and try again."
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Practice a real conversation.",
+      "promptEyebrow": "Set the scene",
+      "mentorPrompt": "Tell me about the conversation you want to rehearse. Who are you speaking with, what is happening, and what would you like to handle better?",
+      "scenario": "What would you like to practice?",
+      "scenarioPlaceholder": "For example: I want to practice giving constructive feedback to a colleague who missed a deadline.",
+      "scenarioHint": "Include any context that would help make the practice realistic, such as the situation, people involved, or your goal.",
+      "privateHint": "Only you can see this practice.",
+      "submit": "Create practice",
+      "suggestions": {
+        "title": "Start with an example",
+        "delayedOrder": {
+          "label": "Customer demands a refund for a delayed order",
+          "value": "A customer wants a refund because an order was delayed. They ordered a coffee machine for a birthday gift. Delivery was promised in 2–3 days, but six days have passed and the parcel has not arrived. The customer is upset, demands an immediate refund and an extra discount, and threatens a negative review. The parcel is with the courier and will probably arrive tomorrow, but I cannot guarantee the delivery time or offer more than a 10% discount. I want to calm the customer, avoid overpromising, and offer a sensible solution."
+        },
+        "orderMistake": {
+          "label": "I made a mistake in the customer's order",
+          "value": "I entered 120 packages of air-conditioning filters instead of 20. The warehouse has already picked and packed the order on pallets for collection today. If it ships, the customer will receive 100 packages too many and we will need to arrange a return. I am unsure whether to stop the shipment, contact the warehouse first, tell my manager, or inform the customer."
+        },
+        "sensitiveData": {
+          "label": "Customer asks me for data I should not share",
+          "value": "A regular business customer gave the company name and order number, then asked for the delivery address and phone number of the person who placed the order. They said they urgently need to contact that person, but they are not listed as the order contact and I cannot verify that they work for the company. They insist that we are colleagues and need the information immediately. I want to help without disclosing personal data improperly."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Set the scene",
+          "description": "Describe the moment in your own words."
+        },
+        "rehearse": {
+          "title": "Rehearse it for real",
+          "description": "Speak or type while AI Mentor plays the other person."
+        },
+        "reflect": {
+          "title": "See what worked",
+          "description": "Finish when you are ready and get focused feedback."
+        }
+      }
+    },
+    "backToDashboard": "Back to dashboard",
+    "rehearsalEyebrow": "Today's rehearsal",
+    "successGoal": "Your goal",
+    "successGoalFallback": "Handle the conversation clearly and reach a constructive next step.",
+    "viewFeedback": "View feedback",
+    "practiceAgain": "Practice again",
+    "replayLoadingTitle": "Setting up your next rehearsal",
+    "yourRole": "Your role",
+    "mentorRole": "AI Mentor role",
+    "feedback": {
+      "title": "Practice feedback",
+      "summaryTitle": "What to take forward",
+      "summaryDescription": "Use these observations to strengthen your next attempt.",
+      "scoreLabel": "Practice score",
+      "criteriaTitle": "What the Judge noticed",
+      "criterionFallback": "Criterion {{number}}",
+      "importantFeedbackTitle": "Important feedback"
+    },
+    "startHint": "Start the conversation when you are ready.",
+    "checkHint": "Finish whenever you want to see how your approach landed.",
+    "checkPractice": "Finish and reflect",
+    "practiceComplete": "Your rehearsal is complete. Your feedback is ready whenever you want to revisit it.",
+    "generating": "AI Mentor is preparing your scenario.",
+    "preparingBackgroundDescription": "Your practice is being prepared in the background. You can return to the dashboard and come back when it is ready.",
+    "failed": "We could not generate this practice scenario.",
+    "error": "We could not load this practice.",
+    "retry": "Try generation again",
+    "conversationTitle": "AI Mentor practice",
+    "mentorName": "AI Mentor",
+    "message": "Message to AI Mentor",
+    "send": "Send"
+  },
   "common": {
     "button": {
       "save": "Save",
@@ -18,7 +314,10 @@
       "edit": "Edit",
       "delete": "Delete",
       "uploading": "Uploading...",
-      "sending": "Sending..."
+      "sending": "Sending...",
+      "loading": "Loading...",
+      "previous": "Previous",
+      "next": "Next"
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",
@@ -58,8 +357,10 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong.",
       "threadMustBeActive": "The thread must be active.",
+      "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
-      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
+      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },
     "loader": {
       "textSequence": {
@@ -1529,6 +1830,7 @@
         "learning_progress": "learning progress",
         "certificate": "certificates",
         "file": "files",
+        "resource_library": "Resource Library",
         "ai": "AI features",
         "announcement": "announcements",
         "news": "news",
@@ -1552,6 +1854,8 @@
         "user_manage": "Manage users, including roles and account status.",
         "settings_read_self": "View their own profile and preference settings.",
         "settings_update_self": "Update their own profile and preference settings.",
+        "dashboard_read": "View their dashboard.",
+        "todo_task_manage_self": "Create and manage their own to-do tasks.",
         "settings_manage": "Manage global platform settings.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",
@@ -1590,6 +1894,7 @@
         "certificate_render": "Generate certificate files.",
         "file_upload": "Upload files to the platform.",
         "file_delete": "Delete files directly from platform storage.",
+        "resource_library_manage": "Manage private assets in the Resource Library.",
         "ai_use": "Use AI-powered platform features.",
         "announcement_read": "View announcements.",
         "announcement_create": "Create announcements.",
@@ -1960,6 +2265,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default.",
       "noMissingTranslations": "No missing translations",
       "mismatchContentLength": "The number of translations does not match the number of generated translations",
+      "invalidTranslationStructure": "The generated translation did not preserve the content structure. Please try again.",
       "translationsGeneratedSuccessfully": "Translations generated successfully",
       "lumaNotConfigured": "Luma API key is not configured.",
       "lumaBadRequest": "Luma request was invalid.",
@@ -2380,6 +2686,238 @@
           "customTTSReference": "Enter custom TTS reference ID...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "AI Mentor behavior",
+          "emptyDescription": "Choose how the AI should guide or interact with the learner.",
+          "baseLanguageRequired": "Configure AI Mentor behavior in the course base language before translating it.",
+          "incompleteDescription": "This configuration needs a few details before it can be edited or translated.",
+          "configureManually": "Configure manually",
+          "reviewConfiguration": "Review configuration",
+          "dialogTitle": "Configure AI Mentor",
+          "dialogDescription": "Choose a mode and define the behavior learners should experience.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Fine-tune behavior (optional)",
+          "translationModeTitle": "Translation mode",
+          "translationModeDescription": "Translate the text fields here. Mode, teaching style, and difficulty are managed in the course base language.",
+          "structureLockedTooltip": "AI Mentor structure can only be changed in the course base language.",
+          "applyConfiguration": "Apply configuration",
+          "saveConfiguration": "Save configuration",
+          "saveTranslation": "Save translation",
+          "configurationSaved": "AI Mentor configuration saved.",
+          "translationSaved": "AI Mentor translation saved.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor mode",
+            "teacher": {
+              "label": "Teacher",
+              "description": "Explains concepts and guides practice."
+            },
+            "roleplay": {
+              "label": "Roleplay",
+              "description": "Acts as a participant in a practice scenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Start from a scenario",
+            "scenarioSimulation": {
+              "taskDescription": "Practice discovering a software client's needs and proposing an offer that fits their constraints.",
+              "aiRole": "Prospective software client",
+              "learnerRole": "Sales representative",
+              "characterGoal": "Choose a supplier who can meet the timeline, budget, and communication requirements.",
+              "factsAndConstraints": "The application must be ready within three months. The budget is limited, and clear, regular communication is required.",
+              "openingInstruction": "Introduce yourself as a client evaluating software suppliers and ask how the learner can help."
+            },
+            "problemSolving": {
+              "taskDescription": "Practice handling an employee's salary increase request constructively.",
+              "aiRole": "Employee requesting a salary increase",
+              "learnerRole": "Manager",
+              "characterGoal": "Be heard and reach a credible alternative or follow-up plan.",
+              "factsAndConstraints": "The employee has made meaningful recent contributions, but the company currently has no budget for salary increases.",
+              "openingInstruction": "Open by explaining your recent contributions and asking to discuss a salary increase."
+            },
+            "creativeTask": {
+              "taskDescription": "Develop and refine an original idea for a new customer service.",
+              "taskGoal": "Help the learner develop and refine an original service idea.",
+              "expertise": "Service innovation coach",
+              "feedbackGuidance": "Encourage originality and practical value. Ask focused follow-up questions and point out important gaps without taking over the idea.",
+              "openingInstruction": "Invite the learner to share their initial service idea and who it would help."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Learn practical time-management techniques and plan how to apply one at work.",
+              "taskGoal": "Help the learner understand and apply practical time-management techniques.",
+              "expertise": "Time-management coach",
+              "feedbackGuidance": "Correct misconceptions gently and connect feedback to a concrete, realistic workplace application.",
+              "openingInstruction": "Introduce one practical time-management technique, then ask how the learner currently organizes their work."
+            }
+          },
+          "taskGoal": {
+            "label": "Task goal",
+            "placeholder": "What should the Teacher help the learner understand or practice?"
+          },
+          "expertise": {
+            "label": "Expertise",
+            "placeholder": "For example: GDPR compliance trainer"
+          },
+          "contentScope": {
+            "label": "Content scope",
+            "placeholder": "What may the Teacher cover, and what should it avoid?"
+          },
+          "teachingStyle": {
+            "label": "Teaching style",
+            "explain_and_practice": {
+              "label": "Explain and practice",
+              "description": "Explain clearly, then reinforce with practice."
+            },
+            "guided_discovery": {
+              "label": "Guided discovery",
+              "description": "Help the learner reach conclusions step by step."
+            },
+            "socratic": {
+              "label": "Socratic",
+              "description": "Use focused questions to deepen reasoning."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback guidance",
+            "placeholder": "How should the Teacher correct or reinforce the learner?"
+          },
+          "scenario": {
+            "label": "Scenario",
+            "placeholder": "Describe the situation the learner will practice."
+          },
+          "aiRole": {
+            "label": "AI role",
+            "placeholder": "For example: Hesitant customer"
+          },
+          "learnerRole": {
+            "label": "Learner role",
+            "placeholder": "For example: Sales representative"
+          },
+          "characterGoal": {
+            "label": "AI character goal",
+            "placeholder": "What is the AI character trying to achieve?"
+          },
+          "difficulty": {
+            "label": "Difficulty",
+            "cooperative": {
+              "label": "Cooperative",
+              "description": "Helpful and willing to move the conversation forward."
+            },
+            "realistic": {
+              "label": "Realistic",
+              "description": "Natural resistance and believable reactions."
+            },
+            "challenging": {
+              "label": "Challenging",
+              "description": "Firm resistance that requires a strong response."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Facts and constraints",
+            "placeholder": "Add budgets, deadlines, policies, authority, or facts that must remain true."
+          },
+          "openingInstruction": {
+            "label": "Opening instruction",
+            "placeholder": "How should the one-time welcome message begin?"
+          },
+          "additionalInstructions": {
+            "label": "Additional instructions",
+            "placeholder": "Add exceptional behavior not covered by the fields above."
+          },
+          "typeChange": {
+            "title": "Change Mentor mode?",
+            "description": "Switching to {{type}} clears the current mode-specific fields. Opening and additional instructions are preserved."
+          },
+          "validation": {
+            "required": "This field is required.",
+            "configurationRequired": "Configure AI Mentor behavior before saving the lesson."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentor mode",
+          "createWithAi": "Create with AI",
+          "improveWithAi": "Improve with AI",
+          "checkQualityWithAi": "Check quality with AI",
+          "aiAssistance": "AI assistance",
+          "create": {
+            "title": "Create AI Mentor behavior with AI",
+            "description": "Choose the Mentor mode, then describe the experience you want to create.",
+            "fieldLabel": "What scenario should AI prepare?",
+            "fieldDescription": "AI will return a complete working draft of the scenario for the selected mode. Review it before applying it.",
+            "placeholder": "For example: a manager handling a difficult feedback conversation.",
+            "submit": "Generate draft"
+          },
+          "improve": {
+            "title": "Improve AI Mentor behavior with AI",
+            "description": "AI uses the current unsaved configuration and its selected mode.",
+            "fieldLabel": "What should AI change in the scenario?",
+            "fieldDescription": "Describe what should become more realistic, coherent, or specific. The selected mode stays unchanged.",
+            "placeholder": "For example: make the scenario more realistic and add clearer constraints.",
+            "submit": "Improve draft"
+          },
+          "progressTitle": "Preparing your draft",
+          "progressDescription": "AI is generating and checking the configuration.",
+          "readyTitle": "Draft ready for review",
+          "revisionTitle": "Draft needs your decision",
+          "failedTitle": "Could not generate a draft",
+          "cancel": "Cancel generation",
+          "revise": "Revise draft",
+          "review": "Review configuration",
+          "progressLabel": "AI Mentor generation progress",
+          "stages": {
+            "draft": "Generating draft",
+            "qualityCheck": "Quality check",
+            "ready": "Ready"
+          },
+          "status": {
+            "drafting": "Generating the configuration",
+            "evaluating": "Checking configuration quality",
+            "revising": "Improving the draft",
+            "awaiting_revision": "Quality check needs your decision",
+            "completed": "Configuration is ready",
+            "requires_review": "Draft requires your decision",
+            "failed": "Generation could not be completed",
+            "cancelled": "Generation cancelled"
+          },
+          "statusDescription": {
+            "drafting": "Preparing the Mentor behavior for the selected mode.",
+            "evaluating": "Checking whether the behavior is clear, complete, and consistent.",
+            "revising": "Applying the latest quality-check corrections.",
+            "awaiting_revision": "Review the findings before starting another generation attempt.",
+            "completed": "The draft passed the quality check.",
+            "requires_review": "The latest draft was kept so you can decide what to change.",
+            "failed": "Try again or configure the Mentor behavior manually.",
+            "cancelled": "No configuration changes were applied."
+          },
+          "attempt": "Draft {{attempt}} of {{maxAttempts}}",
+          "currentDraft": "Current draft",
+          "qualityCheckLabel": "Quality check",
+          "qualityDecisionTitle": "{{count}} improvements suggested",
+          "qualityDecisionDescription": "Review the suggestions or continue with this configuration.",
+          "suggestedImprovements": "Suggested improvements",
+          "applyImprovements": "Revise",
+          "useCurrentDraft": "Continue",
+          "reviewExactChanges": "What AI changed ({{count}})",
+          "reviewConfiguration": "Review configuration",
+          "showMoreFindings": "Show {{count}} more findings",
+          "showFewerFindings": "Show fewer findings",
+          "review": {
+            "currentDraftTitle": "Review the current draft",
+            "currentDraftDescription": "This draft still has quality suggestions. Review it before applying it.",
+            "requiresReviewTitle": "Review the generated configuration",
+            "requiresReviewDescription": "AI kept the latest draft so you can make the final decision."
+          },
+          "quality": {
+            "title": "Check quality with AI",
+            "resultTitle": "Quality check",
+            "description": "AI reviews the current unsaved configuration without changing it.",
+            "checking": "Checking the current configuration…",
+            "checkingDescription": "Reviewing the selected mode, guidance, constraints, and conversation behavior.",
+            "hasFindings": "Review the findings or let AI improve the configuration using this feedback.",
+            "passed": "No changes are required. You can continue editing or save the configuration.",
+            "improve": "Improve with AI"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Completion conditions",
           "configured": "Configured",
@@ -2389,6 +2927,7 @@
           "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
           "configureWithAi": "Configure with AI",
           "createWithAi": "Create with AI",
+          "aiMentorConfigurationRequiredTooltip": "Configure AI Mentor behavior before creating completion conditions with AI.",
           "improveWithAi": "Improve with AI",
           "checkQualityWithAi": "Check quality with AI",
           "checkingQuality": "Checking quality...",
@@ -3353,6 +3892,7 @@
         },
         "retakeModalTitle": "Are you sure you want to retake the lesson?",
         "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone.",
+        "retakeLoadingTitle": "Setting up your next attempt",
         "retakeAccessDenied": "You can retake this lesson only if you're enrolled in the course or you're the course author."
       }
     },
@@ -3452,6 +3992,7 @@
   },
   "settings": {
     "title": "Settings",
+    "supportModeNoAvailable": "No settings are available for this user while in support mode.",
     "buttons": {
       "cancel": "Cancel",
       "save": "Save"
@@ -3467,7 +4008,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Global settings not found"
+        "globalNotFound": "Global settings not found",
+        "userSettingsNotFound": "User settings not found"
       },
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
@@ -3507,6 +4049,17 @@
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
+      "courseListLayout": "Course list layout",
+      "courseListLayoutDescription": "How courses are displayed to all users on the platform",
+      "courseListLayoutClassic": "Classic",
+      "courseListLayoutModern": "Modern",
+      "courseListLayoutClassicDescription": "Traditional course grid layout",
+      "courseListLayoutModernDescription": "Hero section with featured courses",
+      "courseListLayoutPreview": {
+        "continueLearning": "Continue learning",
+        "topCourses": "Top 5 courses",
+        "availableCourses": "Available courses"
+      },
       "courseDiscussions": "Enable course discussions",
       "courseDiscussionsDescription": "Allow enrolled users to view and participate in course discussion threads",
       "calendar": "Enable calendar",
@@ -4008,6 +4561,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Choose asset visibility",
+      "description": "Choose the visibility for all {{count}} dropped assets.",
+      "privateInfo": "Private assets are visible only to you and administrators in the Asset Library, but remain available to students in lesson content."
+    },
     "uploadDisplayModeDialog": {
       "title": "Choose how to display this file",
       "description": "Select how \"{{name}}\" should appear for students.",
@@ -4071,6 +4629,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
@@ -4626,7 +5204,7 @@
     },
     "errors": {
       "generic": "Could not start support mode",
-      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "targetUserRequired": "Choose an active user from the selected organization",
       "invalidSession": "Support session is invalid"
     }
   },
@@ -4658,7 +5236,7 @@
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Enter as admin"
+        "impersonateUser": "Impersonate user"
       }
     },
     "activityTrend": {
@@ -4669,8 +5247,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "loading": "Loading admin users...",
-      "empty": "No active admin users found.",
+      "tabs": { "admins": "Admins", "allUsers": "All users" },
+      "loading": "Loading users...",
+      "emptyAdmins": "No active admin users found.",
+      "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
+      "emptyAllUsers": "No active users found.",
+      "searchAllUsers": "Search all users",
       "loadMore": "Load more users"
     },
     "status": {
@@ -4850,10 +5432,13 @@
       "before": "Before",
       "after": "After",
       "context": "Context",
+      "resourceName": "Resource name",
+      "resourceId": "Resource ID",
       "noMetadata": "No metadata available."
     },
     "fallbacks": {
       "unknown": "Unknown",
+      "nameUnavailable": "Name unavailable",
       "notAvailable": "n/a"
     },
     "labels": {
@@ -4915,6 +5500,7 @@
       "email": "Email",
       "action": "Action",
       "resource": "Resource",
+      "resourceName": "Resource name",
       "details": "Details",
       "showDetails": "Show details",
       "loading": "Loading activity logs...",
@@ -4983,7 +5569,7 @@
       "aboutCourse": "About this course",
       "description": "Description",
       "descriptionPlaceholder": "Enter course description...",
-      "whatYouWillMaster": "What you'll master",
+      "whatYouWillMaster": "What you'll learn",
       "noLearningOutcomes": "No learning outcomes added yet.",
       "learningOutcomePlaceholder": "Add a learning outcome...",
       "addLearningOutcome": "Add learning outcome",
@@ -5032,6 +5618,7 @@
       "daysLeft_other": "{{count}} days left",
       "certificate": "Certificate",
       "uponCompletion": "Upon completion",
+      "notIssuedYet": "Not issued yet",
       "aboutAuthor": "About author"
     },
     "certificate": {

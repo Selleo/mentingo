@@ -8,7 +8,10 @@ import type {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiJudgeScoreGuidance,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
+  aiMentorTeacherConfigurations,
   categories,
   chapters,
   courses,
@@ -183,6 +186,20 @@ export type QuestionAnswerOptionJsonbUpdate = Partial<
 
 export type AiMentorLessonSelect = InferSelectModel<typeof aiMentorLessons>;
 export type AiMentorLessonInsert = InferInsertModel<typeof aiMentorLessons>;
+export type AiMentorConfigurationSelect = InferSelectModel<typeof aiMentorConfigurations>;
+export type AiMentorConfigurationInsert = InferInsertModel<typeof aiMentorConfigurations>;
+export type AiMentorTeacherConfigurationSelect = InferSelectModel<
+  typeof aiMentorTeacherConfigurations
+>;
+export type AiMentorTeacherConfigurationInsert = InferInsertModel<
+  typeof aiMentorTeacherConfigurations
+>;
+export type AiMentorRoleplayConfigurationSelect = InferSelectModel<
+  typeof aiMentorRoleplayConfigurations
+>;
+export type AiMentorRoleplayConfigurationInsert = InferInsertModel<
+  typeof aiMentorRoleplayConfigurations
+>;
 
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
@@ -250,6 +267,9 @@ export type SourceSnapshot = {
   questions: Array<QuestionSelect>;
   options: Array<QuestionAnswerOptionSelect>;
   aiMentors: Array<AiMentorLessonSelect>;
+  aiMentorConfigurations: Array<AiMentorConfigurationSelect>;
+  aiMentorTeacherConfigurations: Array<AiMentorTeacherConfigurationSelect>;
+  aiMentorRoleplayConfigurations: Array<AiMentorRoleplayConfigurationSelect>;
   aiJudgeConfigurations: Array<AiJudgeConfigurationSelect>;
   aiJudgeCriteria: Array<AiJudgeCriterionSelect>;
   aiJudgeScoreGuidance: Array<AiJudgeScoreGuidanceSelect>;

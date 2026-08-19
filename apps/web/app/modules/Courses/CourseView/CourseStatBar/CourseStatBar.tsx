@@ -14,6 +14,7 @@ import { hasAllPermissions, hasPermission } from "~/common/permissions/permissio
 import { cn } from "~/lib/utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+import CourseCertificate from "../CourseCertificate";
 import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
 import AuthorModal from "./AuthorModal";
@@ -188,7 +189,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       {
         groups: groupDeadlines.map((group) => ({
           id: group.id,
-          isMandatory: group.isMandatory,
+          isMandatory: deadlineEnabledDraft ? true : group.isMandatory,
           dueDate:
             deadlineEnabledDraft && group.deadline ? new Date(group.deadline).toISOString() : null,
         })),
@@ -223,7 +224,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   return (
     <div
       className={cn(
-        "mb-4 grid gap-4 md:mb-6",
+        "grid gap-3 md:gap-4",
         getGridClassName({
           showAuthorCard,
           showCertificateCard,
@@ -248,13 +249,15 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         />
       )}
 
-      {showCertificateCard && (
+      {isAdminExperience && showCertificateCard && (
         <CertificateStatCard
           hasCertificate={hasCertificate}
           isAdminExperience={isAdminExperience}
           onOpen={openCertificateModal}
         />
       )}
+
+      {!isAdminExperience && <CourseCertificate courseId={course.id} />}
 
       {showAuthorCard && (
         <AuthorStatCard

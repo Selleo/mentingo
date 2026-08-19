@@ -1,12 +1,8 @@
-import {
-  AI_MENTOR_TTS_PRESET,
-  AI_MENTOR_TYPE,
-  AI_MENTOR_VOICE_MODE,
-  DEFAULT_AI_MENTOR_TYPE,
-} from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 import { z } from "zod";
 
 import { aiJudgeConfigurationSchema } from "../AiJudge/aiJudgeConfiguration.schema";
+import { aiMentorConfigurationSchema } from "../AiMentorConfiguration/aiMentorConfiguration.schema";
 import {
   MAX_AI_MENTOR_TEXT_LENGTH,
   MAX_MB_PER_FILE,
@@ -23,8 +19,12 @@ export const stripHtmlTags = (str: string): string => {
     .trim();
 };
 
-export const aiMentorLessonFormSchema = (t: TFunction) =>
-  z
+export const aiMentorLessonFormSchema = (t: TFunction, requireAiMentorConfiguration = false) => {
+  const mentorConfigurationField = requireAiMentorConfiguration
+    ? aiMentorConfigurationSchema(t)
+    : aiMentorConfigurationSchema(t).optional();
+
+  return z
     .object({
       title: z
         .string()
@@ -38,33 +38,8 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
           }),
         })
         .optional(),
-      aiMentorInstructions: z
-        .string()
-        .min(1, {
-          message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsRequired"),
-        })
-        .refine(
-          (val) => {
-            const textContent = stripHtmlTags(val);
-            return textContent.length > 0;
-          },
-          {
-            message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsRequired"),
-          },
-        )
-        .refine(
-          (val) => {
-            const textContent = stripHtmlTags(val);
-            return textContent.length <= 20_000;
-          },
-          {
-            message: t(
-              "adminCourseView.curriculum.lesson.validation.aiMentorInstructionsMaxLength",
-            ),
-          },
-        ),
+      aiMentorConfiguration: mentorConfigurationField,
       aiJudgeConfiguration: aiJudgeConfigurationSchema(t),
-      type: z.nativeEnum(AI_MENTOR_TYPE).default(DEFAULT_AI_MENTOR_TYPE),
       name: z.string(),
       voiceMode: z.nativeEnum(AI_MENTOR_VOICE_MODE).default(AI_MENTOR_VOICE_MODE.PRESET),
       ttsPreset: z.nativeEnum(AI_MENTOR_TTS_PRESET).default(AI_MENTOR_TTS_PRESET.MALE),
@@ -79,6 +54,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
         });
       }
     });
+};
 
 export const aiMentorLessonFileSchema = (t: TFunction) =>
   z.object({

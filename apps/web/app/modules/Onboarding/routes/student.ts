@@ -1,13 +1,17 @@
 import type i18next from "i18next";
 
-export const studentDashboardSteps = (t: typeof i18next.t) => [
+export const studentSettingsSteps = (t: typeof i18next.t) => [
   {
-    selector: "#client-statistics",
-    content: t("studentOnboarding.dashboard.clientStatistics"),
+    selector: "#settings-tabs",
+    content: t("studentOnboarding.settings.welcome"),
   },
   {
-    selector: "#daily-streak",
-    content: t("studentOnboarding.dashboard.dailyStreak"),
+    selector: "#change-language",
+    content: t("studentOnboarding.settings.language"),
+  },
+  {
+    selector: "#change-password",
+    content: t("studentOnboarding.settings.password"),
   },
 ];
 
@@ -26,21 +30,6 @@ export const studentAnnouncementsSteps = (t: typeof i18next.t) => [
   {
     selector: "#announcements",
     content: t("studentOnboarding.announcements.stayInformed"),
-  },
-];
-
-export const studentSettingsSteps = (t: typeof i18next.t) => [
-  {
-    selector: "#settings-tabs",
-    content: t("studentOnboarding.settings.welcome"),
-  },
-  {
-    selector: "#change-language",
-    content: t("studentOnboarding.settings.language"),
-  },
-  {
-    selector: "#change-password",
-    content: t("studentOnboarding.settings.password"),
   },
 ];
 

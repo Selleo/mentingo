@@ -1,5 +1,10 @@
 import { NotFoundException } from "@nestjs/common";
-import { AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS } from "@repo/shared";
+import {
+  AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS,
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TYPE,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { v5 as uuidv5 } from "uuid";
 
 import { AI_JUDGE_GENERATION_STATUS } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
@@ -28,11 +33,21 @@ const currentUser = {
   permissions: [],
   roleSlugs: [],
 };
+const lessonContext = {
+  aiMentorConfiguration: {
+    type: AI_MENTOR_TYPE.ROLEPLAY,
+    scenario: "A buyer challenges the price of the proposed solution.",
+    aiRole: "Skeptical buyer",
+    learnerRole: "Sales representative",
+    characterGoal: "Understand whether the proposal justifies its price.",
+    difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+  },
+} as const;
 const prepared = {
   workflowInput: {
     mode: "create",
-    language: "en",
-    lessonContext: { aiMentorType: "roleplay" },
+    language: SUPPORTED_LANGUAGES.EN,
+    lessonContext,
     brief: "Assess discovery skills.",
   },
   identities: { criteria: [], blockingErrors: [] },
@@ -42,7 +57,7 @@ const prepared = {
 const input = {
   courseId: "00000000-0000-4000-8000-000000000004",
   mode: "create",
-  lessonContext: { aiMentorType: "roleplay" },
+  lessonContext,
   brief: "Assess discovery skills.",
 } as const;
 const generatedConfiguration = {

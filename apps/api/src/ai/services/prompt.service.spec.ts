@@ -1,4 +1,4 @@
-import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES, type AiMentorType } from "@repo/shared";
 
 import { PromptService } from "src/ai/services/prompt.service";
 import { MESSAGE_ROLE } from "src/ai/utils/ai.type";
@@ -12,17 +12,29 @@ describe("PromptService learner-name personalization", () => {
   const threadId = "11111111-1111-4111-8111-111111111111";
   const userId = "22222222-2222-4222-8222-222222222222";
 
-  const createService = () => {
+  const createService = (type: AiMentorType = AI_MENTOR_TYPE.ROLEPLAY) => {
     const aiRepository = {
       findFirstMessageByRoleAndThread: jest.fn().mockResolvedValue(null),
       findLessonIdByThreadId: jest.fn().mockResolvedValue({ lessonId: "lesson-1" }),
       findThread: jest.fn().mockResolvedValue({ userLanguage: SUPPORTED_LANGUAGES.PL }),
       findMentorLessonByThreadId: jest.fn().mockResolvedValue({
         title: "Negocjacje",
-        instructions: "Odegraj wymagającego klienta.",
-        type: AI_MENTOR_TYPE.ROLEPLAY,
+        type,
         name: "Klient",
         learnerFirstName: "Maciej",
+        openingInstruction: null,
+        additionalInstructions: null,
+        taskGoal: null,
+        expertise: null,
+        contentScope: null,
+        teachingStyle: null,
+        feedbackGuidance: null,
+        scenario: "Rozmowa z wymagającym klientem.",
+        aiRole: "Klient",
+        learnerRole: "Sprzedawca",
+        characterGoal: "Uzyskaj lepsze warunki.",
+        difficulty: "realistic",
+        factsAndConstraints: null,
       }),
       findGroupsByThreadId: jest.fn().mockResolvedValue([]),
       insertMessage: jest.fn().mockResolvedValue([]),
@@ -70,7 +82,9 @@ describe("PromptService learner-name personalization", () => {
       expect.objectContaining({
         lessonTitle: "Negocjacje",
         name: "Klient",
-        lessonInstructions: "Odegraj wymagającego klienta.",
+        scenario: "Rozmowa z wymagającym klientem.",
+        aiRole: "Klient",
+        learnerRole: "Sprzedawca",
       }),
     );
     expect(prompt).toBe("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES");
@@ -106,7 +120,13 @@ describe("PromptService learner-name personalization", () => {
     const { service } = createService();
     jest.spyOn(service, "loadPrompt").mockResolvedValue("VOICE_MENTOR_ADDON");
 
-    const prompt = await service.buildPrompt(threadId, "New learner message", true, undefined, true);
+    const prompt = await service.buildPrompt(
+      threadId,
+      "New learner message",
+      true,
+      undefined,
+      true,
+    );
 
     expect(prompt).toEqual(
       expect.arrayContaining([
@@ -139,30 +159,46 @@ describe("PromptService learner-name personalization", () => {
       }
     });
 
-    const prompt = await service.buildPrompt(
-      threadId,
-      "Slow answer",
-      true,
-      undefined,
-      false,
-      {
-        elapsedMs: 5400,
-        speechMs: 4200,
-        pauseCount: 2,
-        longestPauseMs: 700,
-        averagePauseMs: 350,
-        segmentCount: 3,
-        wordCount: 14,
-        wordsPerMinute: 200,
-        timingPrecision: "word",
-      },
-    );
+    const prompt = await service.buildPrompt(threadId, "Slow answer", true, undefined, false, {
+      elapsedMs: 5400,
+      speechMs: 4200,
+      pauseCount: 2,
+      longestPauseMs: 700,
+      averagePauseMs: 350,
+      segmentCount: 3,
+      wordCount: 14,
+      wordsPerMinute: 200,
+      timingPrecision: "word",
+    });
 
     expect(prompt).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ content: "VOICE_MENTOR_ADDON" }),
         expect.objectContaining({ content: "VOICE_MENTOR_TIMING_ADDON" }),
       ]),
+    );
+  });
+
+  it("forces the roleplay prompt when a practice thread requests it", async () => {
+    const { service } = createService(AI_MENTOR_TYPE.TEACHER);
+    const loadPrompt = jest.spyOn(service, "loadPrompt").mockImplementation(async (id) => {
+      switch (id) {
+        case "securityAndRagBlock":
+          return "SECURITY";
+        case "learnerNameAddon":
+          return "LEARNER_NAME_RULES";
+        case "roleplayPrompt":
+          return "ROLEPLAY_PROMPT";
+        default:
+          throw new Error(`Unexpected prompt: ${id}`);
+      }
+    });
+
+    await service.setSystemPrompt({ threadId, userId }, AI_MENTOR_TYPE.ROLEPLAY);
+
+    expect(loadPrompt).toHaveBeenCalledWith(
+      "roleplayPrompt",
+      expect.objectContaining({ scenario: "Rozmowa z wymagającym klientem." }),
     );
   });
 });

@@ -1,10 +1,5 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
-import type {
-  AiMentorTTSPreset,
-  AiMentorType,
-  AiMentorVoiceMode,
-  SupportedLanguages,
-} from "@repo/shared";
+import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
   CURRICULUM: "Curriculum",
@@ -20,8 +15,6 @@ export type NavigationTab = EditCourseTab;
 type AiMentor = {
   id: string;
   lessonId: string;
-  aiMentorInstructions: string;
-  type: AiMentorType;
   name: string;
   voiceMode: AiMentorVoiceMode;
   ttsPreset: AiMentorTTSPreset;

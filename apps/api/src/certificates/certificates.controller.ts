@@ -4,7 +4,14 @@ import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDSchema,
+  UUIDType,
+} from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -19,6 +26,7 @@ import {
   certificateResetUsersSchema,
   certificateValidityImpactResponseSchema,
   certificateValidityImpactSchema,
+  certificateDashboardSummarySchema,
   certificateShareLinkResponseSchema,
   createCertificateShareLinkSchema,
   downloadCertificateSchema,
@@ -39,6 +47,7 @@ import type {
   CertificateResetOptionsResponse,
   CertificateResetUsersResponse,
   CertificateValidityImpactResponse,
+  CertificateDashboardSummary,
   CertificateShareLinkResponse,
   ResetCourseCertificatesResponse,
   SingleCertificateResponse,
@@ -74,6 +83,45 @@ export class CertificatesController {
       perPage,
       language,
       sort: sort as "createdAt",
+    });
+    return new PaginatedResponse(data);
+  }
+
+  @Get("dashboard-summary")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
+  @Validate({
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    response: baseResponse(certificateDashboardSummarySchema),
+  })
+  async getDashboardSummary(
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CertificateDashboardSummary>> {
+    return new BaseResponse(await this.certificatesService.getDashboardSummary(userId, language));
+  }
+
+  @Get("dashboard")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
+  @Validate({
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+    ],
+    response: paginatedResponse(allCertificatesSchema),
+  })
+  async getDashboardCertificates(
+    @Query("language") language: SupportedLanguages,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<PaginatedResponse<AllCertificatesResponse>> {
+    const data = await this.certificatesService.getAllCertificates({
+      userId,
+      page,
+      perPage,
+      language,
+      sort: "createdAt",
     });
     return new PaginatedResponse(data);
   }

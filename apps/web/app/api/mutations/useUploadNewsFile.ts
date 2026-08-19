@@ -4,7 +4,7 @@ import { ApiClient } from "../api-client";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
 import { queryClient } from "../queryClient";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { EditableResourceVisibility, SupportedLanguages } from "@repo/shared";
 
 type UploadNewsFileOptions = {
   id: string;
@@ -12,16 +12,25 @@ type UploadNewsFileOptions = {
   language: SupportedLanguages;
   title: string;
   description: string;
+  visibility?: EditableResourceVisibility;
 };
 
 export function useUploadNewsFile() {
   return useMutation({
-    mutationFn: async ({ id, file, language, title, description }: UploadNewsFileOptions) => {
+    mutationFn: async ({
+      id,
+      file,
+      language,
+      title,
+      description,
+      visibility,
+    }: UploadNewsFileOptions) => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("language", language);
       formData.append("title", title);
       formData.append("description", description);
+      if (visibility) formData.append("visibility", visibility);
 
       const response = await ApiClient.api.newsControllerUploadFileToNews(
         id,
@@ -30,6 +39,7 @@ export function useUploadNewsFile() {
           language: SupportedLanguages;
           title: string;
           description: string;
+          visibility?: EditableResourceVisibility;
         },
         {
           headers: { "Content-Type": "multipart/form-data" },

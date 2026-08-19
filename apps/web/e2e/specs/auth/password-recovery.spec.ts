@@ -81,7 +81,7 @@ test("visitor can reset a password from the recovery email", async ({
     await expect(page).toHaveURL("/auth/login");
 
     await login(page, email, UPDATED_PASSWORD);
-    await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/dashboard");
 
     await logout(page);
     await expect(page).toHaveURL("/auth/login");

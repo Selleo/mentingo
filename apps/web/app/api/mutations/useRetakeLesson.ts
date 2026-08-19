@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
@@ -29,7 +30,7 @@ export const useRetakeLesson = (lessonId: string, courseId: string) => {
       await queryClient.invalidateQueries({
         queryKey: ["threadMessages", { lessonId }],
       });
-      await queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+      await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId) });
     },
   });
 };

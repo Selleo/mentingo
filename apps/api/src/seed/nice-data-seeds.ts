@@ -104,7 +104,7 @@ export const niceCourses: NiceCourseData[] = [
           {
             type: LESSON_TYPES.AI_MENTOR,
             title: "HTML Basics",
-            aiMentorInstructions:
+            additionalInstructions:
               "Guide the learner through the basics of HTML structure, including elements, tags, and their roles in building a web page. Encourage questions and provide examples for each concept.",
             aiJudgeConfiguration: {
               taskGoal:

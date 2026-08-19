@@ -26,15 +26,17 @@ export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
 type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
   chapter: Chapter;
+  isLastChapter?: boolean;
 };
 
-export const CourseChapter = ({ chapter }: CourseChapterProps) => {
+export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterProps) => {
   const { t } = useTranslation();
   const { id: courseSlug } = useParams();
   const { data: currentUser } = useCurrentUser();
   const {
     course: { enrolled, priceInCents },
     isCourseStudentModeActive,
+    isEffectiveStudentExperience,
     isPreviewMode,
   } = useCourseAccessProvider();
   const isPaidCourse = priceInCents !== 0;
@@ -71,7 +73,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
 
     return (
       <span
-        key={index}
+        key={`${chapter.id}-progress-${index}`}
         className={cn("h-1 w-full rounded-lg", {
           "bg-secondary-100":
             typeof chapter?.completedLessonCount === "number" &&
@@ -112,7 +114,9 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
           <ChapterCounter
             chapterProgress={chapter.chapterProgress}
             displayOrder={chapter.displayOrder}
+            isLastChapter={isLastChapter}
             isPreviewMode={isPreviewMode}
+            showProgressIcons={isEffectiveStudentExperience && enrolled}
           />
           <div className="flex w-full flex-col">
             <AccordionTrigger
@@ -168,9 +172,8 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                     (hasCourseLearningAccess && lessonWithPublicAccess.hasAccess);
 
                   return canOpenLesson ? (
-                    <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
+                    <Link key={lesson.id} to={`/course/${courseSlug}/lesson/${lesson.id}`}>
                       <CourseChapterLesson
-                        key={lesson.id}
                         lesson={lessonWithPublicAccess}
                         allowPreviewAccess={!isPublicVisitor}
                       />

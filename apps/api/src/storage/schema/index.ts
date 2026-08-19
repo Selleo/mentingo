@@ -29,11 +29,17 @@ import {
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TEACHING_STYLE,
+  AI_MENTOR_TYPE,
+  RESOURCE_VISIBILITY,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
+  date,
   index,
   integer,
   jsonb,
@@ -113,8 +119,13 @@ import type {
   OutlookEventAvailability,
   OutlookEventSensitivity,
   AnnouncementAudience,
+  AiMentorRoleplayDifficulty,
+  AiMentorTeachingStyle,
+  AiMentorType,
+  ResourceVisibility,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
+import type { AiMentorPracticeStatus } from "src/ai/ai-practice.types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -928,19 +939,101 @@ export const aiMentorLessons = pgTable(
     lessonId: uuid("lesson_id")
       .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
-    aiMentorInstructions: jsonb("ai_mentor_instructions")
-      .$type<LocalizedText>()
-      .default({})
-      .notNull(),
     name: jsonb("name").$type<LocalizedText>().default({}).notNull(),
     avatarReference: varchar("avatar_reference", { length: 500 }),
-    type: text("type").notNull().default("roleplay"),
     voiceMode: text("voice_mode").notNull().default("preset"),
     ttsPreset: text("tts_preset").notNull().default("male"),
     customTtsReference: jsonb("custom_tts_reference"),
     tenantId,
   },
   withTenantIdIndex("ai_mentor_lessons"),
+);
+
+export const structuredAiMentorTypeEnum = pgEnum(
+  "structured_ai_mentor_type",
+  Object.values(AI_MENTOR_TYPE) as [string, ...string[]],
+);
+export const aiMentorTeachingStyleEnum = pgEnum(
+  "ai_mentor_teaching_style",
+  Object.values(AI_MENTOR_TEACHING_STYLE) as [string, ...string[]],
+);
+export const aiMentorRoleplayDifficultyEnum = pgEnum(
+  "ai_mentor_roleplay_difficulty",
+  Object.values(AI_MENTOR_ROLEPLAY_DIFFICULTY) as [string, ...string[]],
+);
+
+export const aiMentorConfigurations = pgTable(
+  "ai_mentor_configurations",
+  {
+    ...id,
+    ...timestamps,
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
+    type: structuredAiMentorTypeEnum("type").$type<AiMentorType>().notNull(),
+    openingInstruction: jsonb("opening_instruction").$type<LocalizedText>(),
+    additionalInstructions: jsonb("additional_instructions").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_configurations", (table) => ({
+    lessonUniqueIdx: uniqueIndex("ai_mentor_configurations_lesson_unique_idx").on(
+      table.aiMentorLessonId,
+    ),
+    practiceSessionUniqueIdx: uniqueIndex(
+      "ai_mentor_configurations_practice_session_unique_idx",
+    ).on(table.practiceSessionId),
+    sourceCheck: check(
+      "ai_mentor_configurations_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
+);
+
+export const aiMentorTeacherConfigurations = pgTable(
+  "ai_mentor_teacher_configurations",
+  {
+    ...id,
+    ...timestamps,
+    configurationId: uuid("configuration_id")
+      .references(() => aiMentorConfigurations.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    taskGoal: jsonb("task_goal").$type<LocalizedText>().default({}).notNull(),
+    expertise: jsonb("expertise").$type<LocalizedText>().default({}).notNull(),
+    contentScope: jsonb("content_scope").$type<LocalizedText>().default({}).notNull(),
+    teachingStyle: aiMentorTeachingStyleEnum("teaching_style")
+      .$type<AiMentorTeachingStyle>()
+      .notNull(),
+    feedbackGuidance: jsonb("feedback_guidance").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_teacher_configurations"),
+);
+
+export const aiMentorRoleplayConfigurations = pgTable(
+  "ai_mentor_roleplay_configurations",
+  {
+    ...id,
+    ...timestamps,
+    configurationId: uuid("configuration_id")
+      .references(() => aiMentorConfigurations.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    scenario: jsonb("scenario").$type<LocalizedText>().default({}).notNull(),
+    aiRole: jsonb("ai_role").$type<LocalizedText>().default({}).notNull(),
+    learnerRole: jsonb("learner_role").$type<LocalizedText>().default({}).notNull(),
+    characterGoal: jsonb("character_goal").$type<LocalizedText>().default({}).notNull(),
+    difficulty: aiMentorRoleplayDifficultyEnum("difficulty")
+      .$type<AiMentorRoleplayDifficulty>()
+      .notNull(),
+    factsAndConstraints: jsonb("facts_and_constraints").$type<LocalizedText>(),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_roleplay_configurations"),
 );
 
 export const aiMentorThreads = pgTable(
@@ -951,14 +1044,56 @@ export const aiMentorThreads = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    aiMentorLessonId: uuid("ai_mentor_lesson_id")
-      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-      .notNull(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
     status: varchar("status", { length: 20 }).notNull().default("active"),
     userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
     tenantId,
   },
-  withTenantIdIndex("ai_mentor_threads"),
+  withTenantIdIndex("ai_mentor_threads", (table) => ({
+    practiceSessionUniqueIdx: uniqueIndex("ai_mentor_threads_practice_session_unique_idx").on(
+      table.practiceSessionId,
+    ),
+    sourceCheck: check(
+      "ai_mentor_threads_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
+);
+
+export const aiMentorPracticeSessions = pgTable(
+  "ai_mentor_practice_sessions",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    practiceDate: date("practice_date", { mode: "string" }).notNull(),
+    language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
+    title: text("title"),
+    aiMentorName: text("ai_mentor_name"),
+    scenario: text("scenario").notNull(),
+    status: varchar("status", { length: 20 })
+      .$type<AiMentorPracticeStatus>()
+      .notNull()
+      .default("queued"),
+    errorCode: text("error_code"),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_practice_sessions", (table) => ({
+    dailyUniqueIdx: uniqueIndex("ai_mentor_practice_sessions_daily_unique_idx").on(
+      table.tenantId,
+      table.userId,
+      table.practiceDate,
+    ),
+    statusIdx: index("ai_mentor_practice_sessions_status_idx").on(table.tenantId, table.status),
+  })),
 );
 
 export const aiMentorThreadMessages = pgTable(
@@ -983,15 +1118,29 @@ export const aiJudgeConfigurations = pgTable(
   {
     ...id,
     ...timestamps,
-    aiMentorLessonId: uuid("ai_mentor_lesson_id")
-      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-      .notNull()
-      .unique(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id").references(() => aiMentorLessons.id, {
+      onDelete: "cascade",
+    }),
+    practiceSessionId: uuid("practice_session_id").references(
+      (): AnyPgColumn => aiMentorPracticeSessions.id,
+      { onDelete: "cascade" },
+    ),
     taskGoal: jsonb("task_goal").$type<LocalizedText>().default({}).notNull(),
     passingThresholdPercent: integer("passing_threshold_percent").notNull(),
     tenantId,
   },
-  withTenantIdIndex("ai_judge_configurations"),
+  withTenantIdIndex("ai_judge_configurations", (table) => ({
+    lessonUniqueIdx: uniqueIndex("ai_judge_configurations_lesson_unique_idx").on(
+      table.aiMentorLessonId,
+    ),
+    practiceSessionUniqueIdx: uniqueIndex("ai_judge_configurations_practice_session_unique_idx").on(
+      table.practiceSessionId,
+    ),
+    sourceCheck: check(
+      "ai_judge_configurations_exactly_one_source_check",
+      sql`(${table.aiMentorLessonId} IS NOT NULL) <> (${table.practiceSessionId} IS NOT NULL)`,
+    ),
+  })),
 );
 
 export const aiJudgeCriteria = pgTable(
@@ -1307,6 +1456,11 @@ export const studentCourses = pgTable(
     status: varchar("status").notNull().default("enrolled"), // enrolled/not_enrolled
     paymentId: varchar("payment_id", { length: 50 }),
     enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
+    lastOpenedAt: timestamp("last_opened_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
     tenantId,
   },
   withTenantIdIndex("student_courses", (table) => ({
@@ -1815,6 +1969,28 @@ export const certificates = pgTable(
   })),
 );
 
+export const todoTasks = pgTable(
+  "todo_tasks",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    title: varchar("title", { length: 200 }).notNull(),
+    position: integer("position").notNull().default(0),
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("todo_tasks", (table) => ({
+    userPositionIdx: index("todo_tasks_user_position_idx").on(
+      table.userId,
+      table.completedAt,
+      table.position,
+    ),
+  })),
+);
+
 export const announcements = pgTable(
   "announcements",
   {
@@ -2186,6 +2362,10 @@ export const resources = pgTable(
     contentType: varchar("content_type", { length: 100 }).notNull(),
     metadata: jsonb("metadata").$type<ResourceMetadata>().default({}),
     uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+    visibility: varchar("visibility", { length: 20 })
+      .$type<ResourceVisibility>()
+      .notNull()
+      .default(RESOURCE_VISIBILITY.PUBLIC),
     archived,
     tenantId,
   },

@@ -54,7 +54,7 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs, TabsContent } from "~/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
@@ -240,17 +240,6 @@ const EditCourse = () => {
     }
   }, [language, courseLanguage, course, isFetching]);
 
-  const handleTabChange = useCallback(
-    (tabValue: NavigationTab) => {
-      setSearchParams((prevParams) => {
-        const nextParams = new URLSearchParams(prevParams);
-        nextParams.set("tab", tabValue);
-        return nextParams;
-      });
-    },
-    [setSearchParams],
-  );
-
   const handleGenerate = useCallback(async () => {
     await generateTranslations({ courseId: id, language: courseLanguage });
     setOpenGenerateTranslationModal(false);
@@ -309,7 +298,7 @@ const EditCourse = () => {
       ? EDIT_COURSE_TABS.STATUS
       : EDIT_COURSE_TABS.CURRICULUM;
 
-  const { visibleCourseTabs, activeTab } = useMemo(() => {
+  const { activeTab } = useMemo(() => {
     const canShowPricingTab = Boolean(isStripeConfigured?.enabled);
 
     const visibleCourseTabs = (
@@ -388,7 +377,7 @@ const EditCourse = () => {
     <PageWrapper breadcrumbs={breadcrumbs} className="relative">
       <Tabs
         data-testid={EDIT_COURSE_PAGE_HANDLES.PAGE}
-        value={activeTab}
+        value={EDIT_COURSE_TABS.CURRICULUM}
         className="flex h-full flex-col gap-y-4"
       >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
@@ -553,18 +542,6 @@ const EditCourse = () => {
               </Button>
             </div>
           </div>
-          <TabsList className="w-min">
-            {visibleCourseTabs.map(({ label, value }) => (
-              <TabsTrigger
-                key={value}
-                data-testid={EDIT_COURSE_PAGE_HANDLES.tab(value)}
-                value={value}
-                onClick={() => handleTabChange(value)}
-              >
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
         </div>
         {isDuplicationLocked && (
           <Alert variant={duplicationNotice.variant}>
@@ -619,7 +596,7 @@ const EditCourse = () => {
           />
         </TabsContent>
         <TabsContent value={EDIT_COURSE_TABS.ENROLLED}>
-          <CourseEnrolled language={courseLanguage} />
+          <CourseEnrolled language={language} />
         </TabsContent>
         <TabsContent value={EDIT_COURSE_TABS.EXPORTS}>
           <CourseSharingTabContent

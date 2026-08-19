@@ -25,10 +25,31 @@ test("admin can toggle course settings switches", async ({
 
     await openCourseOverviewFlow(page, course.id);
     await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON).click();
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER).waitFor();
+    const settingsDrawer = page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER);
+    await settingsDrawer.waitFor();
 
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH).click();
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH).click();
+    const lessonSequenceSwitch = settingsDrawer.getByTestId(
+      COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH,
+    );
+    const quizFeedbackSwitch = settingsDrawer.getByTestId(
+      COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH,
+    );
+    await expect(lessonSequenceSwitch).toBeVisible();
+    await expect(quizFeedbackSwitch).toBeVisible();
+    await expect(lessonSequenceSwitch).toBeEnabled();
+    await expect(quizFeedbackSwitch).toBeEnabled();
+
+    await lessonSequenceSwitch.click();
+
+    await expect
+      .poll(async () => {
+        const settings = await courseFactory.getSettings(course.id);
+        return settings.lessonSequenceEnabled;
+      })
+      .toBe(true);
+
+    await expect(quizFeedbackSwitch).toBeEnabled();
+    await quizFeedbackSwitch.click();
 
     await expect
       .poll(async () => {

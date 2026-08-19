@@ -69,8 +69,8 @@ vi.mock("../CourseAdminStatistics/CourseAdminStatistics", () => ({
   CourseAdminStatistics: () => <div>Course statistics content</div>,
 }));
 
-vi.mock("./ChapterList", () => ({
-  default: () => <div>Course chapters content</div>,
+vi.mock("~/modules/Courses/CourseView/components/ChapterListOverview", () => ({
+  ChapterListOverview: () => <div>Course chapters content</div>,
 }));
 
 describe("TableOfContent", () => {

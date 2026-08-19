@@ -21,6 +21,7 @@ import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 type CourseOverviewActionsProps = {
   isTogglingLearningMode: boolean;
   onContinueLearning: () => void;
+  onEnrollmentCompleted: () => void;
   onOpenDetails: () => void;
   onToggleLearningMode: () => void;
 };
@@ -28,6 +29,7 @@ type CourseOverviewActionsProps = {
 export default function CourseOverviewActions({
   isTogglingLearningMode,
   onContinueLearning,
+  onEnrollmentCompleted,
   onOpenDetails,
   onToggleLearningMode,
 }: CourseOverviewActionsProps) {
@@ -49,6 +51,7 @@ export default function CourseOverviewActions({
       queryClient.invalidateQueries(availableCoursesQueryOptions({ language })),
       queryClient.invalidateQueries(studentCoursesQueryOptions({ language })),
     ]);
+    onEnrollmentCompleted();
   };
 
   const renderPrimaryAction = () => {

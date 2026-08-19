@@ -2,10 +2,11 @@ import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
-import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
+import { match } from "ts-pattern";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { MessageService } from "src/ai/services/message.service";
@@ -171,7 +172,7 @@ export class PromptService implements OnModuleInit {
 
     const { chunks: context } = await observe(
       async () => {
-        return this.ragService.getContext(contextInfo, lessonId);
+        return lessonId ? this.ragService.getContext(contextInfo, lessonId) : { chunks: [] };
       },
       { name: "RAG", asType: "retriever" },
     )();
@@ -188,16 +189,19 @@ export class PromptService implements OnModuleInit {
     return ["word", "segment", "boundary_estimate"].includes(value) ? value : "unknown";
   }
 
-  async setSystemPrompt(data: ThreadOwnershipBody) {
+  async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {
     const { userLanguage } = await this.aiRepository.findThread([
       eq(aiMentorThreads.id, data.threadId),
     ]);
 
     const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId, userLanguage);
 
-    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
+    if (!lesson) {
+      throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+    }
 
-    const mode = (lesson.type ?? DEFAULT_AI_MENTOR_TYPE).toLowerCase();
+    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
+    const mode = mentorType ?? lesson.type;
 
     const securityAndRagBlock = await this.loadPrompt("securityAndRagBlock", {
       language: userLanguage,
@@ -208,27 +212,47 @@ export class PromptService implements OnModuleInit {
       language: userLanguage,
     });
 
-    let promptChoice;
-
-    switch (mode) {
-      case "teacher":
-        promptChoice = promptTemplates.teacherPrompt.id;
-        break;
-      case "roleplay":
-        promptChoice = promptTemplates.roleplayPrompt.id;
-        break;
-      case "mentor":
-      default:
-        promptChoice = promptTemplates.mentorPrompt.id;
-    }
-
-    const mentorPrompt = await this.loadPrompt(promptChoice, {
+    const commonPromptVariables = {
       lessonTitle: lesson.title,
+      language: userLanguage,
       name: lesson.name,
-      lessonInstructions: lesson.instructions,
+      openingInstruction: lesson.openingInstruction ?? "",
+      additionalInstructions: lesson.additionalInstructions ?? "",
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
-      securityAndRagBlock: securityAndRagBlock,
-    });
+      securityAndRagBlock,
+    };
+
+    const mentorPrompt = await match(mode)
+      .with(AI_MENTOR_TYPE.TEACHER, async () => {
+        if (!lesson.teachingStyle)
+          throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+
+        return this.loadPrompt("teacherPrompt", {
+          ...commonPromptVariables,
+          taskGoal: lesson.taskGoal,
+          expertise: lesson.expertise,
+          contentScope: lesson.contentScope,
+          teachingStyle: lesson.teachingStyle,
+          feedbackGuidance: lesson.feedbackGuidance ?? "",
+        });
+      })
+      .with(AI_MENTOR_TYPE.ROLEPLAY, async () => {
+        if (!lesson.difficulty)
+          throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+
+        return this.loadPrompt("roleplayPrompt", {
+          ...commonPromptVariables,
+          scenario: lesson.scenario,
+          aiRole: lesson.aiRole,
+          learnerRole: lesson.learnerRole,
+          characterGoal: lesson.characterGoal,
+          difficulty: lesson.difficulty,
+          factsAndConstraints: lesson.factsAndConstraints ?? "",
+        });
+      })
+      .otherwise(() => {
+        throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+      });
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
 

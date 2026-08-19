@@ -19,10 +19,23 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 
 import type {
   CourseStudentsStatsByMonth,
+  DashboardDeadlineRiskCourse,
+  DashboardDeadlineRiskCourseSummary,
+  DashboardDeadlineRiskGroup,
+  DashboardDeadlineRiskSummary,
+  DashboardDeadlineRiskType,
+  DashboardIncompleteCourses,
+  DashboardTrainingCompletion,
   StatsByMonth,
   UserStats,
 } from "./schemas/userStats.schema";
-import type { SupportedLanguages } from "@repo/shared";
+import type {
+  DashboardDeadlineRiskType as SharedDashboardDeadlineRiskType,
+  DashboardDeadlineRiskGroupSortField,
+  DashboardDeadlineRiskSortDirection,
+  DashboardDeadlineRiskUrgencyOrder,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -98,6 +111,156 @@ export class StatisticsService {
         answerCount: avgQuizScore.correctAnswersCount + avgQuizScore.wrongAnswersCount,
       },
     };
+  }
+
+  async getDashboardTrainingCompletion(
+    currentUser: CurrentUserType,
+  ): Promise<DashboardTrainingCompletion> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const trainingCompletion =
+      await this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId);
+    const total = trainingCompletion?.total ?? 0;
+    const completed = trainingCompletion?.completed ?? 0;
+
+    return {
+      completed,
+      inProgress: trainingCompletion?.inProgress ?? 0,
+      notStarted: trainingCompletion?.notStarted ?? 0,
+      total,
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+    };
+  }
+
+  async getDashboardDeadlineRiskSummary(
+    currentUser: CurrentUserType,
+  ): Promise<DashboardDeadlineRiskSummary> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const deadlineRisks =
+      await this.statisticsRepository.getDashboardDeadlineRiskCounts(ownerUserId);
+
+    return {
+      overdueCount: deadlineRisks?.overdueCount ?? 0,
+      dueSoonCount: deadlineRisks?.dueSoonCount ?? 0,
+    };
+  }
+
+  async getDashboardIncompleteCourses(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+  ): Promise<DashboardIncompleteCourses> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const [courses, trainingCompletion] = await Promise.all([
+      this.statisticsRepository.getDashboardIncompleteCourses(ownerUserId, language),
+      this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId),
+    ]);
+
+    return {
+      hasEnrollments: (trainingCompletion?.total ?? 0) > 0,
+      courses,
+    };
+  }
+
+  async getDashboardDeadlineRisks(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+    riskType: DashboardDeadlineRiskType,
+    page: number,
+    perPage: number,
+  ) {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { rows, totalItems } = await this.statisticsRepository.getDashboardDeadlineRisks(
+      ownerUserId,
+      language,
+      riskType,
+      page,
+      perPage,
+    );
+    const courses = new Map<string, DashboardDeadlineRiskCourse>();
+
+    for (const row of rows) {
+      const course = courses.get(row.courseId) ?? {
+        id: row.courseId,
+        title: row.courseTitle,
+        students: [],
+      };
+      course.students.push({
+        id: row.studentId,
+        name: row.studentName,
+        dueDate: row.dueDate,
+      });
+      courses.set(row.courseId, course);
+    }
+
+    return {
+      data: [...courses.values()],
+      pagination: { totalItems, page, perPage },
+    };
+  }
+
+  async getDashboardDeadlineRiskCourseSummaries(
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+    urgencyOrder: DashboardDeadlineRiskUrgencyOrder,
+    page: number,
+    perPage: number,
+  ): Promise<{
+    data: DashboardDeadlineRiskCourseSummary[];
+    pagination: { totalItems: number; page: number; perPage: number };
+  }> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { data, totalItems } =
+      await this.statisticsRepository.getDashboardDeadlineRiskCourseSummaries(
+        ownerUserId,
+        language,
+        urgencyOrder,
+        page,
+        perPage,
+      );
+    const coursesWithThumbnails = await Promise.all(
+      data.map(async ({ thumbnailUrl, ...course }) => ({
+        ...course,
+        thumbnailUrl: thumbnailUrl
+          ? await this.fileService.getFileUrl(thumbnailUrl, { quality: IMAGE_QUALITY.SM })
+          : null,
+      })),
+    );
+
+    return { data: coursesWithThumbnails, pagination: { totalItems, page, perPage } };
+  }
+
+  async getDashboardDeadlineRiskGroups(
+    currentUser: CurrentUserType,
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    urgency: SharedDashboardDeadlineRiskType | undefined,
+    search: string | undefined,
+    sortBy: DashboardDeadlineRiskGroupSortField,
+    sortDirection: DashboardDeadlineRiskSortDirection,
+    page: number,
+    perPage: number,
+  ): Promise<{
+    data: DashboardDeadlineRiskGroup[];
+    pagination: { totalItems: number; page: number; perPage: number };
+  }> {
+    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { data, totalItems } = await this.statisticsRepository.getDashboardDeadlineRiskGroups(
+      ownerUserId,
+      courseId,
+      language,
+      urgency,
+      search?.trim() || undefined,
+      sortBy,
+      sortDirection,
+      page,
+      perPage,
+    );
+    return { data, pagination: { totalItems, page, perPage } };
+  }
+
+  private getDashboardOwnerUserId(currentUser: CurrentUserType): UUIDType | undefined {
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)
+      ? undefined
+      : currentUser.userId;
   }
 
   async getAdminStats() {

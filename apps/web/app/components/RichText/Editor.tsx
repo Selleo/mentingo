@@ -1,10 +1,28 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, detectVideoProviderFromUrl } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  RESOURCE_VISIBILITY,
+  detectVideoProviderFromUrl,
+  type EditableResourceVisibility,
+} from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { Lock, Unlock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { extractUrlFromClipboard } from "./extensions/utils/video";
@@ -26,7 +44,12 @@ type RichTextEditorVariant =
 type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
-  onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
+  onBlur?: (editor: TiptapEditor | null) => void;
+  onUpload?: (
+    file?: File,
+    editor?: TiptapEditor | null,
+    visibility?: EditableResourceVisibility,
+  ) => Promise<void>;
   onCtrlSave?: (editor: TiptapEditor | null) => void;
   uploadProgress?: number | null;
   placeholder?: string;
@@ -60,6 +83,7 @@ const Editor = ({
   placeholder,
   ariaLabel,
   onChange,
+  onBlur,
   onUpload,
   onCtrlSave,
   id,
@@ -71,10 +95,32 @@ const Editor = ({
   assetLibrary,
   variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
 }: EditorProps) => {
+  const { t } = useTranslation();
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
+  const [pendingDrop, setPendingDrop] = useState<{ files: File[]; position: number } | null>(null);
+  const [dropVisibility, setDropVisibility] = useState<EditableResourceVisibility>(
+    RESOURCE_VISIBILITY.PUBLIC,
+  );
 
   const extensions = useMemo(() => getEditorExtensions(variant), [variant]);
+
+  const uploadDroppedFiles = useCallback(
+    async (visibility: EditableResourceVisibility) => {
+      if (!pendingDrop || !onUpload) return;
+
+      const activeEditor = editorRef.current;
+      setPendingDrop(null);
+
+      for (const file of pendingDrop.files) {
+        activeEditor?.commands.setTextSelection(pendingDrop.position);
+        activeEditor?.commands.focus();
+        await onUpload(file, activeEditor, visibility);
+        activeEditor?.commands.focus();
+      }
+    },
+    [onUpload, pendingDrop],
+  );
 
   const handleDrop = useCallback(
     async (event: DragEvent) => {
@@ -85,24 +131,12 @@ const Editor = ({
 
       event.preventDefault();
 
-      for (const file of files) {
-        const coordinates = activeEditor?.view.posAtCoords({
-          left: event.clientX,
-          top: event.clientY,
-        });
-
-        if (coordinates) {
-          activeEditor?.commands.setTextSelection(coordinates.pos);
-        } else {
-          activeEditor?.commands.setTextSelection(0);
-        }
-
-        activeEditor?.commands.focus();
-
-        await onUpload(file, activeEditor);
-
-        activeEditor?.commands.focus();
-      }
+      const coordinates = activeEditor?.view.posAtCoords({
+        left: event.clientX,
+        top: event.clientY,
+      });
+      setDropVisibility(RESOURCE_VISIBILITY.PUBLIC);
+      setPendingDrop({ files, position: coordinates?.pos ?? 0 });
       return true;
     },
     [allowFiles, onUpload],
@@ -170,6 +204,7 @@ const Editor = ({
       lastEmittedContentRef.current = nextContent;
       onChange(nextContent);
     },
+    onBlur: ({ editor }) => onBlur?.(editor),
     onDrop: handleDrop,
     editorProps: {
       handleKeyDown,
@@ -236,6 +271,59 @@ const Editor = ({
         placeholder={placeholder}
         className={editorClasses}
       />
+      <Dialog open={Boolean(pendingDrop)} onOpenChange={(open) => !open && setPendingDrop(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("richText.dropVisibilityDialog.title")}</DialogTitle>
+            <DialogDescription>
+              {t("richText.dropVisibilityDialog.description", {
+                count: pendingDrop?.files.length ?? 0,
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <RadioGroup
+            value={dropVisibility}
+            onValueChange={(value) => setDropVisibility(value as EditableResourceVisibility)}
+            className="flex gap-2 pb-2 pt-4"
+          >
+            {[RESOURCE_VISIBILITY.PUBLIC, RESOURCE_VISIBILITY.PRIVATE].map((visibility) => (
+              <Label
+                key={visibility}
+                htmlFor={`drop-visibility-${visibility}`}
+                className={cn(
+                  "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  dropVisibility === visibility
+                    ? "border border-primary bg-[color-mix(in_srgb,var(--primary)_5%,transparent)] text-primary hover:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)]"
+                    : "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                <RadioGroupItem
+                  id={`drop-visibility-${visibility}`}
+                  value={visibility}
+                  className="sr-only"
+                />
+                {visibility === RESOURCE_VISIBILITY.PRIVATE ? (
+                  <Lock className="size-4" aria-hidden />
+                ) : (
+                  <Unlock className="size-4" aria-hidden />
+                )}
+                {t(`richText.assetLibrary.visibility.${visibility}`)}
+              </Label>
+            ))}
+          </RadioGroup>
+          <p className="pb-4 text-sm text-muted-foreground">
+            {t("richText.dropVisibilityDialog.privateInfo")}
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingDrop(null)}>
+              {t("common.button.cancel")}
+            </Button>
+            <Button type="button" onClick={() => void uploadDroppedFiles(dropVisibility)}>
+              {t("common.button.proceed")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

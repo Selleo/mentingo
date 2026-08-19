@@ -1,4 +1,9 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import {
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
+} from "@repo/shared";
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -68,7 +73,7 @@ vi.mock("~/api/queryClient", () => ({
 
 import { useAiMentorLessonForm } from "./useAiMentorLessonForm";
 
-describe("useAiMentorLessonForm suggestions", () => {
+describe("useAiMentorLessonForm", () => {
   const lessonToEdit: Lesson = {
     id: "lesson-id",
     updatedAt: "2026-07-13T00:00:00.000Z",
@@ -79,8 +84,6 @@ describe("useAiMentorLessonForm suggestions", () => {
     aiMentor: {
       id: "ai-mentor-id",
       lessonId: "lesson-id",
-      aiMentorInstructions: "Existing instructions",
-      type: AI_MENTOR_TYPE.ROLEPLAY,
       name: "Customer",
       voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
       ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
@@ -102,73 +105,96 @@ describe("useAiMentorLessonForm suggestions", () => {
     mocks.invalidateQueries.mockResolvedValue(undefined);
   });
 
-  it("persists the structured Judge draft when an existing lesson is saved", async () => {
-    const saveStagedAiJudgeConfiguration = vi.fn().mockResolvedValue(undefined);
+  it("creates a lesson with staged Mentor and Judge configurations", async () => {
+    mocks.createAiMentorLesson.mockResolvedValue(undefined);
     const { result } = renderHook(() =>
       useAiMentorLessonForm({
         chapterToEdit,
-        lessonToEdit,
+        lessonToEdit: null,
         setContentTypeToDisplay: vi.fn(),
         language: "en",
         baseLanguage: "en",
-        onSaveStagedAiJudgeConfiguration: saveStagedAiJudgeConfiguration,
       }),
     );
 
     act(() => {
-      result.current.handleSuggestionClick("scenarioSimulation");
-    });
-    act(() => {
-      result.current.onConfirmOverwrite();
+      result.current.form.setValue("aiMentorConfiguration", {
+        type: AI_MENTOR_TYPE.ROLEPLAY,
+        scenario: "Discovery call",
+        aiRole: "Customer",
+        learnerRole: "Sales representative",
+        characterGoal: "Assess whether the offer is relevant",
+        difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      });
+      result.current.form.setValue("aiJudgeConfiguration", {
+        taskGoal: "Complete the discovery call",
+        passingThresholdPercent: 0,
+        criteria: [],
+        blockingErrors: [],
+      });
     });
 
     const values = result.current.form.getValues();
-    expect(values.aiJudgeConfiguration).toMatchObject({
-      passingThresholdPercent: 60,
-      criteria: [
-        {
-          expectedBehavior: "Asks about the budget.",
-          maxScore: 1,
-          scoreGuidance: [
-            {
-              score: 0,
-              description: "No observable evidence of the expected behavior.",
-              example: "The response omits the expected behavior.",
-            },
-            {
-              score: 1,
-              description: "Clearly demonstrates the expected behavior in context.",
-              example: "What budget range have you allocated?",
-            },
-          ],
-        },
-        {
-          expectedBehavior: "Asks about the timeline.",
-          maxScore: 1,
-          scoreGuidance: [
-            {
-              score: 0,
-              description: "No observable evidence of the expected behavior.",
-              example: "The response omits the expected behavior.",
-            },
-            {
-              score: 1,
-              description: "Clearly demonstrates the expected behavior in context.",
-              example: "Is the three-month deadline fixed?",
-            },
-          ],
-        },
-      ],
-      blockingErrors: [
-        { description: "Makes a commitment that contradicts the client's constraints." },
-      ],
-    });
 
     await act(async () => {
       await result.current.onSubmit(values);
     });
 
-    expect(saveStagedAiJudgeConfiguration).toHaveBeenCalledWith(values.aiJudgeConfiguration);
+    expect(mocks.createAiMentorLesson).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        chapterId: "chapter-id",
+        aiMentorConfiguration: expect.objectContaining(values.aiMentorConfiguration ?? {}),
+        aiJudgeConfiguration: expect.objectContaining(values.aiJudgeConfiguration ?? {}),
+      }),
+    });
+  });
+
+  it("normalizes empty optional Mentor fields before creating a lesson", async () => {
+    mocks.createAiMentorLesson.mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useAiMentorLessonForm({
+        chapterToEdit,
+        lessonToEdit: null,
+        setContentTypeToDisplay: vi.fn(),
+        language: "en",
+        baseLanguage: "en",
+      }),
+    );
+    const configuration = {
+      type: AI_MENTOR_TYPE.ROLEPLAY,
+      scenario: "Discovery call",
+      aiRole: "Customer",
+      learnerRole: "Sales representative",
+      characterGoal: "Assess whether the offer is relevant",
+      difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      factsAndConstraints: "",
+      openingInstruction: "",
+      additionalInstructions: "",
+    } as const;
+
+    act(() => {
+      result.current.form.setValue("aiMentorConfiguration", configuration);
+      result.current.form.setValue("aiJudgeConfiguration", {
+        taskGoal: "Complete the discovery call",
+        passingThresholdPercent: 0,
+        criteria: [],
+        blockingErrors: [],
+      });
+    });
+
+    await act(async () => {
+      await result.current.onSubmit(result.current.form.getValues());
+    });
+
+    expect(mocks.createAiMentorLesson).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        aiMentorConfiguration: expect.objectContaining({
+          factsAndConstraints: null,
+          openingInstruction: null,
+          additionalInstructions: null,
+        }),
+      }),
+    });
   });
 
   it("does not resave an unchanged Judge configuration with the lesson form", async () => {

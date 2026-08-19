@@ -13,7 +13,9 @@ export const QUEUE_NAMES = {
   COURSE_DUPLICATION: "course-duplication",
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
+  AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
+  AI_MENTOR_PRACTICE: "ai-mentor-practice",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

@@ -6,6 +6,7 @@ import type {
   certificateSchema,
   certificateValidityImpactResponseSchema,
   certificateValidityImpactSchema,
+  certificateDashboardSummarySchema,
   createCertificateShareLinkSchema,
   downloadCertificateSchema,
   resetCourseCertificatesResponseSchema,
@@ -32,6 +33,7 @@ export type CertificateValidityImpactResponse = Static<
 >;
 
 export type AllCertificatesResponse = Static<typeof allCertificatesSchema>;
+export type CertificateDashboardSummary = Static<typeof certificateDashboardSummarySchema>;
 
 export type CertificatesQuery = {
   userId: UUIDType;

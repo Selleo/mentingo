@@ -4,6 +4,7 @@ import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ENTITY_TYPES,
   NEWS_STATUS,
+  type EditableResourceVisibility,
   type SupportedLanguages,
 } from "@repo/shared";
 import { useEffect, useMemo, useState } from "react";
@@ -186,7 +187,7 @@ function NewsFormPage() {
 
   const sharedFileUploadHandler = buildRichTextFileUploadHandler({
     entityType: ENTITY_TYPES.NEWS,
-    getVideoSessionForFile: (file) =>
+    getVideoSessionForFile: (file, visibility) =>
       getSessionForFile({
         file,
         init: () =>
@@ -199,15 +200,17 @@ function NewsFormPage() {
             entityId: id,
             entityType: ENTITY_TYPES.NEWS,
             linkToEntity: false,
+            visibility,
           }),
       }),
     uploadVideo,
-    uploadResourceFile: (file) =>
+    uploadResourceFile: (file, visibility) =>
       uploadResource({
         file,
         entityType: ENTITY_TYPES.NEWS,
         entityId: id,
         language: activeLanguage,
+        visibility,
       }),
     askForDisplayMode,
     onVideoUploadError: () =>
@@ -463,8 +466,13 @@ function NewsFormPage() {
                               parentClassName="-mt-px rounded-t-none after:rounded-t-none"
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
-                              onUpload={async (file?: File, editor?: TipTapEditor | null) => {
-                                if (file && id) await sharedFileUploadHandler(file, editor);
+                              onUpload={async (
+                                file?: File,
+                                editor?: TipTapEditor | null,
+                                visibility?: EditableResourceVisibility,
+                              ) => {
+                                if (file && id)
+                                  await sharedFileUploadHandler(file, editor, visibility);
                               }}
                               assetLibrary={{
                                 entityType: ENTITY_TYPES.NEWS,

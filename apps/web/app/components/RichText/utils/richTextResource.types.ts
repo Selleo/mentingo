@@ -1,4 +1,9 @@
-import type { EntityType, SupportedLanguages, VideoProvider } from "@repo/shared";
+import type {
+  EditableResourceVisibility,
+  EntityType,
+  SupportedLanguages,
+  VideoProvider,
+} from "@repo/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 
 export type UploadResourceArgs = {
@@ -9,6 +14,7 @@ export type UploadResourceArgs = {
   language?: SupportedLanguages;
   title?: string;
   description?: string;
+  visibility?: EditableResourceVisibility;
 };
 
 export const RICH_TEXT_RESOURCE_TYPE = {

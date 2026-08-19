@@ -1,6 +1,308 @@
 {
+  "dashboardHome": {
+    "title": "Tu dashboard",
+    "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
+    "customize": "Personalizar panel",
+    "edit": {
+      "badge": "Edición",
+      "widgetsButton": "Widgets",
+      "restore": "Restaurar valores",
+      "restoreConfirm": "¿Restaurar el diseño predeterminado de los widgets? Se reemplazará tu organización actual.",
+      "changeSize": "Cambiar el tamaño de {{title}}",
+      "sizeTitle": "Tamaño del widget",
+      "sizes": {
+        "1x1": "Compacto",
+        "2x1": "Ancho",
+        "1x2": "Alto",
+        "2x2": "Grande",
+        "3x2": "Ampliado",
+        "4x1": "Extra ancho",
+        "4x2": "Destacado",
+        "4x3": "Destacado alto"
+      },
+      "drag": "Mover {{title}}",
+      "widgetLibrary": "Widgets del panel",
+      "widgetLibraryDescription": "Elige los widgets visibles en tu panel.",
+      "required": "Obligatorio",
+      "toggle": "Activar o desactivar {{title}}",
+      "confirm": "Sí",
+      "cancel": "No"
+    },
+    "empty": {
+      "title": "Tu panel está vacío",
+      "description": "Personaliza el panel y añade los widgets que te interesan.",
+      "editDescription": "Activa al menos un widget de la lista superior."
+    },
+    "error": {
+      "invalidWidgetLayout": "El diseño del panel contiene widgets no disponibles o duplicados.",
+      "invalidWidgetSize": "Este tamaño no está permitido para el widget seleccionado.",
+      "requiredWidgetMissing": "Falta un widget obligatorio del panel.",
+      "title": "No se pudo cargar el panel",
+      "description": "Vuelve a intentarlo en unos instantes.",
+      "retry": "Intentar de nuevo",
+      "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado.",
+      "staleLayout": "Tu panel se actualizó en otro lugar. Actualiza la página e inténtalo de nuevo."
+    },
+    "toast": {
+      "layoutSaved": "Los cambios del panel se guardaron.",
+      "layoutSaveError": "No pudimos guardar los cambios del panel.",
+      "layoutReset": "Se restauró el diseño predeterminado del panel.",
+      "layoutResetError": "No pudimos restaurar el diseño predeterminado del panel."
+    },
+    "widgets": {
+      "loadError": "No se pudieron cargar los datos de este widget.",
+      "trainingCompletionChartLabel": "{{completed}} de {{total}} inscripciones completadas, {{percentage}} por ciento.",
+      "deadlineRisksPage": "Página {{page}} de {{totalPages}}",
+      "placeholderDescription": "Widget del panel preparado para una vista de datos propia",
+      "placeholderContent": "Este widget está preparado para el contenido específico de su función.",
+      "placeholderFooter": "Widget de ejemplo",
+      "s_placeholder_1": { "title": "Widget de estudiante 1" },
+      "s_placeholder_2": { "title": "Widget de estudiante 2" },
+      "s_placeholder_3": { "title": "Widget de estudiante 3" },
+      "loadError": "No se pudo cargar este widget.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Todos los cursos que has comenzado",
+          "empty": "No tienes cursos en progreso.",
+          "nextLesson": "Siguiente: {{title}}",
+          "openCourse": "Abrir curso",
+          "viewAll": "{{count}} cursos en progreso"
+        },
+        "requiredCourse": {
+          "description": "Todos los cursos obligatorios pendientes",
+          "empty": "No tienes cursos obligatorios pendientes.",
+          "overdue": "Atrasado",
+          "dueSoon": "Próximo vencimiento",
+          "scheduled": "Próximo",
+          "noDeadline": "Sin fecha límite",
+          "dueDate": "Vence el {{date}}",
+          "noDueDate": "Sin fecha de vencimiento",
+          "total": "{{count}} cursos obligatorios",
+          "overdueCount": "{{count}} atrasados"
+        },
+        "courseCompletion": {
+          "description": "Resumen del progreso de cursos asignados",
+          "empty": "Aún no tienes cursos asignados.",
+          "completedOfTotal": "{{completed}} de {{total}} completados",
+          "completed": "Completados",
+          "inProgress": "En progreso",
+          "notStarted": "Sin iniciar"
+        },
+        "certificates": {
+          "description": "Certificados activos y próximos vencimientos",
+          "empty": "No tienes certificados activos.",
+          "active": "Certificados activos",
+          "expiringSoon": "Vence en 30 días",
+          "cta": "Ver certificado",
+          "viewAll": "Ver todos los certificados",
+          "dialogTitle": "Tus certificados",
+          "dialogDescription": "Revisa todos los certificados activos que has obtenido.",
+          "issued": "Emitido el {{date}}",
+          "expires": "Vence el {{date}}",
+          "noExpiry": "Sin fecha de vencimiento",
+          "previous": "Anterior",
+          "next": "Siguiente",
+          "page": "Página {{page}} de {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Crea un escenario de práctica al día",
+          "empty": "Describe una situación y practícala con Mentor IA.",
+          "emptyPrompt": "¿Qué conversación te gustaría afrontar con más confianza?",
+          "startCta": "Iniciar práctica",
+          "continueCta": "Continuar práctica",
+          "feedbackCta": "Ver comentarios",
+          "completedEyebrow": "Ensayo completado",
+          "privateHint": "Un espacio privado para probar y mejorar",
+          "status": {
+            "queued": "Tu escenario está en cola.",
+            "processing": "Tu escenario se está preparando.",
+            "ready": "La práctica de hoy está lista.",
+            "failed": "La generación falló. Ábrela para reintentar."
+          }
+        }
+      },
+      "todoTasks": {
+        "title": "Lista de tareas",
+        "description": "Pequeñas tareas para tu jornada",
+        "empty": "Aún no hay tareas. Añade una abajo.",
+        "placeholder": "Añadir una tarea",
+        "add": "Añadir tarea",
+        "toggle": "Alternar {{title}}",
+        "edit": "Editar tarea",
+        "delete": "Eliminar tarea",
+        "reorder": "Reordenar tarea",
+        "toast": {
+          "createSuccess": "Tarea añadida.",
+          "createError": "No pudimos añadir la tarea.",
+          "updateSuccess": "Tarea actualizada.",
+          "updateError": "No pudimos actualizar la tarea.",
+          "deleteSuccess": "Tarea eliminada.",
+          "deleteError": "No pudimos eliminar la tarea.",
+          "reorderSuccess": "Orden de tareas guardado.",
+          "reorderError": "No pudimos guardar el orden de las tareas."
+        }
+      },
+      "commonDescription": "Información clave de un vistazo",
+      "training_completion": {
+        "title": "Finalización de formación",
+        "description": "Estado de todas las inscripciones en cursos",
+        "completed": "Completado",
+        "inProgress": "En curso",
+        "notStarted": "No iniciado",
+        "viewAnalytics": "Ver analítica",
+        "empty": "Aún no hay inscripciones en cursos.",
+        "assignCourses": "Asignar cursos"
+      },
+      "deadline_risks": {
+        "title": "Riesgos de plazos",
+        "description": "Cursos obligatorios que requieren atención",
+        "sort": "Ordenar",
+        "sortMostUrgent": "Más urgentes primero",
+        "sortLeastUrgent": "Menos urgentes primero",
+        "student": "Alumno",
+        "group": "Grupo",
+        "learners": "Alumnos",
+        "deadline": "Fecha límite",
+        "status": "Estado",
+        "searchStudents": "Buscar alumnos",
+        "searchGroups": "Buscar grupos o alumnos",
+        "allStatuses": "Todos los estados",
+        "studentsEmpty": "No hay alumnos afectados.",
+        "groupsEmpty": "No hay grupos afectados.",
+        "overdue": "Vencido",
+        "dueSoon": "Próximo a vencer",
+        "empty": "No hay riesgos de plazos ahora.",
+        "overdueTitle": "Cursos obligatorios vencidos",
+        "dueSoonTitle": "Cursos obligatorios próximos a vencer",
+        "goToCourse": "Ir al curso",
+        "affected_one": "{{count}} alumno afectado",
+        "affected_other": "{{count}} alumnos afectados"
+      },
+      "incomplete_courses": {
+        "title": "Cursos incompletos",
+        "description": "Cursos con más inscripciones sin completar",
+        "allCompleted": "Todos los cursos asignados están completados.",
+        "noEnrollments": "Aún no hay inscripciones en cursos.",
+        "enrollments": "inscripciones",
+        "notCompleted": "{{count}} sin completar"
+      },
+      "event_calendar": {
+        "title": "Calendario de eventos",
+        "description": "Eventos de aprendizaje y plazos de este mes",
+        "previousMonth": "Mes anterior",
+        "nextMonth": "Mes siguiente",
+        "selectMonth": "Seleccionar mes",
+        "selectYear": "Seleccionar año",
+        "selectedDay": "Día seleccionado",
+        "upcoming": "Próximos eventos",
+        "empty": "No hay eventos este mes.",
+        "liveTraining": "Formación en directo",
+        "courseDeadline": "Plazo del curso",
+        "weekdays": {
+          "mon": "Lun",
+          "tue": "Mar",
+          "wed": "Mié",
+          "thu": "Jue",
+          "fri": "Vie",
+          "sat": "Sáb",
+          "sun": "Dom"
+        }
+      },
+      "continue_learning": { "title": "Continuar aprendiendo" },
+      "required_course": { "title": "Cursos obligatorios" },
+      "course_completion": { "title": "Progreso de cursos" },
+      "certificates": { "title": "Certificados" },
+      "ai_mentor_practice": {
+        "title": "Práctica con Mentor IA",
+        "aiNotConfigured": "Mentor IA no está configurado para esta organización."
+      }
+    }
+  },
+  "todoTasks": {
+    "limitReached": "Puedes tener hasta 100 tareas.",
+    "notFound": "Esta tarea ya no existe.",
+    "invalidOrder": "El orden de las tareas ya no está actualizado. Actualiza la página e inténtalo de nuevo."
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Practica una conversación real.",
+      "promptEyebrow": "Prepara la escena",
+      "mentorPrompt": "Cuéntame la conversación que quieres ensayar. ¿Con quién hablas, qué está ocurriendo y qué te gustaría manejar mejor?",
+      "scenario": "¿Qué quieres practicar?",
+      "scenarioPlaceholder": "Por ejemplo: Quiero practicar cómo dar comentarios constructivos a un compañero que no cumplió un plazo.",
+      "scenarioHint": "Añade contexto para que la práctica sea realista, como la situación, las personas o tu objetivo.",
+      "privateHint": "Solo tú puedes ver esta práctica.",
+      "submit": "Crear práctica",
+      "suggestions": {
+        "title": "Empieza con un ejemplo",
+        "feedback": {
+          "label": "Dar comentarios",
+          "value": "Quiero practicar cómo dar comentarios constructivos a un compañero cuyo trabajo no cumplió un plazo importante."
+        },
+        "boundary": {
+          "label": "Marcar un límite",
+          "value": "Quiero practicar cómo marcar un límite claro cuando un compañero me pide trabajo urgente fuera de mis prioridades actuales."
+        },
+        "explanation": {
+          "label": "Explicar una decisión",
+          "value": "Quiero practicar cómo explicar una decisión difícil a alguien que no está de acuerdo."
+        },
+        "request": {
+          "label": "Hacer una petición",
+          "value": "Quiero practicar cómo pedir apoyo a mi responsable cuando la carga de trabajo es demasiado alta."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Prepara la escena",
+          "description": "Describe el momento con tus propias palabras."
+        },
+        "rehearse": {
+          "title": "Ensáyalo de verdad",
+          "description": "Habla o escribe mientras Mentor IA interpreta a la otra persona."
+        },
+        "reflect": {
+          "title": "Descubre qué funcionó",
+          "description": "Termina cuando estés listo y recibe comentarios concretos."
+        }
+      }
+    },
+    "backToDashboard": "Volver al panel",
+    "rehearsalEyebrow": "Ensayo de hoy",
+    "successGoal": "Tu objetivo",
+    "successGoalFallback": "Conduce la conversación con claridad y acuerda un siguiente paso constructivo.",
+    "viewFeedback": "Ver comentarios",
+    "practiceAgain": "Practicar de nuevo",
+    "replayLoadingTitle": "Preparando tu próximo ensayo",
+    "yourRole": "Tu papel",
+    "mentorRole": "Papel del Mentor IA",
+    "feedback": {
+      "title": "Comentarios de la práctica",
+      "summaryTitle": "Qué llevarte para la próxima vez",
+      "summaryDescription": "Utiliza estas observaciones para mejorar tu próximo intento.",
+      "scoreLabel": "Resultado de la práctica",
+      "criteriaTitle": "Qué observó el evaluador IA",
+      "criterionFallback": "Criterio {{number}}",
+      "importantFeedbackTitle": "Comentarios importantes"
+    },
+    "startHint": "Empieza la conversación cuando estés listo.",
+    "checkHint": "Termina cuando quieras para ver cómo funcionó tu enfoque.",
+    "checkPractice": "Terminar y reflexionar",
+    "practiceComplete": "Tu ensayo ha terminado. Puedes volver a tus comentarios cuando quieras.",
+    "generating": "Mentor IA está preparando tu escenario.",
+    "preparingBackgroundDescription": "Tu práctica se está preparando en segundo plano. Puedes volver al panel y regresar cuando esté lista.",
+    "failed": "No se pudo generar el escenario.",
+    "error": "No se pudo cargar la práctica.",
+    "retry": "Intentar de nuevo",
+    "conversationTitle": "Práctica con Mentor IA",
+    "mentorName": "Mentor IA",
+    "message": "Mensaje para Mentor IA",
+    "send": "Enviar"
+  },
   "common": {
     "button": {
+      "previous": "Anterior",
+      "next": "Siguiente",
       "save": "Guardar",
       "saving": "Guardando...",
       "delete": "Eliminar",
@@ -18,7 +320,8 @@
       "edit": "Editar",
       "delete": "Eliminar",
       "uploading": "Subiendo...",
-      "sending": "Enviando..."
+      "sending": "Enviando...",
+      "loading": "Cargando..."
     },
     "toast": {
       "noAccess": "No tienes permiso para acceder a este recurso.",
@@ -58,8 +361,10 @@
     "error": {
       "somethingWentWrong": "¡Ups! Algo salió mal.",
       "threadMustBeActive": "El hilo debe estar activo.",
+      "aiMentorConfigurationIncomplete": "La configuración de AI Mentor está incompleta.",
       "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
-      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
+      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },
     "loader": {
       "textSequence": {
@@ -1517,6 +1822,7 @@
         "learning_progress": "progreso del aprendizaje",
         "certificate": "certificados",
         "file": "archivos",
+        "resource_library": "Biblioteca de recursos",
         "ai": "Funciones de IA",
         "announcement": "anuncios",
         "news": "noticias",
@@ -1540,6 +1846,8 @@
         "user_manage": "Administre usuarios, incluidos roles y estado de cuenta.",
         "settings_read_self": "Ver su propio perfil y configuración de preferencias.",
         "settings_update_self": "Actualice su propio perfil y configuración de preferencias.",
+        "dashboard_read": "Ver su panel de control.",
+        "todo_task_manage_self": "Crear y gestionar sus propias tareas.",
         "settings_manage": "Administrar la configuración global de la plataforma.",
         "env_read_public": "Ver los valores de configuración del entorno público.",
         "env_manage": "Administrar los valores de configuración del entorno.",
@@ -1578,6 +1886,7 @@
         "certificate_render": "Generar archivos de certificados.",
         "file_upload": "Subir archivos a la plataforma.",
         "file_delete": "Eliminar archivos directamente del almacenamiento de la plataforma.",
+        "resource_library_manage": "Gestionar recursos privados en la biblioteca de recursos.",
         "ai_use": "Utilice funciones de plataforma impulsadas por IA.",
         "announcement_read": "Ver anuncios.",
         "announcement_create": "Crear anuncios.",
@@ -1948,6 +2257,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "No puede modificar las preguntas en un idioma que no sea el predeterminado.",
       "noMissingTranslations": "No faltan traducciones",
       "mismatchContentLength": "El número de traducciones no coincide con el número de traducciones generadas",
+      "invalidTranslationStructure": "La traducción generada no conservó la estructura del contenido. Inténtalo de nuevo.",
       "translationsGeneratedSuccessfully": "Traducciones generadas exitosamente",
       "lumaNotConfigured": "La clave Luma API no está configurada.",
       "lumaBadRequest": "La solicitud Luma no era válida.",
@@ -2368,6 +2678,186 @@
           "customTTSReference": "Ingrese el ID de referencia TTS personalizado...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Comportamiento del mentor de IA",
+          "emptyDescription": "Elige cómo debe guiar la IA al alumno o interactuar con él.",
+          "baseLanguageRequired": "Configura primero el comportamiento del mentor de IA en el idioma base del curso.",
+          "incompleteDescription": "Faltan algunos datos para completar esta configuración.",
+          "configureManually": "Configurar manualmente",
+          "reviewConfiguration": "Revisar configuración",
+          "dialogTitle": "Configurar mentor de IA",
+          "dialogDescription": "Elige un modo y define la experiencia que tendrán los alumnos.",
+          "optional": "(opcional)",
+          "fineTuneBehavior": "Ajustar comportamiento (opcional)",
+          "translationModeTitle": "Modo de traducción",
+          "translationModeDescription": "Traduce aquí los campos de texto. El modo, el estilo de enseñanza y la dificultad se gestionan en el idioma base.",
+          "structureLockedTooltip": "La estructura del mentor de IA solo puede cambiarse en el idioma base.",
+          "applyConfiguration": "Aplicar configuración",
+          "saveConfiguration": "Guardar configuración",
+          "saveTranslation": "Guardar traducción",
+          "configurationSaved": "Configuración del mentor de IA guardada.",
+          "translationSaved": "Traducción del mentor de IA guardada.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Modo del mentor",
+            "teacher": {
+              "label": "Profesor",
+              "description": "Explica conceptos y guía la práctica."
+            },
+            "roleplay": {
+              "label": "Juego de roles",
+              "description": "Actúa como participante en un escenario de práctica."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Empezar desde un escenario",
+            "scenarioSimulation": {
+              "taskDescription": "Practica cómo descubrir las necesidades de un cliente de software y proponer una oferta acorde a sus restricciones.",
+              "aiRole": "Cliente potencial de servicios de software",
+              "learnerRole": "Representante de ventas",
+              "characterGoal": "Elegir un proveedor que cumpla los requisitos de plazo, presupuesto y comunicación.",
+              "factsAndConstraints": "La aplicación debe estar lista en tres meses. El presupuesto es limitado y se requiere una comunicación clara y regular.",
+              "openingInstruction": "Preséntate como un cliente que evalúa proveedores de software y pregunta cómo puede ayudarte el alumno."
+            },
+            "problemSolving": {
+              "taskDescription": "Practica cómo gestionar de forma constructiva la solicitud de aumento salarial de un empleado.",
+              "aiRole": "Empleado que solicita un aumento",
+              "learnerRole": "Responsable de equipo",
+              "characterGoal": "Ser escuchado y acordar una alternativa creíble o un plan de seguimiento.",
+              "factsAndConstraints": "El empleado ha realizado aportaciones importantes recientemente, pero la empresa no dispone actualmente de presupuesto para aumentos salariales.",
+              "openingInstruction": "Empieza explicando tus aportaciones recientes y pide hablar sobre un aumento salarial."
+            },
+            "creativeTask": {
+              "taskDescription": "Desarrolla y mejora una idea original para un nuevo servicio al cliente.",
+              "taskGoal": "Ayuda al alumno a desarrollar y mejorar una idea de servicio original.",
+              "expertise": "Coach de innovación de servicios",
+              "feedbackGuidance": "Fomenta la originalidad y el valor práctico. Haz preguntas de seguimiento concretas y señala carencias importantes sin apropiarte de la idea.",
+              "openingInstruction": "Invita al alumno a compartir su idea inicial de servicio y a quién ayudaría."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Aprende técnicas prácticas de gestión del tiempo y planifica cómo aplicar una en el trabajo.",
+              "taskGoal": "Ayuda al alumno a comprender y aplicar técnicas prácticas de gestión del tiempo.",
+              "expertise": "Coach de gestión del tiempo",
+              "feedbackGuidance": "Corrige los malentendidos con suavidad y conecta los comentarios con una aplicación concreta y realista en el trabajo.",
+              "openingInstruction": "Presenta una técnica práctica de gestión del tiempo y pregunta después cómo organiza actualmente su trabajo el alumno."
+            }
+          },
+          "taskGoal": {
+            "label": "Objetivo de la tarea",
+            "placeholder": "¿Qué debe ayudar a comprender o practicar el profesor?"
+          },
+          "expertise": {
+            "label": "Especialidad",
+            "placeholder": "Por ejemplo: formador en cumplimiento del RGPD"
+          },
+          "contentScope": {
+            "label": "Alcance del contenido",
+            "placeholder": "¿Qué puede tratar el profesor y qué debe evitar?"
+          },
+          "teachingStyle": {
+            "label": "Estilo de enseñanza",
+            "explain_and_practice": {
+              "label": "Explicar y practicar",
+              "description": "Explicar con claridad y reforzar con práctica."
+            },
+            "guided_discovery": {
+              "label": "Descubrimiento guiado",
+              "description": "Guiar al alumno paso a paso hasta las conclusiones."
+            },
+            "socratic": {
+              "label": "Socrático",
+              "description": "Usar preguntas concretas para profundizar el razonamiento."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Pautas de feedback",
+            "placeholder": "¿Cómo debe corregir o reforzar el profesor al alumno?"
+          },
+          "scenario": {
+            "label": "Escenario",
+            "placeholder": "Describe la situación que practicará el alumno."
+          },
+          "aiRole": { "label": "Rol de la IA", "placeholder": "Por ejemplo: cliente indeciso" },
+          "learnerRole": {
+            "label": "Rol del alumno",
+            "placeholder": "Por ejemplo: representante de ventas"
+          },
+          "characterGoal": {
+            "label": "Objetivo del personaje de IA",
+            "placeholder": "¿Qué intenta conseguir el personaje de IA?"
+          },
+          "difficulty": {
+            "label": "Dificultad",
+            "cooperative": {
+              "label": "Cooperativa",
+              "description": "Colabora y ayuda a que la conversación avance."
+            },
+            "realistic": {
+              "label": "Realista",
+              "description": "Resistencia natural y reacciones creíbles."
+            },
+            "challenging": {
+              "label": "Difícil",
+              "description": "Resistencia firme que exige una respuesta sólida."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Hechos y restricciones",
+            "placeholder": "Añade presupuestos, plazos, políticas o hechos que deben mantenerse."
+          },
+          "openingInstruction": {
+            "label": "Instrucción de apertura",
+            "placeholder": "¿Cómo debe empezar el mensaje de bienvenida inicial?"
+          },
+          "additionalInstructions": {
+            "label": "Instrucciones adicionales",
+            "placeholder": "Añade comportamientos excepcionales no cubiertos arriba."
+          },
+          "typeChange": {
+            "title": "¿Cambiar el modo del mentor?",
+            "description": "Al cambiar a {{type}} se borrarán los campos específicos del modo actual. Se conservarán las instrucciones de apertura y adicionales."
+          },
+          "validation": {
+            "required": "Este campo es obligatorio.",
+            "configurationRequired": "Configura el comportamiento del mentor de IA antes de guardar la lección."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Modo del mentor",
+          "createWithAi": "Crear con IA",
+          "improveWithAi": "Mejorar con IA",
+          "checkQualityWithAi": "Comprobar calidad con IA",
+          "create": {
+            "title": "Crear el comportamiento del mentor de IA con IA",
+            "description": "Elige el modo del mentor y describe la experiencia que quieres crear.",
+            "fieldLabel": "¿Qué escenario debe preparar la IA?",
+            "fieldDescription": "La IA devolverá un borrador de trabajo completo del escenario para el modo seleccionado.",
+            "placeholder": "Por ejemplo: un responsable gestionando una conversación difícil.",
+            "submit": "Generar borrador"
+          },
+          "improve": {
+            "title": "Mejorar el comportamiento del mentor de IA con IA",
+            "description": "La IA usa la configuración actual sin guardar y su modo seleccionado.",
+            "fieldLabel": "¿Qué debe cambiar la IA en el escenario?",
+            "fieldDescription": "Describe qué debe ser más realista, coherente o concreto. El modo seleccionado no cambiará.",
+            "placeholder": "Por ejemplo: hacer el escenario más realista y añadir restricciones claras.",
+            "submit": "Mejorar borrador"
+          },
+          "progressTitle": "Preparando el borrador",
+          "progressDescription": "La IA está generando y comprobando la configuración.",
+          "readyTitle": "Borrador listo para revisar",
+          "revisionTitle": "El borrador necesita una decisión",
+          "failedTitle": "No se pudo generar el borrador",
+          "cancel": "Cancelar generación",
+          "revise": "Revisar borrador",
+          "review": "Revisar configuración",
+          "quality": {
+            "title": "Comprobar calidad con IA",
+            "description": "La IA revisa la configuración actual sin guardarla ni cambiarla.",
+            "checking": "Comprobando la configuración actual…",
+            "improve": "Mejorar con IA"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Condiciones de finalización",
           "configured": "Configurado",
@@ -2377,6 +2867,7 @@
           "summary": "{{criteria}} criterios · {{score}} puntos totales · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
           "configureWithAi": "Configurar con IA",
           "createWithAi": "Crear con IA",
+          "aiMentorConfigurationRequiredTooltip": "Configura primero el comportamiento del Mentor de IA antes de crear las condiciones de finalización con IA.",
           "improveWithAi": "Mejorar con IA",
           "checkQualityWithAi": "Comprobar la calidad con IA",
           "checkingQuality": "Comprobando la calidad...",
@@ -3340,6 +3831,7 @@
         },
         "retakeModalTitle": "¿Estás seguro de que quieres volver a tomar la lección?",
         "retakeModalDescription": "Esto restablecerá su progreso en esta lección. Esta acción no se puede deshacer.",
+        "retakeLoadingTitle": "Preparando tu próximo intento",
         "retakeAccessDenied": "Puede volver a tomar esta lección solo si está inscrito en el curso o es el autor del curso."
       }
     },
@@ -3439,6 +3931,7 @@
   },
   "settings": {
     "title": "Configuración",
+    "supportModeNoAvailable": "No hay configuraciones disponibles para este usuario en el modo de soporte.",
     "buttons": {
       "cancel": "Cancelar",
       "save": "Guardar"
@@ -3454,7 +3947,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Configuración global no encontrada"
+        "globalNotFound": "Configuración global no encontrada",
+        "userSettingsNotFound": "No se encontró la configuración del usuario"
       },
       "qaSettingUpdatedSuccessfully": "La configuración de control de calidad se actualizó correctamente",
       "ageLimitUpdatedSuccessfully": "Límite de edad actualizado correctamente",
@@ -3494,6 +3988,17 @@
       "coursesVisibilityDescription": "Permita que los visitantes vean la lista de cursos y accedan a lecciones gratuitas sin iniciar sesión",
       "modernCourseList": "Utilice la vista de lista de cursos moderna",
       "modernCourseListDescription": "Habilite el nuevo diseño de lista de cursos con secciones destacadas y de cursos principales",
+      "courseListLayout": "Diseño de lista de cursos",
+      "courseListLayoutDescription": "Cómo se muestran los cursos a todos los usuarios de la plataforma",
+      "courseListLayoutClassic": "Clásico",
+      "courseListLayoutModern": "Moderno",
+      "courseListLayoutClassicDescription": "Diseño de cuadrícula de cursos tradicional",
+      "courseListLayoutModernDescription": "Sección hero con cursos destacados",
+      "courseListLayoutPreview": {
+        "continueLearning": "Continuar aprendiendo",
+        "topCourses": "Top 5 cursos",
+        "availableCourses": "Cursos disponibles"
+      },
       "courseDiscussions": "Habilitar debates del curso",
       "courseDiscussionsDescription": "Permitir a los usuarios inscritos ver y participar en los hilos de discusión del curso.",
       "calendar": "Habilitar calendario",
@@ -3994,6 +4499,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Elegir visibilidad de recursos",
+      "description": "Elige la visibilidad para los {{count}} recursos soltados.",
+      "privateInfo": "Los recursos privados solo son visibles para ti y los administradores en la biblioteca de recursos, pero siguen disponibles para los estudiantes en el contenido de las lecciones."
+    },
     "uploadDisplayModeDialog": {
       "title": "Elija cómo mostrar este archivo",
       "description": "Seleccione cómo debe aparecer \"{{name}}\" para los estudiantes.",
@@ -4057,6 +4567,26 @@
       "upload": "Cargar recurso",
       "insert": "Insertar",
       "delete": "Eliminar",
+      "columns": {
+        "asset": "Recurso",
+        "actions": "Acciones"
+      },
+      "visibility": {
+        "public": "Público",
+        "private": "Privado",
+        "toggle": "Cambiar privacidad del recurso",
+        "select": "Seleccionar recurso",
+        "selectAll": "Seleccionar todo",
+        "deselectAll": "Deseleccionar todo",
+        "new": "Nuevo",
+        "selected": "{{count}} seleccionados",
+        "makePublic": "Hacer público",
+        "makePrivate": "Hacer privado",
+        "confirmationTitle": "¿Hacer privado el recurso?",
+        "usedWarning": "Este recurso se usa en contenido. Seguirá disponible allí, pero se ocultará de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkUsedWarning": "{{count}} recursos seleccionados se usan en contenido. Seguirán disponibles allí, pero se ocultarán de las bibliotecas de otros creadores y del acceso directo. ¿Continuar?",
+        "bulkSkipped": "Algunos recursos ya tenían la visibilidad seleccionada y se omitieron."
+      },
       "loading": "Cargando recursos...",
       "loadingUsages": "Cargando usos...",
       "disabledUntilSaved": "Guarde este contenido antes de insertar o eliminar recursos existentes. La carga de un nuevo activo todavía está disponible.",
@@ -4612,7 +5142,7 @@
     },
     "errors": {
       "generic": "No se pudo iniciar el modo de soporte",
-      "targetAdminRequired": "Elija un usuario administrador activo de la organización seleccionada",
+      "targetUserRequired": "Elija un usuario activo de la organización seleccionada",
       "invalidSession": "La sesión de soporte no es válida"
     }
   },
@@ -4644,7 +5174,7 @@
       "actions": {
         "title": "Acciones",
         "enterSupportMode": "Ingrese al modo de soporte",
-        "impersonateAdmin": "Entrar como administrador"
+        "impersonateUser": "Suplantar usuario"
       }
     },
     "activityTrend": {
@@ -4655,8 +5185,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
-      "loading": "Cargando usuarios administradores...",
-      "empty": "No se encontraron usuarios administradores activos.",
+      "tabs": { "admins": "Administradores", "allUsers": "Todos los usuarios" },
+      "loading": "Cargando usuarios...",
+      "emptyAdmins": "No se encontraron administradores activos.",
+      "emptyAdminsSearch": "No se encontraron administradores activos para \"{{search}}\".",
+      "emptyAllUsers": "No se encontraron usuarios activos.",
+      "searchAllUsers": "Buscar entre todos los usuarios",
       "loadMore": "Cargar más usuarios"
     },
     "status": {
@@ -4836,10 +5370,13 @@
       "before": "Antes",
       "after": "Después",
       "context": "Contexto",
+      "resourceName": "Nombre del recurso",
+      "resourceId": "ID del recurso",
       "noMetadata": "No hay metadatos disponibles."
     },
     "fallbacks": {
       "unknown": "Desconocido",
+      "nameUnavailable": "Nombre no disponible",
       "notAvailable": "N/D"
     },
     "labels": {
@@ -4901,6 +5438,7 @@
       "email": "Correo electrónico",
       "action": "Acción",
       "resource": "Recurso",
+      "resourceName": "Nombre del recurso",
       "details": "Detalles",
       "showDetails": "Mostrar detalles",
       "loading": "Cargando registros de actividad...",
@@ -4969,7 +5507,7 @@
       "aboutCourse": "Acerca de este curso",
       "description": "Descripción",
       "descriptionPlaceholder": "Introduce la descripción del curso...",
-      "whatYouWillMaster": "Lo que dominarás",
+      "whatYouWillMaster": "Lo que aprenderás",
       "noLearningOutcomes": "Aún no se han añadido resultados de aprendizaje.",
       "learningOutcomePlaceholder": "Añade un resultado de aprendizaje...",
       "addLearningOutcome": "Añadir resultado de aprendizaje",
@@ -5018,6 +5556,7 @@
       "daysLeft_other": "Quedan {{count}} días",
       "certificate": "Certificado",
       "uponCompletion": "Al finalizar",
+      "notIssuedYet": "Aún no emitido",
       "aboutAuthor": "Acerca del autor"
     },
     "certificate": {

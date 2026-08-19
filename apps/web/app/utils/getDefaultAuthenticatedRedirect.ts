@@ -24,6 +24,13 @@ export const getDefaultAuthenticatedRedirect = (
   const permissions = currentUser.permissions;
 
   if (
+    isAvailableRoute("/dashboard", excludedRoutes) &&
+    hasPermission(permissions, PERMISSIONS.DASHBOARD_READ)
+  ) {
+    return "/dashboard";
+  }
+
+  if (
     isAvailableRoute("/courses", excludedRoutes) &&
     hasPermission(permissions, PERMISSIONS.COURSE_READ)
   ) {
@@ -35,13 +42,6 @@ export const getDefaultAuthenticatedRedirect = (
     hasPermission(permissions, PERMISSIONS.CALENDAR_READ)
   ) {
     return "/calendar";
-  }
-
-  if (
-    isAvailableRoute("/progress", excludedRoutes) &&
-    hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE)
-  ) {
-    return "/progress";
   }
 
   if (

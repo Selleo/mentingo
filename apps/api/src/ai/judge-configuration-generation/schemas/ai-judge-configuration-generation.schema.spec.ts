@@ -1,3 +1,9 @@
+import {
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TEACHING_STYLE,
+  AI_MENTOR_TYPE,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import {
@@ -19,8 +25,15 @@ const courseId = "baeb297a-b7d0-498a-bd4d-d70afcc428f1";
 const lessonContext = {
   title: "Handle a difficult sales objection",
   taskDescription: "Reach an agreed next step.",
-  aiMentorInstructions: "Act as a skeptical buyer.",
-  aiMentorType: "roleplay",
+  aiMentorConfiguration: {
+    type: AI_MENTOR_TYPE.ROLEPLAY,
+    scenario: "A buyer challenges the price of the proposed solution.",
+    aiRole: "Skeptical buyer",
+    learnerRole: "Sales representative",
+    characterGoal: "Understand whether the proposal justifies its price.",
+    difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+    additionalInstructions: "Raise a credible budget objection.",
+  },
 } as const;
 
 const configuration = {
@@ -85,9 +98,56 @@ describe("AI Judge configuration generation schemas", () => {
         lessonContext,
         mode: "create",
         brief: "Assess objection handling.",
-        language: "pl",
+        language: SUPPORTED_LANGUAGES.PL,
       }),
     ).toBe(false);
+  });
+
+  it("accepts both structured variants and rejects the legacy flat mentor context", () => {
+    expect(
+      Value.Check(generateAiJudgeConfigurationInputSchema, {
+        courseId,
+        lessonContext: {
+          title: "Explain safe password storage",
+          aiMentorConfiguration: {
+            type: AI_MENTOR_TYPE.TEACHER,
+            taskGoal: "Teach the learner to distinguish hashing from encryption.",
+            expertise: "Application security instructor",
+            contentScope: "Password storage, salts, and adaptive password hashing.",
+            teachingStyle: AI_MENTOR_TEACHING_STYLE.GUIDED_DISCOVERY,
+          },
+        },
+        mode: "create",
+        brief: "Assess whether the learner can select a safe password-storage approach.",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(generateAiJudgeConfigurationInputSchema, {
+        courseId,
+        lessonContext: {
+          title: "Handle a difficult sales objection",
+          aiMentorInstructions: "Act as a skeptical buyer.",
+          aiMentorType: AI_MENTOR_TYPE.ROLEPLAY,
+        },
+        mode: "create",
+        brief: "Assess objection handling.",
+      }),
+    ).toBe(false);
+  });
+
+  it("accepts lesson context before Mentor behavior is configured", () => {
+    expect(
+      Value.Check(generateAiJudgeConfigurationInputSchema, {
+        courseId,
+        lessonContext: {
+          title: "Handle a difficult sales objection",
+          taskDescription: "Respond to the customer's concern and agree on a next step.",
+        },
+        mode: "create",
+        brief: "Assess objection handling.",
+      }),
+    ).toBe(true);
   });
 
   it("requires complete configuration context for improve requests", () => {

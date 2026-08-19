@@ -133,7 +133,7 @@ const ChatMessage = ({
           {isAssistant ? (
             <Markdown
               components={variants}
-              remarkPlugins={[remarkGfm, remarkMath]}
+              remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
               rehypePlugins={[rehypeKatex]}
             >
               {textContent}

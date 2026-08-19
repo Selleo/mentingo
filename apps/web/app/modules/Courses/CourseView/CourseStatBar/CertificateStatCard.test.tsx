@@ -19,6 +19,8 @@ describe("CertificateStatCard", () => {
 
     expect(card).toBeEnabled();
     expect(card).toHaveClass("opacity-50");
+    expect(card).toHaveClass("shadow-sm");
+    expect(card).not.toHaveClass("shadow-lg");
 
     await user.click(card);
 
@@ -30,6 +32,6 @@ describe("CertificateStatCard", () => {
       <CertificateStatCard hasCertificate isAdminExperience={false} onOpen={vi.fn()} />,
     );
 
-    expect(screen.getByRole("button", { name: /certificate upon completion/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /certificate not issued yet/i })).toBeDisabled();
   });
 });

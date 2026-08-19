@@ -13,7 +13,7 @@ export const UserAvatar = ({ userName, profilePictureUrl, className }: UserAvata
       <AvatarImage
         src={profilePictureUrl}
         alt={`${userName} profile`}
-        className="h-full w-full object-cover"
+        className="block size-full max-h-full max-w-full object-cover"
       />
     ) : (
       <Gravatar email="email@example.com" />

@@ -11,6 +11,7 @@ import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseWhatYouWillLearnProps = {
   courseOutcomes?: string[];
+  idOrSlug: string;
   language: SupportedLanguages;
 };
 
@@ -24,6 +25,7 @@ const areOutcomesEqual = (first: string[], second: string[]) =>
 
 export default function CourseWhatYouWillLearn({
   courseOutcomes = [],
+  idOrSlug,
   language,
 }: CourseWhatYouWillLearnProps) {
   const { t } = useTranslation();
@@ -65,6 +67,7 @@ export default function CourseWhatYouWillLearn({
         language,
         learningOutcomes: normalizedOutcomes,
       },
+      courseOverviewCache: { idOrSlug, language },
     });
   };
 
@@ -141,21 +144,8 @@ export default function CourseWhatYouWillLearn({
         )}
 
         {outcomesDraft.map((outcome, index) => (
-          <div
-            key={index}
-            className={cn("group/outcome flex gap-3", {
-              "items-center": editingOutcomeIndex === index,
-              "items-start": editingOutcomeIndex !== index,
-            })}
-          >
-            <span
-              className={cn(
-                "flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white",
-                {
-                  "mt-1": editingOutcomeIndex !== index,
-                },
-              )}
-            >
+          <div key={index} className="group/outcome flex items-center gap-3">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
               <Check className="size-3" strokeWidth={3} />
             </span>
 
@@ -190,7 +180,7 @@ export default function CourseWhatYouWillLearn({
                 className={cn(
                   "min-h-7 flex-1 rounded-lg border-2 border-dashed border-transparent px-2 py-0.5 text-left text-base font-medium leading-6 text-white transition-all",
                   {
-                    "cursor-pointer group-hover/outcome:border-white  group-hover/outcome:bg-opacity-10 hover:border-white  hover:bg-opacity-10 hover:text-white focus-visible:border-white focus-visible:bg-white focus-visible:bg-opacity-10 focus-visible:outline-none":
+                    "cursor-pointer focus-visible:border-white focus-visible:bg-white focus-visible:bg-opacity-10 focus-visible:outline-none":
                       isAdminExperience,
                     "cursor-default disabled:opacity-100": !isAdminExperience,
                   },

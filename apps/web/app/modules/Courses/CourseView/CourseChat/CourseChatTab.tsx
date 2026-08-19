@@ -134,7 +134,7 @@ export function CourseChatTab({
 
   return (
     <Card
-      className="overflow-hidden border-neutral-200 shadow-sm"
+      className="overflow-visible border-neutral-200 shadow-sm"
       data-testid={COURSE_DISCUSSION_HANDLES.ROOT}
     >
       <CardContent className="bg-neutral-50 p-0">

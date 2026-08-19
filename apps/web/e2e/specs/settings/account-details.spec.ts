@@ -119,7 +119,7 @@ test("user can change password with valid current password and matching new pass
     await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_SAVE).click();
 
     await login(page, currentUser.data.data.email, newPassword, { origin });
-    await expect(page).toHaveURL(`${origin}/courses`);
+    await expect(page).toHaveURL(`${origin}/dashboard`);
     await apiClient.syncFromContext(page.context(), origin);
   });
 });

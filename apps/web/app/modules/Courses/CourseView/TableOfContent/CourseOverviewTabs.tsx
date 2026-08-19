@@ -8,6 +8,8 @@ import { cn } from "~/lib/utils";
 import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
 
+import type { ReactNode } from "react";
+
 export const COURSE_OVERVIEW_TABS = {
   TOC: "toc",
   STATISTICS: "statistics",
@@ -15,6 +17,31 @@ export const COURSE_OVERVIEW_TABS = {
 } as const;
 
 export type CourseOverviewTab = (typeof COURSE_OVERVIEW_TABS)[keyof typeof COURSE_OVERVIEW_TABS];
+
+export const CourseOverviewTabButton = ({
+  active,
+  children,
+  onClick,
+  testId,
+}: {
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+  testId?: string;
+}) => (
+  <button
+    type="button"
+    data-testid={testId}
+    onClick={onClick}
+    className={cn(
+      "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
+      active ? "text-primary-700" : "text-neutral-800 hover:text-neutral-950",
+    )}
+  >
+    {children}
+    {active && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />}
+  </button>
+);
 
 type CourseOverviewTabsProps = {
   activeTab: CourseOverviewTab;

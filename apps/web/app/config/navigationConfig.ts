@@ -57,6 +57,15 @@ export const getNavigationConfig = (
       testId: NAVIGATION_HANDLES.COURSES_GROUP,
       items: [
         {
+          label: t("navigationSideBar.dashboard"),
+          path: "dashboard",
+          iconName: "Dashboard",
+          accessRequirement: {
+            anyOf: [PERMISSIONS.DASHBOARD_READ],
+          },
+          testId: NAVIGATION_HANDLES.DASHBOARD_LINK,
+        },
+        {
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",
@@ -75,24 +84,6 @@ export const getNavigationConfig = (
               },
             ] as NavigationItem[])
           : []),
-        {
-          label: t("navigationSideBar.calendar"),
-          path: "calendar",
-          iconName: "Calendar",
-          testId: NAVIGATION_HANDLES.CALENDAR_LINK,
-        },
-        {
-          label: t("navigationSideBar.analytics"),
-          path: "admin/analytics",
-          iconName: "ChartNoAxes",
-          testId: NAVIGATION_HANDLES.ANALYTICS_LINK,
-        },
-        {
-          label: t("navigationSideBar.progress"),
-          path: "progress",
-          iconName: "Target",
-          testId: NAVIGATION_HANDLES.PROGRESS_LINK,
-        },
       ],
     },
     ...(isAnyContentFeatureEnabled

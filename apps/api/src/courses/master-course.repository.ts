@@ -20,7 +20,10 @@ import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiJudgeScoreGuidance,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
+  aiMentorTeacherConfigurations,
   categories,
   chapters,
   courses,
@@ -42,6 +45,9 @@ import {
 } from "src/storage/schema";
 
 import type {
+  AiMentorConfigurationInsert,
+  AiMentorRoleplayConfigurationInsert,
+  AiMentorTeacherConfigurationInsert,
   AiJudgeBlockingErrorJsonbInsert,
   AiJudgeConfigurationJsonbInsert,
   AiJudgeConfigurationJsonbUpdate,
@@ -385,6 +391,29 @@ export class MasterCourseRepository {
       .where(inArray(aiMentorLessons.lessonId, lessonIds));
   }
 
+  async getSourceAiMentorConfigurations(aiMentorLessonIds: UUIDType[]) {
+    if (!aiMentorLessonIds.length) return [];
+
+    return this.db
+      .select()
+      .from(aiMentorConfigurations)
+      .where(inArray(aiMentorConfigurations.aiMentorLessonId, aiMentorLessonIds));
+  }
+
+  async getSourceAiMentorTeacherConfigurations(configurationIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiMentorTeacherConfigurations)
+      .where(inArray(aiMentorTeacherConfigurations.configurationId, configurationIds));
+  }
+
+  async getSourceAiMentorRoleplayConfigurations(configurationIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiMentorRoleplayConfigurations)
+      .where(inArray(aiMentorRoleplayConfigurations.configurationId, configurationIds));
+  }
+
   async getSourceAiJudgeConfigurations(aiMentorLessonIds: UUIDType[]) {
     return this.db
       .select()
@@ -674,6 +703,65 @@ export class MasterCourseRepository {
 
   async updateAiMentor(aiMentorId: UUIDType, values: Partial<AiMentorLessonInsert>) {
     await this.db.update(aiMentorLessons).set(values).where(eq(aiMentorLessons.id, aiMentorId));
+  }
+
+  async findAiMentorConfigurationByAiMentorLessonId(
+    aiMentorLessonId: UUIDType,
+    dbInstance: DatabasePg,
+  ) {
+    const [configuration] = await dbInstance
+      .select({ id: aiMentorConfigurations.id })
+      .from(aiMentorConfigurations)
+      .where(eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessonId))
+      .limit(1);
+
+    return configuration;
+  }
+
+  async createAiMentorConfiguration(
+    values: AiMentorConfigurationInsert,
+    dbInstance: DatabasePg,
+  ): Promise<UUIDType> {
+    const [configuration] = await dbInstance
+      .insert(aiMentorConfigurations)
+      .values(values)
+      .returning({ id: aiMentorConfigurations.id });
+
+    return configuration.id;
+  }
+
+  async updateAiMentorConfiguration(
+    configurationId: UUIDType,
+    values: Partial<AiMentorConfigurationInsert>,
+    dbInstance: DatabasePg,
+  ) {
+    await dbInstance
+      .update(aiMentorConfigurations)
+      .set(values)
+      .where(eq(aiMentorConfigurations.id, configurationId));
+  }
+
+  async replaceAiMentorConfigurationSubtype(
+    configurationId: UUIDType,
+    teacher: Omit<AiMentorTeacherConfigurationInsert, "configurationId"> | null,
+    roleplay: Omit<AiMentorRoleplayConfigurationInsert, "configurationId"> | null,
+    dbInstance: DatabasePg,
+  ) {
+    await dbInstance
+      .delete(aiMentorTeacherConfigurations)
+      .where(eq(aiMentorTeacherConfigurations.configurationId, configurationId));
+    await dbInstance
+      .delete(aiMentorRoleplayConfigurations)
+      .where(eq(aiMentorRoleplayConfigurations.configurationId, configurationId));
+
+    if (teacher)
+      await dbInstance
+        .insert(aiMentorTeacherConfigurations)
+        .values({ ...teacher, configurationId });
+    if (roleplay)
+      await dbInstance
+        .insert(aiMentorRoleplayConfigurations)
+        .values({ ...roleplay, configurationId });
   }
 
   async findAiJudgeConfigurationByAiMentorLessonId(

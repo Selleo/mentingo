@@ -25,6 +25,7 @@ const course = {
   baseLanguage: "en",
   category: "Analytics",
   categoryId: "category-1",
+  chapters: [],
   description: "Course description",
   estimatedDurationSeconds: 3_600,
   learningOutcomes: [],
@@ -70,7 +71,10 @@ vi.mock("~/api/mutations/admin/useUpdateCourseMedia", () => ({
 
 vi.mock("~/api/queries", () => ({
   useCategories: () => ({
-    data: [{ id: "category-1", title: "Analytics" }],
+    data: [
+      { id: "category-1", title: "Analytics" },
+      { id: "category-2", title: "Data" },
+    ],
   }),
   useCurrentUser: () => ({
     data: { permissions: [] },
@@ -244,6 +248,7 @@ describe("CourseOverview", () => {
     renderWith().render(
       <MemoryRouter>
         <CourseOverview
+          idOrSlug="course-slug"
           language="en"
           onLanguageChange={vi.fn()}
           openGenerateTranslationModal={false}
@@ -298,6 +303,7 @@ describe("CourseOverview", () => {
     renderWith().render(
       <MemoryRouter>
         <CourseOverview
+          idOrSlug="course-slug"
           language="en"
           onLanguageChange={vi.fn()}
           openGenerateTranslationModal={false}
@@ -320,11 +326,17 @@ describe("CourseOverview", () => {
           language: "en",
           title: "Updated course title",
         },
+        courseOverviewCache: { idOrSlug: "course-slug", language: "en" },
       });
       expect(mocks.updateCourse).toHaveBeenCalledWith({
         courseId: "course-1",
         data: {
           categoryId: "category-2",
+          language: "en",
+        },
+        courseOverviewCache: {
+          categoryTitle: "Data",
+          idOrSlug: "course-slug",
           language: "en",
         },
       });
@@ -334,6 +346,7 @@ describe("CourseOverview", () => {
           description: "Updated description",
           language: "en",
         },
+        courseOverviewCache: { idOrSlug: "course-slug", language: "en" },
       });
     });
   });

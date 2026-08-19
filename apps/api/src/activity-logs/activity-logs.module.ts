@@ -4,7 +4,9 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { ArticlesActivityHandler } from "src/activity-logs/handlers/articles-activity.handler";
 import { QAActivityHandler } from "src/activity-logs/handlers/qa-activity.handler";
 import { LiveTrainingModule } from "src/live-training/live-training.module";
+import { LocalizationModule } from "src/localization/localization.module";
 
+import { ActivityLogResourceNameService } from "./activity-log-resource-name.service";
 import { ActivityLogsController } from "./activity-logs.controller";
 import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 import { ActivityLogsService } from "./activity-logs.service";
@@ -28,10 +30,11 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
 @Global()
 @Module({
-  imports: [CqrsModule, LiveTrainingModule],
+  imports: [CqrsModule, LiveTrainingModule, LocalizationModule],
   controllers: [ActivityLogsController],
   providers: [
     ActivityLogsService,
+    ActivityLogResourceNameService,
     ChapterActivityHandler,
     LessonActivityHandler,
     CourseActivityHandler,

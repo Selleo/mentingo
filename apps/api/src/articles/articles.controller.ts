@@ -444,6 +444,7 @@ export class ArticlesController {
       uploadFileBody.language,
       uploadFileBody.title,
       uploadFileBody.description,
+      uploadFileBody.visibility,
       currentUser,
     );
 

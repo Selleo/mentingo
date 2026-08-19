@@ -34,12 +34,12 @@ export default function DeadlineStatCard({
           onOpen();
         }
       }}
-      className={cn("relative overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg", {
+      className={cn("relative overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-sm", {
         "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl": isAdminExperience,
         "opacity-50 hover:bg-neutral-100 hover:opacity-75": isAdminExperience && !hasDeadline,
       })}
     >
-      <div className="absolute inset-y-0 left-0 w-1 bg-secondary-500" aria-hidden="true" />
+      <div className="absolute inset-y-0 left-0 w-1.5 bg-secondary-500" aria-hidden="true" />
       <div className="flex items-center gap-4">
         <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
           <Calendar className="size-6 text-secondary-500" />

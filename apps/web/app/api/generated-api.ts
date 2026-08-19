@@ -45,6 +45,7 @@ export interface InitVideoUploadBody {
     | "live_training";
   relationshipType?: string;
   linkToEntity?: boolean;
+  visibility?: "public" | "private";
 }
 
 export interface InitVideoUploadResponse {
@@ -233,6 +234,8 @@ export interface CurrentUserResponse {
       | "live_training.start"
       | "live_training.end"
       | "live_training.statistics"
+      | "dashboard.read"
+      | "todo_task.manage_self"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -255,6 +258,7 @@ export interface CurrentUserResponse {
       | "certificate.render"
       | "file.upload"
       | "file.delete"
+      | "resource_library.manage"
       | "ai.use"
       | "announcement.read"
       | "announcement.create"
@@ -560,6 +564,150 @@ export interface UpdateUserSettingsResponse {
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
       };
+}
+
+export interface GetDashboardSettingsResponse {
+  data: {
+    layout: {
+      schemaVersion: 2;
+      /** @min 0 */
+      revision: number;
+      widgets: {
+        type:
+          | "ai_mentor_practice"
+          | "todo_list"
+          | "event_calendar"
+          | "deadline_risks"
+          | "training_completion"
+          | "continue_learning"
+          | "required_courses"
+          | "course_completion"
+          | "certificates";
+        size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+        visible: boolean;
+      }[];
+    };
+    catalog: {
+      type:
+        | "ai_mentor_practice"
+        | "todo_list"
+        | "event_calendar"
+        | "deadline_risks"
+        | "training_completion"
+        | "continue_learning"
+        | "required_courses"
+        | "course_completion"
+        | "certificates";
+      alwaysVisible: boolean;
+      /** @minItems 1 */
+      allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
+      defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+    }[];
+  };
+}
+
+export interface UpdateDashboardSettingsBody {
+  /** @min 0 */
+  expectedRevision: number;
+  widgets: {
+    type:
+      | "ai_mentor_practice"
+      | "todo_list"
+      | "event_calendar"
+      | "deadline_risks"
+      | "training_completion"
+      | "continue_learning"
+      | "required_courses"
+      | "course_completion"
+      | "certificates";
+    size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+    visible: boolean;
+  }[];
+}
+
+export interface UpdateDashboardSettingsResponse {
+  data: {
+    layout: {
+      schemaVersion: 2;
+      /** @min 0 */
+      revision: number;
+      widgets: {
+        type:
+          | "ai_mentor_practice"
+          | "todo_list"
+          | "event_calendar"
+          | "deadline_risks"
+          | "training_completion"
+          | "continue_learning"
+          | "required_courses"
+          | "course_completion"
+          | "certificates";
+        size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+        visible: boolean;
+      }[];
+    };
+    catalog: {
+      type:
+        | "ai_mentor_practice"
+        | "todo_list"
+        | "event_calendar"
+        | "deadline_risks"
+        | "training_completion"
+        | "continue_learning"
+        | "required_courses"
+        | "course_completion"
+        | "certificates";
+      alwaysVisible: boolean;
+      /** @minItems 1 */
+      allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
+      defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+    }[];
+  };
+}
+
+export interface ResetDashboardSettingsBody {
+  /** @min 0 */
+  expectedRevision: number;
+}
+
+export interface ResetDashboardSettingsResponse {
+  data: {
+    layout: {
+      schemaVersion: 2;
+      /** @min 0 */
+      revision: number;
+      widgets: {
+        type:
+          | "ai_mentor_practice"
+          | "todo_list"
+          | "event_calendar"
+          | "deadline_risks"
+          | "training_completion"
+          | "continue_learning"
+          | "required_courses"
+          | "course_completion"
+          | "certificates";
+        size: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+        visible: boolean;
+      }[];
+    };
+    catalog: {
+      type:
+        | "ai_mentor_practice"
+        | "todo_list"
+        | "event_calendar"
+        | "deadline_risks"
+        | "training_completion"
+        | "continue_learning"
+        | "required_courses"
+        | "course_completion"
+        | "certificates";
+      alwaysVisible: boolean;
+      /** @minItems 1 */
+      allowedSizes: ("1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3")[];
+      defaultSize: "1x1" | "2x1" | "1x2" | "2x2" | "3x2" | "4x1" | "4x2" | "4x3";
+    }[];
+  };
 }
 
 export interface UpdateAdminNewUserNotificationResponse {
@@ -1304,6 +1452,94 @@ export interface GetStatsResponse {
   };
 }
 
+export interface GetDashboardTrainingCompletionResponse {
+  data: {
+    completed: number;
+    inProgress: number;
+    notStarted: number;
+    total: number;
+    percentage: number;
+  };
+}
+
+export interface GetDashboardDeadlineRiskSummaryResponse {
+  data: {
+    overdueCount: number;
+    dueSoonCount: number;
+  };
+}
+
+export interface GetDashboardIncompleteCoursesResponse {
+  data: {
+    hasEnrollments: boolean;
+    courses: {
+      id: string;
+      title: string;
+      total: number;
+      overdue: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+    }[];
+  };
+}
+
+export interface GetDashboardDeadlineRisksResponse {
+  data: {
+    id: string;
+    title: string;
+    students: {
+      id: string;
+      name: string;
+      dueDate: string;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetDashboardDeadlineRiskCourseSummariesResponse {
+  data: {
+    id: string;
+    title: string;
+    thumbnailUrl: string | null;
+    overdueCount: number;
+    dueSoonCount: number;
+    nearestDueDate: string;
+    urgency: "overdue" | "dueSoon";
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetDashboardDeadlineRiskGroupsResponse {
+  data: {
+    id: string;
+    name: string;
+    dueDate: string;
+    urgency: "overdue" | "dueSoon";
+    studentCount: number;
+    students: {
+      id: string;
+      name: string;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetUsersResponse {
   data: ({
     id: string;
@@ -1878,6 +2114,45 @@ export interface GetStudentCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetStudentDashboardSummaryResponse {
+  data: {
+    continueLearningCourses: {
+      /** @format uuid */
+      courseId: string;
+      slug: string;
+      title: string;
+      thumbnailUrl: string | null;
+      completedChapterCount: number;
+      courseChapterCount: number;
+      lesson: {
+        /** @format uuid */
+        id: string;
+        title: string | null;
+      } | null;
+    }[];
+    requiredCourses: {
+      /** @format uuid */
+      courseId: string;
+      slug: string;
+      title: string;
+      thumbnailUrl: string | null;
+      dueDate: string | null;
+      urgency: "overdue" | "dueSoon" | "scheduled" | "noDeadline";
+    }[];
+    completion: {
+      total: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+      percentage: number;
+    };
+  };
+}
+
+export interface MarkCourseOpenedResponse {
+  data: null;
+}
+
 export interface GetStudentsWithEnrollmentDateResponse {
   data: {
     name?: string;
@@ -2187,8 +2462,6 @@ export interface GetBetaCourseByIdResponse {
           id: string;
           /** @format uuid */
           lessonId: string;
-          aiMentorInstructions: string;
-          type: "mentor" | "teacher" | "roleplay";
           name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
@@ -2911,8 +3184,6 @@ export type BetaCreateChapterBody = {
       id: string;
       /** @format uuid */
       lessonId: string;
-      aiMentorInstructions: string;
-      type: "mentor" | "teacher" | "roleplay";
       name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
@@ -2997,8 +3268,6 @@ export type UpdateChapterBody = ({
       id: string;
       /** @format uuid */
       lessonId: string;
-      aiMentorInstructions: string;
-      type: "mentor" | "teacher" | "roleplay";
       name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
@@ -3331,8 +3600,6 @@ export type BetaCreateLessonBody = {
     id: string;
     /** @format uuid */
     lessonId: string;
-    aiMentorInstructions: string;
-    type: "mentor" | "teacher" | "roleplay";
     name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
@@ -3524,7 +3791,35 @@ export type BetaCreateAiMentorLessonBody = {
   /** @format uuid */
   chapterId: string;
   displayOrder?: number;
-  aiMentorInstructions: string;
+  aiMentorConfiguration:
+    | {
+        type: "teacher";
+        /** @minLength 1 */
+        taskGoal: string;
+        /** @minLength 1 */
+        expertise: string;
+        /** @minLength 1 */
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      }
+    | {
+        type: "roleplay";
+        /** @minLength 1 */
+        scenario: string;
+        /** @minLength 1 */
+        aiRole: string;
+        /** @minLength 1 */
+        learnerRole: string;
+        /** @minLength 1 */
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      };
   aiJudgeConfiguration: {
     /** @minLength 1 */
     taskGoal: string;
@@ -3563,7 +3858,6 @@ export type BetaCreateAiMentorLessonBody = {
       description: string;
     }[];
   };
-  type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
@@ -3625,8 +3919,6 @@ export type BetaUpdateAiMentorLessonBody = ({
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
-  aiMentorInstructions: string;
-  type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
@@ -3817,8 +4109,6 @@ export type BetaUpdateLessonBody = ({
     id: string;
     /** @format uuid */
     lessonId: string;
-    aiMentorInstructions: string;
-    type: "mentor" | "teacher" | "roleplay";
     name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
@@ -4152,8 +4442,35 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorInstructions?: string;
-        aiMentorType: "mentor" | "teacher" | "roleplay";
+        aiMentorConfiguration?:
+          | {
+              type: "teacher";
+              /** @minLength 1 */
+              taskGoal: string;
+              /** @minLength 1 */
+              expertise: string;
+              /** @minLength 1 */
+              contentScope: string;
+              teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+              feedbackGuidance?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            }
+          | {
+              type: "roleplay";
+              /** @minLength 1 */
+              scenario: string;
+              /** @minLength 1 */
+              aiRole: string;
+              /** @minLength 1 */
+              learnerRole: string;
+              /** @minLength 1 */
+              characterGoal: string;
+              difficulty: "cooperative" | "realistic" | "challenging";
+              factsAndConstraints?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            };
       };
       mode: "create";
       /** @minLength 1 */
@@ -4167,8 +4484,35 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorInstructions?: string;
-        aiMentorType: "mentor" | "teacher" | "roleplay";
+        aiMentorConfiguration?:
+          | {
+              type: "teacher";
+              /** @minLength 1 */
+              taskGoal: string;
+              /** @minLength 1 */
+              expertise: string;
+              /** @minLength 1 */
+              contentScope: string;
+              teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+              feedbackGuidance?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            }
+          | {
+              type: "roleplay";
+              /** @minLength 1 */
+              scenario: string;
+              /** @minLength 1 */
+              aiRole: string;
+              /** @minLength 1 */
+              learnerRole: string;
+              /** @minLength 1 */
+              characterGoal: string;
+              difficulty: "cooperative" | "realistic" | "challenging";
+              factsAndConstraints?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            };
       };
       mode: "improve";
       /** @minLength 1 */
@@ -5495,8 +5839,35 @@ export interface ValidateConfigurationBody {
   lessonContext: {
     title?: string;
     taskDescription?: string;
-    aiMentorInstructions?: string;
-    aiMentorType: "mentor" | "teacher" | "roleplay";
+    aiMentorConfiguration?:
+      | {
+          type: "teacher";
+          /** @minLength 1 */
+          taskGoal: string;
+          /** @minLength 1 */
+          expertise: string;
+          /** @minLength 1 */
+          contentScope: string;
+          teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+          feedbackGuidance?: string | null;
+          openingInstruction?: string | null;
+          additionalInstructions?: string | null;
+        }
+      | {
+          type: "roleplay";
+          /** @minLength 1 */
+          scenario: string;
+          /** @minLength 1 */
+          aiRole: string;
+          /** @minLength 1 */
+          learnerRole: string;
+          /** @minLength 1 */
+          characterGoal: string;
+          difficulty: "cooperative" | "realistic" | "challenging";
+          factsAndConstraints?: string | null;
+          openingInstruction?: string | null;
+          additionalInstructions?: string | null;
+        };
   };
   /** @minLength 1 */
   brief?: string;
@@ -5590,6 +5961,1370 @@ export interface ValidateConfigurationResponse {
   };
 }
 
+export interface GetAiMentorConfigurationResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
+}
+
+export type ReplaceAiMentorConfigurationBody =
+  | {
+      type: "teacher";
+      /** @minLength 1 */
+      taskGoal: string;
+      /** @minLength 1 */
+      expertise: string;
+      /** @minLength 1 */
+      contentScope: string;
+      teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+      feedbackGuidance?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    }
+  | {
+      type: "roleplay";
+      /** @minLength 1 */
+      scenario: string;
+      /** @minLength 1 */
+      aiRole: string;
+      /** @minLength 1 */
+      learnerRole: string;
+      /** @minLength 1 */
+      characterGoal: string;
+      difficulty: "cooperative" | "realistic" | "challenging";
+      factsAndConstraints?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    };
+
+export interface ReplaceAiMentorConfigurationResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
+}
+
+export type UpdateAiMentorConfigurationTranslationsBody =
+  | {
+      type: "teacher";
+      /** @minLength 1 */
+      taskGoal?: string;
+      /** @minLength 1 */
+      expertise?: string;
+      /** @minLength 1 */
+      contentScope?: string;
+      feedbackGuidance?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    }
+  | {
+      type: "roleplay";
+      /** @minLength 1 */
+      scenario?: string;
+      /** @minLength 1 */
+      aiRole?: string;
+      /** @minLength 1 */
+      learnerRole?: string;
+      /** @minLength 1 */
+      characterGoal?: string;
+      factsAndConstraints?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    };
+
+export interface UpdateAiMentorConfigurationTranslationsResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
+}
+
+export type GenerateAiMentorConfigurationBody =
+  | {
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      lessonId?: string;
+      lessonContext: {
+        title?: string;
+        taskDescription?: string;
+      };
+      mode: "create";
+      configurationType: "teacher" | "roleplay";
+      /** @minLength 1 */
+      brief: string;
+    }
+  | {
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      lessonId?: string;
+      lessonContext: {
+        title?: string;
+        taskDescription?: string;
+      };
+      mode: "improve";
+      /** @minLength 1 */
+      instruction: string;
+      /** @minLength 1 */
+      brief?: string;
+      currentConfiguration:
+        | {
+            type: "teacher";
+            taskGoal?: string | null;
+            expertise?: string | null;
+            contentScope?: string | null;
+            teachingStyle?: string | null;
+            feedbackGuidance?: string | null;
+            openingInstruction?: string | null;
+            additionalInstructions?: string | null;
+          }
+        | {
+            type: "roleplay";
+            scenario?: string | null;
+            aiRole?: string | null;
+            learnerRole?: string | null;
+            characterGoal?: string | null;
+            difficulty?: string | null;
+            factsAndConstraints?: string | null;
+            openingInstruction?: string | null;
+            additionalInstructions?: string | null;
+          };
+      latestValidation?: {
+        passed: boolean;
+        /**
+         * @minLength 1
+         * @maxLength 180
+         */
+        summary: string;
+        /** @maxItems 3 */
+        issues: {
+          /** @minLength 1 */
+          code: string;
+          severity: "error" | "warning";
+          target: {
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+          };
+          /** @minLength 1 */
+          message: string;
+          /** @minLength 1 */
+          correction: string;
+        }[];
+      };
+    };
+
+export interface GenerateAiMentorConfigurationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+  };
+}
+
+export interface GetAiMentorConfigurationGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    progress:
+      | {
+          status: "drafting";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        }
+      | {
+          status: "evaluating";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          draft:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+            before?: string | null;
+            after?: string | null;
+          }[];
+        }
+      | {
+          status: "revising";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          draft:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          validation: {
+            passed: boolean;
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target: {
+                field:
+                  | "taskGoal"
+                  | "expertise"
+                  | "contentScope"
+                  | "teachingStyle"
+                  | "feedbackGuidance"
+                  | "scenario"
+                  | "aiRole"
+                  | "learnerRole"
+                  | "characterGoal"
+                  | "difficulty"
+                  | "factsAndConstraints"
+                  | "openingInstruction"
+                  | "additionalInstructions";
+              };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+            before?: string | null;
+            after?: string | null;
+          }[];
+        }
+      | {
+          status: "awaiting_revision";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          validation: {
+            passed: boolean;
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target: {
+                field:
+                  | "taskGoal"
+                  | "expertise"
+                  | "contentScope"
+                  | "teachingStyle"
+                  | "feedbackGuidance"
+                  | "scenario"
+                  | "aiRole"
+                  | "learnerRole"
+                  | "characterGoal"
+                  | "difficulty"
+                  | "factsAndConstraints"
+                  | "openingInstruction"
+                  | "additionalInstructions";
+              };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+            before?: string | null;
+            after?: string | null;
+          }[];
+        }
+      | {
+          status: "completed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          validation: {
+            passed: boolean;
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target: {
+                field:
+                  | "taskGoal"
+                  | "expertise"
+                  | "contentScope"
+                  | "teachingStyle"
+                  | "feedbackGuidance"
+                  | "scenario"
+                  | "aiRole"
+                  | "learnerRole"
+                  | "characterGoal"
+                  | "difficulty"
+                  | "factsAndConstraints"
+                  | "openingInstruction"
+                  | "additionalInstructions";
+              };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+            before?: string | null;
+            after?: string | null;
+          }[];
+        }
+      | {
+          status: "requires_review";
+          attempt: 3;
+          configuration:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          validation: {
+            passed: boolean;
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target: {
+                field:
+                  | "taskGoal"
+                  | "expertise"
+                  | "contentScope"
+                  | "teachingStyle"
+                  | "feedbackGuidance"
+                  | "scenario"
+                  | "aiRole"
+                  | "learnerRole"
+                  | "characterGoal"
+                  | "difficulty"
+                  | "factsAndConstraints"
+                  | "openingInstruction"
+                  | "additionalInstructions";
+              };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            field:
+              | "taskGoal"
+              | "expertise"
+              | "contentScope"
+              | "teachingStyle"
+              | "feedbackGuidance"
+              | "scenario"
+              | "aiRole"
+              | "learnerRole"
+              | "characterGoal"
+              | "difficulty"
+              | "factsAndConstraints"
+              | "openingInstruction"
+              | "additionalInstructions";
+            before?: string | null;
+            after?: string | null;
+          }[];
+        }
+      | {
+          status: "failed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          /** @minLength 1 */
+          message: string;
+          configuration?:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        }
+      | {
+          status: "cancelled";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration?:
+            | {
+                type: "teacher";
+                /** @minLength 1 */
+                taskGoal: string;
+                /** @minLength 1 */
+                expertise: string;
+                /** @minLength 1 */
+                contentScope: string;
+                teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                feedbackGuidance?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              }
+            | {
+                type: "roleplay";
+                /** @minLength 1 */
+                scenario: string;
+                /** @minLength 1 */
+                aiRole: string;
+                /** @minLength 1 */
+                learnerRole: string;
+                /** @minLength 1 */
+                characterGoal: string;
+                difficulty: "cooperative" | "realistic" | "challenging";
+                factsAndConstraints?: string | null;
+                openingInstruction?: string | null;
+                additionalInstructions?: string | null;
+              };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              field:
+                | "taskGoal"
+                | "expertise"
+                | "contentScope"
+                | "teachingStyle"
+                | "feedbackGuidance"
+                | "scenario"
+                | "aiRole"
+                | "learnerRole"
+                | "characterGoal"
+                | "difficulty"
+                | "factsAndConstraints"
+                | "openingInstruction"
+                | "additionalInstructions";
+              before?: string | null;
+              after?: string | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target: {
+                  field:
+                    | "taskGoal"
+                    | "expertise"
+                    | "contentScope"
+                    | "teachingStyle"
+                    | "feedbackGuidance"
+                    | "scenario"
+                    | "aiRole"
+                    | "learnerRole"
+                    | "characterGoal"
+                    | "difficulty"
+                    | "factsAndConstraints"
+                    | "openingInstruction"
+                    | "additionalInstructions";
+                };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        };
+  };
+}
+
+export interface ReviseAiMentorConfigurationGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+  };
+}
+
+export interface CancelAiMentorConfigurationGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    cancellationRequested: true;
+  };
+}
+
+export interface ValidateAiMentorConfigurationDraftBody {
+  /** @format uuid */
+  courseId: string;
+  /** @format uuid */
+  lessonId?: string;
+  lessonContext: {
+    title?: string;
+    taskDescription?: string;
+  };
+  /** @minLength 1 */
+  brief?: string;
+  configuration:
+    | {
+        type: "teacher";
+        taskGoal?: string | null;
+        expertise?: string | null;
+        contentScope?: string | null;
+        teachingStyle?: string | null;
+        feedbackGuidance?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      }
+    | {
+        type: "roleplay";
+        scenario?: string | null;
+        aiRole?: string | null;
+        learnerRole?: string | null;
+        characterGoal?: string | null;
+        difficulty?: string | null;
+        factsAndConstraints?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      };
+}
+
+export interface ValidateAiMentorConfigurationDraftResponse {
+  data: {
+    passed: boolean;
+    /**
+     * @minLength 1
+     * @maxLength 180
+     */
+    summary: string;
+    /** @maxItems 3 */
+    issues: {
+      /** @minLength 1 */
+      code: string;
+      severity: "error" | "warning";
+      target: {
+        field:
+          | "taskGoal"
+          | "expertise"
+          | "contentScope"
+          | "teachingStyle"
+          | "feedbackGuidance"
+          | "scenario"
+          | "aiRole"
+          | "learnerRole"
+          | "characterGoal"
+          | "difficulty"
+          | "factsAndConstraints"
+          | "openingInstruction"
+          | "additionalInstructions";
+      };
+      /** @minLength 1 */
+      message: string;
+      /** @minLength 1 */
+      correction: string;
+    }[];
+  };
+}
+
 export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
@@ -5597,6 +7332,46 @@ export interface MarkLessonAsCompletedResponse {
 }
 
 export interface GetAllCertificatesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    userId: string;
+    /** @format uuid */
+    courseId: string;
+    courseTitle?: string | null;
+    completionDate?: string | null;
+    fullName?: string | null;
+    certificateSignatureUrl?: string | null;
+    certificateFontColor?: string | null;
+    issuedAt: string;
+    expiresAt?: string | null;
+    createdAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetDashboardSummaryResponse {
+  data: {
+    activeCount: number;
+    expiringSoon: {
+      /** @format uuid */
+      certificateId: string;
+      /** @format uuid */
+      courseId: string;
+      courseSlug: string;
+      courseTitle: string;
+      expiresAt: string;
+    } | null;
+  };
+}
+
+export interface GetDashboardCertificatesResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -5714,12 +7489,211 @@ export interface ResetCourseCertificatesResponse {
   affectedUserCount: number;
 }
 
+export interface GetTodayPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  } | null;
+}
+
+export interface CreatePracticeBody {
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /**
+   * @minLength 1
+   * @maxLength 3000
+   */
+  scenario: string;
+}
+
+export interface CreatePracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface GetPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface RetryPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
+export interface ReplayPracticeResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    practiceDate: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    title: string | null;
+    aiMentorName: string | null;
+    threadId: string | null;
+    threadStatus: ("active" | "completed" | "archived") | null;
+    taskGoal: string | null;
+    evaluation: {
+      passed: boolean;
+      minScore: number;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        /** @format uuid */
+        criterionId: string;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        /** @format uuid */
+        blockingErrorId: string;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+    status: "queued" | "processing" | "ready" | "failed";
+    errorCode: string | null;
+  };
+}
+
 export interface GetThreadResponse {
   data: {
     /** @format uuid */
     id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
+    aiMentorLessonId: string | null;
+    practiceSessionId: string | null;
     /** @format uuid */
     userId: string;
     userLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -5802,6 +7776,9 @@ export interface GetAssetsResponse {
     reference: string;
     videoProvider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
     uploadedBy: string | null;
+    visibility: "public" | "private" | "hidden";
+    canChangeVisibility: boolean;
+    isNew: boolean;
     /** @format date-time */
     createdAt: string;
     usageCount: number;
@@ -5826,6 +7803,34 @@ export interface GetAssetUsagesResponse {
     /** @format date-time */
     createdAt: string;
   }[];
+}
+
+export interface UpdateAssetVisibilityBody {
+  visibility: "public" | "private";
+}
+
+export interface UpdateAssetVisibilityResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    visibility: "public" | "private";
+  };
+}
+
+export interface BulkUpdateAssetVisibilityBody {
+  /** @minItems 1 */
+  resourceIds: string[];
+  visibility: "public" | "private";
+  confirmUsedAssetPrivacyChange?: boolean;
+}
+
+export interface BulkUpdateAssetVisibilityResponse {
+  data: {
+    updatedIds: string[];
+    skippedIds: string[];
+    requiresConfirmation: boolean;
+    affectedUsedAssetCount: number;
+  };
 }
 
 export interface LinkAssetBody {
@@ -5870,6 +7875,7 @@ export interface UploadAssetBody {
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
+  visibility?: "public" | "private";
 }
 
 export interface UploadAssetResponse {
@@ -8047,6 +10053,16 @@ export interface UpdateTenantByIdResponse {
   };
 }
 
+export interface FindSupportRolesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    slug: string;
+    name: string;
+    isSystem: boolean;
+  }[];
+}
+
 export interface FindSupportUsersResponse {
   data: {
     /** @format uuid */
@@ -8057,6 +10073,13 @@ export interface FindSupportUsersResponse {
     lastName: string;
     label: string;
     profilePictureUrl: string | null;
+    roles: {
+      /** @format uuid */
+      id: string;
+      slug: string;
+      name: string;
+      isSystem: boolean;
+    }[];
   }[];
   pagination: {
     totalItems: number;
@@ -8116,6 +10139,7 @@ export interface GetActivityLogsResponse {
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
+    resourceName: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -8697,6 +10721,7 @@ export interface UploadFileToArticleBody {
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   title: string;
   description: string;
+  visibility?: "public" | "private";
 }
 
 export interface UploadFileToArticleResponse {
@@ -8771,6 +10796,19 @@ export interface GetEventsResponse {
           };
     }[];
   };
+}
+
+export interface GetDashboardEventsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    /** @format uuid */
+    targetId: string;
+    title: string;
+    startsAt: string;
+    allDay: boolean;
+  }[];
 }
 
 export interface GetEventDetailsResponse {
@@ -8914,6 +10952,98 @@ export interface LifecycleNotificationsBody {
     [key: string]: any;
   }[];
   [key: string]: any;
+}
+
+export interface ListResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+}
+
+export interface CreateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title?: string;
+  completed?: boolean;
+}
+
+export interface UpdateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ReorderBody {
+  /** @maxItems 100 */
+  activeTaskIds: string[];
+  /** @maxItems 100 */
+  completedTaskIds: string[];
+}
+
+export interface ReorderResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
 }
 
 import type {
@@ -9618,6 +11748,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetDashboardSettings
+     * @request GET:/api/settings/dashboard
+     */
+    settingsControllerGetDashboardSettings: (params: RequestParams = {}) =>
+      this.request<GetDashboardSettingsResponse, any>({
+        path: `/api/settings/dashboard`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateDashboardSettings
+     * @request PUT:/api/settings/dashboard
+     */
+    settingsControllerUpdateDashboardSettings: (
+      data: UpdateDashboardSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateDashboardSettingsResponse, any>({
+        path: `/api/settings/dashboard`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerResetDashboardSettings
+     * @request POST:/api/settings/dashboard/reset
+     */
+    settingsControllerResetDashboardSettings: (
+      data: ResetDashboardSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ResetDashboardSettingsResponse, any>({
+        path: `/api/settings/dashboard/reset`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateAdminNewUserNotification
      * @request PATCH:/api/settings/admin/new-user-notification
      */
@@ -10269,6 +12451,151 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetStatsResponse, any>({
         path: `/api/statistics/stats`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardTrainingCompletion
+     * @request GET:/api/statistics/dashboard/training-completion
+     */
+    statisticsControllerGetDashboardTrainingCompletion: (params: RequestParams = {}) =>
+      this.request<GetDashboardTrainingCompletionResponse, any>({
+        path: `/api/statistics/dashboard/training-completion`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRiskSummary
+     * @request GET:/api/statistics/dashboard/deadline-risks/summary
+     */
+    statisticsControllerGetDashboardDeadlineRiskSummary: (params: RequestParams = {}) =>
+      this.request<GetDashboardDeadlineRiskSummaryResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks/summary`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardIncompleteCourses
+     * @request GET:/api/statistics/dashboard/incomplete-courses
+     */
+    statisticsControllerGetDashboardIncompleteCourses: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardIncompleteCoursesResponse, any>({
+        path: `/api/statistics/dashboard/incomplete-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRisks
+     * @request GET:/api/statistics/dashboard/deadline-risks
+     */
+    statisticsControllerGetDashboardDeadlineRisks: (
+      query?: {
+        type?: "overdue" | "dueSoon";
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        perPage?: number;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardDeadlineRisksResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRiskCourseSummaries
+     * @request GET:/api/statistics/dashboard/deadline-risks/courses
+     */
+    statisticsControllerGetDashboardDeadlineRiskCourseSummaries: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        urgencyOrder?: "mostUrgent" | "leastUrgent";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardDeadlineRiskCourseSummariesResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks/courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetDashboardDeadlineRiskGroups
+     * @request GET:/api/statistics/dashboard/deadline-risks/courses/{courseId}/groups
+     */
+    statisticsControllerGetDashboardDeadlineRiskGroups: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        sortBy?: "name" | "dueDate" | "urgency" | "studentCount";
+        sortDirection?: "asc" | "desc";
+        urgency?: "overdue" | "dueSoon";
+        /** @maxLength 200 */
+        search?: string;
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardDeadlineRiskGroupsResponse, any>({
+        path: `/api/statistics/dashboard/deadline-risks/courses/${courseId}/groups`,
         method: "GET",
         query: query,
         format: "json",
@@ -11013,6 +13340,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/get-student-courses`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetStudentDashboardSummary
+     * @request GET:/api/course/dashboard-summary
+     */
+    courseControllerGetStudentDashboardSummary: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetStudentDashboardSummaryResponse, any>({
+        path: `/api/course/dashboard-summary`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerMarkCourseOpened
+     * @request POST:/api/course/{courseId}/open
+     */
+    courseControllerMarkCourseOpened: (courseId: string, params: RequestParams = {}) =>
+      this.request<MarkCourseOpenedResponse, any>({
+        path: `/api/course/${courseId}/open`,
+        method: "POST",
         format: "json",
         ...params,
       }),
@@ -12592,6 +14954,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         title: string;
         description: string;
         contextId?: string;
+        visibility?: "public" | "private";
       },
       params: RequestParams = {},
     ) =>
@@ -12907,6 +15270,158 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AiMentorConfigurationControllerGetAiMentorConfiguration
+     * @request GET:/api/lesson/{lessonId}/ai-mentor-configuration
+     */
+    aiMentorConfigurationControllerGetAiMentorConfiguration: (
+      lessonId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAiMentorConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationControllerReplaceAiMentorConfiguration
+     * @request PUT:/api/lesson/{lessonId}/ai-mentor-configuration
+     */
+    aiMentorConfigurationControllerReplaceAiMentorConfiguration: (
+      lessonId: string,
+      data: ReplaceAiMentorConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceAiMentorConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations
+     * @request PATCH:/api/lesson/{lessonId}/ai-mentor-configuration/translations/{language}
+     */
+    aiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations: (
+      lessonId: string,
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr",
+      data: UpdateAiMentorConfigurationTranslationsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAiMentorConfigurationTranslationsResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration/translations/${language}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationGenerationControllerGenerateAiMentorConfiguration
+     * @request POST:/api/ai/mentor-configuration/generate
+     */
+    aiMentorConfigurationGenerationControllerGenerateAiMentorConfiguration: (
+      data: GenerateAiMentorConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GenerateAiMentorConfigurationResponse, any>({
+        path: `/api/ai/mentor-configuration/generate`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationGenerationControllerGetAiMentorConfigurationGeneration
+     * @request GET:/api/ai/mentor-configuration/generations/{generationId}
+     */
+    aiMentorConfigurationGenerationControllerGetAiMentorConfigurationGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAiMentorConfigurationGenerationResponse, any>({
+        path: `/api/ai/mentor-configuration/generations/${generationId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationGenerationControllerReviseAiMentorConfigurationGeneration
+     * @request POST:/api/ai/mentor-configuration/generations/{generationId}/revise
+     */
+    aiMentorConfigurationGenerationControllerReviseAiMentorConfigurationGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReviseAiMentorConfigurationGenerationResponse, any>({
+        path: `/api/ai/mentor-configuration/generations/${generationId}/revise`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationGenerationControllerCancelAiMentorConfigurationGeneration
+     * @request POST:/api/ai/mentor-configuration/generations/{generationId}/cancel
+     */
+    aiMentorConfigurationGenerationControllerCancelAiMentorConfigurationGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CancelAiMentorConfigurationGenerationResponse, any>({
+        path: `/api/ai/mentor-configuration/generations/${generationId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationGenerationControllerValidateAiMentorConfigurationDraft
+     * @request POST:/api/ai/mentor-configuration/validate
+     */
+    aiMentorConfigurationGenerationControllerValidateAiMentorConfigurationDraft: (
+      data: ValidateAiMentorConfigurationDraftBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ValidateAiMentorConfigurationDraftResponse, any>({
+        path: `/api/ai/mentor-configuration/validate`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StudentLessonProgressControllerMarkLessonAsCompleted
      * @request POST:/api/studentLessonProgress
      */
@@ -12948,6 +15463,52 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetAllCertificatesResponse, any>({
         path: `/api/certificates/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetDashboardSummary
+     * @request GET:/api/certificates/dashboard-summary
+     */
+    certificatesControllerGetDashboardSummary: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardSummaryResponse, any>({
+        path: `/api/certificates/dashboard-summary`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetDashboardCertificates
+     * @request GET:/api/certificates/dashboard
+     */
+    certificatesControllerGetDashboardCertificates: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardCertificatesResponse, any>({
+        path: `/api/certificates/dashboard`,
         method: "GET",
         query: query,
         format: "json",
@@ -13148,6 +15709,78 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AiControllerGetTodayPractice
+     * @request GET:/api/ai/practice/today
+     */
+    aiControllerGetTodayPractice: (params: RequestParams = {}) =>
+      this.request<GetTodayPracticeResponse, any>({
+        path: `/api/ai/practice/today`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerCreatePractice
+     * @request POST:/api/ai/practice
+     */
+    aiControllerCreatePractice: (data: CreatePracticeBody, params: RequestParams = {}) =>
+      this.request<CreatePracticeResponse, any>({
+        path: `/api/ai/practice`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetPractice
+     * @request GET:/api/ai/practice/{id}
+     */
+    aiControllerGetPractice: (id: string, params: RequestParams = {}) =>
+      this.request<GetPracticeResponse, any>({
+        path: `/api/ai/practice/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerRetryPractice
+     * @request POST:/api/ai/practice/{id}/retry
+     */
+    aiControllerRetryPractice: (id: string, params: RequestParams = {}) =>
+      this.request<RetryPracticeResponse, any>({
+        path: `/api/ai/practice/${id}/retry`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerReplayPractice
+     * @request POST:/api/ai/practice/{id}/replay
+     */
+    aiControllerReplayPractice: (id: string, params: RequestParams = {}) =>
+      this.request<ReplayPracticeResponse, any>({
+        path: `/api/ai/practice/${id}/replay`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AiControllerGetThread
      * @request GET:/api/ai/thread
      */
@@ -13326,6 +15959,45 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/resource-library/assets/${id}/usages`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUpdateAssetVisibility
+     * @request PATCH:/api/resource-library/assets/{id}/visibility
+     */
+    resourceLibraryControllerUpdateAssetVisibility: (
+      id: string,
+      data: UpdateAssetVisibilityBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAssetVisibilityResponse, any>({
+        path: `/api/resource-library/assets/${id}/visibility`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerBulkUpdateAssetVisibility
+     * @request PATCH:/api/resource-library/assets/visibility/bulk
+     */
+    resourceLibraryControllerBulkUpdateAssetVisibility: (
+      data: BulkUpdateAssetVisibilityBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BulkUpdateAssetVisibilityResponse, any>({
+        path: `/api/resource-library/assets/visibility/bulk`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -13754,13 +16426,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        feed?: "all" | "admin_announcements" | "system";
-        status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        feed?: "all" | "admin_announcements" | "system";
+        status?: "scheduled" | "published";
       },
       params: RequestParams = {},
     ) =>
@@ -13817,11 +16489,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15006,7 +17678,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -15026,7 +17697,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -15821,6 +18491,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name TenantsControllerFindSupportRoles
+     * @request GET:/api/super-admin/tenants/{id}/support-roles
+     */
+    tenantsControllerFindSupportRoles: (id: string, params: RequestParams = {}) =>
+      this.request<FindSupportRolesResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-roles`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name TenantsControllerFindSupportUsers
      * @request GET:/api/super-admin/tenants/{id}/support-users
      */
@@ -15832,6 +18516,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         perPage?: number;
         search?: string;
+        roleSlug?: string;
+        scope?: "admins" | "all";
       },
       params: RequestParams = {},
     ) =>
@@ -15877,23 +18563,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         keyword?: string;
         email?: string;
-        resourceType?:
-          | "user"
-          | "course"
-          | "chapter"
-          | "lesson"
-          | "announcement"
-          | "group"
-          | "settings"
-          | "integration"
-          | "category"
-          | "qa"
-          | "news"
-          | "article"
-          | "articleSection"
-          | "live_training"
-          | "learning_path"
-          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -15953,6 +18622,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "play_scorm"
               | "complete_scorm"
             )[];
+        resourceType?:
+          | "user"
+          | "course"
+          | "chapter"
+          | "lesson"
+          | "announcement"
+          | "group"
+          | "settings"
+          | "integration"
+          | "category"
+          | "qa"
+          | "news"
+          | "article"
+          | "articleSection"
+          | "live_training"
+          | "learning_path"
+          | "scorm";
       },
       params: RequestParams = {},
     ) =>
@@ -16320,6 +19006,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         title: string;
         description: string;
+        visibility?: "public" | "private";
       },
       params: RequestParams = {},
     ) =>
@@ -16731,6 +19418,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CalendarControllerGetDashboardEvents
+     * @request GET:/api/calendar/dashboard/events
+     */
+    calendarControllerGetDashboardEvents: (
+      query?: {
+        /** @minLength 1 */
+        start?: string;
+        /** @minLength 1 */
+        end?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @minLength 1 */
+        timezone?: string;
+        view?: "all" | "upcoming";
+        /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+        selectedDate?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDashboardEventsResponse, any>({
+        path: `/api/calendar/dashboard/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CalendarControllerGetEventDetails
      * @request GET:/api/calendar/events/{eventId}
      */
@@ -16885,6 +19602,81 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/auth/microsoft-calendar/callback`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TodoTasksControllerList
+     * @request GET:/api/todo-tasks
+     */
+    todoTasksControllerList: (params: RequestParams = {}) =>
+      this.request<ListResponse, any>({
+        path: `/api/todo-tasks`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TodoTasksControllerCreate
+     * @request POST:/api/todo-tasks
+     */
+    todoTasksControllerCreate: (data: CreateBody, params: RequestParams = {}) =>
+      this.request<CreateResponse, any>({
+        path: `/api/todo-tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TodoTasksControllerUpdate
+     * @request PATCH:/api/todo-tasks/{id}
+     */
+    todoTasksControllerUpdate: (id: string, data: UpdateBody, params: RequestParams = {}) =>
+      this.request<UpdateResponse, any>({
+        path: `/api/todo-tasks/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TodoTasksControllerRemove
+     * @request DELETE:/api/todo-tasks/{id}
+     */
+    todoTasksControllerRemove: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/todo-tasks/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TodoTasksControllerReorder
+     * @request PUT:/api/todo-tasks/order
+     */
+    todoTasksControllerReorder: (data: ReorderBody, params: RequestParams = {}) =>
+      this.request<ReorderResponse, any>({
+        path: `/api/todo-tasks/order`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };

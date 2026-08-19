@@ -7,12 +7,14 @@ import VideoUploadInput from "~/components/FileUploadInput/VideoUploadInput";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
+import { COURSE_HERO_PLACEHOLDER_BACKGROUND } from "./courseHeroPlaceholder";
+
 import type { RefObject } from "react";
 
 type CourseMediaModalProps = {
   heroImagePositionDraft: number;
   imageInputRef: RefObject<HTMLInputElement>;
-  imagePreviewUrl: string;
+  imagePreviewUrl?: string;
   isSaving: boolean;
   onClose: () => void;
   onImageSelection: (file: File) => void;
@@ -64,11 +66,16 @@ export default function CourseMediaModal({
             {t("modernCourseView.media.currentImage")}
           </p>
           <div className="relative mb-4 aspect-[21/9] overflow-hidden rounded-xl border-2 border-neutral-200">
-            <img
-              src={imagePreviewUrl}
-              alt={t("modernCourseView.media.previewAlt")}
-              className="size-full object-cover"
-              style={{ objectPosition: `center ${heroImagePositionDraft}%` }}
+            <div
+              role="img"
+              aria-label={t("modernCourseView.media.previewAlt")}
+              className="absolute inset-0 size-full bg-cover bg-no-repeat"
+              style={{
+                backgroundImage: imagePreviewUrl
+                  ? `url(${JSON.stringify(imagePreviewUrl)})`
+                  : COURSE_HERO_PLACEHOLDER_BACKGROUND,
+                backgroundPosition: `center ${heroImagePositionDraft}%`,
+              }}
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
             <div className="absolute bottom-4 left-4 text-sm font-semibold text-white">

@@ -1,6 +1,8 @@
+import { DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { EnvService } from "src/env/services/env.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -198,6 +200,66 @@ describe("SettingsController (e2e)", () => {
 
         expect(response.body).toBeDefined();
         expect(response.body.data).toBeDefined();
+        expect(response.body.data.language).toBe("en");
+        expect(response.body.data.dashboard).toBeUndefined();
+      });
+    });
+
+    describe("dashboard widget catalog", () => {
+      let aiConfiguredSpy: jest.SpyInstance;
+
+      beforeEach(async () => {
+        aiConfiguredSpy = jest
+          .spyOn(app.get(EnvService), "getAIConfigured")
+          .mockResolvedValue({ enabled: true });
+
+        await truncateTables(baseDb, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        testUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        testCookies = await cookieFor(testUser, app);
+      });
+
+      afterEach(() => {
+        aiConfiguredSpy.mockRestore();
+      });
+
+      it("should return dashboard widgets available to the current user", async () => {
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/dashboard")
+          .set("Cookie", testCookies)
+          .expect(200);
+
+        expect(response.body.data.catalog.map(({ type }: { type: string }) => type)).toEqual([
+          DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+          DASHBOARD_WIDGET_TYPES.TODO_LIST,
+          DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+          DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+          DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES,
+          DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION,
+          DASHBOARD_WIDGET_TYPES.CERTIFICATES,
+        ]);
+      });
+
+      it("should return the semantic role default when stored dashboard data is incompatible", async () => {
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/dashboard")
+          .set("Cookie", testCookies)
+          .expect(200);
+
+        expect(response.body.data.layout.schemaVersion).toBe(2);
+        expect(response.body.data.layout.revision).toBe(0);
+        expect(response.body.data.layout.widgets[0].type).toBe(
+          DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+        );
+      });
+
+      it("should return 401 for an unauthenticated dashboard request", async () => {
+        await request(app.getHttpServer()).get("/api/settings/dashboard").expect(401);
       });
     });
   });

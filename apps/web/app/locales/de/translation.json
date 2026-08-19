@@ -1,6 +1,304 @@
 {
+  "dashboardHome": {
+    "title": "Ihr Dashboard",
+    "subtitle": "Die wichtigsten Lerninformationen und Aktionen immer griffbereit.",
+    "customize": "Dashboard anpassen",
+    "edit": {
+      "badge": "Bearbeitung",
+      "widgetsButton": "Widgets",
+      "restore": "Standard wiederherstellen",
+      "restoreConfirm": "Standard-Widget-Layout wiederherstellen? Ihre aktuelle Anordnung wird ersetzt.",
+      "changeSize": "Größe von {{title}} ändern",
+      "sizeTitle": "Widget-Größe",
+      "sizes": {
+        "1x1": "Kompakt",
+        "2x1": "Breit",
+        "1x2": "Hoch",
+        "2x2": "Groß",
+        "3x2": "Erweitert",
+        "4x1": "Extra breit",
+        "4x2": "Hervorgehoben",
+        "4x3": "Hoch hervorgehoben"
+      },
+      "drag": "{{title}} verschieben",
+      "widgetLibrary": "Dashboard-Widgets",
+      "widgetLibraryDescription": "Wählen Sie die Widgets aus, die auf Ihrem Dashboard sichtbar sein sollen.",
+      "required": "Erforderlich",
+      "toggle": "{{title}} umschalten",
+      "confirm": "Ja",
+      "cancel": "Nein"
+    },
+    "empty": {
+      "title": "Ihr Dashboard ist leer",
+      "description": "Passen Sie das Dashboard an und fügen Sie wichtige Widgets hinzu.",
+      "editDescription": "Aktivieren Sie mindestens ein Widget in der Liste oben."
+    },
+    "error": {
+      "invalidWidgetLayout": "Das Dashboard-Layout enthält nicht verfügbare oder doppelte Widgets.",
+      "invalidWidgetSize": "Diese Größe ist für das ausgewählte Widget nicht zulässig.",
+      "requiredWidgetMissing": "Ein erforderliches Dashboard-Widget fehlt.",
+      "title": "Dashboard konnte nicht geladen werden",
+      "description": "Versuchen Sie es gleich noch einmal.",
+      "retry": "Erneut versuchen",
+      "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig.",
+      "staleLayout": "Ihr Dashboard wurde an anderer Stelle aktualisiert. Aktualisieren Sie die Seite und versuchen Sie es erneut."
+    },
+    "toast": {
+      "layoutSaved": "Dashboard-Änderungen wurden gespeichert.",
+      "layoutSaveError": "Die Dashboard-Änderungen konnten nicht gespeichert werden.",
+      "layoutReset": "Das Standard-Dashboard-Layout wurde wiederhergestellt.",
+      "layoutResetError": "Das Standard-Dashboard-Layout konnte nicht wiederhergestellt werden."
+    },
+    "widgets": {
+      "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
+      "trainingCompletionChartLabel": "{{completed}} von {{total}} Zuweisungen abgeschlossen, {{percentage}} Prozent.",
+      "deadlineRisksPage": "Seite {{page}} von {{totalPages}}",
+      "placeholderDescription": "Dashboard-Widget für eine eigene Datenansicht",
+      "placeholderContent": "Dieses Widget ist für funktionsspezifische Inhalte vorbereitet.",
+      "placeholderFooter": "Beispiel-Widget",
+      "s_placeholder_1": { "title": "Lernenden-Widget 1" },
+      "s_placeholder_2": { "title": "Lernenden-Widget 2" },
+      "s_placeholder_3": { "title": "Lernenden-Widget 3" },
+      "loadError": "Dieses Widget konnte nicht geladen werden.",
+      "studentTiles": {
+        "continueLearning": {
+          "description": "Alle von dir begonnenen Kurse",
+          "empty": "Du hast keine laufenden Kurse.",
+          "nextLesson": "Als Nächstes: {{title}}",
+          "openCourse": "Kurs öffnen",
+          "viewAll": "{{count}} laufende Kurse"
+        },
+        "requiredCourse": {
+          "description": "Alle noch abzuschließenden Pflichtkurse",
+          "empty": "Du hast keine offenen Pflichtkurse.",
+          "overdue": "Überfällig",
+          "dueSoon": "Bald fällig",
+          "scheduled": "Bevorstehend",
+          "noDeadline": "Keine Frist",
+          "dueDate": "Fällig am {{date}}",
+          "noDueDate": "Kein Fälligkeitsdatum",
+          "total": "{{count}} Pflichtkurse",
+          "overdueCount": "{{count}} überfällig"
+        },
+        "courseCompletion": {
+          "description": "Fortschritt deiner zugewiesenen Kurse",
+          "empty": "Dir wurden noch keine Kurse zugewiesen.",
+          "completedOfTotal": "{{completed}} von {{total}} abgeschlossen",
+          "completed": "Abgeschlossen",
+          "inProgress": "In Bearbeitung",
+          "notStarted": "Nicht begonnen"
+        },
+        "certificates": {
+          "description": "Aktive Zertifikate und bevorstehende Abläufe",
+          "empty": "Du hast keine aktiven Zertifikate.",
+          "active": "Aktive Zertifikate",
+          "expiringSoon": "Läuft innerhalb von 30 Tagen ab",
+          "cta": "Zertifikat anzeigen",
+          "viewAll": "Alle Zertifikate anzeigen",
+          "dialogTitle": "Deine Zertifikate",
+          "dialogDescription": "Alle erworbenen aktiven Zertifikate anzeigen.",
+          "issued": "Ausgestellt am {{date}}",
+          "expires": "Läuft am {{date}} ab",
+          "noExpiry": "Kein Ablaufdatum",
+          "previous": "Zurück",
+          "next": "Weiter",
+          "page": "Seite {{page}} von {{totalPages}}"
+        },
+        "aiMentorPractice": {
+          "description": "Erstelle täglich ein gezieltes Übungsszenario",
+          "empty": "Beschreibe eine Situation und übe sie mit dem KI-Mentor.",
+          "emptyPrompt": "Welches Gespräch möchtest du souveräner führen?",
+          "startCta": "Übung starten",
+          "continueCta": "Übung fortsetzen",
+          "feedbackCta": "Feedback ansehen",
+          "completedEyebrow": "Probe abgeschlossen",
+          "privateHint": "Ein privater Ort zum Ausprobieren und Verbessern",
+          "status": {
+            "queued": "Dein Szenario wartet.",
+            "processing": "Dein Szenario wird vorbereitet.",
+            "ready": "Die heutige Übung ist bereit.",
+            "failed": "Die Erstellung ist fehlgeschlagen. Öffne sie zum Wiederholen."
+          }
+        }
+      },
+      "commonDescription": "Wichtige Informationen auf einen Blick",
+      "training_completion": {
+        "title": "Schulungsabschluss",
+        "description": "Abschlussstatus aller Kurszuweisungen",
+        "completed": "Abgeschlossen",
+        "inProgress": "In Bearbeitung",
+        "notStarted": "Nicht begonnen",
+        "viewAnalytics": "Analysen anzeigen",
+        "empty": "Noch keine Kurszuweisungen.",
+        "assignCourses": "Kurse zuweisen"
+      },
+      "deadline_risks": {
+        "title": "Terminrisiken",
+        "description": "Pflichtkurse, die Aufmerksamkeit benötigen",
+        "sort": "Sortieren",
+        "sortMostUrgent": "Dringendste zuerst",
+        "sortLeastUrgent": "Weniger dringende zuerst",
+        "student": "Teilnehmer",
+        "group": "Gruppe",
+        "learners": "Teilnehmer",
+        "deadline": "Frist",
+        "status": "Status",
+        "searchStudents": "Teilnehmer suchen",
+        "searchGroups": "Gruppen oder Teilnehmer suchen",
+        "allStatuses": "Alle Status",
+        "studentsEmpty": "Keine betroffenen Teilnehmer.",
+        "groupsEmpty": "Keine betroffenen Gruppen.",
+        "overdue": "Überfällig",
+        "dueSoon": "Bald fällig",
+        "empty": "Derzeit keine Terminrisiken.",
+        "overdueTitle": "Überfällige Pflichtkurse",
+        "dueSoonTitle": "Bald fällige Pflichtkurse",
+        "goToCourse": "Zum Kurs",
+        "affected_one": "{{count}} betroffene Person",
+        "affected_other": "{{count}} betroffene Personen"
+      },
+      "incomplete_courses": {
+        "title": "Unvollständige Kurse",
+        "description": "Kurse mit den meisten offenen Zuweisungen",
+        "allCompleted": "Alle zugewiesenen Kurse sind abgeschlossen.",
+        "noEnrollments": "Noch keine Kurszuweisungen.",
+        "enrollments": "Zuweisungen",
+        "notCompleted": "{{count}} nicht abgeschlossen"
+      },
+      "event_calendar": {
+        "title": "Veranstaltungskalender",
+        "description": "Lernveranstaltungen und Termine in diesem Monat",
+        "previousMonth": "Vorheriger Monat",
+        "nextMonth": "Nächster Monat",
+        "selectMonth": "Monat auswählen",
+        "selectYear": "Jahr auswählen",
+        "selectedDay": "Ausgewählter Tag",
+        "upcoming": "Bevorstehende Veranstaltungen",
+        "empty": "Keine Veranstaltungen in diesem Monat.",
+        "liveTraining": "Live-Schulung",
+        "courseDeadline": "Kurstermin",
+        "weekdays": {
+          "mon": "Mo",
+          "tue": "Di",
+          "wed": "Mi",
+          "thu": "Do",
+          "fri": "Fr",
+          "sat": "Sa",
+          "sun": "So"
+        }
+      },
+      "continue_learning": { "title": "Weiterlernen" },
+      "required_course": { "title": "Pflichtkurse" },
+      "course_completion": { "title": "Kursfortschritt" },
+      "certificates": { "title": "Zertifikate" },
+      "ai_mentor_practice": {
+        "title": "KI-Mentor-Übung",
+        "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
+      },
+      "todoTasks": {
+        "title": "Aufgabenliste",
+        "description": "Kleine Aufgaben für deinen Arbeitstag",
+        "empty": "Noch keine Aufgaben. Füge unten eine hinzu.",
+        "placeholder": "Aufgabe hinzufügen",
+        "add": "Aufgabe hinzufügen",
+        "toggle": "{{title}} umschalten",
+        "edit": "Aufgabe bearbeiten",
+        "delete": "Aufgabe löschen",
+        "reorder": "Aufgabe neu ordnen",
+        "toast": {
+          "createSuccess": "Aufgabe hinzugefügt.",
+          "createError": "Die Aufgabe konnte nicht hinzugefügt werden.",
+          "updateSuccess": "Aufgabe aktualisiert.",
+          "updateError": "Die Aufgabe konnte nicht aktualisiert werden.",
+          "deleteSuccess": "Aufgabe gelöscht.",
+          "deleteError": "Die Aufgabe konnte nicht gelöscht werden.",
+          "reorderSuccess": "Aufgabenreihenfolge gespeichert.",
+          "reorderError": "Die Aufgabenreihenfolge konnte nicht gespeichert werden."
+        }
+      }
+    }
+  },
+  "todoTasks": {
+    "limitReached": "Sie können bis zu 100 Aufgaben haben.",
+    "notFound": "Diese Aufgabe existiert nicht mehr.",
+    "invalidOrder": "Die Aufgabenreihenfolge ist nicht mehr aktuell. Aktualisieren Sie die Seite und versuchen Sie es erneut."
+  },
+  "aiMentorPractice": {
+    "form": {
+      "title": "Ein echtes Gespräch üben.",
+      "promptEyebrow": "Szene festlegen",
+      "mentorPrompt": "Erzähl mir von dem Gespräch, das du proben möchtest. Mit wem sprichst du, was passiert und was möchtest du besser bewältigen?",
+      "scenario": "Was möchtest du üben?",
+      "scenarioPlaceholder": "Zum Beispiel: Ich möchte üben, einem Kollegen konstruktives Feedback zu einer verpassten Frist zu geben.",
+      "scenarioHint": "Ergänze hilfreichen Kontext, zum Beispiel die Situation, beteiligte Personen oder dein Ziel.",
+      "privateHint": "Nur du kannst diese Übung sehen.",
+      "submit": "Übung erstellen",
+      "suggestions": {
+        "title": "Mit einem Beispiel starten",
+        "delayedOrder": {
+          "label": "Kunde verlangt eine Rückerstattung für eine verspätete Bestellung",
+          "value": "Ein Kunde verlangt wegen einer verspäteten Bestellung sein Geld zurück. Die Lieferung einer Kaffeemaschine als Geburtstagsgeschenk wurde in 2–3 Tagen versprochen, aber nach sechs Tagen ist das Paket noch nicht angekommen. Der Kunde fordert sofort eine Rückerstattung und einen zusätzlichen Rabatt und droht mit einer negativen Bewertung. Das Paket ist bereits beim Kurier und kommt wahrscheinlich morgen, aber ich kann weder die Lieferzeit garantieren noch mehr als 10 % Rabatt anbieten. Ich möchte den Kunden beruhigen, nichts Unmögliches versprechen und eine sinnvolle Lösung anbieten."
+        },
+        "orderMistake": {
+          "label": "Ich habe einen Fehler in der Kundenbestellung gemacht",
+          "value": "Ich habe 120 statt 20 Packungen Klimaanlagenfilter bestellt. Das Lager hat die Bestellung bereits auf Paletten zusammengestellt und für die Abholung vorbereitet. Wenn sie versendet wird, erhält der Kunde 100 Packungen zu viel und wir müssen eine Rücksendung organisieren. Ich weiß nicht, ob ich zuerst den Versand stoppen, das Lager kontaktieren, meine Führungskraft informieren oder den Kunden benachrichtigen soll."
+        },
+        "sensitiveData": {
+          "label": "Kunde bittet mich um Daten, die ich nicht weitergeben sollte",
+          "value": "Ein regelmäßiger Geschäftskunde nennt den Firmennamen und die Bestellnummer und verlangt die Lieferadresse sowie die Telefonnummer der bestellenden Person. Die anrufende Person ist nicht als Kontakt hinterlegt und ich kann nicht prüfen, ob sie tatsächlich dort arbeitet. Sie drängt auf die sofortige Herausgabe der Daten. Ich möchte helfen, ohne Datenschutzregeln zu verletzen."
+        }
+      },
+      "steps": {
+        "setScene": {
+          "title": "Szene festlegen",
+          "description": "Beschreibe den Moment mit deinen eigenen Worten."
+        },
+        "rehearse": {
+          "title": "Realistisch proben",
+          "description": "Sprich oder schreibe, während der KI-Mentor die andere Person spielt."
+        },
+        "reflect": {
+          "title": "Erkennen, was wirkt",
+          "description": "Beende die Probe, wenn du bereit bist, und erhalte gezieltes Feedback."
+        }
+      }
+    },
+    "backToDashboard": "Zurück zum Dashboard",
+    "rehearsalEyebrow": "Heutige Probe",
+    "successGoal": "Dein Ziel",
+    "successGoalFallback": "Führe das Gespräch klar und erreiche einen konstruktiven nächsten Schritt.",
+    "viewFeedback": "Feedback ansehen",
+    "practiceAgain": "Erneut üben",
+    "replayLoadingTitle": "Deine nächste Probe wird vorbereitet",
+    "yourRole": "Deine Rolle",
+    "mentorRole": "Rolle des KI-Mentors",
+    "feedback": {
+      "title": "Feedback zur Übung",
+      "summaryTitle": "Was du mitnehmen kannst",
+      "summaryDescription": "Nutze diese Beobachtungen, um deinen nächsten Versuch zu verbessern.",
+      "scoreLabel": "Übungsergebnis",
+      "criteriaTitle": "Was der KI-Judge bemerkt hat",
+      "criterionFallback": "Kriterium {{number}}",
+      "importantFeedbackTitle": "Wichtiges Feedback"
+    },
+    "startHint": "Beginne das Gespräch, wenn du bereit bist.",
+    "checkHint": "Beende jederzeit, um zu sehen, wie dein Ansatz angekommen ist.",
+    "checkPractice": "Beenden und reflektieren",
+    "practiceComplete": "Deine Probe ist abgeschlossen. Dein Feedback kannst du jederzeit erneut ansehen.",
+    "generating": "Der KI-Mentor bereitet dein Szenario vor.",
+    "preparingBackgroundDescription": "Deine Übung wird im Hintergrund vorbereitet. Du kannst zum Dashboard zurückkehren und später wiederkommen.",
+    "failed": "Das Übungsszenario konnte nicht erstellt werden.",
+    "error": "Die Übung konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "conversationTitle": "KI-Mentor-Übung",
+    "mentorName": "KI-Mentor",
+    "message": "Nachricht an den KI-Mentor",
+    "send": "Senden"
+  },
   "common": {
     "button": {
+      "previous": "Zurück",
+      "next": "Weiter",
       "save": "Speichern",
       "saving": "Sparen...",
       "delete": "Löschen",
@@ -18,7 +316,8 @@
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "uploading": "Hochladen...",
-      "sending": "Senden..."
+      "sending": "Senden...",
+      "loading": "Laden..."
     },
     "toast": {
       "noAccess": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
@@ -58,8 +357,10 @@
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
       "threadMustBeActive": "Der Thread muss aktiv sein.",
+      "aiMentorConfigurationIncomplete": "Die Konfiguration des KI-Mentors ist unvollständig.",
       "aiJudgeConfigurationMissing": "Die Konfiguration der Abschlussbedingungen fehlt.",
-      "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
+      "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
     },
     "loader": {
       "textSequence": {
@@ -1527,6 +1828,7 @@
         "learning_progress": "Lernfortschritt",
         "certificate": "Zertifikate",
         "file": "Dateien",
+        "resource_library": "Ressourcenbibliothek",
         "ai": "KI-Funktionen",
         "announcement": "Ankündigungen",
         "news": "News",
@@ -1550,6 +1852,8 @@
         "user_manage": "Benutzer einschließlich Rollen und Kontostatus verwalten.",
         "settings_read_self": "Eigene Profil- und Präferenzeinstellungen anzeigen.",
         "settings_update_self": "Eigene Profil- und Präferenzeinstellungen aktualisieren.",
+        "dashboard_read": "Das eigene Dashboard anzeigen.",
+        "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
@@ -1583,6 +1887,7 @@
         "certificate_render": "Zertifikatsdateien erstellen.",
         "file_upload": "Dateien über die gemeinsamen Upload-Funktionen der Plattform hochladen.",
         "file_delete": "Dateien direkt aus dem Plattformspeicher löschen.",
+        "resource_library_manage": "Private Ressourcen in der Ressourcenbibliothek verwalten.",
         "ai_use": "KI-gestützte Plattformfunktionen verwenden.",
         "announcement_read": "Ankündigungen anzeigen.",
         "announcement_create": "Ankündigungen erstellen.",
@@ -1958,6 +2263,7 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Sie können keine Fragen in einer anderen Sprache als der Standardsprache ändern.",
       "noMissingTranslations": "Keine fehlenden Übersetzungen",
       "mismatchContentLength": "Die Anzahl der Übersetzungen stimmt nicht mit der Anzahl der generierten Übersetzungen überein",
+      "invalidTranslationStructure": "Die generierte Übersetzung hat die Inhaltsstruktur nicht beibehalten. Bitte versuchen Sie es erneut.",
       "translationsGeneratedSuccessfully": "Übersetzungen erfolgreich generiert",
       "lumaNotConfigured": "Der Luma-API-Schlüssel ist nicht konfiguriert.",
       "lumaBadRequest": "Die Luma-Anfrage war ungültig.",
@@ -2378,6 +2684,235 @@
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Verhalten des KI-Mentors",
+          "emptyDescription": "Legen Sie fest, wie die KI den Lernenden anleiten oder mit ihm interagieren soll.",
+          "baseLanguageRequired": "Konfigurieren Sie das Verhalten des KI-Mentors zuerst in der Basissprache des Kurses.",
+          "incompleteDescription": "Für diese Konfiguration fehlen noch einige Angaben.",
+          "configureManually": "Manuell konfigurieren",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "dialogTitle": "KI-Mentor konfigurieren",
+          "dialogDescription": "Wählen Sie einen Modus und definieren Sie das gewünschte Lernerlebnis.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Verhalten feinabstimmen (optional)",
+          "translationModeTitle": "Übersetzungsmodus",
+          "translationModeDescription": "Übersetzen Sie hier die Textfelder. Modus, Lehrstil und Schwierigkeitsgrad werden in der Basissprache verwaltet.",
+          "structureLockedTooltip": "Die Struktur des KI-Mentors kann nur in der Basissprache geändert werden.",
+          "applyConfiguration": "Konfiguration übernehmen",
+          "saveConfiguration": "Konfiguration speichern",
+          "saveTranslation": "Übersetzung speichern",
+          "configurationSaved": "KI-Mentor-Konfiguration gespeichert.",
+          "translationSaved": "KI-Mentor-Übersetzung gespeichert.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor-Modus",
+            "teacher": {
+              "label": "Lehrer",
+              "description": "Erklärt Konzepte und begleitet Übungen."
+            },
+            "roleplay": {
+              "label": "Rollenspiel",
+              "description": "Übernimmt eine Rolle in einem Übungsszenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Mit einem Szenario beginnen",
+            "scenarioSimulation": {
+              "taskDescription": "Üben Sie, den Bedarf eines Softwarekunden zu ermitteln und ein passendes Angebot vorzuschlagen.",
+              "aiRole": "Potenzieller Softwarekunde",
+              "learnerRole": "Vertriebsmitarbeiter",
+              "characterGoal": "Einen Anbieter wählen, der Termin-, Budget- und Kommunikationsanforderungen erfüllt.",
+              "factsAndConstraints": "Die Anwendung muss innerhalb von drei Monaten fertig sein. Das Budget ist begrenzt, und eine klare, regelmäßige Kommunikation ist erforderlich.",
+              "openingInstruction": "Stellen Sie sich als Kunde vor, der Softwareanbieter bewertet, und fragen Sie, wie der Lernende helfen kann."
+            },
+            "problemSolving": {
+              "taskDescription": "Üben Sie den konstruktiven Umgang mit dem Wunsch eines Mitarbeiters nach einer Gehaltserhöhung.",
+              "aiRole": "Mitarbeiter mit Gehaltswunsch",
+              "learnerRole": "Führungskraft",
+              "characterGoal": "Gehört werden und eine glaubwürdige Alternative oder einen Folgeplan vereinbaren.",
+              "factsAndConstraints": "Der Mitarbeiter hat zuletzt wichtige Beiträge geleistet, aber das Unternehmen hat derzeit kein Budget für Gehaltserhöhungen.",
+              "openingInstruction": "Beginnen Sie mit Ihren jüngsten Beiträgen und bitten Sie um ein Gespräch über eine Gehaltserhöhung."
+            },
+            "creativeTask": {
+              "taskDescription": "Entwickeln und verfeinern Sie eine originelle Idee für einen neuen Kundenservice.",
+              "taskGoal": "Helfen Sie dem Lernenden, eine originelle Serviceidee zu entwickeln und zu verfeinern.",
+              "expertise": "Coach für Serviceinnovation",
+              "feedbackGuidance": "Fördern Sie Originalität und praktischen Nutzen. Stellen Sie gezielte Rückfragen und weisen Sie auf wichtige Lücken hin, ohne die Idee zu übernehmen.",
+              "openingInstruction": "Bitten Sie den Lernenden, seine erste Serviceidee vorzustellen und zu erklären, wem sie helfen soll."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Lernen Sie praktische Zeitmanagementmethoden und planen Sie deren Anwendung im Arbeitsalltag.",
+              "taskGoal": "Helfen Sie dem Lernenden, praktische Zeitmanagementmethoden zu verstehen und anzuwenden.",
+              "expertise": "Zeitmanagement-Coach",
+              "feedbackGuidance": "Korrigieren Sie Missverständnisse behutsam und verbinden Sie das Feedback mit einer konkreten, realistischen Anwendung am Arbeitsplatz.",
+              "openingInstruction": "Stellen Sie eine praktische Zeitmanagementmethode vor und fragen Sie dann, wie der Lernende seine Arbeit derzeit organisiert."
+            }
+          },
+          "taskGoal": {
+            "label": "Aufgabenziel",
+            "placeholder": "Was soll der Lehrer erklären oder üben helfen?"
+          },
+          "expertise": {
+            "label": "Fachgebiet",
+            "placeholder": "Zum Beispiel: Trainer für DSGVO-Compliance"
+          },
+          "contentScope": {
+            "label": "Inhaltsrahmen",
+            "placeholder": "Was darf der Lehrer behandeln und was soll er vermeiden?"
+          },
+          "teachingStyle": {
+            "label": "Lehrstil",
+            "explain_and_practice": {
+              "label": "Erklären und üben",
+              "description": "Klar erklären und anschließend mit Übungen festigen."
+            },
+            "guided_discovery": {
+              "label": "Geführtes Entdecken",
+              "description": "Den Lernenden schrittweise zu Schlussfolgerungen führen."
+            },
+            "socratic": {
+              "label": "Sokratisch",
+              "description": "Mit gezielten Fragen das Denken vertiefen."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback-Vorgaben",
+            "placeholder": "Wie soll der Lehrer korrigieren oder bestärken?"
+          },
+          "scenario": {
+            "label": "Szenario",
+            "placeholder": "Beschreiben Sie die Übungssituation."
+          },
+          "aiRole": { "label": "Rolle der KI", "placeholder": "Zum Beispiel: Zögernder Kunde" },
+          "learnerRole": {
+            "label": "Rolle des Lernenden",
+            "placeholder": "Zum Beispiel: Vertriebsmitarbeiter"
+          },
+          "characterGoal": {
+            "label": "Ziel der KI-Figur",
+            "placeholder": "Was möchte die KI-Figur erreichen?"
+          },
+          "difficulty": {
+            "label": "Schwierigkeitsgrad",
+            "cooperative": {
+              "label": "Kooperativ",
+              "description": "Hilfsbereit und bereit, das Gespräch voranzubringen."
+            },
+            "realistic": {
+              "label": "Realistisch",
+              "description": "Natürlicher Widerstand und glaubwürdige Reaktionen."
+            },
+            "challenging": {
+              "label": "Anspruchsvoll",
+              "description": "Deutlicher Widerstand, der eine starke Reaktion verlangt."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakten und Einschränkungen",
+            "placeholder": "Budgets, Fristen, Richtlinien oder unveränderliche Fakten."
+          },
+          "openingInstruction": {
+            "label": "Eröffnungsanweisung",
+            "placeholder": "Wie soll die einmalige Begrüßung beginnen?"
+          },
+          "additionalInstructions": {
+            "label": "Zusätzliche Anweisungen",
+            "placeholder": "Ergänzen Sie besonderes Verhalten, das oben nicht abgedeckt ist."
+          },
+          "typeChange": {
+            "title": "Mentor-Modus ändern?",
+            "description": "Beim Wechsel zu {{type}} werden die modusspezifischen Felder geleert. Eröffnungs- und Zusatzanweisungen bleiben erhalten."
+          },
+          "validation": {
+            "required": "Dieses Feld ist erforderlich.",
+            "configurationRequired": "Konfigurieren Sie das Verhalten des KI-Mentors, bevor Sie die Lektion speichern."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentor-Modus",
+          "createWithAi": "Mit KI erstellen",
+          "improveWithAi": "Mit KI verbessern",
+          "checkQualityWithAi": "Qualität mit KI prüfen",
+          "aiAssistance": "KI-Unterstützung",
+          "create": {
+            "title": "KI-Mentor-Verhalten mit KI erstellen",
+            "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.",
+            "fieldLabel": "Welches Szenario soll die KI vorbereiten?",
+            "fieldDescription": "Die KI erstellt einen vollständigen Arbeitsentwurf des Szenarios für den ausgewählten Modus.",
+            "placeholder": "Beschreiben Sie die Situation, die Beteiligten und das Gesprächsziel…",
+            "submit": "Entwurf erstellen"
+          },
+          "improve": {
+            "title": "KI-Mentor-Verhalten mit KI verbessern",
+            "description": "KI verwendet die aktuelle ungespeicherte Konfiguration und ihren Modus.",
+            "fieldLabel": "Was soll die KI am Szenario ändern?",
+            "fieldDescription": "Beschreiben Sie, was realistischer, stimmiger oder konkreter werden soll. Der ausgewählte Modus bleibt unverändert.",
+            "placeholder": "Beschreiben Sie die gewünschte Änderung…",
+            "submit": "Entwurf verbessern"
+          },
+          "progressTitle": "Entwurf wird vorbereitet",
+          "progressDescription": "KI erstellt und prüft die Konfiguration.",
+          "readyTitle": "Entwurf bereit zur Prüfung",
+          "revisionTitle": "Entwurf benötigt Ihre Entscheidung",
+          "failedTitle": "Entwurf konnte nicht erstellt werden",
+          "cancel": "Generierung abbrechen",
+          "revise": "Entwurf überarbeiten",
+          "review": "Konfiguration prüfen",
+          "progressLabel": "Fortschritt der KI-Mentor-Generierung",
+          "stages": {
+            "draft": "Entwurf erstellen",
+            "qualityCheck": "Qualitätsprüfung",
+            "ready": "Bereit"
+          },
+          "status": {
+            "drafting": "Konfiguration wird erstellt",
+            "evaluating": "Konfigurationsqualität wird geprüft",
+            "revising": "Entwurf wird verbessert",
+            "awaiting_revision": "Qualitätsprüfung benötigt Ihre Entscheidung",
+            "completed": "Konfiguration ist bereit",
+            "requires_review": "Entwurf benötigt Ihre Entscheidung",
+            "failed": "Generierung konnte nicht abgeschlossen werden",
+            "cancelled": "Generierung abgebrochen"
+          },
+          "statusDescription": {
+            "drafting": "Das Mentor-Verhalten für den ausgewählten Modus wird vorbereitet.",
+            "evaluating": "Es wird geprüft, ob das Verhalten klar, vollständig und konsistent ist.",
+            "revising": "Die letzten Korrekturen der Qualitätsprüfung werden angewendet.",
+            "awaiting_revision": "Prüfen Sie die Hinweise vor einem weiteren Versuch.",
+            "completed": "Der Entwurf hat die Qualitätsprüfung bestanden.",
+            "requires_review": "Der letzte Entwurf wurde für Ihre Entscheidung beibehalten.",
+            "failed": "Versuchen Sie es erneut oder konfigurieren Sie das Mentor-Verhalten manuell.",
+            "cancelled": "Es wurden keine Konfigurationsänderungen angewendet."
+          },
+          "attempt": "Entwurf {{attempt}} von {{maxAttempts}}",
+          "currentDraft": "Aktueller Entwurf",
+          "qualityCheckLabel": "Qualitätsprüfung",
+          "qualityDecisionTitle": "{{count}} Verbesserungen vorgeschlagen",
+          "qualityDecisionDescription": "Prüfen Sie die Vorschläge oder fahren Sie mit dieser Konfiguration fort.",
+          "suggestedImprovements": "Vorgeschlagene Verbesserungen",
+          "applyImprovements": "Überarbeiten",
+          "useCurrentDraft": "Weiter",
+          "reviewExactChanges": "Änderungen durch KI ({{count}})",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "showMoreFindings": "{{count}} weitere Hinweise anzeigen",
+          "showFewerFindings": "Weniger Hinweise anzeigen",
+          "review": {
+            "currentDraftTitle": "Aktuellen Entwurf prüfen",
+            "currentDraftDescription": "Dieser Entwurf enthält noch Qualitätsvorschläge. Prüfen Sie ihn vor der Anwendung.",
+            "requiresReviewTitle": "Generierte Konfiguration prüfen",
+            "requiresReviewDescription": "KI hat den letzten Entwurf für Ihre endgültige Entscheidung beibehalten."
+          },
+          "quality": {
+            "title": "Qualität mit KI prüfen",
+            "resultTitle": "Qualitätsprüfung",
+            "description": "KI prüft die aktuelle ungespeicherte Konfiguration, ohne sie zu ändern.",
+            "checking": "Aktuelle Konfiguration wird geprüft…",
+            "checkingDescription": "Modus, Hinweise, Einschränkungen und Gesprächsverhalten werden geprüft.",
+            "hasFindings": "Prüfen Sie die Hinweise oder lassen Sie die Konfiguration anhand des Feedbacks von KI verbessern.",
+            "passed": "Keine Änderungen erforderlich. Sie können weiter bearbeiten oder speichern.",
+            "improve": "Mit KI verbessern"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Abschlussbedingungen",
           "configured": "Konfiguriert",
@@ -2387,6 +2922,7 @@
           "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
           "configureWithAi": "Mit KI konfigurieren",
           "createWithAi": "Mit KI erstellen",
+          "aiMentorConfigurationRequiredTooltip": "Konfigurieren Sie zuerst das Verhalten des AI Mentors, bevor Sie Abschlussbedingungen mit KI erstellen.",
           "improveWithAi": "Mit KI verbessern",
           "checkQualityWithAi": "Qualität mit KI prüfen",
           "checkingQuality": "Qualität wird geprüft...",
@@ -3351,6 +3887,7 @@
         },
         "retakeModalTitle": "Sind Sie sicher, dass Sie die Lektion wiederholen möchten?",
         "retakeModalDescription": "Dadurch wird Ihr Fortschritt in dieser Lektion zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "retakeLoadingTitle": "Dein nächster Versuch wird vorbereitet",
         "retakeAccessDenied": "Sie können diese Lektion nur wiederholen, wenn Sie im Kurs eingeschrieben sind oder der Autor des Kurses sind."
       }
     },
@@ -3450,6 +3987,7 @@
   },
   "settings": {
     "title": "Einstellungen",
+    "supportModeNoAvailable": "Für diesen Benutzer sind im Supportmodus keine Einstellungen verfügbar.",
     "buttons": {
       "cancel": "Stornieren",
       "save": "Speichern"
@@ -3465,7 +4003,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Globale Einstellungen nicht gefunden"
+        "globalNotFound": "Globale Einstellungen nicht gefunden",
+        "userSettingsNotFound": "Benutzereinstellungen nicht gefunden"
       },
       "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
@@ -3504,7 +4043,18 @@
       "coursesVisibility": "Zeigen Sie Besuchern Kurse",
       "coursesVisibilityDescription": "Ermöglichen Sie Besuchern, die Kursliste anzuzeigen und auf kostenlose Lektionen zuzugreifen, ohne sich anzumelden",
       "modernCourseList": "Nutzen Sie die moderne Kurslistenansicht",
-      "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten „Hero“ und „Top-Kurse“.",
+      "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten Hero und Top-Kurse.",
+      "courseListLayout": "Kurslistenlayout",
+      "courseListLayoutDescription": "Wie Kurse allen Benutzern der Plattform angezeigt werden",
+      "courseListLayoutClassic": "Klassisch",
+      "courseListLayoutModern": "Modern",
+      "courseListLayoutClassicDescription": "Traditionelles Kursraster-Layout",
+      "courseListLayoutModernDescription": "Hero-Bereich mit hervorgehobenen Kursen",
+      "courseListLayoutPreview": {
+        "continueLearning": "Weiterlernen",
+        "topCourses": "Top 5 Kurse",
+        "availableCourses": "Verfügbare Kurse"
+      },
       "courseDiscussions": "Kursdiskussionen aktivieren",
       "courseDiscussionsDescription": "Eingeschriebenen Benutzern erlauben, Kursdiskussionen anzuzeigen und daran teilzunehmen",
       "calendar": "Kalender aktivieren",
@@ -3987,6 +4537,11 @@
     }
   },
   "richText": {
+    "dropVisibilityDialog": {
+      "title": "Sichtbarkeit der Ressourcen wählen",
+      "description": "Wählen Sie die Sichtbarkeit für alle {{count}} abgelegten Ressourcen.",
+      "privateInfo": "Private Ressourcen sind in der Ressourcenbibliothek nur für Sie und Administratoren sichtbar, bleiben aber für Lernende in den Lektionsinhalten verfügbar."
+    },
     "uploadDisplayModeDialog": {
       "title": "Wählen Sie aus, wie diese Datei angezeigt werden soll",
       "description": "Wählen Sie aus, wie „{{name}}“ für Studierende angezeigt werden soll.",
@@ -4050,6 +4605,26 @@
       "upload": "Upload asset",
       "insert": "Insert",
       "delete": "Delete",
+      "columns": {
+        "asset": "Asset",
+        "actions": "Actions"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private",
+        "toggle": "Toggle asset privacy",
+        "select": "Select asset",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "new": "New",
+        "selected": "{{count}} selected",
+        "makePublic": "Make public",
+        "makePrivate": "Make private",
+        "confirmationTitle": "Make asset private?",
+        "usedWarning": "This asset is used in content. It will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkUsedWarning": "{{count}} selected assets are used in content. They will remain available there, but will be hidden from other creators' libraries and standalone access. Continue?",
+        "bulkSkipped": "Some assets already had the selected visibility and were skipped."
+      },
       "loading": "Loading assets...",
       "loadingUsages": "Loading usages...",
       "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
@@ -4195,10 +4770,13 @@
       "before": "Vorher",
       "after": "Nachher",
       "context": "Kontext",
+      "resourceName": "Ressourcenname",
+      "resourceId": "Ressourcen-ID",
       "noMetadata": "Keine Metadaten verfügbar."
     },
     "fallbacks": {
       "unknown": "Unbekannt",
+      "nameUnavailable": "Name nicht verfügbar",
       "notAvailable": "k. A."
     },
     "labels": {
@@ -4260,6 +4838,7 @@
       "email": "E-Mail",
       "action": "Aktion",
       "resource": "Ressource",
+      "resourceName": "Ressourcenname",
       "details": "Details",
       "showDetails": "Details anzeigen",
       "loading": "Aktivitätsprotokoll wird geladen...",
@@ -4745,7 +5324,7 @@
     },
     "errors": {
       "generic": "Support-Modus konnte nicht gestartet werden",
-      "targetAdminRequired": "Wählen Sie einen aktiven Administrator aus der ausgewählten Organisation",
+      "targetUserRequired": "Wählen Sie einen aktiven Benutzer aus der ausgewählten Organisation",
       "invalidSession": "Support-Sitzung ist ungültig"
     }
   },
@@ -4777,7 +5356,7 @@
       "actions": {
         "title": "Aktionen",
         "enterSupportMode": "Wechseln Sie in den Support-Modus",
-        "impersonateAdmin": "Als Admin betreten"
+        "impersonateUser": "Als Benutzer handeln"
       }
     },
     "activityTrend": {
@@ -4788,8 +5367,12 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Nach Name oder E-Mail suchen...",
-      "loading": "Administratoren werden geladen...",
-      "empty": "Keine aktiven Administratoren gefunden.",
+      "tabs": { "admins": "Administratoren", "allUsers": "Alle Benutzer" },
+      "loading": "Benutzer werden geladen...",
+      "emptyAdmins": "Keine aktiven Administratoren gefunden.",
+      "emptyAdminsSearch": "Keine aktiven Administratoren für \"{{search}}\" gefunden.",
+      "emptyAllUsers": "Keine aktiven Benutzer gefunden.",
+      "searchAllUsers": "Alle Benutzer durchsuchen",
       "loadMore": "Weitere Benutzer laden"
     },
     "status": {
@@ -4960,7 +5543,7 @@
       "aboutCourse": "Über diesen Kurs",
       "description": "Beschreibung",
       "descriptionPlaceholder": "Kursbeschreibung eingeben...",
-      "whatYouWillMaster": "Das wirst du meistern",
+      "whatYouWillMaster": "Was du lernen wirst",
       "noLearningOutcomes": "Noch keine Lernergebnisse hinzugefügt.",
       "learningOutcomePlaceholder": "Lernergebnis hinzufügen...",
       "addLearningOutcome": "Lernergebnis hinzufügen",
@@ -5009,6 +5592,7 @@
       "daysLeft_other": "Noch {{count}} Tage",
       "certificate": "Zertifikat",
       "uponCompletion": "Nach Abschluss",
+      "notIssuedYet": "Noch nicht ausgestellt",
       "aboutAuthor": "Über den Autor"
     },
     "certificate": {

@@ -7,7 +7,7 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { EditableResourceVisibility, SupportedLanguages } from "@repo/shared";
 import type { RichTextResourceLibraryEntityType } from "~/types/resourceLibrary";
 
 type UploadAssetOptions = {
@@ -18,6 +18,7 @@ type UploadAssetOptions = {
   language: SupportedLanguages;
   title?: string;
   description?: string;
+  visibility?: EditableResourceVisibility;
 };
 
 export function useUploadResourceLibraryAsset() {
@@ -33,6 +34,7 @@ export function useUploadResourceLibraryAsset() {
       language,
       title,
       description,
+      visibility,
     }: UploadAssetOptions) => {
       const response = await ApiClient.api.resourceLibraryControllerUploadAsset({
         file,
@@ -42,6 +44,7 @@ export function useUploadResourceLibraryAsset() {
         description: description ?? file.name,
         ...(entityId ? { entityId } : {}),
         ...(contextId ? { contextId } : {}),
+        ...(visibility ? { visibility } : {}),
       });
 
       return response.data;

@@ -1,3 +1,11 @@
+export const AI_MENTOR_EVALUATION_CONTEXT = {
+  LESSON: "lesson",
+  PRACTICE: "practice",
+} as const;
+
+export type AiMentorEvaluationContext =
+  (typeof AI_MENTOR_EVALUATION_CONTEXT)[keyof typeof AI_MENTOR_EVALUATION_CONTEXT];
+
 export type AiMentorEvaluation = {
   passed?: boolean | null;
   minScore?: number | null;

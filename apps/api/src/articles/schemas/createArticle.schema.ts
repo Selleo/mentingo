@@ -1,3 +1,4 @@
+import { RESOURCE_VISIBILITY } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -28,6 +29,12 @@ export const uploadFileSchema = Type.Object({
   language: supportedLanguagesSchema,
   title: Type.String(),
   description: Type.String(),
+  visibility: Type.Optional(
+    Type.Union([
+      Type.Literal(RESOURCE_VISIBILITY.PUBLIC),
+      Type.Literal(RESOURCE_VISIBILITY.PRIVATE),
+    ]),
+  ),
 });
 
 export type CreateLanguageArticle = Static<typeof createLanguageArticleSchema>;

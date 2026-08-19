@@ -14,6 +14,9 @@ import {
   COURSE_FEATURE,
   ENTITY_TYPES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
+  type EditableResourceVisibility,
+  type SupportedLanguages,
 } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
@@ -42,9 +45,9 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { AiJudgeConfigurationGraphService } from "../ai-judge-configuration/ai-judge-configuration-graph.service";
+import { AiMentorConfigurationGraphService } from "../ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -64,7 +67,6 @@ import type {
   UpdateQuizLessonBody,
 } from "../lesson.schema";
 import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
-import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CourseContentEntityType } from "src/common/types/course-content-entity.type";
@@ -94,6 +96,7 @@ export class AdminLessonService {
     private readonly liveTrainingService: LiveTrainingService,
     private readonly searchIndexService: SearchIndexService,
     private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
+    private readonly aiMentorConfigurationGraphService: AiMentorConfigurationGraphService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -456,9 +459,6 @@ export class AdminLessonService {
       });
     }
 
-    if (isRichTextEmpty(data.aiMentorInstructions))
-      throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
-
     if (!data.name?.trim().length) data.name = "AI Mentor";
     const voiceMode = data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET;
     const customTtsReference = data.customTtsReference?.trim() || null;
@@ -575,9 +575,6 @@ export class AdminLessonService {
     }
 
     if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
-
-    if (isRichTextEmpty(data.aiMentorInstructions))
-      throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -842,14 +839,19 @@ export class AdminLessonService {
       const [aiMentorLesson] = await this.adminLessonRepository.createAiMentorLessonData(
         {
           lessonId: lesson.id,
-          aiMentorInstructions: data.aiMentorInstructions,
-          type: data.type,
           name: data?.name,
           voiceMode: data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET,
           ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
           customTtsReference: data.customTtsReference,
           language,
         },
+        trx,
+      );
+
+      await this.aiMentorConfigurationGraphService.createConfigurationInTransaction(
+        aiMentorLesson.id,
+        data.aiMentorConfiguration,
+        language,
         trx,
       );
 
@@ -872,7 +874,7 @@ export class AdminLessonService {
     userId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { aiMentorInstructions, type: _type, name, ...lessonData } = data;
+      const { name, ...lessonData } = data;
 
       const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
@@ -893,9 +895,6 @@ export class AdminLessonService {
         trx,
       );
 
-      if (isRichTextEmpty(data.aiMentorInstructions))
-        throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
-
       if (data.name?.trim().length === 0) {
         data.name = "AI Mentor";
       }
@@ -910,8 +909,6 @@ export class AdminLessonService {
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
         {
-          aiMentorInstructions,
-          type: data.type,
           name,
           voiceMode,
           ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
@@ -1376,6 +1373,7 @@ export class AdminLessonService {
     description: string,
     lessonId?: UUIDType,
     contextId?: string,
+    visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
   ) {
     if (lessonId) {
       await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
@@ -1400,7 +1398,7 @@ export class AdminLessonService {
       title: fileTitle,
       description: fileDescription,
       currentUser,
-      options: { contextId },
+      options: { contextId, visibility },
     });
 
     return { resourceId: fileData.resourceId };
@@ -1592,10 +1590,8 @@ export class AdminLessonService {
       aiMentor:
         lesson.type === LESSON_TYPES.AI_MENTOR
           ? {
-              aiMentorInstructions: lesson.aiMentorInstructions,
               name: lesson.aiMentorName,
               avatarReference: lesson.aiMentorAvatarReference,
-              type: lesson.aiMentorType,
               voiceMode: lesson.aiMentorVoiceMode,
               ttsPreset: lesson.aiMentorTTSPreset,
               customTtsReference: lesson.aiMentorCustomTtsReference,

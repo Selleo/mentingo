@@ -29,7 +29,7 @@ test("student can read an announcement from the notifications popover", async ({
     translations: [{ language: SUPPORTED_LANGUAGES.EN, title, content }],
   });
 
-  await studentSession.page.goto(`${workspace.origin}/progress`);
+  await studentSession.page.goto(`${workspace.origin}/dashboard`);
   await studentSession.page.getByTestId(NOTIFICATIONS_HANDLES.TRIGGER).click();
 
   const popover = studentSession.page.getByTestId(NOTIFICATIONS_HANDLES.POPOVER);
@@ -71,7 +71,7 @@ test("student can open the notification center from the popover", async ({
     ],
   });
 
-  await studentSession.page.goto(`${workspace.origin}/progress`);
+  await studentSession.page.goto(`${workspace.origin}/dashboard`);
   await studentSession.page.getByTestId(NOTIFICATIONS_HANDLES.TRIGGER).click();
 
   const notificationCenterLink = studentSession.page.getByTestId(NOTIFICATIONS_HANDLES.CENTER_LINK);

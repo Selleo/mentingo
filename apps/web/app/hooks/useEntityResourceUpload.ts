@@ -20,6 +20,7 @@ export const useEntityResourceUpload = () => {
     language,
     title,
     description,
+    visibility,
   }: UploadResourceArgs) => {
     const resolvedTitle = title ?? file.name;
     const resolvedDescription = description ?? file.name;
@@ -35,6 +36,7 @@ export const useEntityResourceUpload = () => {
           language,
           title: resolvedTitle,
           description: resolvedDescription,
+          visibility,
         });
         return response.data.resourceId;
       })
@@ -47,6 +49,7 @@ export const useEntityResourceUpload = () => {
           language,
           title: resolvedTitle,
           description: resolvedDescription,
+          visibility,
         });
         return response.data.resourceId;
       })
@@ -59,6 +62,7 @@ export const useEntityResourceUpload = () => {
           language,
           title: resolvedTitle,
           description: resolvedDescription,
+          visibility,
         });
         return response.data.resourceId;
       })

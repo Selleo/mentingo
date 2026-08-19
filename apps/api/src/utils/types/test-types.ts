@@ -59,7 +59,7 @@ const niceCourseData = Type.Intersect([
               ),
               Type.Partial(
                 Type.Object({
-                  aiMentorInstructions: Type.String(),
+                  additionalInstructions: Type.String(),
                   aiJudgeConfiguration: aiJudgeConfigurationInputSchema,
                 }),
               ),
