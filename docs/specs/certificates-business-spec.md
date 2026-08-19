@@ -16,7 +16,7 @@ The feature also gives course managers controlled ways to handle certificate val
 ## Feature Functions
 
 - List active certificates for a learner profile.
-- Open certificate previews for completed courses and learning paths.
+- Open centered certificate previews for completed courses and learning paths, including from dashboard certificate tiles and the course overview certificate card.
 - Switch certificate preview language between all supported platform languages.
 - Download certificate PDFs with generated filenames.
 - Share certificates externally through LinkedIn/public share links.
@@ -38,7 +38,7 @@ For administrators, the reset and validity tools reduce operational risk. When a
 
 ## How It Works
 
-Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish and French, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
+Learners access certificates from the profile certificate area, dashboard certificate tiles, or an eligible course overview certificate card. Each certificate opens in a centered preview, can be rendered as a PDF, and can be shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish and French, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
 
 Course certificate settings are managed from the admin course settings workflow and the certificate card on the modern course page. Administrators can preview the certificate with their own signed-in name, enable or disable certificate issuance with an immediately saved switch, customize the certificate font color in the live preview and receive confirmation after closing the color picker, upload or remove the certificate signature, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates. When validity is enabled for the first time and no active certificates exist, the confirmation focuses on enabling validity without showing the later-change empty-state message. When certificate issuance is disabled, the dependent settings remain visible for context but cannot be edited until issuance is enabled again.
 

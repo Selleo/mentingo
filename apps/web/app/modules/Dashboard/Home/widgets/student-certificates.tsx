@@ -73,7 +73,11 @@ export function WidgetStudentCertificates({
   return (
     <>
       <DashboardWidgetCard testId={DASHBOARD_WIDGET_HANDLES.STUDENT_CERTIFICATES}>
-        <DashboardWidgetHeader title={t(metadata.titleKey)} icon={metadata.icon} />
+        <DashboardWidgetHeader
+          title={t(metadata.titleKey)}
+          icon={metadata.icon}
+          dataScope={metadata.dataScope}
+        />
         <DashboardWidgetContent>
           {isLoading && certificates.length === 0 ? (
             <DashboardWidgetQueryState isLoading isError={false} onRetry={() => void refetch()} />

@@ -3,7 +3,7 @@ import {
   DASHBOARD_WIDGET_TYPES,
   type DashboardWidgetType,
 } from "@repo/shared";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserRound, UsersRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
@@ -17,7 +17,13 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Switch } from "~/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
@@ -105,6 +111,9 @@ export function WidgetPickerDialog({
                 (widget) => widget.id === widgetId && widget.visible !== false,
               );
               const Icon = entry.icon;
+              const ScopeIcon = entry.dataScope === "personal" ? UserRound : UsersRound;
+              const scopeLabel = t(`dashboardHome.widgets.dataScope.${entry.dataScope}`);
+              const scopeTooltip = t(`dashboardHome.widgets.dataScope.${entry.dataScope}Tooltip`);
               const switchId = `dashboard-widget-${widgetId}`;
 
               return (
@@ -137,6 +146,28 @@ export function WidgetPickerDialog({
                             </Tooltip>
                           </TooltipProvider>
                         )}
+                        <TooltipProvider delayDuration={0}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label={scopeLabel}
+                                title={scopeLabel}
+                                className="inline-flex size-5 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1"
+                              >
+                                <ScopeIcon className="size-4" aria-hidden="true" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              align="start"
+                              className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                            >
+                              {scopeTooltip}
+                              <TooltipArrow className="fill-black" />
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         {isAlwaysVisible && (
                           <Badge className="px-1.5 py-0.5 text-[11px]" variant="notStarted">
                             {t("dashboardHome.edit.required")}

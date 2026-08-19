@@ -20,7 +20,7 @@ Learners use the same overview to understand the course, continue learning, revi
 - Update inline course-overview edits immediately without making the user wait for a broad page refresh.
 - Manage curriculum through a dedicated action while keeping the legacy editor focused on curriculum.
 - Organize status, pricing, enrollment, sharing, and course behavior in a consistent tabbed settings sheet.
-- Let eligible learners open, download, and share an awarded certificate from the course page.
+- Let eligible learners open a centered preview, download, and share an awarded certificate from the course page.
 - Keep mention suggestions usable with long participant names and near viewport edges.
 
 ## End-User Value
@@ -29,7 +29,7 @@ Course teams spend less time navigating between management pages and see changes
 
 ## How It Works
 
-An administrator opens the course overview, selects a course language, and edits learner-facing details in place, or opens the settings sheet to choose a management area. The selected language's learning outcomes can be edited independently, including clearing a translation without replacing the base-language content. Learners continue to see the base-language outcome fallback when a translated outcome is unavailable. Curriculum editing remains available through its dedicated action, and the course overview uses the established accordion curriculum with chapter counters, progress, access indicators, and lesson actions. A learner who completes a certificate-enabled course sees a certificate card and can open the existing localized preview.
+An administrator opens the course overview, selects a course language, and edits learner-facing details in place, or opens the settings sheet to choose a management area. The selected language's learning outcomes can be edited independently, including clearing a translation without replacing the base-language content. Learners continue to see the base-language outcome fallback when a translated outcome is unavailable. Curriculum editing remains available through its dedicated action, and the course overview uses the established accordion curriculum with chapter counters, progress, access indicators, and lesson actions. A learner who completes a certificate-enabled course sees a certificate card and can open the existing localized preview in a centered modal.
 
 ## Key Technical Context
 

@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
+      "dataScope": {
+        "personal": "Jūsų duomenys",
+        "otherUsers": "Organizacijos duomenys",
+        "personalTooltip": "Šis valdiklis rodo jūsų asmeninius mokymosi duomenis.",
+        "otherUsersTooltip": "Šis valdiklis rodo kitų jūsų organizacijos naudotojų mokymosi duomenis."
+      },
       "trainingCompletionChartLabel": "Užbaigta {{completed}} iš {{total}} priskyrimų, {{percentage}} procentų.",
       "deadlineRisksPage": "{{page}} puslapis iš {{totalPages}}",
       "placeholderDescription": "Prietaisų skydelio valdiklis, paruoštas atskiram duomenų rodiniui",
@@ -106,6 +112,7 @@
         },
         "aiMentorPractice": {
           "description": "Kasdien sukurkite vieną praktikos scenarijų",
+          "dailyRefreshInfo": "Kiekvieną dieną galite sugeneruoti vieną naują DI praktikos sesiją.",
           "empty": "Aprašykite situaciją ir praktikuokitės su DI mentoriumi.",
           "emptyPrompt": "Kokį pokalbį norėtumėte vesti užtikrinčiau?",
           "startCta": "Pradėti praktiką",
@@ -277,7 +284,7 @@
       "summaryTitle": "Ką verta pritaikyti toliau",
       "summaryDescription": "Pasinaudokite šiomis įžvalgomis, kad sustiprintumėte kitą bandymą.",
       "scoreLabel": "Praktikos rezultatas",
-      "criteriaTitle": "Ką pastebėjo DI vertintojas",
+      "criteriaTitle": "Užduoties įvertinimas",
       "criterionFallback": "Kriterijus {{number}}",
       "importantFeedbackTitle": "Svarbus grįžtamasis ryšys"
     },

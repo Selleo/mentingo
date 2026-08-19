@@ -6,6 +6,8 @@ import type { ComponentType, SVGProps } from "react";
 
 export type DashboardWidgetIconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
 
+export type DashboardWidgetDataScope = "personal" | "otherUsers";
+
 export type DashboardLayoutItem = {
   id: DashboardWidgetType;
   size?: DashboardWidgetSize;
@@ -40,6 +42,7 @@ export const dashboardSizeToSpan = (size: DashboardWidgetSize | undefined) => {
 export type DashboardWidgetMetadata = {
   titleKey: string;
   descriptionKey: string;
+  dataScope: DashboardWidgetDataScope;
   icon: DashboardWidgetIconComponent;
   iconClassName?: string;
   iconContainerClassName?: string;

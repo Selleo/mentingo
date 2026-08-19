@@ -27,6 +27,7 @@ import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
 import {
   and,
+  asc,
   between,
   count,
   countDistinct,
@@ -263,6 +264,12 @@ const getRequiredCourseUrgency = (
     )
     .otherwise(() => STUDENT_COURSE_URGENCY.SCHEDULED);
 
+const studentCourseProgressOrder = sql<number>`CASE
+  WHEN ${courses.chapterCount} > 0
+    THEN COALESCE(${studentCourses.finishedChapterCount}, 0)::numeric / ${courses.chapterCount}
+  ELSE 0
+END`;
+
 @Injectable()
 export class CourseService {
   private readonly logger = new Logger(CourseService.name);
@@ -474,6 +481,7 @@ export class CourseService {
         )
         .orderBy(
           sql`CASE WHEN ${studentCourses.completedAt} IS NULL THEN 0 ELSE 1 END`,
+          studentCourseProgressOrder,
           sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
         );
 
@@ -553,10 +561,14 @@ export class CourseService {
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<StudentCourseDashboardSummary> {
+    const continueCourseTitle = this.localizationService.getLocalizedSqlField(
+      courses.title,
+      language,
+    );
     const continueCourses = await this.db
       .select({
         courseId: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: continueCourseTitle,
         thumbnailS3Key: courses.thumbnailS3Key,
         completedChapterCount: studentCourses.finishedChapterCount,
         courseChapterCount: courses.chapterCount,
@@ -572,7 +584,12 @@ export class CourseService {
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .orderBy(
+        studentCourseProgressOrder,
+        asc(continueCourseTitle),
+        desc(studentCourses.lastOpenedAt),
+        desc(studentCourses.updatedAt),
+      )
       .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
 
     const requiredCourses = await this.db

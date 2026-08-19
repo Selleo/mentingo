@@ -737,7 +737,7 @@ export class StudentLessonProgressService {
     );
 
     if (courseProgress.courseIsCompleted) {
-      await this.updateStudentCourseStats(
+      const courseWasCompleted = await this.updateStudentCourseStats(
         studentId,
         courseId,
         PROGRESS_STATUSES.COMPLETED,
@@ -746,6 +746,8 @@ export class StudentLessonProgressService {
         trx,
         language,
       );
+
+      if (!courseWasCompleted) return;
 
       const dbInstance = trx ?? this.db;
       const [course] = await dbInstance
@@ -823,7 +825,7 @@ export class StudentLessonProgressService {
     actor: ActorUserType,
     dbInstance: DatabasePg = this.db,
     language?: SupportedLanguages,
-  ) {
+  ): Promise<boolean> {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
       const [studentCourse] = await dbInstance
         .update(studentCourses)
@@ -842,9 +844,12 @@ export class StudentLessonProgressService {
             eq(studentCourses.studentId, studentId),
             eq(studentCourses.courseId, courseId),
             eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+            isNull(studentCourses.completedAt),
           ),
         )
         .returning();
+
+      if (!studentCourse) return false;
 
       const courseCompletionDetails = await this.getUserCourseCompletionDetails(
         studentId,
@@ -860,13 +865,15 @@ export class StudentLessonProgressService {
         dbInstance,
       );
 
-      return studentCourse;
+      return true;
     }
 
-    return dbInstance
+    await dbInstance
       .update(studentCourses)
       .set({ progress, finishedChapterCount, completedAt: null })
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+
+    return false;
   }
 
   private async checkLessonAssignment(

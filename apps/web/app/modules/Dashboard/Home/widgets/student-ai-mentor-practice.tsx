@@ -331,6 +331,7 @@ export function WidgetStudentAiMentorPractice({
     <DashboardWidgetCard testId={AI_MENTOR_PRACTICE_HANDLES.WIDGET} className="h-full">
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
+        info={t("dashboardHome.widgets.studentTiles.aiMentorPractice.dailyRefreshInfo")}
         titleBadge={
           <TooltipProvider>
             <Tooltip>
@@ -344,13 +345,14 @@ export function WidgetStudentAiMentorPractice({
           </TooltipProvider>
         }
         icon={metadata.icon}
+        dataScope={metadata.dataScope}
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
         headerAction={
           data ? (
             <Link
               to={`/ai-mentor/practice/${data.id}`}
-              className="inline-flex size-8 items-center justify-center rounded-md text-primary-800 transition-[color,transform] duration-75 hover:text-primary-950 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
+              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
               aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
               title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
             >
