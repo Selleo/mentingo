@@ -25,11 +25,11 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import { DashboardWidgetDataScope, type DashboardLayoutItem } from "../types";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
 import { DashboardWidgetIcon } from "./WidgetCard";
 
-import type { DashboardLayoutItem } from "../types";
 import type { DashboardCatalogEntry } from "~/api/queries/useDashboardSettings";
 
 type WidgetPickerDialogProps = {
@@ -111,7 +111,8 @@ export function WidgetPickerDialog({
                 (widget) => widget.id === widgetId && widget.visible !== false,
               );
               const Icon = entry.icon;
-              const ScopeIcon = entry.dataScope === "personal" ? UserRound : UsersRound;
+              const ScopeIcon =
+                entry.dataScope === DashboardWidgetDataScope.PERSONAL ? UserRound : UsersRound;
               const scopeLabel = t(`dashboardHome.widgets.dataScope.${entry.dataScope}`);
               const scopeTooltip = t(`dashboardHome.widgets.dataScope.${entry.dataScope}Tooltip`);
               const switchId = `dashboard-widget-${widgetId}`;

@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
+import { DashboardWidgetDataScope } from "../types";
+
 import { DashboardWidgetHeader } from "./WidgetCard";
 
 describe("DashboardWidgetHeader", () => {
@@ -12,7 +14,11 @@ describe("DashboardWidgetHeader", () => {
     const user = userEvent.setup();
 
     renderWith().render(
-      <DashboardWidgetHeader title="Course completion" icon={Info} dataScope="personal" />,
+      <DashboardWidgetHeader
+        title="Course completion"
+        icon={Info}
+        dataScope={DashboardWidgetDataScope.PERSONAL}
+      />,
     );
 
     const scopeButton = screen.getByRole("button", { name: "Your data" });

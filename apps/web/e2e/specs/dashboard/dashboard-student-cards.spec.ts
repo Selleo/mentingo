@@ -588,7 +588,8 @@ test.describe("learner certificates card", () => {
       await page.goto("/dashboard");
 
       const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CERTIFICATES);
-      await expect(widget.getByRole("button")).toHaveCount(10);
+      const certificateRows = widget.locator("div.h-full.min-h-0.overflow-y-auto > button");
+      await expect(certificateRows).toHaveCount(10);
       await expect(widget.getByRole("button", { name: /Customer onboarding/ })).toBeVisible();
       await widget.getByRole("button", { name: /Customer onboarding/ }).click();
       await expect(page.getByText("Taylor Student")).toBeVisible();

@@ -253,7 +253,6 @@ test("student can review practice feedback and start the practice again", async 
     await page.goto(`/ai-mentor/practice/${PRACTICE_ID}`);
 
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONVERSATION)).toBeVisible();
-    await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.TASK_BUTTON).click();
     await expect(
       page.getByText("Explain the workload impact and agree on a practical next step."),
     ).toBeVisible();
