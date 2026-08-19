@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
-import { DashboardWidgetDataScope } from "../types";
+import { DASHBOARD_WIDGET_DATA_SCOPES } from "../types";
 
 import { DashboardWidgetHeader } from "./WidgetCard";
 
@@ -17,7 +17,7 @@ describe("DashboardWidgetHeader", () => {
       <DashboardWidgetHeader
         title="Course completion"
         icon={Info}
-        dataScope={DashboardWidgetDataScope.PERSONAL}
+        dataScope={DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL}
       />,
     );
 

@@ -6,10 +6,13 @@ import type { ComponentType, SVGProps } from "react";
 
 export type DashboardWidgetIconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
 
-export enum DashboardWidgetDataScope {
-  PERSONAL = "personal",
-  OTHER_USERS = "otherUsers",
-}
+export const DASHBOARD_WIDGET_DATA_SCOPES = {
+  PERSONAL: "personal",
+  OTHER_USERS: "otherUsers",
+} as const;
+
+export type DashboardWidgetDataScope =
+  (typeof DASHBOARD_WIDGET_DATA_SCOPES)[keyof typeof DASHBOARD_WIDGET_DATA_SCOPES];
 
 export type DashboardLayoutItem = {
   id: DashboardWidgetType;

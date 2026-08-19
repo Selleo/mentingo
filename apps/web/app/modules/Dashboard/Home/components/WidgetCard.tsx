@@ -11,7 +11,11 @@ import {
 import { cn } from "~/lib/utils";
 
 import { useDashboardEditMode } from "../dashboardEditContext";
-import { DashboardWidgetDataScope, type DashboardWidgetIconComponent } from "../types";
+import {
+  DASHBOARD_WIDGET_DATA_SCOPES,
+  type DashboardWidgetDataScope,
+  type DashboardWidgetIconComponent,
+} from "../types";
 
 import type { ReactNode } from "react";
 
@@ -99,7 +103,8 @@ export function DashboardWidgetHeader({
 }: DashboardWidgetHeaderProps) {
   const { t } = useTranslation();
   const isEditing = useDashboardEditMode();
-  const ScopeIcon = dataScope === DashboardWidgetDataScope.PERSONAL ? UserRound : UsersRound;
+  const ScopeIcon =
+    dataScope === DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL ? UserRound : UsersRound;
   const scopeLabel = dataScope ? t(`dashboardHome.widgets.dataScope.${dataScope}`) : undefined;
   const scopeTooltip = dataScope
     ? t(`dashboardHome.widgets.dataScope.${dataScope}Tooltip`)
