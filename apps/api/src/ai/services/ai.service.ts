@@ -1,4 +1,4 @@
-import { observe, updateActiveObservation, updateActiveTrace } from "@langfuse/tracing";
+import { observe, propagateAttributes, updateActiveObservation } from "@langfuse/tracing";
 import {
   BadRequestException,
   ForbiddenException,
@@ -94,35 +94,38 @@ export class AiService {
 
   async getThreadWithSetup(data: CreateThreadBody) {
     return observe(
-      async () => {
-        try {
-          const threadData = await this.threadService.createThreadIfNoneExist(data);
-
-          if (!threadData.newThread) {
-            return { data: threadData.thread };
-          }
-
-          updateActiveTrace({
+      async () =>
+        propagateAttributes(
+          {
             userId: dbAls.getStore()?.tenantId,
-            sessionId: threadData.thread.id,
-          });
+          },
+          async () => {
+            try {
+              const threadData = await this.threadService.createThreadIfNoneExist(data);
 
-          const systemPrompt = await this.promptService.setSystemPrompt({
-            threadId: threadData.thread.id,
-            userId: threadData.thread.userId,
-          });
+              if (!threadData.newThread) {
+                return { data: threadData.thread };
+              }
 
-          await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
+              return propagateAttributes({ sessionId: threadData.thread.id }, async () => {
+                const systemPrompt = await this.promptService.setSystemPrompt({
+                  threadId: threadData.thread.id,
+                  userId: threadData.thread.userId,
+                });
 
-          return { data: threadData.thread };
-        } catch (error) {
-          updateActiveObservation({
-            level: "ERROR",
-            statusMessage: error.message,
-          });
-          throw error;
-        }
-      },
+                await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
+
+                return { data: threadData.thread };
+              });
+            } catch (error) {
+              updateActiveObservation({
+                level: "ERROR",
+                statusMessage: error.message,
+              });
+              throw error;
+            }
+          },
+        ),
       { name: "Get Thread", asType: "span" },
     )();
   }
@@ -132,30 +135,38 @@ export class AiService {
     userId: UUIDType;
     userLanguage: SupportedLanguages;
   }) {
-    const existingThread = await this.aiRepository.findThread([
-      eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
-      eq(aiMentorThreads.userId, data.userId),
-    ]);
-
-    if (existingThread) return existingThread;
-
-    const thread = await this.aiRepository.createThread({
-      practiceSessionId: data.practiceSessionId,
-      userId: data.userId,
-      userLanguage: data.userLanguage,
-      status: THREAD_STATUS.ACTIVE,
-    });
-
-    const systemPrompt = await this.promptService.setSystemPrompt(
+    return propagateAttributes(
       {
-        threadId: thread.id,
-        userId: thread.userId,
+        sessionId: data.practiceSessionId,
+        metadata: { practiceSessionId: data.practiceSessionId },
       },
-      AI_MENTOR_TYPE.ROLEPLAY,
-    );
-    await this.sendWelcomeMessage(thread.id, systemPrompt);
+      async () => {
+        const existingThread = await this.aiRepository.findThread([
+          eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
+          eq(aiMentorThreads.userId, data.userId),
+        ]);
 
-    return thread;
+        if (existingThread) return existingThread;
+
+        const thread = await this.aiRepository.createThread({
+          practiceSessionId: data.practiceSessionId,
+          userId: data.userId,
+          userLanguage: data.userLanguage,
+          status: THREAD_STATUS.ACTIVE,
+        });
+
+        const systemPrompt = await this.promptService.setSystemPrompt(
+          {
+            threadId: thread.id,
+            userId: thread.userId,
+          },
+          AI_MENTOR_TYPE.ROLEPLAY,
+        );
+        await this.sendWelcomeMessage(thread.id, systemPrompt);
+
+        return thread;
+      },
+    );
   }
 
   async streamMessage(
@@ -166,66 +177,76 @@ export class AiService {
   ): Promise<AiMentorChatStreamResult> {
     return observe(
       async () => {
-        updateActiveTrace({
-          sessionId: data.threadId,
-          userId: currentUser.tenantId,
-        });
+        const thread = await this.isThreadActive(data.threadId, currentUser.userId);
+        const sessionId = data.voiceSessionId ?? thread.practiceSessionId ?? data.threadId;
 
-        await this.isThreadActive(data.threadId, currentUser.userId);
-        await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
+        return propagateAttributes(
+          {
+            sessionId,
+            userId: currentUser.tenantId,
+            metadata: {
+              threadId: data.threadId,
+              ...(thread.practiceSessionId && { practiceSessionId: thread.practiceSessionId }),
+              ...(data.voiceSessionId && { voiceSessionId: data.voiceSessionId }),
+            },
+          },
+          async () => {
+            await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
-        const prompt = await this.promptService.buildPrompt(
-          data.threadId,
-          data.content,
-          isVoiceMentor,
-          data.id,
-        );
+            const prompt = await this.promptService.buildPrompt(
+              data.threadId,
+              data.content,
+              isVoiceMentor,
+              data.id,
+            );
 
-        const generationConfig = isVoiceMentor
-          ? {
-              temperature: 0.2,
-              topK: 20,
-              topP: 0.5,
-            }
-          : {
-              temperature: 0.8,
-              topK: 50,
-              topP: 0.8,
+            const generationConfig = isVoiceMentor
+              ? {
+                  temperature: 0.2,
+                  topK: 20,
+                  topP: 0.5,
+                }
+              : {
+                  temperature: 0.8,
+                  topK: 50,
+                  topP: 0.8,
+                };
+
+            const createCoreStream = async (persistOnFinish = true) => {
+              return await this.streamCoreMentorChat({
+                data,
+                model,
+                currentUser,
+                isVoiceMentor,
+                prompt,
+                generationConfig,
+                persistOnFinish,
+              });
             };
 
-        const createCoreStream = async (persistOnFinish = true) => {
-          return await this.streamCoreMentorChat({
-            data,
-            model,
-            currentUser,
-            isVoiceMentor,
-            prompt,
-            generationConfig,
-            persistOnFinish,
-          });
-        };
+            const stream = await this.aiRuntimeService.streamMentorChat(
+              {
+                messages: this.toPublicAiMessages(prompt),
+                temperature: generationConfig.temperature,
+                voiceSessionId: data.voiceSessionId,
+              },
+              createCoreStream,
+            );
 
-        const stream = await this.aiRuntimeService.streamMentorChat(
-          {
-            messages: this.toPublicAiMessages(prompt),
-            temperature: generationConfig.temperature,
-            voiceSessionId: data.voiceSessionId,
+            if (stream.source === AI_RUNTIME_SOURCES.CORE) return stream;
+
+            return {
+              ...stream,
+              textStream: this.persistLumaMentorChatStream({
+                stream: stream.textStream,
+                data,
+                model,
+                currentUser,
+                isVoiceMentor,
+              }),
+            };
           },
-          createCoreStream,
         );
-
-        if (stream.source === AI_RUNTIME_SOURCES.CORE) return stream;
-
-        return {
-          ...stream,
-          textStream: this.persistLumaMentorChatStream({
-            stream: stream.textStream,
-            data,
-            model,
-            currentUser,
-            isVoiceMentor,
-          }),
-        };
       },
       { name: "Conversation", asType: "generation", endOnExit: false },
     )();
@@ -329,13 +350,18 @@ export class AiService {
     const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
 
     const judged = await observe(
-      async () => {
-        updateActiveTrace({
-          sessionId: data.threadId,
-          userId: dbAls.getStore()?.tenantId,
-        });
-        return this.judgeService.runJudge(data, viewer);
-      },
+      async () =>
+        propagateAttributes(
+          {
+            sessionId: thread.practiceSessionId ?? data.threadId,
+            userId: dbAls.getStore()?.tenantId,
+            metadata: {
+              threadId: data.threadId,
+              ...(thread.practiceSessionId && { practiceSessionId: thread.practiceSessionId }),
+            },
+          },
+          () => this.judgeService.runJudge(data, viewer),
+        ),
       { name: "Thread Evaluator", asType: "evaluator" },
     )();
 
@@ -450,36 +476,35 @@ export class AiService {
 
   async transcribe(clientId: string, audio: Buffer): Promise<AiTranscriptionResult | undefined> {
     return observe(
-      async () => {
-        updateActiveTrace({ sessionId: `transcription-${clientId}` });
+      async () =>
+        propagateAttributes({ sessionId: `transcription-${clientId}` }, async () => {
+          const transcription = await this.aiRuntimeService.transcribeDictation(
+            {
+              file: new File([audio], `${clientId}.webm`),
+            },
+            async () => {
+              const openai = await this.promptService.getOpenAI();
+              const whisper = openai.transcriptionModel?.(OPENAI_MODELS.TRANSCRIBE);
+              if (!whisper) return;
+              const { experimental_transcribe } = await loadAiSdk();
 
-        const transcription = await this.aiRuntimeService.transcribeDictation(
-          {
-            file: new File([audio], `${clientId}.webm`),
-          },
-          async () => {
-            const openai = await this.promptService.getOpenAI();
-            const whisper = openai.transcriptionModel?.(OPENAI_MODELS.TRANSCRIBE);
-            if (!whisper) return;
-            const { experimental_transcribe } = await loadAiSdk();
+              return await experimental_transcribe({
+                model: whisper,
+                audio,
+              });
+            },
+          );
 
-            return await experimental_transcribe({
-              model: whisper,
-              audio,
-            });
-          },
-        );
+          updateActiveObservation(
+            {
+              input: { audioLength: audio.length },
+              output: { ...transcription },
+            },
+            { asType: "generation" },
+          );
 
-        updateActiveObservation(
-          {
-            input: { audioLength: audio.length },
-            output: { ...transcription },
-          },
-          { asType: "generation" },
-        );
-
-        return transcription;
-      },
+          return transcription;
+        }),
       { name: "transcription-generator", asType: "generation" },
     )();
   }
@@ -491,125 +516,127 @@ export class AiService {
     chunkSize: number = 4,
   ) {
     return observe(
-      async () => {
-        updateActiveTrace({ sessionId: `generate-missing-translations-${courseId}` });
+      async () =>
+        propagateAttributes(
+          { sessionId: `generate-missing-translations-${courseId}` },
+          async () => {
+            const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
 
-        const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
+            const translateChunk = async (
+              chunk: Array<{
+                data: CourseTranslationType;
+                metadata: string;
+                context: Record<string, string | undefined>;
+                itemId: string;
+              }>,
+            ) => {
+              const preparedChunk = chunk.map((item) => ({
+                ...item,
+                context: getTranslationContext(item.metadata, item.data.base, item.context),
+              }));
+              const formatted = preparedChunk
+                .map(({ data: c, metadata, context, itemId }, i) => {
+                  const ctxLines = [
+                    context.courseTitle && `Course: ${context.courseTitle}`,
+                    context.chapterTitle && `Chapter: ${context.chapterTitle}`,
+                    context.lessonTitle && `Lesson: ${context.lessonTitle}`,
+                    context.lessonDescription && `Lesson description: ${context.lessonDescription}`,
+                    context.questionTitle && `Question: ${context.questionTitle}`,
+                    context.questionDescription &&
+                      `Question description: ${context.questionDescription}`,
+                    context.questionOptions && `Options:\n${context.questionOptions}`,
+                    context.optionText && `Option: ${context.optionText}`,
+                    context.aiJudgeTaskGoal && `AI Judge task goal: ${context.aiJudgeTaskGoal}`,
+                    context.aiJudgeCriterionTitle &&
+                      `AI Judge criterion: ${context.aiJudgeCriterionTitle}`,
+                    context.aiJudgeExpectedBehavior &&
+                      `Expected behavior: ${context.aiJudgeExpectedBehavior}`,
+                    context.aiJudgeScore && `Score guidance: ${context.aiJudgeScore}`,
+                  ]
+                    .filter(Boolean)
+                    .join("\n");
 
-        const translateChunk = async (
-          chunk: Array<{
-            data: CourseTranslationType;
-            metadata: string;
-            context: Record<string, string | undefined>;
-            itemId: string;
-          }>,
-        ) => {
-          const preparedChunk = chunk.map((item) => ({
-            ...item,
-            context: getTranslationContext(item.metadata, item.data.base, item.context),
-          }));
-          const formatted = preparedChunk
-            .map(({ data: c, metadata, context, itemId }, i) => {
-              const ctxLines = [
-                context.courseTitle && `Course: ${context.courseTitle}`,
-                context.chapterTitle && `Chapter: ${context.chapterTitle}`,
-                context.lessonTitle && `Lesson: ${context.lessonTitle}`,
-                context.lessonDescription && `Lesson description: ${context.lessonDescription}`,
-                context.questionTitle && `Question: ${context.questionTitle}`,
-                context.questionDescription &&
-                  `Question description: ${context.questionDescription}`,
-                context.questionOptions && `Options:\n${context.questionOptions}`,
-                context.optionText && `Option: ${context.optionText}`,
-                context.aiJudgeTaskGoal && `AI Judge task goal: ${context.aiJudgeTaskGoal}`,
-                context.aiJudgeCriterionTitle &&
-                  `AI Judge criterion: ${context.aiJudgeCriterionTitle}`,
-                context.aiJudgeExpectedBehavior &&
-                  `Expected behavior: ${context.aiJudgeExpectedBehavior}`,
-                context.aiJudgeScore && `Score guidance: ${context.aiJudgeScore}`,
-              ]
-                .filter(Boolean)
-                .join("\n");
+                  return [
+                    `ITEM ${i + 1}`,
+                    `ITEM ID: ${itemId}`,
+                    `METADATA: ${metadata}`,
+                    ctxLines ? `CONTEXT:\n${ctxLines}` : undefined,
+                    `TEXT TO TRANSLATE:\n${c.base}`,
+                  ]
+                    .filter(Boolean)
+                    .join("\n");
+                })
+                .join("\n\n");
 
-              return [
-                `ITEM ${i + 1}`,
-                `ITEM ID: ${itemId}`,
-                `METADATA: ${metadata}`,
-                ctxLines ? `CONTEXT:\n${ctxLines}` : undefined,
-                `TEXT TO TRANSLATE:\n${c.base}`,
-              ]
-                .filter(Boolean)
-                .join("\n");
-            })
-            .join("\n\n");
+              const { jsonSchema } = await loadAiSdk();
+              const schema = jsonSchema(generateTranslationSchema);
 
-          const { jsonSchema } = await loadAiSdk();
-          const schema = jsonSchema(generateTranslationSchema);
+              const userContent = `Return exactly ${chunk.length} strings. Each output string MUST start with the matching ITEM ID, followed by one newline and the translated text. Preserve each ITEM ID exactly. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`;
 
-          const userContent = `Return exactly ${chunk.length} strings. Each output string MUST start with the matching ITEM ID, followed by one newline and the translated text. Preserve each ITEM ID exactly. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`;
+              const run = async () => {
+                return await this.aiRuntimeService.generateTranslations(
+                  {
+                    messages: [
+                      { role: MESSAGE_ROLE.SYSTEM, content: prompt },
+                      { role: MESSAGE_ROLE.USER, content: userContent },
+                    ],
+                    temperature: 0,
+                  },
+                  async () => {
+                    const openai = await this.promptService.getOpenAI();
+                    const { generateObject } = await loadAiSdk();
+                    const { object } = await generateObject({
+                      model: openai(OPENAI_MODELS.TRANSLATION),
+                      schema,
+                      system: prompt,
+                      temperature: 0,
+                      topP: 0.9,
+                      topK: 10,
+                      experimental_telemetry: { isEnabled: true },
+                      messages: [
+                        {
+                          role: "user",
+                          content: userContent,
+                        },
+                      ],
+                    });
 
-          const run = async () => {
-            return await this.aiRuntimeService.generateTranslations(
-              {
-                messages: [
-                  { role: MESSAGE_ROLE.SYSTEM, content: prompt },
-                  { role: MESSAGE_ROLE.USER, content: userContent },
-                ],
-                temperature: 0,
-              },
-              async () => {
-                const openai = await this.promptService.getOpenAI();
-                const { generateObject } = await loadAiSdk();
-                const { object } = await generateObject({
-                  model: openai(OPENAI_MODELS.TRANSLATION),
-                  schema,
-                  system: prompt,
-                  temperature: 0,
-                  topP: 0.9,
-                  topK: 10,
-                  experimental_telemetry: { isEnabled: true },
-                  messages: [
-                    {
-                      role: "user",
-                      content: userContent,
-                    },
-                  ],
+                    return object as GenerateTranslationBody;
+                  },
+                );
+              };
+
+              const { translations } = await run();
+
+              try {
+                const alignedTranslations = alignTranslationItems(
+                  translations,
+                  chunk.map(({ itemId }) => itemId),
+                );
+
+                alignedTranslations.forEach((translatedText, index) => {
+                  validateTranslationStructure(chunk[index].data.base, translatedText);
                 });
 
-                return object as GenerateTranslationBody;
-              },
+                return alignedTranslations;
+              } catch (error) {
+                const translationErrorKey =
+                  error instanceof TranslationStructureError
+                    ? "adminCourseView.toast.invalidTranslationStructure"
+                    : "adminCourseView.toast.mismatchContentLength";
+
+                throw new BadRequestException(translationErrorKey);
+              }
+            };
+
+            const chunked = _.chunk(
+              data.map((item, index) => ({ ...item, itemId: `translation-item-${index + 1}` })),
+              chunkSize,
             );
-          };
 
-          const { translations } = await run();
-
-          try {
-            const alignedTranslations = alignTranslationItems(
-              translations,
-              chunk.map(({ itemId }) => itemId),
-            );
-
-            alignedTranslations.forEach((translatedText, index) => {
-              validateTranslationStructure(chunk[index].data.base, translatedText);
-            });
-
-            return alignedTranslations;
-          } catch (error) {
-            const translationErrorKey =
-              error instanceof TranslationStructureError
-                ? "adminCourseView.toast.invalidTranslationStructure"
-                : "adminCourseView.toast.mismatchContentLength";
-
-            throw new BadRequestException(translationErrorKey);
-          }
-        };
-
-        const chunked = _.chunk(
-          data.map((item, index) => ({ ...item, itemId: `translation-item-${index + 1}` })),
-          chunkSize,
-        );
-
-        return Promise.all(chunked.map(translateChunk));
-      },
+            return Promise.all(chunked.map(translateChunk));
+          },
+        ),
       { name: "translation-generator", asType: "generation" },
     )();
   }

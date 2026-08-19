@@ -1,3 +1,4 @@
+import { propagateAttributes } from "@langfuse/tracing";
 import {
   BadRequestException,
   ConflictException,
@@ -148,26 +149,40 @@ export class AiPracticeService {
         title,
         taskDescription: session.scenario,
       };
-      const mentorConfiguration = await this.aiMentorConfigurationGeneratorService.generate({
-        configurationType: AI_MENTOR_TYPE.ROLEPLAY,
-        language: session.language,
-        lessonContext,
-        mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
-        brief: session.scenario,
-        generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
-      });
+      const mentorConfiguration = await propagateAttributes(
+        {
+          sessionId: session.id,
+          metadata: { practiceSessionId: session.id },
+        },
+        () =>
+          this.aiMentorConfigurationGeneratorService.generate({
+            configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+            language: session.language,
+            lessonContext,
+            mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
+            brief: session.scenario,
+            generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
+          }),
+      );
       if (mentorConfiguration.type !== AI_MENTOR_TYPE.ROLEPLAY)
         throw new Error("Practice AI Mentor generator returned a non-roleplay configuration");
 
-      const judgeConfiguration = await this.aiJudgeConfigurationGeneratorService.generate({
-        language: session.language,
-        lessonContext: {
-          ...lessonContext,
-          aiMentorConfiguration: mentorConfiguration,
+      const judgeConfiguration = await propagateAttributes(
+        {
+          sessionId: session.id,
+          metadata: { practiceSessionId: session.id },
         },
-        mode: AI_JUDGE_GENERATION_MODE.CREATE,
-        brief: session.scenario,
-      });
+        () =>
+          this.aiJudgeConfigurationGeneratorService.generate({
+            language: session.language,
+            lessonContext: {
+              ...lessonContext,
+              aiMentorConfiguration: mentorConfiguration,
+            },
+            mode: AI_JUDGE_GENERATION_MODE.CREATE,
+            brief: session.scenario,
+          }),
+      );
 
       await this.aiRepository.saveGeneratedPractice(
         session.id,

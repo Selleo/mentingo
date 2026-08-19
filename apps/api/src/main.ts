@@ -52,6 +52,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+  app.enableShutdownHooks();
 
   app.getHttpAdapter().getInstance().set("trust proxy", 1);
 

@@ -75,17 +75,17 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(@langchain/core@0.3.72(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(openai@5.12.2(ws@8.18.3)(zod@3.25.76)))
       '@langfuse/client':
-        specifier: 4.2.0
-        version: 4.2.0(@opentelemetry/api@1.9.0)
+        specifier: 5.10.1
+        version: 5.10.1(@opentelemetry/api@1.9.0)
       '@langfuse/core':
-        specifier: 4.2.0
-        version: 4.2.0
+        specifier: 5.10.1
+        version: 5.10.1(@opentelemetry/api@1.9.0)
       '@langfuse/otel':
-        specifier: 4.2.0
-        version: 4.2.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))
+        specifier: 5.10.1
+        version: 5.10.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))
       '@langfuse/tracing':
-        specifier: 4.2.0
-        version: 4.2.0(@opentelemetry/api@1.9.0)
+        specifier: 5.10.1
+        version: 5.10.1(@opentelemetry/api@1.9.0)
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4371,16 +4371,18 @@ packages:
     peerDependencies:
       '@langchain/core': '>=0.2.21 <0.4.0'
 
-  '@langfuse/client@4.2.0':
-    resolution: {integrity: sha512-3Ps+k0SdNwntZhUJMaxfImQ1A7iubxBae4xz3h7TMf5afBuTaJrrrgTrkUJVP+qSzyCa95wzerDPm/X4h5p5PA==}
+  '@langfuse/client@5.10.1':
+    resolution: {integrity: sha512-isfMUbb55mXnp5EjIKnKmdB6aVxy+jPYK65RkaLdi2xveUbifVeov9kAwHQN6lWtzkR/ssSk6+JwvTCLaPcvTQ==}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
 
-  '@langfuse/core@4.2.0':
-    resolution: {integrity: sha512-QARHC8Xz3ZyFrIQtbc9L34XQo5yWwpTBvzqiXeEw/LScigG9gyUf3XaykVbJ8Er0O7cggHm9wBXw3POMxDih/w==}
+  '@langfuse/core@5.10.1':
+    resolution: {integrity: sha512-W8UArizWSy1DdeLGTsTwJwl7bkA7OQQcGZW8RtoopXyJZ93O0rwG7wzzeiZjhjpj5OtWOUTEaJuNkwOrF31UDw==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
 
-  '@langfuse/otel@4.2.0':
-    resolution: {integrity: sha512-SRso7L/GdKJ1MjOdiCwctJVm4skEl4XLYipa4kQsk5mhfxU/1WPO4FwFocc/IRE7PxkMYVmkKOAB2za7ROVgTw==}
+  '@langfuse/otel@5.10.1':
+    resolution: {integrity: sha512-F2153e4PoJ1cN+5tM/xnsS44aQCQwK3p0nPk4NEpITV5pMTqiQVyvpkAvly8GKQ5Qjjr7heJ1dFtghW43ysyPQ==}
     engines: {node: '>=20'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -4388,8 +4390,8 @@ packages:
       '@opentelemetry/exporter-trace-otlp-http': '>=0.202.0 <1.0.0'
       '@opentelemetry/sdk-trace-base': ^2.0.1
 
-  '@langfuse/tracing@4.2.0':
-    resolution: {integrity: sha512-0WiqupzU2OoItnlPBFNZa6ODOKxPtD3f46c+G9RaajOELX+lfToDMvVWjmajuZdHbm5BE6BYidbGJtFfLNiyTA==}
+  '@langfuse/tracing@5.10.1':
+    resolution: {integrity: sha512-m2kK4D0MsH8g4Og6KpnlYk8NLdQTYe0JR5M4KKpfNj99XXLlbdpXE/g3uJSqkcrWFhpiIb+3cyS9+uV6wQ6WtA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -21655,26 +21657,28 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@langfuse/client@4.2.0(@opentelemetry/api@1.9.0)':
+  '@langfuse/client@5.10.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@langfuse/core': 4.2.0
-      '@langfuse/tracing': 4.2.0(@opentelemetry/api@1.9.0)
+      '@langfuse/core': 5.10.1(@opentelemetry/api@1.9.0)
+      '@langfuse/tracing': 5.10.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api': 1.9.0
       mustache: 4.2.0
 
-  '@langfuse/core@4.2.0': {}
-
-  '@langfuse/otel@4.2.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))':
+  '@langfuse/core@5.10.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@langfuse/core': 4.2.0
+      '@opentelemetry/api': 1.9.0
+
+  '@langfuse/otel@5.10.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.206.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))':
+    dependencies:
+      '@langfuse/core': 5.10.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.1.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-http': 0.206.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.1.0(@opentelemetry/api@1.9.0)
 
-  '@langfuse/tracing@4.2.0(@opentelemetry/api@1.9.0)':
+  '@langfuse/tracing@5.10.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@langfuse/core': 4.2.0
+      '@langfuse/core': 5.10.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api': 1.9.0
 
   '@livekit/components-core@0.12.13(livekit-client@2.18.9(@types/dom-mediacapture-record@1.0.22))(tslib@2.8.1)':
