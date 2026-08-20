@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { COURSE_VIEW_QUERY_KEY } from "~/api/queries/useCourse";
+import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { invalidateCourseListData } from "~/api/utils/invalidateCourseListData";
@@ -54,6 +55,10 @@ export function useUpdateCourse() {
             queryKey: COURSE_VIEW_QUERY_KEY,
           }),
         ]);
+      }
+
+      if (options.data.status) {
+        await queryClient.invalidateQueries(globalSettingsQueryOptions);
       }
 
       await invalidateCourseListData();

@@ -3652,6 +3652,16 @@
         "moreInfo": "Daugiau informacijos",
         "info": "Informacija"
       },
+      "featuredCourse": {
+        "label": "Teminis kursas",
+        "none": "Pasirinkite teminį kursą",
+        "search": "Ieškoti paskelbtų kursų...",
+        "empty": "Paskelbtų kursų nerasta",
+        "clear": "Išvalyti teminį kursą",
+        "loadMore": "Įkelti daugiau kursų",
+        "updated": "Teminis kursas atnaujintas",
+        "updateFailed": "Nepavyko atnaujinti teminio kurso"
+      },
       "lessonsCount_one": "{{count}} pamoka",
       "lessonsCount_other": "{{count}} pamokų"
     }

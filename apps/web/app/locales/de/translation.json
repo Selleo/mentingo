@@ -3651,6 +3651,16 @@
         "moreInfo": "Weitere Informationen",
         "info": "Info"
       },
+      "featuredCourse": {
+        "label": "Hervorgehobener Kurs",
+        "none": "Hervorgehobenen Kurs auswählen",
+        "search": "Veröffentlichte Kurse suchen...",
+        "empty": "Keine veröffentlichten Kurse gefunden",
+        "clear": "Hervorgehobenen Kurs entfernen",
+        "loadMore": "Weitere Kurse laden",
+        "updated": "Hervorgehobener Kurs aktualisiert",
+        "updateFailed": "Hervorgehobener Kurs konnte nicht aktualisiert werden"
+      },
       "lessonsCount_one": "{{count}} Lektion",
       "lessonsCount_other": "{{count}} Lektionen"
     }

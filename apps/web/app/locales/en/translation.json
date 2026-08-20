@@ -3656,6 +3656,16 @@
         "moreInfo": "More info",
         "info": "Info"
       },
+      "featuredCourse": {
+        "label": "Featured course",
+        "none": "Choose featured course",
+        "search": "Search published courses...",
+        "empty": "No published courses found",
+        "clear": "Clear featured course",
+        "loadMore": "Load more courses",
+        "updated": "Featured course updated",
+        "updateFailed": "Could not update featured course"
+      },
       "lessonsCount_one": "{{count}} lesson",
       "lessonsCount_other": "{{count}} lessons"
     }

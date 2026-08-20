@@ -1,6 +1,8 @@
 import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
+import { UUIDSchema } from "src/common";
+
 import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
 import {
@@ -57,6 +59,10 @@ export const updateLiveTrainingMaxParallelSessionsSchema = Type.Object({
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),
 });
 
+export const updateFeaturedCourseSchema = Type.Object({
+  featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
+});
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateDashboardSettingsBody = Static<typeof updateDashboardSettingsBodySchema>;
 export type ResetDashboardSettingsBody = Static<typeof resetDashboardSettingsBodySchema>;
@@ -68,3 +74,4 @@ export type UpdateAgeLimitBody = Static<typeof updateAgeLimitSchema>;
 export type UpdateLiveTrainingMaxParallelSessionsBody = Static<
   typeof updateLiveTrainingMaxParallelSessionsSchema
 >;
+export type UpdateFeaturedCourseBody = Static<typeof updateFeaturedCourseSchema>;

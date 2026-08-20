@@ -3657,6 +3657,16 @@
         "moreInfo": "Více informací",
         "info": "Info"
       },
+      "featuredCourse": {
+        "label": "Doporučený kurz",
+        "none": "Vyberte doporučený kurz",
+        "search": "Hledat publikované kurzy...",
+        "empty": "Nebyly nalezeny žádné publikované kurzy",
+        "clear": "Zrušit doporučený kurz",
+        "loadMore": "Načíst další kurzy",
+        "updated": "Doporučený kurz byl aktualizován",
+        "updateFailed": "Doporučený kurz se nepodařilo aktualizovat"
+      },
       "lessonsCount_one": "{{count}} lekce",
       "lessonsCount_other": "{{count}} lekcí"
     }

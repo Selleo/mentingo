@@ -84,6 +84,8 @@ import {
   UpdateAgeLimitBody,
   updateLiveTrainingMaxParallelSessionsSchema,
   UpdateLiveTrainingMaxParallelSessionsBody,
+  updateFeaturedCourseSchema,
+  UpdateFeaturedCourseBody,
   updateDashboardSettingsBodySchema,
   resetDashboardSettingsBodySchema,
   UpdateDashboardSettingsBody,
@@ -243,6 +245,24 @@ export class SettingsController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalModernCourseListEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/featured-course")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: updateFeaturedCourseSchema }],
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateFeaturedCourse(
+    @Body() body: UpdateFeaturedCourseBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalFeaturedCourse(
+      body.featuredCourseId,
+      currentUser,
+    );
     return new BaseResponse(result);
   }
 
