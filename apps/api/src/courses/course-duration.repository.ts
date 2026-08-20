@@ -14,6 +14,8 @@ import {
   resources,
 } from "src/storage/schema";
 
+import { COURSE_DURATION_ADVISORY_LOCK_NAMESPACE } from "./constants/course-duration.constants";
+
 import type {
   DurationDb,
   DurationEstimatesByLanguage,
@@ -33,7 +35,8 @@ export class CourseDurationRepository {
     callback: (db: DatabasePg) => Promise<T>,
   ): Promise<T> {
     return (db ?? this.db).transaction(async (trx) => {
-      await trx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${courseId}, 1917))`);
+      const lockKey = `${COURSE_DURATION_ADVISORY_LOCK_NAMESPACE}:${courseId}`;
+      await trx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`);
       return callback(trx);
     });
   }
