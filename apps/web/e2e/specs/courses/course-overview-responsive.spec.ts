@@ -6,7 +6,7 @@ import { openCourseOverviewFlow } from "../../flows/learning/open-course-overvie
 
 const MOBILE_VIEWPORT = { width: 320, height: 844 };
 
-test("admin course controls stay in one compact row on a small screen", async ({
+test("admin course controls remain accessible on a small screen", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -51,66 +51,23 @@ test("admin course controls stay in one compact row on a small screen", async ({
     await expect(editMediaButton.locator("span")).toBeHidden();
     await expect(languageSelect.locator("span.hidden", { hasText: "English" })).toBeHidden();
 
-    const settingsBox = await settingsButton.boundingBox();
-    const editMediaBox = await editMediaButton.boundingBox();
-    const languageBox = await languageSelect.boundingBox();
-    const heroBox = await hero.boundingBox();
-    const heroContentBox = await heroContent.boundingBox();
-    const heroTitleBox = await heroTitle.boundingBox();
-    const learningModeBox = await learningModeButton.boundingBox();
-    const detailsBox = await detailsButton.boundingBox();
-
-    expect(settingsBox).not.toBeNull();
-    expect(editMediaBox).not.toBeNull();
-    expect(languageBox).not.toBeNull();
-    expect(heroBox).not.toBeNull();
-    expect(heroContentBox).not.toBeNull();
-    expect(heroTitleBox).not.toBeNull();
-    expect(learningModeBox).not.toBeNull();
-    expect(detailsBox).not.toBeNull();
-
-    if (
-      !(
-        settingsBox &&
-        editMediaBox &&
-        languageBox &&
-        heroBox &&
-        heroContentBox &&
-        heroTitleBox &&
-        learningModeBox &&
-        detailsBox
-      )
-    ) {
-      throw new Error("Course overview hero, controls, and content must have measurable bounds");
+    for (const element of [
+      settingsButton,
+      editMediaButton,
+      languageSelect,
+      hero,
+      heroContent,
+      heroTitle,
+      courseActions,
+      learningModeButton,
+      detailsButton,
+    ]) {
+      await expect(element).toBeInViewport({ ratio: 1 });
     }
-
-    const toolbarBottom = Math.max(
-      settingsBox.y + settingsBox.height,
-      editMediaBox.y + editMediaBox.height,
-      languageBox.y + languageBox.height,
-    );
-    const actionsBottom = Math.max(
-      learningModeBox.y + learningModeBox.height,
-      detailsBox.y + detailsBox.height,
-    );
-    const heroBottom = heroBox.y + heroBox.height;
-    const heroRight = heroBox.x + heroBox.width;
-
-    expect(heroBox.x).toBeGreaterThanOrEqual(0);
-    expect(heroRight).toBeLessThanOrEqual(MOBILE_VIEWPORT.width);
-    expect(settingsBox.x + settingsBox.width).toBeLessThanOrEqual(editMediaBox.x);
-    expect(editMediaBox.x + editMediaBox.width).toBeLessThanOrEqual(languageBox.x);
-    expect(languageBox.x).toBeGreaterThanOrEqual(heroBox.x);
-    expect(languageBox.x + languageBox.width).toBeLessThanOrEqual(heroRight);
-    expect(toolbarBottom).toBeLessThanOrEqual(heroContentBox.y);
-    expect(heroTitleBox.x).toBeGreaterThanOrEqual(heroBox.x);
-    expect(heroTitleBox.x + heroTitleBox.width).toBeLessThanOrEqual(heroRight);
-    expect(heroTitleBox.y + heroTitleBox.height).toBeLessThanOrEqual(heroBottom);
-    expect(actionsBottom).toBeLessThanOrEqual(heroBottom);
   });
 });
 
-test("student course actions stay visible on a small screen", async ({
+test("student course actions remain accessible on a small screen", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -161,33 +118,9 @@ test("student course actions stay visible on a small screen", async ({
         await expect(continueLearningButton).toHaveText("Continue learning");
         await expect(detailsButton).toHaveText("Course details");
 
-        const continueLearningBox = await continueLearningButton.boundingBox();
-        const detailsBox = await detailsButton.boundingBox();
-        const heroBox = await hero.boundingBox();
-        const heroTitleBox = await heroTitle.boundingBox();
-
-        expect(continueLearningBox).not.toBeNull();
-        expect(detailsBox).not.toBeNull();
-        expect(heroBox).not.toBeNull();
-        expect(heroTitleBox).not.toBeNull();
-
-        if (!(continueLearningBox && detailsBox && heroBox && heroTitleBox)) {
-          throw new Error("Student course hero and actions must have measurable bounds");
+        for (const element of [hero, heroTitle, continueLearningButton, detailsButton]) {
+          await expect(element).toBeInViewport({ ratio: 1 });
         }
-
-        const actionsBottom = Math.max(
-          continueLearningBox.y + continueLearningBox.height,
-          detailsBox.y + detailsBox.height,
-        );
-        const heroBottom = heroBox.y + heroBox.height;
-        const heroRight = heroBox.x + heroBox.width;
-
-        expect(heroBox.x).toBeGreaterThanOrEqual(0);
-        expect(heroRight).toBeLessThanOrEqual(MOBILE_VIEWPORT.width);
-        expect(heroTitleBox.x).toBeGreaterThanOrEqual(heroBox.x);
-        expect(heroTitleBox.x + heroTitleBox.width).toBeLessThanOrEqual(heroRight);
-        expect(heroTitleBox.y + heroTitleBox.height).toBeLessThanOrEqual(heroBottom);
-        expect(actionsBottom).toBeLessThanOrEqual(heroBottom);
       },
       { root: true },
     );

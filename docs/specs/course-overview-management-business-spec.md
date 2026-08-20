@@ -39,7 +39,7 @@ An administrator opens the course overview, selects a course language, and edits
 - Course editors receive exact selected-language values for localized learning outcomes; learner and preview experiences retain base-language fallback behavior.
 - Inline overview edits update the active course view from the saved value and preserve the selected course language.
 - Course route loaders resolve the account language and prime the course response before rendering; the course list follows the same language initialization path.
-- The mobile details view uses the shared bottom-sheet dialog behavior, while the hero keeps a mobile-friendly aspect ratio.
+- The mobile details view uses the shared bottom-sheet dialog behavior, while the hero grows with its content so controls remain accessible on narrow screens.
 - The settings sheet reuses established course-management panels and the course overview tab visual language.
 - Certificate visibility still depends on an issued certificate, completed course progress, and the effective learner experience.
 - Course language remains explicit throughout localized management and certificate rendering.
@@ -48,4 +48,4 @@ An administrator opens the course overview, selects a course language, and edits
 
 - Source coverage exists for the modern overview, TOC tabs, settings drawer, details, outcomes, certificates, and discussions.
 - API coverage verifies localized course outcomes for editor and learner experiences, including empty translated outcomes.
-- Existing responsive course-overview E2E coverage verifies compact controls and visible learner actions at a 320px viewport; additional loading-transition assertions remain a follow-up opportunity.
+- Existing responsive course-overview E2E coverage verifies accessible controls and visible learner actions at a 320px viewport; additional loading-transition assertions remain a follow-up opportunity.
