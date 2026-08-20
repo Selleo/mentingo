@@ -7,7 +7,6 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { RealtimePCMPlayer } from "../audio-player";
 import { RealtimePCMStreamerWorklet } from "../audio-stream";
-import { AUDIO_CAPTURE_MODE } from "../audio-stream.types";
 import { voiceSocketProtocol } from "../voiceSocketProtocol";
 
 import {
@@ -254,7 +253,6 @@ export function useVoiceMentor({
       await streamerRef.current.start({
         voiceAction: VOICE_ACTION.VOICE_MENTOR,
         lessonId,
-        captureMode: AUDIO_CAPTURE_MODE.CONTINUOUS,
       });
 
       setIsRecording(true);

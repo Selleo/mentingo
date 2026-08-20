@@ -4,10 +4,12 @@ import {
   LUMA_AUDIO_FORMATS,
   LUMA_SOCKET_MESSAGE_TYPES,
   type AudioChunkPayload,
+  type AudioStartedPayload,
   type AudioOutputErrorPayload,
   type AudioOutputCompletePayload,
   type AudioOutputInterruptedPayload,
   type AudioStopPayload,
+  type ClientSpeechBoundaryPayload as LumaClientSpeechBoundaryPayload,
   type MentorTranscriptionPayload,
   type StartAudioPayload,
   TRANSCRIPTION_MODES,
@@ -39,6 +41,7 @@ import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realti
 import type {
   AiMentorTTSPreset,
   AudioSpeechEventPayload,
+  ClientSpeechBoundaryPayload,
   MentorResponseDeltaEventPayload,
   MentorResponseCompletedEventPayload,
   MentorTranscriptionEventPayload,
@@ -54,7 +57,7 @@ import type { WsUser } from "src/websocket/websocket.types";
 
 type VoiceMentorSocketHandlers = {
   disconnect: () => void;
-  audioStarted: () => void;
+  audioStarted: (payload: AudioStartedPayload) => void;
   mentorTranscription: (payload: MentorTranscriptionPayload) => Promise<void>;
   audioOutputChunk: (payload: { data: AudioSpeechEventPayload }) => void;
   audioOutputInterrupted: (payload: AudioOutputInterruptedPayload) => void;
@@ -108,6 +111,43 @@ export class ExternalAudioService {
     };
 
     session.socket.sendAudioChunk(audioChunkPayload, bytes);
+    return true;
+  }
+
+  async clientSpeechStart(
+    sessionId: string,
+    payload: ClientSpeechBoundaryPayload,
+  ): Promise<boolean> {
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const boundary: LumaClientSpeechBoundaryPayload = {
+      type: LUMA_SOCKET_MESSAGE_TYPES.CLIENT_SPEECH_START,
+      sessionRunId: payload.sessionRunId,
+      boundarySeq: payload.boundarySeq,
+      tsMs: Math.trunc(payload.tsMs),
+      lastAudioSeq: payload.lastAudioSeq,
+    };
+    session.socket.sendClientSpeechStart(boundary);
+    return true;
+  }
+
+  async clientSpeechEnd(sessionId: string, payload: ClientSpeechBoundaryPayload): Promise<boolean> {
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const boundary: LumaClientSpeechBoundaryPayload = {
+      type: LUMA_SOCKET_MESSAGE_TYPES.CLIENT_SPEECH_END,
+      sessionRunId: payload.sessionRunId,
+      boundarySeq: payload.boundarySeq,
+      tsMs: Math.trunc(payload.tsMs),
+      lastAudioSeq: payload.lastAudioSeq,
+    };
+    session.socket.sendClientSpeechEnd(boundary);
     return true;
   }
 
@@ -251,8 +291,8 @@ export class ExternalAudioService {
       disconnect: () => {
         this.sessionStore.delete(sessionId);
       },
-      audioStarted: () => {
-        this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, {});
+      audioStarted: (payload) => {
+        this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, payload);
       },
       mentorTranscription: async (payload) => {
         await this.handleMentorTranscription(sessionId, payload);
@@ -377,7 +417,7 @@ export class ExternalAudioService {
             voiceDeliveryContext,
             abortSignal: abortController.signal,
           },
-          OPENAI_MODELS.BASIC,
+          OPENAI_MODELS.VOICE,
           session.currentUser,
           true,
         );

@@ -7,15 +7,6 @@ export const AUDIO_CAPTURE_MODE = {
 
 export type AudioCaptureMode = (typeof AUDIO_CAPTURE_MODE)[keyof typeof AUDIO_CAPTURE_MODE];
 
-export const TRANSCRIPTION_MODE = {
-  PAUSE_BATCH: "pause_batch",
-  REALTIME_STREAM: "realtime_stream",
-} as const;
-
-export const TRANSCRIPTION_PROVIDER = {
-  GLADIA: "gladia",
-} as const;
-
 export const AUDIO_STREAM_EVENT = {
   RECONNECT: "audio_reconnect",
   START_ACCEPTED: VOICE_SOCKET_EVENT.AUDIO_STARTED,

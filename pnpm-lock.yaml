@@ -3733,7 +3733,7 @@ packages:
     engines: {node: '>=8'}
 
   '@japro/luma-sdk@file:../../../../private/tmp/luma-sdk-voice-recovery/japro-luma-sdk-0.2.16.tgz':
-    resolution: {integrity: sha512-KbrqPEFHWvhvQSbaL503T0jgTk8A+6YuoeWOX+qYY20XmRmYAyXToaZ6inDYBPIUs/SSllq1x7JU3fJk0HD0rw==, tarball: file:../../../../private/tmp/luma-sdk-voice-recovery/japro-luma-sdk-0.2.16.tgz}
+    resolution: {integrity: sha512-0psA2sjFwGwZI8xi1RciSXVbccb6QiVHrjkIhOu+cEV1I7ufQhOyotnvcJyq43fDJQiHW0G56v9LlI4yUIr8aA==, tarball: file:../../../../private/tmp/luma-sdk-voice-recovery/japro-luma-sdk-0.2.16.tgz}
     version: 0.2.16
 
   '@jest/console@29.7.0':

@@ -20,7 +20,7 @@ import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realti
 import { ExternalAudioService } from "./external-audio.service";
 
 import type { OnModuleInit } from "@nestjs/common";
-import type { PcmChunkMeta, VoiceAction } from "@repo/shared";
+import type { ClientSpeechBoundaryPayload, PcmChunkMeta, VoiceAction } from "@repo/shared";
 import type {
   SendTTSTriggerBody,
   StartAudioBody,
@@ -95,19 +95,39 @@ export class AudioService implements OnModuleInit {
   }
 
   async audioChunk(sessionId: string, meta: PcmChunkMeta, bytes: Buffer) {
-    let result = false;
+    return this.enqueueSessionOperation(sessionId, () =>
+      this.processAudioChunk(sessionId, meta, bytes),
+    );
+  }
+
+  async clientSpeechStart(sessionId: string, payload: ClientSpeechBoundaryPayload) {
+    await this.enqueueSessionOperation(sessionId, () =>
+      this.externalAudioService.clientSpeechStart(sessionId, payload),
+    );
+  }
+
+  async clientSpeechEnd(sessionId: string, payload: ClientSpeechBoundaryPayload) {
+    await this.enqueueSessionOperation(sessionId, () =>
+      this.externalAudioService.clientSpeechEnd(sessionId, payload),
+    );
+  }
+
+  private async enqueueSessionOperation<T>(
+    sessionId: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
     const previous = this.audioChunkQueues.get(sessionId) ?? Promise.resolve();
-    const current = previous.catch(() => undefined).then(async () => {
-      result = await this.processAudioChunk(sessionId, meta, bytes);
-    });
+    const operationPromise = previous.catch(() => undefined).then(operation);
+    const queueTail = operationPromise.then(
+      () => undefined,
+      () => undefined,
+    );
 
-    this.audioChunkQueues.set(sessionId, current);
-
+    this.audioChunkQueues.set(sessionId, queueTail);
     try {
-      await current;
-      return result;
+      return await operationPromise;
     } finally {
-      if (this.audioChunkQueues.get(sessionId) === current) {
+      if (this.audioChunkQueues.get(sessionId) === queueTail) {
         this.audioChunkQueues.delete(sessionId);
       }
     }

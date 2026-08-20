@@ -1,6 +1,6 @@
 import {
-  VOICE_ACTION,
   VOICE_SOCKET_EVENT,
+  type ClientSpeechBoundaryPayload,
   type VoiceAction,
   type PcmChunkMeta,
   type StreamInitPayload,
@@ -56,6 +56,14 @@ const buildVoiceCancelEmit = (): SocketEmitSpec => ({
   args: [],
 });
 
+const buildSpeechBoundaryEmit = (params: {
+  event: string;
+  boundary: ClientSpeechBoundaryPayload;
+}): SocketEmitSpec => ({
+  event: params.event,
+  args: [params.boundary],
+});
+
 const buildVoiceReconnectEmit = (params: {
   sessionRunId: string;
   lastSentAudioSeq: number;
@@ -77,11 +85,17 @@ export const voiceSocketProtocol: StreamProtocol<VoiceStartContext, void> = {
   buildChunkEmit: buildVoiceChunkEmit,
   buildStopEmit: buildVoiceStopEmit,
   buildCancelEmit: buildVoiceCancelEmit,
-  resolveCaptureMode: (context) =>
-    context.captureMode ??
-    (context.voiceAction === VOICE_ACTION.VOICE_MENTOR
-      ? AUDIO_CAPTURE_MODE.CONTINUOUS
-      : AUDIO_CAPTURE_MODE.VAD_SEGMENTED),
+  buildSpeechStartEmit: ({ boundary }) =>
+    buildSpeechBoundaryEmit({
+      event: VOICE_SOCKET_EVENT.CLIENT_SPEECH_START,
+      boundary,
+    }),
+  buildSpeechEndEmit: ({ boundary }) =>
+    buildSpeechBoundaryEmit({
+      event: VOICE_SOCKET_EVENT.CLIENT_SPEECH_END,
+      boundary,
+    }),
+  resolveCaptureMode: (context) => context.captureMode ?? AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
   buildReconnectEmit: buildVoiceReconnectEmit,
   lifecycleEvents: {
     startAccepted: AUDIO_STREAM_EVENT.START_ACCEPTED,

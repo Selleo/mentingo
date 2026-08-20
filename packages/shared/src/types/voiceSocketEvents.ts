@@ -1,5 +1,14 @@
 import type { VoiceAction } from "../constants/voiceAction";
 
+export type { AudioStartedPayload } from "@japro/luma-sdk";
+
+export type ClientSpeechBoundaryPayload = {
+  sessionRunId: string;
+  boundarySeq: number;
+  tsMs: number;
+  lastAudioSeq: number;
+};
+
 export type StopAudioEventPayload = {
   payload?: string;
   voiceAction?: VoiceAction | null;
