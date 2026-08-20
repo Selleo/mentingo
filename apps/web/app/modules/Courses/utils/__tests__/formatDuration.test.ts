@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
+
 import {
   formatDuration,
   formatDurationToDisplayBucket,
@@ -66,14 +68,14 @@ describe("chapter display aggregation", () => {
       sumRemainingChapterDisplayDurations([
         {
           lessons: [
-            { estimatedDurationSeconds: 1, status: "IN_PROGRESS" },
-            { estimatedDurationSeconds: 1, status: "COMPLETED" },
+            { estimatedDurationSeconds: 1, status: LESSON_PROGRESS_STATUSES.IN_PROGRESS },
+            { estimatedDurationSeconds: 1, status: LESSON_PROGRESS_STATUSES.COMPLETED },
           ],
         },
         {
           lessons: [
-            { estimatedDurationSeconds: 1, status: "NOT_STARTED" },
-            { estimatedDurationSeconds: 1, status: "COMPLETED" },
+            { estimatedDurationSeconds: 1, status: LESSON_PROGRESS_STATUSES.NOT_STARTED },
+            { estimatedDurationSeconds: 1, status: LESSON_PROGRESS_STATUSES.COMPLETED },
           ],
         },
       ]),

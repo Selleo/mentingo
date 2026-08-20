@@ -1,3 +1,5 @@
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
+
 import type { TFunction } from "i18next";
 
 const formatMinutes = (minutes: number, t: TFunction): string =>
@@ -36,7 +38,7 @@ type DurationChapter = {
 
 export const sumRemainingChapterDisplayDurations = (
   chapters: readonly DurationChapter[],
-  completedStatus = "COMPLETED",
+  completedStatus = LESSON_PROGRESS_STATUSES.COMPLETED,
 ): number =>
   sumChapterDisplayDurations(
     chapters.map((chapter) =>
