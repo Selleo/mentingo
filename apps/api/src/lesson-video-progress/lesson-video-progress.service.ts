@@ -24,6 +24,7 @@ import { LESSON_VIDEO_PROGRESS_ERROR_KEYS } from "./lesson-video-progress.types"
 import { LessonVideoWatchSessionService } from "./lesson-video-watch-session.service";
 import { LessonVideoProgressRepository } from "./repositories/lesson-video-progress.repository";
 import { countBuckets, mergeBucketRanges, toBucketRanges } from "./utils/video-coverage-ranges";
+import { getCanonicalVideoDurationSeconds } from "./utils/video-duration";
 
 import type { GetProgressForResourceIdsParams } from "./lesson-video-progress.types";
 import type { UpsertLessonVideoProgress } from "./schemas/lesson-video-progress.schema";
@@ -77,19 +78,10 @@ export class LessonVideoProgressService {
 
   async upsertProgress(body: UpsertLessonVideoProgress, currentUser: CurrentUserType) {
     const bucketSizeSeconds = body.bucketSize ?? VIDEO_TRACKING_BUCKET_SIZE_SECONDS;
-    const durationSeconds = Math.ceil(body.durationSeconds);
 
     if (bucketSizeSeconds !== VIDEO_TRACKING_BUCKET_SIZE_SECONDS) {
       throw new BadRequestException(LESSON_VIDEO_PROGRESS_ERROR_KEYS.UNSUPPORTED_BUCKET_SIZE);
     }
-
-    const bucketRanges = mergeBucketRanges(
-      toBucketRanges({
-        watchedRanges: body.watchedRanges,
-        durationSeconds,
-        bucketSizeSeconds,
-      }),
-    );
 
     return this.db.transaction(async (trx) => {
       const context = await this.lessonVideoProgressRepository.getLessonVideoContext(
@@ -121,15 +113,37 @@ export class LessonVideoProgressService {
         throw new ForbiddenException(LESSON_VIDEO_PROGRESS_ERROR_KEYS.ACCESS_DENIED);
       }
 
-      const currentProgress = await this.lessonVideoProgressRepository.ensureProgressRow(
+      const canonicalDurationSeconds = getCanonicalVideoDurationSeconds(context.resourceMetadata);
+      const requestedDurationSeconds = Math.ceil(body.durationSeconds);
+      const initialProgress = await this.lessonVideoProgressRepository.ensureProgressRow(
         {
           studentId: currentUser.userId,
           lessonId: body.lessonId,
           resourceEntityId: body.resourceEntityId,
-          durationSeconds,
+          durationSeconds: requestedDurationSeconds,
           bucketSizeSeconds,
         },
         trx,
+      );
+      const currentProgress = canonicalDurationSeconds
+        ? await this.lessonVideoProgressRepository.normalizeProgressRow(
+            {
+              studentId: currentUser.userId,
+              lessonId: body.lessonId,
+              resourceEntityId: body.resourceEntityId,
+              durationSeconds: canonicalDurationSeconds,
+              maxBucketCount: Math.max(1, Math.ceil(canonicalDurationSeconds / bucketSizeSeconds)),
+            },
+            trx,
+          )
+        : initialProgress;
+      const durationSeconds = canonicalDurationSeconds ?? currentProgress.durationSeconds;
+      const bucketRanges = mergeBucketRanges(
+        toBucketRanges({
+          watchedRanges: body.watchedRanges,
+          durationSeconds,
+          bucketSizeSeconds,
+        }),
       );
 
       const existingCoverage = mergeBucketRanges(currentProgress.watchedRanges);

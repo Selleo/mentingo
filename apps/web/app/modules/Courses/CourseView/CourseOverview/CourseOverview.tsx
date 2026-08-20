@@ -394,6 +394,9 @@ export default function CourseOverview({
               canManageCategories={canManageCategories}
               disabled={isUpdatingCourse}
               durationSeconds={course.estimatedDurationSeconds}
+              chapterDurationsSeconds={course.chapters.map(
+                (chapter) => chapter.estimatedDurationSeconds,
+              )}
               isEditing={isEditingCategory}
               onChange={handleCategoryChange}
               onClose={() => setIsEditingCategory(false)}

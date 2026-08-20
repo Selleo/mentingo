@@ -1,299 +1,269 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { SUPPORTED_LANGUAGES, type LocalizedText, type SupportedLanguages } from "@repo/shared";
-import { load as loadHtml } from "cheerio";
-import { count, eq, inArray, sql } from "drizzle-orm";
-import { match } from "ts-pattern";
+import { Injectable } from "@nestjs/common";
 
-import { DatabasePg } from "src/common";
-import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
-import { LESSON_TYPES } from "src/lesson/lesson.type";
-import { LocalizationService } from "src/localization/localization.service";
-import { chapters, courses, lessons, questions } from "src/storage/schema";
-
-import { DURATION_DEFAULTS } from "./constants/duration-defaults";
+import { CourseDurationRepository } from "./course-duration.repository";
+import {
+  calculateLessonDurationSeconds,
+  emptyLanguageEstimates,
+  extractEmbeddedResourceIds,
+  getEstimate,
+  getLocalizedDurationDescription,
+  roundChapterDurationForDisplay,
+  selectDurationLanguage,
+} from "./utils/course-duration.utils";
 
 import type {
-  CourseDurationEstimatesByLanguage,
   CourseDurationHierarchy,
+  DurationDb,
   DurationEstimatesByCourse,
+  DurationEstimatesByLanguage,
+  DurationLessonRow,
+  DurationProjection,
+  DurationResource,
 } from "./types/duration";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class CourseDurationService {
-  constructor(
-    @Inject("DB") private readonly db: DatabasePg,
-    private readonly localizationService: LocalizationService,
-  ) {}
+  constructor(private readonly courseDurationRepository: CourseDurationRepository) {}
 
   async getCourseDurationHierarchy(
     courseId: UUIDType,
     language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
+    dbInstance?: DurationDb,
   ): Promise<CourseDurationHierarchy> {
-    const courseLessonIds = dbInstance
-      .select({ id: lessons.id })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(eq(chapters.courseId, courseId));
+    const [course] = await this.courseDurationRepository.getCourseLocalization(
+      courseId,
+      dbInstance,
+    );
+    if (!course) return { totalSeconds: 0, byChapterId: {}, byLessonId: {} };
 
-    const questionCounts = dbInstance
-      .select({
-        lessonId: questions.lessonId,
-        questionCount: count(questions.id).as("questionCount"),
-      })
-      .from(questions)
-      .where(inArray(questions.lessonId, courseLessonIds))
-      .groupBy(questions.lessonId)
-      .as("question_counts");
+    const selectedLanguage = selectDurationLanguage(course, language);
+    const chapterRows = await this.courseDurationRepository.getChapterDurationRows(
+      courseId,
+      dbInstance,
+    );
+    const lessonRows = await this.courseDurationRepository.getLessonDurationRows(
+      courseId,
+      dbInstance,
+    );
+    const byChapterId: Record<UUIDType, number> = {};
+    const byLessonId: Record<UUIDType, number> = {};
 
-    const lessonRows = await dbInstance
-      .select({
-        id: lessons.id,
-        chapterId: lessons.chapterId,
-        type: lessons.type,
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .where(eq(chapters.courseId, courseId));
+    for (const chapter of chapterRows)
+      byChapterId[chapter.id] = this.getEstimateSeconds(
+        chapter.durationEstimates,
+        selectedLanguage,
+      );
+    for (const lesson of lessonRows)
+      byLessonId[lesson.id] = this.getEstimateSeconds(lesson.durationEstimates, selectedLanguage);
 
-    const result: CourseDurationHierarchy = {
-      totalSeconds: 0,
-      byChapterId: {},
-      byLessonId: {},
+    return {
+      totalSeconds: Object.values(byChapterId).reduce((sum, seconds) => sum + seconds, 0),
+      byChapterId,
+      byLessonId,
     };
-
-    for (const lesson of lessonRows) {
-      const estimatedSeconds = this.getLessonSeconds({
-        descriptionHtml: lesson.description,
-        quizQuestionCount: Number(lesson.questionCount) || 0,
-        lessonType: lesson.type,
-      });
-
-      result.byLessonId[lesson.id] = estimatedSeconds;
-      result.byChapterId[lesson.chapterId] =
-        (result.byChapterId[lesson.chapterId] ?? 0) + estimatedSeconds;
-      result.totalSeconds += estimatedSeconds;
-    }
-
-    return result;
   }
 
   async getCourseDurationEstimates(
     courseIds: UUIDType[],
     language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
+    dbInstance?: DurationDb,
   ): Promise<DurationEstimatesByCourse> {
     if (!courseIds.length) return {};
-
-    const durationLanguage = language ?? SUPPORTED_LANGUAGES.EN;
-    const courseRows = await dbInstance
-      .select({
-        id: courses.id,
-        durationEstimates: courses.durationEstimates,
-      })
-      .from(courses)
-      .where(inArray(courses.id, courseIds));
-
+    const courseRows = await this.courseDurationRepository.getCourseDurationRows(
+      courseIds,
+      dbInstance,
+    );
     return Object.fromEntries(
       courseRows.map((course) => [
         course.id,
-        course.durationEstimates[durationLanguage] ?? { totalMinutes: 0 },
+        getEstimate(course.durationEstimates, selectDurationLanguage(course, language)),
       ]),
     );
   }
 
-  async refreshCourseDurationEstimates(
-    courseId: UUIDType,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<void> {
-    const estimates = await this.computeCourseDurationEstimates([courseId], dbInstance);
-    const durationEstimates = estimates[courseId];
-    if (!durationEstimates) return;
-
-    await dbInstance
-      .update(courses)
-      .set({
-        durationEstimates,
-        updatedAt: sql`${courses.updatedAt}`,
-      })
-      .where(eq(courses.id, courseId));
-  }
-
-  private async computeCourseDurationEstimates(
+  /** List endpoints retain minutes, derived from exact chapter projections. */
+  async getCourseDurationDisplayMinutes(
     courseIds: UUIDType[],
-    dbInstance: DatabasePg,
-  ): Promise<Record<UUIDType, CourseDurationEstimatesByLanguage>> {
-    const courseRows = await dbInstance
-      .select({
-        id: courses.id,
-        baseLanguage: courses.baseLanguage,
-        availableLocales: courses.availableLocales,
-      })
-      .from(courses)
-      .where(inArray(courses.id, courseIds));
-
-    if (!courseRows.length) return {};
-
-    const scopedLessonIds = dbInstance
-      .select({ id: lessons.id })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const questionCounts = dbInstance
-      .select({
-        lessonId: questions.lessonId,
-        questionCount: count(questions.id).as("questionCount"),
-      })
-      .from(questions)
-      .where(inArray(questions.lessonId, scopedLessonIds))
-      .groupBy(questions.lessonId)
-      .as("question_counts");
-
-    const lessonRows = await dbInstance
-      .select({
-        courseId: chapters.courseId,
-        type: lessons.type,
-        description: lessons.description,
-        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const courseLocalization = new Map(
-      courseRows.map((course) => [
-        course.id,
-        {
-          baseLanguage: course.baseLanguage,
-          availableLocales: course.availableLocales,
-        },
-      ]),
+    language: SupportedLanguages | undefined,
+    dbInstance?: DurationDb,
+  ): Promise<Record<UUIDType, number>> {
+    if (!courseIds.length) return {};
+    const courseRows = await this.courseDurationRepository.getCourseDurationRows(
+      courseIds,
+      dbInstance,
     );
-    const secondsByCourseAndLanguage = new Map<string, number>();
+    const languageByCourse = new Map(
+      courseRows.map((course) => [course.id, selectDurationLanguage(course, language)]),
+    );
+    const chapterRows = await this.courseDurationRepository.getChapterDurationRowsForCourses(
+      courseIds,
+      dbInstance,
+    );
+    const result: Record<UUIDType, number> = {};
+    for (const chapter of chapterRows) {
+      const selectedLanguage = languageByCourse.get(chapter.courseId);
+      if (!selectedLanguage) continue;
+      const seconds = this.getEstimateSeconds(chapter.durationEstimates, selectedLanguage);
+      result[chapter.courseId] =
+        (result[chapter.courseId] ?? 0) + roundChapterDurationForDisplay(seconds) / 60;
+    }
+    return result;
+  }
+
+  async refreshCourseDurationEstimates(courseId: UUIDType, dbInstance?: DurationDb): Promise<void> {
+    await this.courseDurationRepository.withCourseDurationTransaction(
+      courseId,
+      dbInstance,
+      async (trx) => {
+        const projection = await this.computeProjection(courseId, trx);
+        if (!projection) return;
+        const lessonUpdates = [...projection.lessons].map(([id, durationEstimates]) => ({
+          id,
+          durationEstimates,
+        }));
+        if (lessonUpdates.length)
+          await this.courseDurationRepository.updateLessonDurations(lessonUpdates, trx);
+        const chapterUpdates = [...projection.chapters].map(([id, durationEstimates]) => ({
+          id,
+          durationEstimates,
+        }));
+        if (chapterUpdates.length)
+          await this.courseDurationRepository.updateChapterDurations(chapterUpdates, trx);
+        const durationEstimates = projection.courses.get(courseId);
+        if (durationEstimates)
+          await this.courseDurationRepository.updateCourseDuration(
+            courseId,
+            durationEstimates,
+            trx,
+          );
+      },
+    );
+  }
+
+  async refreshCoursesForResource(resourceId: UUIDType, dbInstance?: DurationDb): Promise<void> {
+    const relationRows = await this.courseDurationRepository.getResourceRelations(
+      resourceId,
+      dbInstance,
+    );
+    const references = [resourceId, ...relationRows.map((relation) => relation.resourceEntityId)];
+    const contentRows = await this.courseDurationRepository.getLessonsReferencingResourceContent(
+      resourceId,
+      dbInstance,
+    );
+    const relationRowsByLesson = relationRows.length
+      ? await this.courseDurationRepository.getLessonsByIds(
+          relationRows.map((relation) => relation.entityId),
+          dbInstance,
+        )
+      : [];
+    const lessonRows = [...contentRows, ...relationRowsByLesson];
+    const courseIds = [
+      ...new Set(
+        lessonRows
+          .filter((lesson) =>
+            Object.values(lesson.description ?? {}).some((content) =>
+              references.some((reference) => content.includes(reference)),
+            ),
+          )
+          .map((lesson) => lesson.courseId),
+      ),
+    ];
+    for (const courseId of courseIds)
+      await this.refreshCourseDurationEstimates(courseId, dbInstance);
+  }
+
+  private async computeProjection(
+    courseId: UUIDType,
+    db: DurationDb,
+  ): Promise<DurationProjection | null> {
+    const [course] = await this.courseDurationRepository.getCourseLocalization(courseId, db);
+    if (!course) return null;
+
+    const chapterRows = await this.courseDurationRepository.getChapterDurationRows(courseId, db);
+    const lessonRows = (await this.courseDurationRepository.getLessonProjectionRows(
+      courseId,
+      db,
+    )) as DurationLessonRow[];
+    const embeddedResourceIds = [
+      ...new Set(
+        lessonRows.flatMap((lesson) =>
+          Object.values(lesson.description ?? {}).flatMap((content) =>
+            extractEmbeddedResourceIds(content),
+          ),
+        ),
+      ),
+    ];
+    const resourceRows = embeddedResourceIds.length
+      ? await this.courseDurationRepository.getResourceRowsByReferences(embeddedResourceIds, db)
+      : [];
+    const resourcesByReference = new Map<string, DurationResource>();
+    for (const resource of resourceRows) {
+      const value = {
+        id: resource.id,
+        resourceEntityId: resource.resourceEntityId,
+        contentType: resource.contentType,
+        metadata: resource.metadata,
+      };
+      resourcesByReference.set(resource.id, value);
+      if (resource.resourceEntityId) resourcesByReference.set(resource.resourceEntityId, value);
+    }
+
+    const lessonProjections = new Map<UUIDType, DurationEstimatesByLanguage>();
+    const chapterProjections = new Map<UUIDType, DurationEstimatesByLanguage>();
+    const courseProjections = new Map<UUIDType, DurationEstimatesByLanguage>();
+    const chapterTotals = new Map<UUIDType, Map<SupportedLanguages, number>>();
+    const activeLanguages = [
+      ...new Set([course.baseLanguage, ...course.availableLocales]),
+    ] as SupportedLanguages[];
+    for (const chapter of chapterRows) chapterTotals.set(chapter.id, new Map());
 
     for (const lesson of lessonRows) {
-      const localization = courseLocalization.get(lesson.courseId);
-      if (!localization) continue;
-
-      for (const language of Object.values(SUPPORTED_LANGUAGES)) {
-        const description = this.getLocalizedDescription(
+      const byLanguage = emptyLanguageEstimates(activeLanguages);
+      for (const language of activeLanguages) {
+        const description = getLocalizedDurationDescription(
           lesson.description,
           language,
-          localization.baseLanguage,
-          localization.availableLocales,
+          course.baseLanguage,
+          course.availableLocales,
         );
-        const lessonSeconds = this.getLessonSeconds({
+        const seconds = calculateLessonDurationSeconds({
           descriptionHtml: description,
           quizQuestionCount: Number(lesson.questionCount) || 0,
           lessonType: lesson.type,
+          resourcesByReference,
         });
-        const key = this.getCourseLanguageKey(lesson.courseId, language);
-
-        secondsByCourseAndLanguage.set(
-          key,
-          (secondsByCourseAndLanguage.get(key) ?? 0) + lessonSeconds,
-        );
+        byLanguage[language] = { totalSeconds: seconds };
+        const chapterTotal = chapterTotals.get(lesson.chapterId);
+        chapterTotal?.set(language, (chapterTotal.get(language) ?? 0) + seconds);
       }
+      lessonProjections.set(lesson.id, byLanguage);
     }
 
-    return Object.fromEntries(
-      courseRows.map((course) => [
-        course.id,
-        Object.fromEntries(
-          Object.values(SUPPORTED_LANGUAGES).map((language) => {
-            const totalSeconds =
-              secondsByCourseAndLanguage.get(this.getCourseLanguageKey(course.id, language)) ?? 0;
-
-            return [
-              language,
-              { totalMinutes: totalSeconds > 0 ? Math.ceil(totalSeconds / 60) : 0 },
-            ];
-          }),
-        ) as CourseDurationEstimatesByLanguage,
-      ]),
-    );
+    for (const chapter of chapterRows) {
+      const byLanguage = emptyLanguageEstimates(activeLanguages);
+      const totals = chapterTotals.get(chapter.id);
+      for (const language of activeLanguages)
+        byLanguage[language] = { totalSeconds: totals?.get(language) ?? 0 };
+      chapterProjections.set(chapter.id, byLanguage);
+    }
+    const courseProjection = emptyLanguageEstimates(activeLanguages);
+    for (const language of activeLanguages)
+      courseProjection[language] = {
+        totalSeconds: [...chapterTotals.values()].reduce(
+          (sum, totals) => sum + (totals.get(language) ?? 0),
+          0,
+        ),
+      };
+    courseProjections.set(courseId, courseProjection);
+    return { lessons: lessonProjections, chapters: chapterProjections, courses: courseProjections };
   }
 
-  private getLocalizedDescription(
-    description: LocalizedText | null,
+  private getEstimateSeconds(
+    estimates: DurationEstimatesByLanguage | null,
     language: SupportedLanguages,
-    baseLanguage: SupportedLanguages,
-    availableLocales: SupportedLanguages[],
-  ): string {
-    if (!description) return "";
-
-    if (availableLocales.includes(language)) {
-      return description[language] ?? description[baseLanguage] ?? "";
-    }
-
-    return description[baseLanguage] ?? "";
-  }
-
-  private getLessonSeconds(params: {
-    descriptionHtml?: string | null;
-    quizQuestionCount: number;
-    lessonType: string;
-  }): number {
-    const { descriptionHtml, quizQuestionCount, lessonType } = params;
-    const content = descriptionHtml ?? "";
-    const wordCount = this.countWordsFromHtml(content);
-    const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
-    const embeddedCounts = this.countEmbeddedResourcesFromHtml(content);
-
-    return match(lessonType)
-      .with(
-        LESSON_TYPES.CONTENT,
-        () =>
-          readingSeconds +
-          embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
-          embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
-          embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
-          embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
-          quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(
-        LESSON_TYPES.QUIZ,
-        () => readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(LESSON_TYPES.AI_MENTOR, () => readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60)
-      .with(LESSON_TYPES.EMBED, () => readingSeconds + DURATION_DEFAULTS.embedMinutes * 60)
-      .otherwise(() => readingSeconds);
-  }
-
-  private countWordsFromHtml(content: string): number {
-    const $ = loadHtml(content);
-    return $.text().trim().split(/\s+/).filter(Boolean).length;
-  }
-
-  private countEmbeddedResourcesFromHtml(content: string): {
-    video: number;
-    image: number;
-    download: number;
-    presentation: number;
-  } {
-    const { contentCount } = injectResourcesIntoContent(content, [], {
-      resourceIdRegex: createLessonResourceIdRegex(),
-      trackNodeTypes: ["video", "image", "downloadable-file", "presentation"],
-      convertImageAnchors: false,
-    });
-
-    return {
-      video: Number(contentCount.video) || 0,
-      image: Number(contentCount.image) || 0,
-      download: Number(contentCount["downloadable-file"]) || 0,
-      presentation: Number(contentCount.presentation) || 0,
-    };
-  }
-
-  private getCourseLanguageKey(courseId: UUIDType, language: SupportedLanguages): string {
-    return `${courseId}:${language}`;
+  ): number {
+    return getEstimate(estimates, language).totalSeconds;
   }
 }

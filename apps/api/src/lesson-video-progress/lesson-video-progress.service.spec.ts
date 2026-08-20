@@ -86,6 +86,7 @@ const createService = () => {
   const repository = {
     getLessonVideoContext: jest.fn().mockResolvedValue(context),
     ensureProgressRow: jest.fn().mockResolvedValue(progressRow()),
+    normalizeProgressRow: jest.fn().mockResolvedValue(progressRow()),
     mergeWatchedRanges: jest.fn().mockResolvedValue(progressRow({ watchedRanges: [[0, 10]] })),
     markWatched: jest.fn(),
     getLocalizedLessonDescription: jest
@@ -131,6 +132,46 @@ const createService = () => {
 };
 
 describe("LessonVideoProgressService", () => {
+  it("uses canonical resource metadata to clamp coverage and replace an inflated client duration", async () => {
+    const { service, repository, watchSessionService } = createService();
+    repository.getLessonVideoContext.mockResolvedValue({
+      ...context,
+      resourceMetadata: { durationSeconds: 42.2 },
+    });
+    repository.ensureProgressRow.mockResolvedValue(progressRow({ durationSeconds: 43 }));
+    repository.mergeWatchedRanges.mockResolvedValue(progressRow({ durationSeconds: 43 }));
+
+    await service.upsertProgress(
+      body({
+        durationSeconds: 500,
+        watchedRanges: [[0, 500]],
+        activeWatchSecondsDelta: 40,
+      }),
+      currentUser,
+    );
+
+    expect(repository.ensureProgressRow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationSeconds: 500,
+      }),
+      expect.anything(),
+    );
+    expect(repository.normalizeProgressRow).toHaveBeenCalledWith(
+      expect.objectContaining({ durationSeconds: 43, maxBucketCount: 43 }),
+      expect.anything(),
+    );
+    expect(repository.mergeWatchedRanges).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationSeconds: 43,
+        ranges: [[0, 43]],
+      }),
+      expect.anything(),
+    );
+    expect(watchSessionService.getAllowedNewBucketCount).toHaveBeenCalledWith(
+      expect.objectContaining({ durationSeconds: 43 }),
+    );
+  });
+
   it("merges only new unique watched ranges and keeps the lesson incomplete below threshold", async () => {
     const { service, repository, watchSessionService, studentLessonProgressService, trx } =
       createService();

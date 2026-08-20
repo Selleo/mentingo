@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDuration, formatDurationToHalfHour } from "../formatDuration";
+import {
+  formatDuration,
+  formatDurationToDisplayBucket,
+  roundDurationToDisplayBucket,
+  sumChapterDisplayDurations,
+  sumRemainingChapterDisplayDurations,
+} from "../formatDuration";
 
 import type { TFunction } from "i18next";
 
@@ -29,18 +35,48 @@ describe("formatDuration", () => {
   });
 });
 
-describe("formatDurationToHalfHour", () => {
+describe("roundDurationToDisplayBucket", () => {
   it.each([
     [undefined, "0 min"],
     [0, "0 min"],
-    [60, "30 min"],
-    [1_800, "30 min"],
-    [1_801, "1 h"],
+    [1, "15 min"],
+    [899, "15 min"],
+    [900, "15 min"],
+    [901, "30 min"],
     [3_600, "1 h"],
-    [3_601, "1 h 30 min"],
-    [5_400, "1 h 30 min"],
-    [5_401, "2 h"],
-  ])("rounds %s seconds up to the nearest half hour as %s", (seconds, expected) => {
-    expect(formatDurationToHalfHour(seconds, t)).toBe(expected);
+    [3_601, "1 h 15 min"],
+  ])("rounds %s seconds up to the nearest 15-minute display bucket as %s", (seconds, expected) => {
+    expect(formatDurationToDisplayBucket(seconds, t)).toBe(expected);
+  });
+});
+
+describe("chapter display aggregation", () => {
+  it("preserves zero and rounds each chapter for display before summing", () => {
+    expect(roundDurationToDisplayBucket(0)).toBe(0);
+    expect(sumChapterDisplayDurations([0, 1, 900, 901])).toBe(3_600);
+  });
+
+  it("does not round the exact course total as one display bucket", () => {
+    expect(sumChapterDisplayDurations([1, 1])).toBe(1_800);
+    expect(roundDurationToDisplayBucket(2)).toBe(900);
+  });
+
+  it("groups incomplete lessons by chapter before display rounding", () => {
+    expect(
+      sumRemainingChapterDisplayDurations([
+        {
+          lessons: [
+            { estimatedDurationSeconds: 1, status: "IN_PROGRESS" },
+            { estimatedDurationSeconds: 1, status: "COMPLETED" },
+          ],
+        },
+        {
+          lessons: [
+            { estimatedDurationSeconds: 1, status: "NOT_STARTED" },
+            { estimatedDurationSeconds: 1, status: "COMPLETED" },
+          ],
+        },
+      ]),
+    ).toBe(1_800);
   });
 });

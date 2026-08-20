@@ -2,6 +2,7 @@ import { Test } from "@nestjs/testing";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { FileService } from "../file.service";
 import { IMAGE_QUALITY, PWA_ICON_IMAGE_QUALITY } from "../image-variants/image-variant.constants";
@@ -9,6 +10,7 @@ import { ImageVariantService } from "../image-variants/image-variant.service";
 import { BunnyVideoProvider } from "../providers/bunny-video.provider";
 import { S3VideoProvider } from "../providers/s3-video.provider";
 import { ThumbnailService } from "../thumbnail.service";
+import { VideoMetadataQueueService } from "../video-metadata.queue.service";
 import { VideoProcessingStateService } from "../video-processing-state.service";
 import { VideoUploadNotificationGateway } from "../video-upload-notification.gateway";
 
@@ -51,6 +53,8 @@ describe("FileService image variant references", () => {
         { provide: "DB", useValue: {} },
         { provide: "CACHE_MANAGER", useValue: {} },
         { provide: VideoUploadNotificationGateway, useValue: {} },
+        { provide: VideoMetadataQueueService, useValue: {} },
+        { provide: TenantDbRunnerService, useValue: {} },
       ],
     }).compile();
 

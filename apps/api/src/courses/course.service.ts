@@ -76,6 +76,7 @@ import { EnvService } from "src/env/services/env.service";
 import {
   BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
+  CourseDurationRefreshRequestedEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
   DeleteCourseEvent,
@@ -1124,7 +1125,7 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
         courseIds,
         language,
         trx,
@@ -1133,7 +1134,7 @@ export class CourseService {
         const duration = durationEstimates[item.id];
         return {
           ...item,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
         };
       });
 
@@ -1295,7 +1296,7 @@ export class CourseService {
 
       const trailerUrls = await this.getCourseTrailerUrls(courseIds);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
         courseIds,
         language,
         trx,
@@ -1329,7 +1330,7 @@ export class CourseService {
         return {
           ...course,
           slug: slugsMap.get(course.id) || course.id,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
         };
       });
 
@@ -1980,7 +1981,7 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
-    const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+    const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
       courseIds,
       language,
     );
@@ -1999,7 +2000,7 @@ export class CourseService {
             ? await this.getSignedCourseThumbnailUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
           slug: slugsMap.get(course.id) || course.id,
         };
       }),
@@ -5502,7 +5503,7 @@ export class CourseService {
       }
     });
 
-    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
+    await this.outboxPublisher.publish(new CourseDurationRefreshRequestedEvent({ courseId }));
 
     this.logger.debug(
       `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,

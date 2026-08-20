@@ -1,5 +1,6 @@
 import type { VideoBucketRange } from "./utils/video-coverage-ranges";
 import type { UUIDType } from "src/common";
+import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 export const LESSON_VIDEO_PROGRESS_ERROR_KEYS = {
   RESOURCE_NOT_FOUND: "studentLessonView.videoProgress.errors.resourceNotFound",
@@ -40,6 +41,7 @@ export type LessonVideoContext = {
   videoCompletionTrackingEnabled: boolean;
   resourceEntityId: UUIDType;
   resourceContentType: string;
+  resourceMetadata?: ResourceMetadata | null;
 };
 
 export type EnsureLessonVideoProgressRowParams = LessonVideoIdentity & {

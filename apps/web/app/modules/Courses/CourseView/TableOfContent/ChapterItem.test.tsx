@@ -80,7 +80,7 @@ describe("ChapterItem", () => {
     );
 
     expect(screen.getByText("Statistical Analysis")).toBeInTheDocument();
-    expect(screen.getByText("1 h 20 min")).toBeInTheDocument();
+    expect(screen.getByText("1 h 30 min")).toBeInTheDocument();
     expect(screen.getByText("3 lessons")).toBeInTheDocument();
     expect(screen.getByText("2/3")).toBeInTheDocument();
     expect(container.querySelectorAll(".bg-primary-700")).toHaveLength(3);

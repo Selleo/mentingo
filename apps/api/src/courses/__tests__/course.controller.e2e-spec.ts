@@ -30,6 +30,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   categories,
+  chapters,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -3384,6 +3385,8 @@ describe("CourseController (e2e)", () => {
         })
         .where(eq(courses.id, course.id));
 
+      await app.get(CourseDurationService).refreshCourseDurationEstimates(course.id);
+
       const response = await request(app.getHttpServer())
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
@@ -3830,6 +3833,8 @@ describe("CourseController (e2e)", () => {
         status: "published",
         thumbnailS3Key: null,
         chapterCount: 1,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
       });
       const chapter = await chapterFactory.create({
         courseId: course.id,
@@ -3858,16 +3863,46 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 1,
+          estimatedDurationMinutes: 15,
         }),
       );
 
       const [courseWithEstimate] = await db
-        .select({ durationEstimates: courses.durationEstimates })
+        .select({
+          durationEstimates: courses.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${courses.durationEstimates})`,
+        })
         .from(courses)
         .where(eq(courses.id, course.id));
 
-      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalMinutes: 1 });
+      const [chapterWithEstimate] = await db
+        .select({
+          durationEstimates: chapters.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${chapters.durationEstimates})`,
+        })
+        .from(chapters)
+        .where(eq(chapters.id, chapter.id));
+      const [lessonWithEstimate] = await db
+        .select({
+          durationEstimates: lessons.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${lessons.durationEstimates})`,
+        })
+        .from(lessons)
+        .where(eq(lessons.id, lesson.id));
+
+      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalSeconds: 2 });
+      expect(courseWithEstimate.durationEstimatesType).toBe("object");
+      expect(Object.keys(courseWithEstimate.durationEstimates).sort()).toEqual(["en", "pl"]);
+      expect(chapterWithEstimate.durationEstimatesType).toBe("object");
+      expect(lessonWithEstimate.durationEstimatesType).toBe("object");
+      expect(chapterWithEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 2 },
+        pl: { totalSeconds: 2 },
+      });
+      expect(lessonWithEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 2 },
+        pl: { totalSeconds: 2 },
+      });
 
       await db
         .update(lessons)
@@ -3887,7 +3922,7 @@ describe("CourseController (e2e)", () => {
       expect(staleResponse.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 1,
+          estimatedDurationMinutes: 15,
         }),
       );
 
@@ -3909,16 +3944,49 @@ describe("CourseController (e2e)", () => {
       expect(refreshedResponse.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 3,
+          estimatedDurationMinutes: 15,
         }),
       );
 
       const [courseWithRefreshedEstimate] = await db
-        .select({ durationEstimates: courses.durationEstimates })
+        .select({
+          durationEstimates: courses.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${courses.durationEstimates})`,
+        })
         .from(courses)
         .where(eq(courses.id, course.id));
 
-      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalMinutes).toBe(3);
+      const [chapterWithRefreshedEstimate] = await db
+        .select({
+          durationEstimates: chapters.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${chapters.durationEstimates})`,
+        })
+        .from(chapters)
+        .where(eq(chapters.id, chapter.id));
+      const [lessonWithRefreshedEstimate] = await db
+        .select({
+          durationEstimates: lessons.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${lessons.durationEstimates})`,
+        })
+        .from(lessons)
+        .where(eq(lessons.id, lesson.id));
+
+      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalSeconds).toBe(150);
+      expect(courseWithRefreshedEstimate.durationEstimatesType).toBe("object");
+      expect(Object.keys(courseWithRefreshedEstimate.durationEstimates).sort()).toEqual([
+        "en",
+        "pl",
+      ]);
+      expect(chapterWithRefreshedEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 150 },
+        pl: { totalSeconds: 150 },
+      });
+      expect(chapterWithRefreshedEstimate.durationEstimatesType).toBe("object");
+      expect(lessonWithRefreshedEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 150 },
+        pl: { totalSeconds: 150 },
+      });
+      expect(lessonWithRefreshedEstimate.durationEstimatesType).toBe("object");
     });
   });
 

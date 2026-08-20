@@ -1,5 +1,6 @@
-import type { SupportedLanguages } from "@repo/shared";
-import type { UUIDType } from "src/common";
+import type { LocalizedText, SupportedLanguages } from "@repo/shared";
+import type { DatabasePg, UUIDType } from "src/common";
+import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 export type CourseDurationHierarchy = {
   totalSeconds: number;
@@ -7,20 +8,63 @@ export type CourseDurationHierarchy = {
   byLessonId: Record<UUIDType, number>;
 };
 
+export type DurationEstimate = {
+  totalSeconds: number;
+};
+
+// Persisted projections contain the course base language and its available locales. Partial keeps
+// the schema compatible with the empty-object default used while rows are being migrated.
+export type DurationEstimatesByLanguage = Partial<Record<SupportedLanguages, DurationEstimate>>;
+
 export type CourseDurationSummary = {
   totalMinutes: number;
   formatted: string;
 };
 
-export type CourseDurationMinutes = {
-  totalMinutes: number;
+export type CourseDurationEstimatesByLanguage = DurationEstimatesByLanguage;
+
+export type DurationEstimatesByCourse = Record<UUIDType, DurationEstimate>;
+
+export type DurationResource = {
+  id: UUIDType;
+  resourceEntityId: UUIDType | null;
+  contentType: string;
+  metadata: ResourceMetadata | null;
 };
 
-export type CourseDurationEstimatesByLanguage = Partial<
-  Record<SupportedLanguages, CourseDurationMinutes>
->;
+export type LessonDurationCalculationParams = {
+  descriptionHtml?: string | null;
+  quizQuestionCount: number;
+  lessonType: string;
+  resourcesByReference?: Map<string, DurationResource>;
+};
 
-export type DurationEstimatesByCourse = Record<UUIDType, CourseDurationMinutes>;
+export type DurationCourseRow = {
+  id: UUIDType;
+  baseLanguage: SupportedLanguages;
+  availableLocales: SupportedLanguages[];
+};
+
+export type DurationLessonRow = {
+  id: UUIDType;
+  chapterId: UUIDType;
+  type: string;
+  description: LocalizedText | null;
+  questionCount: number;
+};
+
+export type DurationProjection = {
+  lessons: Map<UUIDType, DurationEstimatesByLanguage>;
+  chapters: Map<UUIDType, DurationEstimatesByLanguage>;
+  courses: Map<UUIDType, DurationEstimatesByLanguage>;
+};
+
+export type DurationProjectionUpdate = {
+  id: UUIDType;
+  durationEstimates: DurationEstimatesByLanguage;
+};
+
+export type DurationDb = DatabasePg;
 
 export type DurationHeuristics = {
   wordsPerMinute: number;

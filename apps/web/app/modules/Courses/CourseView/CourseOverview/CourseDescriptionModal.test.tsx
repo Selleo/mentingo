@@ -12,6 +12,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
       category: "Analytics",
       description: "Course description",
       estimatedDurationSeconds: 3_600,
+      chapters: [],
       learningOutcomes: [],
       title: "Statistics",
     },

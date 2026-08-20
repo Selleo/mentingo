@@ -2087,8 +2087,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Clave de API de Bunny Stream"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Clave de firma de Bunny Stream"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Clave API de Bunny Stream de solo lectura",
+        "description": "Clave de biblioteca de Bunny Stream de solo lectura para verificar los webhooks de Bunny Stream."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny ID de biblioteca de secuencias"

@@ -59,7 +59,7 @@ describe("AuthorModal", () => {
               title: "Advanced React",
               category: "Frontend",
               enrolledParticipantCount: 42,
-              estimatedDurationMinutes: 61,
+              estimatedDurationMinutes: 60,
             },
           ]}
           showAuthorSectionDraft
@@ -72,7 +72,7 @@ describe("AuthorModal", () => {
     expect(screen.getByText("Advanced React")).toBeInTheDocument();
     expect(screen.getByText("Frontend")).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
-    expect(screen.getByText("1 h 30 min")).toBeInTheDocument();
+    expect(screen.getByText("1 h")).toBeInTheDocument();
     const courseLink = screen.getByRole("link", { name: /Advanced React/ });
 
     expect(courseLink).toHaveAttribute("href", "/course/advanced-react");
