@@ -42,6 +42,7 @@ export function WidgetStudentRequiredCourse({
       <DashboardWidgetHeader
         title={t(metadata.titleKey)}
         icon={metadata.icon}
+        dataScope={metadata.dataScope}
         iconClassName={metadata.iconClassName}
         iconContainerClassName={metadata.iconContainerClassName}
       />

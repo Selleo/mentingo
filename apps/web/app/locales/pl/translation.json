@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Nie udało się wczytać danych tego kafelka.",
+      "dataScope": {
+        "personal": "Twoje dane",
+        "otherUsers": "Dane organizacji",
+        "personalTooltip": "Ten widget pokazuje Twoje osobiste dane dotyczące nauki.",
+        "otherUsersTooltip": "Ten widget pokazuje dane dotyczące innych użytkowników w Twojej organizacji."
+      },
       "trainingCompletionChartLabel": "Ukończono {{completed}} z {{total}} przypisań, {{percentage}} procent.",
       "deadlineRisksPage": "Strona {{page}} z {{totalPages}}",
       "placeholderDescription": "Widżet pulpitu przygotowany pod dedykowany widok danych",
@@ -106,6 +112,7 @@
         },
         "aiMentorPractice": {
           "description": "Codziennie utwórz jeden scenariusz treningowy",
+          "dailyRefreshInfo": "Możesz wygenerować jedną nową sesję praktyki AI dziennie.",
           "empty": "Opisz sytuację i przećwicz ją z Mentorem AI.",
           "emptyPrompt": "Jaką rozmowę chcesz przeprowadzić z większą pewnością?",
           "startCta": "Rozpocznij trening",
@@ -276,7 +283,7 @@
       "summaryTitle": "Co warto wykorzystać dalej",
       "summaryDescription": "Wykorzystaj te obserwacje, aby wzmocnić kolejną próbę.",
       "scoreLabel": "Wynik ćwiczenia",
-      "criteriaTitle": "Co zauważył Sędzia AI",
+      "criteriaTitle": "Ocena zadania",
       "criterionFallback": "Kryterium {{number}}",
       "importantFeedbackTitle": "Ważna informacja zwrotna"
     },

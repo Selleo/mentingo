@@ -28,7 +28,7 @@ export function AiMentorPracticeHeader({ title, taskGoal }: AiMentorPracticeHead
         <h1 className="h3 max-w-3xl text-balance text-neutral-950">
           {title || t("aiMentorPractice.conversationTitle")}
         </h1>
-        <Dialog>
+        <Dialog defaultOpen>
           <DialogTrigger asChild>
             <Button
               type="button"

@@ -303,6 +303,7 @@ export function WidgetAdminDeadlineRisks() {
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}
+          dataScope={metadata.dataScope}
           headerAction={
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

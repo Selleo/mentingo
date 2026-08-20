@@ -56,6 +56,12 @@
     },
     "widgets": {
       "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "dataScope": {
+        "personal": "Vaše data",
+        "otherUsers": "Data organizace",
+        "personalTooltip": "Tento widget zobrazuje vaše osobní údaje o učení.",
+        "otherUsersTooltip": "Tento widget zobrazuje údaje o učení ostatních uživatelů ve vaší organizaci."
+      },
       "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
       "deadlineRisksPage": "Strana {{page}} z {{totalPages}}",
       "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
@@ -111,6 +117,7 @@
         },
         "aiMentorPractice": {
           "description": "Vytvořte každý den jeden cílený scénář",
+          "dailyRefreshInfo": "Každý den můžete vygenerovat jedno nové praktické sezení s AI.",
           "empty": "Popište situaci a procvičte ji s AI mentorem.",
           "emptyPrompt": "Který rozhovor chcete zvládnout s větší jistotou?",
           "startCta": "Zahájit trénink",
@@ -283,7 +290,7 @@
       "summaryTitle": "Co si odnést dál",
       "summaryDescription": "Využijte tyto postřehy k posílení dalšího pokusu.",
       "scoreLabel": "Výsledek procvičení",
-      "criteriaTitle": "Čeho si všiml AI hodnotitel",
+      "criteriaTitle": "Hodnocení úkolu",
       "criterionFallback": "Kritérium {{number}}",
       "importantFeedbackTitle": "Důležitá zpětná vazba"
     },
