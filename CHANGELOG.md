@@ -1,3 +1,19 @@
+<a name="v4.18.0"></a>
+
+## [v4.18.0] - 20.08.2026
+
+### Features:
+
+- make course time estimates reflect video length ([#1920](https://github.com/Selleo/mentingo/issues/1920))
+
+- allow admins to highlight selected courses as featured ([#1889](https://github.com/Selleo/mentingo/issues/1889))
+
+### Bug Fixes:
+
+- prevent course loading flicker and improve the responsive course overview ([#1918](https://github.com/Selleo/mentingo/issues/1918))
+
+- improve learner progress tracking and dashboard clarity for AI Mentor practice ([#1909](https://github.com/Selleo/mentingo/issues/1909))
+
 <a name="v4.17.1"></a>
 
 ## [v4.17.1] - 18.08.2026
@@ -5,6 +21,10 @@
 ### Bug Fixes:
 
 - prevent dashboard redirect loops after session refresh ([#1902](https://github.com/Selleo/mentingo/issues/1902))
+
+### Documentation:
+
+- update changelog for version v4.17.1
 
 <a name="v4.17.0"></a>
 
@@ -3176,7 +3196,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.17.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.18.0...HEAD
+[v4.18.0]: https://github.com/Selleo/mentingo/compare/v4.17.1...v4.18.0
 [v4.17.1]: https://github.com/Selleo/mentingo/compare/v4.17.0...v4.17.1
 [v4.17.0]: https://github.com/Selleo/mentingo/compare/v4.16.0...v4.17.0
 [v4.16.0]: https://github.com/Selleo/mentingo/compare/v4.15.0...v4.16.0
