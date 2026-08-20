@@ -10,6 +10,7 @@ describe("CourseHeroImage", () => {
     const hero = screen.getByRole("img", { name: "Course hero" }).parentElement;
 
     expect(hero).toHaveClass("aspect-[4/3]");
+    expect(hero).toHaveClass("min-h-[22rem]");
     expect(hero).not.toHaveClass("min-h-[32rem]");
     expect(hero).not.toHaveClass("min-[360px]:min-h-[30rem]");
   });
