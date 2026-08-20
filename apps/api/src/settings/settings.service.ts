@@ -1240,7 +1240,7 @@ export class SettingsService {
 
     await dbInstance
       .update(settings)
-      .set({ settings: sql`${settings.settings} - 'featuredCourseId'` })
+      .set({ settings: deleteJsonbField(settings.settings, "featuredCourseId") })
       .where(
         and(
           isNull(settings.userId),
