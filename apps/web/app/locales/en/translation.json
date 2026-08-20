@@ -2095,8 +2095,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Bunny Stream API Key"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Bunny Stream Signing Key"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Bunny Stream Read-Only API Key",
+        "description": "Read-only Bunny Stream library key used to verify Bunny Stream webhooks."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"

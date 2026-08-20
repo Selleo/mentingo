@@ -2,7 +2,7 @@ import { BookOpen, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
-import { formatDuration } from "~/modules/Courses/utils/formatDuration";
+import { formatDurationToDisplayBucket } from "~/modules/Courses/utils/formatDuration";
 
 import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
@@ -148,7 +148,7 @@ export default function ChapterItem({
                 {chapter.title}
               </h3>
               <span className="flex-shrink-0 whitespace-nowrap text-sm text-neutral-800 md:text-xs">
-                {formatDuration(chapter.estimatedDurationSeconds, t)}
+                {formatDurationToDisplayBucket(chapter.estimatedDurationSeconds, t)}
               </span>
             </div>
 

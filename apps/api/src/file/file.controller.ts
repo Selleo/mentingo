@@ -242,8 +242,28 @@ export class FileController {
   @Validate({
     request: [{ type: "body", schema: bunnyWebhookSchema }],
   })
-  async handleBunnyWebhook(@Body() payload: BunnyWebhookBody) {
-    return this.fileService.handleBunnyWebhook(payload);
+  async handleBunnyWebhook(
+    @Body() payload: BunnyWebhookBody,
+    @Req() request: Request & { rawBody?: Buffer | string },
+  ) {
+    const rawBody = request.rawBody;
+    if (!rawBody) throw new BadRequestException("Missing Bunny webhook body");
+
+    const signatureHeader = request.headers["x-bunnystream-signature"];
+    const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
+    const versionHeader = request.headers["x-bunnystream-signature-version"];
+    const signatureVersion = Array.isArray(versionHeader) ? versionHeader[0] : versionHeader;
+    const algorithmHeader = request.headers["x-bunnystream-signature-algorithm"];
+    const signatureAlgorithm = Array.isArray(algorithmHeader)
+      ? algorithmHeader[0]
+      : algorithmHeader;
+    return this.fileService.handleBunnyWebhook(
+      payload,
+      Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(rawBody),
+      signature,
+      signatureVersion,
+      signatureAlgorithm,
+    );
   }
 
   @Public()

@@ -15,6 +15,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
 import { usePermissions } from "~/hooks/usePermissions";
+import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import CoursesHeader from "./CoursesHeader";
@@ -211,9 +212,10 @@ const ModernCoursesView = () => {
             title: featuredCourse.title,
             thumbnailUrl: featuredCourse.thumbnailUrl,
             trailerUrl: featuredCourse.trailerUrl,
-            estimatedDurationMinutes: Math.round(
-              (featuredCourse.estimatedDurationSeconds ?? 0) / 60,
-            ),
+            estimatedDurationMinutes:
+              sumChapterDisplayDurations(
+                featuredCourse.chapters.map((chapter) => chapter.estimatedDurationSeconds),
+              ) / 60,
             lessonCount: featuredCourse.chapters.reduce(
               (total, chapter) => total + chapter.lessonCount,
               0,

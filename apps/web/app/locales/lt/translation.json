@@ -2092,8 +2092,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Bunny Stream API raktas"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Bunny Stream pasirašymo raktas"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Tik skaitomas Bunny Stream API raktas",
+        "description": "Tik skaitomas Bunny Stream bibliotekos raktas, naudojamas Bunny Stream webhookams tikrinti."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream bibliotekos ID"

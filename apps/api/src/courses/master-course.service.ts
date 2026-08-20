@@ -18,6 +18,7 @@ import {
   RESOURCE_VISIBILITY,
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
+  VIDEO_PROVIDERS,
   type MasterCourseEntityType,
 } from "@repo/shared";
 import { eq } from "drizzle-orm";
@@ -42,10 +43,13 @@ import { MasterCourseSnapshotService } from "src/courses/master-course-snapshot.
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { MASTER_COURSE_RESOURCE_REFERENCE_KIND } from "src/courses/types/master-course.types";
+import { mergeResourceMetadataPreservingDuration } from "src/courses/utils/master-course-resource.utils";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
 import { isImageVariantReference } from "src/file/image-variants/image-variant.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
+import { VideoMetadataQueueService } from "src/file/video-metadata.queue.service";
+import { getBunnyVideoId } from "src/file/video-metadata.utils";
 import { rewriteBlankAnswerIds } from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
@@ -82,6 +86,7 @@ import type {
   CopyVideoReferenceParams,
   CreateOrQueueExportForTargetParams,
   CreateTargetCourseFromSourceParams,
+  DuplicateResourcesParams,
   EnsureCourseExportSyncedParams,
   GetTargetResourceEntityIdParams,
   GetTargetScormPackageEntityIdParams,
@@ -119,6 +124,7 @@ export class MasterCourseService {
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly videoMetadataQueueService: VideoMetadataQueueService,
     private readonly courseDurationService: CourseDurationService,
   ) {}
 
@@ -343,6 +349,7 @@ export class MasterCourseService {
     await this.duplicateResources({
       lessonMap,
       targetCourseId: params.targetCourseId,
+      targetTenantId: params.tenantId,
       targetAuthorId: params.actorId,
       resourceCollection,
     });
@@ -658,6 +665,7 @@ export class MasterCourseService {
         exportId: exportLink.id,
         lessonMap,
         targetCourseId: resolvedTargetCourseId,
+        targetTenantId: exportLink.targetTenantId,
         targetAuthorId: targetAuthor.id,
         resourceCollection,
       });
@@ -2520,22 +2528,30 @@ export class MasterCourseService {
 
     for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
       const sourceResource = resourceReference.source.resource;
-      const resourceValues = {
-        title: toJsonbBuildObject(sourceResource.title),
-        description: toJsonbBuildObject(sourceResource.description),
-        reference: resourceReference.target.reference ?? resourceReference.source.reference,
-        contentType: sourceResource.contentType,
-        metadata: normalizeJsonb(sourceResource.metadata, {}),
-        uploadedBy: params.targetAuthorId,
-        visibility: RESOURCE_VISIBILITY.HIDDEN,
-        archived: false,
-      };
-
       const existingTargetResourceId = await this.masterCourseRepository.getMappedTargetEntityId(
         params.exportId,
         MASTER_COURSE_ENTITY_TYPES.RESOURCE,
         sourceResourceId,
       );
+      const existingTargetResource = existingTargetResourceId
+        ? await this.masterCourseRepository.getResourceById(existingTargetResourceId)
+        : undefined;
+      const resourceValues = {
+        title: toJsonbBuildObject(sourceResource.title),
+        description: toJsonbBuildObject(sourceResource.description),
+        reference: resourceReference.target.reference ?? resourceReference.source.reference,
+        contentType: sourceResource.contentType,
+        metadata: toJsonbBuildObject(
+          mergeResourceMetadataPreservingDuration(
+            sourceResource.metadata,
+            existingTargetResource?.metadata,
+          ),
+        ),
+        uploadedBy: params.targetAuthorId,
+        visibility: RESOURCE_VISIBILITY.HIDDEN,
+        archived: false,
+      };
+
       const targetResourceId =
         existingTargetResourceId ??
         (await this.masterCourseRepository.createResource(resourceValues));
@@ -2550,6 +2566,12 @@ export class MasterCourseService {
           targetResourceId,
         );
       }
+
+      await this.enqueueBunnyDurationDiscovery(
+        resourceValues.reference,
+        targetResourceId,
+        params.targetTenantId,
+      );
 
       targetResourceIds.set(sourceResourceId, targetResourceId);
     }
@@ -2577,12 +2599,7 @@ export class MasterCourseService {
     }
   }
 
-  private async duplicateResources(params: {
-    lessonMap: Map<UUIDType, UUIDType>;
-    targetCourseId: UUIDType;
-    targetAuthorId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async duplicateResources(params: DuplicateResourcesParams) {
     const targetLessonIds = Array.from(params.lessonMap.values());
 
     await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
@@ -2601,16 +2618,19 @@ export class MasterCourseService {
 
     for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
       const sourceResource = resourceReference.source.resource;
+      const reference = resourceReference.target.reference ?? resourceReference.source.reference;
       const targetResourceId = await this.masterCourseRepository.createResource({
         title: toJsonbBuildObject(sourceResource.title),
         description: toJsonbBuildObject(sourceResource.description),
-        reference: resourceReference.target.reference ?? resourceReference.source.reference,
+        reference,
         contentType: sourceResource.contentType,
-        metadata: normalizeJsonb(sourceResource.metadata, {}),
+        metadata: toJsonbBuildObject(sourceResource.metadata),
         uploadedBy: params.targetAuthorId,
         visibility: sourceResource.visibility,
         archived: false,
       });
+
+      await this.enqueueBunnyDurationDiscovery(reference, targetResourceId, params.targetTenantId);
 
       targetResourceIds.set(sourceResourceId, targetResourceId);
     }
@@ -2635,6 +2655,23 @@ export class MasterCourseService {
           resourceReference.source.relationshipType || RESOURCE_RELATIONSHIP_TYPES.TRAILER,
       });
     }
+  }
+
+  private async enqueueBunnyDurationDiscovery(
+    reference: string,
+    resourceId: UUIDType,
+    tenantId: UUIDType,
+  ): Promise<void> {
+    const bunnyVideoId = getBunnyVideoId(reference);
+    if (!bunnyVideoId) return;
+
+    await this.videoMetadataQueueService.enqueueWatchdog({
+      tenantId,
+      resourceId,
+      provider: VIDEO_PROVIDERS.BUNNY,
+      fileKey: reference,
+      bunnyVideoId,
+    });
   }
 
   private async cleanupMissingResourceMappings(exportId: UUIDType, sourceResourceIds: UUIDType[]) {

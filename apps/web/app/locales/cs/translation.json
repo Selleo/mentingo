@@ -2098,8 +2098,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Klíč API pro Bunny Stream"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Podepisovací klíč Bunny Stream"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Bunny Stream API klíč pouze pro čtení",
+        "description": "Knihovní klíč Bunny Stream pouze pro čtení používaný k ověřování webhooků Bunny Stream."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "ID knihovny Bunny Stream"

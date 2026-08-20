@@ -5,7 +5,7 @@ import { BaseEditor } from "~/components/RichText/Editor";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
-import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
+import { formatDuration, sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -65,7 +65,12 @@ export default function CourseDescriptionModal({
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="size-4" />
-                {formatDurationToHalfHour(course.estimatedDurationSeconds, t)}
+                {formatDuration(
+                  sumChapterDisplayDurations(
+                    course.chapters.map((chapter) => chapter.estimatedDurationSeconds),
+                  ),
+                  t,
+                )}
               </span>
             </div>
           </div>

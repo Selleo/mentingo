@@ -12,6 +12,7 @@ import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { hasAllPermissions, hasPermission } from "~/common/permissions/permission.utils";
 import { cn } from "~/lib/utils";
+import { sumRemainingChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 import CourseCertificate from "../CourseCertificate";
@@ -213,11 +214,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   };
 
   const timeLeftSeconds = useMemo(
-    () =>
-      course.chapters
-        .flatMap((chapter) => chapter.lessons)
-        .filter((lesson) => lesson.status !== CHAPTER_PROGRESS_STATUSES.COMPLETED)
-        .reduce((total, lesson) => total + (lesson.estimatedDurationSeconds ?? 0), 0),
+    () => sumRemainingChapterDisplayDurations(course.chapters, CHAPTER_PROGRESS_STATUSES.COMPLETED),
     [course.chapters],
   );
 

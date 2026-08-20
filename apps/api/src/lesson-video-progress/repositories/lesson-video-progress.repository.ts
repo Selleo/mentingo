@@ -50,6 +50,7 @@ export class LessonVideoProgressRepository {
         videoCompletionTrackingEnabled: sql<boolean>`COALESCE((${courses.settings}->>'videoCompletionTrackingEnabled')::boolean, TRUE)`,
         resourceEntityId: resourceEntity.id,
         resourceContentType: resources.contentType,
+        resourceMetadata: resources.metadata,
       })
       .from(resourceEntity)
       .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
@@ -100,6 +101,34 @@ export class LessonVideoProgressRepository {
           updatedAt: sql`now()`,
         },
       })
+      .returning();
+
+    return this.mapProgressRow(row);
+  }
+
+  async normalizeProgressRow(
+    params: LessonVideoIdentity & { durationSeconds: number; maxBucketCount: number },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const boundedRanges = sql`${lessonVideoProgress.watchedRanges} * int4multirange(int4range(0, ${params.maxBucketCount}, '[)'))`;
+    const coveredBucketCount = sql`COALESCE((SELECT SUM(UPPER(range_item) - LOWER(range_item))::int FROM unnest(${boundedRanges}) AS range_item), 0)`;
+
+    const [row] = await dbInstance
+      .update(lessonVideoProgress)
+      .set({
+        durationSeconds: params.durationSeconds,
+        watchedRanges: boundedRanges,
+        coveredBucketCount,
+        coveragePercent: sql`LEAST(1, (${coveredBucketCount})::numeric / ${params.maxBucketCount})`,
+        updatedAt: sql`now()`,
+      })
+      .where(
+        and(
+          eq(lessonVideoProgress.studentId, params.studentId),
+          eq(lessonVideoProgress.lessonId, params.lessonId),
+          eq(lessonVideoProgress.resourceEntityId, params.resourceEntityId),
+        ),
+      )
       .returning();
 
     return this.mapProgressRow(row);

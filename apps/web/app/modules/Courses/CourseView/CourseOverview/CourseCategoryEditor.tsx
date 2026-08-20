@@ -11,7 +11,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
-import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
+import {
+  formatDuration,
+  formatDurationToDisplayBucket,
+  sumChapterDisplayDurations,
+} from "~/modules/Courses/utils/formatDuration";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 
@@ -28,6 +32,7 @@ type CourseCategoryEditorProps = {
   categoryTitle: string;
   disabled: boolean;
   durationSeconds?: number;
+  chapterDurationsSeconds?: readonly (number | null | undefined)[];
   isEditing: boolean;
   onChange: (categoryId: string) => Promise<void>;
   onClose: () => void;
@@ -42,6 +47,7 @@ export default function CourseCategoryEditor({
   categoryTitle,
   disabled,
   durationSeconds,
+  chapterDurationsSeconds,
   isEditing,
   onChange,
   onClose,
@@ -131,7 +137,9 @@ export default function CourseCategoryEditor({
 
       <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
         <Clock className="size-3.5" />
-        {formatDurationToHalfHour(durationSeconds, t)}
+        {chapterDurationsSeconds
+          ? formatDuration(sumChapterDisplayDurations(chapterDurationsSeconds), t)
+          : formatDurationToDisplayBucket(durationSeconds, t)}
       </span>
     </div>
   );

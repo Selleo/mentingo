@@ -1,3 +1,4 @@
+import type { VideoProviderType } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -16,6 +17,7 @@ export const QUEUE_NAMES = {
   AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
+  VIDEO_METADATA: "video-metadata",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -76,4 +78,15 @@ export interface CourseDuplicationJobData {
   sourceCourseId: UUIDType;
   targetCourseId: UUIDType;
   actor: CurrentUserType;
+}
+
+export type VideoMetadataProvider = VideoProviderType;
+
+export interface VideoMetadataJobData {
+  tenantId: UUIDType;
+  resourceId: UUIDType;
+  uploadId?: string;
+  provider: VideoMetadataProvider;
+  fileKey?: string;
+  bunnyVideoId?: string;
 }
