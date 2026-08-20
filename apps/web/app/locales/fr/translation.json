@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Impossible de charger ce widget.",
+      "dataScope": {
+        "personal": "Vos données",
+        "otherUsers": "Données de l’organisation",
+        "personalTooltip": "Ce widget présente vos données personnelles d’apprentissage.",
+        "otherUsersTooltip": "Ce widget présente les données d’apprentissage des autres utilisateurs de votre organisation."
+      },
       "trainingCompletionChartLabel": "{{completed}} inscriptions sur {{total}} terminées, soit {{percentage}} %.",
       "deadlineRisksPage": "Page {{page}} sur {{totalPages}}",
       "placeholderDescription": "Widget du tableau de bord préparé pour une vue dédiée",
@@ -114,6 +120,7 @@
         },
         "aiMentorPractice": {
           "description": "Créez chaque jour un scénario de pratique ciblé",
+          "dailyRefreshInfo": "Vous pouvez générer une nouvelle session de pratique avec l’IA par jour.",
           "empty": "Décrivez une situation et entraînez-vous avec l'AI Mentor.",
           "emptyPrompt": "Quelle conversation aimeriez-vous aborder avec plus d'assurance ?",
           "startCta": "Commencer la pratique",
@@ -289,7 +296,7 @@
       "summaryTitle": "Ce qu'il faut retenir",
       "summaryDescription": "Utilisez ces observations pour améliorer votre prochaine tentative.",
       "scoreLabel": "Résultat de la pratique",
-      "criteriaTitle": "Ce que l'évaluateur IA a observé",
+      "criteriaTitle": "Évaluation de la tâche",
       "criterionFallback": "Critère {{number}}",
       "importantFeedbackTitle": "Retour important"
     },
