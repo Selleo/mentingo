@@ -35,11 +35,12 @@ export default function CourseDescriptionModal({
   return (
     <Dialog open onOpenChange={(open) => !open && void saveAndClose()}>
       <DialogContent
-        className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-4xl overflow-x-hidden overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
+        variant="mobileDrawer"
+        className="flex max-h-[90dvh] flex-col rounded-2xl border-0 bg-white shadow-2xl sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:!max-w-4xl"
         noCloseButton
         aria-describedby={undefined}
       >
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mb-4 flex items-center justify-between md:mb-6">
             <DialogTitle className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
               {t("modernCourseView.overview.aboutCourse")}

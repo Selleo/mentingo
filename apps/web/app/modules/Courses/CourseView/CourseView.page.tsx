@@ -4,7 +4,8 @@ import { isAxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { courseLookupQueryOptions, useCourse } from "~/api/queries";
+import { courseLookupQueryOptions, courseQueryOptions, useCourse } from "~/api/queries";
+import { userSettingsQueryOptions } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
@@ -20,11 +21,18 @@ import { TableOfContent } from "./TableOfContent/TableOfContent";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-const resolvePreferredLanguage = (url: URL): SupportedLanguages => {
+const resolvePreferredLanguage = (
+  url: URL,
+  applicationLanguage?: string | null,
+): SupportedLanguages => {
   const languageFromQuery = url.searchParams.get("language");
 
   if (languageFromQuery && isSupportedLanguage(languageFromQuery)) {
     return languageFromQuery as SupportedLanguages;
+  }
+
+  if (applicationLanguage && isSupportedLanguage(applicationLanguage)) {
+    return applicationLanguage as SupportedLanguages;
   }
 
   const storedLanguage = useLanguageStore.getState().language;
@@ -47,7 +55,9 @@ export const clientLoader = async ({
   if (!idOrSlug) return null;
 
   const url = new URL(request.url);
-  const language = resolvePreferredLanguage(url);
+  const userSettingsResponse = await queryClient.ensureQueryData(userSettingsQueryOptions);
+  const language = resolvePreferredLanguage(url, userSettingsResponse?.data?.language);
+  useLanguageStore.getState().setLanguage(language);
 
   const lookupCourse = await queryClient
     .fetchQuery(courseLookupQueryOptions(idOrSlug, language))
@@ -64,6 +74,16 @@ export const clientLoader = async ({
   if (status === "redirect" && slug) {
     throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
+
+  await queryClient.ensureQueryData(courseQueryOptions(idOrSlug, language)).catch(
+    (error: unknown) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        throw redirect("/courses", 302);
+      }
+
+      throw error;
+    },
+  );
 
   return null;
 };

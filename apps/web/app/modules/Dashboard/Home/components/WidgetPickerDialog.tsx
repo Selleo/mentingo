@@ -112,9 +112,7 @@ export function WidgetPickerDialog({
               );
               const Icon = entry.icon;
               const ScopeIcon =
-                entry.dataScope === DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL
-                  ? UserRound
-                  : UsersRound;
+                entry.dataScope === DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL ? UserRound : UsersRound;
               const scopeLabel = t(`dashboardHome.widgets.dataScope.${entry.dataScope}`);
               const scopeTooltip = t(`dashboardHome.widgets.dataScope.${entry.dataScope}Tooltip`);
               const switchId = `dashboard-widget-${widgetId}`;
