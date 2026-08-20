@@ -36,7 +36,7 @@ export default function CourseDescriptionModal({
     <Dialog open onOpenChange={(open) => !open && void saveAndClose()}>
       <DialogContent
         variant="mobileDrawer"
-        className="flex max-h-[90dvh] flex-col rounded-2xl border-0 bg-white shadow-2xl sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:max-w-4xl"
+        className="flex max-h-[90dvh] flex-col rounded-2xl border-0 bg-white shadow-2xl sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:!max-w-4xl"
         noCloseButton
         aria-describedby={undefined}
       >
