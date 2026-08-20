@@ -12,8 +12,6 @@ export type DurationEstimate = {
   totalSeconds: number;
 };
 
-// Persisted projections contain the course base language and its available locales. Partial keeps
-// the schema compatible with the empty-object default used while rows are being migrated.
 export type DurationEstimatesByLanguage = Partial<Record<SupportedLanguages, DurationEstimate>>;
 
 export type CourseDurationSummary = {
