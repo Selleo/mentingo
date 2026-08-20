@@ -1,6 +1,7 @@
 import { Readable } from "stream";
 
 import {
+  AI_MENTOR_TEACHING_STYLE,
   AI_MENTOR_TYPE,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
@@ -23,6 +24,7 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
+  aiMentorConfigurations,
   aiMentorLessons,
   chapters,
   courses,
@@ -327,6 +329,35 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   });
 
   describe("AI mentor lesson translations", () => {
+    const teacherConfiguration = (additionalInstructions: string) => ({
+      type: AI_MENTOR_TYPE.TEACHER,
+      taskGoal: "Guide the learner through the practice",
+      expertise: "Sales negotiation",
+      contentScope: "Discovery and objection handling",
+      teachingStyle: AI_MENTOR_TEACHING_STYLE.GUIDED_DISCOVERY,
+      additionalInstructions,
+    });
+
+    const translateTeacherConfiguration = async (
+      lessonId: UUIDType,
+      cookies: Awaited<ReturnType<typeof cookieFor>>,
+      additionalInstructions: string,
+    ) => {
+      await request(app.getHttpServer())
+        .patch(
+          `/api/lesson/${lessonId}/ai-mentor-configuration/translations/${SUPPORTED_LANGUAGES.PL}`,
+        )
+        .set("Cookie", cookies)
+        .send({
+          type: AI_MENTOR_TYPE.TEACHER,
+          taskGoal: "Przeprowadź ucznia przez ćwiczenie",
+          expertise: "Negocjacje sprzedażowe",
+          contentScope: "Badanie potrzeb i obiekcje",
+          additionalInstructions,
+        })
+        .expect(200);
+    };
+
     const createAiMentorLessonSetup = async (
       availableLocales: SupportedLanguages[] = [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
     ) => {
@@ -352,14 +383,15 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Negotiation practice",
           description: "<p>Practice a sales call.</p>",
           chapterId: chapter.id,
-          aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+          aiMentorConfiguration: teacherConfiguration(
+            "<p>Lead the learner through an English scenario.</p>",
+          ),
           aiJudgeConfiguration: {
             taskGoal: "Complete the negotiation practice",
             passingThresholdPercent: 0,
             criteria: [],
             blockingErrors: [],
           },
-          type: AI_MENTOR_TYPE.MENTOR,
           name: "AI Mentor",
         })
         .expect(201);
@@ -411,8 +443,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Negotiation practice",
           description: "<p>Practice a sales call.</p>",
           chapterId: chapter.id,
-          aiMentorInstructions: "<p>Lead the learner through the scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
+          aiMentorConfiguration: teacherConfiguration(
+            "<p>Lead the learner through the scenario.</p>",
+          ),
           aiJudgeConfiguration: {
             taskGoal: "Handle a sales objection and agree a next step",
             passingThresholdPercent: 70,
@@ -487,8 +520,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Negotiation practice",
           description: "<p>Practice a sales call.</p>",
           chapterId: chapter.id,
-          aiMentorInstructions: "<p>Lead the learner through the scenario.</p>",
-          type: AI_MENTOR_TYPE.ROLEPLAY,
+          aiMentorConfiguration: teacherConfiguration(
+            "<p>Lead the learner through the scenario.</p>",
+          ),
         })
         .expect(400);
     });
@@ -663,12 +697,16 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
-          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
           name: "Mentor PL",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
+
+      await translateTeacherConfiguration(
+        lessonId,
+        adminCookies,
+        "<p>Lead the learner through a Polish scenario.</p>",
+      );
 
       const englishAiMentor = await getAiMentorFromCourse(
         courseId,
@@ -685,12 +723,19 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(englishAiMentor).toMatchObject({
         name: "AI Mentor",
-        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
       });
       expect(polishAiMentor).toMatchObject({
         name: "Mentor PL",
-        aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
       });
+
+      const polishConfiguration = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-mentor-configuration`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(polishConfiguration.body.data.additionalInstructions).toBe(
+        "<p>Lead the learner through a Polish scenario.</p>",
+      );
     });
 
     it("falls back to base-language AI mentor scenario fields on the learner endpoint", async () => {
@@ -719,7 +764,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(response.body.data).toMatchObject({
         aiMentor: { name: "AI Mentor" },
-        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
       });
     });
 
@@ -765,11 +809,15 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
-          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
+
+      await translateTeacherConfiguration(
+        lessonId,
+        adminCookies,
+        "<p>Lead the learner through a Polish scenario.</p>",
+      );
 
       const missingResponse = await request(app.getHttpServer())
         .get("/api/course/beta-course-missing-translations")
@@ -805,12 +853,16 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
-          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
           name: "Mentor PL",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
+
+      await translateTeacherConfiguration(
+        lessonId,
+        adminCookies,
+        "<p>Lead the learner through a Polish scenario.</p>",
+      );
 
       await request(app.getHttpServer())
         .delete(`/api/course/language/${courseId}`)
@@ -821,13 +873,17 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const [aiMentorLesson] = await db
         .select({
           name: aiMentorLessons.name,
-          aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
         })
         .from(aiMentorLessons)
         .where(eq(aiMentorLessons.lessonId, lessonId));
 
       expect(aiMentorLesson.name).toEqual({ en: "AI Mentor" });
-      expect(aiMentorLesson.aiMentorInstructions).toEqual({
+      const [configuration] = await db
+        .select({ additionalInstructions: aiMentorConfigurations.additionalInstructions })
+        .from(aiMentorConfigurations)
+        .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorConfigurations.aiMentorLessonId))
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+      expect(configuration.additionalInstructions).toEqual({
         en: "<p>Lead the learner through an English scenario.</p>",
       });
     });
@@ -842,8 +898,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           title: "German negotiation practice",
           description: "<p>Practice a German sales call.</p>",
-          aiMentorInstructions: "<p>Lead the learner through a German scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
           name: "AI Mentor",
           language: SUPPORTED_LANGUAGES.DE,
         })

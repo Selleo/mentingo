@@ -7,8 +7,19 @@
       "badge": "Úpravy",
       "widgetsButton": "Widgety",
       "restore": "Obnovit výchozí",
-      "instructions": "Přetažením widgetů změníte jejich pořadí. Můžete také změnit šířku a viditelnost.",
-      "changeWidth": "Změnit šířku {{title}}",
+      "restoreConfirm": "Obnovit výchozí rozložení widgetů? Vaše aktuální uspořádání bude nahrazeno.",
+      "changeSize": "Změnit velikost {{title}}",
+      "sizeTitle": "Velikost widgetu",
+      "sizes": {
+        "1x1": "Kompaktní",
+        "2x1": "Široký",
+        "1x2": "Vysoký",
+        "2x2": "Velký",
+        "3x2": "Rozšířený",
+        "4x1": "Extra široký",
+        "4x2": "Výrazný",
+        "4x3": "Výrazný vysoký"
+      },
       "drag": "Přesunout {{title}}",
       "widgetLibrary": "Widgety dashboardu",
       "widgetLibraryDescription": "Vyberte widgety, které mají být na dashboardu viditelné.",
@@ -29,14 +40,28 @@
     },
     "error": {
       "invalidWidgetLayout": "Rozložení dashboardu obsahuje nedostupné nebo duplicitní widgety.",
+      "invalidWidgetSize": "Tato velikost není pro vybraný widget povolena.",
       "requiredWidgetMissing": "Chybí povinný widget dashboardu.",
       "title": "Dashboard se nepodařilo načíst",
       "description": "Zkuste to za chvíli znovu.",
       "retry": "Zkusit znovu",
-      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena."
+      "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena.",
+      "staleLayout": "Váš dashboard byl aktualizován jinde. Obnovte stránku a zkuste to znovu."
+    },
+    "toast": {
+      "layoutSaved": "Změny dashboardu byly uloženy.",
+      "layoutSaveError": "Změny dashboardu se nepodařilo uložit.",
+      "layoutReset": "Výchozí rozložení dashboardu bylo obnoveno.",
+      "layoutResetError": "Výchozí rozložení dashboardu se nepodařilo obnovit."
     },
     "widgets": {
       "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "dataScope": {
+        "personal": "Vaše data",
+        "otherUsers": "Data organizace",
+        "personalTooltip": "Tento widget zobrazuje vaše osobní údaje o učení.",
+        "otherUsersTooltip": "Tento widget zobrazuje údaje o učení ostatních uživatelů ve vaší organizaci."
+      },
       "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
       "deadlineRisksPage": "Strana {{page}} z {{totalPages}}",
       "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
@@ -92,14 +117,13 @@
         },
         "aiMentorPractice": {
           "description": "Vytvořte každý den jeden cílený scénář",
+          "dailyRefreshInfo": "Každý den můžete vygenerovat jedno nové praktické sezení s AI.",
           "empty": "Popište situaci a procvičte ji s AI mentorem.",
           "emptyPrompt": "Který rozhovor chcete zvládnout s větší jistotou?",
           "startCta": "Zahájit trénink",
           "continueCta": "Pokračovat v tréninku",
           "feedbackCta": "Zobrazit zpětnou vazbu",
-          "todayEyebrow": "Dnešní nácvik",
           "completedEyebrow": "Nácvik dokončen",
-          "returnHint": "Váš rozhovor je uložen",
           "privateHint": "Soukromé místo pro zkoušení a zlepšování",
           "status": {
             "queued": "Scénář čeká.",
@@ -123,6 +147,19 @@
       "deadline_risks": {
         "title": "Rizika termínů",
         "description": "Povinné kurzy vyžadující pozornost",
+        "sort": "Řadit",
+        "sortMostUrgent": "Nejnaléhavější první",
+        "sortLeastUrgent": "Nejméně naléhavé první",
+        "student": "Účastník",
+        "group": "Skupina",
+        "learners": "Účastníci",
+        "deadline": "Termín",
+        "status": "Stav",
+        "searchStudents": "Hledat účastníky",
+        "searchGroups": "Hledat skupiny nebo účastníky",
+        "allStatuses": "Všechny stavy",
+        "studentsEmpty": "Žádní dotčení účastníci.",
+        "groupsEmpty": "Žádné dotčené skupiny.",
         "overdue": "Po termínu",
         "dueSoon": "Termín se blíží",
         "empty": "Aktuálně žádná rizika termínů.",
@@ -170,8 +207,34 @@
       "ai_mentor_practice": {
         "title": "Cvičení s AI Mentorem",
         "aiNotConfigured": "AI Mentor není pro tohoto tenanta nakonfigurován."
+      },
+      "todoTasks": {
+        "title": "Seznam úkolů",
+        "description": "Malé úkoly pro váš pracovní den",
+        "empty": "Zatím žádné úkoly. Přidejte jeden níže.",
+        "placeholder": "Přidat úkol",
+        "add": "Přidat úkol",
+        "toggle": "Přepnout {{title}}",
+        "edit": "Upravit úkol",
+        "delete": "Smazat úkol",
+        "reorder": "Změnit pořadí úkolu",
+        "toast": {
+          "createSuccess": "Úkol byl přidán.",
+          "createError": "Úkol se nepodařilo přidat.",
+          "updateSuccess": "Úkol byl aktualizován.",
+          "updateError": "Úkol se nepodařilo aktualizovat.",
+          "deleteSuccess": "Úkol byl odstraněn.",
+          "deleteError": "Úkol se nepodařilo odstranit.",
+          "reorderSuccess": "Pořadí úkolů bylo uloženo.",
+          "reorderError": "Pořadí úkolů se nepodařilo uložit."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Můžete mít maximálně 100 úkolů.",
+    "notFound": "Tento úkol již neexistuje.",
+    "invalidOrder": "Pořadí úkolů již není aktuální. Obnovte stránku a zkuste to znovu."
   },
   "aiMentorPractice": {
     "form": {
@@ -185,21 +248,17 @@
       "submit": "Vytvořit trénink",
       "suggestions": {
         "title": "Začněte příkladem",
-        "feedback": {
-          "label": "Poskytnout zpětnou vazbu",
-          "value": "Chci si procvičit poskytnutí konstruktivní zpětné vazby kolegovi, který nedodržel důležitý termín."
+        "delayedOrder": {
+          "label": "Zákazník požaduje vrácení peněz za opožděnou objednávku",
+          "value": "Zákazník požaduje vrácení peněz kvůli zpožděné objednávce. Kávovar jako narozeninový dárek měl být doručen za 2–3 dny, ale po šesti dnech zásilka stále nedorazila. Zákazník požaduje okamžité vrácení peněz a další slevu a hrozí negativní recenzí. Zásilka je u kurýra a pravděpodobně dorazí zítra, ale nemohu zaručit čas doručení ani nabídnout slevu vyšší než 10 %. Chci zákazníka uklidnit, nic neslibovat nad rámec možností a nabídnout rozumné řešení."
         },
-        "boundary": {
-          "label": "Nastavit hranici",
-          "value": "Chci si procvičit nastavení jasné hranice, když mě kolega žádá o naléhavou práci mimo mé současné priority."
+        "orderMistake": {
+          "label": "Udělal jsem chybu v objednávce zákazníka",
+          "value": "Do objednávky jsem zadal 120 balení filtrů do klimatizace místo 20. Sklad už objednávku zkompletoval, zabalil na palety a připravil k vyzvednutí kurýrem. Pokud odešle, zákazník dostane o 100 balení více a budeme organizovat vrácení. Nevím, zda nejdříve zastavit odeslání, kontaktovat sklad, informovat vedoucího nebo zákazníka."
         },
-        "explanation": {
-          "label": "Vysvětlit rozhodnutí",
-          "value": "Chci si procvičit vysvětlení obtížného rozhodnutí člověku, který s ním nesouhlasí."
-        },
-        "request": {
-          "label": "Přednést žádost",
-          "value": "Chci si procvičit požádání manažera o podporu při příliš vysokém pracovním vytížení."
+        "sensitiveData": {
+          "label": "Zákazník po mně chce údaje, které nemám sdílet",
+          "value": "Pravidelný firemní zákazník uvedl název firmy a číslo objednávky a požádal o doručovací adresu a telefon osoby, která objednávku zadala. Není uveden jako kontakt objednávky a nemohu ověřit, zda ve firmě skutečně pracuje. Naléhá, že informace potřebuje ihned. Chci pomoci, aniž bych porušil pravidla ochrany osobních údajů."
         }
       },
       "steps": {
@@ -231,7 +290,7 @@
       "summaryTitle": "Co si odnést dál",
       "summaryDescription": "Využijte tyto postřehy k posílení dalšího pokusu.",
       "scoreLabel": "Výsledek procvičení",
-      "criteriaTitle": "Čeho si všiml AI hodnotitel",
+      "criteriaTitle": "Hodnocení úkolu",
       "criterionFallback": "Kritérium {{number}}",
       "importantFeedbackTitle": "Důležitá zpětná vazba"
     },
@@ -311,8 +370,10 @@
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo.",
       "threadMustBeActive": "Vlákno musí být aktivní.",
+      "aiMentorConfigurationIncomplete": "Konfigurace AI mentora není úplná.",
       "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
-      "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
+      "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
     },
     "loader": {
       "textSequence": {
@@ -1804,6 +1865,7 @@
         "settings_read_self": "Může zobrazit vlastní nastavení profilu a předvoleb.",
         "settings_update_self": "Může aktualizovat vlastní nastavení profilu a předvoleb.",
         "dashboard_read": "Může zobrazit svůj dashboard.",
+        "todo_task_manage_self": "Může vytvářet a spravovat vlastní úkoly.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
@@ -2634,6 +2696,235 @@
           "customTTSReference": "Zadejte vlastní referenční ID TTS...",
           "aiMentorTypes": "Učitel"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Chování AI Mentora",
+          "emptyDescription": "Zvolte, jak má AI studenta vést nebo s ním komunikovat.",
+          "baseLanguageRequired": "Nejprve nakonfigurujte chování AI Mentora v základním jazyce kurzu.",
+          "incompleteDescription": "Tato konfigurace vyžaduje doplnění několika údajů.",
+          "configureManually": "Nastavit ručně",
+          "reviewConfiguration": "Zkontrolovat konfiguraci",
+          "dialogTitle": "Nastavení AI Mentora",
+          "dialogDescription": "Zvolte režim a definujte chování, které má student zažít.",
+          "optional": "(volitelné)",
+          "fineTuneBehavior": "Doladit chování (volitelné)",
+          "translationModeTitle": "Režim překladu",
+          "translationModeDescription": "Zde přeložte textová pole. Režim, styl výuky a obtížnost se spravují v základním jazyce.",
+          "structureLockedTooltip": "Strukturu AI Mentora lze měnit pouze v základním jazyce kurzu.",
+          "applyConfiguration": "Použít konfiguraci",
+          "saveConfiguration": "Uložit konfiguraci",
+          "saveTranslation": "Uložit překlad",
+          "configurationSaved": "Konfigurace AI Mentora byla uložena.",
+          "translationSaved": "Překlad AI Mentora byl uložen.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Režim Mentora",
+            "teacher": {
+              "label": "Učitel",
+              "description": "Vysvětluje pojmy a vede procvičování."
+            },
+            "roleplay": {
+              "label": "Hraní rolí",
+              "description": "Vystupuje jako účastník cvičného scénáře."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Začít scénářem",
+            "scenarioSimulation": {
+              "taskDescription": "Procvičte zjišťování potřeb softwarového klienta a návrh nabídky odpovídající jeho omezením.",
+              "aiRole": "Potenciální klient softwarových služeb",
+              "learnerRole": "Obchodní zástupce",
+              "characterGoal": "Vybrat dodavatele, který splní požadavky na termín, rozpočet a komunikaci.",
+              "factsAndConstraints": "Aplikace musí být hotová do tří měsíců. Rozpočet je omezený a je vyžadována jasná a pravidelná komunikace.",
+              "openingInstruction": "Představte se jako klient, který hodnotí dodavatele softwaru, a zeptejte se, jak vám může student pomoci."
+            },
+            "problemSolving": {
+              "taskDescription": "Procvičte konstruktivní vedení rozhovoru se zaměstnancem žádajícím o zvýšení platu.",
+              "aiRole": "Zaměstnanec žádající o zvýšení platu",
+              "learnerRole": "Manažer",
+              "characterGoal": "Být vyslechnut a dohodnout věrohodnou alternativu nebo další postup.",
+              "factsAndConstraints": "Zaměstnanec v poslední době významně přispěl, ale společnost nyní nemá rozpočet na zvyšování platů.",
+              "openingInstruction": "Začněte popisem svých nedávných přínosů a požádejte o rozhovor o zvýšení platu."
+            },
+            "creativeTask": {
+              "taskDescription": "Vytvořte a rozpracujte originální nápad na novou službu pro zákazníky.",
+              "taskGoal": "Pomozte studentovi vytvořit a rozpracovat originální nápad na službu.",
+              "expertise": "Kouč inovací služeb",
+              "feedbackGuidance": "Podporujte originalitu a praktickou hodnotu. Pokládejte cílené doplňující otázky a upozorňujte na důležité mezery, aniž byste nápad převzali.",
+              "openingInstruction": "Vyzvěte studenta, aby představil svůj počáteční nápad na službu a komu by měla pomoci."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Naučte se praktické techniky řízení času a naplánujte jejich využití v práci.",
+              "taskGoal": "Pomozte studentovi pochopit a používat praktické techniky řízení času.",
+              "expertise": "Kouč řízení času",
+              "feedbackGuidance": "Jemně opravujte nedorozumění a propojujte zpětnou vazbu s konkrétním a realistickým využitím na pracovišti.",
+              "openingInstruction": "Představte jednu praktickou techniku řízení času a poté se zeptejte, jak si student nyní organizuje práci."
+            }
+          },
+          "taskGoal": {
+            "label": "Cíl úkolu",
+            "placeholder": "Co má Učitel pomoci pochopit nebo procvičit?"
+          },
+          "expertise": {
+            "label": "Odbornost",
+            "placeholder": "Například: školitel souladu s GDPR"
+          },
+          "contentScope": {
+            "label": "Rozsah obsahu",
+            "placeholder": "Co smí Učitel probírat a čemu se má vyhnout?"
+          },
+          "teachingStyle": {
+            "label": "Styl výuky",
+            "explain_and_practice": {
+              "label": "Vysvětlení a procvičení",
+              "description": "Jasně vysvětlit a poté upevnit procvičováním."
+            },
+            "guided_discovery": {
+              "label": "Řízené objevování",
+              "description": "Vést studenta krok za krokem k závěrům."
+            },
+            "socratic": {
+              "label": "Sokratovský",
+              "description": "Prohlubovat uvažování cílenými otázkami."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Pokyny ke zpětné vazbě",
+            "placeholder": "Jak má Učitel studenta opravovat nebo podporovat?"
+          },
+          "scenario": {
+            "label": "Scénář",
+            "placeholder": "Popište situaci, kterou bude student procvičovat."
+          },
+          "aiRole": { "label": "Role AI", "placeholder": "Například: váhající zákazník" },
+          "learnerRole": {
+            "label": "Role studenta",
+            "placeholder": "Například: obchodní zástupce"
+          },
+          "characterGoal": {
+            "label": "Cíl postavy AI",
+            "placeholder": "Čeho se postava AI snaží dosáhnout?"
+          },
+          "difficulty": {
+            "label": "Obtížnost",
+            "cooperative": {
+              "label": "Spolupracující",
+              "description": "Ochotný pomoci a posouvat rozhovor vpřed."
+            },
+            "realistic": {
+              "label": "Realistická",
+              "description": "Přirozený odpor a věrohodné reakce."
+            },
+            "challenging": {
+              "label": "Náročná",
+              "description": "Pevný odpor vyžadující kvalitní reakci."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakta a omezení",
+            "placeholder": "Přidejte rozpočty, termíny, pravidla nebo fakta, která se nesmí změnit."
+          },
+          "openingInstruction": {
+            "label": "Pokyn k zahájení",
+            "placeholder": "Jak má začít jednorázová uvítací zpráva?"
+          },
+          "additionalInstructions": {
+            "label": "Další pokyny",
+            "placeholder": "Přidejte zvláštní chování, které není popsáno výše."
+          },
+          "typeChange": {
+            "title": "Změnit režim Mentora?",
+            "description": "Přepnutím na {{type}} se vymažou pole aktuálního režimu. Úvodní a další pokyny zůstanou zachovány."
+          },
+          "validation": {
+            "required": "Toto pole je povinné.",
+            "configurationRequired": "Před uložením lekce nastavte chování AI Mentora."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Režim mentora",
+          "createWithAi": "Vytvořit pomocí AI",
+          "improveWithAi": "Vylepšit pomocí AI",
+          "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
+          "aiAssistance": "Pomoc AI",
+          "create": {
+            "title": "Vytvořit chování AI Mentora pomocí AI",
+            "description": "Vyberte režim mentora a popište požadovaný zážitek.",
+            "fieldLabel": "Jaký scénář má AI připravit?",
+            "fieldDescription": "AI připraví kompletní pracovní návrh scénáře pro vybraný režim.",
+            "placeholder": "Popište situaci, účastníky a cíl rozhovoru…",
+            "submit": "Vygenerovat návrh"
+          },
+          "improve": {
+            "title": "Vylepšit chování AI Mentora pomocí AI",
+            "description": "AI používá aktuální neuloženou konfiguraci a její režim.",
+            "fieldLabel": "Co má AI ve scénáři změnit?",
+            "fieldDescription": "Popište, co má být realističtější, soudržnější nebo konkrétnější. Vybraný režim zůstane beze změny.",
+            "placeholder": "Popište požadovanou změnu…",
+            "submit": "Vylepšit návrh"
+          },
+          "progressTitle": "Připravuje se návrh",
+          "progressDescription": "AI vytváří a kontroluje konfiguraci.",
+          "readyTitle": "Návrh je připraven k revizi",
+          "revisionTitle": "Návrh vyžaduje vaše rozhodnutí",
+          "failedTitle": "Návrh se nepodařilo vytvořit",
+          "cancel": "Zrušit generování",
+          "revise": "Upravit návrh",
+          "review": "Zkontrolovat konfiguraci",
+          "progressLabel": "Průběh generování AI Mentora",
+          "stages": {
+            "draft": "Generování návrhu",
+            "qualityCheck": "Kontrola kvality",
+            "ready": "Připraveno"
+          },
+          "status": {
+            "drafting": "Generuje se konfigurace",
+            "evaluating": "Kontroluje se kvalita konfigurace",
+            "revising": "Vylepšuje se návrh",
+            "awaiting_revision": "Kontrola kvality vyžaduje vaše rozhodnutí",
+            "completed": "Konfigurace je připravena",
+            "requires_review": "Návrh vyžaduje vaše rozhodnutí",
+            "failed": "Generování se nepodařilo dokončit",
+            "cancelled": "Generování zrušeno"
+          },
+          "statusDescription": {
+            "drafting": "Připravuje se chování Mentora pro vybraný režim.",
+            "evaluating": "Kontroluje se, zda je chování jasné, úplné a konzistentní.",
+            "revising": "Používají se nejnovější opravy z kontroly kvality.",
+            "awaiting_revision": "Před dalším pokusem si projděte zjištění.",
+            "completed": "Návrh prošel kontrolou kvality.",
+            "requires_review": "Nejnovější návrh byl zachován pro vaše rozhodnutí.",
+            "failed": "Zkuste to znovu nebo nastavte chování Mentora ručně.",
+            "cancelled": "Nebyly použity žádné změny konfigurace."
+          },
+          "attempt": "Návrh {{attempt}} z {{maxAttempts}}",
+          "currentDraft": "Aktuální návrh",
+          "qualityCheckLabel": "Kontrola kvality",
+          "qualityDecisionTitle": "Navrhovaná vylepšení: {{count}}",
+          "qualityDecisionDescription": "Projděte si návrhy nebo pokračujte s touto konfigurací.",
+          "suggestedImprovements": "Navrhovaná vylepšení",
+          "applyImprovements": "Upravit",
+          "useCurrentDraft": "Pokračovat",
+          "reviewExactChanges": "Změny provedené AI ({{count}})",
+          "reviewConfiguration": "Zkontrolovat konfiguraci",
+          "showMoreFindings": "Zobrazit dalších {{count}} zjištění",
+          "showFewerFindings": "Zobrazit méně zjištění",
+          "review": {
+            "currentDraftTitle": "Zkontrolovat aktuální návrh",
+            "currentDraftDescription": "Tento návrh stále obsahuje doporučení ke kvalitě. Před použitím jej zkontrolujte.",
+            "requiresReviewTitle": "Zkontrolovat vygenerovanou konfiguraci",
+            "requiresReviewDescription": "AI zachovala nejnovější návrh pro vaše konečné rozhodnutí."
+          },
+          "quality": {
+            "title": "Zkontrolovat kvalitu pomocí AI",
+            "resultTitle": "Kontrola kvality",
+            "description": "AI zkontroluje aktuální neuloženou konfiguraci bez její změny.",
+            "checking": "Kontroluje se aktuální konfigurace…",
+            "checkingDescription": "Kontroluje se režim, pokyny, omezení a chování konverzace.",
+            "hasFindings": "Projděte si zjištění nebo nechte AI konfiguraci podle nich vylepšit.",
+            "passed": "Nejsou potřeba žádné změny. Můžete pokračovat v úpravách nebo konfiguraci uložit.",
+            "improve": "Vylepšit pomocí AI"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Podmínky dokončení",
           "configured": "Nakonfigurováno",
@@ -2643,6 +2934,7 @@
           "summary": "{{criteria}} kritéria · celkem {{score}} bodů · {{threshold}} % pro splnění · {{blockingErrors}} blokující chyby",
           "configureWithAi": "Nastavit pomocí AI",
           "createWithAi": "Vytvořit s AI",
+          "aiMentorConfigurationRequiredTooltip": "Než vytvoříte podmínky dokončení pomocí AI, nejprve nakonfigurujte chování AI Mentora.",
           "improveWithAi": "Vylepšit pomocí AI",
           "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
           "checkingQuality": "Kontrola kvality...",
@@ -3736,7 +4028,8 @@
     },
     "toast": {
       "error": {
-        "globalNotFound": "Globální nastavení nenalezeno"
+        "globalNotFound": "Globální nastavení nenalezeno",
+        "userSettingsNotFound": "Nastavení uživatele nebylo nalezeno"
       },
       "qaSettingUpdatedSuccessfully": "Nastavení QA bylo úspěšně aktualizováno",
       "ageLimitUpdatedSuccessfully": "Věkový limit byl úspěšně aktualizován",

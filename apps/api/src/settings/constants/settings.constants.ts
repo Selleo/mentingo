@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGETS, DASHBOARD_WIDGET_IDS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 const DEFAULT_COMPANY_INFORMATION = {
   companyName: "",
@@ -50,25 +50,10 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   loginPageFiles: [],
 };
 
-export const DEFAULT_DASHBOARD_SETTINGS = {
-  widgets: Object.values(DASHBOARD_WIDGET_IDS)
-    .filter((id) => DASHBOARD_WIDGETS[id].defaultVisible)
-    .map((id) => {
-      const definition = DASHBOARD_WIDGETS[id];
-
-      return {
-        id,
-        order: definition.defaultOrder,
-        width: definition.defaultWidth,
-      };
-    }),
-};
-
 export const DEFAULT_STUDENT_SETTINGS = {
   language: SUPPORTED_LANGUAGES.EN,
   isMFAEnabled: false,
   MFASecret: null,
-  dashboard: DEFAULT_DASHBOARD_SETTINGS,
 };
 
 export const DEFAULT_ADMIN_SETTINGS = {

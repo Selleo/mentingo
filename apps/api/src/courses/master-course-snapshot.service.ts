@@ -29,6 +29,20 @@ export class MasterCourseSnapshotService {
     const optionRows = await this.masterCourseRepository.getSourceOptions(questionIds);
     const aiMentorRows = await this.masterCourseRepository.getSourceAiMentors(lessonIds);
     const aiMentorIds = aiMentorRows.map((row) => row.id);
+    const aiMentorConfigurationRows =
+      await this.masterCourseRepository.getSourceAiMentorConfigurations(aiMentorIds);
+    const aiMentorConfigurationIds = aiMentorConfigurationRows.map((row) => row.id);
+    const [aiMentorTeacherConfigurationRows, aiMentorRoleplayConfigurationRows] =
+      aiMentorConfigurationIds.length
+        ? await Promise.all([
+            this.masterCourseRepository.getSourceAiMentorTeacherConfigurations(
+              aiMentorConfigurationIds,
+            ),
+            this.masterCourseRepository.getSourceAiMentorRoleplayConfigurations(
+              aiMentorConfigurationIds,
+            ),
+          ])
+        : [[], []];
     let aiJudgeConfigurationRows: SourceSnapshot["aiJudgeConfigurations"] = [];
     if (aiMentorIds.length)
       aiJudgeConfigurationRows =
@@ -83,6 +97,9 @@ export class MasterCourseSnapshotService {
       questions: questionRows,
       options: optionRows,
       aiMentors: aiMentorRows,
+      aiMentorConfigurations: aiMentorConfigurationRows,
+      aiMentorTeacherConfigurations: aiMentorTeacherConfigurationRows,
+      aiMentorRoleplayConfigurations: aiMentorRoleplayConfigurationRows,
       aiJudgeConfigurations: aiJudgeConfigurationRows,
       aiJudgeCriteria: aiJudgeCriterionRows,
       aiJudgeScoreGuidance: aiJudgeScoreGuidanceRows,

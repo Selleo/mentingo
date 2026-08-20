@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef } from "react";
 
 import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
@@ -11,6 +11,9 @@ type CourseGenerationComposerCenterContentProps = {
   onInputChange: (value: string) => void;
   onSubmit: () => void;
   inputTestId?: string;
+  ariaLabel?: string;
+  onFocusChange?: (focused: boolean) => void;
+  maxRows?: number;
 };
 
 export function CourseGenerationComposerCenterContent({
@@ -21,10 +24,14 @@ export function CourseGenerationComposerCenterContent({
   onInputChange,
   onSubmit,
   inputTestId,
+  ariaLabel,
+  onFocusChange,
+  maxRows = 4,
 }: CourseGenerationComposerCenterContentProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const shouldReduceMotion = useReducedMotion();
   const layoutTransition = {
-    duration: 0.24,
+    duration: shouldReduceMotion ? 0 : 0.24,
     ease: "easeInOut" as const,
   };
 
@@ -37,7 +44,7 @@ export function CourseGenerationComposerCenterContent({
     const resize = () => {
       el.style.height = "auto";
       const lineHeight = Number.parseFloat(window.getComputedStyle(el).lineHeight) || 20;
-      const maxHeight = lineHeight * 4;
+      const maxHeight = lineHeight * maxRows;
       el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
       el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
     };
@@ -48,10 +55,10 @@ export function CourseGenerationComposerCenterContent({
     return () => {
       el.removeEventListener("input", resize);
     };
-  }, [input, isVoiceMode]);
+  }, [input, isVoiceMode, maxRows]);
 
   return (
-    <motion.div layout transition={layoutTransition} className="relative min-w-0">
+    <motion.div layout transition={layoutTransition} className="relative min-h-0 min-w-0">
       <AnimatePresence initial={false} mode="wait">
         {isVoiceMode ? (
           <motion.div
@@ -73,13 +80,16 @@ export function CourseGenerationComposerCenterContent({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={layoutTransition}
-            className="relative"
+            className="relative min-h-0"
           >
             <textarea
               data-testid={inputTestId}
               ref={textareaRef}
               value={input}
+              aria-label={ariaLabel}
               onChange={(event) => onInputChange(event.target.value)}
+              onFocus={() => onFocusChange?.(true)}
+              onBlur={() => onFocusChange?.(false)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
@@ -100,16 +110,18 @@ export function CourseGenerationComposerCenterContent({
                     transition={{ duration: 0.2 }}
                     className="block w-full overflow-hidden whitespace-pre-wrap break-words text-sm leading-6 text-neutral-500"
                   >
-                    {currentPlaceholder.split("").map((char, index) => (
-                      <motion.span
-                        key={`${char}-${index}`}
-                        initial={{ opacity: 0, x: -2 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.16, delay: index * 0.018 }}
-                      >
-                        {char}
-                      </motion.span>
-                    ))}
+                    {shouldReduceMotion
+                      ? currentPlaceholder
+                      : currentPlaceholder.split("").map((char, index) => (
+                          <motion.span
+                            key={`${char}-${index}`}
+                            initial={{ opacity: 0, x: -2 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.16, delay: index * 0.018 }}
+                          >
+                            {char}
+                          </motion.span>
+                        ))}
                   </motion.span>
                 </AnimatePresence>
               </div>

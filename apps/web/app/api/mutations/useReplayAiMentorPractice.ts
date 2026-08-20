@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { getAiMentorPracticeQueryKey } from "~/api/queries/useAiMentorPractice";
 import { getAiMentorPracticeTodayQueryKey } from "~/api/queries/useAiMentorPracticeToday";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
@@ -22,7 +23,7 @@ export function useReplayAiMentorPractice(practiceId: string) {
       });
     },
     onSuccess: (practice) => {
-      queryClient.setQueryData(["aiMentorPractice", practiceId], practice);
+      queryClient.setQueryData(getAiMentorPracticeQueryKey(practiceId), practice);
       queryClient.setQueryData(getAiMentorPracticeTodayQueryKey(), practice);
     },
   });

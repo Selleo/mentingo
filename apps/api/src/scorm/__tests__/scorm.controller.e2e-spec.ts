@@ -1,5 +1,6 @@
 import { Readable } from "node:stream";
 
+import { EventBus } from "@nestjs/cqrs";
 import {
   COURSE_ENROLLMENT,
   SCORM_COMPLETION_STATUS,
@@ -12,6 +13,7 @@ import AdmZip from "adm-zip";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
+import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -326,6 +328,7 @@ describe("ScormController (e2e)", () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     s3Service.clear();
     await truncateAllTables(baseDb, db);
   });
@@ -509,6 +512,8 @@ describe("ScormController (e2e)", () => {
       await enrollStudent(student.id, imported.courseId);
 
       const studentCookies = await cookieFor(student, app);
+      const eventBus = app.get(EventBus);
+      const publishSpy = jest.spyOn(eventBus, "publish");
       const launchResponse = await request(app.getHttpServer())
         .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", studentCookies)
@@ -580,6 +585,18 @@ describe("ScormController (e2e)", () => {
         })
         .expect(201);
 
+      const repeatedFinishResponse = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/finish")
+        .set("Cookie", studentCookies)
+        .send({
+          ...commitBody,
+          values: {
+            "cmi.core.lesson_status": "completed",
+            "cmi.core.session_time": "0000:01:05.00",
+          },
+        })
+        .expect(201);
+
       expect(finishResponse.body.data).toEqual(
         expect.objectContaining({
           finished: true,
@@ -610,6 +627,10 @@ describe("ScormController (e2e)", () => {
       expect(finishedState.completionStatus).toBe("completed");
       expect(finishedState.totalTime).toBe("0000:01:05.00");
       expect(progress.completedAt).toBeTruthy();
+      expect(repeatedFinishResponse.body.data.lessonCompleted).toBe(true);
+      expect(
+        publishSpy.mock.calls.filter(([event]) => event instanceof UserCourseFinishedEvent),
+      ).toHaveLength(1);
     });
 
     it("requires every SCO to be completed without a failed success status", async () => {

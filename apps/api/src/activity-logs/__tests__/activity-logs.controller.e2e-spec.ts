@@ -1,5 +1,6 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { format } from "date-fns";
+import { count } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -22,6 +23,17 @@ describe("ActivityLogsController (e2e)", () => {
   let courseFactory: ReturnType<typeof createCourseFactory>;
 
   const password = "password123";
+
+  const waitForActivityLogCount = async (expectedCount: number) => {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const [{ totalItems }] = await db.select({ totalItems: count() }).from(activityLogs);
+      if (Number(totalItems) >= expectedCount) return;
+
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+
+    throw new Error(`Expected at least ${expectedCount} activity logs`);
+  };
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest({ enableActivityLogs: true });
@@ -74,9 +86,12 @@ describe("ActivityLogsController (e2e)", () => {
       },
     ]);
 
+    const cookie = await cookieFor(admin, app);
+    await waitForActivityLogCount(4);
+
     const response = await request(app.getHttpServer())
       .get("/api/activity-logs?page=1&perPage=2")
-      .set("Cookie", await cookieFor(admin, app))
+      .set("Cookie", cookie)
       .expect(200);
 
     expect(response.body.data).toHaveLength(2);

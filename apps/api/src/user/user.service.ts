@@ -333,9 +333,11 @@ export class UserService {
       const canViewSelf = userId === currentUser.userId;
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
       const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
-      const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
+      const targetHasPublicProfile =
+        targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN) ||
+        targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
 
-      const canView = canViewSelf || canManageUsers || targetIsAdmin;
+      const canView = canViewSelf || canManageUsers || targetHasPublicProfile;
 
       if (!canView) throw new ForbiddenException("common.toast.noAccess");
     }

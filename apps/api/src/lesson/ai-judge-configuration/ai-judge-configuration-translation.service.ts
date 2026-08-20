@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
+import { getExactLocalizedText } from "src/localization/localization.utils";
 import {
   aiJudgeBlockingErrors,
   aiJudgeConfigurations,
@@ -39,8 +40,8 @@ export class AiJudgeConfigurationTranslationService {
     ];
 
     return localizedValues.some((value) => {
-      const base = this.getLanguageValue(value, baseLanguage);
-      const translated = this.getLanguageValue(value, language);
+      const base = getExactLocalizedText(value, baseLanguage);
+      const translated = getExactLocalizedText(value, language);
 
       return Boolean(base?.length && !translated?.length);
     });
@@ -76,9 +77,9 @@ export class AiJudgeConfigurationTranslationService {
       ...criteria.flatMap((criterion) => {
         const context = {
           ...this.getContext(criterion, baseLanguage),
-          aiJudgeTaskGoal: this.getLanguageValue(criterion.taskGoal, baseLanguage),
-          aiJudgeCriterionTitle: this.getLanguageValue(criterion.title, baseLanguage),
-          aiJudgeExpectedBehavior: this.getLanguageValue(criterion.expectedBehavior, baseLanguage),
+          aiJudgeTaskGoal: getExactLocalizedText(criterion.taskGoal, baseLanguage),
+          aiJudgeCriterionTitle: getExactLocalizedText(criterion.title, baseLanguage),
+          aiJudgeExpectedBehavior: getExactLocalizedText(criterion.expectedBehavior, baseLanguage),
         };
 
         return [
@@ -111,9 +112,9 @@ export class AiJudgeConfigurationTranslationService {
       ...scoreGuidance.flatMap((guidance) => {
         const context = {
           ...this.getContext(guidance, baseLanguage),
-          aiJudgeTaskGoal: this.getLanguageValue(guidance.taskGoal, baseLanguage),
-          aiJudgeCriterionTitle: this.getLanguageValue(guidance.criterionTitle, baseLanguage),
-          aiJudgeExpectedBehavior: this.getLanguageValue(
+          aiJudgeTaskGoal: getExactLocalizedText(guidance.taskGoal, baseLanguage),
+          aiJudgeCriterionTitle: getExactLocalizedText(guidance.criterionTitle, baseLanguage),
+          aiJudgeExpectedBehavior: getExactLocalizedText(
             guidance.criterionExpectedBehavior,
             baseLanguage,
           ),
@@ -157,7 +158,7 @@ export class AiJudgeConfigurationTranslationService {
             metadata: "AI Judge blocking error",
             context: {
               ...this.getContext(blockingError, baseLanguage),
-              aiJudgeTaskGoal: this.getLanguageValue(blockingError.taskGoal, baseLanguage),
+              aiJudgeTaskGoal: getExactLocalizedText(blockingError.taskGoal, baseLanguage),
             },
           },
           language,
@@ -172,8 +173,8 @@ export class AiJudgeConfigurationTranslationService {
     language: SupportedLanguages,
     baseLanguage: SupportedLanguages,
   ): ContextualCourseTranslationType[] {
-    const base = this.getLanguageValue(input.source, baseLanguage);
-    const translated = this.getLanguageValue(input.source, language);
+    const base = getExactLocalizedText(input.source, baseLanguage);
+    const translated = getExactLocalizedText(input.source, language);
 
     if (!base?.length || translated?.length) return [];
 
@@ -200,13 +201,9 @@ export class AiJudgeConfigurationTranslationService {
     baseLanguage: SupportedLanguages,
   ): CourseTranslationContext {
     return {
-      courseTitle: this.getLanguageValue(value.courseTitle, baseLanguage),
-      lessonTitle: this.getLanguageValue(value.lessonTitle, baseLanguage),
-      lessonDescription: this.getLanguageValue(value.lessonDescription, baseLanguage),
+      courseTitle: getExactLocalizedText(value.courseTitle, baseLanguage),
+      lessonTitle: getExactLocalizedText(value.lessonTitle, baseLanguage),
+      lessonDescription: getExactLocalizedText(value.lessonDescription, baseLanguage),
     };
-  }
-
-  private getLanguageValue(value: LocalizedText | null, language: SupportedLanguages) {
-    return value?.[language];
   }
 }

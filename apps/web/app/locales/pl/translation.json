@@ -7,8 +7,19 @@
       "badge": "Edycja",
       "widgetsButton": "Widżety",
       "restore": "Przywróć domyślne",
-      "instructions": "Przeciągaj kafelki, aby zmienić ich kolejność. Możesz też zmieniać ich szerokość i widoczność.",
-      "changeWidth": "Zmień szerokość kafelka {{title}}",
+      "restoreConfirm": "Przywrócić domyślny układ widżetów? Obecny układ zostanie zastąpiony.",
+      "changeSize": "Zmień rozmiar kafelka {{title}}",
+      "sizeTitle": "Rozmiar kafelka",
+      "sizes": {
+        "1x1": "Kompaktowy",
+        "2x1": "Szeroki",
+        "1x2": "Wysoki",
+        "2x2": "Duży",
+        "3x2": "Rozszerzony",
+        "4x1": "Bardzo szeroki",
+        "4x2": "Wyróżniony",
+        "4x3": "Wyróżniony wysoki"
+      },
       "drag": "Przenieś kafelek {{title}}",
       "widgetLibrary": "Kafelki dashboardu",
       "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne na Twoim dashboardzie.",
@@ -24,14 +35,28 @@
     },
     "error": {
       "invalidWidgetLayout": "Układ dashboardu zawiera niedostępne lub zduplikowane kafelki.",
+      "invalidWidgetSize": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
       "requiredWidgetMissing": "Brakuje wymaganego kafelka dashboardu.",
       "title": "Nie udało się wczytać dashboardu",
       "description": "Spróbuj ponownie za chwilę.",
       "retry": "Spróbuj ponownie",
-      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka."
+      "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
+      "staleLayout": "Układ panelu został zmieniony w innym miejscu. Odśwież stronę i spróbuj ponownie."
+    },
+    "toast": {
+      "layoutSaved": "Zmiany w dashboardzie zostały zapisane.",
+      "layoutSaveError": "Nie udało się zapisać zmian w dashboardzie.",
+      "layoutReset": "Przywrócono domyślny układ dashboardu.",
+      "layoutResetError": "Nie udało się przywrócić domyślnego układu dashboardu."
     },
     "widgets": {
       "loadError": "Nie udało się wczytać danych tego kafelka.",
+      "dataScope": {
+        "personal": "Twoje dane",
+        "otherUsers": "Dane organizacji",
+        "personalTooltip": "Ten widget pokazuje Twoje osobiste dane dotyczące nauki.",
+        "otherUsersTooltip": "Ten widget pokazuje dane dotyczące innych użytkowników w Twojej organizacji."
+      },
       "trainingCompletionChartLabel": "Ukończono {{completed}} z {{total}} przypisań, {{percentage}} procent.",
       "deadlineRisksPage": "Strona {{page}} z {{totalPages}}",
       "placeholderDescription": "Widżet pulpitu przygotowany pod dedykowany widok danych",
@@ -87,14 +112,13 @@
         },
         "aiMentorPractice": {
           "description": "Codziennie utwórz jeden scenariusz treningowy",
+          "dailyRefreshInfo": "Możesz wygenerować jedną nową sesję praktyki AI dziennie.",
           "empty": "Opisz sytuację i przećwicz ją z Mentorem AI.",
           "emptyPrompt": "Jaką rozmowę chcesz przeprowadzić z większą pewnością?",
           "startCta": "Rozpocznij trening",
           "continueCta": "Kontynuuj trening",
           "feedbackCta": "Zobacz informację zwrotną",
-          "todayEyebrow": "Dzisiejsza próba",
           "completedEyebrow": "Próba zakończona",
-          "returnHint": "Rozmowa jest zapisana",
           "privateHint": "Prywatne miejsce na próby i poprawki",
           "status": {
             "queued": "Scenariusz czeka na przygotowanie.",
@@ -118,6 +142,19 @@
       "deadline_risks": {
         "title": "Ryzyka terminów",
         "description": "Wymagane kursy, które wymagają uwagi",
+        "sort": "Sortuj",
+        "sortMostUrgent": "Najpilniejsze najpierw",
+        "sortLeastUrgent": "Najmniej pilne najpierw",
+        "student": "Uczestnik",
+        "group": "Grupa",
+        "learners": "Uczestnicy",
+        "deadline": "Termin",
+        "status": "Status",
+        "searchStudents": "Szukaj uczestników",
+        "searchGroups": "Szukaj grup lub uczestników",
+        "allStatuses": "Wszystkie statusy",
+        "studentsEmpty": "Brak uczestników wymagających uwagi.",
+        "groupsEmpty": "Brak grup wymagających uwagi.",
         "overdue": "Po terminie",
         "dueSoon": "Zbliża się termin",
         "empty": "Brak zagrożonych terminów.",
@@ -166,8 +203,34 @@
       "ai_mentor_practice": {
         "title": "Ćwiczenia z Mentorem AI",
         "aiNotConfigured": "Mentor AI nie jest skonfigurowany dla tej organizacji."
+      },
+      "todoTasks": {
+        "title": "Lista zadań",
+        "description": "Małe zadania na dziś",
+        "empty": "Brak zadań. Dodaj pierwsze poniżej.",
+        "placeholder": "Dodaj zadanie",
+        "add": "Dodaj zadanie",
+        "toggle": "Przełącz {{title}}",
+        "edit": "Edytuj zadanie",
+        "delete": "Usuń zadanie",
+        "reorder": "Zmień kolejność zadania",
+        "toast": {
+          "createSuccess": "Dodano zadanie.",
+          "createError": "Nie udało się dodać zadania.",
+          "updateSuccess": "Zaktualizowano zadanie.",
+          "updateError": "Nie udało się zaktualizować zadania.",
+          "deleteSuccess": "Usunięto zadanie.",
+          "deleteError": "Nie udało się usunąć zadania.",
+          "reorderSuccess": "Zapisano kolejność zadań.",
+          "reorderError": "Nie udało się zapisać kolejności zadań."
+        }
       }
     }
+  },
+  "todoTasks": {
+    "limitReached": "Możesz mieć maksymalnie 100 zadań.",
+    "notFound": "To zadanie już nie istnieje.",
+    "invalidOrder": "Kolejność zadań jest nieaktualna. Odśwież stronę i spróbuj ponownie."
   },
   "aiMentorPractice": {
     "form": {
@@ -181,21 +244,17 @@
       "submit": "Utwórz trening",
       "suggestions": {
         "title": "Zacznij od przykładu",
-        "feedback": {
-          "label": "Przekaż informację zwrotną",
-          "value": "Chcę przećwiczyć przekazanie konstruktywnej informacji zwrotnej współpracownikowi, który nie dotrzymał ważnego terminu."
+        "delayedOrder": {
+          "label": "Klient żąda zwrotu pieniędzy za opóźnione zamówienie",
+          "value": "Klient żąda zwrotu pieniędzy za opóźnione zamówienie. Zamówił ekspres do kawy za 1 800 zł jako prezent urodzinowy. Dostawa miała zająć 2–3 dni, ale minęło już 6 dni i przesyłka nadal nie dotarła. Klient jest bardzo poirytowany, żąda natychmiastowego zwrotu pieniędzy i dodatkowego rabatu oraz grozi negatywną opinią. W systemie widzę, że paczka jest już u kuriera i prawdopodobnie dotrze jutro, ale nie mogę zagwarantować konkretnej godziny dostawy ani przyznać rabatu większego niż 10%. Chcę uspokoić klienta, nie obiecać za dużo i zaproponować mu sensowne rozwiązanie."
         },
-        "boundary": {
-          "label": "Postaw granicę",
-          "value": "Chcę przećwiczyć wyznaczenie jasnej granicy, gdy współpracownik prosi mnie o pilne zadanie poza ustalonymi priorytetami."
+        "orderMistake": {
+          "label": "Popełniłem błąd w zamówieniu klienta",
+          "value": "Popełniłem błąd w zamówieniu klienta: wpisałem 120 opakowań filtrów do klimatyzacji zamiast 20. Magazyn zdążył już skompletować zamówienie, zapakować je na palety i przygotować do odbioru przez kuriera. Jeśli przesyłka wyjedzie, klient dostanie o 100 opakowań za dużo i będziemy musieli organizować ich zwrot. Nie wiem, czy najpierw zatrzymać wysyłkę, skontaktować się z magazynem, zgłosić sprawę przełożonemu czy poinformować klienta."
         },
-        "explanation": {
-          "label": "Wyjaśnij decyzję",
-          "value": "Chcę przećwiczyć wyjaśnienie trudnej decyzji osobie, która się z nią nie zgadza."
-        },
-        "request": {
-          "label": "Przedstaw prośbę",
-          "value": "Chcę przećwiczyć poproszenie przełożonego o wsparcie przy zbyt dużym obciążeniu pracą."
+        "sensitiveData": {
+          "label": "Klient prosi mnie o dane, których nie powinienem udostępnić",
+          "value": "Klient z firmy, która regularnie składa u nas zamówienia, podał nazwę firmy i numer zamówienia, a następnie poprosił o adres dostawy i numer telefonu osoby składającej zamówienie. Nie jest wskazany jako kontakt przy zamówieniu i nie mogę potwierdzić, czy rzeczywiście pracuje w tej firmie. Naciska, twierdząc, że jesteśmy z jednej firmy i potrzebuje tych informacji od razu. Chcę pomóc klientowi bez naruszenia zasad ochrony danych."
         }
       },
       "steps": {
@@ -224,7 +283,7 @@
       "summaryTitle": "Co warto wykorzystać dalej",
       "summaryDescription": "Wykorzystaj te obserwacje, aby wzmocnić kolejną próbę.",
       "scoreLabel": "Wynik ćwiczenia",
-      "criteriaTitle": "Co zauważył Sędzia AI",
+      "criteriaTitle": "Ocena zadania",
       "criterionFallback": "Kryterium {{number}}",
       "importantFeedbackTitle": "Ważna informacja zwrotna"
     },
@@ -305,8 +364,10 @@
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak.",
       "threadMustBeActive": "Wątek musi być aktywny.",
+      "aiMentorConfigurationIncomplete": "Konfiguracja Mentora AI jest niekompletna.",
       "aiJudgeConfigurationMissing": "Brakuje konfiguracji warunków zaliczenia.",
-      "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
+      "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
     },
     "loader": {
       "textSequence": {
@@ -2017,6 +2078,7 @@
         "settings_read_self": "Może przeglądać własne ustawienia profilu i preferencji.",
         "settings_update_self": "Może aktualizować własne ustawienia profilu i preferencji.",
         "dashboard_read": "Może wyświetlać swój dashboard.",
+        "todo_task_manage_self": "Może tworzyć i zarządzać własnymi zadaniami.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",
@@ -2855,6 +2917,235 @@
           "customTTSReference": "Wpisz niestandardowy identyfikator TTS...",
           "passThreshold": "np. 70%"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Zachowanie Mentora AI",
+          "emptyDescription": "Wybierz, jak AI ma prowadzić uczestnika lub z nim współpracować.",
+          "baseLanguageRequired": "Najpierw skonfiguruj zachowanie Mentora AI w języku bazowym kursu.",
+          "incompleteDescription": "Ta konfiguracja wymaga uzupełnienia kilku informacji.",
+          "configureManually": "Skonfiguruj ręcznie",
+          "reviewConfiguration": "Sprawdź konfigurację",
+          "dialogTitle": "Konfiguracja Mentora AI",
+          "dialogDescription": "Wybierz tryb i określ zachowanie, którego doświadczy uczestnik.",
+          "optional": "(opcjonalne)",
+          "fineTuneBehavior": "Dostosuj zachowanie (opcjonalne)",
+          "translationModeTitle": "Tryb tłumaczenia",
+          "translationModeDescription": "Przetłumacz tutaj pola tekstowe. Tryb, styl nauczania i poziom trudności są zarządzane w języku bazowym.",
+          "structureLockedTooltip": "Strukturę Mentora AI można zmienić tylko w języku bazowym kursu.",
+          "applyConfiguration": "Zastosuj konfigurację",
+          "saveConfiguration": "Zapisz konfigurację",
+          "saveTranslation": "Zapisz tłumaczenie",
+          "configurationSaved": "Konfiguracja Mentora AI została zapisana.",
+          "translationSaved": "Tłumaczenie Mentora AI zostało zapisane.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Tryb Mentora",
+            "teacher": {
+              "label": "Nauczyciel",
+              "description": "Wyjaśnia zagadnienia i prowadzi ćwiczenia."
+            },
+            "roleplay": {
+              "label": "Odgrywanie roli",
+              "description": "Odgrywa uczestnika scenariusza ćwiczeniowego."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Zacznij od scenariusza",
+            "scenarioSimulation": {
+              "taskDescription": "Przećwicz rozpoznawanie potrzeb klienta oprogramowania i zaproponowanie oferty zgodnej z jego ograniczeniami.",
+              "aiRole": "Potencjalny klient usług programistycznych",
+              "learnerRole": "Przedstawiciel handlowy",
+              "characterGoal": "Wybrać dostawcę, który spełni wymagania dotyczące terminu, budżetu i komunikacji.",
+              "factsAndConstraints": "Aplikacja musi być gotowa w ciągu trzech miesięcy. Budżet jest ograniczony, a jasna i regularna komunikacja jest wymagana.",
+              "openingInstruction": "Przedstaw się jako klient oceniający dostawców oprogramowania i zapytaj, jak uczestnik może Ci pomóc."
+            },
+            "problemSolving": {
+              "taskDescription": "Przećwicz konstruktywne prowadzenie rozmowy z pracownikiem proszącym o podwyżkę.",
+              "aiRole": "Pracownik proszący o podwyżkę",
+              "learnerRole": "Menedżer",
+              "characterGoal": "Zostać wysłuchanym i uzgodnić wiarygodną alternatywę lub dalszy plan.",
+              "factsAndConstraints": "Pracownik wniósł ostatnio istotny wkład, ale firma obecnie nie ma budżetu na podwyżki.",
+              "openingInstruction": "Rozpocznij od przedstawienia swoich ostatnich osiągnięć i poproś o rozmowę na temat podwyżki."
+            },
+            "creativeTask": {
+              "taskDescription": "Opracuj i dopracuj oryginalny pomysł na nową usługę dla klientów.",
+              "taskGoal": "Pomóż uczestnikowi opracować i dopracować oryginalny pomysł na usługę.",
+              "expertise": "Trener innowacji usługowych",
+              "feedbackGuidance": "Wspieraj oryginalność i praktyczną wartość. Zadawaj konkretne pytania uzupełniające i wskazuj ważne luki, nie przejmując pomysłu.",
+              "openingInstruction": "Poproś uczestnika o przedstawienie wstępnego pomysłu na usługę i wskazanie, komu miałaby pomóc."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Poznaj praktyczne techniki zarządzania czasem i zaplanuj zastosowanie jednej z nich w pracy.",
+              "taskGoal": "Pomóż uczestnikowi zrozumieć i zastosować praktyczne techniki zarządzania czasem.",
+              "expertise": "Trener zarządzania czasem",
+              "feedbackGuidance": "Delikatnie koryguj nieporozumienia i łącz informację zwrotną z konkretnym, realistycznym zastosowaniem w pracy.",
+              "openingInstruction": "Przedstaw jedną praktyczną technikę zarządzania czasem, a następnie zapytaj, jak uczestnik obecnie organizuje swoją pracę."
+            }
+          },
+          "taskGoal": {
+            "label": "Cel zadania",
+            "placeholder": "Co Nauczyciel ma pomóc zrozumieć lub przećwiczyć?"
+          },
+          "expertise": {
+            "label": "Specjalizacja",
+            "placeholder": "Na przykład: trener zgodności z RODO"
+          },
+          "contentScope": {
+            "label": "Zakres treści",
+            "placeholder": "Co Nauczyciel może omawiać, a czego powinien unikać?"
+          },
+          "teachingStyle": {
+            "label": "Styl nauczania",
+            "explain_and_practice": {
+              "label": "Wyjaśnij i przećwicz",
+              "description": "Jasno wyjaśniaj, a następnie utrwalaj wiedzę ćwiczeniami."
+            },
+            "guided_discovery": {
+              "label": "Odkrywanie z przewodnikiem",
+              "description": "Prowadź uczestnika krok po kroku do wniosków."
+            },
+            "socratic": {
+              "label": "Sokratejski",
+              "description": "Pogłębiaj rozumowanie za pomocą trafnych pytań."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Wskazówki dotyczące informacji zwrotnej",
+            "placeholder": "Jak Nauczyciel ma korygować lub wzmacniać odpowiedzi?"
+          },
+          "scenario": {
+            "label": "Scenariusz",
+            "placeholder": "Opisz sytuację, którą uczestnik będzie ćwiczyć."
+          },
+          "aiRole": { "label": "Rola AI", "placeholder": "Na przykład: niezdecydowany klient" },
+          "learnerRole": {
+            "label": "Rola uczestnika",
+            "placeholder": "Na przykład: przedstawiciel handlowy"
+          },
+          "characterGoal": {
+            "label": "Cel postaci AI",
+            "placeholder": "Co postać AI próbuje osiągnąć?"
+          },
+          "difficulty": {
+            "label": "Poziom trudności",
+            "cooperative": {
+              "label": "Współpracujący",
+              "description": "Pomocny i skłonny posuwać rozmowę naprzód."
+            },
+            "realistic": {
+              "label": "Realistyczny",
+              "description": "Naturalny opór i wiarygodne reakcje."
+            },
+            "challenging": {
+              "label": "Wymagający",
+              "description": "Stanowczy opór wymagający dobrej odpowiedzi."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakty i ograniczenia",
+            "placeholder": "Dodaj budżety, terminy, zasady lub fakty, które muszą pozostać prawdziwe."
+          },
+          "openingInstruction": {
+            "label": "Instrukcja otwarcia",
+            "placeholder": "Jak ma rozpocząć się jednorazowa wiadomość powitalna?"
+          },
+          "additionalInstructions": {
+            "label": "Dodatkowe instrukcje",
+            "placeholder": "Dodaj nietypowe zachowanie, którego nie opisują pola powyżej."
+          },
+          "typeChange": {
+            "title": "Zmienić tryb Mentora?",
+            "description": "Zmiana na {{type}} wyczyści pola właściwe dla obecnego trybu. Instrukcje otwarcia i dodatkowe zostaną zachowane."
+          },
+          "validation": {
+            "required": "To pole jest wymagane.",
+            "configurationRequired": "Skonfiguruj zachowanie Mentora AI przed zapisaniem lekcji."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Tryb mentora",
+          "createWithAi": "Utwórz z AI",
+          "improveWithAi": "Ulepsz z AI",
+          "checkQualityWithAi": "Sprawdź jakość z AI",
+          "aiAssistance": "Pomoc AI",
+          "create": {
+            "title": "Przygotuj scenariusz AI Mentora z AI",
+            "description": "Wybierz tryb Mentora, a następnie opisz sytuację, uczestników i cel rozmowy.",
+            "fieldLabel": "Jaki scenariusz ma przygotować AI?",
+            "fieldDescription": "AI przygotuje kompletną wersję roboczą scenariusza w wybranym trybie. Przejrzysz ją przed zastosowaniem.",
+            "placeholder": "Opisz sytuację, uczestników i cel rozmowy…",
+            "submit": "Wygeneruj wersję roboczą"
+          },
+          "improve": {
+            "title": "Ulepsz scenariusz AI Mentora z AI",
+            "description": "AI używa bieżącej, niezapisanej konfiguracji i jej trybu.",
+            "fieldLabel": "Co ma zmienić AI w scenariuszu?",
+            "fieldDescription": "Opisz, co ma być bardziej realistyczne, spójne lub konkretne. Wybrany tryb pozostanie bez zmian.",
+            "placeholder": "Np. uczyń scenariusz bardziej realistycznym i dodaj wyraźniejsze ograniczenia…",
+            "submit": "Ulepsz wersję roboczą"
+          },
+          "progressTitle": "Przygotowywanie wersji roboczej",
+          "progressDescription": "AI generuje i sprawdza konfigurację.",
+          "readyTitle": "Wersja robocza gotowa do przeglądu",
+          "revisionTitle": "Wersja robocza wymaga decyzji",
+          "failedTitle": "Nie udało się wygenerować wersji roboczej",
+          "cancel": "Anuluj generowanie",
+          "revise": "Popraw wersję roboczą",
+          "review": "Przejrzyj konfigurację",
+          "progressLabel": "Postęp generowania konfiguracji AI Mentora",
+          "stages": {
+            "draft": "Generowanie wersji roboczej",
+            "qualityCheck": "Kontrola jakości",
+            "ready": "Gotowe"
+          },
+          "status": {
+            "drafting": "Generowanie konfiguracji",
+            "evaluating": "Sprawdzanie jakości konfiguracji",
+            "revising": "Ulepszanie wersji roboczej",
+            "awaiting_revision": "Kontrola jakości wymaga decyzji",
+            "completed": "Konfiguracja jest gotowa",
+            "requires_review": "Wersja robocza wymaga decyzji",
+            "failed": "Nie udało się ukończyć generowania",
+            "cancelled": "Generowanie anulowane"
+          },
+          "statusDescription": {
+            "drafting": "Przygotowywanie zachowania Mentora dla wybranego trybu.",
+            "evaluating": "Sprawdzanie, czy zachowanie jest jasne, kompletne i spójne.",
+            "revising": "Wprowadzanie poprawek z ostatniej kontroli jakości.",
+            "awaiting_revision": "Przejrzyj uwagi przed rozpoczęciem kolejnej próby.",
+            "completed": "Wersja robocza przeszła kontrolę jakości.",
+            "requires_review": "Zachowano najnowszą wersję roboczą, aby umożliwić podjęcie decyzji.",
+            "failed": "Spróbuj ponownie lub skonfiguruj zachowanie Mentora ręcznie.",
+            "cancelled": "Nie zastosowano żadnych zmian konfiguracji."
+          },
+          "attempt": "Wersja robocza {{attempt}} z {{maxAttempts}}",
+          "currentDraft": "Bieżąca wersja robocza",
+          "qualityCheckLabel": "Kontrola jakości",
+          "qualityDecisionTitle": "Sugerowane ulepszenia: {{count}}",
+          "qualityDecisionDescription": "Przejrzyj sugestie lub kontynuuj z tą konfiguracją.",
+          "suggestedImprovements": "Sugerowane ulepszenia",
+          "applyImprovements": "Popraw",
+          "useCurrentDraft": "Kontynuuj",
+          "reviewExactChanges": "Zmiany wprowadzone przez AI ({{count}})",
+          "reviewConfiguration": "Przejrzyj konfigurację",
+          "showMoreFindings": "Pokaż więcej uwag: {{count}}",
+          "showFewerFindings": "Pokaż mniej uwag",
+          "review": {
+            "currentDraftTitle": "Przejrzyj bieżącą wersję roboczą",
+            "currentDraftDescription": "Wersja robocza nadal ma sugestie jakościowe. Przejrzyj ją przed zastosowaniem.",
+            "requiresReviewTitle": "Przejrzyj wygenerowaną konfigurację",
+            "requiresReviewDescription": "AI zachowało najnowszą wersję roboczą, aby umożliwić podjęcie ostatecznej decyzji."
+          },
+          "quality": {
+            "title": "Sprawdź jakość z AI",
+            "resultTitle": "Kontrola jakości",
+            "description": "AI sprawdza bieżącą niezapisaną konfigurację bez jej zmiany.",
+            "checking": "Sprawdzanie bieżącej konfiguracji…",
+            "checkingDescription": "Sprawdzanie trybu, wskazówek, ograniczeń i zachowania w rozmowie.",
+            "hasFindings": "Przejrzyj uwagi lub pozwól AI ulepszyć konfigurację na ich podstawie.",
+            "passed": "Nie są wymagane zmiany. Możesz kontynuować edycję lub zapisać konfigurację.",
+            "improve": "Ulepsz z AI"
+          }
+        },
         "aiJudge": {
           "cardTitle": "Warunki zaliczenia",
           "configured": "Skonfigurowany",
@@ -2864,6 +3155,7 @@
           "summary": "{{criteria}} kryteria · łącznie {{score}} pkt · próg {{threshold}}% · {{blockingErrors}} błędy blokujące",
           "configureWithAi": "Skonfiguruj z AI",
           "createWithAi": "Utwórz z AI",
+          "aiMentorConfigurationRequiredTooltip": "Skonfiguruj zachowanie AI Mentora przed utworzeniem warunków ukończenia z pomocą AI.",
           "improveWithAi": "Ulepsz z AI",
           "checkQualityWithAi": "Sprawdź jakość z AI",
           "checkingQuality": "Sprawdzanie jakości...",
@@ -3968,6 +4260,9 @@
       "settings": "Ustawienia"
     },
     "toast": {
+      "error": {
+        "userSettingsNotFound": "Nie znaleziono ustawień użytkownika"
+      },
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",

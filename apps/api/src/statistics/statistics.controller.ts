@@ -1,5 +1,15 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
+import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import {
+  DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS,
+  DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS,
+  DASHBOARD_DEADLINE_RISK_TYPES,
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+  PERMISSIONS,
+  SupportedLanguages,
+  DashboardDeadlineRiskGroupSortField,
+  DashboardDeadlineRiskSortDirection,
+  DashboardDeadlineRiskUrgencyOrder,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -18,9 +28,12 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import {
   DashboardDeadlineRiskCourseSchema,
+  DashboardDeadlineRiskCourseSummarySchema,
+  DashboardDeadlineRiskGroupSchema,
   DashboardDeadlineRiskSummarySchema,
   DashboardDeadlineRiskType,
   DashboardDeadlineRiskTypeSchema,
+  DashboardDeadlineRiskUrgencyOrderSchema,
   DashboardIncompleteCoursesSchema,
   DashboardTrainingCompletionSchema,
   UserStatsSchema,
@@ -30,12 +43,15 @@ import { StatisticsService } from "./statistics.service";
 
 import type {
   DashboardDeadlineRiskCourse,
+  DashboardDeadlineRiskCourseSummary,
+  DashboardDeadlineRiskGroup,
   DashboardDeadlineRiskSummary,
   DashboardIncompleteCourses,
   DashboardTrainingCompletion,
   UserStats,
   Stats,
 } from "./schemas/userStats.schema";
+import type { DashboardDeadlineRiskType as SharedDashboardDeadlineRiskType } from "@repo/shared";
 
 @UseGuards(PermissionsGuard)
 @Controller("statistics")
@@ -136,6 +152,103 @@ export class StatisticsController {
         currentUser,
         language,
         riskType,
+        page,
+        perPage,
+      ),
+    );
+  }
+
+  @Get("dashboard/deadline-risks/courses")
+  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @Validate({
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      {
+        type: "query",
+        name: "urgencyOrder",
+        schema: Type.Optional(DashboardDeadlineRiskUrgencyOrderSchema),
+      },
+      { type: "query", name: "page", schema: Type.Optional(Type.Integer({ minimum: 1 })) },
+      {
+        type: "query",
+        name: "perPage",
+        schema: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
+      },
+    ],
+    response: paginatedResponse(Type.Array(DashboardDeadlineRiskCourseSummarySchema)),
+  })
+  async getDashboardDeadlineRiskCourseSummaries(
+    @Query("language") language: SupportedLanguages,
+    @Query("urgencyOrder")
+    urgencyOrder: DashboardDeadlineRiskUrgencyOrder = DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
+    @Query("page") page = 1,
+    @Query("perPage") perPage = 20,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<DashboardDeadlineRiskCourseSummary[]>> {
+    return new PaginatedResponse(
+      await this.statisticsService.getDashboardDeadlineRiskCourseSummaries(
+        currentUser,
+        language,
+        urgencyOrder,
+        page,
+        perPage,
+      ),
+    );
+  }
+
+  @Get("dashboard/deadline-risks/courses/:courseId/groups")
+  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: Type.String({ format: "uuid" }) },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      {
+        type: "query",
+        name: "urgency",
+        schema: Type.Optional(Type.Enum(DASHBOARD_DEADLINE_RISK_TYPES)),
+      },
+      { type: "query", name: "search", schema: Type.Optional(Type.String({ maxLength: 200 })) },
+      {
+        type: "query",
+        name: "sortBy",
+        schema: Type.Optional(Type.Enum(DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS)),
+      },
+      {
+        type: "query",
+        name: "sortDirection",
+        schema: Type.Optional(Type.Enum(DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS)),
+      },
+      { type: "query", name: "page", schema: Type.Optional(Type.Integer({ minimum: 1 })) },
+      {
+        type: "query",
+        name: "perPage",
+        schema: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
+      },
+    ],
+    response: paginatedResponse(Type.Array(DashboardDeadlineRiskGroupSchema)),
+  })
+  async getDashboardDeadlineRiskGroups(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @Query("urgency") urgency: SharedDashboardDeadlineRiskType | undefined,
+    @Query("search") search: string | undefined,
+    @Query("sortBy")
+    sortBy: DashboardDeadlineRiskGroupSortField = DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE,
+    @Query("sortDirection")
+    sortDirection: DashboardDeadlineRiskSortDirection = DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
+    @Query("page") page = 1,
+    @Query("perPage") perPage = 20,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<DashboardDeadlineRiskGroup[]>> {
+    return new PaginatedResponse(
+      await this.statisticsService.getDashboardDeadlineRiskGroups(
+        currentUser,
+        courseId,
+        language,
+        urgency,
+        search,
+        sortBy,
+        sortDirection,
         page,
         perPage,
       ),

@@ -1,3 +1,47 @@
+<a name="v4.17.1"></a>
+
+## [v4.17.1] - 18.08.2026
+
+### Bug Fixes:
+
+- prevent dashboard redirect loops after session refresh ([#1902](https://github.com/Selleo/mentingo/issues/1902))
+
+<a name="v4.17.0"></a>
+
+## [v4.17.0] - 18.08.2026
+
+### Features:
+
+- speed up AI Mentor lesson creation and deliver more realistic learner practice ([#1818](https://github.com/Selleo/mentingo/issues/1818))
+
+- tailor dashboard widgets for learners, administrators, and content creators ([#1893](https://github.com/Selleo/mentingo/issues/1893))
+
+- allow content creators to make their resources private ([#1879](https://github.com/Selleo/mentingo/issues/1879))
+
+- introduce a customizable dashboard with role-based widgets and layouts saving ([#1797](https://github.com/Selleo/mentingo/issues/1797))
+
+### Bug Fixes:
+
+- ensure AI translations use the correct lesson title instead of the lesson description ([#1885](https://github.com/Selleo/mentingo/issues/1885))
+
+- avoid app rendering errors during auth transitions ([#1880](https://github.com/Selleo/mentingo/issues/1880))
+
+- display correct translations for localized categories and groups ([#1738](https://github.com/Selleo/mentingo/issues/1738))
+
+- prevent occasional app loading issues and flickering when updating courses ([#1873](https://github.com/Selleo/mentingo/issues/1873))
+
+### Chores:
+
+- show additional activity details in the activity logs table ([#1882](https://github.com/Selleo/mentingo/issues/1882))
+
+- take students directly to the first lesson after enrolling in a course ([#1881](https://github.com/Selleo/mentingo/issues/1881))
+
+- improve design for changing course list layout ([#1420](https://github.com/Selleo/mentingo/issues/1420)) ([#1735](https://github.com/Selleo/mentingo/issues/1735))
+
+### Documentation:
+
+- update changelog for version v4.17.0
+
 <a name="v4.16.0"></a>
 
 ## [v4.16.0] - 11.08.2026
@@ -75,6 +119,10 @@
 ### Code Refactoring:
 
 - improve entity type validation with reusable guards ([#1748](https://github.com/Selleo/mentingo/issues/1748))
+
+### Documentation:
+
+- update changelog for version v4.16.0
 
 <a name="v4.15.0"></a>
 
@@ -1752,27 +1800,11 @@
 
 - implement admin notifications about finished course ([#630](https://github.com/Selleo/mentingo/issues/630))
 
-### Bug Fixes:
-
-- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
-
-### Documentation:
-
-- update changelog for version v3.4.0
-
-<a name="v3.3.0"></a>
-
-## [v3.3.0] - 16.09.2025
-
-### Features:
-
 - generate certificates ([#538](https://github.com/Selleo/mentingo/issues/538))
 
 ### Bug Fixes:
 
-- failing api tests and api e2e tests
-
-- mfa after sso login
+- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
 
 - add fetch depth of 0 to deploy ([#645](https://github.com/Selleo/mentingo/issues/645))
 
@@ -1780,7 +1812,7 @@
 
 ### Documentation:
 
-- update changelog for version v3.3.0
+- update changelog for version v3.4.0
 
 - update changelog for version learn-v2025.09.12
 
@@ -3144,7 +3176,9 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.16.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.17.1...HEAD
+[v4.17.1]: https://github.com/Selleo/mentingo/compare/v4.17.0...v4.17.1
+[v4.17.0]: https://github.com/Selleo/mentingo/compare/v4.16.0...v4.17.0
 [v4.16.0]: https://github.com/Selleo/mentingo/compare/v4.15.0...v4.16.0
 [v4.15.0]: https://github.com/Selleo/mentingo/compare/v4.14.1...v4.15.0
 [v4.14.1]: https://github.com/Selleo/mentingo/compare/v4.14.0...v4.14.1
@@ -3192,8 +3226,7 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
-[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
-[v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
+[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.4.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0

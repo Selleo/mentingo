@@ -1,110 +1,102 @@
-import { DASHBOARD_WIDGET_IDS } from "@repo/shared";
+import { DASHBOARD_WIDGET_TYPES, type DashboardWidgetType } from "@repo/shared";
 import {
   Award,
   BookOpen,
-  BrainCircuit,
   CalendarDays,
   CircleAlert,
   ClipboardCheck,
   GraduationCap,
-  ListChecks,
+  ListTodo,
   TrendingUp,
 } from "lucide-react";
 
+import { AiMentor } from "~/assets/svgs/lesson-types";
+
+import { DASHBOARD_WIDGET_DATA_SCOPES, type DashboardWidgetModule } from "./types";
 import { WidgetAdminDeadlineRisks } from "./widgets/admin-deadline-risks";
-import { WidgetAdminEventCalendar } from "./widgets/admin-event-calendar";
-import { WidgetAdminIncompleteCourses } from "./widgets/admin-incomplete-courses";
 import { WidgetAdminTrainingCompletion } from "./widgets/admin-training-completion";
+import { WidgetEventCalendar } from "./widgets/event-calendar";
 import { WidgetStudentAiMentorPractice } from "./widgets/student-ai-mentor-practice";
 import { WidgetStudentCertificates } from "./widgets/student-certificates";
 import { WidgetStudentContinueLearning } from "./widgets/student-continue-learning";
 import { WidgetStudentCourseCompletion } from "./widgets/student-course-completion";
 import { WidgetStudentRequiredCourse } from "./widgets/student-required-course";
+import { WidgetTodoTasks } from "./widgets/todo-tasks";
 
-import type { DashboardWidgetModule } from "./types";
-import type { DashboardWidgetId } from "@repo/shared";
+export const TODO_TASKS_WIDGET_ID = DASHBOARD_WIDGET_TYPES.TODO_LIST;
 
-export type DashboardWidgetRegistry = Record<DashboardWidgetId, DashboardWidgetModule>;
+export type DashboardWidgetRegistry = Record<DashboardWidgetType, DashboardWidgetModule>;
 
 export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetRegistry = {
-  [DASHBOARD_WIDGET_IDS.ADMIN_TRAINING_COMPLETION]: {
+  [DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION]: {
     titleKey: "dashboardHome.widgets.training_completion.title",
     descriptionKey: "dashboardHome.widgets.training_completion.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.OTHER_USERS,
     icon: TrendingUp,
-    iconClassName: "text-green-700",
-    iconContainerClassName: "bg-green-50",
+    iconClassName: "text-primary-700",
     component: WidgetAdminTrainingCompletion,
   },
-  [DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS]: {
+  [DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS]: {
     titleKey: "dashboardHome.widgets.deadline_risks.title",
     descriptionKey: "dashboardHome.widgets.deadline_risks.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.OTHER_USERS,
     icon: CircleAlert,
-    iconClassName: "text-yellow-700",
-    iconContainerClassName: "bg-yellow-50",
+    iconClassName: "text-primary-700",
     component: WidgetAdminDeadlineRisks,
   },
-  [DASHBOARD_WIDGET_IDS.ADMIN_INCOMPLETE_COURSES]: {
-    titleKey: "dashboardHome.widgets.incomplete_courses.title",
-    descriptionKey: "dashboardHome.widgets.incomplete_courses.description",
-    icon: ListChecks,
-    iconClassName: "text-purple-700",
-    iconContainerClassName: "bg-purple-50",
-    component: WidgetAdminIncompleteCourses,
-  },
-  [DASHBOARD_WIDGET_IDS.ADMIN_EVENT_CALENDAR]: {
+  [DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR]: {
     titleKey: "dashboardHome.widgets.event_calendar.title",
     descriptionKey: "dashboardHome.widgets.event_calendar.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
     icon: CalendarDays,
-    iconClassName: "text-blue-700",
-    iconContainerClassName: "bg-blue-50",
-    component: WidgetAdminEventCalendar,
+    iconClassName: "text-primary-700",
+    component: WidgetEventCalendar,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_EVENT_CALENDAR]: {
-    titleKey: "dashboardHome.widgets.event_calendar.title",
-    descriptionKey: "dashboardHome.widgets.event_calendar.description",
-    icon: CalendarDays,
-    iconClassName: "text-blue-700",
-    iconContainerClassName: "bg-blue-50",
-    component: WidgetAdminEventCalendar,
-  },
-  [DASHBOARD_WIDGET_IDS.STUDENT_CONTINUE_LEARNING]: {
+  [DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING]: {
     titleKey: "dashboardHome.widgets.continue_learning.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.continueLearning.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
     icon: BookOpen,
-    iconClassName: "text-blue-700",
-    iconContainerClassName: "bg-blue-50",
+    iconClassName: "text-primary-700",
     component: WidgetStudentContinueLearning,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_REQUIRED_COURSE]: {
+  [DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES]: {
     titleKey: "dashboardHome.widgets.required_course.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.requiredCourse.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
     icon: GraduationCap,
-    iconClassName: "text-yellow-700",
-    iconContainerClassName: "bg-yellow-50",
+    iconClassName: "text-primary-700",
     component: WidgetStudentRequiredCourse,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_COURSE_COMPLETION]: {
+  [DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION]: {
     titleKey: "dashboardHome.widgets.course_completion.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.courseCompletion.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
     icon: ClipboardCheck,
-    iconClassName: "text-green-700",
-    iconContainerClassName: "bg-green-50",
+    iconClassName: "text-primary-700",
     component: WidgetStudentCourseCompletion,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_CERTIFICATES]: {
+  [DASHBOARD_WIDGET_TYPES.CERTIFICATES]: {
     titleKey: "dashboardHome.widgets.certificates.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.certificates.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
     icon: Award,
-    iconClassName: "text-purple-700",
-    iconContainerClassName: "bg-purple-50",
+    iconClassName: "text-primary-700",
     component: WidgetStudentCertificates,
   },
-  [DASHBOARD_WIDGET_IDS.STUDENT_AI_MENTOR_PRACTICE]: {
+  [DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE]: {
     titleKey: "dashboardHome.widgets.ai_mentor_practice.title",
     descriptionKey: "dashboardHome.widgets.studentTiles.aiMentorPractice.description",
-    icon: BrainCircuit,
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
+    icon: AiMentor,
     iconClassName: "text-primary-700",
-    iconContainerClassName: "bg-primary-50",
     component: WidgetStudentAiMentorPractice,
+  },
+  [TODO_TASKS_WIDGET_ID]: {
+    titleKey: "dashboardHome.widgets.todoTasks.title",
+    descriptionKey: "dashboardHome.widgets.todoTasks.description",
+    dataScope: DASHBOARD_WIDGET_DATA_SCOPES.PERSONAL,
+    icon: ListTodo,
+    component: WidgetTodoTasks,
   },
 };

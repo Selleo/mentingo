@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { ConfigService } from "@nestjs/config";
 import {
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TYPE,
   SYSTEM_ROLE_PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
@@ -21,7 +23,9 @@ import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiJudgeScoreGuidance,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
   articles,
   categories,
   chapters,
@@ -220,23 +224,44 @@ export async function createNiceCourses(
           .returning();
         if (
           lessonData.type === LESSON_TYPES.AI_MENTOR &&
-          lessonData.aiMentorInstructions &&
+          lessonData.additionalInstructions &&
           lessonData.aiJudgeConfiguration
         ) {
           const [aiMentorLesson] = await db
             .insert(aiMentorLessons)
             .values({
               lessonId: lesson.id,
-              aiMentorInstructions: buildJsonbField("en", lessonData.aiMentorInstructions),
               tenantId,
             })
             .returning();
+
+          const [aiMentorConfiguration] = await db
+            .insert(aiMentorConfigurations)
+            .values({
+              aiMentorLessonId: aiMentorLesson.id,
+              type: AI_MENTOR_TYPE.ROLEPLAY,
+              additionalInstructions: buildJsonbField(
+                SUPPORTED_LANGUAGES.EN,
+                lessonData.additionalInstructions,
+              ),
+              tenantId,
+            })
+            .returning();
+
+          await db.insert(aiMentorRoleplayConfigurations).values({
+            configurationId: aiMentorConfiguration.id,
+            difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+            tenantId,
+          });
 
           const [configuration] = await db
             .insert(aiJudgeConfigurations)
             .values({
               aiMentorLessonId: aiMentorLesson.id,
-              taskGoal: buildJsonbField("en", lessonData.aiJudgeConfiguration.taskGoal),
+              taskGoal: buildJsonbField(
+                SUPPORTED_LANGUAGES.EN,
+                lessonData.aiJudgeConfiguration.taskGoal,
+              ),
               passingThresholdPercent: lessonData.aiJudgeConfiguration.passingThresholdPercent,
               tenantId,
             })
@@ -247,8 +272,11 @@ export async function createNiceCourses(
               .insert(aiJudgeCriteria)
               .values({
                 configurationId: configuration.id,
-                title: buildJsonbField("en", criterionData.title),
-                expectedBehavior: buildJsonbField("en", criterionData.expectedBehavior),
+                title: buildJsonbField(SUPPORTED_LANGUAGES.EN, criterionData.title),
+                expectedBehavior: buildJsonbField(
+                  SUPPORTED_LANGUAGES.EN,
+                  criterionData.expectedBehavior,
+                ),
                 maxScore: criterionData.maxScore,
                 tenantId,
               })
@@ -258,8 +286,10 @@ export async function createNiceCourses(
               criterionData.scoreGuidance.map((guidance) => ({
                 criterionId: criterion.id,
                 score: guidance.score,
-                description: buildJsonbField("en", guidance.description),
-                example: guidance.example ? buildJsonbField("en", guidance.example) : undefined,
+                description: buildJsonbField(SUPPORTED_LANGUAGES.EN, guidance.description),
+                example: guidance.example
+                  ? buildJsonbField(SUPPORTED_LANGUAGES.EN, guidance.example)
+                  : undefined,
                 tenantId,
               })),
             );
@@ -269,7 +299,7 @@ export async function createNiceCourses(
             await db.insert(aiJudgeBlockingErrors).values(
               lessonData.aiJudgeConfiguration.blockingErrors.map((blockingError) => ({
                 configurationId: configuration.id,
-                description: buildJsonbField("en", blockingError.description),
+                description: buildJsonbField(SUPPORTED_LANGUAGES.EN, blockingError.description),
                 tenantId,
               })),
             );

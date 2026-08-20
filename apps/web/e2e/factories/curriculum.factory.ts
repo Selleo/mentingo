@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TYPE } from "@repo/shared";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
 
@@ -177,10 +177,16 @@ export class CurriculumFactory {
     const response = await this.apiClient.api.lessonControllerBetaCreateAiMentorLesson({
       title,
       chapterId: input.chapterId,
-      type: input.type ?? DEFAULT_AI_MENTOR_TYPE,
       name: input.name ?? "Mentor",
       description: input.description ?? "AI mentor lesson",
-      aiMentorInstructions: input.aiMentorInstructions ?? "<p>Help the learner.</p>",
+      aiMentorConfiguration: input.aiMentorConfiguration ?? {
+        type: AI_MENTOR_TYPE.ROLEPLAY,
+        scenario: "Practice a realistic workplace conversation.",
+        aiRole: "Customer",
+        learnerRole: "Employee",
+        characterGoal: "Reach a clear and realistic outcome.",
+        difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      },
       aiJudgeConfiguration: input.aiJudgeConfiguration ?? {
         taskGoal: "Complete the AI Mentor exercise",
         passingThresholdPercent: 0,

@@ -1,4 +1,4 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
@@ -15,9 +15,8 @@ export const getAiMentorLessonFormDefaultValues = (
 ): DefaultValues<AiMentorLessonFormValues> => ({
   title: lessonToEdit?.title || "",
   description: lessonToEdit?.description || "",
-  aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
+  aiMentorConfiguration: undefined,
   aiJudgeConfiguration: undefined,
-  type: lessonToEdit?.aiMentor?.type || DEFAULT_AI_MENTOR_TYPE,
   name: lessonToEdit?.aiMentor?.name || "",
   voiceMode: lessonToEdit?.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
   ttsPreset: lessonToEdit?.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,

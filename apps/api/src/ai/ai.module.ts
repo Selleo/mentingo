@@ -6,9 +6,11 @@ import { AiController } from "src/ai/ai.controller";
 import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
 import { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service";
+import { AiMentorConfigurationGenerationWorkflowService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generation-workflow.service";
+import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
+import { AiMentorConfigurationValidatorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-validator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { RagRepository } from "src/ai/repositories/rag.repository";
-import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
@@ -31,7 +33,9 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiJudgeConfigurationGeneratorService,
     AiJudgeConfigurationGenerationWorkflowService,
     AiJudgeConfigurationValidatorService,
-    AiPracticeContentGeneratorService,
+    AiMentorConfigurationGeneratorService,
+    AiMentorConfigurationGenerationWorkflowService,
+    AiMentorConfigurationValidatorService,
     ChatService,
     AiRuntimeService,
     AiService,
@@ -51,6 +55,8 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
   exports: [
     AiJudgeConfigurationGenerationWorkflowService,
     AiJudgeConfigurationValidatorService,
+    AiMentorConfigurationGenerationWorkflowService,
+    AiMentorConfigurationValidatorService,
     AiService,
     AiRuntimeService,
     AiRepository,

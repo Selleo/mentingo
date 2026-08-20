@@ -5,7 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { AI_MENTOR_PRACTICE_ERROR_CODES, AI_MENTOR_TYPE } from "@repo/shared";
+import {
+  AI_MENTOR_PRACTICE_ERROR_CODES,
+  AI_MENTOR_CONFIGURATION_GENERATION_MODE,
+  AI_MENTOR_TYPE,
+} from "@repo/shared";
 
 import { AiPracticeQueueService } from "src/ai/ai-practice.queue.service";
 import {
@@ -14,11 +18,13 @@ import {
 } from "src/ai/ai-practice.types";
 import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 import { AiJudgeConfigurationGeneratorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service";
+import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "src/ai/mentor-configuration-generation/ai-mentor-configuration-generation.constants";
+import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { AiPracticeContentGeneratorService } from "src/ai/services/ai-practice-content-generator.service";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
+import { buildAiPracticeMentorConfiguration } from "src/ai/utils/build-ai-practice-mentor-configuration";
 import { EnvService } from "src/env/services/env.service";
 
 import type {
@@ -33,7 +39,7 @@ export class AiPracticeService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly aiPracticeQueueService: AiPracticeQueueService,
-    private readonly aiPracticeContentGeneratorService: AiPracticeContentGeneratorService,
+    private readonly aiMentorConfigurationGeneratorService: AiMentorConfigurationGeneratorService,
     private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiService: AiService,
     private readonly envService: EnvService,
@@ -65,7 +71,7 @@ export class AiPracticeService {
       userId: currentUser.userId,
       practiceDate,
       language: body.language,
-      instructions: scenario,
+      scenario,
     });
 
     if (!session) {
@@ -123,7 +129,6 @@ export class AiPracticeService {
       practiceSessionId: session.id,
       userId: session.userId,
       userLanguage: session.language,
-      practiceInstructions: session.instructions,
     });
 
     const replayed = await this.aiRepository.findPracticeSessionById(session.id);
@@ -138,34 +143,43 @@ export class AiPracticeService {
     if (!claimed) return;
 
     try {
-      const content = await this.aiPracticeContentGeneratorService.generate({
+      const title = session.scenario.slice(0, 160).trim();
+      const lessonContext = {
+        title,
+        taskDescription: session.scenario,
+      };
+      const mentorConfiguration = await this.aiMentorConfigurationGeneratorService.generate({
+        configurationType: AI_MENTOR_TYPE.ROLEPLAY,
         language: session.language,
-        learnerRequest: session.instructions,
+        lessonContext,
+        mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
+        brief: session.scenario,
+        generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
       });
+      if (mentorConfiguration.type !== AI_MENTOR_TYPE.ROLEPLAY)
+        throw new Error("Practice AI Mentor generator returned a non-roleplay configuration");
+
       const judgeConfiguration = await this.aiJudgeConfigurationGeneratorService.generate({
         language: session.language,
         lessonContext: {
-          title: content.title,
-          taskDescription: content.instructions,
-          aiMentorInstructions: content.instructions,
-          aiMentorType: AI_MENTOR_TYPE.ROLEPLAY,
+          ...lessonContext,
+          aiMentorConfiguration: mentorConfiguration,
         },
         mode: AI_JUDGE_GENERATION_MODE.CREATE,
-        brief: content.instructions,
+        brief: session.scenario,
       });
 
       await this.aiRepository.saveGeneratedPractice(
         session.id,
-        content.title,
-        content.aiMentorName,
-        content.instructions,
+        title,
+        mentorConfiguration.aiRole.slice(0, 120).trim(),
+        buildAiPracticeMentorConfiguration(session.id, mentorConfiguration, session.language),
         buildAiPracticeJudgeConfiguration(session.id, judgeConfiguration, session.language),
       );
       await this.aiService.getPracticeThreadWithSetup({
         practiceSessionId: session.id,
         userId: session.userId,
         userLanguage: session.language,
-        practiceInstructions: content.instructions,
       });
       await this.aiRepository.updatePracticeSession(session.id, {
         status: AI_MENTOR_PRACTICE_STATUSES.READY,

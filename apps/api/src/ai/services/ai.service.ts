@@ -131,7 +131,6 @@ export class AiService {
     practiceSessionId: UUIDType;
     userId: UUIDType;
     userLanguage: SupportedLanguages;
-    practiceInstructions: string;
   }) {
     const existingThread = await this.aiRepository.findThread([
       eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
@@ -154,7 +153,7 @@ export class AiService {
       },
       AI_MENTOR_TYPE.ROLEPLAY,
     );
-    await this.sendWelcomeMessage(thread.id, systemPrompt, data.practiceInstructions);
+    await this.sendWelcomeMessage(thread.id, systemPrompt);
 
     return thread;
   }
@@ -287,16 +286,10 @@ export class AiService {
     );
   }
 
-  async sendWelcomeMessage(
-    threadId: UUIDType,
-    systemPrompt: string,
-    practiceInstructions?: string,
-  ) {
-    const welcomeMessagePrompt = practiceInstructions
-      ? await this.promptService.loadPrompt("aiMentorPracticeOpeningPrompt", {
-          practiceInstructions,
-        })
-      : await this.promptService.loadPrompt("welcomePrompt", { systemPrompt });
+  async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
+    const welcomeMessagePrompt = await this.promptService.loadPrompt("welcomePrompt", {
+      systemPrompt,
+    });
     const welcomeMessages: PublicAiMessage[] = [
       { role: MESSAGE_ROLE.SYSTEM, content: systemPrompt },
       { role: MESSAGE_ROLE.USER, content: welcomeMessagePrompt },

@@ -30,12 +30,7 @@ import type {
   UpdateQuizLessonBody,
 } from "../lesson.schema";
 import type { CreateLiveLessonInput } from "../lesson.type";
-import type {
-  AiMentorType,
-  AiMentorTTSPreset,
-  AiMentorVoiceMode,
-  SupportedLanguages,
-} from "@repo/shared";
+import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
 import type { QuestionType } from "src/questions/schema/question.types";
 
@@ -53,15 +48,8 @@ export class AdminLessonRepository {
         courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        aiMentorInstructions: language
-          ? this.localizationService.getFieldByLanguage(
-              aiMentorLessons.aiMentorInstructions,
-              language,
-            )
-          : this.localizationService.getLocalizedSqlField(aiMentorLessons.aiMentorInstructions),
         aiMentorName: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
         aiMentorAvatarReference: aiMentorLessons.avatarReference,
-        aiMentorType: aiMentorLessons.type,
         aiMentorVoiceMode: aiMentorLessons.voiceMode,
         aiMentorTTSPreset: aiMentorLessons.ttsPreset,
         aiMentorCustomTtsReference: this.localizationService.getLocalizedSqlField(
@@ -74,22 +62,6 @@ export class AdminLessonRepository {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(aiMentorLessons, eq(aiMentorLessons.lessonId, lessons.id))
       .where(eq(lessons.id, id));
-  }
-
-  async getAiMentorInstructionsForCourse(courseId: UUIDType) {
-    return this.db
-      .select({
-        id: aiMentorLessons.id,
-        aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
-        courseTitle: courses.title,
-        lessonTitle: lessons.title,
-        lessonDescription: lessons.description,
-      })
-      .from(aiMentorLessons)
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(eq(courses.id, courseId));
   }
 
   async getContentLessonsByIds(lessonIds: UUIDType[], language?: SupportedLanguages) {
@@ -324,8 +296,6 @@ export class AdminLessonRepository {
   async updateAiMentorLessonData(
     lessonId: UUIDType,
     data: {
-      aiMentorInstructions: string;
-      type: AiMentorType;
       name?: string;
       voiceMode: AiMentorVoiceMode;
       ttsPreset: AiMentorTTSPreset;
@@ -348,12 +318,6 @@ export class AdminLessonRepository {
     return dbInstance
       .update(aiMentorLessons)
       .set({
-        aiMentorInstructions: setJsonbField(
-          aiMentorLessons.aiMentorInstructions,
-          data.language,
-          data.aiMentorInstructions,
-        ),
-        type: data.type,
         name: setJsonbField(aiMentorLessons.name, data.language, data.name),
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,
@@ -365,8 +329,6 @@ export class AdminLessonRepository {
   async createAiMentorLessonData(
     data: {
       lessonId: UUIDType;
-      aiMentorInstructions: string;
-      type: AiMentorType;
       name?: string;
       voiceMode: AiMentorVoiceMode;
       ttsPreset: AiMentorTTSPreset;
@@ -380,14 +342,12 @@ export class AdminLessonRepository {
         ? undefined
         : buildJsonbField(data.language, data.customTtsReference, true);
 
-    const { language, aiMentorInstructions } = data;
+    const { language } = data;
 
     return dbInstance
       .insert(aiMentorLessons)
       .values({
         lessonId: data.lessonId,
-        aiMentorInstructions: buildJsonbField(language, aiMentorInstructions),
-        type: data.type,
         name: buildJsonbField(language, data.name ?? "AI Mentor"),
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,

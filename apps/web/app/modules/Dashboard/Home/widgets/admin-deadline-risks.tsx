@@ -1,16 +1,31 @@
-import { Link } from "@remix-run/react";
-import { DASHBOARD_DEADLINE_RISK_TYPES, DASHBOARD_WIDGET_IDS } from "@repo/shared";
-import { useState } from "react";
+import {
+  DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS,
+  DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS,
+  DASHBOARD_DEADLINE_RISK_TYPES,
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+  DASHBOARD_WIDGET_TYPES,
+  type DashboardDeadlineRiskGroupSortField,
+  type DashboardDeadlineRiskUrgencyOrder,
+} from "@repo/shared";
+import {
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  useReactTable,
+  type ColumnDef,
+  type ExpandedState,
+  type SortingState,
+} from "@tanstack/react-table";
+import { ArrowDownUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Fragment, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useDashboardDeadlineRisks } from "~/api/queries/useDashboardDeadlineRisks";
-import { useDashboardDeadlineRiskSummary } from "~/api/queries/useDashboardDeadlineRiskSummary";
+import { useDashboardDeadlineRiskCourses } from "~/api/queries/useDashboardDeadlineRiskCourses";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
+  useDashboardDeadlineRiskGroups,
+  type DashboardDeadlineRiskGroup,
+} from "~/api/queries/useDashboardDeadlineRiskGroups";
+import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -19,6 +34,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { useDebounce } from "~/hooks/useDebounce";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -31,48 +70,231 @@ import {
 } from "../components/WidgetCard";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
-type RiskType = (typeof DASHBOARD_DEADLINE_RISK_TYPES)[keyof typeof DASHBOARD_DEADLINE_RISK_TYPES];
+const DEADLINE_RISK_FILTERS = {
+  ALL: "all",
+  ...DASHBOARD_DEADLINE_RISK_TYPES,
+} as const;
 
-const DETAILS_PAGE_SIZE = 20;
+type DeadlineRiskFilter = (typeof DEADLINE_RISK_FILTERS)[keyof typeof DEADLINE_RISK_FILTERS];
+
+const DEADLINE_RISK_DIALOG_ACTIONS = {
+  SELECT_COURSE: "select-course",
+  SET_SEARCH: "set-search",
+  SET_URGENCY: "set-urgency",
+  SET_SORTING: "set-sorting",
+  SET_EXPANDED: "set-expanded",
+  RESET: "reset",
+} as const;
+
+type DeadlineRiskDialogState = {
+  selectedCourseId: string | null;
+  search: string;
+  urgency: DeadlineRiskFilter;
+  sorting: SortingState;
+  expanded: ExpandedState;
+};
+
+type DeadlineRiskDialogAction =
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE; courseId: string }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH; search: string }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY; urgency: DeadlineRiskFilter }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING; sorting: SortingState }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED; expanded: ExpandedState }
+  | { type: typeof DEADLINE_RISK_DIALOG_ACTIONS.RESET };
+
+const createInitialDeadlineRiskDialogState = (): DeadlineRiskDialogState => ({
+  selectedCourseId: null,
+  search: "",
+  urgency: DEADLINE_RISK_FILTERS.ALL,
+  sorting: [{ id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE, desc: false }],
+  expanded: {},
+});
+
+function deadlineRiskDialogReducer(
+  state: DeadlineRiskDialogState,
+  action: DeadlineRiskDialogAction,
+): DeadlineRiskDialogState {
+  switch (action.type) {
+    case DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE:
+      return { ...createInitialDeadlineRiskDialogState(), selectedCourseId: action.courseId };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH:
+      return { ...state, search: action.search };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY:
+      return { ...state, urgency: action.urgency, expanded: {} };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING:
+      return { ...state, sorting: action.sorting, expanded: {} };
+    case DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED:
+      return { ...state, expanded: action.expanded };
+    case DEADLINE_RISK_DIALOG_ACTIONS.RESET:
+      return createInitialDeadlineRiskDialogState();
+  }
+}
+
+function isDeadlineRiskFilter(value: string): value is DeadlineRiskFilter {
+  return Object.values(DEADLINE_RISK_FILTERS).some((filter) => filter === value);
+}
+
+function isDeadlineRiskGroupSortField(value: string): value is DashboardDeadlineRiskGroupSortField {
+  return Object.values(DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS).some(
+    (sortField) => sortField === value,
+  );
+}
+
+function isDeadlineRiskUrgencyOrder(value: string): value is DashboardDeadlineRiskUrgencyOrder {
+  return Object.values(DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS).some(
+    (urgencyOrder) => urgencyOrder === value,
+  );
+}
 
 export function WidgetAdminDeadlineRisks() {
   const { t, i18n } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const { data: risks, isLoading, isError, refetch } = useDashboardDeadlineRiskSummary();
-  const [selectedRisk, setSelectedRisk] = useState<RiskType>(DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE);
-  const [areRiskDetailsOpen, setAreRiskDetailsOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_IDS.ADMIN_DEADLINE_RISKS];
-  const isOverdue = selectedRisk === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE;
-  const {
-    data: riskDetails,
-    isLoading: areRiskDetailsLoading,
-    isError: areRiskDetailsError,
-    refetch: refetchRiskDetails,
-  } = useDashboardDeadlineRisks(
-    {
-      language,
-      type: selectedRisk,
-      page,
-      perPage: DETAILS_PAGE_SIZE,
+  const [urgencyOrder, setUrgencyOrder] = useState<DashboardDeadlineRiskUrgencyOrder>(
+    DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
+  );
+  const [dialogState, dispatchDialog] = useReducer(
+    deadlineRiskDialogReducer,
+    undefined,
+    createInitialDeadlineRiskDialogState,
+  );
+  const debouncedGroupSearch = useDebounce(dialogState.search.trim(), 300);
+  const coursesScrollRef = useRef<HTMLDivElement>(null);
+  const groupsScrollRef = useRef<HTMLDivElement>(null);
+  const metadata = DASHBOARD_WIDGET_REGISTRY[DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS];
+  const activeGroupSort = dialogState.sorting[0];
+  const groupSortBy =
+    activeGroupSort && isDeadlineRiskGroupSortField(activeGroupSort.id)
+      ? activeGroupSort.id
+      : DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE;
+  const coursesQuery = useDashboardDeadlineRiskCourses(language, urgencyOrder);
+  const groupsQuery = useDashboardDeadlineRiskGroups(dialogState.selectedCourseId, language, {
+    urgency: dialogState.urgency === DEADLINE_RISK_FILTERS.ALL ? undefined : dialogState.urgency,
+    search: debouncedGroupSearch || undefined,
+    sortBy: groupSortBy,
+    sortDirection: activeGroupSort?.desc
+      ? DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.DESC
+      : DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
+  });
+  const courses = useMemo(
+    () => coursesQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [coursesQuery.data],
+  );
+  const groups = useMemo(
+    () => groupsQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [groupsQuery.data],
+  );
+  const selectedCourse = courses.find((course) => course.id === dialogState.selectedCourseId);
+  const dateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }),
+    [i18n.language],
+  );
+  const groupColumns = useMemo<ColumnDef<DashboardDeadlineRiskGroup>[]>(
+    () => [
+      {
+        accessorKey: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.NAME,
+        header: t("dashboardHome.widgets.deadline_risks.group"),
+        cell: ({ row }) => (
+          <div className="flex min-w-0 items-center gap-2 text-left font-medium text-neutral-950">
+            <ChevronRight
+              className={cn(
+                "size-4 shrink-0 text-neutral-400 transition-transform",
+                row.getIsExpanded() && "rotate-90",
+              )}
+              aria-hidden="true"
+            />
+            <span className="block max-w-52 truncate">{row.original.name}</span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.STUDENT_COUNT,
+        header: t("dashboardHome.widgets.deadline_risks.learners"),
+        sortDescFirst: true,
+        cell: ({ row }) => (
+          <span className="tabular-nums text-neutral-600">{row.original.studentCount}</span>
+        ),
+      },
+      {
+        accessorKey: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.DUE_DATE,
+        header: t("dashboardHome.widgets.deadline_risks.deadline"),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap text-neutral-600">
+            {dateFormatter.format(new Date(row.original.dueDate))}
+          </span>
+        ),
+      },
+      {
+        accessorKey: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY,
+        header: t("dashboardHome.widgets.deadline_risks.status"),
+        cell: ({ row }) => (
+          <div className="text-right">
+            <span
+              className={cn(
+                "inline-flex whitespace-nowrap rounded-full px-2 py-1 text-xs font-medium",
+                row.original.urgency === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE
+                  ? "bg-error-50 text-error-700"
+                  : "bg-warning-50 text-warning-700",
+              )}
+            >
+              {t(`dashboardHome.widgets.deadline_risks.${row.original.urgency}`)}
+            </span>
+          </div>
+        ),
+      },
+    ],
+    [dateFormatter, t],
+  );
+  const groupsTable = useReactTable({
+    data: groups,
+    columns: groupColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
+    getRowId: (group) => group.id,
+    manualFiltering: true,
+    manualSorting: true,
+    onExpandedChange: (updater) => {
+      const expanded = typeof updater === "function" ? updater(dialogState.expanded) : updater;
+      dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED, expanded });
     },
-    areRiskDetailsOpen,
-  );
-  const visibleCourses = riskDetails?.data ?? [];
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      (riskDetails?.pagination.totalItems ?? 0) /
-        (riskDetails?.pagination.perPage ?? DETAILS_PAGE_SIZE),
-    ),
-  );
-
-  const formatDate = (value: string) =>
-    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(value));
-  const openRiskDetails = (riskType: RiskType) => {
-    setSelectedRisk(riskType);
-    setPage(1);
-    setAreRiskDetailsOpen(true);
+    onSortingChange: (updater) => {
+      const sorting = typeof updater === "function" ? updater(dialogState.sorting) : updater;
+      dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING, sorting });
+    },
+    state: {
+      expanded: dialogState.expanded,
+      sorting: dialogState.sorting,
+      globalFilter: debouncedGroupSearch,
+      columnFilters:
+        dialogState.urgency === DEADLINE_RISK_FILTERS.ALL
+          ? []
+          : [
+              {
+                id: DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY,
+                value: dialogState.urgency,
+              },
+            ],
+    },
+  });
+  const loadNextCoursesPage = () => {
+    if (!coursesQuery.hasNextPage || coursesQuery.isFetchingNextPage) return;
+    void coursesQuery.fetchNextPage();
+  };
+  const loadNextGroupsPage = () => {
+    if (!groupsQuery.hasNextPage || groupsQuery.isFetchingNextPage) return;
+    void groupsQuery.fetchNextPage();
+  };
+  const handleCoursesScroll = () => {
+    const element = coursesScrollRef.current;
+    if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
+      loadNextCoursesPage();
+    }
+  };
+  const handleGroupsScroll = () => {
+    const element = groupsScrollRef.current;
+    if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
+      loadNextGroupsPage();
+    }
   };
 
   return (
@@ -81,163 +303,280 @@ export function WidgetAdminDeadlineRisks() {
         <DashboardWidgetHeader
           title={t(metadata.titleKey)}
           icon={metadata.icon}
-          iconClassName={metadata.iconClassName}
-          iconContainerClassName={metadata.iconContainerClassName}
+          dataScope={metadata.dataScope}
+          headerAction={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 rounded-md text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950"
+                  aria-label={t("dashboardHome.widgets.deadline_risks.sort")}
+                  title={t("dashboardHome.widgets.deadline_risks.sort")}
+                >
+                  <ArrowDownUp className="size-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuRadioGroup
+                  value={urgencyOrder}
+                  onValueChange={(value) => {
+                    if (isDeadlineRiskUrgencyOrder(value)) setUrgencyOrder(value);
+                  }}
+                >
+                  <DropdownMenuRadioItem
+                    value={DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT}
+                    className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                  >
+                    {t("dashboardHome.widgets.deadline_risks.sortMostUrgent")}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem
+                    value={DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.LEAST_URGENT}
+                    className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                  >
+                    {t("dashboardHome.widgets.deadline_risks.sortLeastUrgent")}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
         />
         <DashboardWidgetContent>
-          {isLoading || isError ? (
+          {coursesQuery.isLoading || coursesQuery.isError ? (
             <DashboardWidgetQueryState
-              isLoading={isLoading}
-              isError={isError}
-              onRetry={() => void refetch()}
+              isLoading={coursesQuery.isLoading}
+              isError={coursesQuery.isError}
+              onRetry={() => void coursesQuery.refetch()}
             />
-          ) : (risks?.overdueCount ?? 0) === 0 && (risks?.dueSoonCount ?? 0) === 0 ? (
-            <p className="text-neutral-600">{t("dashboardHome.widgets.deadline_risks.empty")}</p>
+          ) : courses.length === 0 ? (
+            <p className="flex h-full items-center justify-center p-4 text-center text-neutral-600">
+              {t("dashboardHome.widgets.deadline_risks.empty")}
+            </p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => openRiskDetails(DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE)}
-                className="min-h-28 rounded-lg border border-error-100 bg-error-50 p-4 text-left transition-colors hover:border-error-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-300 focus-visible:ring-offset-2"
-              >
-                <span className="h4 text-error-700">{risks?.overdueCount ?? 0}</span>
-                <span className="body-sm-md mt-1 block text-error-800">
-                  {t("dashboardHome.widgets.deadline_risks.overdue")}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => openRiskDetails(DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON)}
-                className="min-h-28 rounded-lg border border-warning-100 bg-warning-50 p-4 text-left transition-colors hover:border-warning-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning-300 focus-visible:ring-offset-2"
-              >
-                <span className="h4 text-warning-700">{risks?.dueSoonCount ?? 0}</span>
-                <span className="body-sm-md mt-1 block text-warning-800">
-                  {t("dashboardHome.widgets.deadline_risks.dueSoon")}
-                </span>
-              </button>
+            <div
+              ref={coursesScrollRef}
+              onScroll={handleCoursesScroll}
+              className="h-full min-h-0 overflow-y-auto p-3"
+            >
+              <div className="space-y-2">
+                {courses.map((course) => (
+                  <button
+                    key={course.id}
+                    type="button"
+                    onClick={() =>
+                      dispatchDialog({
+                        type: DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE,
+                        courseId: course.id,
+                      })
+                    }
+                    className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 text-left transition-colors hover:border-primary-200 hover:bg-primary-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+                    aria-label={`${course.title}, ${t(`dashboardHome.widgets.deadline_risks.${course.urgency}`)}`}
+                  >
+                    <img
+                      src={course.thumbnailUrl || DefaultPhotoCourse}
+                      alt=""
+                      className="h-10 w-16 shrink-0 rounded-md object-cover"
+                      onError={(event) => {
+                        event.currentTarget.src = DefaultPhotoCourse;
+                      }}
+                    />
+                    <span className="body-sm-md min-w-0 flex-1 truncate text-neutral-950">
+                      {course.title}
+                    </span>
+                    <ChevronRight className="size-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </DashboardWidgetContent>
       </DashboardWidgetCard>
 
-      <Dialog open={areRiskDetailsOpen} onOpenChange={setAreRiskDetailsOpen}>
-        <DialogContent variant="mobileDrawer" className="flex flex-col sm:!max-w-2xl">
-          <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
-            <DialogTitle className="text-lg font-semibold text-neutral-950">
-              {t(
-                isOverdue
-                  ? "dashboardHome.widgets.deadline_risks.overdueTitle"
-                  : "dashboardHome.widgets.deadline_risks.dueSoonTitle",
-              )}
-            </DialogTitle>
-            <DialogDescription className="sr-only">{t(metadata.descriptionKey)}</DialogDescription>
+      <Dialog
+        open={Boolean(selectedCourse)}
+        onOpenChange={(open) => {
+          if (open) return;
+          dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.RESET });
+        }}
+      >
+        <DialogContent
+          variant="mobileDrawer"
+          className="!flex h-[85dvh] !flex-col overflow-hidden p-0 sm:h-auto sm:max-h-[min(720px,calc(100dvh-2rem))] sm:!max-w-2xl"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <DialogHeader className="border-b border-neutral-100 px-5 py-4 text-left">
+            <DialogTitle>{selectedCourse?.title}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {t("dashboardHome.widgets.deadline_risks.description")}
+            </DialogDescription>
           </DialogHeader>
-          {areRiskDetailsLoading || areRiskDetailsError ? (
-            <DashboardWidgetQueryState
-              isLoading={areRiskDetailsLoading}
-              isError={areRiskDetailsError}
-              onRetry={() => void refetchRiskDetails()}
-              className="p-5"
+          <div className="grid shrink-0 gap-2 border-b border-neutral-100 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_11rem]">
+            <Input
+              type="search"
+              value={dialogState.search}
+              onChange={(event) =>
+                dispatchDialog({
+                  type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SEARCH,
+                  search: event.target.value,
+                })
+              }
+              placeholder={t("dashboardHome.widgets.deadline_risks.searchGroups")}
+              aria-label={t("dashboardHome.widgets.deadline_risks.searchGroups")}
+              className="h-9"
             />
-          ) : (
-            <>
-              <Accordion
-                type="multiple"
-                className="grid min-h-0 grid-cols-1 gap-3 overflow-y-auto px-6 py-5"
+            <Select
+              value={dialogState.urgency}
+              onValueChange={(value) => {
+                if (isDeadlineRiskFilter(value)) {
+                  dispatchDialog({
+                    type: DEADLINE_RISK_DIALOG_ACTIONS.SET_URGENCY,
+                    urgency: value,
+                  });
+                }
+              }}
+            >
+              <SelectTrigger
+                className="h-9"
+                aria-label={t("dashboardHome.widgets.deadline_risks.status")}
               >
-                {visibleCourses.map((course) => {
-                  const relevantDate = course.students.at(0)?.dueDate;
-
-                  return (
-                    <AccordionItem
-                      key={course.id}
-                      value={course.id}
-                      className="rounded-lg border px-4"
-                    >
-                      <AccordionTrigger className="gap-4 py-3 text-left">
-                        <div className="min-w-0 flex-1">
-                          <span className="line-clamp-1 font-medium text-neutral-950">
-                            {course.title}
-                          </span>
-                          <span className="block text-xs font-normal text-neutral-500">
-                            {t("dashboardHome.widgets.deadline_risks.affected", {
-                              count: course.students.length,
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1 justify-center items-end">
-                          <Button asChild variant="ghost" size="xs">
-                            <Link to={`/course/${course.id}?tab=Statistics`}>
-                              {t("dashboardHome.widgets.deadline_risks.goToCourse")}
-                            </Link>
-                          </Button>
-                          {relevantDate && (
-                            <span
-                              className={cn(
-                                "shrink-0 text-xs font-medium",
-                                isOverdue ? "text-error-700" : "text-warning-700",
-                              )}
-                            >
-                              {formatDate(relevantDate)}
-                            </span>
-                          )}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="border-t py-2">
-                        {course.students.map((student) => (
-                          <div
-                            key={student.id}
-                            className="flex items-center justify-between gap-4 border-b border-neutral-100 py-2 last:border-0"
-                          >
-                            <span className="truncate text-sm">{student.name}</span>
-                            <span
-                              className={cn(
-                                "shrink-0 text-xs font-medium",
-                                isOverdue ? "text-error-700" : "text-warning-700",
-                              )}
-                            >
-                              {formatDate(student.dueDate)}
-                              {" · "}
-                              {t(
-                                isOverdue
-                                  ? "dashboardHome.widgets.deadline_risks.overdue"
-                                  : "dashboardHome.widgets.deadline_risks.dueSoon",
-                              )}
-                            </span>
-                          </div>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  value={DEADLINE_RISK_FILTERS.ALL}
+                  className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                >
+                  {t("dashboardHome.widgets.deadline_risks.allStatuses")}
+                </SelectItem>
+                <SelectItem
+                  value={DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE}
+                  className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                >
+                  {t("dashboardHome.widgets.deadline_risks.overdue")}
+                </SelectItem>
+                <SelectItem
+                  value={DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON}
+                  className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
+                >
+                  {t("dashboardHome.widgets.deadline_risks.dueSoon")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div
+            ref={groupsScrollRef}
+            onScroll={handleGroupsScroll}
+            className="min-h-0 flex-1 overflow-y-auto px-5 py-4"
+          >
+            {groupsQuery.isError ? (
+              <DashboardWidgetQueryState
+                isLoading={false}
+                isError
+                onRetry={() => void groupsQuery.refetch()}
+              />
+            ) : (
+              <>
+                {!groupsQuery.isLoading && groups.length === 0 ? (
+                  <p className="py-10 text-center text-sm text-neutral-500">
+                    {t("dashboardHome.widgets.deadline_risks.groupsEmpty")}
+                  </p>
+                ) : (
+                  <div className="overflow-hidden rounded-lg border border-neutral-200">
+                    <Table>
+                      <TableHeader>
+                        {groupsTable.getHeaderGroups().map((headerGroup) => (
+                          <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                            {headerGroup.headers.map((header) => (
+                              <TableHead
+                                key={header.id}
+                                className={cn(
+                                  "h-10 px-3",
+                                  header.column.id ===
+                                    DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY &&
+                                    "text-right",
+                                )}
+                              >
+                                {header.isPlaceholder ? null : (
+                                  <button
+                                    type="button"
+                                    className={cn(
+                                      "flex w-full items-center gap-1.5 text-left hover:text-neutral-950",
+                                      header.column.id ===
+                                        DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS.URGENCY &&
+                                        "justify-end",
+                                    )}
+                                    onClick={header.column.getToggleSortingHandler()}
+                                  >
+                                    {flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext(),
+                                    )}
+                                    {header.column.getIsSorted() ? (
+                                      <ChevronDown
+                                        className={cn(
+                                          "size-3.5",
+                                          header.column.getIsSorted() === "asc" && "rotate-180",
+                                        )}
+                                        aria-hidden="true"
+                                      />
+                                    ) : (
+                                      <ArrowDownUp
+                                        className="size-3.5 opacity-50"
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                  </button>
+                                )}
+                              </TableHead>
+                            ))}
+                          </TableRow>
                         ))}
-                      </AccordionContent>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
-              {totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  >
-                    {t("common.button.previous")}
-                  </Button>
-                  <span className="details text-neutral-500">
-                    {t("dashboardHome.widgets.deadlineRisksPage", { page, totalPages })}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={page === totalPages}
-                    onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                  >
-                    {t("common.button.next")}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
+                      </TableHeader>
+                      <TableBody>
+                        {groupsTable.getRowModel().rows.map((row) => (
+                          <Fragment key={row.id}>
+                            <TableRow
+                              data-state={row.getIsExpanded() ? "selected" : undefined}
+                              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-300"
+                              onClick={row.getToggleExpandedHandler()}
+                              onKeyDown={(event) => {
+                                if (event.key !== "Enter" && event.key !== " ") return;
+                                event.preventDefault();
+                                row.toggleExpanded();
+                              }}
+                              tabIndex={0}
+                              aria-expanded={row.getIsExpanded()}
+                            >
+                              {row.getVisibleCells().map((cell) => (
+                                <TableCell key={cell.id} className="px-3 py-3">
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                            {row.getIsExpanded() &&
+                              row.original.students.map((student) => (
+                                <TableRow
+                                  key={`${row.id}-${student.id}`}
+                                  className="bg-neutral-50/60"
+                                >
+                                  <TableCell className="py-2 pl-9 pr-3 text-sm text-neutral-700">
+                                    {student.name}
+                                  </TableCell>
+                                  <TableCell colSpan={3} />
+                                </TableRow>
+                              ))}
+                          </Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>

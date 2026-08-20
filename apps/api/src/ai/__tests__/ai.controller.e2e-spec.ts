@@ -11,6 +11,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
+  aiMentorConfigurations,
   aiMentorLessons,
   chapters,
   courses,
@@ -79,13 +80,18 @@ describe("AiController (e2e)", () => {
 
     const addPolishAiMentorScenario = async (aiMentorLessonId: UUIDType) => {
       await db
-        .update(aiMentorLessons)
+        .update(aiMentorConfigurations)
         .set({
-          aiMentorInstructions: setJsonbField(
-            aiMentorLessons.aiMentorInstructions,
+          additionalInstructions: setJsonbField(
+            aiMentorConfigurations.additionalInstructions,
             SUPPORTED_LANGUAGES.PL,
             "Polish mentor instructions",
           ),
+        })
+        .where(eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessonId));
+      await db
+        .update(aiMentorLessons)
+        .set({
           name: setJsonbField(aiMentorLessons.name, SUPPORTED_LANGUAGES.PL, "Polish mentor"),
         })
         .where(eq(aiMentorLessons.id, aiMentorLessonId));
@@ -97,7 +103,7 @@ describe("AiController (e2e)", () => {
         .withUserSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const aiMentorLesson = await aiMentorLessonFactory.create({
-        aiMentorInstructions: "English mentor instructions",
+        additionalInstructions: "English mentor instructions",
         taskGoal: "English task goal",
       });
       const courseId = await getCourseIdForAiMentorLesson(aiMentorLesson.lessonId);
@@ -131,9 +137,9 @@ describe("AiController (e2e)", () => {
         SUPPORTED_LANGUAGES.DE,
       );
 
-      expect(polishLesson.instructions).toBe("Polish mentor instructions");
+      expect(polishLesson.additionalInstructions).toBe("Polish mentor instructions");
       expect(polishLesson.name).toBe("Polish mentor");
-      expect(fallbackLesson.instructions).toBe("English mentor instructions");
+      expect(fallbackLesson.additionalInstructions).toBe("English mentor instructions");
       expect(polishLesson.learnerFirstName).toBe(threadOwner.firstName);
     });
   });

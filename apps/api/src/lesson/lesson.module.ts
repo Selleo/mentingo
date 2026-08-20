@@ -24,11 +24,19 @@ import { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration
 import { AiJudgeConfigurationController } from "./ai-judge-configuration/ai-judge-configuration.controller";
 import { AiJudgeConfigurationRepository } from "./ai-judge-configuration/ai-judge-configuration.repository";
 import { AiJudgeConfigurationService } from "./ai-judge-configuration/ai-judge-configuration.service";
+import { AiMentorConfigurationGenerationController } from "./ai-mentor-configuration/controllers/ai-mentor-configuration-generation.controller";
+import { AiMentorConfigurationController } from "./ai-mentor-configuration/controllers/ai-mentor-configuration.controller";
+import { AiMentorConfigurationGenerationQueueService } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation-queue.service";
+import { AiMentorConfigurationGenerationService } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation.service";
+import { AiMentorConfigurationGenerationWorker } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation.worker";
+import { AiMentorConfigurationRepository } from "./ai-mentor-configuration/repositories/ai-mentor-configuration.repository";
+import { AiMentorConfigurationGraphService } from "./ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
+import { AiMentorConfigurationService } from "./ai-mentor-configuration/services/ai-mentor-configuration.service";
+import { AiMentorLessonTranslationService } from "./ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { LessonController } from "./lesson.controller";
 import { AdminLessonRepository } from "./repositories/adminLesson.repository";
 import { LessonRepository } from "./repositories/lesson.repository";
 import { AdminLessonService } from "./services/adminLesson.service";
-import { AiMentorLessonTranslationService } from "./services/aiMentorLessonTranslation.service";
 import { LessonService } from "./services/lesson.service";
 
 @Module({
@@ -51,6 +59,8 @@ import { LessonService } from "./services/lesson.service";
     LessonController,
     AiJudgeConfigurationController,
     AiJudgeConfigurationGenerationController,
+    AiMentorConfigurationController,
+    AiMentorConfigurationGenerationController,
   ],
   providers: [
     AiJudgeConfigurationRepository,
@@ -60,6 +70,12 @@ import { LessonService } from "./services/lesson.service";
     AiJudgeConfigurationGraphService,
     AiJudgeConfigurationService,
     AiJudgeConfigurationTranslationService,
+    AiMentorConfigurationRepository,
+    AiMentorConfigurationGenerationQueueService,
+    AiMentorConfigurationGenerationService,
+    AiMentorConfigurationGenerationWorker,
+    AiMentorConfigurationGraphService,
+    AiMentorConfigurationService,
     AiMentorLessonTranslationService,
     LessonRepository,
     AdminLessonService,
@@ -70,6 +86,7 @@ import { LessonService } from "./services/lesson.service";
   exports: [
     AiJudgeConfigurationGraphService,
     AiJudgeConfigurationTranslationService,
+    AiMentorConfigurationGraphService,
     AiMentorLessonTranslationService,
     AdminLessonService,
     AdminLessonRepository,

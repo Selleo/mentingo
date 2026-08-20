@@ -1,7 +1,9 @@
 import { arrayMove } from "@dnd-kit/sortable";
 
+import { dashboardSizeToSpan } from "../types";
+
 import type { DashboardLayoutItem } from "../types";
-import type { DashboardWidgetId } from "@repo/shared";
+import type { DashboardWidgetType } from "@repo/shared";
 
 export const DASHBOARD_DROP_PLACEMENTS = {
   BEFORE: "before",
@@ -10,6 +12,58 @@ export const DASHBOARD_DROP_PLACEMENTS = {
 
 export type DropPlacement =
   (typeof DASHBOARD_DROP_PLACEMENTS)[keyof typeof DASHBOARD_DROP_PLACEMENTS];
+
+export type DashboardGridPlacement = {
+  id: DashboardWidgetType;
+  column: number;
+  row: number;
+  columns: number;
+  rows: number;
+};
+
+/**
+ * Deterministically places semantic widget spans in row-major order. The
+ * persisted array remains the source of truth for order; this function only
+ * calculates visual coordinates.
+ */
+export const packDashboardWidgets = (
+  widgets: DashboardLayoutItem[],
+  columns: number,
+): DashboardGridPlacement[] => {
+  if (columns < 1) return [];
+  const occupied: boolean[][] = [];
+  const canFit = (row: number, column: number, rows: number, spanColumns: number) => {
+    if (column + spanColumns > columns) return false;
+    for (let y = row; y < row + rows; y += 1) {
+      for (let x = column; x < column + spanColumns; x += 1) {
+        if (occupied[y]?.[x]) return false;
+      }
+    }
+    return true;
+  };
+  const mark = (row: number, column: number, rows: number, spanColumns: number) => {
+    for (let y = row; y < row + rows; y += 1) {
+      occupied[y] ??= [];
+      for (let x = column; x < column + spanColumns; x += 1) occupied[y][x] = true;
+    }
+  };
+
+  return widgets.map((widget) => {
+    const span = dashboardSizeToSpan(widget.size);
+    const spanColumns = Math.min(span.columns, columns);
+    let row = 0;
+    let column = 0;
+    while (!canFit(row, column, span.rows, spanColumns)) {
+      column += 1;
+      if (column + spanColumns > columns) {
+        column = 0;
+        row += 1;
+      }
+    }
+    mark(row, column, span.rows, spanColumns);
+    return { id: widget.id, column, row, columns: spanColumns, rows: span.rows };
+  });
+};
 
 /**
  * Determines whether a dragged widget should be inserted before or after the
@@ -41,8 +95,8 @@ export const getDashboardDropPlacement = (
  */
 export const reorderDashboardWidgets = (
   widgets: DashboardLayoutItem[],
-  activeId: DashboardWidgetId,
-  overId: DashboardWidgetId,
+  activeId: DashboardWidgetType,
+  overId: DashboardWidgetType,
   placement?: DropPlacement,
 ): DashboardLayoutItem[] => {
   const previousIndex = widgets.findIndex((widget) => widget.id === activeId);
@@ -81,8 +135,8 @@ export const reorderDashboardWidgets = (
 export const projectDashboardDragPreview = (
   initialWidgets: DashboardLayoutItem[],
   currentWidgets: DashboardLayoutItem[],
-  activeId: DashboardWidgetId,
-  overId: DashboardWidgetId,
+  activeId: DashboardWidgetType,
+  overId: DashboardWidgetType,
   placement?: DropPlacement,
 ): { widgets: DashboardLayoutItem[]; hasChanged: boolean } => {
   const projectedWidgets = reorderDashboardWidgets(initialWidgets, activeId, overId, placement);

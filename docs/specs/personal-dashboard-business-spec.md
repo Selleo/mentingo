@@ -1,122 +1,128 @@
 # Personal Dashboard Business Spec
 
-## Business Overview
+## Business overview
 
-Student dashboard tiles turn the Mentingo home page into a personalized learning action center. Learners can immediately see what to continue, which mandatory courses need attention, how much assigned learning they have completed, which certificates they hold, and whether a daily AI Mentor practice is available.
+The personal dashboard turns Mentingo's home route into a compact, permission-aware action panel for learning and training operations. It combines personal actions, such as AI Mentor practice and To-do tasks, with the learning or management information the signed-in user is allowed to access.
 
-For HR and L&D teams, this creates a clearer path from assignment to action: urgent learning is surfaced earlier, progress is easier for learners to understand, and achievements remain visible. Learners can personalize the order and size of available tiles, while permissions and tenant configuration ensure they only see relevant capabilities.
+The dashboard is personalized without making users manage a separate save workflow. Visibility changes persist immediately; card order and supported size changes persist after the interaction completes. The localized page title is **Twój dashboard**.
 
-This branch replaces the learner placeholders with five production widgets: Continue learning, Required courses, Course completion, Certificates, and AI Mentor practice. The three administrator widgets remain placeholders.
+## Who uses it
 
-## Who Uses It
+- Students receive learner-facing cards for assigned learning, completion, certificates, calendar events, AI Mentor, and personal To-do tasks when their permissions and tenant features allow them.
+- Administrators start with management cards rather than learner cards. If an administrator also has learner permissions, those cards remain available in the widget picker but are hidden by default.
+- Content creators receive the same management card capabilities as administrators where permissions allow them. Course-derived statistics remain restricted by the API to courses they own or manage unless they also have global scope.
+- Trainers start with the same compact AI Mentor, To-do, and Calendar row. Multi-role users restore the highest-priority management profile (Admin, Content Creator, then Trainer) before the Student profile, so learner cards do not unexpectedly become visible for administrators. Every additional permitted card remains available in the widget picker, and canonical widget IDs prevent duplicate calendars or other shared capabilities.
 
-- Administrators with dashboard access arrange the three admin widgets around the operational information they will need most often.
-- Learners with dashboard access arrange five learner widgets around their day-to-day learning workflow. The three course widgets are enabled by default; Certificates and AI Mentor practice are opt-in.
-- Administrators with organization statistics access monitor completion across every active course enrollment, identify mandatory training at risk, open course or learner details, and review learning events.
-- Users with another system role can access the route when they have `dashboard.read`, but the current shared catalog does not define dedicated content-creator or trainer widgets. A user with multiple roles receives the widgets allowed for any of those roles.
+Frontend visibility is not authorization. Every data endpoint independently enforces tenant, permission, feature, and actor scope.
 
-## Feature Functions
+## Dashboard composition
 
-- Present role-relevant widgets in a responsive personal layout with a consistent maximum tile height.
-- Show completed, in-progress, and not-started course enrollments with an organization-wide completion rate.
-- Highlight overdue mandatory enrollments and those due within seven days, grouped by course and affected learner.
-- Rank courses with unfinished enrollments and link directly to course statistics.
-- Present live trainings and mandatory-course deadlines in a navigable monthly calendar, with selected-day events highlighted above the upcoming-event list.
-- Reorder visible widgets with a live grid preview using mouse, touch, or keyboard controls, then commit the draft order only after a valid drop.
-- Change a widget between only the widths allowed by its shared definition.
-- Add or remove optional widgets through the widget library while keeping required widgets visible.
-- Review each widget's description in the single-column widget library while keeping the dashboard cards focused on titles and data.
-- Restore the current role- and feature-aware default layout without saving it immediately.
-- Recover the canonical role- and feature-aware dashboard defaults when a legacy settings row has no `dashboard` object or has no `dashboard.widgets` array.
-- Save or discard a draft containing the selected widget IDs, order, and width.
-- Filter obsolete or unavailable saved widgets before presenting the dashboard.
-- Resume any enrolled course currently in progress, with progress, the next incomplete lesson when available, and a direct course fallback for formats without a lesson destination.
-- Review every unfinished mandatory course, including assignments without a deadline, with overdue, due-soon, upcoming, and no-deadline states.
-- Summarize completed, in-progress, and not-started course assignments.
-- Show active certificates and the nearest certificate expiring within 30 days, then open a paginated dialog containing every active certificate.
-- Offer one standalone AI Mentor practice per learner-local day when the tenant AI runtime is configured.
+The backend exposes one canonical widget catalog:
 
-## End-User Value
+- `ai_mentor_practice`
+- `todo_list`
+- `event_calendar`
+- `deadline_risks`
+- `training_completion`
+- `continue_learning`
+- `required_courses`
+- `course_completion`
+- `certificates`
 
-Learners spend less time searching for their next action and are more likely to resume active learning, notice mandatory deadlines, and recognize their progress and achievements. HR and L&D teams gain a more consistent learner experience that supports course completion, compliance follow-through, engagement, and self-directed development without adding operational steps for administrators.
+The retired unfinished-courses card is not available. Restore default uses explicit role profiles for both order and size. Every profile starts with AI Mentor at `3x2`, Calendar at `4x2`, and then To-do at `3x2`. Management profiles continue with Deadline Risks at `3x2` and Training Completion at `2x2`, so that operational band fills all eight desktop columns (`3 + 3 + 2`). Student profiles instead pair To-do `3x2`, Continue Learning `3x2`, and Required Courses `2x2`, followed by `2x2` Course Completion and Certificates. Restored profiles never use a one-row card; compact one-row sizes remain a manual personalization option where supported. Administrator and Content Creator defaults contain management cards only, filtered by actual permissions. Temporarily inaccessible widgets remain in saved preferences so they can return if the user regains access.
 
-Personal layout persistence, responsive sizing, and role-aware availability keep the experience relevant and usable across devices while preventing unavailable or unauthorized tiles from creating clutter.
+Cards use semantic sizes from `1x1` through focused `3x2` and `4x2` spans. Each widget advertises only the sizes its content can use well. The grid uses two, four, or eight square columns, so every dimension preserves the same physical unit while content remains constrained to its allocated area.
 
-The dashboard gives administrators a current picture of training execution before missed obligations become a reporting or compliance problem. Completion and risk summaries help L&D teams prioritize intervention, while direct links reduce the time needed to move from a signal to the affected course or learner.
+On narrow screens below the `md` breakpoint, saved semantic sizes remain the user's preference while the visual layout stays usable: one-column cards use one mobile column, and wider `2x`, `3x`, or `4x` cards clamp to the full two-column mobile grid. From `md` upward, the saved `3x2` and `4x2` widths resume their full spans. This prevents implicit mobile columns from collapsing neighboring cards into unusably narrow tiles without changing the user's saved dashboard settings.
 
-## How It Works
+Every card shares the same compact shell: organization-color icon, title, divider, fixed overflow behavior, and an optional top-right navigation icon. Navigation icons stay visually stable on hover; they do not slide or gain a competing hover container. The drag preview reuses this header treatment instead of showing a separate icon badge.
 
-The user opens `/dashboard` and sees the widgets stored in their personal settings. The page title uses the same typography as the administrator Users view for visual consistency across the administration workspace. Selecting **Customize dashboard** creates an editable draft. The user can reorder cards, change supported widths, and open the widget library to show or hide optional widgets. While a card is dragged, a local ordering preview lets CSS Grid reflow the cards at their natural single- or double-column widths; the draft order changes only after a valid drop, while cancellation or dropping outside the grid keeps the previous order. Mouse users get precise pointer-based targeting, touch users get a short activation delay that reduces accidental drags, and keyboard users retain directional sorting. **Restore default** replaces only the draft with the current default returned by the API; **Save** persists it, while **Cancel** returns to the previously saved layout.
+Calendar is a required card whenever the user has calendar access and the tenant calendar feature is enabled. It remains visible in the dashboard and appears in the widget library with a disabled switch and a **Required** label; users can still reorder or resize it within its supported calendar sizes, but cannot hide it.
 
-A widget is visible when it is present in the saved `dashboard.widgets` array. There is no separate `enabled` property. Each saved item contains a stable widget ID, a non-negative order used for sorting, and a width of `1` (single column) or `2` (double column). Adding a widget uses its configured default width and appends it to the draft; removing or dragging widgets recalculates their order.
+## Personalization and persistence
 
-Mentingo determines the effective catalog on the server. It starts with the shared widget definitions, then filters them by the user's roles, permissions, tenant-level feature flags, and AI runtime availability. The same filtering is applied when loading a saved layout and when producing the default layout. Unknown, obsolete, or currently unavailable IDs are therefore not rendered. Submitted settings are structurally validated, and the API additionally verifies that the chosen width is allowed for the specific widget.
+`GET /api/settings/dashboard` returns the user's normalized layout and permission-filtered catalog. Each saved item contains:
 
-The learner starts from the dashboard and sees every enrolled course whose progress is already underway, ordered by recent activity. Each row shows the course image, progress percentage, and next incomplete lesson when one exists. Courses without a lesson destination, including formats that manage progress differently, remain visible and open at the course level.
+```yaml
+type: canonical widget type
+size: 1x1 | 2x1 | 1x2 | 2x2
+visible: boolean
+```
 
-Mandatory learning is presented as a complete action list rather than a single alert. Mentingo includes every unfinished mandatory assignment, whether its deadline is overdue, due within seven days, later, or not configured. Learners can open any row directly, while the footer summarizes the total and calls out overdue work.
+Catalog entries also indicate whether a widget is always visible. The API normalizes required widgets to `visible: true` and restores an omitted required widget during saves, so the rule is enforced even if an older client submits an incomplete layout.
 
-The certificate tile keeps its compact count and nearest-expiry summary. Selecting the count or **View all certificates** opens a responsive dialog that loads the learner's active certificates in pages. Each result shows the course, issue date, and expiration status and links to the corresponding certificate. Empty data never hides a widget; every widget owns its loading, error, retry, populated, and empty presentation.
+Array order is display order. The dashboard subdocument also carries `schemaVersion: 2` and a monotonic `revision`.
 
-Widget rows remain content-driven across screen sizes, while every card stretches to match the tallest card in its row and uses a consistent maximum height that prevents excessive expansion. Longer content scrolls inside its tile while the page retains its natural document flow. Every widget uses the same Mentingo card surface, spacing, header typography, icon treatment, content behavior, and fixed-footer pattern; edit mode adds a non-layout-shifting focus ring around the card.
+`PUT /api/settings/dashboard` atomically replaces the current user's dashboard preferences using an expected revision. Visibility changes are optimistic and automatic; valid reorder and resize operations save on completion. A serialized client queue prevents overlapping changes from overwriting one another. On a revision conflict, the client refetches and replays the latest local operation once.
 
-Widget descriptions appear in the widget library rather than inside the cards, making the dashboard itself more compact while preserving guidance when users choose their layout. On smaller screens, cards have a maximum height and scroll their content when necessary. The calendar reserves enough vertical space for six complete week rows. On large screens, its event panel follows the calendar's height without contributing to it, so longer selected-day and upcoming-event lists scroll independently instead of expanding the tile. The Incomplete courses legend remains fixed in the card footer while its course list scrolls. Training completion presents completed, in-progress, and not-started enrollments as a donut chart, with the completion percentage and completed-to-total ratio visible in the center.
+There is no global Save or Cancel action and no drag-instruction banner. Layout edit mode exposes card order, size, visibility, and reset controls; **Done** only exits layout editing because the changes are already saved. Reset uses confirmation and persists the current permission-aware defaults through `POST /api/settings/dashboard/reset`.
 
-Mentingo determines the effective catalog on the server. It starts with the shared widget definitions, then filters them by the user's roles and any required tenant-level feature flags. The same filtering is applied when loading a saved layout and when producing the default layout. Unknown, obsolete, or currently unavailable IDs are therefore not rendered. When saving, the API rejects unknown, unavailable, or duplicate IDs, verifies widget-specific widths, ensures that every required widget is still present, and normalizes the submitted order into a contiguous sequence.
+Because the semantic grid had not shipped to production, schema version 2 treats every incompatible stored layout as unset. Those users immediately receive the current role-specific default without having to reset or save it themselves. No database backfill is required; the version 2 layout is persisted on the next dashboard change. Once a version 2 layout exists, temporarily inaccessible widgets remain preserved in storage so permission changes do not erase the user's choices.
 
-For administrators, the training widgets count enrollments rather than unique courses or learners. One course assigned to 100 learners therefore contributes 100 enrollments. Training completion uses the shared shadcn chart wrapper over Recharts, including a labeled donut, accessible chart summary, segment tooltip, and color-keyed status breakdown. Each data-backed widget loads independently and receives only its own presentation data, so hiding or failing one widget does not require downloading unrelated dashboard aggregates. Deadline risks include only active, unfinished enrollments made through a mandatory group assignment with a due date. The risk card loads only overdue and due-soon counts; learner and course details are fetched in pages only after the user opens a risk dialog, where a localized action links directly to each course's statistics. Every data-backed widget presents a loading skeleton and a retryable error state.
+## Card behavior
 
-The calendar reuses Mentingo's role-aware event visibility, so administrators see tenant learning events while other roles retain their narrower course, enrollment, or trainer scope. Dates containing events use a light primary background instead of dot markers. Calendar day controls expose full localized date labels and their selected state to assistive technology. The dashboard calendar requests the complete event set for month markers and selected-day rendering, while a separate `upcoming` view applies the five-item limit on the API and excludes the selected local date. When the selected date has events, the widget places them in a highlighted section above upcoming events; events already shown for the selected date are not repeated in the upcoming list.
+### AI Mentor practice
 
-## Key Technical Context
+The AI Mentor card reuses the existing daily-practice lifecycle and chat transport. When no practice exists, users can describe a scenario directly in the card. A plus button opens scenario suggestions; selecting one fills the composer without submitting it. The empty composer cycles example prompts while unfocused and respects reduced-motion preferences.
 
-- The persisted user-settings structure is:
+Creating, queued, generating, failed, active, and completed states remain in place inside the card. Once active, the card shows the conversation in an internally scrollable region, keeps the latest message in view, and provides a text composer plus a top-right CTA to the full practice. The inline chat and full practice synchronize through the same thread-message query cache, so navigation cannot briefly hydrate an older conversation. Voice and detailed evaluation stay on the full AI Mentor page.
 
-  ```yaml
-  dashboard:
-    widgets:
-      - id: DashboardWidgetId
-        order: non-negative integer
-        width: 1 | 2
-  ```
+The card uses one visually flat content flow rather than nested cards. It supports `2x2` and the wider `3x2` option; role-based restored layouts use `3x2`. It never exposes a one-row variant and does not display redundant statements such as “today's attempt” or “the conversation is saved.”
 
-  `widgets` contains only visible tiles; it does not contain `enabled` or presentation data.
+### To-do tasks
 
-- The shared catalog in `packages/shared/src/constants/dashboard.ts` defines each widget's behavior independently from the saved layout:
+To-do is a personal, tenant-scoped task list backed by `todo_tasks`. Users can add tasks, complete or uncomplete them, rename them inline, delete them, and reorder them at any time; these controls do not depend on dashboard layout edit mode. It supports compact `2x1`, standard `2x2`, and wider `3x2` layouts while keeping the task list independently scrollable.
 
-  ```ts
-  {
-    alwaysVisible: boolean;
-    defaultVisible: boolean;
-    defaultWidth: 1 | 2;
-    defaultOrder: number;
-    allowedWidths: readonly (1 | 2)[];
-    allowedRoles?: readonly SystemRoleSlug[];
-    requiredPermissions?: readonly PermissionKey[];
-    requiredFeature?: FeatureKey;
-    requiresAiConfigured?: boolean;
-  }
-  ```
+Active tasks appear before completed tasks. Completion moves a task to the end of the completed section, and reopening it moves it to the end of the active section. DnD reordering is constrained to the current section. Nested task drag events are isolated from the outer dashboard sortable so moving a task cannot move its card.
 
-- The administrator catalog uses semantic persisted IDs: `a_training_completion`, `a_deadline_risks`, `a_incomplete_courses`, and `a_event_calendar`. Learner IDs are `s_continue_learning`, `s_required_course`, `s_course_completion`, `s_certificates`, and `s_ai_mentor_practice`. Continue learning is required and double-width; Required course and Certificates support one or two columns; Course completion is single-width; AI Mentor practice is double-width.
-- The course widgets require `course.read_assigned`, Certificates requires `certificate.read`, and AI Mentor practice requires `ai.use` plus a configured tenant AI runtime. Certificates and AI Mentor practice are not included in the default layout.
-- A data migration maps `s_placeholder_1..3` to the first three production IDs in existing user settings without changing array order, width, or visibility.
-- `GET /api/course/dashboard-summary` supplies arrays for all in-progress and mandatory courses plus the aggregate completion view. `POST /api/course/:courseId/open` records genuine learner access and helps order active courses by recency.
-- `GET /api/certificates/dashboard-summary` supplies the lightweight count and expiry view. The certificate dialog lazily reuses the paginated certificate API with the authenticated learner's ID, so opening the dashboard does not download the complete certificate history.
-- `GET /api/calendar/dashboard/events` accepts `view=all|upcoming` and an optional `selectedDate`. The `all` view remains the source for calendar markers and selected-day events; the `upcoming` view returns only the first five future events outside the selected date.
-- A data migration maps the three historical administrator placeholder IDs to their semantic equivalents without changing each user's saved order, width, or visibility. Training completion and Incomplete courses are optional, default-visible, administrator-only widgets fixed at single width; Deadline risks is optional and default-hidden. Event calendar is default-visible, always visible, fixed at double width, and available only when the tenant calendar feature is enabled.
-- Frontend presentation is an exhaustive registry in `apps/web/app/modules/Dashboard/Home/widgetRegistry.ts`. Each ID maps to a React component, translated title and description keys, an icon, and optional icon styles; these fields are never persisted in user settings.
-- `GET /api/settings` supplies the saved layout, `GET /api/settings/dashboard` supplies the effective list of available IDs, `GET /api/settings/dashboard/default` supplies the effective default items, and `PUT /api/settings` saves the layout. The dashboard catalog endpoints and the `/dashboard` route require `dashboard.read`.
-- `GET /api/settings` treats missing legacy dashboard settings as an empty saved layout and fills it from the permission-filtered default catalog without exposing unavailable widgets.
-- Training completion, deadline-risk summary, incomplete courses, and the dashboard event calendar use separate read endpoints. Each endpoint currently requires the shared `statistics.read` permission and returns only the fields consumed by its widget. `GET /api/statistics/dashboard/deadline-risks` separately supplies paginated course and learner details only after a risk dialog is opened. The lightweight calendar endpoint still reuses Mentingo's role-aware calendar service, but omits event details that the dashboard card does not display.
-- The grid uses one column on phones, two on medium screens, and four on large screens. Grid items and cards stretch to the automatically calculated row height, so tiles sharing a row remain equal without assigning a fixed or viewport-derived row size. Cards are capped at 27rem from the small breakpoint and their content areas scroll vertically when needed. Dragging uses a local order preview with sortable transforms disabled, allowing CSS Grid to reflow mixed-width cards without overlap or visual scaling. Motion animates only an inner visual layer's positional change, while the outer dnd-kit hitbox moves immediately to its logical grid cell; this preserves natural widget dimensions, prevents the animation from shifting collision targets, and respects the user's reduced-motion preference. Pointer-first collision detection uses the item geometry captured at drag start and retains the last valid target through gaps, so a reflowed neighbouring card cannot trigger an unintended second move. Every pointer event captures one immutable drop decision and projects it from the layout captured at drag start rather than from the previous preview, preventing movement from accumulating during a longer drag. Duplicate target decisions are ignored, and a center hysteresis zone prevents minor pointer movement from repeatedly switching between the two halves of a wider target. Those halves map to insertion before or after the target, while returning to the dragged card's original area restores its initial position and leaving the grid clears the target. Keyboard movement uses a center-based fallback, the draft layout is reordered only on drop, and the overlay shows lightweight widget metadata instead of mounting a duplicate data-backed widget. The calendar grid has a six-week-row minimum height, and size containment prevents the adjacent large-screen event panel from affecting the tile's intrinsic height. `DashboardWidgetShell` owns drag and resize controls, while each registered widget owns its card content. All visible dashboard strings exist in the six supported web locales.
+The API exposes self-scoped list, create, update, delete, and transactional reorder operations under `/api/todo-tasks`. Public payloads never accept a tenant or user ID. Titles are trimmed and limited to 200 characters; each user can keep up to 100 tasks.
 
-## Test Evidence
+### Event calendar
 
-Frontend dashboard tests cover saved-widget rendering, editing, width changes, widget selection, restore, and persistence. The production widget components independently cover loading, error, empty, and populated states, prove that multiple in-progress and mandatory courses render together, and verify that the certificate summary opens a dialog containing every loaded certificate.
+There is one `event_calendar` card. Its supported `4x2` and `4x3` layouts give the complete six-week month and an independently scrollable selected-day and upcoming-event region enough room to remain visible together. `4x2` is the default.
 
-Backend settings tests cover stable IDs, widths, defaults, permission filtering, the AI configuration gate, and recovery when a legacy settings row lacks its dashboard object. The course contract distinguishes full course lists from completion aggregates, while certificate access remains permission-protected and tenant-scoped. Dedicated browser coverage for long learner course lists and certificate-dialog pagination is not yet present.
+The header CTA opens `/calendar`. Calendar is removed from user-facing sidebar navigation, while direct route access and its existing permission guard remain. Event visibility continues to use the role-aware calendar service.
 
-Frontend component tests lock the administrator catalog's semantic IDs, roles, visibility flags, default widths, and allowed widths. They also prove that the dashboard title uses the administrator Users view typography, administrator widget titles render from saved IDs, only saved widgets appear, card descriptions are available in the single-column picker rather than on the cards, the Event calendar required badge sits beside its title in the picker, widget cards stretch to their row height and share application typography, icon sizing, maximum-height scrolling, and edit-ring styling, edit mode exposes widget, cancel, and save actions, fixed-width administrator widgets do not expose resize controls, available widgets can be added, restoring defaults includes the event calendar, and saving sends the `dashboard.widgets` structure with `id`, normalized `order`, and `width`. A dedicated Training completion test verifies the donut radii, segment stroke, central percentage and completed-to-total label, and accessible chart summary. Deadline-risk coverage verifies that the localized course action links to the relevant course statistics. Dedicated grid unit tests prove that both single-to-double and double-to-single reordering retain widget widths, create a contiguous order, and do not mutate the input layout. Dedicated calendar-widget coverage verifies localized date labels and selected-state semantics in addition to event highlighting and list behavior.
+### Deadline risks
 
-Backend schema tests cover known widget IDs and the global width enum. Settings API E2E tests cover saving a valid dashboard layout, order normalization, and rejecting unknown, duplicate, unavailable, missing-required, globally unsupported, and widget-specific disallowed values. Dashboard-statistics service tests prove that completion, risk counts, incomplete courses, and paginated risk details are produced independently; a permission-metadata test locks every widget endpoint to `statistics.read`. Frontend component tests mock each widget query separately, while dedicated calendar coverage uses the reduced dashboard event shape. Browser-level coverage of physical mouse and touch drag gestures, aggregate queries, and risk-dialog pagination is not yet present.
+The risk card displays affected courses directly rather than first presenting overdue/due-soon option cards. It supports `2x1`, `2x2`, and `3x2` layouts, defaulting to `2x1`. Courses are loaded incrementally and can be ordered by most or least urgent from the header. The card keeps course rows neutral so selecting a course is the clear primary action.
+
+Selecting a course opens a sortable repo-native Table of the course groups that own an overdue or approaching deadline. The columns are Group, Learners, Deadline, and Status. The entire group row toggles its enrollment-linked learners by pointer or keyboard. Search matches group or learner names, status filtering distinguishes overdue and due-soon groups, and selected filter options use a primary-tinted background without a dot/check marker. Changing filters or sorting keeps the same course's previous rows visible until the updated result arrives instead of replacing the table with a loader or skeleton. Groups are loaded incrementally. The responsive dialog uses the mobile drawer presentation on narrow screens and the same constrained centered width pattern as AI Mentor dialogs on desktop. It omits the redundant course-attention subtitle and keeps constant padding and hidden horizontal overflow. Its pointer, click, and keyboard events do not bubble to the sortable card below it.
+
+The backend paginates distinct courses at `/api/statistics/dashboard/deadline-risks/courses` and course-specific deadline groups at `/api/statistics/dashboard/deadline-risks/courses/:courseId/groups`. It verifies course access before returning groups and their learners, and applies administrator versus owned/manageable-course scope server-side. Deadlines are derived from current `group_users + group_courses` membership rather than the enrollment's single `enrolledByGroupId`, so a learner in multiple groups can contribute to every applicable course-group deadline.
+
+### Certificates
+
+The certificate card shows certificate records immediately in an internally scrollable list instead of counters or active/overdue grouping. Additional records load as the user reaches the end. Selecting a row opens the same shared certificate preview modal used by the course view rather than navigating to its course. It includes the tenant logo and background, persisted certificate font color and signature, download, and share controls. The dashboard calls the current-user `/api/certificates/dashboard` endpoint and never supplies another user's ID.
+
+### Learning and statistics
+
+Continue Learning, Required Courses, and Course Completion remain permission-gated learner views. Continue Learning shows only unfinished enrolled courses and orders them from the lowest course progress to the highest, matching the learner's course list. Required Courses derives mandatory assignments and the earliest applicable deadline from current group membership, including for course managers who are not the course author. Group enrollment excludes only the course author rather than every user with course-management permissions. Training Completion and Deadline Risks remain independently loaded management views. Each widget header uses a single-person or multiple-person icon with a hover tooltip to clarify whether the card is personal or organization-wide; the widget settings list uses the same indicator. AI Practice Sessions explain that a new session can be generated once per day. Visible chart legends are removed to reduce card noise; tooltips may extend beyond the chart card without being clipped, while accessible text summaries preserve the information.
+
+Each card owns its loading, error, retry, empty, and populated states. A failed card does not prevent the rest of the dashboard from loading.
+
+## Permissions and data boundaries
+
+- AI Mentor requires `ai.use` and a configured tenant AI runtime.
+- To-do requires `todo_task.manage_self`.
+- Calendar requires `calendar.read` and the calendar feature.
+- Deadline Risks and Training Completion require `statistics.read`; repository queries choose tenant-wide or owned/manageable-course scope from the actor's permissions.
+- Learner course cards require assigned-course read access.
+- Certificates require certificate read access.
+
+Role profiles only establish initial order and visibility. The permission-filtered server catalog is authoritative for what a user may submit or render. Unknown types, duplicates, unavailable widgets, and unsupported sizes are rejected using own-property/set membership semantics.
+
+## Accessibility and interaction quality
+
+- Mouse, delayed-touch, and keyboard dashboard sorting remain supported.
+- Reduced-motion preferences disable non-essential card and placeholder movement.
+- Fixed grid cells use internal scrolling and do not resize around loading or long content.
+- Calendar dates expose localized labels and selected state.
+- Chart information remains available without relying only on color.
+- Icon-only controls have accessible names, and destructive To-do actions remain explicit.
+
+## Implementation evidence
+
+The branch includes backend coverage for dashboard normalization, catalog filtering, revision conflicts, self-scoped To-do operations, current-user certificates, deadline course/student scope, and tenant RLS. Frontend coverage exercises grid packing, persisted wide-span clamping at a narrow viewport, and the primary card behaviors, with Playwright flows added for layout persistence, navigation, AI Mentor, deadlines, certificates, and To-do interactions.
+
+The latest user-directed refinement pass was implemented without rerunning automated checks. The final validation run remains intentionally deferred until requested.

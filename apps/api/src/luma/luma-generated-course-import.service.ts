@@ -5,6 +5,8 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
   AI_MENTOR_VOICE_MODE,
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TEACHING_STYLE,
   DEFAULT_AI_MENTOR_TYPE,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
@@ -21,6 +23,7 @@ import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { AiJudgeConfigurationGraphService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-graph.service";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
+import { AiMentorConfigurationGraphService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonRepository } from "src/lesson/repositories/adminLesson.repository";
 import {
@@ -78,6 +81,7 @@ export class LumaGeneratedCourseImportService {
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonRepository: AdminLessonRepository,
     private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
+    private readonly aiMentorConfigurationGraphService: AiMentorConfigurationGraphService,
     private readonly ingestionService: IngestionService,
     private readonly lumaCourseGenerationSyncRepository: LumaCourseGenerationSyncRepository,
   ) {}
@@ -230,16 +234,18 @@ export class LumaGeneratedCourseImportService {
       .insert(aiMentorLessons)
       .values({
         lessonId: lesson.id,
-        aiMentorInstructions: buildJsonbField(
-          data.language,
-          this.sanitizeText(aiMentor.aiMentorInstructions),
-        ),
-        type: this.mapAiMentorType(aiMentor.type),
         name: buildJsonbField(data.language, this.sanitizeText(aiMentor?.name ?? "AI Mentor")),
         voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
         ttsPreset: this.mapAiMentorTtsPreset(aiMentor.ttsPreset),
       })
       .returning({ id: aiMentorLessons.id });
+
+    await this.aiMentorConfigurationGraphService.createConfigurationInTransaction(
+      aiMentorLesson.id,
+      this.buildImportedAiMentorConfiguration(aiMentor),
+      data.language,
+      data.trx,
+    );
 
     await this.aiJudgeConfigurationGraphService.createConfigurationInTransaction(
       aiMentorLesson.id,
@@ -723,6 +729,32 @@ export class LumaGeneratedCourseImportService {
     }
 
     return DEFAULT_AI_MENTOR_TYPE;
+  }
+
+  private buildImportedAiMentorConfiguration(aiMentor: LumaGeneratedCourseAiMentor) {
+    const type = this.mapAiMentorType(aiMentor.type);
+    const additionalInstructions = this.sanitizeText(aiMentor.aiMentorInstructions);
+
+    if (type === AI_MENTOR_TYPE.TEACHER) {
+      return {
+        type: AI_MENTOR_TYPE.TEACHER,
+        taskGoal: "",
+        expertise: "",
+        contentScope: "",
+        teachingStyle: AI_MENTOR_TEACHING_STYLE.EXPLAIN_AND_PRACTICE,
+        additionalInstructions,
+      };
+    }
+
+    return {
+      type: AI_MENTOR_TYPE.ROLEPLAY,
+      scenario: "",
+      aiRole: "",
+      learnerRole: "",
+      characterGoal: "",
+      difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      additionalInstructions,
+    };
   }
 
   private mapAiMentorTtsPreset(preset: "male" | "female" | undefined): AiMentorTTSPreset {

@@ -1,3 +1,5 @@
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../data/ai-mentor-practice/handles";
@@ -84,7 +86,27 @@ const installDashboardAndPracticeMocks = async (page: Page) => {
     }
 
     if (request.method() === "GET" && path === "/api/settings/dashboard") {
-      await fulfillJson(route, ["s_ai_mentor_practice"]);
+      await fulfillJson(route, {
+        layout: {
+          schemaVersion: 2,
+          revision: 0,
+          widgets: [
+            {
+              type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+              size: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+              visible: true,
+            },
+          ],
+        },
+        catalog: [
+          {
+            type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+            alwaysVisible: false,
+            allowedSizes: [DASHBOARD_WIDGET_SIZES.TWO_BY_TWO, DASHBOARD_WIDGET_SIZES.THREE_BY_TWO],
+            defaultSize: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+          },
+        ],
+      });
       return;
     }
 
@@ -139,14 +161,15 @@ test("student can start a practice from the dashboard and see background prepara
     const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
     await expect(widget).toBeVisible();
     await expect(widget.getByRole("heading", { name: "AI Mentor practice" })).toBeVisible();
-    await widget.getByRole("link", { name: "Start practice" }).click();
-
-    await expect(page).toHaveURL(/\/ai-mentor\/practice\/new$/);
-    await page
+    await widget
       .getByTestId(AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT)
       .fill("I want to practice asking my manager for help with an overloaded workload.");
-    await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SUBMIT_BUTTON).click();
+    await widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SUBMIT_BUTTON).click();
 
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(widget.getByRole("status")).toContainText("Your practice scenario is queued.");
+    await expect(widget.getByRole("link", { name: "Continue practice" })).toBeVisible();
+    await widget.getByRole("link", { name: "Continue practice" }).click();
     await expect(page).toHaveURL(new RegExp(`/ai-mentor/practice/${PRACTICE_ID}$`));
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.PREPARING_STATE)).toBeVisible();
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON)).toBeVisible();
@@ -230,7 +253,6 @@ test("student can review practice feedback and start the practice again", async 
     await page.goto(`/ai-mentor/practice/${PRACTICE_ID}`);
 
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONVERSATION)).toBeVisible();
-    await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.TASK_BUTTON).click();
     await expect(
       page.getByText("Explain the workload impact and agree on a practical next step."),
     ).toBeVisible();

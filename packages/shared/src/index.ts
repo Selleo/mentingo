@@ -3,6 +3,7 @@ export * from "./constants/accessGuard";
 export * from "./constants/activityLogs";
 export * from "./constants/aiJudge";
 export * from "./constants/aiMentorAvatar";
+export * from "./constants/aiMentorGeneration";
 export * from "./constants/aiMentorPractice";
 export * from "./constants/aiMentorTypes";
 export * from "./constants/aiMentorVoice";

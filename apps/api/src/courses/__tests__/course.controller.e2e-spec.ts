@@ -1629,6 +1629,7 @@ describe("CourseController (e2e)", () => {
           categoryId: category.id,
           status: "published",
           thumbnailS3Key: null,
+          chapterCount: 4,
         });
         const inProgressCourse = await courseFactory.create({
           title: "Z In Progress Course",
@@ -1636,6 +1637,15 @@ describe("CourseController (e2e)", () => {
           categoryId: category.id,
           status: "published",
           thumbnailS3Key: null,
+          chapterCount: 4,
+        });
+        const earlyProgressCourse = await courseFactory.create({
+          title: "M Early Progress Course",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+          chapterCount: 4,
         });
 
         await db.insert(studentCourses).values([
@@ -1649,7 +1659,12 @@ describe("CourseController (e2e)", () => {
           {
             studentId: student.id,
             courseId: inProgressCourse.id,
-            finishedChapterCount: 0,
+            finishedChapterCount: 3,
+          },
+          {
+            studentId: student.id,
+            courseId: earlyProgressCourse.id,
+            finishedChapterCount: 1,
           },
         ]);
 
@@ -1659,6 +1674,7 @@ describe("CourseController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data.map((course: CourseTest) => course.title)).toEqual([
+          "M Early Progress Course",
           "Z In Progress Course",
           "A Completed Course",
         ]);
@@ -1711,6 +1727,75 @@ describe("CourseController (e2e)", () => {
           perPage: 5,
         });
       });
+    });
+  });
+
+  describe("GET /api/course/dashboard-summary", () => {
+    it("returns unfinished courses in ascending progress order", async () => {
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+      });
+      const earlyProgressCourse = await courseFactory.create({
+        title: "Early Progress Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+      const lateProgressCourse = await courseFactory.create({
+        title: "Late Progress Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+      const completedCourse = await courseFactory.create({
+        title: "Completed Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+
+      await db.insert(studentCourses).values([
+        {
+          studentId: student.id,
+          courseId: earlyProgressCourse.id,
+          progress: "in_progress",
+          finishedChapterCount: 1,
+        },
+        {
+          studentId: student.id,
+          courseId: lateProgressCourse.id,
+          progress: "in_progress",
+          finishedChapterCount: 3,
+        },
+        {
+          studentId: student.id,
+          courseId: completedCourse.id,
+          progress: "completed",
+          completedAt: new Date().toISOString(),
+          finishedChapterCount: 4,
+        },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/dashboard-summary?language=en")
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(
+        response.body.data.continueLearningCourses.map((course: CourseTest) => course.title),
+      ).toEqual(["Early Progress Course", "Late Progress Course"]);
     });
   });
 
@@ -4096,6 +4181,39 @@ describe("CourseController (e2e)", () => {
           expect(groupCourse.isMandatory).toBe(true);
           expect(groupCourse.enrolledBy).toBe(admin.id);
           expect(groupCourse.dueDate?.toISOString()).toBe(dueDate.toISOString());
+        });
+
+        it("enrolls a course manager in an assigned group unless they authored the course", async () => {
+          const author = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const courseManager = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: author.id,
+            categoryId: category.id,
+            status: "published",
+          });
+          const group = await groupFactory.withMembers([author.id, courseManager.id]).create();
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group.id, isMandatory: true, dueDate: null }] })
+            .set("Cookie", await cookieFor(author, app))
+            .expect(201);
+
+          const enrollments = await db
+            .select({ studentId: studentCourses.studentId })
+            .from(studentCourses)
+            .where(eq(studentCourses.courseId, course.id));
+
+          expect(enrollments).toEqual([{ studentId: courseManager.id }]);
         });
 
         it("creates a course due-date calendar event visible to students in the group", async () => {

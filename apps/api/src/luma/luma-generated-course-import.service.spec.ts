@@ -14,6 +14,7 @@ describe("LumaGeneratedCourseImportService", () => {
       undefined as never,
       undefined as never,
       undefined as never,
+      undefined as never,
     );
 
   it("accepts a generated AI Mentor lesson with a structured Judge configuration", () => {

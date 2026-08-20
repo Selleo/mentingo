@@ -91,11 +91,11 @@ import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
 import { AiJudgeConfigurationTranslationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-translation.service";
+import { AiMentorLessonTranslationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
-import { AiMentorLessonTranslationService } from "src/lesson/services/aiMentorLessonTranslation.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { LumaService } from "src/luma/luma.service";
@@ -117,7 +117,10 @@ import {
   coursesSummaryStats,
   groups,
   groupUsers,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
+  aiMentorTeacherConfigurations,
   lessonLearningTime,
   lessons,
   questionAnswerOptions,
@@ -261,6 +264,12 @@ const getRequiredCourseUrgency = (
       () => STUDENT_COURSE_URGENCY.DUE_SOON,
     )
     .otherwise(() => STUDENT_COURSE_URGENCY.SCHEDULED);
+
+const studentCourseProgressOrder = sql<number>`CASE
+  WHEN ${courses.chapterCount} > 0
+    THEN COALESCE(${studentCourses.finishedChapterCount}, 0)::numeric / ${courses.chapterCount}
+  ELSE 0
+END`;
 
 @Injectable()
 export class CourseService {
@@ -473,6 +482,7 @@ export class CourseService {
         )
         .orderBy(
           sql`CASE WHEN ${studentCourses.completedAt} IS NULL THEN 0 ELSE 1 END`,
+          studentCourseProgressOrder,
           sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
         );
 
@@ -552,10 +562,14 @@ export class CourseService {
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<StudentCourseDashboardSummary> {
+    const continueCourseTitle = this.localizationService.getLocalizedSqlField(
+      courses.title,
+      language,
+    );
     const continueCourses = await this.db
       .select({
         courseId: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: continueCourseTitle,
         thumbnailS3Key: courses.thumbnailS3Key,
         completedChapterCount: studentCourses.finishedChapterCount,
         courseChapterCount: courses.chapterCount,
@@ -571,34 +585,42 @@ export class CourseService {
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .orderBy(
+        studentCourseProgressOrder,
+        asc(continueCourseTitle),
+        desc(studentCourses.lastOpenedAt),
+        desc(studentCourses.updatedAt),
+      )
       .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
 
     const requiredCourses = await this.db
       .select({
         courseId: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        dueDate: sql<string | null>`${groupCourses.dueDate}`,
+        thumbnailS3Key: courses.thumbnailS3Key,
+        dueDate: sql<string | null>`MIN(${groupCourses.dueDate})::TEXT`,
       })
-      .from(studentCourses)
-      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
-      .innerJoin(
-        groupCourses,
+      .from(groupUsers)
+      .innerJoin(groupCourses, eq(groupCourses.groupId, groupUsers.groupId))
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .leftJoin(
+        studentCourses,
         and(
-          eq(groupCourses.courseId, studentCourses.courseId),
-          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          eq(studentCourses.studentId, groupUsers.userId),
+          eq(studentCourses.courseId, groupCourses.courseId),
         ),
       )
       .where(
         and(
-          eq(studentCourses.studentId, userId),
+          eq(groupUsers.userId, userId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(studentCourses.completedAt),
           eq(groupCourses.isMandatory, true),
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(groupCourses.dueDate, courses.title)
+      .groupBy(courses.id)
+      .orderBy(sql`MIN(${groupCourses.dueDate}) NULLS LAST`, courses.title)
       .limit(STUDENT_DASHBOARD_LIMITS.REQUIRED_COURSES);
 
     const [completion] = await this.db
@@ -681,23 +703,29 @@ export class CourseService {
     );
     const now = Date.now();
     const dueSoonBoundary = addDays(new Date(now), 7).getTime();
-
-    const total = completion?.total ?? 0;
-    const completed = completion?.completed ?? 0;
-
-    return {
-      continueLearningCourses,
-      requiredCourses: requiredCourses.map((course) => {
+    const requiredDashboardCourses = await Promise.all(
+      requiredCourses.map(async (course) => {
         const urgency = getRequiredCourseUrgency(course.dueDate, now, dueSoonBoundary);
 
         return {
           courseId: course.courseId,
           slug: slugs.get(course.courseId) ?? course.courseId,
           title: course.title,
+          thumbnailUrl: course.thumbnailS3Key
+            ? await this.getSignedCourseThumbnailUrl(course.thumbnailS3Key)
+            : null,
           dueDate: course.dueDate,
           urgency,
         };
       }),
+    );
+
+    const total = completion?.total ?? 0;
+    const completed = completion?.completed ?? 0;
+
+    return {
+      continueLearningCourses,
+      requiredCourses: requiredDashboardCourses,
       completion: {
         total,
         completed,
@@ -1785,14 +1813,20 @@ export class CourseService {
 
     if (hasMissingCourseFields) return true;
 
-    const missingJudgeFields =
-      await this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+    const [missingMentorFields, missingJudgeFields] = await Promise.all([
+      this.aiMentorLessonTranslationService.getMissingTranslations(
         id,
         language,
         courseInRequestedLanguage.baseLanguage,
-      );
+      ),
+      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        id,
+        language,
+        courseInRequestedLanguage.baseLanguage,
+      ),
+    ]);
 
-    return missingJudgeFields.length > 0;
+    return missingMentorFields.length > 0 || missingJudgeFields.length > 0;
   }
 
   async getContentCreatorCourses({
@@ -2430,7 +2464,7 @@ export class CourseService {
         }
 
         if (updatedCourse.status !== COURSE_STATUSES.PUBLISHED) {
-          await this.settingsService.clearFeaturedCourseIfMatches(id, trx);
+          await this.settingsService.clearFeaturedCoursesIfMatches(id, trx);
         }
 
         if (!isPlaywrightTest && isStripeConfigured) {
@@ -3058,12 +3092,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-                PERMISSIONS.COURSE_UPDATE,
-                PERMISSIONS.COURSE_UPDATE_OWN,
-              ]),
-            ),
+            ne(users.id, course.authorId),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -3105,12 +3134,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-                PERMISSIONS.COURSE_UPDATE,
-                PERMISSIONS.COURSE_UPDATE_OWN,
-              ]),
-            ),
+            ne(users.id, course.authorId),
             isNull(studentCourses.id),
           ),
         )
@@ -3573,7 +3597,7 @@ export class CourseService {
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
-      await this.settingsService.clearFeaturedCourseIfMatches(id, trx);
+      await this.settingsService.clearFeaturedCoursesIfMatches(id, trx);
 
       if (isLumaConfigured) {
         await this.lumaService
@@ -4953,9 +4977,58 @@ export class CourseService {
           .update(aiMentorLessons)
           .set({
             name: deleteJsonbField(aiMentorLessons.name, language),
-            aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
           })
           .where(inArray(aiMentorLessons.lessonId, lessonIds));
+
+        const aiMentorConfigurationIds = trx
+          .select({ id: aiMentorConfigurations.id })
+          .from(aiMentorConfigurations)
+          .innerJoin(
+            aiMentorLessons,
+            eq(aiMentorLessons.id, aiMentorConfigurations.aiMentorLessonId),
+          )
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
+
+        await trx
+          .update(aiMentorConfigurations)
+          .set({
+            openingInstruction: deleteJsonbField(
+              aiMentorConfigurations.openingInstruction,
+              language,
+            ),
+            additionalInstructions: deleteJsonbField(
+              aiMentorConfigurations.additionalInstructions,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorConfigurations.id, aiMentorConfigurationIds));
+
+        await trx
+          .update(aiMentorTeacherConfigurations)
+          .set({
+            taskGoal: deleteJsonbField(aiMentorTeacherConfigurations.taskGoal, language),
+            expertise: deleteJsonbField(aiMentorTeacherConfigurations.expertise, language),
+            contentScope: deleteJsonbField(aiMentorTeacherConfigurations.contentScope, language),
+            feedbackGuidance: deleteJsonbField(
+              aiMentorTeacherConfigurations.feedbackGuidance,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorTeacherConfigurations.configurationId, aiMentorConfigurationIds));
+
+        await trx
+          .update(aiMentorRoleplayConfigurations)
+          .set({
+            scenario: deleteJsonbField(aiMentorRoleplayConfigurations.scenario, language),
+            aiRole: deleteJsonbField(aiMentorRoleplayConfigurations.aiRole, language),
+            learnerRole: deleteJsonbField(aiMentorRoleplayConfigurations.learnerRole, language),
+            characterGoal: deleteJsonbField(aiMentorRoleplayConfigurations.characterGoal, language),
+            factsAndConstraints: deleteJsonbField(
+              aiMentorRoleplayConfigurations.factsAndConstraints,
+              language,
+            ),
+          })
+          .where(inArray(aiMentorRoleplayConfigurations.configurationId, aiMentorConfigurationIds));
 
         const aiJudgeConfigurationRows = await trx
           .select({ id: aiJudgeConfigurations.id })
@@ -5584,14 +5657,6 @@ export class CourseService {
             hasValue: Boolean(lesson.aiMentor?.name?.length),
             baseValue: baseLesson?.aiMentor?.name,
             field: aiMentorLessons.name,
-            idColumn: aiMentorLessons.lessonId,
-          };
-
-          yield {
-            id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
-            baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
-            field: aiMentorLessons.aiMentorInstructions,
             idColumn: aiMentorLessons.lessonId,
           };
         }

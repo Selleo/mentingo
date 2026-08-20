@@ -1,4 +1,7 @@
-import { DASHBOARD_DEADLINE_RISK_TYPES } from "@repo/shared";
+import {
+  DASHBOARD_DEADLINE_RISK_TYPES,
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { nextLessonSchema } from "src/lesson/lesson.schema";
@@ -107,6 +110,34 @@ export const DashboardDeadlineRiskCourseSchema = Type.Object({
   students: Type.Array(DashboardDeadlineStudentSchema),
 });
 
+export const DashboardDeadlineRiskUrgencyOrderSchema = Type.Enum(
+  DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
+);
+
+export const DashboardDeadlineRiskCourseSummarySchema = Type.Object({
+  id: Type.String(),
+  title: Type.String(),
+  thumbnailUrl: Type.Union([Type.String(), Type.Null()]),
+  overdueCount: Type.Number(),
+  dueSoonCount: Type.Number(),
+  nearestDueDate: Type.String(),
+  urgency: DashboardDeadlineRiskTypeSchema,
+});
+
+export const DashboardDeadlineRiskStudentSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+});
+
+export const DashboardDeadlineRiskGroupSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  dueDate: Type.String(),
+  urgency: DashboardDeadlineRiskTypeSchema,
+  studentCount: Type.Number(),
+  students: Type.Array(DashboardDeadlineRiskStudentSchema),
+});
+
 export const DashboardTrainingCompletionSchema = Type.Object({
   ...DashboardCourseProgressSchema.properties,
   total: Type.Number(),
@@ -147,4 +178,12 @@ export type DashboardDeadlineRiskSummary = Static<typeof DashboardDeadlineRiskSu
 export type DashboardIncompleteCourses = Static<typeof DashboardIncompleteCoursesSchema>;
 export type DashboardDeadlineRiskType = Static<typeof DashboardDeadlineRiskTypeSchema>;
 export type DashboardDeadlineRiskCourse = Static<typeof DashboardDeadlineRiskCourseSchema>;
+export type DashboardDeadlineRiskUrgencyOrder = Static<
+  typeof DashboardDeadlineRiskUrgencyOrderSchema
+>;
+export type DashboardDeadlineRiskCourseSummary = Static<
+  typeof DashboardDeadlineRiskCourseSummarySchema
+>;
+export type DashboardDeadlineRiskStudent = Static<typeof DashboardDeadlineRiskStudentSchema>;
+export type DashboardDeadlineRiskGroup = Static<typeof DashboardDeadlineRiskGroupSchema>;
 export type CourseStudentsStatsByMonth = Static<typeof CourseStudentsStatsByMonthSchema>;

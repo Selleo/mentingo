@@ -7,6 +7,12 @@ import { ApiClient } from "../api-client";
 
 import { useCurrentUser } from "./useCurrentUser";
 
+import type { GetDashboardCertificatesResponse } from "../generated-api";
+
+export type DashboardCertificate = GetDashboardCertificatesResponse["data"][number];
+
+export type DashboardCertificatesResponse = GetDashboardCertificatesResponse;
+
 const DASHBOARD_CERTIFICATES_PAGE_SIZE = 10;
 
 export function useDashboardCertificates(page: number, enabled: boolean) {
@@ -18,15 +24,11 @@ export function useDashboardCertificates(page: number, enabled: boolean) {
     queryKey: ["dashboard", "certificates", currentUser?.id, language, page],
     queryFn: async () => {
       if (!currentUser?.id) throw new Error(t("auth.error.unauthenticated"));
-
-      const response = await ApiClient.api.certificatesControllerGetAllCertificates({
-        userId: currentUser.id,
+      const response = await ApiClient.api.certificatesControllerGetDashboardCertificates({
         language,
         page,
         perPage: DASHBOARD_CERTIFICATES_PAGE_SIZE,
-        sort: "-createdAt",
       });
-
       return response.data;
     },
     enabled: enabled && Boolean(currentUser?.id),

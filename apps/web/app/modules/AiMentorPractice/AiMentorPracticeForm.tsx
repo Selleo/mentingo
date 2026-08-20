@@ -17,20 +17,16 @@ import { createPracticeFormSchema, type PracticeFormValues } from "./aiMentorPra
 
 const PRACTICE_SUGGESTIONS = [
   {
-    label: "aiMentorPractice.form.suggestions.feedback.label",
-    value: "aiMentorPractice.form.suggestions.feedback.value",
+    label: "aiMentorPractice.form.suggestions.delayedOrder.label",
+    value: "aiMentorPractice.form.suggestions.delayedOrder.value",
   },
   {
-    label: "aiMentorPractice.form.suggestions.boundary.label",
-    value: "aiMentorPractice.form.suggestions.boundary.value",
+    label: "aiMentorPractice.form.suggestions.orderMistake.label",
+    value: "aiMentorPractice.form.suggestions.orderMistake.value",
   },
   {
-    label: "aiMentorPractice.form.suggestions.explanation.label",
-    value: "aiMentorPractice.form.suggestions.explanation.value",
-  },
-  {
-    label: "aiMentorPractice.form.suggestions.request.label",
-    value: "aiMentorPractice.form.suggestions.request.value",
+    label: "aiMentorPractice.form.suggestions.sensitiveData.label",
+    value: "aiMentorPractice.form.suggestions.sensitiveData.value",
   },
 ] as const;
 
