@@ -200,7 +200,6 @@ export type AiMentorRoleplayConfigurationSelect = InferSelectModel<
 export type AiMentorRoleplayConfigurationInsert = InferInsertModel<
   typeof aiMentorRoleplayConfigurations
 >;
-
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationJsonbInsert = Omit<AiJudgeConfigurationInsert, "taskGoal"> & {

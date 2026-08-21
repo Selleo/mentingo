@@ -1359,6 +1359,13 @@
       "when": 1787219830731,
       "tag": "0193_rename_bunny_stream_signing_secret",
       "breakpoints": true
+    },
+    {
+      "idx": 194,
+      "version": "7",
+      "when": 1787298970074,
+      "tag": "0194_normalize_ai_mentor_custom_tts_references",
+      "breakpoints": true
     }
   ]
 }

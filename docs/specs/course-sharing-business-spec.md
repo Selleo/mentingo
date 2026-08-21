@@ -17,6 +17,7 @@ The managing-tenant administrator selects recipient organizations from the cours
 - Share one course with selected recipient organizations.
 - Create each newly shared course as a draft so the recipient can decide when to launch it.
 - Synchronize later course, chapter, lesson, category, resource, quiz, AI Mentor, and supported SCORM content changes from the source.
+- Copy AI Mentor voice configuration with the shared lesson. Preset settings and localized custom provider voice identifiers are configuration values, so custom voice identifiers are preserved literally and do not require tenant asset copying.
 - Preserve the recipient course's publication status when source content is synchronized.
 - Let recipient administrators publish shared courses and manage participants while keeping shared content read-only.
 - Show source and recipient copies as shared courses and prevent an exported copy from becoming a new sharing source.

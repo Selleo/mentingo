@@ -52,10 +52,12 @@ export class AdminLessonRepository {
         aiMentorAvatarReference: aiMentorLessons.avatarReference,
         aiMentorVoiceMode: aiMentorLessons.voiceMode,
         aiMentorTTSPreset: aiMentorLessons.ttsPreset,
-        aiMentorCustomTtsReference: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.customTtsReference,
-          language,
-        ),
+        aiMentorCustomTtsReference: language
+          ? this.localizationService.getFieldByLanguage(
+              aiMentorLessons.customTtsReference,
+              language,
+            )
+          : this.localizationService.getLocalizedSqlField(aiMentorLessons.customTtsReference),
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
