@@ -11,6 +11,7 @@ import type { RealtimePCMPlayer } from "../audio-player";
 import type {
   AudioOutputLifecycleEventPayload,
   AudioSpeechEventPayload,
+  MentorResponseDeltaEventPayload,
   MentorResponseCompletedEventPayload,
   MentorTranscriptionEventPayload,
   StopAudioEventPayload,
@@ -27,8 +28,8 @@ type VoiceMentorSocketHandlerDependencies = {
   restartInactivityTimer: () => void;
   clearInactivityTimer: () => void;
   finalizeTurnIfReady: () => void;
-  onAudioChunkReceived?: () => void;
   onMentorTranscription?: (text: string) => void;
+  onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioStarted?: () => void;
   onAudioInterrupted?: () => void;
@@ -39,6 +40,7 @@ type SocketEventHandlerMap = {
   [VOICE_SOCKET_EVENT.STOP_AUDIO]: (payload: StopAudioEventPayload) => void;
   [VOICE_SOCKET_EVENT.AUDIO_SPEECH]: (payload: AudioSpeechEventPayload) => Promise<void>;
   [VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION]: (payload: MentorTranscriptionEventPayload) => void;
+  [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA]: (payload: MentorResponseDeltaEventPayload) => void;
   [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED]: (
     payload: MentorResponseCompletedEventPayload,
   ) => void;
@@ -51,6 +53,7 @@ export const SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS = [
   VOICE_SOCKET_EVENT.STOP_AUDIO,
   VOICE_SOCKET_EVENT.AUDIO_SPEECH,
   VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION,
+  VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA,
   VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED,
   VOICE_SOCKET_EVENT.AUDIO_INTERRUPTED,
   VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED,
@@ -66,8 +69,8 @@ export function createVoiceMentorSocketHandlers({
   restartInactivityTimer,
   clearInactivityTimer,
   finalizeTurnIfReady,
-  onAudioChunkReceived,
   onMentorTranscription,
+  onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioStarted,
   onAudioInterrupted,
@@ -118,7 +121,6 @@ export function createVoiceMentorSocketHandlers({
       }
 
       await audioPlayerRef.current?.enqueue(bytes);
-      onAudioChunkReceived?.();
       restartInactivityTimer();
     },
     [VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION]: (payload) => {
@@ -128,6 +130,13 @@ export function createVoiceMentorSocketHandlers({
       }
 
       onMentorTranscription?.(text);
+    },
+    [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA]: (payload) => {
+      if (typeof payload.text !== "string" || payload.text.length === 0) {
+        return;
+      }
+
+      onMentorResponseDelta?.(payload.text);
     },
     [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED]: (payload) => {
       if (payload.reason !== "complete") {

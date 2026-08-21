@@ -28,12 +28,12 @@ type VoiceMentorProps = {
   setInput: Dispatch<SetStateAction<string>>;
   onLevelChange: (level: number) => void;
   onMentorTranscription?: (text: string) => void;
+  onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioStarted?: () => void;
   onAudioOutputCompleted?: () => void;
   onAudioInterrupted?: () => void;
   onSpeechChunkSent?: () => void;
-  onAudioChunkReceived?: () => void;
   onMentorAudioLevel?: (level: number) => void;
 };
 
@@ -42,12 +42,12 @@ export function useVoiceMentor({
   setInput,
   onLevelChange,
   onMentorTranscription,
+  onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioStarted,
   onAudioOutputCompleted,
   onAudioInterrupted,
   onSpeechChunkSent,
-  onAudioChunkReceived,
   onMentorAudioLevel,
 }: VoiceMentorProps) {
   const streamerRef = useRef<RealtimePCMStreamerWorklet | null>(null);
@@ -58,18 +58,19 @@ export function useVoiceMentor({
   const onLevelChangeRef = useRef(onLevelChange);
   const setInputRef = useRef(setInput);
   const onMentorTranscriptionRef = useRef(onMentorTranscription);
+  const onMentorResponseDeltaRef = useRef(onMentorResponseDelta);
   const onMentorResponseCompletedRef = useRef(onMentorResponseCompleted);
   const onAudioStartedRef = useRef(onAudioStarted);
   const onAudioOutputCompletedRef = useRef(onAudioOutputCompleted);
   const onAudioInterruptedRef = useRef(onAudioInterrupted);
   const onSpeechChunkSentRef = useRef(onSpeechChunkSent);
-  const onAudioChunkReceivedRef = useRef(onAudioChunkReceived);
   const onMentorAudioLevelRef = useRef(onMentorAudioLevel);
   const showErrorToastRef = useRef<(translationKey: string) => void>(() => undefined);
   const { t } = useTranslation();
   const { toast } = useToast();
 
   const [isRecording, setIsRecording] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
@@ -83,6 +84,10 @@ export function useVoiceMentor({
   useEffect(() => {
     onMentorTranscriptionRef.current = onMentorTranscription;
   }, [onMentorTranscription]);
+
+  useEffect(() => {
+    onMentorResponseDeltaRef.current = onMentorResponseDelta;
+  }, [onMentorResponseDelta]);
 
   useEffect(() => {
     onMentorResponseCompletedRef.current = onMentorResponseCompleted;
@@ -103,10 +108,6 @@ export function useVoiceMentor({
   useEffect(() => {
     onSpeechChunkSentRef.current = onSpeechChunkSent;
   }, [onSpeechChunkSent]);
-
-  useEffect(() => {
-    onAudioChunkReceivedRef.current = onAudioChunkReceived;
-  }, [onAudioChunkReceived]);
 
   useEffect(() => {
     onMentorAudioLevelRef.current = onMentorAudioLevel;
@@ -212,8 +213,8 @@ export function useVoiceMentor({
       restartInactivityTimer,
       clearInactivityTimer,
       finalizeTurnIfReady,
-      onAudioChunkReceived: () => onAudioChunkReceivedRef.current?.(),
       onMentorTranscription: (text) => onMentorTranscriptionRef.current?.(text),
+      onMentorResponseDelta: (text) => onMentorResponseDeltaRef.current?.(text),
       onMentorResponseCompleted: (text) => onMentorResponseCompletedRef.current?.(text),
       onAudioStarted: () => onAudioStartedRef.current?.(),
       onAudioInterrupted: () => onAudioInterruptedRef.current?.(),
@@ -239,8 +240,9 @@ export function useVoiceMentor({
   }, [teardownVoiceMentorCapture]);
 
   const startVoiceMentor = async () => {
-    if (isRecording || !streamerRef.current || !audioPlayerRef.current) return false;
+    if (isRecording || isStarting || !streamerRef.current || !audioPlayerRef.current) return false;
 
+    setIsStarting(true);
     try {
       if (inactivityTimerRef.current) {
         clearTimeout(inactivityTimerRef.current);
@@ -259,6 +261,8 @@ export function useVoiceMentor({
     } catch (error) {
       console.error("Failed to start voice mentor recording", error);
       return false;
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -319,6 +323,7 @@ export function useVoiceMentor({
 
   return {
     isRecording,
+    isStarting,
     isMuted,
     startVoiceMentor,
     stopVoiceMentor,

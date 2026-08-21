@@ -1,9 +1,17 @@
 import {
   VOICE_SOCKET_EVENT,
+  type ClientSpeechBoundaryPayload,
   type VoiceAction,
   type PcmChunkMeta,
   type StreamInitPayload,
 } from "@repo/shared";
+
+import {
+  AUDIO_CAPTURE_MODE,
+  AUDIO_STREAM_EVENT,
+  AUDIO_STREAM_MESSAGE_TYPE,
+  type AudioCaptureMode,
+} from "./audio-stream.types";
 
 import type { SocketEmitSpec, StreamProtocol } from "./audio-stream";
 
@@ -11,6 +19,7 @@ export type VoiceStartContext = {
   voiceAction: VoiceAction;
   lessonId?: string;
   metadata?: Record<string, unknown>;
+  captureMode?: AudioCaptureMode;
 };
 
 const buildVoiceStartEmit = (params: {
@@ -47,9 +56,52 @@ const buildVoiceCancelEmit = (): SocketEmitSpec => ({
   args: [],
 });
 
+const buildSpeechBoundaryEmit = (params: {
+  event: string;
+  boundary: ClientSpeechBoundaryPayload;
+}): SocketEmitSpec => ({
+  event: params.event,
+  args: [params.boundary],
+});
+
+const buildVoiceReconnectEmit = (params: {
+  sessionRunId: string;
+  lastSentAudioSeq: number;
+  attempt: number;
+}): SocketEmitSpec => ({
+  event: AUDIO_STREAM_EVENT.RECONNECT,
+  args: [
+    {
+      type: AUDIO_STREAM_MESSAGE_TYPE.RECONNECT,
+      sessionRunId: params.sessionRunId,
+      lastSentAudioSeq: Math.max(0, params.lastSentAudioSeq),
+      attempt: params.attempt,
+    },
+  ],
+});
+
 export const voiceSocketProtocol: StreamProtocol<VoiceStartContext, void> = {
   buildStartEmit: buildVoiceStartEmit,
   buildChunkEmit: buildVoiceChunkEmit,
   buildStopEmit: buildVoiceStopEmit,
   buildCancelEmit: buildVoiceCancelEmit,
+  buildSpeechStartEmit: ({ boundary }) =>
+    buildSpeechBoundaryEmit({
+      event: VOICE_SOCKET_EVENT.CLIENT_SPEECH_START,
+      boundary,
+    }),
+  buildSpeechEndEmit: ({ boundary }) =>
+    buildSpeechBoundaryEmit({
+      event: VOICE_SOCKET_EVENT.CLIENT_SPEECH_END,
+      boundary,
+    }),
+  resolveCaptureMode: (context) => context.captureMode ?? AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
+  buildReconnectEmit: buildVoiceReconnectEmit,
+  lifecycleEvents: {
+    startAccepted: AUDIO_STREAM_EVENT.START_ACCEPTED,
+    recovered: AUDIO_STREAM_EVENT.RECOVERED,
+    reconnectError: AUDIO_STREAM_EVENT.RECONNECT_ERROR,
+    chunkAccepted: AUDIO_STREAM_EVENT.CHUNK_ACCEPTED,
+    chunkError: AUDIO_STREAM_EVENT.CHUNK_ERROR,
+  },
 };

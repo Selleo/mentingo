@@ -2,7 +2,24 @@ import { MicVAD } from "@ricky0123/vad-web";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
-import type { PcmChunkMeta, StreamInitPayload } from "@repo/shared";
+import { resolveAudioCaptureMode } from "./audio-capture-mode";
+import {
+  AUDIO_CAPTURE_MODE,
+  AUDIO_SESSION_ERROR_CODE,
+  type AudioCaptureMode,
+  type AudioReconnectContext,
+  type AudioStreamLifecycleEvents,
+} from "./audio-stream.types";
+import {
+  advanceVadEndDeferral,
+  beginVadEndDeferral,
+  createVadEndDeferralState,
+  shouldForwardVadEndFrame,
+  VAD_END_DEFERRAL_PHASE,
+  type VadEndDeferralState,
+} from "./vad-end-deferral";
+
+import type { ClientSpeechBoundaryPayload, PcmChunkMeta, StreamInitPayload } from "@repo/shared";
 import type { Socket } from "socket.io-client";
 
 export type SocketEmitSpec = {
@@ -17,6 +34,11 @@ export type StreamProtocol<TStartContext = void, TStopContext = void> = {
   buildChunkEmit: (params: { chunkMeta: PcmChunkMeta; chunkBuffer: ArrayBuffer }) => SocketEmitSpec;
   buildStopEmit: (params: { lastSeq: number; context?: TStopContext }) => SocketEmitSpec;
   buildCancelEmit: () => SocketEmitSpec;
+  buildSpeechStartEmit?: (params: { boundary: ClientSpeechBoundaryPayload }) => SocketEmitSpec;
+  buildSpeechEndEmit?: (params: { boundary: ClientSpeechBoundaryPayload }) => SocketEmitSpec;
+  resolveCaptureMode?: (context: TStartContext) => AudioCaptureMode;
+  buildReconnectEmit?: (context: AudioReconnectContext) => SocketEmitSpec;
+  lifecycleEvents?: AudioStreamLifecycleEvents;
 };
 
 const VAD_WEB_VERSION = "0.0.30";
@@ -30,14 +52,23 @@ const VAD_CONFIG = {
   redemptionMs: 700,
   preSpeechPadMs: 220,
 } as const;
-const POST_REDEMPTION_EMPTY_AUDIO_MS = VAD_CONFIG.redemptionMs;
+const POST_REDEMPTION_EMPTY_AUDIO_MS = 64;
+const MAX_AUDIO_RECONNECT_ATTEMPTS = 8;
+const START_ACCEPT_TIMEOUT_MS = 10000;
+const AUDIO_LEVEL_NOISE_FLOOR = 0.008;
+const AUDIO_LEVEL_SCALE = 4;
 
 export class RealtimePCMStreamerWorklet {
   private readonly protocol: StreamProtocol<unknown, unknown>;
   private socket: Socket | null = null;
   private micVad: MicVAD | null = null;
+  private continuousAudioContext: AudioContext | null = null;
+  private continuousAudioStream: MediaStream | null = null;
+  private continuousAudioSource: MediaStreamAudioSourceNode | null = null;
+  private continuousAudioProcessor: ScriptProcessorNode | null = null;
   private readonly onLevelChange?: (level: number) => void;
   private readonly onChunkSent?: (meta: PcmChunkMeta) => void;
+  private readonly onRecoveryError?: (code: string) => void;
 
   private readonly targetSr = 16000;
   private readonly chunkMs = 32;
@@ -45,21 +76,63 @@ export class RealtimePCMStreamerWorklet {
   private readonly chunkSamples = (this.targetSr * this.chunkMs) / 1000;
   private readonly preSpeechMaxSamples = (this.targetSr * (VAD_CONFIG.preSpeechPadMs + 120)) / 1000;
 
-  private seq = 0;
+  private nextAudioSeq = 1;
+  private serverNextAudioSeq: number | null = null;
+  private lastSentAudioSeq = -1;
+  private sessionRunId: string | null = null;
+  private reconnectAttempt = 0;
+  private isRecovering = false;
+  private readonly outboundOperations: Array<{ operation: () => void; seq?: number }> = [];
+  private isPumpingOutbound = false;
+  private speechBoundarySeq = 0;
+  private isSessionActive = false;
+  private captureMode: AudioCaptureMode = AUDIO_CAPTURE_MODE.VAD_SEGMENTED;
+  private readonly sentChunks = new Map<number, ArrayBuffer>();
   private pendingSamples: number[] = [];
   private preSpeechSamples: number[] = [];
   private isSpeaking = false;
   private hasActiveSpeechSegment = false;
+  private vadEndDeferral: VadEndDeferralState = createVadEndDeferralState();
   private isMuted = false;
+  private captureGeneration = 0;
+  private startAcceptedResolve: (() => void) | null = null;
+  private startAcceptedReject: ((reason: unknown) => void) | null = null;
   private readonly onSocketConnect = () => {
-    this.emitReadyChunks();
+    if (!this.isSessionActive) {
+      return;
+    }
+
+    if (this.sessionRunId && this.protocol.buildReconnectEmit) {
+      this.pauseOutboundAndRequestRecovery();
+      return;
+    }
+
+    void this.pumpOutbound();
   };
   private readonly onSessionMetadataCleared = () => {
-    this.seq = 0;
+    this.captureGeneration += 1;
+    void this.destroyMicVad();
+    void this.stopContinuousCapture();
+    this.startAcceptedReject?.(new Error("AUDIO_START_CANCELLED"));
+    this.startAcceptedResolve = null;
+    this.startAcceptedReject = null;
+    this.nextAudioSeq = 1;
+    this.serverNextAudioSeq = null;
+    this.lastSentAudioSeq = -1;
+    this.sessionRunId = null;
+    this.reconnectAttempt = 0;
+    this.isRecovering = false;
+    this.outboundOperations.length = 0;
+    this.isPumpingOutbound = false;
+    this.speechBoundarySeq = 0;
+    this.isSessionActive = false;
+    this.captureMode = AUDIO_CAPTURE_MODE.VAD_SEGMENTED;
+    this.sentChunks.clear();
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.vadEndDeferral = createVadEndDeferralState();
     this.isMuted = false;
   };
 
@@ -67,110 +140,47 @@ export class RealtimePCMStreamerWorklet {
     protocol: StreamProtocol<unknown, unknown>,
     onLevelChange?: (level: number) => void,
     onChunkSent?: (meta: PcmChunkMeta) => void,
+    onRecoveryError?: (code: string) => void,
   ) {
     this.protocol = protocol;
     this.onLevelChange = onLevelChange;
     this.onChunkSent = onChunkSent;
+    this.onRecoveryError = onRecoveryError;
   }
 
   async start<TStartContext>(context: TStartContext) {
-    this.socket = acquireSocket();
+    if (this.isSessionActive) {
+      throw new Error("AUDIO_SESSION_ALREADY_ACTIVE");
+    }
 
-    this.socket.on("connect", this.onSocketConnect);
-    this.socket.on("voice:sessionMetadataCleared", this.onSessionMetadataCleared);
+    this.captureGeneration += 1;
+    if (!this.socket) {
+      this.socket = acquireSocket();
+      this.socket.on("connect", this.onSocketConnect);
+      this.socket.on("voice:sessionMetadataCleared", this.onSessionMetadataCleared);
+      this.registerLifecycleHandlers();
+    }
 
-    this.socket.connect();
-
-    this.seq = 0;
+    this.nextAudioSeq = 1;
+    this.serverNextAudioSeq = null;
+    this.lastSentAudioSeq = -1;
+    this.sessionRunId = null;
+    this.reconnectAttempt = 0;
+    this.isRecovering = false;
+    this.outboundOperations.length = 0;
+    this.isPumpingOutbound = false;
+    this.speechBoundarySeq = 0;
+    this.isSessionActive = false;
+    this.captureMode =
+      this.protocol.resolveCaptureMode?.(context) ?? AUDIO_CAPTURE_MODE.VAD_SEGMENTED;
+    this.sentChunks.clear();
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.vadEndDeferral = createVadEndDeferralState();
 
-    if (!this.micVad) {
-      this.micVad = await MicVAD.new({
-        model: "v5",
-        startOnLoad: false,
-        submitUserSpeechOnPause: true,
-        positiveSpeechThreshold: VAD_CONFIG.positiveSpeechThreshold,
-        negativeSpeechThreshold: VAD_CONFIG.negativeSpeechThreshold,
-        minSpeechMs: VAD_CONFIG.minSpeechMs,
-        redemptionMs: VAD_CONFIG.redemptionMs,
-        preSpeechPadMs: VAD_CONFIG.preSpeechPadMs,
-        baseAssetPath: VAD_ASSET_BASE_PATH,
-        onnxWASMBasePath: ONNX_WASM_BASE_PATH,
-        getStream: async () => {
-          return await navigator.mediaDevices.getUserMedia({
-            audio: {
-              channelCount: 1,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: false,
-            },
-            video: false,
-          });
-        },
-        onFrameProcessed: (probabilities, frame) => {
-          const level = Number(probabilities.isSpeech) || 0;
-          this.onLevelChange?.(this.isMuted ? 0 : Math.max(0, Math.min(1, level)));
-
-          if (this.isMuted) {
-            this.pendingSamples = [];
-            this.preSpeechSamples = [];
-            return;
-          }
-
-          const pcm16Frame = float32ToPcm16(frame);
-          if (pcm16Frame.length > 0) {
-            this.preSpeechSamples.push(...pcm16Frame);
-            if (this.preSpeechSamples.length > this.preSpeechMaxSamples) {
-              this.preSpeechSamples.splice(
-                0,
-                this.preSpeechSamples.length - this.preSpeechMaxSamples,
-              );
-            }
-          }
-
-          if (!this.isSpeaking) {
-            return;
-          }
-
-          if (pcm16Frame.length > 0) {
-            this.pendingSamples.push(...pcm16Frame);
-          }
-
-          this.emitReadyChunks();
-        },
-        onSpeechStart: () => undefined,
-        onSpeechRealStart: () => {
-          if (this.isMuted) {
-            return;
-          }
-
-          this.isSpeaking = true;
-          this.hasActiveSpeechSegment = true;
-          if (this.preSpeechSamples.length > 0) {
-            this.pendingSamples.push(...this.preSpeechSamples);
-            this.preSpeechSamples = [];
-            this.emitReadyChunks();
-          }
-        },
-        onSpeechEnd: () => {
-          this.isSpeaking = false;
-          this.preSpeechSamples = [];
-          if (!this.isMuted && this.socket?.connected) {
-            this.emitSpeechEndBoundary();
-          }
-          this.hasActiveSpeechSegment = false;
-        },
-        onVADMisfire: () => {
-          this.isSpeaking = false;
-          this.pendingSamples = [];
-          this.preSpeechSamples = [];
-          this.hasActiveSpeechSegment = false;
-        },
-      });
-    }
+    this.socket.connect();
 
     const startPayload: StreamInitPayload = {
       sr: this.targetSr,
@@ -182,15 +192,187 @@ export class RealtimePCMStreamerWorklet {
       init: startPayload,
       context,
     });
+    this.isSessionActive = true;
+    const startAccepted = this.waitForStartAccepted();
     this.socket.emit(startEmit.event, ...startEmit.args);
 
-    await this.micVad.start();
+    try {
+      await startAccepted;
+      if (!this.isSessionActive) {
+        return;
+      }
+
+      if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+        await this.startContinuousCapture();
+      } else {
+        await this.ensureMicVad();
+        await this.micVad?.start();
+      }
+    } catch (error) {
+      await this.cleanup();
+      throw error;
+    }
+  }
+
+  private waitForStartAccepted(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.startAcceptedResolve = resolve;
+      this.startAcceptedReject = reject;
+
+      const timeout = setTimeout(() => {
+        this.startAcceptedResolve = null;
+        this.startAcceptedReject = null;
+        reject(new Error("AUDIO_START_ACCEPT_TIMEOUT"));
+      }, START_ACCEPT_TIMEOUT_MS);
+
+      const resolveOnce = () => {
+        clearTimeout(timeout);
+        this.startAcceptedResolve = null;
+        this.startAcceptedReject = null;
+        resolve();
+      };
+      this.startAcceptedResolve = resolveOnce;
+    });
+  }
+
+  private async ensureMicVad(): Promise<void> {
+    if (this.micVad) {
+      return;
+    }
+
+    const captureGeneration = this.captureGeneration;
+    this.micVad = await MicVAD.new({
+      model: "v5",
+      startOnLoad: false,
+      submitUserSpeechOnPause: true,
+      positiveSpeechThreshold: VAD_CONFIG.positiveSpeechThreshold,
+      negativeSpeechThreshold: VAD_CONFIG.negativeSpeechThreshold,
+      minSpeechMs: VAD_CONFIG.minSpeechMs,
+      redemptionMs: VAD_CONFIG.redemptionMs,
+      preSpeechPadMs: VAD_CONFIG.preSpeechPadMs,
+      baseAssetPath: VAD_ASSET_BASE_PATH,
+      onnxWASMBasePath: ONNX_WASM_BASE_PATH,
+      getStream: async () => {
+        return await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: false,
+          },
+          video: false,
+        });
+      },
+      onFrameProcessed: (probabilities, frame) => {
+        if (!this.isCaptureGenerationActive(captureGeneration)) {
+          return;
+        }
+
+        const level = Number(probabilities.isSpeech) || 0;
+        this.onLevelChange?.(this.isMuted ? 0 : Math.max(0, Math.min(1, level)));
+
+        if (this.isMuted) {
+          this.pendingSamples = [];
+          this.preSpeechSamples = [];
+          this.vadEndDeferral = createVadEndDeferralState();
+          return;
+        }
+
+        const pcm16Frame = float32ToPcm16(frame);
+        if (!this.isSpeaking && pcm16Frame.length > 0) {
+          this.preSpeechSamples.push(...pcm16Frame);
+          if (this.preSpeechSamples.length > this.preSpeechMaxSamples) {
+            this.preSpeechSamples.splice(
+              0,
+              this.preSpeechSamples.length - this.preSpeechMaxSamples,
+            );
+          }
+        }
+
+        if (!this.isSpeaking) {
+          return;
+        }
+
+        const frameRms = calculateRms(frame);
+        const isDeferringEnd = this.vadEndDeferral.phase === VAD_END_DEFERRAL_PHASE.PENDING;
+        if (pcm16Frame.length > 0 && (!isDeferringEnd || shouldForwardVadEndFrame(frameRms))) {
+          this.pendingSamples.push(...pcm16Frame);
+          this.emitReadyChunks();
+        }
+
+        this.advanceDeferredSpeechEnd(frameRms, frame.length);
+      },
+      onSpeechStart: () => undefined,
+      onSpeechRealStart: () => {
+        if (!this.isCaptureGenerationActive(captureGeneration)) {
+          return;
+        }
+
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS || this.isMuted) {
+          return;
+        }
+
+        if (this.hasActiveSpeechSegment) {
+          this.vadEndDeferral = createVadEndDeferralState();
+          this.isSpeaking = true;
+          return;
+        }
+
+        this.vadEndDeferral = createVadEndDeferralState();
+        this.isSpeaking = true;
+        this.hasActiveSpeechSegment = true;
+        this.emitSpeechStartBoundary();
+        if (this.preSpeechSamples.length > 0) {
+          this.pendingSamples.push(...this.preSpeechSamples);
+          this.preSpeechSamples = [];
+          this.emitReadyChunks();
+        }
+      },
+      onSpeechEnd: () => {
+        if (!this.isCaptureGenerationActive(captureGeneration)) {
+          return;
+        }
+
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+          return;
+        }
+
+        if (this.isMuted || !this.hasActiveSpeechSegment) {
+          return;
+        }
+
+        this.preSpeechSamples = [];
+        this.vadEndDeferral = beginVadEndDeferral(this.vadEndDeferral);
+      },
+      onVADMisfire: () => {
+        if (!this.isCaptureGenerationActive(captureGeneration)) {
+          return;
+        }
+
+        if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+          return;
+        }
+
+        if (this.hasActiveSpeechSegment) {
+          this.vadEndDeferral = beginVadEndDeferral(this.vadEndDeferral);
+          return;
+        }
+
+        this.isSpeaking = false;
+        this.pendingSamples = [];
+        this.preSpeechSamples = [];
+        this.hasActiveSpeechSegment = false;
+        this.vadEndDeferral = createVadEndDeferralState();
+      },
+    });
   }
 
   async stop<TStopContext>(context?: TStopContext): Promise<unknown | null> {
+    this.captureGeneration += 1;
+    this.vadEndDeferral = createVadEndDeferralState();
     let ackPayload: unknown | null = null;
     const stopEmit = this.protocol.buildStopEmit({
-      lastSeq: this.seq - 1,
+      lastSeq: this.lastSentAudioSeq,
       context,
     });
 
@@ -221,7 +403,12 @@ export class RealtimePCMStreamerWorklet {
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.vadEndDeferral = createVadEndDeferralState();
     this.onLevelChange?.(0);
+
+    if (this.captureMode === AUDIO_CAPTURE_MODE.CONTINUOUS) {
+      return;
+    }
 
     if (!this.micVad) {
       return;
@@ -236,6 +423,8 @@ export class RealtimePCMStreamerWorklet {
   }
 
   async cancel(): Promise<void> {
+    this.captureGeneration += 1;
+    this.vadEndDeferral = createVadEndDeferralState();
     const cancelEmit = this.protocol.buildCancelEmit();
 
     if (this.socket?.connected) {
@@ -246,26 +435,48 @@ export class RealtimePCMStreamerWorklet {
   }
 
   private async cleanup() {
+    this.captureGeneration += 1;
+    this.startAcceptedReject?.(new Error("AUDIO_START_CANCELLED"));
+    this.startAcceptedResolve = null;
+    this.startAcceptedReject = null;
     releaseSocket();
 
     this.socket?.off("connect", this.onSocketConnect);
     this.socket?.off("voice:sessionMetadataCleared", this.onSessionMetadataCleared);
+    this.unregisterLifecycleHandlers();
     this.socket = null;
-    this.seq = 0;
+    this.nextAudioSeq = 1;
+    this.serverNextAudioSeq = null;
+    this.lastSentAudioSeq = -1;
+    this.sessionRunId = null;
+    this.reconnectAttempt = 0;
+    this.isRecovering = false;
+    this.outboundOperations.length = 0;
+    this.isPumpingOutbound = false;
+    this.speechBoundarySeq = 0;
+    this.isSessionActive = false;
+    this.captureMode = AUDIO_CAPTURE_MODE.VAD_SEGMENTED;
+    this.sentChunks.clear();
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.vadEndDeferral = createVadEndDeferralState();
     this.isMuted = false;
 
-    if (this.micVad) {
-      await this.micVad.destroy().catch(() => undefined);
-      this.micVad = null;
-    }
+    await this.destroyMicVad();
+
+    await this.stopContinuousCapture();
+  }
+
+  private async destroyMicVad() {
+    const micVad = this.micVad;
+    this.micVad = null;
+    await micVad?.destroy().catch(() => undefined);
   }
 
   private emitReadyChunks() {
-    if (!this.socket || !this.socket.connected) {
+    if (!this.socket) {
       return;
     }
 
@@ -274,7 +485,7 @@ export class RealtimePCMStreamerWorklet {
       const chunkBuffer = copyToArrayBuffer(Int16Array.from(chunkSlice));
 
       const meta: PcmChunkMeta = {
-        seq: this.seq++,
+        seq: this.nextAudioSeq++,
         sr: this.targetSr,
         samples: this.chunkSamples,
         ts_ms: performance.now(),
@@ -285,8 +496,17 @@ export class RealtimePCMStreamerWorklet {
         chunkBuffer,
       });
 
-      this.socket.emit(chunkEmit.event, ...chunkEmit.args);
-      this.onChunkSent?.(meta);
+      this.sentChunks.set(meta.seq, chunkBuffer);
+      this.trimSentChunks();
+
+      this.enqueueOutbound(() => {
+        this.socket?.emit(chunkEmit.event, ...chunkEmit.args);
+        this.lastSentAudioSeq = Math.max(this.lastSentAudioSeq, meta.seq);
+      }, meta.seq);
+
+      if (this.captureMode === AUDIO_CAPTURE_MODE.VAD_SEGMENTED) {
+        this.onChunkSent?.(meta);
+      }
     }
   }
 
@@ -303,7 +523,452 @@ export class RealtimePCMStreamerWorklet {
     this.pendingSamples.push(...Array(chunkBoundaryPadding + trailingSilenceSamples).fill(0));
     this.emitReadyChunks();
     this.pendingSamples = [];
+
+    const buildSpeechEndEmit = this.protocol.buildSpeechEndEmit;
+    if (!this.sessionRunId || !buildSpeechEndEmit) {
+      return;
+    }
+
+    const boundarySeq = ++this.speechBoundarySeq;
+    const tsMs = performance.now();
+    const lastAudioSeq = Math.max(this.lastSentAudioSeq, this.nextAudioSeq - 1);
+    this.enqueueOutbound(() => {
+      if (!this.sessionRunId) {
+        return;
+      }
+
+      const boundaryEmit = buildSpeechEndEmit({
+        boundary: {
+          sessionRunId: this.sessionRunId,
+          boundarySeq,
+          tsMs,
+          lastAudioSeq,
+        },
+      });
+      this.socket?.emit(boundaryEmit.event, ...boundaryEmit.args);
+    });
   }
+
+  private advanceDeferredSpeechEnd(frameRms: number, frameSamples: number) {
+    const result = advanceVadEndDeferral(
+      this.vadEndDeferral,
+      frameRms,
+      (frameSamples / this.targetSr) * 1000,
+    );
+    this.vadEndDeferral = result.state;
+
+    if (result.shouldFinalize) {
+      this.completeActiveSpeechSegment();
+    }
+  }
+
+  private completeActiveSpeechSegment() {
+    if (!this.hasActiveSpeechSegment) {
+      return;
+    }
+
+    this.isSpeaking = false;
+    this.preSpeechSamples = [];
+    this.emitSpeechEndBoundary();
+    this.hasActiveSpeechSegment = false;
+    this.vadEndDeferral = createVadEndDeferralState();
+  }
+
+  private enqueueOutbound(operation: () => void, seq?: number) {
+    this.outboundOperations.push({ operation, seq });
+    void this.pumpOutbound();
+  }
+
+  private async pumpOutbound() {
+    if (this.isPumpingOutbound || this.isRecovering) {
+      return;
+    }
+
+    this.isPumpingOutbound = true;
+    try {
+      while (!this.isRecovering && this.socket?.connected && this.outboundOperations.length > 0) {
+        const operation = this.outboundOperations.shift();
+        operation?.operation();
+        await Promise.resolve();
+      }
+    } finally {
+      this.isPumpingOutbound = false;
+    }
+  }
+
+  private pauseOutboundAndRequestRecovery() {
+    if (this.isRecovering) {
+      return;
+    }
+
+    this.isRecovering = true;
+    this.requestRecovery();
+  }
+
+  private emitSpeechStartBoundary() {
+    const buildSpeechStartEmit = this.protocol.buildSpeechStartEmit;
+    if (!this.sessionRunId || !buildSpeechStartEmit) {
+      return;
+    }
+
+    const boundarySeq = ++this.speechBoundarySeq;
+    const tsMs = performance.now();
+    const lastAudioSeq = this.lastSentAudioSeq;
+    this.enqueueOutbound(() => {
+      if (!this.sessionRunId) {
+        return;
+      }
+
+      const boundaryEmit = buildSpeechStartEmit({
+        boundary: {
+          sessionRunId: this.sessionRunId,
+          boundarySeq,
+          tsMs,
+          lastAudioSeq,
+        },
+      });
+      this.socket?.emit(boundaryEmit.event, ...boundaryEmit.args);
+    });
+  }
+
+  private async startContinuousCapture() {
+    if (this.continuousAudioContext) {
+      return;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: false,
+      },
+      video: false,
+    });
+    const audioContext = new AudioContext({ sampleRate: this.targetSr });
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+    const source = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(1024, 1, 1);
+    const silentGain = audioContext.createGain();
+    silentGain.gain.value = 0;
+
+    processor.onaudioprocess = (event) => {
+      if (this.isMuted) {
+        return;
+      }
+
+      const input = event.inputBuffer.getChannelData(0);
+      const frame = resampleAudio(input, event.inputBuffer.sampleRate, this.targetSr);
+      this.onLevelChange?.(calculateAudioLevel(frame));
+      this.pendingSamples.push(...float32ToPcm16(frame));
+      this.emitReadyChunks();
+    };
+
+    source.connect(processor);
+    processor.connect(silentGain);
+    silentGain.connect(audioContext.destination);
+
+    this.continuousAudioContext = audioContext;
+    this.continuousAudioStream = stream;
+    this.continuousAudioSource = source;
+    this.continuousAudioProcessor = processor;
+  }
+
+  private async stopContinuousCapture() {
+    this.continuousAudioProcessor?.disconnect();
+    this.continuousAudioSource?.disconnect();
+    this.continuousAudioStream?.getTracks().forEach((track) => track.stop());
+
+    if (this.continuousAudioContext && this.continuousAudioContext.state !== "closed") {
+      await this.continuousAudioContext.close().catch(() => undefined);
+    }
+
+    this.continuousAudioProcessor = null;
+    this.continuousAudioSource = null;
+    this.continuousAudioStream = null;
+    this.continuousAudioContext = null;
+  }
+
+  private registerLifecycleHandlers() {
+    const events = this.protocol.lifecycleEvents;
+    if (!this.socket || !events) {
+      return;
+    }
+
+    if (events.startAccepted) {
+      this.socket.on(events.startAccepted, this.onStartAccepted);
+    }
+    if (events.recovered) {
+      this.socket.on(events.recovered, this.onRecovered);
+    }
+    if (events.reconnectError) {
+      this.socket.on(events.reconnectError, this.onReconnectError);
+    }
+    if (events.chunkAccepted) {
+      this.socket.on(events.chunkAccepted, this.onChunkAccepted);
+    }
+    if (events.chunkError) {
+      this.socket.on(events.chunkError, this.onChunkError);
+    }
+  }
+
+  private unregisterLifecycleHandlers() {
+    const events = this.protocol.lifecycleEvents;
+    if (!this.socket || !events) {
+      return;
+    }
+
+    if (events.startAccepted) {
+      this.socket.off(events.startAccepted, this.onStartAccepted);
+    }
+    if (events.recovered) {
+      this.socket.off(events.recovered, this.onRecovered);
+    }
+    if (events.reconnectError) {
+      this.socket.off(events.reconnectError, this.onReconnectError);
+    }
+    if (events.chunkAccepted) {
+      this.socket.off(events.chunkAccepted, this.onChunkAccepted);
+    }
+    if (events.chunkError) {
+      this.socket.off(events.chunkError, this.onChunkError);
+    }
+  }
+
+  private readonly onStartAccepted = (payload: unknown) => {
+    const sessionRunId = readString(payload, "sessionRunId");
+    if (sessionRunId) {
+      this.sessionRunId = sessionRunId;
+      this.reconnectAttempt = 0;
+    }
+
+    const nextAudioSeq = readNonNegativeInteger(payload, "nextAudioSeq");
+    if (nextAudioSeq !== null) {
+      this.serverNextAudioSeq = nextAudioSeq;
+      if (this.lastSentAudioSeq < 0) {
+        this.nextAudioSeq = Math.max(this.nextAudioSeq, nextAudioSeq);
+      }
+    }
+
+    this.captureMode = resolveAudioCaptureMode(payload, this.captureMode);
+
+    this.startAcceptedResolve?.();
+  };
+
+  private readonly onRecovered = (payload: unknown) => {
+    const sessionRunId = readString(payload, "sessionRunId");
+    if (sessionRunId) {
+      this.sessionRunId = sessionRunId;
+    }
+
+    const nextAudioSeq = readNonNegativeInteger(payload, "nextAudioSeq");
+    if (nextAudioSeq !== null) {
+      this.serverNextAudioSeq = nextAudioSeq;
+      const replayed = this.replayUnacknowledgedChunks(nextAudioSeq);
+      if (!replayed) {
+        return;
+      }
+    }
+
+    this.isRecovering = false;
+    this.reconnectAttempt = 0;
+    void this.pumpOutbound();
+  };
+
+  private readonly onReconnectError = (payload: unknown) => {
+    const code = readString(payload, "code");
+    if (
+      code === AUDIO_SESSION_ERROR_CODE.RUN_REPLACED ||
+      code === AUDIO_SESSION_ERROR_CODE.CLOSED
+    ) {
+      this.isSessionActive = false;
+    }
+  };
+
+  private readonly onChunkAccepted = (payload: unknown) => {
+    const nextAudioSeq = readNonNegativeInteger(payload, "nextAudioSeq");
+    if (nextAudioSeq === null) {
+      return;
+    }
+
+    this.serverNextAudioSeq = Math.max(this.serverNextAudioSeq ?? 0, nextAudioSeq);
+    this.removeAcknowledgedQueuedChunks(nextAudioSeq);
+    for (const seq of this.sentChunks.keys()) {
+      if (seq < nextAudioSeq) {
+        this.sentChunks.delete(seq);
+      }
+    }
+  };
+
+  private readonly onChunkError = (payload: unknown) => {
+    const nextAudioSeq = readNonNegativeInteger(payload, "nextAudioSeq");
+    if (nextAudioSeq !== null) {
+      this.serverNextAudioSeq = nextAudioSeq;
+      this.pauseOutboundAndRequestRecovery();
+      return;
+    }
+
+    if (readString(payload, "code") === AUDIO_SESSION_ERROR_CODE.CHUNK_SEQUENCE_GAP) {
+      this.pauseOutboundAndRequestRecovery();
+    }
+  };
+
+  private requestRecovery() {
+    if (!this.socket?.connected || !this.sessionRunId || !this.protocol.buildReconnectEmit) {
+      return;
+    }
+
+    this.reconnectAttempt = Math.min(this.reconnectAttempt + 1, MAX_AUDIO_RECONNECT_ATTEMPTS);
+    const reconnectEmit = this.protocol.buildReconnectEmit({
+      sessionRunId: this.sessionRunId,
+      lastSentAudioSeq: this.lastSentAudioSeq,
+      attempt: this.reconnectAttempt,
+    });
+    this.socket.emit(reconnectEmit.event, ...reconnectEmit.args);
+  }
+
+  private replayUnacknowledgedChunks(expectedNextAudioSeq: number): boolean {
+    if (!this.socket?.connected) {
+      return false;
+    }
+
+    const replayable = [...this.sentChunks.entries()].filter(
+      ([seq]) => seq >= expectedNextAudioSeq && seq < this.nextAudioSeq,
+    );
+    const firstBufferedSeq = replayable[0]?.[0];
+    if (
+      expectedNextAudioSeq < this.nextAudioSeq &&
+      (firstBufferedSeq === undefined || firstBufferedSeq > expectedNextAudioSeq)
+    ) {
+      this.failRecovery("AUDIO_SEQUENCE_RECOVERY_BUFFER_MISS");
+      return false;
+    }
+
+    const queuedSequences = new Set(
+      this.outboundOperations.flatMap(({ seq }) => (seq === undefined ? [] : [seq])),
+    );
+    this.removeAcknowledgedQueuedChunks(expectedNextAudioSeq);
+    const replayOperations = replayable
+      .filter(([seq]) => !queuedSequences.has(seq))
+      .map(([seq, chunkBuffer]) => {
+        const meta: PcmChunkMeta = {
+          seq,
+          sr: this.targetSr,
+          samples: this.chunkSamples,
+          ts_ms: performance.now(),
+        };
+        const chunkEmit = this.protocol.buildChunkEmit({ chunkMeta: meta, chunkBuffer });
+        return {
+          seq,
+          operation: () => this.socket?.emit(chunkEmit.event, ...chunkEmit.args),
+        };
+      });
+    this.outboundOperations.unshift(...replayOperations);
+
+    return true;
+  }
+
+  private removeAcknowledgedQueuedChunks(nextAudioSeq: number) {
+    const pendingOperations = this.outboundOperations.filter(
+      ({ seq }) => seq === undefined || seq >= nextAudioSeq,
+    );
+    this.outboundOperations.splice(0, this.outboundOperations.length, ...pendingOperations);
+  }
+
+  private failRecovery(code: string) {
+    this.isRecovering = true;
+    this.isSessionActive = false;
+    const cancelEmit = this.protocol.buildCancelEmit();
+    this.socket?.emit(cancelEmit.event, ...cancelEmit.args);
+    this.onRecoveryError?.(code);
+    void this.cleanup();
+  }
+
+  private trimSentChunks() {
+    const maxBufferedChunks = 256;
+    while (this.sentChunks.size > maxBufferedChunks) {
+      const oldestSeq = this.sentChunks.keys().next().value;
+      if (typeof oldestSeq !== "number") {
+        return;
+      }
+      this.sentChunks.delete(oldestSeq);
+    }
+  }
+
+  private isCaptureGenerationActive(captureGeneration: number) {
+    return this.isSessionActive && captureGeneration === this.captureGeneration;
+  }
+}
+
+function readString(payload: unknown, ...path: string[]): string | null {
+  let current: unknown = payload;
+  for (const key of path) {
+    if (!isRecord(current)) {
+      return null;
+    }
+    current = current[key];
+  }
+  return typeof current === "string" && current.length > 0 ? current : null;
+}
+
+function readNonNegativeInteger(payload: unknown, ...path: string[]): number | null {
+  let current: unknown = payload;
+  for (const key of path) {
+    if (!isRecord(current)) {
+      return null;
+    }
+    current = current[key];
+  }
+  return typeof current === "number" && Number.isInteger(current) && current >= 0 ? current : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function resampleAudio(audio: Float32Array, sourceSampleRate: number, targetSampleRate: number) {
+  if (sourceSampleRate === targetSampleRate) {
+    return audio;
+  }
+
+  const targetLength = Math.max(
+    1,
+    Math.round((audio.length * targetSampleRate) / sourceSampleRate),
+  );
+  const result = new Float32Array(targetLength);
+  const ratio = sourceSampleRate / targetSampleRate;
+
+  for (let index = 0; index < targetLength; index += 1) {
+    const sourceIndex = index * ratio;
+    const lowerIndex = Math.floor(sourceIndex);
+    const upperIndex = Math.min(lowerIndex + 1, audio.length - 1);
+    const weight = sourceIndex - lowerIndex;
+    result[index] = audio[lowerIndex] * (1 - weight) + audio[upperIndex] * weight;
+  }
+
+  return result;
+}
+
+function calculateAudioLevel(audio: Float32Array) {
+  const rms = calculateRms(audio);
+  const signal = Math.max(0, rms - AUDIO_LEVEL_NOISE_FLOOR);
+
+  return Math.min(1, Math.sqrt(signal) * AUDIO_LEVEL_SCALE);
+}
+
+function calculateRms(audio: Float32Array) {
+  if (audio.length === 0) {
+    return 0;
+  }
+
+  let sum = 0;
+  for (const sample of audio) {
+    sum += sample * sample;
+  }
+
+  return Math.sqrt(sum / audio.length);
 }
 
 function float32ToPcm16(audio: Float32Array): Int16Array {

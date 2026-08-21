@@ -62,6 +62,18 @@ export const voiceMentorAddonSchema = Type.Object({
   language: Type.String(),
 });
 
+export const voiceMentorTimingAddonSchema = Type.Object({
+  elapsedMs: Type.Integer({ minimum: 0 }),
+  speechMs: Type.Integer({ minimum: 0 }),
+  pauseCount: Type.Integer({ minimum: 0 }),
+  longestPauseMs: Type.Integer({ minimum: 0 }),
+  averagePauseMs: Type.String(),
+  segmentCount: Type.Integer({ minimum: 0 }),
+  wordCount: Type.Integer({ minimum: 0 }),
+  wordsPerMinute: Type.String(),
+  timingPrecision: Type.String({ minLength: 1 }),
+});
+
 export const learnerNameAddonSchema = Type.Object({
   learnerFirstName: Type.String({ minLength: 1 }),
   language: Type.String({ minLength: 1 }),
@@ -114,6 +126,7 @@ export const PROMPT_MAP = {
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,
+  voiceMentorTimingAddon: voiceMentorTimingAddonSchema,
   learnerNameAddon: learnerNameAddonSchema,
   aiJudgeConfigurationGeneratorBase: aiJudgeConfigurationGeneratorBaseSchema,
   aiJudgeConfigurationGeneratorCreate: aiJudgeConfigurationGeneratorModeSchema,

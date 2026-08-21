@@ -9,6 +9,21 @@ export type AiStreamMessageInput = {
   lessonId?: UUIDType;
   voiceSessionId?: string;
   voiceTurnId?: string;
+  voiceTurnWasInterrupted?: boolean;
+  voiceDeliveryContext?: AiVoiceDeliveryContext;
+  abortSignal?: AbortSignal;
+};
+
+export type AiVoiceDeliveryContext = {
+  elapsedMs: number;
+  speechMs: number;
+  pauseCount: number;
+  longestPauseMs: number;
+  averagePauseMs: number | null;
+  segmentCount: number;
+  wordCount: number;
+  wordsPerMinute: number | null;
+  timingPrecision: string;
 };
 
 export type AiStreamTextResult = ReturnType<typeof streamText>;

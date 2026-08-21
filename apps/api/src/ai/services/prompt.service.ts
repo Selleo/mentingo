@@ -18,6 +18,7 @@ import { aiMentorThreads } from "src/storage/schema";
 import type { OnModuleInit } from "@nestjs/common";
 import type { promptId } from "@repo/prompts";
 import type { Static } from "@sinclair/typebox";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
 import type { CompiledTemplate } from "src/ai/utils/prompt.type";
@@ -62,6 +63,8 @@ export class PromptService implements OnModuleInit {
     content: string,
     isVoiceMentor: boolean = false,
     tempMessageId?: string,
+    voiceTurnWasInterrupted: boolean = false,
+    voiceDeliveryContext?: AiVoiceDeliveryContext,
   ) {
     const { history } = await this.messageService.findMessageHistory(threadId, false);
 
@@ -102,6 +105,50 @@ export class PromptService implements OnModuleInit {
         userName: null,
         content: voiceMentorAddon,
       });
+
+      metaMessages.push({
+        id: "",
+        role: MESSAGE_ROLE.SYSTEM,
+        userName: null,
+        content:
+          "VOICE INTERRUPTION POLICY: Treat an interruption as current only when this request contains the explicit marker [VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]. Ignore interruption mentions in conversation history because they describe earlier turns.",
+      });
+
+      if (voiceDeliveryContext) {
+        const voiceMentorTimingAddon = await this.loadPrompt("voiceMentorTimingAddon", {
+          elapsedMs: voiceDeliveryContext.elapsedMs,
+          speechMs: voiceDeliveryContext.speechMs,
+          pauseCount: voiceDeliveryContext.pauseCount,
+          longestPauseMs: voiceDeliveryContext.longestPauseMs,
+          averagePauseMs:
+            voiceDeliveryContext.averagePauseMs === null
+              ? "not available"
+              : `${voiceDeliveryContext.averagePauseMs} milliseconds`,
+          segmentCount: voiceDeliveryContext.segmentCount,
+          wordCount: voiceDeliveryContext.wordCount,
+          wordsPerMinute:
+            voiceDeliveryContext.wordsPerMinute === null
+              ? "not available"
+              : `${voiceDeliveryContext.wordsPerMinute} words per minute`,
+          timingPrecision: this.normalizeTimingPrecision(voiceDeliveryContext.timingPrecision),
+        });
+        metaMessages.push({
+          id: "",
+          role: MESSAGE_ROLE.SYSTEM,
+          userName: null,
+          content: voiceMentorTimingAddon,
+        });
+      }
+
+      if (voiceTurnWasInterrupted) {
+        metaMessages.push({
+          id: "",
+          role: MESSAGE_ROLE.SYSTEM,
+          userName: null,
+          content:
+            "[VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED] The learner interrupted the previous mentor response in the current turn. Continue naturally from the conversation context and prioritize the learner's new message. Do not mention this internal event.",
+        });
+      }
     }
 
     if (summary) {
@@ -132,6 +179,10 @@ export class PromptService implements OnModuleInit {
     );
 
     return history;
+  }
+
+  private normalizeTimingPrecision(value: string): string {
+    return ["word", "segment", "boundary_estimate"].includes(value) ? value : "unknown";
   }
 
   async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {

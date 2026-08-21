@@ -11,6 +11,7 @@ type ResolvePrimaryActionParams = Pick<
   | "canSubmit"
   | "canUseVoiceMentor"
   | "isVoiceMentorMode"
+  | "isVoiceMentorStarting"
   | "isVoiceMode"
   | "sendLabel"
   | "startVoiceMentorLabel"
@@ -21,6 +22,7 @@ export const resolveLessonComposerPrimaryAction = ({
   canSubmit,
   canUseVoiceMentor,
   isVoiceMentorMode,
+  isVoiceMentorStarting,
   isVoiceMode,
   sendLabel,
   startVoiceMentorLabel,
@@ -43,7 +45,7 @@ export const resolveLessonComposerPrimaryAction = ({
     }))
     .with({ canUseVoiceMentor: true, canSubmit: false }, () => ({
       ariaLabel: startVoiceMentorLabel,
-      disabled: false,
+      disabled: isVoiceMentorStarting,
       label: startVoiceMentorLabel,
       mode: LESSON_COMPOSER_PRIMARY_ACTION_MODE.VOICE,
       showText: false,

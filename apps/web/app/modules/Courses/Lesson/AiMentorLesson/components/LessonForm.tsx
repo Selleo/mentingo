@@ -18,12 +18,15 @@ import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 import type { UIMessage } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
+const MENTOR_PLAYBACK_ACTIVITY_THRESHOLD = 0.01;
+
 interface LessonFormProps {
   lessonId: string;
   mentorName: string;
   mentorAvatarUrl?: string | null;
   handleSubmit: () => void;
   onMentorTranscription?: (text: string) => void;
+  onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioOutputCompleted?: () => void;
   onAudioInterrupted?: () => void;
@@ -45,6 +48,7 @@ export const LessonForm = ({
   mentorAvatarUrl,
   handleSubmit,
   onMentorTranscription,
+  onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioOutputCompleted,
   onAudioInterrupted,
@@ -68,6 +72,7 @@ export const LessonForm = ({
   const [mentorVoiceLevel, setMentorVoiceLevel] = useState(0);
   const [latestTranscript, setLatestTranscript] = useState("");
   const [latestResponse, setLatestResponse] = useState("");
+  const mentorPlaybackActiveRef = useRef(false);
   const { data: lumaConfigured } = useLumaConfigured();
   const canUseVoiceMentor = allowVoiceMentor && Boolean(lumaConfigured?.voiceMentorEnabled);
   const voiceModeUI = useVoiceModeUIState();
@@ -83,6 +88,7 @@ export const LessonForm = ({
   });
   const {
     isRecording: isVoiceMentorMode,
+    isStarting: isVoiceMentorStarting,
     isMuted: isVoiceMentorMuted,
     startVoiceMentor,
     cancelVoiceMentor,
@@ -94,8 +100,13 @@ export const LessonForm = ({
     onLevelChange: setVoiceLevel,
     onMentorTranscription: (text) => {
       setLatestTranscript(text);
+      setLatestResponse("");
       voiceModeUI.onMentorTranscriptionReceived();
       onMentorTranscription?.(text);
+    },
+    onMentorResponseDelta: (text) => {
+      setLatestResponse((previous) => previous + text);
+      onMentorResponseDelta?.(text);
     },
     onMentorResponseCompleted: (text) => {
       setLatestResponse(text);
@@ -105,20 +116,31 @@ export const LessonForm = ({
       setIsVoiceMentorAudioStarted(true);
     },
     onAudioOutputCompleted: () => {
+      mentorPlaybackActiveRef.current = false;
       voiceModeUI.onAudioOutputCompleted(isVoiceMentorMode);
       onAudioOutputCompleted?.();
     },
     onAudioInterrupted: () => {
+      mentorPlaybackActiveRef.current = false;
       voiceModeUI.onAudioInterrupted(isVoiceMentorMode);
       onAudioInterrupted?.();
     },
     onSpeechChunkSent: () => {
       voiceModeUI.onUserSpeechChunkSent();
     },
-    onAudioChunkReceived: () => {
-      voiceModeUI.onAudioChunkReceived();
+    onMentorAudioLevel: (level) => {
+      setMentorVoiceLevel(level);
+
+      if (level >= MENTOR_PLAYBACK_ACTIVITY_THRESHOLD) {
+        if (!mentorPlaybackActiveRef.current) {
+          mentorPlaybackActiveRef.current = true;
+          voiceModeUI.onAudioPlaybackStarted();
+        }
+        return;
+      }
+
+      mentorPlaybackActiveRef.current = false;
     },
-    onMentorAudioLevel: setMentorVoiceLevel,
   });
 
   useEffect(() => {
@@ -170,6 +192,7 @@ export const LessonForm = ({
     setIsVoiceMode(true);
     setLatestTranscript("");
     setLatestResponse("");
+    mentorPlaybackActiveRef.current = false;
     voiceModeUI.onMicCaptureStarted();
   };
 
@@ -295,6 +318,7 @@ export const LessonForm = ({
             <LessonComposerRightControls
               isVoiceMode={isVoiceMode}
               isVoiceMentorMode={isVoiceMentorMode}
+              isVoiceMentorStarting={isVoiceMentorStarting}
               canSubmit={Boolean(input.trim())}
               canUseVoiceMentor={canUseVoiceMentor}
               onStartVoiceMode={() => void startVoiceMode()}

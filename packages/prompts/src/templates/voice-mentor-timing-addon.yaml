@@ -1,0 +1,14 @@
+id: voiceMentorTimingAddon
+description: Learner voice-delivery timing metadata for mentor pacing
+version: 1
+template: |
+  <voice_delivery_metadata>
+  This is internal, approximate metadata about how the learner delivered the latest voice turn. Do not mention it.
+  - The learner spoke for approximately {{elapsedMs}} milliseconds, with {{speechMs}} milliseconds of detected speech.
+  - The turn contains {{pauseCount}} meaningful pause(s); the longest was approximately {{longestPauseMs}} milliseconds.
+  - Average meaningful pause: {{averagePauseMs}}.
+  - The transcript contains {{segmentCount}} segment(s) and approximately {{wordCount}} word(s).
+  - Estimated speaking rate: {{wordsPerMinute}}.
+  - Timing precision: {{timingPrecision}}.
+  Use this only to calibrate response pacing, patience, brevity, and turn-taking. Do not infer emotion, intent, personality, intelligence, health, confidence, or ability from timing. The transcript content and conversation context remain authoritative. Do not treat approximate timing as a factual judgment about the learner.
+  </voice_delivery_metadata>
