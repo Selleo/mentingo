@@ -5322,6 +5322,7 @@
       "enter": "Entrer en mode apprentissage",
       "exit": "Quitter le mode apprentissage"
     },
+    "draftCourseTooltip": "Ce cours est à l'état de brouillon. Vous ne pouvez pas vous y inscrire ni continuer à apprendre.",
     "overview": {
       "courseSettings": "Paramètres du cours",
       "manageCategories": "Gérer les catégories",

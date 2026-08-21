@@ -12,6 +12,7 @@ describe("ProgressStatCard", () => {
       <ProgressStatCard
         completedChapterCount={1}
         courseChapterCount={3}
+        isDraftCourse={false}
         isAdminExperience={false}
         onEnterLearningMode={vi.fn()}
         timeLeftSeconds={5_400}
@@ -30,6 +31,7 @@ describe("ProgressStatCard", () => {
       <ProgressStatCard
         completedChapterCount={3}
         courseChapterCount={3}
+        isDraftCourse={false}
         isAdminExperience={false}
         onEnterLearningMode={vi.fn()}
         timeLeftSeconds={0}
@@ -50,6 +52,7 @@ describe("ProgressStatCard", () => {
       <ProgressStatCard
         completedChapterCount={1}
         courseChapterCount={3}
+        isDraftCourse={false}
         isAdminExperience
         onEnterLearningMode={onEnterLearningMode}
         timeLeftSeconds={5_400}
@@ -61,5 +64,24 @@ describe("ProgressStatCard", () => {
     await user.click(screen.getByRole("button", { name: "Enter learning mode" }));
 
     expect(onEnterLearningMode).toHaveBeenCalledOnce();
+  });
+
+  it("does not let admins enter learning mode for draft courses", async () => {
+    const onEnterLearningMode = vi.fn();
+
+    renderWith().render(
+      <ProgressStatCard
+        completedChapterCount={1}
+        courseChapterCount={3}
+        isDraftCourse
+        isAdminExperience
+        onEnterLearningMode={onEnterLearningMode}
+        timeLeftSeconds={5_400}
+      />,
+    );
+
+    await userEvent.setup().click(screen.getByRole("button", { name: "Enter learning mode" }));
+
+    expect(onEnterLearningMode).not.toHaveBeenCalled();
   });
 });

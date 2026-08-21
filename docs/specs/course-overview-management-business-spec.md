@@ -22,6 +22,7 @@ Learners use the same overview to understand the course, continue learning, revi
 - Update inline course-overview edits immediately without making the user wait for a broad page refresh.
 - Manage curriculum through a dedicated action while keeping the legacy editor focused on curriculum.
 - Organize status, pricing, enrollment, sharing, and course behavior in a consistent tabbed settings sheet.
+- Keep draft courses in authoring mode by explaining that learning mode and progress tracking become available after publication.
 - Let eligible learners open a centered preview, download, and share an awarded certificate from the course page.
 - Keep mention suggestions usable with long participant names and near viewport edges.
 
@@ -31,7 +32,7 @@ Course teams spend less time navigating between management pages and see changes
 
 ## How It Works
 
-An administrator opens the course overview, selects a course language, and edits learner-facing details in place, or opens the settings sheet to choose a management area. The overview loads the selected course and language before showing the page, so users do not see a blank intermediate state. The selected language's learning outcomes can be edited independently, including clearing a translation without replacing the base-language content. Learners continue to see the base-language outcome fallback when a translated outcome is unavailable. Curriculum editing remains available through its dedicated action, and the course overview uses the established accordion curriculum with chapter counters, progress, access indicators, and lesson actions. The hero and course-details view remain usable on narrow screens. A learner who completes a certificate-enabled course sees a certificate card and can open the existing localized preview in a centered modal.
+An administrator opens the course overview, selects a course language, and edits learner-facing details in place, or opens the settings sheet to choose a management area. The overview loads the selected course and language before showing the page, so users do not see a blank intermediate state. The selected language's learning outcomes can be edited independently, including clearing a translation without replacing the base-language content. Learners continue to see the base-language outcome fallback when a translated outcome is unavailable. Curriculum editing remains available through its dedicated action, and the course overview uses the established accordion curriculum with chapter counters, progress, access indicators, and lesson actions. Draft courses keep users out of learning mode and explain that publication is required before learning progress can be recorded. The hero and course-details view remain usable on narrow screens. A learner who completes a certificate-enabled course sees a certificate card and can open the existing localized preview in a centered modal.
 
 ## Key Technical Context
 
@@ -42,6 +43,7 @@ An administrator opens the course overview, selects a course language, and edits
 - The mobile details view uses the shared bottom-sheet dialog behavior, while the hero grows with its content so controls remain accessible on narrow screens.
 - The settings sheet reuses established course-management panels and the course overview tab visual language.
 - Certificate visibility still depends on an issued certificate, completed course progress, and the effective learner experience.
+- The API rejects progress writes for draft courses, including progress initiated through lesson, video, SCORM, or AI mentor flows.
 - Course language remains explicit throughout localized management and certificate rendering.
 
 ## Verification Notes
@@ -49,3 +51,4 @@ An administrator opens the course overview, selects a course language, and edits
 - Source coverage exists for the modern overview, TOC tabs, settings drawer, details, outcomes, certificates, and discussions.
 - API coverage verifies localized course outcomes for editor and learner experiences, including empty translated outcomes.
 - Existing responsive course-overview E2E coverage verifies accessible controls and visible learner actions at a 320px viewport; additional loading-transition assertions remain a follow-up opportunity.
+- Focused web and API tests verify that draft-course learning-mode entry is disabled and draft progress writes are rejected without creating progress.

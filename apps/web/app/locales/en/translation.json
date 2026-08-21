@@ -5575,6 +5575,7 @@
       "enter": "Enter learning mode",
       "exit": "Exit learning mode"
     },
+    "draftCourseTooltip": "This course is in draft status. You cannot enroll in it or continue learning.",
     "overview": {
       "courseSettings": "Course settings",
       "manageCategories": "Manage categories",

@@ -5557,6 +5557,7 @@
       "enter": "Spustit výukový režim",
       "exit": "Ukončit výukový režim"
     },
+    "draftCourseTooltip": "Tento kurz je ve stavu konceptu. Nemůžete se do něj zapsat ani pokračovat ve studiu.",
     "overview": {
       "courseSettings": "Nastavení kurzu",
       "manageCategories": "Spravovat kategorie",
