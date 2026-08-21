@@ -8,3 +8,7 @@ export const DASHBOARD_WIDGET_HANDLES = {
   STUDENT_CERTIFICATES: "dashboard-widget-student-certificates",
   TODO_TASKS: "dashboard-widget-todo-tasks",
 } as const;
+
+export const DASHBOARD_REPORT_HANDLES = {
+  DOWNLOAD: "dashboard-report-download",
+} as const;

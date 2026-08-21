@@ -35,7 +35,7 @@ Statistics and Analytics help learning teams move from anecdotal feedback to mea
 
 A learner opens Progress to see personal learning activity. Mentingo aggregates the learner's course, lesson, quiz, and streak data in the selected interface language and displays charts that help the learner continue from the right context.
 
-An administrator opens Analytics to review organization-level charts and download a summary report. These charts summarize course popularity, enrollment, completion, freemium conversion, and average quiz performance.
+An administrator opens the dashboard to review organization-level training completion and, when reporting access is granted, download the XLSX summary report. The report includes learner/course progress and quiz results within the administrator's permitted scope.
 
 From the course overview, permitted users can open the Statistics tab beside the table of contents. Mentingo reuses the full course-admin statistics experience there, showing overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons.
 From a course management view, permitted users can open the Statistics tab. Mentingo shows course overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons. Learner search accepts a given name, family name, or a combined full name so course managers can find a specific person using the name format they see in the table.
