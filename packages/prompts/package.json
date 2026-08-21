@@ -15,9 +15,9 @@
   },
   "devDependencies": {
     "@sinclair/typebox": "0.32.34",
-    "@types/node": "^24.10.0",
+    "@types/node": "24.10.0",
     "ts-node": "10.9.1",
-    "typescript": "^5.4.5",
+    "typescript": "5.4.5",
     "yaml": "2.4.2"
   },
   "keywords": [],
