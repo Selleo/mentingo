@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
+      "dataScope": {
+        "personal": "Deine Daten",
+        "otherUsers": "Organisationsdaten",
+        "personalTooltip": "Dieses Widget zeigt deine persönlichen Lerndaten.",
+        "otherUsersTooltip": "Dieses Widget zeigt Lerndaten anderer Nutzer in deiner Organisation."
+      },
       "trainingCompletionChartLabel": "{{completed}} von {{total}} Zuweisungen abgeschlossen, {{percentage}} Prozent.",
       "deadlineRisksPage": "Seite {{page}} von {{totalPages}}",
       "placeholderDescription": "Dashboard-Widget für eine eigene Datenansicht",
@@ -106,6 +112,7 @@
         },
         "aiMentorPractice": {
           "description": "Erstelle täglich ein gezieltes Übungsszenario",
+          "dailyRefreshInfo": "Du kannst pro Tag eine neue AI-Übungssitzung generieren.",
           "empty": "Beschreibe eine Situation und übe sie mit dem KI-Mentor.",
           "emptyPrompt": "Welches Gespräch möchtest du souveräner führen?",
           "startCta": "Übung starten",
@@ -277,7 +284,7 @@
       "summaryTitle": "Was du mitnehmen kannst",
       "summaryDescription": "Nutze diese Beobachtungen, um deinen nächsten Versuch zu verbessern.",
       "scoreLabel": "Übungsergebnis",
-      "criteriaTitle": "Was der KI-Judge bemerkt hat",
+      "criteriaTitle": "Aufgabenbewertung",
       "criterionFallback": "Kriterium {{number}}",
       "importantFeedbackTitle": "Wichtiges Feedback"
     },
@@ -2086,8 +2093,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Bunny Stream API-Schlüssel"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Bunny Stream-Signaturschlüssel"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Bunny Stream API-Schlüssel mit Leserechten",
+        "description": "Schreibgeschützter Bunny-Stream-Bibliotheksschlüssel zur Verifizierung von Bunny-Stream-Webhooks."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream-Bibliotheks-ID"
@@ -3643,6 +3651,16 @@
         "start": "Start",
         "moreInfo": "Weitere Informationen",
         "info": "Info"
+      },
+      "featuredCourse": {
+        "label": "Hervorgehobener Kurs",
+        "none": "Hervorgehobenen Kurs auswählen",
+        "search": "Veröffentlichte Kurse suchen...",
+        "empty": "Keine veröffentlichten Kurse gefunden",
+        "clear": "Hervorgehobenen Kurs entfernen",
+        "loadMore": "Weitere Kurse laden",
+        "updated": "Hervorgehobener Kurs aktualisiert",
+        "updateFailed": "Hervorgehobener Kurs konnte nicht aktualisiert werden"
       },
       "lessonsCount_one": "{{count}} Lektion",
       "lessonsCount_other": "{{count}} Lektionen"

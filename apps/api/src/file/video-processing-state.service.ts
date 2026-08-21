@@ -11,6 +11,8 @@ import type { UUIDType } from "src/common";
 export type VideoUploadState = {
   uploadId: string;
   placeholderKey: string;
+  tenantId?: UUIDType;
+  resourceId?: UUIDType;
   status: VideoUploadStatus;
   provider?: VideoProviderType;
   fileKey?: string;
@@ -68,6 +70,7 @@ export class VideoProcessingStateService {
     fileType?: string,
     userId?: UUIDType,
     options?: {
+      tenantId?: UUIDType;
       provider?: VideoProviderType;
       fileKey?: string;
       multipartUploadId?: string;
@@ -78,6 +81,7 @@ export class VideoProcessingStateService {
     const state: VideoUploadState = {
       uploadId,
       placeholderKey,
+      tenantId: options?.tenantId,
       status: VIDEO_UPLOAD_STATUS.QUEUED,
       fileType,
       userId,
@@ -256,7 +260,11 @@ export class VideoProcessingStateService {
   }
 
   async markFailed(uploadId: string, placeholderKey: string, error?: string) {
-    const current = (await this.getState(uploadId)) ?? { uploadId, placeholderKey, userId: "" };
+    const current = (await this.getState(uploadId)) ?? {
+      uploadId,
+      placeholderKey,
+      userId: "",
+    };
     const next: VideoUploadState = {
       ...current,
       status: VIDEO_UPLOAD_STATUS.FAILED,

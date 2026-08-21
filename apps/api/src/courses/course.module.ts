@@ -28,6 +28,7 @@ import { CourseDuplicationQueueService } from "./course-duplication.queue.servic
 import { CourseDuplicationRepository } from "./course-duplication.repository";
 import { CourseDuplicationService } from "./course-duplication.service";
 import { CourseDuplicationWorker } from "./course-duplication.worker";
+import { CourseDurationRepository } from "./course-duration.repository";
 import { CourseDurationService } from "./course-duration.service";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
@@ -73,6 +74,7 @@ import { MasterCourseWorker } from "./master-course.worker";
   providers: [
     CourseService,
     CourseDurationService,
+    CourseDurationRepository,
     CourseScormAssetsService,
     CourseScormExportService,
     CourseScormSnapshotRepository,

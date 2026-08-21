@@ -4,6 +4,8 @@ import { faker } from "@faker-js/faker";
 import {
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TYPE,
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_VOICE_MODE,
   LESSON_TYPES,
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
@@ -981,6 +983,11 @@ describe("Master course export and sync (e2e)", () => {
 
   it("copies and resynchronizes the complete localized AI Judge configuration", async () => {
     let sourceConfigurationId = "";
+    let sourceAiMentorId = "";
+    const sourceVoiceReferences = {
+      en: "cartesia-source-english",
+      pl: "cartesia-source-polish",
+    };
 
     const { sourceCourseId, targetCourseId } = await setupAndExport({
       beforeExport: async ({ sourceLessonId }) => {
@@ -1013,6 +1020,20 @@ describe("Master course export and sync (e2e)", () => {
             configurationId: sourceMentorConfiguration.id,
             difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
           });
+          sourceAiMentorId = sourceAiMentor.id;
+
+          await db
+            .update(aiMentorLessons)
+            .set({
+              name: {
+                en: "Discovery Mentor",
+                pl: "Mentor discovery",
+              },
+              voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+              ttsPreset: AI_MENTOR_TTS_PRESET.FEMALE,
+              customTtsReference: sourceVoiceReferences,
+            })
+            .where(eq(aiMentorLessons.id, sourceAiMentor.id));
 
           const [sourceConfiguration] = await db
             .insert(aiJudgeConfigurations)
@@ -1131,7 +1152,44 @@ describe("Master course export and sync (e2e)", () => {
         return { configuration, criteria, scoreGuidance, blockingErrors };
       });
 
+    const getTargetVoiceConfig = () =>
+      runAsTenant(targetTenantId, async () => {
+        const [voiceConfig] = await db
+          .select({
+            voiceMode: aiMentorLessons.voiceMode,
+            ttsPreset: aiMentorLessons.ttsPreset,
+            customTtsReference: aiMentorLessons.customTtsReference,
+            name: aiMentorLessons.name,
+          })
+          .from(aiMentorLessons)
+          .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .limit(1);
+
+        return voiceConfig;
+      });
+
     const initialTargetGraph = await getTargetGraph();
+    expect(await getTargetVoiceConfig()).toMatchObject({
+      voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+      ttsPreset: AI_MENTOR_TTS_PRESET.FEMALE,
+      customTtsReference: sourceVoiceReferences,
+      name: {
+        en: "Discovery Mentor",
+        pl: "Mentor discovery",
+      },
+    });
+    expect(
+      mockS3Service.copyFile.mock.calls.some(
+        ([reference]) => reference === sourceVoiceReferences.en,
+      ),
+    ).toBe(false);
+    expect(
+      mockS3Service.copyFile.mock.calls.some(
+        ([reference]) => reference === sourceVoiceReferences.pl,
+      ),
+    ).toBe(false);
     expect(initialTargetGraph.configuration).toMatchObject({
       taskGoal: {
         en: "Discover the client's needs",
@@ -1181,6 +1239,17 @@ describe("Master course export and sync (e2e)", () => {
           passingThresholdPercent: 80,
         })
         .where(eq(aiJudgeConfigurations.id, sourceConfigurationId));
+      await db
+        .update(aiMentorLessons)
+        .set({
+          voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+          ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: {
+            en: "cartesia-updated-english",
+            pl: "cartesia-updated-polish",
+          },
+        })
+        .where(eq(aiMentorLessons.id, sourceAiMentorId));
       await db
         .delete(aiJudgeCriteria)
         .where(eq(aiJudgeCriteria.configurationId, sourceConfigurationId));
@@ -1255,6 +1324,14 @@ describe("Master course export and sync (e2e)", () => {
     ]);
     expect(synchronizedTargetGraph.scoreGuidance).toHaveLength(2);
     expect(synchronizedTargetGraph.blockingErrors).toEqual([]);
+    expect(await getTargetVoiceConfig()).toMatchObject({
+      voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+      ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+      customTtsReference: {
+        en: "cartesia-updated-english",
+        pl: "cartesia-updated-polish",
+      },
+    });
   });
 
   it("copies rich-text S3 resources, rewrites localized content, and reuses target resource rows on sync", async () => {

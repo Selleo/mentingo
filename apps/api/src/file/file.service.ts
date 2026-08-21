@@ -18,6 +18,7 @@ import {
   ENTITY_TYPES,
   RESOURCE_VISIBILITY,
   VIDEO_UPLOAD_STATUS,
+  VIDEO_PROVIDERS,
   type VideoProvider,
   type ResourceVisibility,
   type SupportedLanguages,
@@ -50,6 +51,7 @@ import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/uti
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
 import { DB } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -69,6 +71,8 @@ import { ThumbnailService } from "./thumbnail.service";
 import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
+import { VideoMetadataQueueService } from "./video-metadata.queue.service";
+import { isBunnyVideoReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
@@ -113,6 +117,8 @@ export class FileService {
     @Inject(DB) private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
+    private readonly videoMetadataQueueService: VideoMetadataQueueService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async getFileUrl(fileKey: string, options: { quality?: ImageQuality } = {}): Promise<string> {
@@ -291,6 +297,7 @@ export class FileService {
     placeholderKey: string,
     fileType: string | undefined,
     currentUserId?: UUIDType,
+    tenantId?: UUIDType,
     maxUploadSize?: number,
   ) {
     await this.videoProcessingStateService.initializeState(
@@ -298,7 +305,7 @@ export class FileService {
       placeholderKey,
       fileType,
       currentUserId,
-      { maxUploadSize },
+      { maxUploadSize, tenantId },
     );
   }
 
@@ -351,6 +358,7 @@ export class FileService {
     relationshipType?: ResourceRelationshipType;
     linkToEntity?: boolean;
     visibility?: ResourceVisibility;
+    currentUser?: CurrentUserType;
   }) {
     const {
       entityType,
@@ -363,6 +371,7 @@ export class FileService {
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       linkToEntity = true,
       visibility = RESOURCE_VISIBILITY.PUBLIC,
+      currentUser,
     } = params;
 
     if (!entityId && !contextId) return undefined;
@@ -379,6 +388,7 @@ export class FileService {
       },
       contextId,
       visibility,
+      currentUser,
     });
 
     return resourceResult.resourceId;
@@ -443,6 +453,7 @@ export class FileService {
       placeholderKey,
       fileType,
       currentUser?.userId,
+      currentUser?.tenantId,
       maxUploadSize,
     );
 
@@ -473,7 +484,26 @@ export class FileService {
       relationshipType,
       linkToEntity,
       visibility,
+      currentUser,
     });
+
+    await this.videoProcessingStateService.updateState(uploadId, {
+      ...(currentUser?.tenantId ? { tenantId: currentUser.tenantId } : {}),
+      ...(resourceId ? { resourceId } : {}),
+    });
+
+    if (resourceId && currentUser?.tenantId) {
+      if (providerResponse.provider === VIDEO_PROVIDERS.BUNNY && providerResponse.bunnyGuid) {
+        await this.videoMetadataQueueService.enqueueWatchdog({
+          tenantId: currentUser.tenantId,
+          resourceId,
+          uploadId,
+          provider: VIDEO_PROVIDERS.BUNNY,
+          fileKey: providerResponse.fileKey,
+          bunnyVideoId: providerResponse.bunnyGuid,
+        });
+      }
+    }
 
     return {
       uploadId,
@@ -956,7 +986,13 @@ export class FileService {
     return this.videoProcessingStateService.getState(uploadId);
   }
 
-  async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {
+  async handleBunnyWebhook(
+    payload: BunnyWebhookBody & Record<string, unknown>,
+    rawBody: Buffer,
+    signature?: string,
+    signatureVersion?: string,
+    signatureAlgorithm?: string,
+  ) {
     const status = payload.status ?? payload.Status ?? 0;
 
     const videoId =
@@ -971,17 +1007,41 @@ export class FileService {
       throw new BadRequestException("Missing video identifier");
     }
 
-    if (Number(status) !== 3) {
+    const cacheKey = videoKey(videoId);
+    const uploadId = (await this.cache.get(cacheKey)) as string | undefined;
+    const data = uploadId
+      ? ((await this.cache.get(uploadKey(uploadId))) as VideoUploadState | undefined)
+      : undefined;
+
+    if (!uploadId || !data?.tenantId || !data.resourceId) {
+      this.logger.warn(`Ignoring Bunny webhook without cached upload mapping for video ${videoId}`);
+      return { ignored: true };
+    }
+
+    if (
+      !signature ||
+      !signatureVersion ||
+      !signatureAlgorithm ||
+      !(await this.tenantRunner.runWithTenant(data.tenantId, () =>
+        this.bunnyStreamService.validateWebhookSignature(
+          rawBody,
+          signature,
+          signatureVersion,
+          signatureAlgorithm,
+        ),
+      ))
+    ) {
+      throw new BadRequestException("Invalid Bunny webhook signature");
+    }
+
+    if (!isBunnyVideoReadyStatus(status)) {
       return { ignored: true };
     }
 
     const fileKey = `bunny-${videoId}`;
-    const fileUrl = await this.bunnyStreamService.getUrl(videoId);
-
-    const cacheKey = videoKey(videoId);
-    const uploadId = (await this.cache.get(cacheKey)) as string | undefined;
-
-    const data = (await this.cache.get(uploadKey(uploadId ?? ""))) as VideoUploadState | undefined;
+    const fileUrl = await this.tenantRunner.runWithTenant(data.tenantId, () =>
+      this.bunnyStreamService.getUrl(videoId),
+    );
 
     if (uploadId) {
       await this.notificationGateway.publishNotification({
@@ -991,11 +1051,18 @@ export class FileService {
         fileUrl,
         userId: data?.userId,
       });
-    } else {
-      throw new BadRequestException("No uploadId found in cache for videoId");
     }
 
     await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
+
+    await this.videoMetadataQueueService.enqueueReady({
+      tenantId: data.tenantId,
+      resourceId: data.resourceId,
+      uploadId,
+      provider: VIDEO_PROVIDERS.BUNNY,
+      fileKey,
+      bunnyVideoId: videoId,
+    });
 
     return { success: true };
   }

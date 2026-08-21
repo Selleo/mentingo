@@ -6,7 +6,10 @@ import { S3Service } from "src/s3/s3.service";
 
 import { MAX_VIDEO_SIZE } from "../file.constants";
 import { FileGuard } from "../guards/file.guard";
+import { VideoMetadataQueueService } from "../video-metadata.queue.service";
 import { VideoProcessingStateService } from "../video-processing-state.service";
+
+import type { UUIDType } from "src/common";
 
 type TusUploadState = {
   uploadId: string;
@@ -18,6 +21,8 @@ type TusUploadState = {
   placeholderKey: string;
   fileType?: string;
   userId?: string;
+  tenantId?: UUIDType;
+  resourceId?: UUIDType;
   sniffedMimeType?: string;
 };
 
@@ -29,6 +34,7 @@ export class TusUploadService {
   constructor(
     private readonly s3Service: S3Service,
     private readonly videoProcessingStateService: VideoProcessingStateService,
+    private readonly videoMetadataQueueService: VideoMetadataQueueService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -68,6 +74,8 @@ export class TusUploadService {
       placeholderKey: state.placeholderKey,
       fileType: state.fileType,
       userId: state.userId,
+      tenantId: state.tenantId,
+      resourceId: state.resourceId,
     };
 
     await this.cache.set(this.getCacheKey(uploadId), session, TUS_STATE_TTL);
@@ -150,6 +158,16 @@ export class TusUploadService {
         fileType: session.fileType,
         provider: VIDEO_PROVIDERS.S3,
       });
+
+      if (session.tenantId && session.resourceId) {
+        await this.videoMetadataQueueService.enqueueReady({
+          tenantId: session.tenantId,
+          resourceId: session.resourceId,
+          uploadId: session.uploadId,
+          provider: VIDEO_PROVIDERS.S3,
+          fileKey: session.fileKey,
+        });
+      }
 
       await this.cache.del(this.getCacheKey(uploadId));
 

@@ -18,6 +18,7 @@ import { validate as uuidValidate } from "uuid";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CourseDurationRefreshRequestedEvent } from "src/events";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
@@ -32,6 +33,7 @@ import {
   LUMA_GENERATED_COURSE_QUESTION_TYPES,
 } from "src/luma/luma-course-generation-sync.constants";
 import { LumaCourseGenerationSyncRepository } from "src/luma/luma-course-generation-sync.repository";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -84,6 +86,7 @@ export class LumaGeneratedCourseImportService {
     private readonly aiMentorConfigurationGraphService: AiMentorConfigurationGraphService,
     private readonly ingestionService: IngestionService,
     private readonly lumaCourseGenerationSyncRepository: LumaCourseGenerationSyncRepository,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async importBundle(
@@ -128,6 +131,8 @@ export class LumaGeneratedCourseImportService {
 
       await this.updateCourseChapterCount(courseId, trx);
     });
+
+    await this.outboxPublisher.publish(new CourseDurationRefreshRequestedEvent({ courseId }));
 
     await this.flushPendingAiMentorContextIngestions(contextIngestions, currentUser);
 

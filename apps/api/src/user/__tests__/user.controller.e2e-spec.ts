@@ -402,6 +402,23 @@ describe("UsersController (e2e)", () => {
         .expect(200);
     });
 
+    it("should allow students to view content creator details", async () => {
+      const contentCreator = await userFactory.withContentCreatorSettings(db).create();
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/user/details?userId=${contentCreator.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: contentCreator.id,
+          firstName: contentCreator.firstName,
+          lastName: contentCreator.lastName,
+        }),
+      );
+    });
+
     it("should hide contact fields for unauthenticated requests", async () => {
       await db.insert(userDetailsTable).values({
         userId: testUser.id,

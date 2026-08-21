@@ -1,5 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
 
+import { CourseDurationRefreshRequestedEvent } from "src/events";
 import { LumaGeneratedCourseImportService } from "src/luma/luma-generated-course-import.service";
 
 import type { LumaGeneratedCourseLesson } from "src/luma/luma.types";
@@ -7,6 +8,7 @@ import type { LumaGeneratedCourseLesson } from "src/luma/luma.types";
 describe("LumaGeneratedCourseImportService", () => {
   const createService = () =>
     new LumaGeneratedCourseImportService(
+      undefined as never,
       undefined as never,
       undefined as never,
       undefined as never,
@@ -73,5 +75,38 @@ describe("LumaGeneratedCourseImportService", () => {
     expect(() => createService()["getAiMentor"](lesson)).toThrow(
       new BadRequestException("luma.errors.invalidAiJudgeConfiguration"),
     );
+  });
+
+  it("publishes a course duration refresh event after the import transaction commits", async () => {
+    let committed = false;
+    const transaction = jest.fn(async (callback: (trx: never) => Promise<void>) => {
+      await callback({} as never);
+      committed = true;
+    });
+    const publish = jest.fn(async () => {
+      expect(committed).toBe(true);
+    });
+    const service = new LumaGeneratedCourseImportService(
+      { transaction } as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      { markProcessed: jest.fn().mockResolvedValue({}) } as never,
+      { publish } as never,
+    );
+    const serviceInternals = service as unknown as Record<string, jest.Mock>;
+    serviceInternals.getCourseBaseLanguage = jest.fn().mockResolvedValue("en");
+    serviceInternals.assertCourseHasNoChapters = jest.fn().mockResolvedValue(undefined);
+    serviceInternals.sortChapters = jest.fn().mockReturnValue([]);
+    serviceInternals.updateCourseChapterCount = jest.fn().mockResolvedValue(undefined);
+    serviceInternals.flushPendingAiMentorContextIngestions = jest.fn().mockResolvedValue(undefined);
+
+    const courseId = "course-id" as never;
+    await service.importBundle(courseId, { assets: [], course: {} } as never, undefined as never);
+
+    expect(publish).toHaveBeenCalledWith(new CourseDurationRefreshRequestedEvent({ courseId }));
   });
 });

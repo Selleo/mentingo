@@ -412,7 +412,9 @@ export class ExternalAudioService {
           {
             threadId: session.threadId,
             content: text,
+            lessonId: session.lessonId,
             voiceSessionId: sessionId,
+            voiceTurnId: payload.jobId,
             voiceTurnWasInterrupted,
             voiceDeliveryContext,
             abortSignal: abortController.signal,

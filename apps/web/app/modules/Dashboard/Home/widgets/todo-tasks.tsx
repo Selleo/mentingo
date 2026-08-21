@@ -220,6 +220,7 @@ export function WidgetTodoTasks({
       <DashboardWidgetHeader
         title={t(metadata?.titleKey ?? "dashboardHome.widgets.todoTasks.title")}
         icon={metadata?.icon ?? ListTodo}
+        dataScope={metadata?.dataScope}
       />
       <DashboardWidgetContent
         className={cn("flex flex-col", isCompact ? "gap-1 p-2" : "gap-3 p-3")}

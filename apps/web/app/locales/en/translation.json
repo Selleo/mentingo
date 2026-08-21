@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "This widget could not load its data.",
+      "dataScope": {
+        "personal": "Your data",
+        "otherUsers": "Organization data",
+        "personalTooltip": "This widget shows your personal learning data.",
+        "otherUsersTooltip": "This widget shows learning data for other users in your organization."
+      },
       "trainingCompletionChartLabel": "{{completed}} of {{total}} enrollments completed, {{percentage}} percent.",
       "deadlineRisksPage": "Page {{page}} of {{totalPages}}",
       "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
@@ -106,6 +112,7 @@
         },
         "aiMentorPractice": {
           "description": "Create one focused practice scenario each day",
+          "dailyRefreshInfo": "You can generate one new AI Practice Session per day.",
           "empty": "Describe a situation and practice it with AI Mentor.",
           "emptyPrompt": "What conversation would you like to handle with more confidence?",
           "startCta": "Start practice",
@@ -277,7 +284,7 @@
       "summaryTitle": "What to take forward",
       "summaryDescription": "Use these observations to strengthen your next attempt.",
       "scoreLabel": "Practice score",
-      "criteriaTitle": "What the Judge noticed",
+      "criteriaTitle": "Task assessment",
       "criterionFallback": "Criterion {{number}}",
       "importantFeedbackTitle": "Important feedback"
     },
@@ -2088,8 +2095,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Bunny Stream API Key"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Bunny Stream Signing Key"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Bunny Stream Read-Only API Key",
+        "description": "Read-only Bunny Stream library key used to verify Bunny Stream webhooks."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"
@@ -3648,6 +3656,16 @@
         "start": "Start",
         "moreInfo": "More info",
         "info": "Info"
+      },
+      "featuredCourse": {
+        "label": "Featured course",
+        "none": "Choose featured course",
+        "search": "Search published courses...",
+        "empty": "No published courses found",
+        "clear": "Clear featured course",
+        "loadMore": "Load more courses",
+        "updated": "Featured course updated",
+        "updateFailed": "Could not update featured course"
       },
       "lessonsCount_one": "{{count}} lesson",
       "lessonsCount_other": "{{count}} lessons"

@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
+      "dataScope": {
+        "personal": "Jūsų duomenys",
+        "otherUsers": "Organizacijos duomenys",
+        "personalTooltip": "Šis valdiklis rodo jūsų asmeninius mokymosi duomenis.",
+        "otherUsersTooltip": "Šis valdiklis rodo kitų jūsų organizacijos naudotojų mokymosi duomenis."
+      },
       "trainingCompletionChartLabel": "Užbaigta {{completed}} iš {{total}} priskyrimų, {{percentage}} procentų.",
       "deadlineRisksPage": "{{page}} puslapis iš {{totalPages}}",
       "placeholderDescription": "Prietaisų skydelio valdiklis, paruoštas atskiram duomenų rodiniui",
@@ -106,6 +112,7 @@
         },
         "aiMentorPractice": {
           "description": "Kasdien sukurkite vieną praktikos scenarijų",
+          "dailyRefreshInfo": "Kiekvieną dieną galite sugeneruoti vieną naują DI praktikos sesiją.",
           "empty": "Aprašykite situaciją ir praktikuokitės su DI mentoriumi.",
           "emptyPrompt": "Kokį pokalbį norėtumėte vesti užtikrinčiau?",
           "startCta": "Pradėti praktiką",
@@ -277,7 +284,7 @@
       "summaryTitle": "Ką verta pritaikyti toliau",
       "summaryDescription": "Pasinaudokite šiomis įžvalgomis, kad sustiprintumėte kitą bandymą.",
       "scoreLabel": "Praktikos rezultatas",
-      "criteriaTitle": "Ką pastebėjo DI vertintojas",
+      "criteriaTitle": "Užduoties įvertinimas",
       "criterionFallback": "Kriterijus {{number}}",
       "importantFeedbackTitle": "Svarbus grįžtamasis ryšys"
     },
@@ -2085,8 +2092,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Bunny Stream API raktas"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Bunny Stream pasirašymo raktas"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Tik skaitomas Bunny Stream API raktas",
+        "description": "Tik skaitomas Bunny Stream bibliotekos raktas, naudojamas Bunny Stream webhookams tikrinti."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream bibliotekos ID"
@@ -3644,6 +3652,16 @@
         "start": "Pradėti",
         "moreInfo": "Daugiau informacijos",
         "info": "Informacija"
+      },
+      "featuredCourse": {
+        "label": "Teminis kursas",
+        "none": "Pasirinkite teminį kursą",
+        "search": "Ieškoti paskelbtų kursų...",
+        "empty": "Paskelbtų kursų nerasta",
+        "clear": "Išvalyti teminį kursą",
+        "loadMore": "Įkelti daugiau kursų",
+        "updated": "Teminis kursas atnaujintas",
+        "updateFailed": "Nepavyko atnaujinti teminio kurso"
       },
       "lessonsCount_one": "{{count}} pamoka",
       "lessonsCount_other": "{{count}} pamokų"

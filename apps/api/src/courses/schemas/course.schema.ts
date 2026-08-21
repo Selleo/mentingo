@@ -44,6 +44,16 @@ export const studentCourseSchema = Type.Object({
   slug: Type.String(),
 });
 
+export const publishedCourseLookupSchema = Type.Object({
+  id: UUIDSchema,
+  title: Type.String(),
+});
+
+export const publishedCourseLookupResponseSchema = Type.Array(publishedCourseLookupSchema);
+
+export type PublishedCourseLookup = Static<typeof publishedCourseLookupSchema>;
+export type PublishedCourseLookupResponse = Static<typeof publishedCourseLookupResponseSchema>;
+
 export const coursesForContentCreatorSchema = Type.Object({
   ...studentCourseSchema.properties,
   authorId: UUIDSchema,

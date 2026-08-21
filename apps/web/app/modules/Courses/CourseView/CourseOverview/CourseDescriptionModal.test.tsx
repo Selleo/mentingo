@@ -12,6 +12,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
       category: "Analytics",
       description: "Course description",
       estimatedDurationSeconds: 3_600,
+      chapters: [],
       learningOutcomes: [],
       title: "Statistics",
     },
@@ -33,7 +34,7 @@ describe("CourseDescriptionModal", () => {
       />,
     );
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toHaveClass("flex", "max-h-[90dvh]", "sm:!max-w-4xl");
 
     await user.keyboard("{Escape}");
 

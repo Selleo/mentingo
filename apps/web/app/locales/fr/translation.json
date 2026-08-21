@@ -51,6 +51,12 @@
     },
     "widgets": {
       "loadError": "Impossible de charger ce widget.",
+      "dataScope": {
+        "personal": "Vos données",
+        "otherUsers": "Données de l’organisation",
+        "personalTooltip": "Ce widget présente vos données personnelles d’apprentissage.",
+        "otherUsersTooltip": "Ce widget présente les données d’apprentissage des autres utilisateurs de votre organisation."
+      },
       "trainingCompletionChartLabel": "{{completed}} inscriptions sur {{total}} terminées, soit {{percentage}} %.",
       "deadlineRisksPage": "Page {{page}} sur {{totalPages}}",
       "placeholderDescription": "Widget du tableau de bord préparé pour une vue dédiée",
@@ -114,6 +120,7 @@
         },
         "aiMentorPractice": {
           "description": "Créez chaque jour un scénario de pratique ciblé",
+          "dailyRefreshInfo": "Vous pouvez générer une nouvelle session de pratique avec l’IA par jour.",
           "empty": "Décrivez une situation et entraînez-vous avec l'AI Mentor.",
           "emptyPrompt": "Quelle conversation aimeriez-vous aborder avec plus d'assurance ?",
           "startCta": "Commencer la pratique",
@@ -289,7 +296,7 @@
       "summaryTitle": "Ce qu'il faut retenir",
       "summaryDescription": "Utilisez ces observations pour améliorer votre prochaine tentative.",
       "scoreLabel": "Résultat de la pratique",
-      "criteriaTitle": "Ce que l'évaluateur IA a observé",
+      "criteriaTitle": "Évaluation de la tâche",
       "criterionFallback": "Critère {{number}}",
       "importantFeedbackTitle": "Retour important"
     },
@@ -2087,8 +2094,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Clé API Bunny Stream"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Clé de signature de flux Bunny"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Clé API Bunny Stream en lecture seule",
+        "description": "Clé de bibliothèque Bunny Stream en lecture seule utilisée pour vérifier les webhooks Bunny Stream."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "ID de la bibliothèque Bunny Stream"
@@ -3406,6 +3414,16 @@
         "start": "Commencer",
         "moreInfo": "Plus d'informations",
         "info": "Informations"
+      },
+      "featuredCourse": {
+        "label": "Cours à la une",
+        "none": "Choisir un cours à la une",
+        "search": "Rechercher des cours publiés...",
+        "empty": "Aucun cours publié trouvé",
+        "clear": "Supprimer le cours à la une",
+        "loadMore": "Charger plus de cours",
+        "updated": "Cours à la une mis à jour",
+        "updateFailed": "Impossible de mettre à jour le cours à la une"
       },
       "lessonsCount_one": "{{count}} leçon",
       "lessonsCount_other": "{{count}} leçons"

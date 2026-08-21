@@ -56,6 +56,12 @@
     },
     "widgets": {
       "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "dataScope": {
+        "personal": "Vaše data",
+        "otherUsers": "Data organizace",
+        "personalTooltip": "Tento widget zobrazuje vaše osobní údaje o učení.",
+        "otherUsersTooltip": "Tento widget zobrazuje údaje o učení ostatních uživatelů ve vaší organizaci."
+      },
       "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
       "deadlineRisksPage": "Strana {{page}} z {{totalPages}}",
       "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
@@ -111,6 +117,7 @@
         },
         "aiMentorPractice": {
           "description": "Vytvořte každý den jeden cílený scénář",
+          "dailyRefreshInfo": "Každý den můžete vygenerovat jedno nové praktické sezení s AI.",
           "empty": "Popište situaci a procvičte ji s AI mentorem.",
           "emptyPrompt": "Který rozhovor chcete zvládnout s větší jistotou?",
           "startCta": "Zahájit trénink",
@@ -283,7 +290,7 @@
       "summaryTitle": "Co si odnést dál",
       "summaryDescription": "Využijte tyto postřehy k posílení dalšího pokusu.",
       "scoreLabel": "Výsledek procvičení",
-      "criteriaTitle": "Čeho si všiml AI hodnotitel",
+      "criteriaTitle": "Hodnocení úkolu",
       "criterionFallback": "Kritérium {{number}}",
       "importantFeedbackTitle": "Důležitá zpětná vazba"
     },
@@ -2091,8 +2098,9 @@
       "BUNNY_STREAM_API_KEY": {
         "label": "Klíč API pro Bunny Stream"
       },
-      "BUNNY_STREAM_SIGNING_KEY": {
-        "label": "Podepisovací klíč Bunny Stream"
+      "BUNNY_STREAM_READ_ONLY_API_KEY": {
+        "label": "Bunny Stream API klíč pouze pro čtení",
+        "description": "Knihovní klíč Bunny Stream pouze pro čtení používaný k ověřování webhooků Bunny Stream."
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "ID knihovny Bunny Stream"
@@ -3649,6 +3657,16 @@
         "start": "Start",
         "moreInfo": "Více informací",
         "info": "Info"
+      },
+      "featuredCourse": {
+        "label": "Doporučený kurz",
+        "none": "Vyberte doporučený kurz",
+        "search": "Hledat publikované kurzy...",
+        "empty": "Nebyly nalezeny žádné publikované kurzy",
+        "clear": "Zrušit doporučený kurz",
+        "loadMore": "Načíst další kurzy",
+        "updated": "Doporučený kurz byl aktualizován",
+        "updateFailed": "Doporučený kurz se nepodařilo aktualizovat"
       },
       "lessonsCount_one": "{{count}} lekce",
       "lessonsCount_other": "{{count}} lekcí"
