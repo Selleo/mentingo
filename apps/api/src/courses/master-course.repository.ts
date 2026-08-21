@@ -53,8 +53,7 @@ import type {
   AiJudgeConfigurationJsonbUpdate,
   AiJudgeCriterionJsonbInsert,
   AiJudgeScoreGuidanceJsonbInsert,
-  AiMentorLessonJsonbInsert,
-  AiMentorLessonJsonbUpdate,
+  AiMentorLessonInsert,
   CategoryJsonbInsert,
   CategoryJsonbUpdate,
   CourseSelect,
@@ -704,7 +703,7 @@ export class MasterCourseRepository {
     return existingAiMentor;
   }
 
-  async createAiMentor(values: AiMentorLessonJsonbInsert): Promise<UUIDType> {
+  async createAiMentor(values: AiMentorLessonInsert): Promise<UUIDType> {
     const [created] = await this.db
       .insert(aiMentorLessons)
       .values(values)
@@ -712,7 +711,7 @@ export class MasterCourseRepository {
     return created.id;
   }
 
-  async updateAiMentor(aiMentorId: UUIDType, values: AiMentorLessonJsonbUpdate) {
+  async updateAiMentor(aiMentorId: UUIDType, values: Partial<AiMentorLessonInsert>) {
     await this.db.update(aiMentorLessons).set(values).where(eq(aiMentorLessons.id, aiMentorId));
   }
 

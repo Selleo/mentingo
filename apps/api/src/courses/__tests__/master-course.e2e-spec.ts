@@ -1013,10 +1013,6 @@ describe("Master course export and sync (e2e)", () => {
                 en: "Run a discovery conversation",
                 pl: "Przeprowadz rozmowe discovery",
               }),
-              name: buildJsonbFieldWithMultipleEntries({
-                en: "Discovery Mentor",
-                pl: "Mentor discovery",
-              }),
             })
             .returning({ id: aiMentorConfigurations.id });
 
@@ -1029,6 +1025,10 @@ describe("Master course export and sync (e2e)", () => {
           await db
             .update(aiMentorLessons)
             .set({
+              name: {
+                en: "Discovery Mentor",
+                pl: "Mentor discovery",
+              },
               voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
               ttsPreset: AI_MENTOR_TTS_PRESET.FEMALE,
               customTtsReference: sourceVoiceReferences,

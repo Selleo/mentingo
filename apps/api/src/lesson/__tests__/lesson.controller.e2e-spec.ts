@@ -700,7 +700,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Negotiation practice",
           description: "<p>Practice a sales call.</p>",
           aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
-          type: AI_MENTOR_TYPE.MENTOR,
+          type: AI_MENTOR_TYPE.TEACHER,
           name: "AI Mentor",
           voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
           ttsPreset: AI_MENTOR_TTS_PRESET.MALE,

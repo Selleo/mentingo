@@ -1239,8 +1239,7 @@ export class MasterCourseService {
       if (!existingAiMentor) {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
-          aiMentorInstructions: toJsonbBuildObject(sourceAiMentor.aiMentorInstructions),
-          name: toJsonbBuildObject(sourceAiMentor.name),
+          name: sourceAiMentor.name,
           avatarReference,
           voiceMode: sourceAiMentor.voiceMode,
           ttsPreset: sourceAiMentor.ttsPreset,
@@ -1251,8 +1250,7 @@ export class MasterCourseService {
       }
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
-        aiMentorInstructions: toJsonbBuildObject(sourceAiMentor.aiMentorInstructions),
-        name: toJsonbBuildObject(sourceAiMentor.name),
+        name: sourceAiMentor.name,
         avatarReference,
         voiceMode: sourceAiMentor.voiceMode,
         ttsPreset: sourceAiMentor.ttsPreset,
