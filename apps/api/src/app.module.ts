@@ -9,6 +9,7 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
 import { EnvModule } from "src/env/env.module";
+import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
@@ -225,6 +226,7 @@ import type { RedisClient } from "src/redis";
     GoogleStrategy,
     MicrosoftStrategy,
     AppStartupService,
+    LangfuseShutdownService,
     ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })

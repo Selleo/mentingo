@@ -4,6 +4,11 @@ import { Injectable } from "@nestjs/common";
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
+import {
+  AI_TELEMETRY_FUNCTION_IDS,
+  buildAiTelemetry,
+  type AiTelemetryFunctionId,
+} from "src/ai/utils/ai-telemetry";
 import { aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
 
@@ -16,6 +21,7 @@ export class ChatService {
     prompt: string,
     model: OpenAIModels = OPENAI_MODELS.BASIC,
     systemPrompt?: string,
+    functionId: AiTelemetryFunctionId = AI_TELEMETRY_FUNCTION_IDS.AI_SUMMARY,
   ): Promise<string> {
     return observe(
       async () => {
@@ -29,7 +35,7 @@ export class ChatService {
             system: systemPrompt,
             prompt: prompt,
             maxOutputTokens: MAX_TOKENS,
-            experimental_telemetry: { isEnabled: true },
+            telemetry: buildAiTelemetry(functionId),
           });
 
           return text;
@@ -60,7 +66,7 @@ export class ChatService {
             topP: 0.9,
             system,
             prompt,
-            experimental_telemetry: { isEnabled: true },
+            telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_JUDGE),
           });
 
           const judged = result.object as AiJudgeModelResult;

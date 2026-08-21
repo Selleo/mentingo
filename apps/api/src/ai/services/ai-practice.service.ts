@@ -1,3 +1,4 @@
+import { propagateAttributes } from "@langfuse/tracing";
 import {
   BadRequestException,
   ConflictException,
@@ -22,6 +23,10 @@ import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "src/ai/mentor-config
 import { AiMentorConfigurationGeneratorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
+import {
+  AI_MENTOR_TRACE_FLOWS,
+  buildAiMentorTraceAttributes,
+} from "src/ai/utils/ai-mentor-trace-context";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { buildAiPracticeMentorConfiguration } from "src/ai/utils/build-ai-practice-mentor-configuration";
@@ -148,26 +153,50 @@ export class AiPracticeService {
         title,
         taskDescription: session.scenario,
       };
-      const mentorConfiguration = await this.aiMentorConfigurationGeneratorService.generate({
-        configurationType: AI_MENTOR_TYPE.ROLEPLAY,
-        language: session.language,
-        lessonContext,
-        mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
-        brief: session.scenario,
-        generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
-      });
+      const mentorConfiguration = await propagateAttributes(
+        buildAiMentorTraceAttributes({
+          sessionId: session.id,
+          userId: session.userId,
+          tenantId: session.tenantId,
+          flow: AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE,
+          operation: "configuration-generation",
+          channel: "background",
+          practiceSessionId: session.id,
+        }),
+        () =>
+          this.aiMentorConfigurationGeneratorService.generate({
+            configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+            language: session.language,
+            lessonContext,
+            mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
+            brief: session.scenario,
+            generationPurpose: AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE.STANDALONE_PRACTICE,
+          }),
+      );
       if (mentorConfiguration.type !== AI_MENTOR_TYPE.ROLEPLAY)
         throw new Error("Practice AI Mentor generator returned a non-roleplay configuration");
 
-      const judgeConfiguration = await this.aiJudgeConfigurationGeneratorService.generate({
-        language: session.language,
-        lessonContext: {
-          ...lessonContext,
-          aiMentorConfiguration: mentorConfiguration,
-        },
-        mode: AI_JUDGE_GENERATION_MODE.CREATE,
-        brief: session.scenario,
-      });
+      const judgeConfiguration = await propagateAttributes(
+        buildAiMentorTraceAttributes({
+          sessionId: session.id,
+          userId: session.userId,
+          tenantId: session.tenantId,
+          flow: AI_MENTOR_TRACE_FLOWS.STANDALONE_PRACTICE,
+          operation: "configuration-generation",
+          channel: "background",
+          practiceSessionId: session.id,
+        }),
+        () =>
+          this.aiJudgeConfigurationGeneratorService.generate({
+            language: session.language,
+            lessonContext: {
+              ...lessonContext,
+              aiMentorConfiguration: mentorConfiguration,
+            },
+            mode: AI_JUDGE_GENERATION_MODE.CREATE,
+            brief: session.scenario,
+          }),
+      );
 
       await this.aiRepository.saveGeneratedPractice(
         session.id,
