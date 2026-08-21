@@ -4,9 +4,7 @@
 -- tenant-owned storage references.
 UPDATE ai_mentor_lessons AS target_mentor
 SET
-  ai_mentor_instructions = source_mentor.ai_mentor_instructions,
   name = source_mentor.name,
-  type = source_mentor.type,
   voice_mode = source_mentor.voice_mode,
   tts_preset = source_mentor.tts_preset,
   custom_tts_reference = source_mentor.custom_tts_reference
@@ -25,9 +23,7 @@ WHERE lesson_map.entity_type = 'lesson'
   AND target_mentor.lesson_id = lesson_map.target_entity_id
   AND export_link.source_course_id = source_course.id
   AND (
-    target_mentor.ai_mentor_instructions IS DISTINCT FROM source_mentor.ai_mentor_instructions
-    OR target_mentor.name IS DISTINCT FROM source_mentor.name
-    OR target_mentor.type IS DISTINCT FROM source_mentor.type
+    target_mentor.name IS DISTINCT FROM source_mentor.name
     OR target_mentor.voice_mode IS DISTINCT FROM source_mentor.voice_mode
     OR target_mentor.tts_preset IS DISTINCT FROM source_mentor.tts_preset
     OR target_mentor.custom_tts_reference IS DISTINCT FROM source_mentor.custom_tts_reference
