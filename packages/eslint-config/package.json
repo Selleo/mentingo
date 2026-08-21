@@ -8,10 +8,10 @@
     "react-internal.js"
   ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "7.1.0",
-    "@typescript-eslint/parser": "7.1.0",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
     "eslint-config-prettier": "9.1.0",
-    "eslint-config-turbo": "2.0.12",
+    "eslint-config-turbo": "2.3.3",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-only-warn": "1.1.0",
     "eslint-plugin-prettier": "5.0.0",
