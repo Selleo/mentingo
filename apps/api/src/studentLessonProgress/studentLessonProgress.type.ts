@@ -1,4 +1,4 @@
-import type { PermissionKey } from "@repo/shared";
+import type { CourseStatus, PermissionKey } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
@@ -23,6 +23,13 @@ export type MarkLessonAsIncompleteParams = {
 
 export type MarkLessonProgressResult = {
   messageKey: StudentLessonProgressMessageKey | null;
+};
+
+export type EnsureDraftCourseProgressAllowedParams = {
+  courseStatus: CourseStatus | null;
+  isCourseAuthor: boolean;
+  isLearningModeActive: boolean;
+  userPermissions: PermissionKey[];
 };
 
 export type LessonProgressAccessResult = {

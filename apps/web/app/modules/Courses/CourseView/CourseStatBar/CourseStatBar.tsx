@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { COURSE_STATUSES, PERMISSIONS } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
@@ -232,6 +232,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       <ProgressStatCard
         completedChapterCount={course.completedChapterCount ?? 0}
         courseChapterCount={course.courseChapterCount}
+        isDraftCourse={course.status === COURSE_STATUSES.DRAFT}
         isAdminExperience={isAdminExperience}
         onEnterLearningMode={enterLearningMode}
         timeLeftSeconds={timeLeftSeconds}

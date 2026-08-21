@@ -5553,6 +5553,7 @@
       "enter": "Įjungti mokymosi režimą",
       "exit": "Išjungti mokymosi režimą"
     },
+    "draftCourseTooltip": "Šis kursas yra juodraščio būsenoje. Negalite jame užsiregistruoti ar tęsti mokymosi.",
     "overview": {
       "courseSettings": "Kurso nustatymai",
       "manageCategories": "Tvarkyti kategorijas",

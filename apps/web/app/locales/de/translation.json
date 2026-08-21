@@ -5549,6 +5549,7 @@
       "enter": "Lernmodus starten",
       "exit": "Lernmodus beenden"
     },
+    "draftCourseTooltip": "Dieser Kurs befindet sich im Entwurfsstatus. Sie können sich nicht anmelden oder weiter lernen.",
     "overview": {
       "courseSettings": "Kurseinstellungen",
       "manageCategories": "Kategorien verwalten",
