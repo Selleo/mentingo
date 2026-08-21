@@ -19,13 +19,21 @@ describe("LumaGeneratedCourseImportService", () => {
       undefined as never,
     );
 
-  it("accepts a generated AI Mentor lesson with a structured Judge configuration", () => {
+  it("accepts a generated Roleplay lesson and imports its structured configuration", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer with a budget objection.",
-        taskDescription: "Handle the objection and agree a next step.",
-        type: "ROLEPLAY",
+        aiMentorConfiguration: {
+          type: "roleplay",
+          scenario: "A customer objects to the proposed budget.",
+          aiRole: "A skeptical customer",
+          learnerRole: "A sales representative",
+          characterGoal: "Understand the value before agreeing to a next step.",
+          difficulty: "challenging",
+          factsAndConstraints: "The customer has a fixed budget.",
+          openingInstruction: "Stay skeptical but answer questions.",
+          additionalInstructions: "Do not invent pricing details.",
+        },
         ttsPreset: "female",
         aiJudgeConfiguration: {
           taskGoal: "Handle the objection and agree a next step",
@@ -59,21 +67,69 @@ describe("LumaGeneratedCourseImportService", () => {
     expect(aiMentor.aiJudgeConfiguration.taskGoal).toBe(
       "Handle the objection and agree a next step",
     );
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration)).toEqual(
+      {
+        type: "roleplay",
+        scenario: "A customer objects to the proposed budget.",
+        aiRole: "A skeptical customer",
+        learnerRole: "A sales representative",
+        characterGoal: "Understand the value before agreeing to a next step.",
+        difficulty: "challenging",
+        factsAndConstraints: "The customer has a fixed budget.",
+        openingInstruction: "Stay skeptical but answer questions.",
+        additionalInstructions: "Do not invent pricing details.",
+      },
+    );
   });
 
-  it("rejects a generated AI Mentor lesson without a valid Judge configuration", () => {
+  it("imports all required Teacher configuration fields", () => {
+    const lesson = {
+      aiMentor: {
+        name: "Product Coach",
+        aiMentorConfiguration: {
+          type: "teacher",
+          taskGoal: "Explain the product value proposition.",
+          expertise: "B2B product sales",
+          contentScope: "The product catalogue and customer outcomes",
+          teachingStyle: "guided_discovery",
+          feedbackGuidance: "Ask for evidence before correcting the learner.",
+        },
+        ttsPreset: "male",
+        aiJudgeConfiguration: {
+          taskGoal: "Explain the product value proposition",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+      },
+    } as unknown as LumaGeneratedCourseLesson;
+
+    const aiMentor = createService()["getAiMentor"](lesson);
+
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration)).toEqual(
+      {
+        type: "teacher",
+        taskGoal: "Explain the product value proposition.",
+        expertise: "B2B product sales",
+        contentScope: "The product catalogue and customer outcomes",
+        teachingStyle: "guided_discovery",
+        feedbackGuidance: "Ask for evidence before correcting the learner.",
+        openingInstruction: undefined,
+        additionalInstructions: undefined,
+      },
+    );
+  });
+
+  it("rejects a generated AI Mentor lesson without a valid configuration", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer.",
-        taskDescription: "Practice the conversation.",
-        type: "ROLEPLAY",
         ttsPreset: "female",
       },
     } as unknown as LumaGeneratedCourseLesson;
 
     expect(() => createService()["getAiMentor"](lesson)).toThrow(
-      new BadRequestException("luma.errors.invalidAiJudgeConfiguration"),
+      new BadRequestException("luma.errors.invalidAiMentorConfiguration"),
     );
   });
 
