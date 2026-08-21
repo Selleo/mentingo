@@ -1,11 +1,7 @@
 import { Readable } from "stream";
 
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
-import {
-  AI_MENTOR_TTS_PRESET,
-  AI_MENTOR_TYPE,
-  AI_MENTOR_VOICE_MODE,
-} from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import axios from "axios";
 import { load as loadHtml } from "cheerio";
@@ -21,8 +17,8 @@ import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { AiJudgeConfigurationGraphService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-graph.service";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
-import { AiMentorConfigurationGraphService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { aiMentorConfigurationContentSchema } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
+import { AiMentorConfigurationGraphService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonRepository } from "src/lesson/repositories/adminLesson.repository";
 import {

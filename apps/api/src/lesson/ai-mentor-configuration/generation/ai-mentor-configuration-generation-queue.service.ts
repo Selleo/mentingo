@@ -70,10 +70,7 @@ export class AiMentorConfigurationGenerationQueueService {
       progress.validation,
       progress.attemptHistory,
     );
-    const revisionGenerationId = uuidv5(
-      `revision-${prepared.attempt}`,
-      generationId,
-    );
+    const revisionGenerationId = uuidv5(`revision-${prepared.attempt}`, generationId);
 
     return this.enqueue(prepared, currentUser, revisionGenerationId);
   }
@@ -192,9 +189,7 @@ export class AiMentorConfigurationGenerationQueueService {
   }
 
   private getQueue() {
-    return this.globalQueueService.getQueue(
-      QUEUE_NAMES.AI_MENTOR_CONFIGURATION_GENERATION,
-    );
+    return this.globalQueueService.getQueue(QUEUE_NAMES.AI_MENTOR_CONFIGURATION_GENERATION);
   }
 
   private getStoredProgress(
@@ -205,10 +200,7 @@ export class AiMentorConfigurationGenerationQueueService {
       return undefined;
 
     const latestDraft = "latestDraft" in value ? value.latestDraft : undefined;
-    if (
-      latestDraft !== undefined &&
-      Value.Check(aiMentorConfigurationContentSchema, latestDraft)
-    )
+    if (latestDraft !== undefined && Value.Check(aiMentorConfigurationContentSchema, latestDraft))
       return { progress: value.progress, latestDraft };
 
     return { progress: value.progress };

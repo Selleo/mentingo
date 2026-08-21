@@ -157,12 +157,8 @@ describe("AiMentorConfigurationGenerationQueueService", () => {
     await expect(service.getSnapshot(generationId, actor)).rejects.toBeInstanceOf(
       NotFoundException,
     );
-    await expect(service.revise(generationId, actor)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
-    await expect(service.cancel(generationId, actor)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(service.revise(generationId, actor)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.cancel(generationId, actor)).rejects.toBeInstanceOf(NotFoundException);
     expect(generationService.prepareRevision).not.toHaveBeenCalled();
     expect(job.updateData).not.toHaveBeenCalled();
   });

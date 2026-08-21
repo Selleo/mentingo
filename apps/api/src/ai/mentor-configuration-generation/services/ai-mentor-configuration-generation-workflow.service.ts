@@ -118,8 +118,7 @@ export class AiMentorConfigurationGenerationWorkflowService {
       options,
     );
 
-    const deterministicValidation =
-      getDeterministicAiMentorConfigurationValidation(latestDraft);
+    const deterministicValidation = getDeterministicAiMentorConfigurationValidation(latestDraft);
     const validation =
       deterministicValidation ??
       (await this.validatorService.validate({
@@ -143,10 +142,7 @@ export class AiMentorConfigurationGenerationWorkflowService {
         options,
       );
 
-    const nextHistory = [
-      ...attemptHistory,
-      { attempt, changes: changes ?? [], validation },
-    ];
+    const nextHistory = [...attemptHistory, { attempt, changes: changes ?? [], validation }];
 
     if (validation.passed)
       return this.report(
@@ -191,8 +187,7 @@ export class AiMentorConfigurationGenerationWorkflowService {
     input: RunAiMentorConfigurationGenerationInput,
   ): string | undefined {
     if (input.creatorInstruction) return input.creatorInstruction;
-    if (input.mode === AI_MENTOR_CONFIGURATION_GENERATION_MODE.IMPROVE)
-      return input.instruction;
+    if (input.mode === AI_MENTOR_CONFIGURATION_GENERATION_MODE.IMPROVE) return input.instruction;
     return undefined;
   }
 

@@ -18,9 +18,7 @@ export type RunAiMentorConfigurationGenerationInput =
   | RepairAiMentorConfigurationDraftInput;
 
 export type AiMentorConfigurationGenerationWorkflowOptions = {
-  reportProgress?: (
-    progress: AiMentorConfigurationGenerationProgressEvent,
-  ) => Promise<void> | void;
+  reportProgress?: (progress: AiMentorConfigurationGenerationProgressEvent) => Promise<void> | void;
   isCancelled?: () => Promise<boolean> | boolean;
   onDraft?: (draft: AiMentorConfigurationContent) => Promise<void> | void;
   attempt?: number;

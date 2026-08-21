@@ -32,10 +32,7 @@ export type ConfiguredAiMentorLessonContext = Omit<
   configurationType: AiMentorType;
 };
 
-export type AiMentorLessonContext = Omit<
-  AiMentorConfigurationLessonContext,
-  "aiMentorLessonId"
-> & {
+export type AiMentorLessonContext = Omit<AiMentorConfigurationLessonContext, "aiMentorLessonId"> & {
   aiMentorLessonId: UUIDType;
 };
 

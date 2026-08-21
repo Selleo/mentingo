@@ -67,19 +67,19 @@ describe("LumaGeneratedCourseImportService", () => {
     expect(aiMentor.aiJudgeConfiguration.taskGoal).toBe(
       "Handle the objection and agree a next step",
     );
-    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration)).toEqual(
-      {
-        type: "roleplay",
-        scenario: "A customer objects to the proposed budget.",
-        aiRole: "A skeptical customer",
-        learnerRole: "A sales representative",
-        characterGoal: "Understand the value before agreeing to a next step.",
-        difficulty: "challenging",
-        factsAndConstraints: "The customer has a fixed budget.",
-        openingInstruction: "Stay skeptical but answer questions.",
-        additionalInstructions: "Do not invent pricing details.",
-      },
-    );
+    expect(
+      createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration),
+    ).toEqual({
+      type: "roleplay",
+      scenario: "A customer objects to the proposed budget.",
+      aiRole: "A skeptical customer",
+      learnerRole: "A sales representative",
+      characterGoal: "Understand the value before agreeing to a next step.",
+      difficulty: "challenging",
+      factsAndConstraints: "The customer has a fixed budget.",
+      openingInstruction: "Stay skeptical but answer questions.",
+      additionalInstructions: "Do not invent pricing details.",
+    });
   });
 
   it("imports all required Teacher configuration fields", () => {
@@ -106,18 +106,18 @@ describe("LumaGeneratedCourseImportService", () => {
 
     const aiMentor = createService()["getAiMentor"](lesson);
 
-    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration)).toEqual(
-      {
-        type: "teacher",
-        taskGoal: "Explain the product value proposition.",
-        expertise: "B2B product sales",
-        contentScope: "The product catalogue and customer outcomes",
-        teachingStyle: "guided_discovery",
-        feedbackGuidance: "Ask for evidence before correcting the learner.",
-        openingInstruction: undefined,
-        additionalInstructions: undefined,
-      },
-    );
+    expect(
+      createService()["buildImportedAiMentorConfiguration"](aiMentor.aiMentorConfiguration),
+    ).toEqual({
+      type: "teacher",
+      taskGoal: "Explain the product value proposition.",
+      expertise: "B2B product sales",
+      contentScope: "The product catalogue and customer outcomes",
+      teachingStyle: "guided_discovery",
+      feedbackGuidance: "Ask for evidence before correcting the learner.",
+      openingInstruction: undefined,
+      additionalInstructions: undefined,
+    });
   });
 
   it("rejects a generated AI Mentor lesson without a valid configuration", () => {

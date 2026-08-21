@@ -93,8 +93,9 @@ export class AiMentorConfigurationGenerationService {
       input.lessonId,
       currentUser,
     );
-    const deterministicValidation =
-      getDeterministicAiMentorConfigurationValidation(input.configuration);
+    const deterministicValidation = getDeterministicAiMentorConfigurationValidation(
+      input.configuration,
+    );
     if (deterministicValidation) return deterministicValidation;
 
     if (!Value.Check(aiMentorConfigurationContentSchema, input.configuration))
