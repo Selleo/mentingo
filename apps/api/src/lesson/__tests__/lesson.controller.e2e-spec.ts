@@ -754,14 +754,21 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(englishAiMentor).toMatchObject({
         name: "AI Mentor",
-        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
         customTtsReference: "voice-reference-en",
       });
       expect(polishAiMentor).toMatchObject({
         name: "Mentor PL",
-        aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
         customTtsReference: "voice-reference-pl",
       });
+
+      const englishConfiguration = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-mentor-configuration`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(englishConfiguration.body.data.additionalInstructions).toBe(
+        "<p>Lead the learner through an English scenario.</p>",
+      );
 
       const polishConfiguration = await request(app.getHttpServer())
         .get(`/api/lesson/${lessonId}/ai-mentor-configuration`)
