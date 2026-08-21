@@ -49,3 +49,5 @@ yarn-error.log*
 .gitnexus
 
 .pnpm-store
+
+/packages/prompts/src/generated-prompts.ts

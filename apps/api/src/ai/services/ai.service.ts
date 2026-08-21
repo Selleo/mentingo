@@ -28,6 +28,7 @@ import {
   AI_MENTOR_TRACE_FLOWS,
   buildAiMentorTraceAttributes,
 } from "src/ai/utils/ai-mentor-trace-context";
+import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
 import { generateTranslationSchema } from "src/ai/utils/ai.schema";
 import {
   MESSAGE_ROLE,
@@ -365,6 +366,13 @@ export class AiService {
 
     const content = await observe(
       async () => {
+        updateActiveObservation({
+          input: {
+            systemPrompt,
+            prompt: welcomeMessagePrompt,
+          },
+        });
+
         return this.aiRuntimeService.generateMentorChat(
           {
             messages: welcomeMessages,
@@ -374,6 +382,7 @@ export class AiService {
               welcomeMessagePrompt,
               OPENAI_MODELS.BASIC,
               systemPrompt,
+              AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_WELCOME,
             ),
         );
       },
@@ -644,7 +653,7 @@ export class AiService {
                       temperature: 0,
                       topP: 0.9,
                       topK: 10,
-                      experimental_telemetry: { isEnabled: true },
+                      telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.COURSE_TRANSLATION),
                       messages: [
                         {
                           role: "user",
@@ -724,7 +733,7 @@ export class AiService {
       messages,
       maxOutputTokens: MAX_TOKENS,
       ...generationConfig,
-      experimental_telemetry: { isEnabled: true },
+      telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CHAT),
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 

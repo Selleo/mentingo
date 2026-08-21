@@ -33,7 +33,7 @@ patchNestJsSwagger();
 applyFormats();
 
 async function bootstrap() {
-  startInstrumentation();
+  await startInstrumentation();
 
   if (process.env.SENTRY_DSN) {
     Sentry.init({

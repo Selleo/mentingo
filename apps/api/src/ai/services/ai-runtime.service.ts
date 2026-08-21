@@ -22,6 +22,7 @@ import {
   referencedAiJudgeConfigurationStructuredOutputSchema,
 } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
+import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
 import { aiJudgeJudgementSchema, generateTranslationSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { EnvService } from "src/env/services/env.service";
@@ -78,6 +79,7 @@ export class AiRuntimeService {
       try {
         const luma = await this.getLumaClient();
         const { embeddings } = await luma.ai.createEmbeddings({ texts: contents });
+
         return embeddings;
       } catch (error) {
         this.logger.warn(
@@ -296,6 +298,7 @@ export class AiRuntimeService {
     const { embeddings } = await embedMany({
       model: provider.embeddingModel(OPENAI_MODELS.EMBEDDING),
       values: contents,
+      telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_RAG_EMBEDDINGS),
     });
 
     return embeddings;

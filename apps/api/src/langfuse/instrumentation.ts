@@ -1,6 +1,8 @@
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 
+import { loadAiSdk, loadLangfuseVercelAiSdk } from "src/ai/utils/ai-esm";
+
 import type { OnApplicationShutdown } from "@nestjs/common";
 
 const langfuseBaseUrl =
@@ -19,12 +21,24 @@ export const sdk = new NodeSDK({
 
 let instrumentationStarted = false;
 let shutdownPromise: Promise<void> | undefined;
+let instrumentationStartPromise: Promise<void> | undefined;
 
-export function startInstrumentation() {
-  if (instrumentationStarted) return;
+export function startInstrumentation(): Promise<void> {
+  if (instrumentationStartPromise) return instrumentationStartPromise;
 
-  sdk.start();
-  instrumentationStarted = true;
+  instrumentationStartPromise = (async () => {
+    sdk.start();
+
+    const [{ registerTelemetry }, { LangfuseVercelAiSdkIntegration }] = await Promise.all([
+      loadAiSdk(),
+      loadLangfuseVercelAiSdk(),
+    ]);
+    registerTelemetry(new LangfuseVercelAiSdkIntegration());
+
+    instrumentationStarted = true;
+  })();
+
+  return instrumentationStartPromise;
 }
 
 export async function shutdownInstrumentation() {

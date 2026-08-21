@@ -9,6 +9,7 @@ import {
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
+import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 
 import { AI_JUDGE_CONFIGURATION_VALIDATOR_REASONING_EFFORT } from "../ai-judge-configuration-generation.constants";
@@ -54,7 +55,7 @@ export class AiJudgeConfigurationValidatorService {
         };
 
         updateActiveObservation({
-          input: { language: input.language },
+          input: { language: input.language, system, prompt },
           output: result,
         });
 
@@ -95,7 +96,9 @@ export class AiJudgeConfigurationValidatorService {
             temperature: 0,
             system,
             prompt,
-            experimental_telemetry: { isEnabled: true },
+            telemetry: buildAiTelemetry(
+              AI_TELEMETRY_FUNCTION_IDS.AI_JUDGE_CONFIGURATION_VALIDATION,
+            ),
           }).then((result) => result.output);
         },
       );
