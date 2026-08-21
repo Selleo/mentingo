@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
 import { RealtimePCMStreamerWorklet } from "../audio-stream";
+import { AUDIO_CAPTURE_MODE } from "../audio-stream.types";
 import { voiceSocketProtocol } from "../voiceSocketProtocol";
 
 import type { StreamProtocol } from "../audio-stream";
@@ -68,6 +69,7 @@ export function useTranscription({ setInput, onLevelChange }: TranscriptionProps
     try {
       await streamerRef.current.start({
         voiceAction: VOICE_ACTION.TRANSCRIPT,
+        captureMode: AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
       });
 
       setIsRecording(true);

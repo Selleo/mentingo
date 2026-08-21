@@ -8,7 +8,7 @@ type VoiceModeUIEvent =
   | { type: "MIC_CAPTURE_STOPPED" }
   | { type: "USER_SPEECH_CHUNK_SENT" }
   | { type: "MENTOR_TRANSCRIPTION_RECEIVED" }
-  | { type: "AUDIO_CHUNK_RECEIVED" }
+  | { type: "AUDIO_PLAYBACK_STARTED" }
   | { type: "AUDIO_OUTPUT_COMPLETED"; isCaptureActive: boolean }
   | { type: "AUDIO_INTERRUPTED"; isCaptureActive: boolean };
 
@@ -19,7 +19,7 @@ function voiceModeUIReducer(state: VoiceModeState, event: VoiceModeUIEvent): Voi
       return VOICE_MODE_STATE.LISTENING;
     case "MENTOR_TRANSCRIPTION_RECEIVED":
       return VOICE_MODE_STATE.THINKING;
-    case "AUDIO_CHUNK_RECEIVED":
+    case "AUDIO_PLAYBACK_STARTED":
       return VOICE_MODE_STATE.SPEAKING;
     case "AUDIO_OUTPUT_COMPLETED":
     case "AUDIO_INTERRUPTED":
@@ -50,8 +50,8 @@ export function useVoiceModeUIState() {
     dispatch({ type: "MENTOR_TRANSCRIPTION_RECEIVED" });
   }, []);
 
-  const onAudioChunkReceived = useCallback(() => {
-    dispatch({ type: "AUDIO_CHUNK_RECEIVED" });
+  const onAudioPlaybackStarted = useCallback(() => {
+    dispatch({ type: "AUDIO_PLAYBACK_STARTED" });
   }, []);
 
   const onAudioOutputCompleted = useCallback((isCaptureActive: boolean) => {
@@ -68,7 +68,7 @@ export function useVoiceModeUIState() {
     onMicCaptureStopped,
     onUserSpeechChunkSent,
     onMentorTranscriptionReceived,
-    onAudioChunkReceived,
+    onAudioPlaybackStarted,
     onAudioOutputCompleted,
     onAudioInterrupted,
   };

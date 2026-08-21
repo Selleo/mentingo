@@ -10,6 +10,7 @@ export type LessonComposerPrimaryActionMode =
 export type LessonComposerRightControlsProps = {
   isVoiceMode: boolean;
   isVoiceMentorMode: boolean;
+  isVoiceMentorStarting: boolean;
   canSubmit: boolean;
   canUseVoiceMentor: boolean;
   onStartVoiceMode: () => void;

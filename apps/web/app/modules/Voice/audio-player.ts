@@ -17,8 +17,11 @@ export class RealtimePCMPlayer {
 
   private audioCtx: AudioContext | null = null;
   private gainNode: GainNode | null = null;
+  private analyserNode: AnalyserNode | null = null;
   private nextStartTime = 0;
   private activeSources = new Set<AudioBufferSourceNode>();
+  private levelMonitorFrame: number | null = null;
+  private levelMonitorBuffer: Float32Array | null = null;
   private onIdle: (() => void) | null = null;
 
   constructor({
@@ -40,7 +43,11 @@ export class RealtimePCMPlayer {
       this.audioCtx = new AudioContext({ sampleRate: this.sampleRate });
       this.gainNode = this.audioCtx.createGain();
       this.gainNode.gain.value = this.gain;
-      this.gainNode.connect(this.audioCtx.destination);
+      this.analyserNode = this.audioCtx.createAnalyser();
+      this.analyserNode.fftSize = 256;
+      this.levelMonitorBuffer = new Float32Array(this.analyserNode.fftSize);
+      this.gainNode.connect(this.analyserNode);
+      this.analyserNode.connect(this.audioCtx.destination);
     }
 
     if (this.audioCtx.state === "suspended") {
@@ -66,7 +73,6 @@ export class RealtimePCMPlayer {
     if (samples.length === 0) {
       return;
     }
-    this.onLevelChange?.(this.calculateRmsLevel(samples));
 
     const frameCount = Math.floor(samples.length / this.channels);
     if (frameCount <= 0) {
@@ -91,9 +97,11 @@ export class RealtimePCMPlayer {
     this.nextStartTime = startAt + audioBuffer.duration;
 
     this.activeSources.add(source);
+    this.startLevelMonitor();
     source.onended = () => {
       this.activeSources.delete(source);
       if (this.activeSources.size === 0) {
+        this.stopLevelMonitor();
         this.onLevelChange?.(0);
         this.onIdle?.();
       }
@@ -121,6 +129,7 @@ export class RealtimePCMPlayer {
 
     this.activeSources.clear();
     this.nextStartTime = this.audioCtx.currentTime + this.leadTimeSeconds;
+    this.stopLevelMonitor();
     this.onLevelChange?.(0);
   }
 
@@ -133,6 +142,8 @@ export class RealtimePCMPlayer {
 
     this.audioCtx = null;
     this.gainNode = null;
+    this.analyserNode = null;
+    this.levelMonitorBuffer = null;
     this.nextStartTime = 0;
     this.onIdle = null;
     this.onLevelChange?.(0);
@@ -168,5 +179,35 @@ export class RealtimePCMPlayer {
     }
 
     return Math.max(0, Math.min(1, Math.sqrt(sumSquares / samples.length) * 4));
+  }
+
+  private startLevelMonitor() {
+    if (this.levelMonitorFrame !== null) {
+      return;
+    }
+
+    const updateLevel = () => {
+      this.levelMonitorFrame = null;
+
+      if (!this.analyserNode || !this.levelMonitorBuffer || this.activeSources.size === 0) {
+        this.onLevelChange?.(0);
+        return;
+      }
+
+      this.analyserNode.getFloatTimeDomainData(this.levelMonitorBuffer);
+      this.onLevelChange?.(this.calculateRmsLevel(this.levelMonitorBuffer));
+      this.levelMonitorFrame = requestAnimationFrame(updateLevel);
+    };
+
+    this.levelMonitorFrame = requestAnimationFrame(updateLevel);
+  }
+
+  private stopLevelMonitor() {
+    if (this.levelMonitorFrame === null) {
+      return;
+    }
+
+    cancelAnimationFrame(this.levelMonitorFrame);
+    this.levelMonitorFrame = null;
   }
 }

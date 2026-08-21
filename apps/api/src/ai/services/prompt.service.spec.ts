@@ -14,6 +14,8 @@ describe("PromptService learner-name personalization", () => {
 
   const createService = (type: AiMentorType = AI_MENTOR_TYPE.ROLEPLAY) => {
     const aiRepository = {
+      findFirstMessageByRoleAndThread: jest.fn().mockResolvedValue(null),
+      findLessonIdByThreadId: jest.fn().mockResolvedValue({ lessonId: "lesson-1" }),
       findThread: jest.fn().mockResolvedValue({ userLanguage: SUPPORTED_LANGUAGES.PL }),
       findMentorLessonByThreadId: jest.fn().mockResolvedValue({
         title: "Negocjacje",
@@ -37,15 +39,21 @@ describe("PromptService learner-name personalization", () => {
       findGroupsByThreadId: jest.fn().mockResolvedValue([]),
       insertMessage: jest.fn().mockResolvedValue([]),
     };
+    const messageService = {
+      findMessageHistory: jest.fn().mockResolvedValue({ history: [] }),
+    };
+    const ragService = {
+      getContext: jest.fn().mockResolvedValue({ chunks: [] }),
+    };
     const tokenService = { countTokens: jest.fn().mockReturnValue(42) };
     const service = new PromptService(
       aiRepository as unknown as AiRepository,
-      {} as MessageService,
+      messageService as unknown as MessageService,
       tokenService as unknown as TokenService,
-      {} as RagService,
+      ragService as unknown as RagService,
     );
 
-    return { aiRepository, service, tokenService };
+    return { aiRepository, messageService, ragService, service, tokenService };
   };
 
   it("appends the learner-name rules to the stored Roleplay prompt returned for the welcome", async () => {
@@ -106,6 +114,69 @@ describe("PromptService learner-name personalization", () => {
     expect(prompt).toContain("Do not use the name in every reply");
     expect(prompt).toContain("Never infer or invent gender, titles, honorifics");
     expect(prompt).toContain("In Roleplay, remain fully in character");
+  });
+
+  it("adds a system interruption marker to the next voice mentor prompt", async () => {
+    const { service } = createService();
+    jest.spyOn(service, "loadPrompt").mockResolvedValue("VOICE_MENTOR_ADDON");
+
+    const prompt = await service.buildPrompt(
+      threadId,
+      "New learner message",
+      true,
+      undefined,
+      true,
+    );
+
+    expect(prompt).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: MESSAGE_ROLE.SYSTEM,
+          content: expect.stringContaining("[VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]"),
+        }),
+      ]),
+    );
+    expect(prompt).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: MESSAGE_ROLE.SYSTEM,
+          content: expect.stringContaining("Ignore interruption mentions in conversation history"),
+        }),
+      ]),
+    );
+  });
+
+  it("adds learner delivery timing as a separate voice system message", async () => {
+    const { service } = createService();
+    jest.spyOn(service, "loadPrompt").mockImplementation(async (id) => {
+      switch (id) {
+        case "voiceMentorAddon":
+          return "VOICE_MENTOR_ADDON";
+        case "voiceMentorTimingAddon":
+          return "VOICE_MENTOR_TIMING_ADDON";
+        default:
+          throw new Error(`Unexpected prompt: ${id}`);
+      }
+    });
+
+    const prompt = await service.buildPrompt(threadId, "Slow answer", true, undefined, false, {
+      elapsedMs: 5400,
+      speechMs: 4200,
+      pauseCount: 2,
+      longestPauseMs: 700,
+      averagePauseMs: 350,
+      segmentCount: 3,
+      wordCount: 14,
+      wordsPerMinute: 200,
+      timingPrecision: "word",
+    });
+
+    expect(prompt).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ content: "VOICE_MENTOR_ADDON" }),
+        expect.objectContaining({ content: "VOICE_MENTOR_TIMING_ADDON" }),
+      ]),
+    );
   });
 
   it("forces the roleplay prompt when a practice thread requests it", async () => {
