@@ -1,5 +1,4 @@
-export const AI_MENTOR_CONFIGURATION_GENERATION_JOB_NAME =
-  "ai-mentor-configuration-generation";
+export const AI_MENTOR_CONFIGURATION_GENERATION_JOB_NAME = "ai-mentor-configuration-generation";
 
 export const AI_MENTOR_CONFIGURATION_GENERATION_JOB_RETENTION = {
   age: 60 * 60,
