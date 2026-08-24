@@ -11,6 +11,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 
+import { shouldApplyGroupManagerScope } from "src/common/permissions/group-manager-scope.utils";
 import {
   EndLiveTrainingSessionEvent,
   FailLiveTrainingSessionEvent,
@@ -98,6 +99,30 @@ export class LiveTrainingSessionsService {
     this.assertCanViewSessionData(liveTraining, currentUser);
 
     const rows = await this.liveTrainingSessionsRepository.getSessionRows(liveTrainingId);
+    if (this.isGroupManagerScoped(currentUser)) {
+      const scopedCounts =
+        await this.liveTrainingSessionsRepository.getManagedParticipantCountsBySession(
+          liveTrainingId,
+          currentUser.userId,
+        );
+      const scopedCountsBySessionId = new Map(
+        scopedCounts.map((counts) => [counts.sessionId, counts]),
+      );
+
+      return Promise.all(
+        rows.map((row) => {
+          const counts = scopedCountsBySessionId.get(row.id);
+          const uniqueParticipantCount = counts?.uniqueParticipantCount ?? 0;
+
+          return this.mapSessionSummary({
+            ...row,
+            activeParticipantCount: counts?.activeParticipantCount ?? 0,
+            uniqueParticipantCount,
+            peakParticipantCount: Math.min(row.peakParticipantCount, uniqueParticipantCount),
+          });
+        }),
+      );
+    }
 
     return Promise.all(rows.map((row) => this.mapSessionSummary(row)));
   }
@@ -117,7 +142,11 @@ export class LiveTrainingSessionsService {
 
     const [sessionRow, participantRows, attendanceRows] = await Promise.all([
       this.liveTrainingSessionsRepository.getSessionRow(liveTrainingId, sessionId),
-      this.liveTrainingSessionsRepository.getParticipantRows(liveTrainingId, sessionId),
+      this.liveTrainingSessionsRepository.getParticipantRows(
+        liveTrainingId,
+        sessionId,
+        this.isGroupManagerScoped(currentUser) ? currentUser.userId : undefined,
+      ),
       this.liveTrainingSessionsRepository.getAttendanceRows(liveTrainingId, sessionId),
     ]);
 
@@ -125,7 +154,17 @@ export class LiveTrainingSessionsService {
       throw new NotFoundException("liveTraining.errors.sessionNotFound");
     }
 
-    const session = await this.mapSessionSummary(sessionRow);
+    const scopedSessionRow = this.isGroupManagerScoped(currentUser)
+      ? {
+          ...sessionRow,
+          activeParticipantCount: participantRows.filter((participant) => !participant.lastLeftAt)
+            .length,
+          uniqueParticipantCount: participantRows.length,
+          peakParticipantCount: Math.min(sessionRow.peakParticipantCount, participantRows.length),
+        }
+      : sessionRow;
+
+    const session = await this.mapSessionSummary(scopedSessionRow);
     const intervalsByParticipantId = new Map<UUIDType, typeof attendanceRows>();
 
     for (const interval of attendanceRows) {
@@ -349,6 +388,7 @@ export class LiveTrainingSessionsService {
     const participants = await this.liveTrainingSessionsRepository.getParticipantRows(
       liveTrainingId,
       currentSession.id,
+      this.isGroupManagerScoped(currentUser) ? currentUser.userId : undefined,
     );
 
     return Promise.all(
@@ -930,12 +970,20 @@ export class LiveTrainingSessionsService {
   ) {
     if (
       this.canManageSession(liveTraining, currentUser) ||
-      currentUser.permissions.includes(PERMISSIONS.LIVE_TRAINING_STATISTICS)
+      currentUser.permissions.includes(PERMISSIONS.LIVE_TRAINING_STATISTICS) ||
+      currentUser.permissions.includes(PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
     ) {
       return;
     }
 
     throw new NotFoundException("liveTraining.errors.notFound");
+  }
+
+  private isGroupManagerScoped(currentUser: CurrentUserType) {
+    return shouldApplyGroupManagerScope(currentUser, [
+      PERMISSIONS.LIVE_TRAINING_READ,
+      PERMISSIONS.LIVE_TRAINING_STATISTICS,
+    ]);
   }
 
   private canManageSession(

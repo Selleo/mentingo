@@ -9,7 +9,7 @@ import {
   type LiveTrainingParticipantRole,
   type PermissionKey,
 } from "@repo/shared";
-import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
@@ -21,6 +21,8 @@ import {
   liveLessons,
   liveTrainingLinks,
   calendarEvents,
+  groupManagerGroups,
+  groupUsers,
   liveTrainings,
   permissionRoles,
   permissionRoleRuleSets,
@@ -34,6 +36,7 @@ import type {
   LiveTrainingAttendanceRow,
   LiveTrainingCreatedSessionRow,
   LiveTrainingLessonCompletionRow,
+  ManagedLiveTrainingSessionParticipantCountsRow,
   LiveTrainingSessionParticipantRow,
   LiveTrainingSessionRow,
   LiveTrainingSessionRoomRow,
@@ -141,7 +144,29 @@ export class LiveTrainingSessionsRepository {
   async getParticipantRows(
     liveTrainingId: UUIDType,
     sessionId: UUIDType,
+    managedByUserId?: UUIDType,
   ): Promise<LiveTrainingSessionParticipantRow[]> {
+    const managedLearnerCondition = managedByUserId
+      ? exists(
+          this.db
+            .select({ id: groupUsers.id })
+            .from(groupUsers)
+            .innerJoin(
+              groupManagerGroups,
+              and(
+                eq(groupManagerGroups.groupId, groupUsers.groupId),
+                eq(groupManagerGroups.tenantId, groupUsers.tenantId),
+              ),
+            )
+            .where(
+              and(
+                eq(groupManagerGroups.managerUserId, managedByUserId),
+                eq(groupUsers.userId, liveTrainingSessionParticipants.userId),
+              ),
+            ),
+        )
+      : undefined;
+
     return this.db
       .select({
         id: liveTrainingSessionParticipants.id,
@@ -162,9 +187,47 @@ export class LiveTrainingSessionsRepository {
         and(
           eq(liveTrainingSessionParticipants.liveTrainingId, liveTrainingId),
           eq(liveTrainingSessionParticipants.liveTrainingSessionId, sessionId),
+          managedLearnerCondition,
         ),
       )
       .orderBy(users.firstName, users.lastName, users.email);
+  }
+
+  async getManagedParticipantCountsBySession(
+    liveTrainingId: UUIDType,
+    managedByUserId: UUIDType,
+  ): Promise<ManagedLiveTrainingSessionParticipantCountsRow[]> {
+    return this.db
+      .select({
+        sessionId: liveTrainingSessionParticipants.liveTrainingSessionId,
+        activeParticipantCount: sql<number>`count(*) filter (where ${liveTrainingSessionParticipants.lastLeftAt} is null)::int`,
+        uniqueParticipantCount: sql<number>`count(*)::int`,
+      })
+      .from(liveTrainingSessionParticipants)
+      .where(
+        and(
+          eq(liveTrainingSessionParticipants.liveTrainingId, liveTrainingId),
+          exists(
+            this.db
+              .select({ id: groupUsers.id })
+              .from(groupUsers)
+              .innerJoin(
+                groupManagerGroups,
+                and(
+                  eq(groupManagerGroups.groupId, groupUsers.groupId),
+                  eq(groupManagerGroups.tenantId, groupUsers.tenantId),
+                ),
+              )
+              .where(
+                and(
+                  eq(groupManagerGroups.managerUserId, managedByUserId),
+                  eq(groupUsers.userId, liveTrainingSessionParticipants.userId),
+                ),
+              ),
+          ),
+        ),
+      )
+      .groupBy(liveTrainingSessionParticipants.liveTrainingSessionId);
   }
 
   async getAttendanceRows(

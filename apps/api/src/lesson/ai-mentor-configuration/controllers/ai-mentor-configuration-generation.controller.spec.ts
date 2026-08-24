@@ -60,10 +60,7 @@ describe("AiMentorConfigurationGenerationController", () => {
 
   it("requires either course update permission at the HTTP boundary", () => {
     expect(
-      Reflect.getMetadata(
-        REQUIRED_PERMISSIONS_KEY,
-        AiMentorConfigurationGenerationController,
-      ),
+      Reflect.getMetadata(REQUIRED_PERMISSIONS_KEY, AiMentorConfigurationGenerationController),
     ).toEqual([PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]);
   });
 
@@ -77,9 +74,9 @@ describe("AiMentorConfigurationGenerationController", () => {
       brief: "Create a discovery coach.",
     } as const;
 
-    await expect(
-      controller.generateAiMentorConfiguration(input, currentUser),
-    ).resolves.toEqual({ data: { generationId } });
+    await expect(controller.generateAiMentorConfiguration(input, currentUser)).resolves.toEqual({
+      data: { generationId },
+    });
     expect(queueService.start).toHaveBeenCalledWith(input, currentUser);
   });
 
@@ -104,9 +101,7 @@ describe("AiMentorConfigurationGenerationController", () => {
     await controller.generateAiMentorConfiguration(input, currentUser);
 
     expect(queueService.start).toHaveBeenCalledWith(input, currentUser);
-    expect(queueService.start.mock.calls[0][0].currentConfiguration).toBe(
-      currentConfiguration,
-    );
+    expect(queueService.start.mock.calls[0][0].currentConfiguration).toBe(currentConfiguration);
   });
 
   it("passes the current unsaved draft to non-mutating validation", async () => {

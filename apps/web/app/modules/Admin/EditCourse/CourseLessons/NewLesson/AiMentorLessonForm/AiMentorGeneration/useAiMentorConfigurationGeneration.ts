@@ -25,9 +25,7 @@ import type {
 import type { AiMentorType } from "@repo/shared";
 import type { GenerateAiMentorConfigurationBody } from "~/api/generated-api";
 
-const getRequestedConfigurationType = (
-  input: GenerateAiMentorConfigurationBody,
-): AiMentorType =>
+const getRequestedConfigurationType = (input: GenerateAiMentorConfigurationBody): AiMentorType =>
   input.mode === AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE
     ? input.configurationType
     : input.currentConfiguration.type;
@@ -85,8 +83,7 @@ export const useAiMentorConfigurationGeneration = () => {
   const startGeneration = async (input: GenerateAiMentorConfigurationBody) => {
     const requestedType = getRequestedConfigurationType(input);
     setGenerationType(requestedType);
-    const { generationId: nextGenerationId } =
-      await startAiMentorConfigurationGeneration(input);
+    const { generationId: nextGenerationId } = await startAiMentorConfigurationGeneration(input);
     const initialSnapshot: AiMentorGenerationSnapshot = {
       generationId: nextGenerationId,
       progress: {

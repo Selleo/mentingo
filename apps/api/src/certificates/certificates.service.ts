@@ -14,6 +14,7 @@ import {
   CERTIFICATE_RESET_SCOPES,
   CERTIFICATE_VALIDITY_TYPES,
   CERTIFICATE_VALIDITY_UNITS,
+  COURSE_CERTIFICATE_STATUSES,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SHARE_IMAGE_HEIGHT,
@@ -32,6 +33,7 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { DEFAULT_PAGE_SIZE, parsePagination } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
@@ -42,6 +44,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { studentCourses } from "src/storage/schema";
 
 import { CertificateRepository } from "./certificate.repository";
 import {
@@ -152,6 +155,43 @@ export class CertificatesService implements OnModuleDestroy {
       language,
       addDays(new Date(), 30).toISOString(),
     );
+  }
+
+  async getCourseCertificateRows(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+    search?: string,
+  ) {
+    const learnerScope = getGroupManagerLearnerScopeCondition(
+      currentUser,
+      studentCourses.studentId,
+      [PERMISSIONS.COURSE_STATISTICS],
+    );
+
+    const { rows, hasScopedLearner } = await this.certificateRepository.getCourseCertificateRows(
+      courseId,
+      learnerScope,
+      language,
+      search,
+    );
+
+    if (learnerScope && !hasScopedLearner)
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    const certificateSignature = rows[0]?.certificateSignature;
+    const certificateSignatureUrl = certificateSignature
+      ? await this.fileService.getFileUrl(certificateSignature)
+      : null;
+
+    return rows.map(({ certificateSignature: _certificateSignature, status, ...row }) => ({
+      ...row,
+      status,
+      certificateSignatureUrl,
+      previewAllowed:
+        status === COURSE_CERTIFICATE_STATUSES.ACTIVE ||
+        status === COURSE_CERTIFICATE_STATUSES.EXPIRED,
+    }));
   }
 
   async createCertificate(userId: UUIDType, courseId: UUIDType, trx?: DatabasePg) {

@@ -65,7 +65,7 @@ export default function LessonPage() {
   useLearningTimeTracker({
     lessonId,
     courseId,
-    enabled: !!user && !!lesson && !!course,
+    enabled: !!user && !!lesson && !!course && !course.isManagerPreview,
   });
 
   useEffect(() => {

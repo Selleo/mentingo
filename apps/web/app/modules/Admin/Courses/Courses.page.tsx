@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, COURSE_TYPE } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, COURSE_TYPE, PERMISSIONS } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -15,8 +15,9 @@ import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
-import { useCategoriesSuspense } from "~/api/queries";
+import { useCategoriesSuspense, useCurrentUser } from "~/api/queries";
 import { useCoursesSuspense } from "~/api/queries/useCourses";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
@@ -76,6 +77,17 @@ const Courses = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { t } = useTranslation();
+  const { data: currentUser } = useCurrentUser();
+  const permissions = currentUser?.permissions ?? [];
+
+  const canManageCourses =
+    hasPermission(permissions, PERMISSIONS.COURSE_UPDATE) ||
+    hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN);
+  const isReadOnlyGroupManager =
+    hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ) && !canManageCourses;
+
+  const coursesListPath = isReadOnlyGroupManager ? "/courses" : "/admin/courses";
+
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
   const coursesWithOriginBadge: TCourse["originType"][] = [
     COURSE_ORIGIN_TYPES.MASTER,
@@ -315,7 +327,7 @@ const Courses = () => {
       breadcrumbs={[
         {
           title: t("adminCourseView.breadcrumbs.courses"),
-          href: "/admin/courses",
+          href: coursesListPath,
         },
       ]}
     >
@@ -327,25 +339,29 @@ const Courses = () => {
           <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
         </div>
         <div className="ml-auto flex gap-3">
-          <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
-            <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
-          </Link>
+          {canManageCourses && (
+            <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
+              <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
+            </Link>
+          )}
 
-          <ButtonGroup
-            className="not-sr-only"
-            buttons={[
-              {
-                children: <DashboardIcon />,
-                isActive: false,
-                onClick: () => navigate("/courses"),
-              },
-              {
-                children: <HamburgerIcon />,
-                isActive: true,
-                onClick: () => navigate("/admin/courses"),
-              },
-            ]}
-          />
+          {!isReadOnlyGroupManager && (
+            <ButtonGroup
+              className="not-sr-only"
+              buttons={[
+                {
+                  children: <DashboardIcon />,
+                  isActive: false,
+                  onClick: () => navigate("/courses"),
+                },
+                {
+                  children: <HamburgerIcon />,
+                  isActive: true,
+                  onClick: () => navigate("/admin/courses"),
+                },
+              ]}
+            />
+          )}
         </div>
         <div className="flex items-center justify-between gap-2">
           <SearchFilter
@@ -354,11 +370,13 @@ const Courses = () => {
             onChange={handleFilterChange}
             isLoading={false}
           />
-          <CourseBulkActions
-            selectedCourseIds={selectedCourses}
-            categories={categories ?? []}
-            onBulkActionComplete={handleBulkActionComplete}
-          />
+          {canManageCourses && (
+            <CourseBulkActions
+              selectedCourseIds={selectedCourses}
+              categories={categories ?? []}
+              onBulkActionComplete={handleBulkActionComplete}
+            />
+          )}
         </div>
         <Table data-testid={COURSES_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
           <TableHeader>

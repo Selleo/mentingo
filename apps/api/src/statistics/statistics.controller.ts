@@ -85,7 +85,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/training-completion")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     response: baseResponse(DashboardTrainingCompletionSchema),
   })
@@ -98,7 +98,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/deadline-risks/summary")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     response: baseResponse(DashboardDeadlineRiskSummarySchema),
   })
@@ -111,7 +111,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/incomplete-courses")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: baseResponse(DashboardIncompleteCoursesSchema),
@@ -126,7 +126,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/deadline-risks")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -159,7 +159,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/deadline-risks/courses")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -197,7 +197,7 @@ export class StatisticsController {
   }
 
   @Get("dashboard/deadline-risks/courses/:courseId/groups")
-  @RequirePermission(PERMISSIONS.STATISTICS_READ)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: Type.String({ format: "uuid" }) },

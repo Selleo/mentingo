@@ -214,6 +214,7 @@ export interface CurrentUserResponse {
       | "category.manage"
       | "group.read"
       | "group.manage"
+      | "managed_group_results.read"
       | "learning_path.read"
       | "learning_path.create"
       | "learning_path.update"
@@ -1594,6 +1595,11 @@ export interface GetUserByIdResponse {
       id: string;
       name: string;
     }[];
+    managedGroups?: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
   };
 }
 
@@ -1615,6 +1621,7 @@ export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1655,6 +1662,7 @@ export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1771,6 +1779,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   roleSlugs: string[];
+  managedGroupIds?: string[];
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
@@ -2386,6 +2395,7 @@ export interface GetCourseResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     dueDate: string | null;
+    isManagerPreview?: boolean;
   };
 }
 
@@ -2851,6 +2861,7 @@ export interface GetCourseStudentsProgressResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     groups:
       | {
@@ -2875,6 +2886,7 @@ export interface GetCourseStudentsQuizResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -2896,6 +2908,7 @@ export interface GetCourseStudentsAiMentorResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -7329,6 +7342,21 @@ export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
   };
+}
+
+export interface GetCourseCertificateRowsResponse {
+  data: {
+    learnerName: string;
+    learnerEmail: string;
+    groups: string[];
+    status: "not_earned" | "active" | "expired" | "revoked";
+    issuedAt: string | null;
+    expiresAt: string | null;
+    courseTitle: string;
+    certificateSignatureUrl: string | null;
+    certificateFontColor: string | null;
+    previewAllowed: boolean;
+  }[];
 }
 
 export interface GetAllCertificatesResponse {
@@ -12514,6 +12542,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     statisticsControllerGetDashboardDeadlineRisks: (
       query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         type?: "overdue" | "dueSoon";
         /**
          * @min 1
@@ -12526,8 +12556,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @default 20
          */
         perPage?: number;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -15445,6 +15473,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CertificatesControllerGetCourseCertificateRows
+     * @request GET:/api/certificates/course/{courseId}
+     */
+    certificatesControllerGetCourseCertificateRows: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseCertificateRowsResponse, any>({
+        path: `/api/certificates/course/${courseId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CertificatesControllerGetAllCertificates
      * @request GET:/api/certificates/all
      */
@@ -16426,13 +16477,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        feed?: "all" | "admin_announcements" | "system";
+        status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        feed?: "all" | "admin_announcements" | "system";
-        status?: "scheduled" | "published";
       },
       params: RequestParams = {},
     ) =>
@@ -16489,11 +16540,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17678,6 +17729,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -17697,6 +17749,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -18563,6 +18616,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         keyword?: string;
         email?: string;
+        resourceType?:
+          | "user"
+          | "course"
+          | "chapter"
+          | "lesson"
+          | "announcement"
+          | "group"
+          | "settings"
+          | "integration"
+          | "category"
+          | "qa"
+          | "news"
+          | "article"
+          | "articleSection"
+          | "live_training"
+          | "learning_path"
+          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -18622,23 +18692,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "play_scorm"
               | "complete_scorm"
             )[];
-        resourceType?:
-          | "user"
-          | "course"
-          | "chapter"
-          | "lesson"
-          | "announcement"
-          | "group"
-          | "settings"
-          | "integration"
-          | "category"
-          | "qa"
-          | "news"
-          | "article"
-          | "articleSection"
-          | "live_training"
-          | "learning_path"
-          | "scorm";
       },
       params: RequestParams = {},
     ) =>

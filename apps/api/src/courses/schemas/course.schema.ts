@@ -84,6 +84,7 @@ export const courseAverageQuizScoresSchema = Type.Object({
 export const studentCourseProgressionSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
+  studentEmail: Type.Union([Type.String(), Type.Null()]),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
   groups: Type.Union([
     Type.Array(
@@ -102,6 +103,7 @@ export const studentCourseProgressionSchema = Type.Object({
 export const studentQuizResultSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
+  studentEmail: Type.Union([Type.String(), Type.Null()]),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
   lessonId: UUIDSchema,
   quizName: Type.String(),
@@ -113,6 +115,7 @@ export const studentQuizResultSchema = Type.Object({
 export const studentAiMentorResultSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
+  studentEmail: Type.Union([Type.String(), Type.Null()]),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
   lessonId: UUIDSchema,
   lessonName: Type.String(),

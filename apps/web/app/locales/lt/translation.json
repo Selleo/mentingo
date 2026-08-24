@@ -335,7 +335,8 @@
       "admin": "Admin",
       "contentCreator": "Turinio kūrėjas",
       "trainer": "Trainer",
-      "student": "Studentas"
+      "student": "Studentas",
+      "groupManager": "Grupių vadovas"
     },
     "languages": {
       "en": "Anglų",
@@ -1878,6 +1879,7 @@
         "course_delete": "Gali trinti kursus.",
         "course_enrollment": "Gali valdyti registraciją į kursus.",
         "course_statistics": "Gali peržiūrėti kursų analizę ir statistiką.",
+        "group_manager_read": "Gali peržiūrėti priskirtų valdomų grupių besimokančiųjų rezultatus.",
         "course_export": "Gali eksportuoti kursų duomenis.",
         "learning_mode_use": "Gali naudoti mokymosi režimo funkcijas.",
         "learning_progress_update": "Gali atnaujinti besimokančiojo pažangą.",
@@ -2011,7 +2013,7 @@
   },
   "adminUserView": {
     "header": "Sukurti naują vartotoją",
-    "subHeader": "Norėdami sukurti naują vartotoją, užpildykite informaciją. Baigę spustelėkite išsaugoti.",
+    "managedGroupsTooltip": "Pasirinktos grupės nustato, kurių besimokančiųjų kursus, pažangą, rezultatus, mokymosi laiką ir sertifikatus šis naudotojas gali peržiūrėti kaip grupės vadovas.",
     "editUserHeader": "Vartotojo informacija",
     "tabs": {
       "information": "Vartotojo informacija",
@@ -2024,7 +2026,8 @@
     "placeholder": {
       "role": "Pasirinkite vaidmenį",
       "groupId": "Pasirinkite grupę",
-      "language": "Pasirinkite kalbą"
+      "language": "Pasirinkite kalbą",
+      "managedGroups": "Pasirinkite valdomas grupes"
     },
     "field": {
       "firstName": "Vardas",
@@ -2033,7 +2036,8 @@
       "role": "Vaidmuo",
       "language": "Kalba",
       "status": "Būsena",
-      "groups": "Grupė"
+      "groups": "Grupė",
+      "managedGroups": "Valdomos grupės"
     },
     "toast": {
       "userCreatedSuccessfully": "Vartotojas sėkmingai sukurtas",
@@ -3381,7 +3385,23 @@
         "progress": "Pažanga",
         "quizResults": "Viktorinos rezultatai",
         "aiMentorResults": "AI mentoriaus rezultatai",
-        "learningTime": "Mokymosi laikas"
+        "learningTime": "Mokymosi laikas",
+        "certificates": "Sertifikatai"
+      },
+      "certificates": {
+        "learner": "Besimokantysis",
+        "email": "El. paštas",
+        "groups": "Grupės",
+        "status": "Būsena",
+        "expiry": "Galiojimo pabaiga",
+        "preview": "Peržiūrėti sertifikatą",
+        "empty": "Užregistruotų besimokančiųjų nerasta.",
+        "statuses": {
+          "not_earned": "Negautas",
+          "active": "Aktyvus",
+          "expired": "Baigė galioti",
+          "revoked": "Atšauktas"
+        }
       },
       "field": {
         "studentName": "Studentas",
@@ -3681,6 +3701,7 @@
       "single": "Vienišas",
       "multiple": "Keli",
       "fillInTheBlanks": "Užpildykite tuščias vietas.",
+      "notAnswered": "Neatsakyta",
       "selectQuestion": "pasirinkti klausimą.",
       "trueOrFalseQuestion": "Tikras ar klaidingas klausimas.",
       "multipleChoice": "Klausimas su keliais pasirinkimais.",
@@ -4158,7 +4179,8 @@
       "admin": "Administratorius",
       "student": "Studentas",
       "content_creator": "Turinio kūrėjas",
-      "trainer": "Treneris"
+      "trainer": "Treneris",
+      "group_manager": "Grupių vadovas"
     },
     "switch": {
       "enabled": "Įjungta",

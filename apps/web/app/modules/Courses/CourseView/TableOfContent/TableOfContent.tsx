@@ -55,8 +55,8 @@ export function TableOfContent({ language }: TableOfContentProps) {
   );
   const canShowStatistics =
     !isCourseStudentModeActive &&
-    canManageCourse &&
-    hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
+    ((canManageCourse && hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS)) ||
+      hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ));
   const shouldShowTabs = isAdminExperience || canShowChat || canShowStatistics;
   const hasMissingTranslations = missingTranslationsResponse?.data.hasMissingTranslations ?? false;
 
@@ -95,7 +95,7 @@ export function TableOfContent({ language }: TableOfContentProps) {
       {activeTab === COURSE_OVERVIEW_TABS.TOC && <ChapterListOverview />}
 
       {canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS && (
-        <CourseAdminStatistics course={course} canManageCourse={canManageCourse} />
+        <CourseAdminStatistics course={course} canManageCourse={canShowStatistics} />
       )}
 
       {canShowChat && activeTab === COURSE_OVERVIEW_TABS.CHAT && currentUser && (

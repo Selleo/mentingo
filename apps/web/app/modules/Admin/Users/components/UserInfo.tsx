@@ -13,6 +13,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 
 import { USER_PAGE_HANDLES } from "../../../../../e2e/data/users/handles";
 
+import { UserMultiSelect } from "./UserMultiSelect";
+
 import type { GetUserByIdResponse, UpdateUserBody } from "~/api/generated-api";
 
 interface UserInfoType {
@@ -38,10 +40,43 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
     }
   }, [user, setSelectedGroups]);
 
-  const defaultValue: UpdateUserBody[typeof name] =
-    name === "groups"
-      ? (user.groups.map((group) => group.id) as UpdateUserBody[typeof name])
-      : (user[name] as UpdateUserBody[typeof name]);
+  const getDefaultValue = (): UpdateUserBody[typeof name] => {
+    switch (name) {
+      case "firstName":
+        return user.firstName;
+      case "lastName":
+        return user.lastName;
+      case "email":
+        return user.email;
+      case "roleSlugs":
+        return user.roleSlugs;
+      case "groups":
+        return user.groups.map((group) => group.id);
+      case "managedGroupIds":
+        return (user.managedGroups ?? []).map((group) => group.id);
+      case "archived":
+        return user.archived;
+    }
+  };
+
+  const getDisplayValue = () => {
+    switch (name) {
+      case "groups":
+        return user.groups.map((group) => group.name).join(", ");
+      case "managedGroupIds":
+        return (user.managedGroups ?? []).map((group) => group.name).join(", ");
+      case "roleSlugs":
+        return user.roleSlugs.join(", ");
+      case "firstName":
+        return user.firstName;
+      case "lastName":
+        return user.lastName;
+      case "email":
+        return user.email;
+      case "archived":
+        return user.archived.toString();
+    }
+  };
 
   const getInputTestId = () => {
     switch (name) {
@@ -60,7 +95,7 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
     <Controller
       name={name}
       control={control}
-      defaultValue={defaultValue}
+      defaultValue={getDefaultValue()}
       render={({ field }) => {
         if (!isEditing) {
           if (name === "archived") {
@@ -70,35 +105,21 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
               </span>
             );
           }
-          return <span className="font-semibold capitalize">{user[name]?.toString()}</span>;
+          return <span className="font-semibold capitalize">{getDisplayValue()}</span>;
         }
 
         if (name === "roleSlugs") {
           return (
-            <MultipleSelector
+            <UserMultiSelect
               testId={USER_PAGE_HANDLES.ROLE_SELECT}
               getOptionTestId={(option) => USER_PAGE_HANDLES.roleOption(option.value)}
-              value={((field.value as string[] | undefined) ?? []).map((roleSlug) => ({
-                value: roleSlug,
-                label: getRoleLabel(roleSlug, t, roles),
-              }))}
+              value={(field.value as string[] | undefined) ?? []}
               options={roles.map((role) => ({
                 value: role.slug,
                 label: getRoleLabel(role.slug, t, roles),
               }))}
-              onChange={(options) => field.onChange(options.map((option) => option.value))}
+              onChange={field.onChange}
               placeholder={t("adminUsersView.filters.placeholder.roles")}
-              hidePlaceholderWhenSelected
-              hideClearAllButton
-              className="w-full bg-background p-2"
-              badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
-              commandProps={{
-                label: t("adminUsersView.filters.placeholder.roles"),
-              }}
-              inputProps={{
-                className: "w-full outline-none py-0 body-base",
-              }}
-              checkbox={false}
             />
           );
         }
@@ -128,6 +149,20 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
                 className: "w-full outline-none py-0 body-base",
               }}
               checkbox={false}
+            />
+          );
+        }
+
+        if (name === "managedGroupIds") {
+          return (
+            <UserMultiSelect
+              testId={USER_PAGE_HANDLES.MANAGED_GROUPS_SELECT}
+              getOptionTestId={(option) => USER_PAGE_HANDLES.managedGroupOption(option.value)}
+              value={(field.value as string[] | undefined) ?? []}
+              options={groups.map((group) => ({ value: group.id, label: group.name }))}
+              onChange={field.onChange}
+              placeholder={t("adminUserView.placeholder.managedGroups")}
+              emptyIndicator={<p>{t("adminGroupsView.groupSelect.noGroups")}</p>}
             />
           );
         }

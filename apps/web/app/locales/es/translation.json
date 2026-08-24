@@ -339,7 +339,8 @@
       "admin": "Administrador",
       "contentCreator": "Creador de contenido",
       "trainer": "Formador",
-      "student": "Estudiante"
+      "student": "Estudiante",
+      "groupManager": "Gestor de grupos"
     },
     "languages": {
       "en": "Inglés",
@@ -1873,6 +1874,7 @@
         "course_delete": "Eliminar cursos.",
         "course_enrollment": "Gestionar inscripciones a cursos.",
         "course_statistics": "Ver análisis y estadísticas del curso.",
+        "group_manager_read": "Ver los resultados de alumnos de los grupos gestionados asignados.",
         "course_export": "Exportar datos del curso.",
         "course_discussion_read": "Ver discusiones del curso.",
         "course_discussion_message_create": "Crear mensajes en las discusiones del curso.",
@@ -2006,7 +2008,7 @@
   },
   "adminUserView": {
     "header": "Crear nuevo usuario",
-    "subHeader": "Complete los detalles para crear un nuevo usuario. Haga clic en guardar cuando haya terminado.",
+    "managedGroupsTooltip": "Los grupos seleccionados determinan qué cursos, progreso, resultados, tiempo de aprendizaje y certificados de los alumnos puede ver este usuario como gestor de grupo.",
     "editUserHeader": "Información del usuario",
     "tabs": {
       "information": "Información del usuario",
@@ -2019,7 +2021,8 @@
     "placeholder": {
       "role": "Seleccione un rol",
       "groupId": "Seleccione un grupo",
-      "language": "Seleccione un idioma"
+      "language": "Seleccione un idioma",
+      "managedGroups": "Seleccione los grupos gestionados"
     },
     "field": {
       "firstName": "Nombre",
@@ -2028,7 +2031,8 @@
       "role": "Rol",
       "language": "Idioma",
       "status": "Estado",
-      "groups": "Grupo"
+      "groups": "Grupo",
+      "managedGroups": "Grupos gestionados"
     },
     "toast": {
       "userCreatedSuccessfully": "Usuario creado exitosamente",
@@ -3325,7 +3329,23 @@
         "progress": "Progreso",
         "quizResults": "Resultados del examen",
         "aiMentorResults": "Resultados del mentor de IA",
-        "learningTime": "Tiempo de aprendizaje"
+        "learningTime": "Tiempo de aprendizaje",
+        "certificates": "Certificados"
+      },
+      "certificates": {
+        "learner": "Alumno",
+        "email": "Correo electrónico",
+        "groups": "Grupos",
+        "status": "Estado",
+        "expiry": "Caducidad",
+        "preview": "Vista previa del certificado",
+        "empty": "No se encontraron alumnos inscritos.",
+        "statuses": {
+          "not_earned": "No obtenido",
+          "active": "Activo",
+          "expired": "Caducado",
+          "revoked": "Revocado"
+        }
       },
       "field": {
         "studentName": "Estudiante",
@@ -3625,6 +3645,7 @@
       "single": "Única",
       "multiple": "Múltiple",
       "fillInTheBlanks": "Complete los espacios en blanco.",
+      "notAnswered": "Sin responder",
       "selectQuestion": "seleccione la pregunta.",
       "trueOrFalseQuestion": "Pregunta de verdadero o falso.",
       "multipleChoice": "Pregunta de opción múltiple.",
@@ -4098,7 +4119,8 @@
     "roles": {
       "admin": "Administrador",
       "student": "Estudiante",
-      "content_creator": "Creador de contenido"
+      "content_creator": "Creador de contenido",
+      "group_manager": "Gestor de grupos"
     },
     "switch": {
       "enabled": "Habilitado",

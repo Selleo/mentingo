@@ -8594,6 +8594,79 @@
         }
       }
     },
+    "/api/certificates/course/{courseId}": {
+      "get": {
+        "operationId": "CertificatesController_getCourseCertificateRows",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseCertificateRowsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/certificates/all": {
       "get": {
         "operationId": "CertificatesController_getAllCertificates",
@@ -19080,6 +19153,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "managed_group_results.read",
+                      "type": "string"
+                    },
+                    {
                       "const": "learning_path.read",
                       "type": "string"
                     },
@@ -26009,6 +26086,25 @@
                     "name"
                   ]
                 }
+              },
+              "managedGroups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -26148,6 +26244,13 @@
                 "type": "null"
               }
             ]
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           },
           "email": {
             "format": "email",
@@ -26292,6 +26395,13 @@
                 "type": "null"
               }
             ]
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           },
           "email": {
             "format": "email",
@@ -26688,6 +26798,13 @@
           "roleSlugs": {
             "type": "array",
             "items": {
+              "type": "string"
+            }
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -30308,6 +30425,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "isManagerPreview": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -32359,6 +32479,16 @@
                 "studentName": {
                   "type": "string"
                 },
+                "studentEmail": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "studentAvatarUrl": {
                   "anyOf": [
                     {
@@ -32421,6 +32551,7 @@
               "required": [
                 "studentId",
                 "studentName",
+                "studentEmail",
                 "studentAvatarUrl",
                 "groups",
                 "completedLessonsCount",
@@ -32475,6 +32606,16 @@
                 "studentName": {
                   "type": "string"
                 },
+                "studentEmail": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "studentAvatarUrl": {
                   "anyOf": [
                     {
@@ -32505,6 +32646,7 @@
               "required": [
                 "studentId",
                 "studentName",
+                "studentEmail",
                 "studentAvatarUrl",
                 "lessonId",
                 "quizName",
@@ -32560,6 +32702,16 @@
                 "studentName": {
                   "type": "string"
                 },
+                "studentEmail": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "studentAvatarUrl": {
                   "anyOf": [
                     {
@@ -32587,6 +32739,7 @@
               "required": [
                 "studentId",
                 "studentName",
+                "studentEmail",
                 "studentAvatarUrl",
                 "lessonId",
                 "lessonName",
@@ -53060,6 +53213,112 @@
             "required": [
               "message"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseCertificateRowsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "learnerName": {
+                  "type": "string"
+                },
+                "learnerEmail": {
+                  "type": "string"
+                },
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "not_earned",
+                      "type": "string"
+                    },
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "expired",
+                      "type": "string"
+                    },
+                    {
+                      "const": "revoked",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "issuedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "courseTitle": {
+                  "type": "string"
+                },
+                "certificateSignatureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateFontColor": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "previewAllowed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "learnerName",
+                "learnerEmail",
+                "groups",
+                "status",
+                "issuedAt",
+                "expiresAt",
+                "courseTitle",
+                "certificateSignatureUrl",
+                "certificateFontColor",
+                "previewAllowed"
+              ]
+            }
           }
         },
         "required": [

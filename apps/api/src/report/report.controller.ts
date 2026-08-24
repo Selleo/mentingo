@@ -17,7 +17,7 @@ export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Get("summary")
-  @RequirePermission(PERMISSIONS.REPORT_READ)
+  @RequirePermission(PERMISSIONS.REPORT_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
   })

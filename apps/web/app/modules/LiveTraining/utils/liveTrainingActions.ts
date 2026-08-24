@@ -47,7 +47,11 @@ export const deriveLiveTrainingUiActions = ({
   const canManageSession = hasHostRole || hasBroadManagePermission;
   const canViewAllMaterials = hasHostRole || hasBroadManagePermission;
   const canViewSessionData =
-    canManageSession || hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_STATISTICS);
+    canManageSession ||
+    hasAnyPermission(permissions, [
+      PERMISSIONS.LIVE_TRAINING_STATISTICS,
+      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    ]);
   const isActiveSession = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
   const canStartFromStatus =
     liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED ||

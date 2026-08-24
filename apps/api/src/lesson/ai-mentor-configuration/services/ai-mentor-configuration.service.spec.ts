@@ -65,12 +65,8 @@ describe("AiMentorConfigurationService generation authoring gate", () => {
   };
 
   it("authorizes a new unsaved lesson at course scope", async () => {
-    const {
-      adminLessonService,
-      courseFeaturePolicyService,
-      masterCourseService,
-      service,
-    } = createService();
+    const { adminLessonService, courseFeaturePolicyService, masterCourseService, service } =
+      createService();
 
     await expect(
       service.prepareGenerationAuthoringContext(courseId, undefined, currentUser),
@@ -88,12 +84,8 @@ describe("AiMentorConfigurationService generation authoring gate", () => {
   });
 
   it("authorizes an existing AI Mentor lesson at lesson scope", async () => {
-    const {
-      adminLessonService,
-      courseFeaturePolicyService,
-      masterCourseService,
-      service,
-    } = createService();
+    const { adminLessonService, courseFeaturePolicyService, masterCourseService, service } =
+      createService();
 
     await expect(
       service.prepareGenerationAuthoringContext(courseId, lessonId, currentUser),
@@ -101,9 +93,10 @@ describe("AiMentorConfigurationService generation authoring gate", () => {
     expect(masterCourseService.assertCourseContentEditableByLessonId).toHaveBeenCalledWith(
       lessonId,
     );
-    expect(
-      courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId,
-    ).toHaveBeenCalledWith(lessonId, COURSE_FEATURE.CURRICULUM_EDITING);
+    expect(courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId).toHaveBeenCalledWith(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
     expect(adminLessonService.validateAccess).toHaveBeenCalledWith(
       ENTITY_TYPES.LESSON,
       currentUser,

@@ -223,13 +223,17 @@ export class UserController {
       }
 
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
-      const { roleSlugs, groups, archived } = data;
+      const { roleSlugs, groups, managedGroupIds, archived } = data;
 
       if ((roleSlugs !== undefined || archived !== undefined) && !canManageUsers) {
         throw new ForbiddenException("common.toast.noAccess");
       }
 
       if (groups !== undefined && !canManageUsers) {
+        throw new ForbiddenException("common.toast.noAccess");
+      }
+
+      if (managedGroupIds !== undefined && !canManageUsers) {
         throw new ForbiddenException("common.toast.noAccess");
       }
 

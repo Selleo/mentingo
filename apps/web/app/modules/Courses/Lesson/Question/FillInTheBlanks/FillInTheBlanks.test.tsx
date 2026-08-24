@@ -79,6 +79,36 @@ describe("FillInTheBlanks", () => {
     expect(screen.getByText("correct")).toBeInTheDocument();
   });
 
+  it("labels a completed text blank when the learner did not submit an answer", () => {
+    renderQuestion(
+      <FillInTheBlanks
+        isCompleted
+        question={
+          {
+            id: "question-unanswered",
+            type: "fill_in_the_blanks_text",
+            displayOrder: 1,
+            description: "The <blank-answer-answer-1> answer.",
+            solutionExplanation: null,
+            passQuestion: false,
+            options: [
+              {
+                id: "answer-1",
+                optionText: "correct",
+                displayOrder: 1,
+                isCorrect: true,
+                isStudentAnswer: null,
+                studentAnswer: null,
+              },
+            ],
+          } as QuizQuestion
+        }
+      />,
+    );
+
+    expect(screen.getByPlaceholderText("Not answered")).toBeDisabled();
+  });
+
   it("shows a derived correct sentence for completed drag-and-drop blanks without solution explanation", () => {
     renderQuestion(
       <FillInTheBlanksDnd

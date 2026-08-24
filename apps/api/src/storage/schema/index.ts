@@ -1833,6 +1833,28 @@ export const groupUsers = pgTable(
   })),
 );
 
+export const groupManagerGroups = pgTable(
+  "group_manager_groups",
+  {
+    ...id,
+    ...timestamps,
+    managerUserId: uuid("manager_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("group_manager_groups", (table) => ({
+    managerGroupUniqueIdx: uniqueIndex("group_manager_groups_manager_user_id_group_id_unique").on(
+      table.managerUserId,
+      table.groupId,
+    ),
+    groupIdx: index("group_manager_groups_group_id_idx").on(table.groupId),
+  })),
+);
+
 export const groupCourses = pgTable(
   "group_courses",
   {

@@ -10,12 +10,17 @@ import {
   subDays,
 } from "date-fns";
 
+import {
+  getGroupManagerLearnerScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { studentCourses } from "src/storage/schema";
 
 import type {
   CourseStudentsStatsByMonth,
@@ -116,9 +121,11 @@ export class StatisticsService {
   async getDashboardTrainingCompletion(
     currentUser: CurrentUserType,
   ): Promise<DashboardTrainingCompletion> {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
-    const trainingCompletion =
-      await this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
+    const trainingCompletion = await this.statisticsRepository.getDashboardTrainingCompletion(
+      ownerUserId,
+      learnerScope,
+    );
     const total = trainingCompletion?.total ?? 0;
     const completed = trainingCompletion?.completed ?? 0;
 
@@ -134,9 +141,11 @@ export class StatisticsService {
   async getDashboardDeadlineRiskSummary(
     currentUser: CurrentUserType,
   ): Promise<DashboardDeadlineRiskSummary> {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
-    const deadlineRisks =
-      await this.statisticsRepository.getDashboardDeadlineRiskCounts(ownerUserId);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
+    const deadlineRisks = await this.statisticsRepository.getDashboardDeadlineRiskCounts(
+      ownerUserId,
+      learnerScope,
+    );
 
     return {
       overdueCount: deadlineRisks?.overdueCount ?? 0,
@@ -148,10 +157,10 @@ export class StatisticsService {
     currentUser: CurrentUserType,
     language: SupportedLanguages,
   ): Promise<DashboardIncompleteCourses> {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
     const [courses, trainingCompletion] = await Promise.all([
-      this.statisticsRepository.getDashboardIncompleteCourses(ownerUserId, language),
-      this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId),
+      this.statisticsRepository.getDashboardIncompleteCourses(ownerUserId, language, learnerScope),
+      this.statisticsRepository.getDashboardTrainingCompletion(ownerUserId, learnerScope),
     ]);
 
     return {
@@ -167,13 +176,15 @@ export class StatisticsService {
     page: number,
     perPage: number,
   ) {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
     const { rows, totalItems } = await this.statisticsRepository.getDashboardDeadlineRisks(
       ownerUserId,
       language,
       riskType,
       page,
       perPage,
+      learnerScope,
+      learnerScope ? currentUser.userId : undefined,
     );
     const courses = new Map<string, DashboardDeadlineRiskCourse>();
 
@@ -207,7 +218,7 @@ export class StatisticsService {
     data: DashboardDeadlineRiskCourseSummary[];
     pagination: { totalItems: number; page: number; perPage: number };
   }> {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
     const { data, totalItems } =
       await this.statisticsRepository.getDashboardDeadlineRiskCourseSummaries(
         ownerUserId,
@@ -215,6 +226,7 @@ export class StatisticsService {
         urgencyOrder,
         page,
         perPage,
+        learnerScope,
       );
     const coursesWithThumbnails = await Promise.all(
       data.map(async ({ thumbnailUrl, ...course }) => ({
@@ -242,7 +254,7 @@ export class StatisticsService {
     data: DashboardDeadlineRiskGroup[];
     pagination: { totalItems: number; page: number; perPage: number };
   }> {
-    const ownerUserId = this.getDashboardOwnerUserId(currentUser);
+    const { ownerUserId, learnerScope } = this.getDashboardScope(currentUser);
     const { data, totalItems } = await this.statisticsRepository.getDashboardDeadlineRiskGroups(
       ownerUserId,
       courseId,
@@ -253,6 +265,8 @@ export class StatisticsService {
       sortDirection,
       page,
       perPage,
+      learnerScope,
+      learnerScope ? currentUser.userId : undefined,
     );
     return { data, pagination: { totalItems, page, perPage } };
   }
@@ -261,6 +275,19 @@ export class StatisticsService {
     return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE)
       ? undefined
       : currentUser.userId;
+  }
+
+  private getDashboardScope(currentUser: CurrentUserType) {
+    const isManagerScoped = shouldApplyGroupManagerScope(currentUser, [
+      PERMISSIONS.STATISTICS_READ,
+    ]);
+
+    return {
+      ownerUserId: isManagerScoped ? undefined : this.getDashboardOwnerUserId(currentUser),
+      learnerScope: getGroupManagerLearnerScopeCondition(currentUser, studentCourses.studentId, [
+        PERMISSIONS.STATISTICS_READ,
+      ]),
+    };
   }
 
   async getAdminStats() {

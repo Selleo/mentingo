@@ -347,9 +347,7 @@ export type GeneratedAiMentorRoleplayConfigurationFields = Static<
 export type GeneratedAiMentorConfigurationFields =
   | GeneratedAiMentorTeacherConfigurationFields
   | GeneratedAiMentorRoleplayConfigurationFields;
-export type AiMentorGenerationLessonContext = Static<
-  typeof aiMentorGenerationLessonContextSchema
->;
+export type AiMentorGenerationLessonContext = Static<typeof aiMentorGenerationLessonContextSchema>;
 export type AiMentorConfigurationValidationIssue = Static<
   typeof aiMentorConfigurationValidationIssueSchema
 >;

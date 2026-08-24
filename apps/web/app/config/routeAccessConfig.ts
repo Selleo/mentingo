@@ -61,13 +61,13 @@ const QA_EDIT_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.QA_MANAGE, PERMISSIONS.QA_MANAGE_OWN],
 };
 const LEARNING_PATH_READ_ACCESS: PermissionRequirement = {
-  anyOf: [PERMISSIONS.LEARNING_PATH_READ],
+  anyOf: [PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
 };
 const CALENDAR_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.CALENDAR_READ],
 };
 const LIVE_TRAINING_READ_ACCESS: PermissionRequirement = {
-  anyOf: [PERMISSIONS.LIVE_TRAINING_READ],
+  anyOf: [PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
 };
 const DASHBOARD_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.DASHBOARD_READ],
@@ -121,7 +121,9 @@ export const routeAccessConfig = createRouteConfig({
   "news/:newsId": PUBLIC,
 
   // Admin part
-  "admin/courses": COURSE_EDIT_ACCESS,
+  "admin/courses": {
+    anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  },
   "admin/courses/new": COURSE_EDIT_ACCESS,
   "admin/course/:courseId/lesson/:lessonId/preview": COURSE_EDIT_ACCESS,
   "admin/beta-courses/new": {

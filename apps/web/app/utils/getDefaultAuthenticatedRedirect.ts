@@ -24,6 +24,13 @@ export const getDefaultAuthenticatedRedirect = (
   const permissions = currentUser.permissions;
 
   if (
+    isAvailableRoute("/courses", excludedRoutes) &&
+    hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+  ) {
+    return "/courses";
+  }
+
+  if (
     isAvailableRoute("/dashboard", excludedRoutes) &&
     hasPermission(permissions, PERMISSIONS.DASHBOARD_READ)
   ) {
@@ -47,7 +54,8 @@ export const getDefaultAuthenticatedRedirect = (
   if (
     isAvailableRoute("/development-paths", excludedRoutes) &&
     globalSettings?.learningPathsEnabled !== false &&
-    hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ)
+    (hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ) ||
+      hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ))
   ) {
     return "/development-paths";
   }

@@ -42,6 +42,7 @@ export const commonShowCourseSchema = Type.Object({
   availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
   baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
   dueDate: Type.Union([Type.String(), Type.Null()]),
+  isManagerPreview: Type.Optional(Type.Boolean()),
 });
 
 export const commonShowBetaCourseSchema = Type.Object({

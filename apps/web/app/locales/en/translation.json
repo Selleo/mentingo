@@ -335,7 +335,8 @@
       "admin": "Admin",
       "contentCreator": "Content creator",
       "trainer": "Trainer",
-      "student": "Student"
+      "student": "Student",
+      "groupManager": "Group Manager"
     },
     "languages": {
       "en": "English",
@@ -1881,6 +1882,7 @@
         "course_delete": "Delete courses.",
         "course_enrollment": "Manage course enrollments.",
         "course_statistics": "View course analytics and statistics.",
+        "group_manager_read": "View learner results for assigned managed groups.",
         "course_export": "Export course data.",
         "course_discussion_read": "View course discussions.",
         "course_discussion_message_create": "Create messages in course discussions.",
@@ -2014,7 +2016,7 @@
   },
   "adminUserView": {
     "header": "Create New User",
-    "subHeader": "Fill in the details to create a new user. Click save when you're done.",
+    "managedGroupsTooltip": "Selected groups determine which learners' courses, progress, results, learning time, and certificates this user can view as a Group Manager.",
     "editUserHeader": "User Information",
     "tabs": {
       "information": "User information",
@@ -2027,7 +2029,8 @@
     "placeholder": {
       "role": "Select a role",
       "groupId": "Select a group",
-      "language": "Select a language"
+      "language": "Select a language",
+      "managedGroups": "Select managed groups"
     },
     "field": {
       "firstName": "First name",
@@ -2036,7 +2039,8 @@
       "role": "Role",
       "language": "Language",
       "status": "Status",
-      "groups": "Group"
+      "groups": "Group",
+      "managedGroups": "Managed groups"
     },
     "toast": {
       "userCreatedSuccessfully": "User created successfully",
@@ -3385,7 +3389,23 @@
         "progress": "Progress",
         "quizResults": "Quiz Results",
         "aiMentorResults": "AI Mentor Results",
-        "learningTime": "Learning Time"
+        "learningTime": "Learning Time",
+        "certificates": "Certificates"
+      },
+      "certificates": {
+        "learner": "Learner",
+        "email": "Email",
+        "groups": "Groups",
+        "status": "Status",
+        "expiry": "Expiry",
+        "preview": "Preview certificate",
+        "empty": "No enrolled learners found.",
+        "statuses": {
+          "not_earned": "Not earned",
+          "active": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked"
+        }
       },
       "field": {
         "studentName": "Student",
@@ -3685,6 +3705,7 @@
       "single": "Single",
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
+      "notAnswered": "Not answered",
       "selectQuestion": "select question.",
       "trueOrFalseQuestion": "True or false question.",
       "multipleChoice": "Multiple choice question.",
@@ -4160,7 +4181,8 @@
       "admin": "Administrator",
       "student": "Student",
       "content_creator": "Content Creator",
-      "trainer": "Trainer"
+      "trainer": "Trainer",
+      "group_manager": "Group Manager"
     },
     "switch": {
       "enabled": "Enabled",

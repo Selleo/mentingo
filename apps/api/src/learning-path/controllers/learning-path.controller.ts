@@ -64,7 +64,7 @@ export class LearningPathController {
   constructor(private readonly learningPathService: LearningPathService) {}
 
   @Get()
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_READ)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
@@ -93,7 +93,7 @@ export class LearningPathController {
   }
 
   @Get(":learningPathId")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_READ)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },

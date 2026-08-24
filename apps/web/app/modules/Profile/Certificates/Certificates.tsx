@@ -1,5 +1,4 @@
 import { useParams } from "@remix-run/react";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { useCertificates } from "~/api/queries/useCertificates";
@@ -73,9 +72,7 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
       <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3">
         {certificates.map((certificate) => {
           const completionDate = certificate.completionDate || certificate.createdAt;
-          const formattedDate = completionDate
-            ? format(new Date(completionDate), "dd.MM.yyyy")
-            : "";
+          const formattedDate = formatCertificateDate(completionDate);
           const formattedExpiryDate = formatCertificateDate(certificate.expiresAt);
 
           return (

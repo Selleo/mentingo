@@ -22,9 +22,7 @@ import type {
 
 @Injectable()
 export class AiMentorConfigurationValidatorService {
-  constructor(
-    private readonly promptService: PromptService,
-  ) {}
+  constructor(private readonly promptService: PromptService) {}
 
   async validate(
     input: ValidateAiMentorConfigurationDraftInput,
@@ -41,8 +39,7 @@ export class AiMentorConfigurationValidatorService {
         const result = {
           ...modelResult,
           passed: !modelResult.issues.some(
-            ({ severity }) =>
-              severity === AI_MENTOR_CONFIGURATION_VALIDATION_SEVERITY.ERROR,
+            ({ severity }) => severity === AI_MENTOR_CONFIGURATION_VALIDATION_SEVERITY.ERROR,
           ),
         };
 

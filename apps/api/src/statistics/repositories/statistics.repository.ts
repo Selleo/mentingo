@@ -7,7 +7,7 @@ import {
   DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS,
   PERMISSIONS,
 } from "@repo/shared";
-import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, exists, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
@@ -18,6 +18,7 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   groupCourses,
+  groupManagerGroups,
   groups,
   groupUsers,
   lessons,
@@ -38,6 +39,7 @@ import type {
   SupportedLanguages,
 } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { NextLesson } from "src/lesson/lesson.schema";
@@ -54,6 +56,27 @@ export class StatisticsRepository {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
+
+  private getManagedGroupCondition(
+    managedByUserId: UUIDType | undefined,
+    groupIdColumn: AnyPgColumn,
+    tenantIdColumn: AnyPgColumn,
+  ): SQL | undefined {
+    if (!managedByUserId) return undefined;
+
+    return exists(
+      this.db
+        .select({ id: groupManagerGroups.id })
+        .from(groupManagerGroups)
+        .where(
+          and(
+            eq(groupManagerGroups.managerUserId, managedByUserId),
+            eq(groupManagerGroups.groupId, groupIdColumn),
+            eq(groupManagerGroups.tenantId, tenantIdColumn),
+          ),
+        ),
+    );
+  }
 
   async getQuizStats(userId: UUIDType) {
     const [quizStatsResult] = await this.db
@@ -196,7 +219,7 @@ export class StatisticsRepository {
       .where(userId ? eq(coursesSummaryStats.authorId, userId) : undefined);
   }
 
-  async getDashboardTrainingCompletion(ownerUserId?: UUIDType) {
+  async getDashboardTrainingCompletion(ownerUserId?: UUIDType, learnerScope?: SQL) {
     const [result] = await this.db
       .select({
         completed: sql<number>`COUNT(*) FILTER (WHERE ${studentCourses.progress} = ${PROGRESS_STATUSES.COMPLETED})::INTEGER`,
@@ -211,6 +234,7 @@ export class StatisticsRepository {
         and(
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+          learnerScope,
         ),
       );
 
@@ -220,6 +244,7 @@ export class StatisticsRepository {
   async getDashboardIncompleteCourses(
     ownerUserId: UUIDType | undefined,
     language: SupportedLanguages,
+    learnerScope?: SQL,
   ) {
     return this.db
       .select({
@@ -249,6 +274,7 @@ export class StatisticsRepository {
         and(
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+          learnerScope,
         ),
       )
       .groupBy(courses.id, courses.title)
@@ -270,7 +296,7 @@ export class StatisticsRepository {
       );
   }
 
-  async getDashboardDeadlineRiskCounts(ownerUserId?: UUIDType) {
+  async getDashboardDeadlineRiskCounts(ownerUserId?: UUIDType, learnerScope?: SQL) {
     const [result] = await this.db
       .select({
         overdueCount: sql<number>`COUNT(*) FILTER (
@@ -299,6 +325,7 @@ export class StatisticsRepository {
           sql`${groupCourses.dueDate} IS NOT NULL`,
           sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
           ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+          learnerScope,
         ),
       );
 
@@ -311,6 +338,8 @@ export class StatisticsRepository {
     riskType: DashboardDeadlineRiskType,
     page: number,
     perPage: number,
+    learnerScope?: SQL,
+    managedByUserId?: UUIDType,
   ) {
     const riskCondition =
       riskType === DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE
@@ -319,6 +348,11 @@ export class StatisticsRepository {
             sql`${groupCourses.dueDate} >= NOW()`,
             sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
           );
+    const managedGroupCondition = this.getManagedGroupCondition(
+      managedByUserId,
+      groupCourses.groupId,
+      groupCourses.tenantId,
+    );
     const commonCondition = and(
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       sql`${studentCourses.progress} != ${PROGRESS_STATUSES.COMPLETED}`,
@@ -326,6 +360,8 @@ export class StatisticsRepository {
       sql`${groupCourses.dueDate} IS NOT NULL`,
       riskCondition,
       ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+      learnerScope,
+      managedGroupCondition,
     );
     const rowsQuery = this.db
       .select({
@@ -373,6 +409,7 @@ export class StatisticsRepository {
     urgencyOrder: DashboardDeadlineRiskUrgencyOrder,
     page: number,
     perPage: number,
+    learnerScope?: SQL,
   ) {
     const overdueCondition = sql`${groupCourses.dueDate} < NOW()`;
     const dueSoonCondition = and(
@@ -386,6 +423,7 @@ export class StatisticsRepository {
       sql`${groupCourses.dueDate} IS NOT NULL`,
       sql`${groupCourses.dueDate} < NOW() + INTERVAL '7 days'`,
       ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+      learnerScope,
     );
     const urgencyRank = sql`CASE WHEN COUNT(*) FILTER (WHERE ${overdueCondition}) > 0 THEN ${
       urgencyOrder === DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT ? 0 : 1
@@ -444,6 +482,8 @@ export class StatisticsRepository {
     sortDirection: DashboardDeadlineRiskSortDirection,
     page: number,
     perPage: number,
+    learnerScope?: SQL,
+    managedByUserId?: UUIDType,
   ) {
     const localizedGroupName = this.localizationService.getLocalizedSqlField(
       groups.name,
@@ -451,6 +491,11 @@ export class StatisticsRepository {
       groups,
     );
     const studentName = sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`;
+    const managedGroupCondition = this.getManagedGroupCondition(
+      managedByUserId,
+      groupCourses.groupId,
+      groupCourses.tenantId,
+    );
     const commonCondition = and(
       eq(courses.id, courseId),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
@@ -471,6 +516,8 @@ export class StatisticsRepository {
           )
         : undefined,
       ownerUserId ? eq(courses.authorId, ownerUserId) : undefined,
+      learnerScope,
+      managedGroupCondition,
     );
     const urgencySort = sql<number>`CASE WHEN ${groupCourses.dueDate} < NOW() THEN 0 ELSE 1 END`;
     let sortExpression: SQL = sql`${groupCourses.dueDate}`;

@@ -6,6 +6,7 @@ import { useCreateCertificateShareLink } from "~/api/mutations/useCreateCertific
 import { useCreateLearningPathCertificateShareLink } from "~/api/mutations/useCreateLearningPathCertificateShareLink";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
@@ -69,6 +70,8 @@ const CertificatePreview = ({
   const [colorTheme, setColorTheme] = useState<CertificateColorTheme>(
     getCertificateColorTheme(initialColor),
   );
+  const formattedCompletionDate = formatCertificateDate(completionDate);
+  const formattedExpiryDate = formatCertificateDate(expiryDate);
 
   useEffect(() => {
     setColorTheme(getCertificateColorTheme(initialColor));
@@ -111,7 +114,7 @@ const CertificatePreview = ({
           >
             <div className="flex flex-col items-start">
               <h2 className="font-medium text-primary-800">{courseName}</h2>
-              <h2 className="text-sm text-gray-400">{completionDate}</h2>
+              <h2 className="text-sm text-gray-400">{formattedCompletionDate}</h2>
             </div>
 
             <CertificateControls
@@ -135,8 +138,8 @@ const CertificatePreview = ({
           <CertificateContent
             studentName={studentName}
             courseName={courseName}
-            completionDate={completionDate}
-            expiryDate={expiryDate}
+            completionDate={formattedCompletionDate}
+            expiryDate={formattedExpiryDate || undefined}
             isModal
             platformLogo={platformLogo}
             backgroundImageUrl={certificateBackgroundImageUrl}

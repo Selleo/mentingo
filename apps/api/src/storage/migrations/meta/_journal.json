@@ -1338,6 +1338,20 @@
       "when": 1787048771824,
       "tag": "0190_drop_legacy_ai_mentor_configuration_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 191,
+      "version": "7",
+      "when": 1787066689396,
+      "tag": "0191_add_group_manager_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 192,
+      "version": "7",
+      "when": 1787066730425,
+      "tag": "0192_enable_group_manager_groups_rls",
+      "breakpoints": true
     }
   ]
 }

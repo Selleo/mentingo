@@ -6,6 +6,7 @@ export const updateUserSchema = Type.Object({
   firstName: Type.Optional(Type.String()),
   lastName: Type.Optional(Type.String()),
   groups: Type.Optional(Type.Union([Type.Array(Type.String()), Type.Null()])),
+  managedGroupIds: Type.Optional(Type.Array(UUIDSchema)),
   email: Type.Optional(Type.String({ format: "email" })),
   roleSlugs: Type.Optional(Type.Array(Type.String())),
   archived: Type.Optional(Type.Boolean()),

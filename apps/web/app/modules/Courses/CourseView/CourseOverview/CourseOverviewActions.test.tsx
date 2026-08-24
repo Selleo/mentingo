@@ -1,3 +1,4 @@
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -10,7 +11,7 @@ import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles
 import CourseOverviewActions from "./CourseOverviewActions";
 
 const enrollCourse = vi.fn();
-let currentUser: { id: string } | undefined;
+let currentUser: { id: string; permissions: PermissionKey[] } | undefined;
 let inviteOnlyRegistration = false;
 let course: { enrolled: boolean; id: string };
 let isAdminExperience = false;
@@ -128,7 +129,7 @@ describe("CourseOverviewActions", () => {
   it("lets an enrolled learner continue learning", async () => {
     const user = userEvent.setup();
     const onContinueLearning = vi.fn();
-    currentUser = { id: "user-1" };
+    currentUser = { id: "user-1", permissions: [] };
     course = { enrolled: true, id: "course-1" };
 
     renderActions({ onContinueLearning });
@@ -141,7 +142,7 @@ describe("CourseOverviewActions", () => {
   it("notifies the overview after enrollment succeeds", async () => {
     const user = userEvent.setup();
     const onEnrollmentCompleted = vi.fn();
-    currentUser = { id: "user-1" };
+    currentUser = { id: "user-1", permissions: [] };
 
     renderActions({ onEnrollmentCompleted });
 
@@ -152,7 +153,7 @@ describe("CourseOverviewActions", () => {
   });
 
   it("keeps course actions available on small screens", () => {
-    currentUser = { id: "user-1" };
+    currentUser = { id: "user-1", permissions: [] };
     course = { enrolled: true, id: "course-1" };
 
     renderActions();
@@ -162,6 +163,15 @@ describe("CourseOverviewActions", () => {
     expect(actions).toHaveClass("flex", "flex-wrap");
     expect(actions).not.toHaveClass("hidden");
     expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
+  });
+
+  it("hides enrollment while keeping course details available for Group Managers", () => {
+    currentUser = { id: "manager-1", permissions: [PERMISSIONS.MANAGED_GROUP_RESULTS_READ] };
+
+    renderActions();
+
+    expect(screen.queryByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON)).not.toBeInTheDocument();
     expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
   });
 });
