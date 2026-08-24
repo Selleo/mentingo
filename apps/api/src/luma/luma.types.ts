@@ -1,6 +1,9 @@
 import type {
   createLumaClient,
   GeneratedCourseBundleResponse,
+  GeneratedCourseAiMentorConfiguration,
+  GeneratedCourseAiMentorRoleplayConfiguration,
+  GeneratedCourseAiMentorTeacherConfiguration,
   GeneratedCourseResponse,
 } from "@japro/luma-sdk";
 import type { CourseGenerationSyncStatus } from "@repo/shared";
@@ -8,10 +11,7 @@ import type { Static } from "@sinclair/typebox";
 import type { InferUIMessageChunk, UIMessage } from "ai";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type {
-  LUMA_GENERATED_COURSE_AI_MENTOR_TYPES,
-  LUMA_GENERATED_COURSE_QUESTION_TYPES,
-} from "src/luma/luma-course-generation-sync.constants";
+import type { LUMA_GENERATED_COURSE_QUESTION_TYPES } from "src/luma/luma-course-generation-sync.constants";
 import type { LumaCourseGenerationSyncRecord } from "src/luma/luma-course-generation-sync.repository";
 import type { chatOptionsSchema } from "src/luma/schema/luma.schema";
 
@@ -35,15 +35,17 @@ export type CourseGenerationLegacyFramePipeOptions = {
   writer: { write: (chunk: CourseGenerationUIMessageChunk) => void };
 };
 
-export type LumaGeneratedCourseAiMentorType =
-  (typeof LUMA_GENERATED_COURSE_AI_MENTOR_TYPES)[keyof typeof LUMA_GENERATED_COURSE_AI_MENTOR_TYPES];
-
 export type LumaGeneratedCourseQuestionType =
   (typeof LUMA_GENERATED_COURSE_QUESTION_TYPES)[keyof typeof LUMA_GENERATED_COURSE_QUESTION_TYPES];
 
 export type LumaGeneratedCourseChapter = GeneratedCourseResponse["chapters"][number];
 export type LumaGeneratedCourseLesson = LumaGeneratedCourseChapter["lessons"][number];
 export type LumaGeneratedCourseAiMentor = NonNullable<LumaGeneratedCourseLesson["aiMentor"]>;
+export type LumaGeneratedCourseAiMentorConfiguration = GeneratedCourseAiMentorConfiguration;
+export type LumaGeneratedCourseAiMentorTeacherConfiguration =
+  GeneratedCourseAiMentorTeacherConfiguration;
+export type LumaGeneratedCourseAiMentorRoleplayConfiguration =
+  GeneratedCourseAiMentorRoleplayConfiguration;
 export type LumaGeneratedCourseQuestion = NonNullable<
   LumaGeneratedCourseLesson["questions"]
 >[number];

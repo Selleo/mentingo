@@ -4,6 +4,7 @@ import {
   createLumaClient,
   type AiRuntimeConfiguration,
   type GenerateAiJudgeConfigurationOptions,
+  type GenerateAiMentorConfigurationOptions,
   type GenerateTranslationsOptions,
   type GenerateTranslationsResponse,
   type MentorChatOptions,
@@ -17,6 +18,10 @@ import { Value } from "@sinclair/typebox/value";
 
 import { LUMA_CONFIGURATION_CACHE_TTL_MS } from "src/ai/ai-runtime.constants";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
+import {
+  generatedAiMentorRoleplayConfigurationFieldsSchema,
+  generatedAiMentorTeacherConfigurationFieldsSchema,
+} from "src/ai/mentor-configuration-generation/schemas/ai-mentor-configuration-generation.schema";
 import {
   aiJudgeConfigurationValidatorStructuredOutputSchema,
   referencedAiJudgeConfigurationStructuredOutputSchema,
@@ -32,6 +37,7 @@ import type { OpenAIProvider } from "@ai-sdk/openai";
 import type { AiMentorChatStreamResult, AiStreamTextResult } from "src/ai/ai-chat.types";
 import type { AiRuntimeSource } from "src/ai/ai-runtime.types";
 import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-configuration.types";
+import type { GeneratedAiMentorConfigurationFields } from "src/ai/mentor-configuration-generation/schemas/ai-mentor-configuration-generation.schema";
 import type {
   AiJudgeConfigurationValidatorStructuredOutput,
   ReferencedAiJudgeConfiguration,
@@ -222,6 +228,38 @@ export class AiRuntimeService {
       } catch (error) {
         this.logger.warn(
           `Luma AI Judge configuration generation failed; falling back to core generation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return generateCoreConfiguration();
+  }
+
+  async generateMentorConfiguration(
+    input: GenerateAiMentorConfigurationOptions,
+    generateCoreConfiguration: () => Promise<GeneratedAiMentorConfigurationFields>,
+  ): Promise<GeneratedAiMentorConfigurationFields> {
+    if (
+      (await this.resolveSource(AiCapability.AiMentorConfigurationGenerator)) ===
+      AI_RUNTIME_SOURCES.LUMA
+    ) {
+      try {
+        const luma = await this.getLumaClient();
+        const result = await luma.ai.generateMentorConfiguration(input);
+        const schema =
+          input.configurationType === "teacher"
+            ? generatedAiMentorTeacherConfigurationFieldsSchema
+            : generatedAiMentorRoleplayConfigurationFieldsSchema;
+
+        if (!Value.Check(schema, result))
+          throw new Error("Luma AI Mentor configuration generator returned an invalid result");
+
+        return result as GeneratedAiMentorConfigurationFields;
+      } catch (error) {
+        this.logger.warn(
+          `Luma AI Mentor configuration generation failed; falling back to core generation: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );

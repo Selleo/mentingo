@@ -13,12 +13,6 @@ export const LUMA_GENERATED_COURSE_LESSON_TYPES = {
   QUIZ: "QUIZ",
 } as const;
 
-export const LUMA_GENERATED_COURSE_AI_MENTOR_TYPES = {
-  ROLEPLAY: "ROLEPLAY",
-  MENTOR: "MENTOR",
-  TEACHER: "TEACHER",
-} as const;
-
 export const LUMA_GENERATED_COURSE_QUESTION_TYPES = {
   SINGLE_SELECT: "SingleSelect",
   MULTI_SELECT: "MultiSelect",

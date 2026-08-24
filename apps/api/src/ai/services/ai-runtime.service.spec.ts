@@ -42,6 +42,16 @@ describe("AiRuntimeService", () => {
     ],
     blockingErrors: [],
   };
+  const generatedMentorConfiguration = {
+    scenario: "A customer challenges a delayed delivery.",
+    aiRole: "Marek, the customer",
+    learnerRole: "Customer support specialist",
+    characterGoal: "Obtain a credible resolution date.",
+    difficulty: "realistic" as const,
+    factsAndConstraints: null,
+    openingInstruction: null,
+    additionalInstructions: null,
+  };
 
   it("uses the Core Judge fallback with the structured result contract", async () => {
     const service = new AiRuntimeService({} as EnvService);
@@ -166,6 +176,45 @@ describe("AiRuntimeService", () => {
     expect(generateJudgeConfiguration).toHaveBeenCalledWith(authoringInput);
     expect(generateCore).not.toHaveBeenCalled();
     expect(result).toEqual(generatedConfiguration);
+  });
+
+  it("uses Luma for AI Mentor configuration generation", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const generateCore = jest.fn();
+    const generateMentorConfiguration = jest.fn().mockResolvedValue(generatedMentorConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { generateMentorConfiguration } }),
+    });
+    const input = { ...authoringInput, configurationType: "roleplay" as const };
+
+    const result = await service.generateMentorConfiguration(input, generateCore);
+
+    expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiMentorConfigurationGenerator);
+    expect(generateMentorConfiguration).toHaveBeenCalledWith(input);
+    expect(generateCore).not.toHaveBeenCalled();
+    expect(result).toEqual(generatedMentorConfiguration);
+  });
+
+  it("falls back to Core when Luma AI Mentor configuration generation is invalid", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const generateCore = jest.fn().mockResolvedValue(generatedMentorConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({
+        ai: { generateMentorConfiguration: jest.fn().mockResolvedValue({ scenario: "partial" }) },
+      }),
+    });
+
+    await expect(
+      service.generateMentorConfiguration(
+        { ...authoringInput, configurationType: "roleplay" },
+        generateCore,
+      ),
+    ).resolves.toEqual(generatedMentorConfiguration);
+    expect(generateCore).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to Core when Luma AI Judge configuration generation fails", async () => {
