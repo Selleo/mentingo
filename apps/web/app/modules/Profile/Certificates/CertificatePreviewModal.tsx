@@ -18,7 +18,10 @@ export function CertificatePreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-none border-0 bg-transparent p-0 shadow-none" noCloseButton>
+      <DialogContent
+        className="flex w-[min(1120px,95vw)] items-center justify-center max-w-none border-0 bg-transparent p-0 shadow-none"
+        noCloseButton
+      >
         <CertificatePreview {...certificatePreviewProps} onClose={close} />
       </DialogContent>
     </Dialog>

@@ -63,6 +63,7 @@ import {
   transferCourseOwnershipRequestSchema,
   TransferCourseOwnershipRequestBody,
   courseOwnershipCandidatesResponseSchema,
+  publishedCourseLookupResponseSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -164,6 +165,7 @@ import type {
   AllStudentAiMentorResultsResponse,
   AllStudentCourseProgressionResponse,
   AllStudentCoursesResponse,
+  PublishedCourseLookupResponse,
   AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
   LessonSequenceEnabledResponse,
@@ -229,6 +231,33 @@ export class CourseController {
     };
 
     const data = await this.courseService.getAllCourses(query);
+
+    return new PaginatedResponse(data);
+  }
+
+  @Get("published-lookup")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    request: [
+      { type: "query", name: "title", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: paginatedResponse(publishedCourseLookupResponseSchema),
+  })
+  async getPublishedCourseLookup(
+    @Query("title") title: string,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("language") language: SupportedLanguages,
+  ): Promise<PaginatedResponse<PublishedCourseLookupResponse>> {
+    const data = await this.courseService.getPublishedCourseLookup({
+      title,
+      page,
+      perPage,
+      language,
+    });
 
     return new PaginatedResponse(data);
   }

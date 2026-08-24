@@ -200,7 +200,6 @@ export type AiMentorRoleplayConfigurationSelect = InferSelectModel<
 export type AiMentorRoleplayConfigurationInsert = InferInsertModel<
   typeof aiMentorRoleplayConfigurations
 >;
-
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationJsonbInsert = Omit<AiJudgeConfigurationInsert, "taskGoal"> & {
@@ -246,6 +245,9 @@ export type DocumentToAiMentorLessonInsert = InferInsertModel<typeof documentToA
 
 export type ResourceSelect = InferSelectModel<typeof resources>;
 export type ResourceInsert = InferInsertModel<typeof resources>;
+export type ResourceJsonbInsert = Omit<ResourceInsert, "metadata"> & {
+  metadata: SQL<unknown>;
+};
 
 export type ResourceEntitySelect = InferSelectModel<typeof resourceEntity>;
 export type ResourceEntityInsert = InferInsertModel<typeof resourceEntity>;
@@ -436,6 +438,15 @@ export type SyncResourcesParams = {
   exportId: UUIDType;
   lessonMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
+  targetTenantId: UUIDType;
+  targetAuthorId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type DuplicateResourcesParams = {
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+  targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
   resourceCollection: MasterCourseResourceCollection;
 };

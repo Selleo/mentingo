@@ -31,5 +31,9 @@ describe("Environment page", () => {
     expect(screen.getByRole("heading", { name: "Environment Variables" }));
     expect(screen.getByLabelText("Microsoft Calendar Client ID"));
     expect(screen.getByLabelText("Microsoft Calendar Client Secret"));
+    expect(screen.getByLabelText("Bunny Stream Read-Only API Key"));
+    expect(
+      screen.getByText("Read-only Bunny Stream library key used to verify Bunny Stream webhooks."),
+    );
   });
 });

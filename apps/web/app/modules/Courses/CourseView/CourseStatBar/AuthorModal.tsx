@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
+import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
 
@@ -195,7 +195,7 @@ export default function AuthorModal({
                         <Clock className="size-3" />
                         <span>
                           {course.estimatedDurationMinutes != null
-                            ? formatDurationToHalfHour(course.estimatedDurationMinutes * 60, t)
+                            ? formatDuration(course.estimatedDurationMinutes * 60, t)
                             : (course.estimatedDurationFormatted ?? "—")}
                         </span>
                       </div>

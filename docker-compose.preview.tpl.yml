@@ -148,7 +148,7 @@ services:
       S3_BUCKET_NAME: "preview-pr-${PR_ID}"
       SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
       BUNNY_STREAM_API_KEY: ""
-      BUNNY_STREAM_SIGNING_KEY: ""
+      BUNNY_STREAM_READ_ONLY_API_KEY: ""
       BUNNY_STREAM_LIBRARY_ID: ""
       BUNNY_STREAM_CDN_URL: ""
       STRIPE_SECRET_KEY: ""

@@ -6,7 +6,9 @@ export type AiStreamMessageInput = {
   threadId: UUIDType;
   content: string;
   id?: UUIDType;
+  lessonId?: UUIDType;
   voiceSessionId?: string;
+  voiceTurnId?: string;
 };
 
 export type AiStreamTextResult = ReturnType<typeof streamText>;

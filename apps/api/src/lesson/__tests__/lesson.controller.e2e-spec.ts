@@ -2,7 +2,9 @@ import { Readable } from "stream";
 
 import {
   AI_MENTOR_TEACHING_STYLE,
+  AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
@@ -695,9 +697,29 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .query({ id: lessonId })
         .set("Cookie", adminCookies)
         .send({
+          title: "Negotiation practice",
+          description: "<p>Practice a sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+          type: AI_MENTOR_TYPE.TEACHER,
+          name: "AI Mentor",
+          voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+          ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: "voice-reference-en",
+          language: SUPPORTED_LANGUAGES.EN,
+        })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
           name: "Mentor PL",
+          voiceMode: AI_MENTOR_VOICE_MODE.CUSTOM,
+          ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: "voice-reference-pl",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
@@ -707,6 +729,15 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         adminCookies,
         "<p>Lead the learner through a Polish scenario.</p>",
       );
+
+      const [storedAiMentor] = await db
+        .select({ customTtsReference: aiMentorLessons.customTtsReference })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+      expect(storedAiMentor.customTtsReference).toEqual({
+        en: "voice-reference-en",
+        pl: "voice-reference-pl",
+      });
 
       const englishAiMentor = await getAiMentorFromCourse(
         courseId,
@@ -723,10 +754,21 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(englishAiMentor).toMatchObject({
         name: "AI Mentor",
+        customTtsReference: "voice-reference-en",
       });
       expect(polishAiMentor).toMatchObject({
         name: "Mentor PL",
+        customTtsReference: "voice-reference-pl",
       });
+
+      const englishConfiguration = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-mentor-configuration`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(englishConfiguration.body.data.additionalInstructions).toBe(
+        "<p>Lead the learner through an English scenario.</p>",
+      );
 
       const polishConfiguration = await request(app.getHttpServer())
         .get(`/api/lesson/${lessonId}/ai-mentor-configuration`)
@@ -1582,6 +1624,81 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         );
 
       expect(progress?.completedAt).toBeTruthy();
+    });
+
+    it("rejects progress requests for draft courses", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: author.id,
+        lessonCount: 1,
+      });
+      const lesson = await createContentLesson(chapter.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const response = await request(app.getHttpServer())
+        .post("/api/studentLessonProgress")
+        .query({ id: lesson.id, language: "en" })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      expect(response.body.message).toBe("modernCourseView.draftCourseTooltip");
+
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.studentId, admin.id),
+            eq(studentLessonProgress.lessonId, lesson.id),
+          ),
+        );
+
+      expect(progress).toHaveLength(0);
+    });
+
+    it("allows an admin to preview a draft lesson without learning mode", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: author.id,
+        lessonCount: 1,
+      });
+      const lesson = await createContentLesson(chapter.id);
+
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: "en" })
+        .set("Cookie", cookies)
+        .expect(200);
     });
   });
 

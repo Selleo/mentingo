@@ -25,12 +25,20 @@ type FormValues = Partial<Record<SecretKey, string>>;
 interface SecretFieldProps {
   name: SecretKey;
   labelKey: string;
+  descriptionKey?: string;
   placeholderKey: string;
   register: UseFormRegister<FormValues>;
   setValue: UseFormSetValue<FormValues>;
 }
 
-const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: SecretFieldProps) => {
+const SecretField = ({
+  name,
+  labelKey,
+  descriptionKey,
+  placeholderKey,
+  register,
+  setValue,
+}: SecretFieldProps) => {
   const { t } = useTranslation();
   const [viewSecret, setViewSecret] = useState(false);
 
@@ -50,6 +58,7 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
       <Label className="text-xl" htmlFor={name}>
         {t(labelKey)}
       </Label>
+      {descriptionKey && <p className="mt-1 text-sm text-neutral-600">{t(descriptionKey)}</p>}
       <div className="relative">
         <Input
           data-testid={ENV_PAGE_HANDLES.input(name)}
@@ -142,6 +151,7 @@ const Envs = (): React.ReactElement => {
                     key={key}
                     name={key}
                     labelKey={meta.labelKey}
+                    descriptionKey={"descriptionKey" in meta ? meta.descriptionKey : undefined}
                     placeholderKey={meta.placeholderKey}
                     register={register}
                     setValue={setValue}

@@ -3,12 +3,14 @@ import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries";
 import { globalSettingsQueryOptions, useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { userSettingsQueryOptions } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import GroupManagerModernCoursesView from "~/modules/Courses/components/modern/GroupManagerModernCoursesView";
 import ModernCoursesView from "~/modules/Courses/components/modern/ModernCoursesView";
 import LegacyCoursesView from "~/modules/Courses/LegacyCoursesView";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDefaultAuthenticatedRedirect } from "~/utils/getDefaultAuthenticatedRedirect";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -22,10 +24,13 @@ export const links: LinksFunction = () => [{ rel: "stylesheet", href: bodyStyles
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 
 export const clientLoader = async (_args: ClientLoaderFunctionArgs) => {
-  const [currentUserResponse, globalSettingsResponse] = await Promise.all([
+  const [currentUserResponse, globalSettingsResponse, userSettingsResponse] = await Promise.all([
     queryClient.ensureQueryData(currentUserQueryOptions),
     queryClient.ensureQueryData(globalSettingsQueryOptions),
+    queryClient.ensureQueryData(userSettingsQueryOptions),
   ]);
+
+  useLanguageStore.getState().initializeLanguage(userSettingsResponse?.data?.language);
 
   const currentUser = currentUserResponse?.data;
 

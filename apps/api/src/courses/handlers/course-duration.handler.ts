@@ -1,21 +1,19 @@
-import { Inject } from "@nestjs/common";
 import { EventsHandler } from "@nestjs/cqrs";
-import { eq } from "drizzle-orm";
 
-import { DatabasePg } from "src/common";
+import { CourseDurationRepository } from "src/courses/course-duration.repository";
 import { CourseDurationService } from "src/courses/course-duration.service";
 import {
   CreateChapterEvent,
   CreateCourseEvent,
+  CourseDurationRefreshRequestedEvent,
   CreateLessonEvent,
   DeleteChapterEvent,
   DeleteLessonEvent,
   UpdateChapterEvent,
   UpdateCourseEvent,
   UpdateLessonEvent,
+  ResourceVideoDurationUpdatedEvent,
 } from "src/events";
-import { DB } from "src/storage/db/db.providers";
-import { chapters, lessons } from "src/storage/schema";
 
 import type { IEventHandler } from "@nestjs/cqrs";
 import type { UUIDType } from "src/common";
@@ -28,7 +26,9 @@ type CourseDurationEvent =
   | DeleteChapterEvent
   | CreateLessonEvent
   | UpdateLessonEvent
-  | DeleteLessonEvent;
+  | DeleteLessonEvent
+  | ResourceVideoDurationUpdatedEvent
+  | CourseDurationRefreshRequestedEvent;
 
 @EventsHandler(
   CreateCourseEvent,
@@ -39,14 +39,28 @@ type CourseDurationEvent =
   CreateLessonEvent,
   UpdateLessonEvent,
   DeleteLessonEvent,
+  ResourceVideoDurationUpdatedEvent,
+  CourseDurationRefreshRequestedEvent,
 )
 export class CourseDurationHandler implements IEventHandler<CourseDurationEvent> {
   constructor(
     private readonly courseDurationService: CourseDurationService,
-    @Inject(DB) private readonly db: DatabasePg,
+    private readonly courseDurationRepository: CourseDurationRepository,
   ) {}
 
   async handle(event: CourseDurationEvent): Promise<void> {
+    if (event instanceof ResourceVideoDurationUpdatedEvent) {
+      await this.courseDurationService.refreshCoursesForResource(
+        event.resourceVideoDurationUpdatedData.resourceId,
+      );
+      return;
+    }
+    if (event instanceof CourseDurationRefreshRequestedEvent) {
+      await this.courseDurationService.refreshCourseDurationEstimates(
+        event.courseDurationRefreshRequestedData.courseId,
+      );
+      return;
+    }
     const courseId = await this.resolveCourseId(event);
     if (!courseId) return;
 
@@ -54,6 +68,8 @@ export class CourseDurationHandler implements IEventHandler<CourseDurationEvent>
   }
 
   private async resolveCourseId(event: CourseDurationEvent): Promise<UUIDType | null> {
+    if (event instanceof ResourceVideoDurationUpdatedEvent) return null;
+    if (event instanceof CourseDurationRefreshRequestedEvent) return null;
     if (event instanceof CreateCourseEvent) return event.courseCreationData.courseId;
     if (event instanceof UpdateCourseEvent) return event.courseUpdateData.courseId;
 
@@ -69,11 +85,7 @@ export class CourseDurationHandler implements IEventHandler<CourseDurationEvent>
           ? event.chapterCreationData.chapterId
           : event.chapterUpdateData.chapterId;
 
-      const [chapter] = await this.db
-        .select({ courseId: chapters.courseId })
-        .from(chapters)
-        .where(eq(chapters.id, chapterId))
-        .limit(1);
+      const [chapter] = await this.courseDurationRepository.getCourseIdByChapterId(chapterId);
 
       return chapter?.courseId ?? null;
     }
@@ -85,12 +97,7 @@ export class CourseDurationHandler implements IEventHandler<CourseDurationEvent>
         ? event.lessonCreationData.lessonId
         : event.lessonUpdateData.lessonId;
 
-    const [lesson] = await this.db
-      .select({ courseId: chapters.courseId })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(eq(lessons.id, lessonId))
-      .limit(1);
+    const [lesson] = await this.courseDurationRepository.getCourseIdByLessonId(lessonId);
 
     return lesson?.courseId ?? null;
   }

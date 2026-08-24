@@ -1,5 +1,5 @@
 import { Link, useParams } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, COURSE_STATUSES } from "@repo/shared";
 import { GraduationCap, Info, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,7 @@ import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -49,6 +50,8 @@ export default function CourseOverviewActions({
     PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
   );
 
+  const isDraftCourse = course.status === COURSE_STATUSES.DRAFT;
+
   const handleEnrollCourse = async () => {
     await enrollCourse({ id: course.id });
     await Promise.all([
@@ -63,10 +66,10 @@ export default function CourseOverviewActions({
 
   const renderPrimaryAction = () => {
     if (isAdminExperience || (canEditCourse && isCourseStudentModeActive)) {
-      return (
+      const learningModeButton = (
         <Button
           data-testid={COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON}
-          disabled={isTogglingLearningMode}
+          disabled={isTogglingLearningMode || (isDraftCourse && !isCourseStudentModeActive)}
           onClick={onToggleLearningMode}
           className="flex items-center gap-2 shadow-2xl transition disabled:opacity-50"
         >
@@ -81,6 +84,23 @@ export default function CourseOverviewActions({
           </span>
         </Button>
       );
+
+      if (isDraftCourse && !isCourseStudentModeActive) {
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>{learningModeButton}</span>
+              </TooltipTrigger>
+              <TooltipContent variant="black">
+                {t("modernCourseView.draftCourseTooltip")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      }
+
+      return learningModeButton;
     }
 
     if (!course.enrolled) {

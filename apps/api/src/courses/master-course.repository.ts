@@ -72,7 +72,7 @@ import type {
   QuestionJsonbInsert,
   QuestionJsonbUpdate,
   ResourceEntityInsert,
-  ResourceInsert,
+  ResourceJsonbInsert,
   ScormPackageInsert,
   ScormScoInsert,
 } from "src/courses/types/master-course.types";
@@ -531,6 +531,16 @@ export class MasterCourseRepository {
       .where(and(inArray(resources.id, resourceIds), eq(resources.archived, false)));
   }
 
+  async getResourceById(resourceId: UUIDType) {
+    const [resource] = await this.db
+      .select(getTableColumns(resources))
+      .from(resources)
+      .where(eq(resources.id, resourceId))
+      .limit(1);
+
+    return resource;
+  }
+
   async getSourceCourseResources(sourceCourseId: UUIDType) {
     return this.db
       .select({
@@ -906,7 +916,7 @@ export class MasterCourseRepository {
       );
   }
 
-  async createResource(values: ResourceInsert): Promise<UUIDType> {
+  async createResource(values: ResourceJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db
       .insert(resources)
       .values(values)
@@ -914,7 +924,7 @@ export class MasterCourseRepository {
     return created.id;
   }
 
-  async updateResource(resourceId: UUIDType, values: Partial<ResourceInsert>) {
+  async updateResource(resourceId: UUIDType, values: Partial<ResourceJsonbInsert>) {
     await this.db.update(resources).set(values).where(eq(resources.id, resourceId));
   }
 

@@ -26,7 +26,7 @@ import type { UUIDType } from "src/common";
 @Injectable()
 export class PromptService implements OnModuleInit {
   private prompts = new Map<promptId, CompiledTemplate>();
-  private langfuseClient: LangfuseClient;
+  private langfuseClient?: LangfuseClient;
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly messageService: MessageService,
@@ -35,6 +35,17 @@ export class PromptService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
+    const langfuseBaseUrl =
+      process.env.LANGFUSE_BASE_URL ?? process.env.LANGFUSE_HOST ?? "http://localhost:3002";
+
+    if (process.env.LANGFUSE_PUBLIC_KEY && process.env.LANGFUSE_SECRET_KEY) {
+      this.langfuseClient = new LangfuseClient({
+        secretKey: process.env.LANGFUSE_SECRET_KEY,
+        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+        baseUrl: langfuseBaseUrl,
+      });
+    }
+
     Object.entries(promptTemplates).forEach(([id, template]) => {
       const compiled = Handlebars.compile(template.template);
 
@@ -42,21 +53,6 @@ export class PromptService implements OnModuleInit {
         id: id as promptId,
         template: compiled,
         varsSchema: PROMPT_MAP[id as keyof typeof PROMPT_MAP],
-      });
-
-      if (
-        !(
-          process.env.LANGFUSE_PUBLIC_KEY &&
-          process.env.LANGFUSE_SECRET_KEY &&
-          process.env.LANGFUSE_HOST
-        )
-      )
-        return;
-
-      this.langfuseClient = new LangfuseClient({
-        secretKey: process.env.LANGFUSE_SECRET_KEY,
-        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-        baseUrl: process.env.LANGFUSE_HOST,
       });
     });
   }
@@ -218,10 +214,12 @@ export class PromptService implements OnModuleInit {
   }
 
   async loadPrompt<K extends keyof typeof PROMPT_MAP>(id: K, vars: Static<(typeof PROMPT_MAP)[K]>) {
-    const langfusePrompt = await this.langfuseClient?.prompt?.get(id).catch(() => undefined);
+    const langfusePrompt = await this.langfuseClient?.prompt
+      ?.get(id, { type: "text" })
+      .catch(() => undefined);
 
     if (langfusePrompt?.prompt) {
-      return Handlebars.compile(langfusePrompt.prompt)(vars);
+      return langfusePrompt.compile(vars as Record<string, string>);
     }
 
     const prompt = this.prompts.get(id);

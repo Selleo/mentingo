@@ -25,14 +25,25 @@ type FlushOptions = {
   syncCompletionQueries?: boolean;
 };
 
-const getSafeDurationSeconds = (player: VideoJSType | null, fallback: number | null) => {
+const getSafeDurationSeconds = (
+  player: VideoJSType | null,
+  canonicalDurationSeconds: number | null,
+) => {
+  if (
+    typeof canonicalDurationSeconds === "number" &&
+    Number.isFinite(canonicalDurationSeconds) &&
+    canonicalDurationSeconds > 0
+  ) {
+    return Math.ceil(canonicalDurationSeconds);
+  }
+
   const duration = player?.duration();
 
   if (typeof duration === "number" && Number.isFinite(duration) && duration > 0) {
     return Math.ceil(duration);
   }
 
-  return fallback;
+  return null;
 };
 
 const getInitialSnapshot = ({

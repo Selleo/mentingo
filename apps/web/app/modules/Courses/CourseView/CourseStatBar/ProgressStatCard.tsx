@@ -1,12 +1,15 @@
 import { Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 type ProgressStatCardProps = {
   completedChapterCount: number;
   courseChapterCount: number;
+  isDraftCourse: boolean;
   isAdminExperience: boolean;
   onEnterLearningMode: () => void;
   timeLeftSeconds: number;
@@ -15,6 +18,7 @@ type ProgressStatCardProps = {
 export default function ProgressStatCard({
   completedChapterCount,
   courseChapterCount,
+  isDraftCourse,
   isAdminExperience,
   onEnterLearningMode,
   timeLeftSeconds,
@@ -86,13 +90,36 @@ export default function ProgressStatCard({
       {isAdminExperience && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-950/35 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
           <p className="mx-3 rounded-xl  bg-white/95 px-4 py-3 text-center text-sm font-semibold text-neutral-950 ">
-            <button
-              type="button"
-              onClick={onEnterLearningMode}
-              className="text-primary-700 underline transition-colors hover:text-primary-800"
-            >
-              {t("modernCourseView.learningMode.enter")}
-            </button>{" "}
+            {isDraftCourse ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        type="button"
+                        disabled
+                        variant="link"
+                        className="h-auto p-0 text-primary-700 underline"
+                      >
+                        {t("modernCourseView.learningMode.enter")}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent variant="black">
+                    {t("modernCourseView.draftCourseTooltip")}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Button
+                type="button"
+                onClick={onEnterLearningMode}
+                variant="link"
+                className="h-auto p-0 text-primary-700 underline transition-colors hover:text-primary-800"
+              >
+                {t("modernCourseView.learningMode.enter")}
+              </Button>
+            )}
             {t("modernCourseView.stats.trackProgress")}
           </p>
         </div>

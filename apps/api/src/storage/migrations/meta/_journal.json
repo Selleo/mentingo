@@ -1342,15 +1342,29 @@
     {
       "idx": 191,
       "version": "7",
-      "when": 1787066689396,
-      "tag": "0191_add_group_manager_role",
+      "when": 1787219195066,
+      "tag": "0191_add_duration_estimates_to_lessons_and_chapters",
       "breakpoints": true
     },
     {
       "idx": 192,
       "version": "7",
-      "when": 1787066730425,
-      "tag": "0192_enable_group_manager_groups_rls",
+      "when": 1787219204519,
+      "tag": "0192_backfill_duration_estimates_hierarchy",
+      "breakpoints": true
+    },
+    {
+      "idx": 193,
+      "version": "7",
+      "when": 1787219830731,
+      "tag": "0193_rename_bunny_stream_signing_secret",
+      "breakpoints": true
+    },
+    {
+      "idx": 194,
+      "version": "7",
+      "when": 1787298970074,
+      "tag": "0194_normalize_ai_mentor_custom_tts_references",
       "breakpoints": true
     }
   ]

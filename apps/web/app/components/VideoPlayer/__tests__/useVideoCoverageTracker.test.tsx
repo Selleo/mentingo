@@ -173,6 +173,38 @@ describe("useVideoCoverageTracker", () => {
     );
   });
 
+  it("uses the backend duration instead of the player duration for coverage", async () => {
+    const player = new FakeVideoPlayer();
+
+    renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialDurationSeconds: 60,
+        initialBucketSizeSeconds: 1,
+      }),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(5);
+      player.emit("timeupdate");
+      player.setPaused(true);
+      player.emit("pause");
+    });
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationSeconds: 60,
+      }),
+    );
+  });
+
   it("ignores impossible media jumps during timeupdate", async () => {
     const player = new FakeVideoPlayer();
 

@@ -13,7 +13,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -30,6 +30,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   categories,
+  chapters,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -41,6 +42,7 @@ import {
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  settings,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -182,6 +184,25 @@ describe("CourseController (e2e)", () => {
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
   });
+
+  const setFeaturedCourseId = async (courseId: string) => {
+    await db
+      .update(settings)
+      .set({
+        settings: sql`${settings.settings} || jsonb_build_object('featuredCourseId', to_jsonb(${courseId}::text))`,
+      })
+      .where(isNull(settings.userId));
+  };
+
+  const getFeaturedCourseId = async () => {
+    const [globalSettings] = await db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return (globalSettings?.settings as { featuredCourseId?: string | null } | undefined)
+      ?.featuredCourseId;
+  };
 
   describe("course statistics after student deletion", () => {
     it("excludes soft-deleted students from statistics endpoints", async () => {
@@ -1609,6 +1630,7 @@ describe("CourseController (e2e)", () => {
           categoryId: category.id,
           status: "published",
           thumbnailS3Key: null,
+          chapterCount: 4,
         });
         const inProgressCourse = await courseFactory.create({
           title: "Z In Progress Course",
@@ -1616,6 +1638,15 @@ describe("CourseController (e2e)", () => {
           categoryId: category.id,
           status: "published",
           thumbnailS3Key: null,
+          chapterCount: 4,
+        });
+        const earlyProgressCourse = await courseFactory.create({
+          title: "M Early Progress Course",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+          chapterCount: 4,
         });
 
         await db.insert(studentCourses).values([
@@ -1629,7 +1660,12 @@ describe("CourseController (e2e)", () => {
           {
             studentId: student.id,
             courseId: inProgressCourse.id,
-            finishedChapterCount: 0,
+            finishedChapterCount: 3,
+          },
+          {
+            studentId: student.id,
+            courseId: earlyProgressCourse.id,
+            finishedChapterCount: 1,
           },
         ]);
 
@@ -1639,6 +1675,7 @@ describe("CourseController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data.map((course: CourseTest) => course.title)).toEqual([
+          "M Early Progress Course",
           "Z In Progress Course",
           "A Completed Course",
         ]);
@@ -1691,6 +1728,75 @@ describe("CourseController (e2e)", () => {
           perPage: 5,
         });
       });
+    });
+  });
+
+  describe("GET /api/course/dashboard-summary", () => {
+    it("returns unfinished courses in ascending progress order", async () => {
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+      });
+      const earlyProgressCourse = await courseFactory.create({
+        title: "Early Progress Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+      const lateProgressCourse = await courseFactory.create({
+        title: "Late Progress Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+      const completedCourse = await courseFactory.create({
+        title: "Completed Course",
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 4,
+      });
+
+      await db.insert(studentCourses).values([
+        {
+          studentId: student.id,
+          courseId: earlyProgressCourse.id,
+          progress: "in_progress",
+          finishedChapterCount: 1,
+        },
+        {
+          studentId: student.id,
+          courseId: lateProgressCourse.id,
+          progress: "in_progress",
+          finishedChapterCount: 3,
+        },
+        {
+          studentId: student.id,
+          courseId: completedCourse.id,
+          progress: "completed",
+          completedAt: new Date().toISOString(),
+          finishedChapterCount: 4,
+        },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/dashboard-summary?language=en")
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(
+        response.body.data.continueLearningCourses.map((course: CourseTest) => course.title),
+      ).toEqual(["Early Progress Course", "Late Progress Course"]);
     });
   });
 
@@ -1858,6 +1964,61 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/:id status", () => {
+    it("clears the featured course when it becomes unpublished", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(course.id);
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
+    });
+
+    it("keeps the featured course when another course changes status", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const featuredCourse = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      const otherCourse = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(featuredCourse.id);
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${otherCourse.id}`)
+        .set("x-playwright-test", "true")
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBe(featuredCourse.id);
+    });
+  });
+
   describe("PATCH /api/course/bulk/status", () => {
     it("updates statuses for selected courses", async () => {
       const admin = await userFactory
@@ -1906,6 +2067,38 @@ describe("CourseController (e2e)", () => {
 
       expect(updatedCourses).toHaveLength(2);
       expect(updatedCourses.every((course) => course.status === "private")).toBe(true);
+    });
+
+    it("clears the featured course when a bulk status update unpublishes it", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const coursesToUpdate = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.PUBLISHED,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.PUBLISHED,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      await setFeaturedCourseId(coursesToUpdate[0].id);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({
+          ids: coursesToUpdate.map((course) => course.id),
+          status: COURSE_STATUSES.PRIVATE,
+        })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
     });
 
     it("allows a content creator to update only their own courses", async () => {
@@ -2219,6 +2412,27 @@ describe("CourseController (e2e)", () => {
       expect(deletedCourse).toHaveLength(0);
     });
 
+    it("clears a stale featured-course reference when deleting a draft course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+      await setFeaturedCourseId(course.id);
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/deleteCourse/${course.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
+    });
+
     it.each([COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE])(
       "rejects deleting a %s course",
       async (status) => {
@@ -2284,6 +2498,35 @@ describe("CourseController (e2e)", () => {
       const deletedCourses = await db.select().from(courses).where(inArray(courses.id, courseIds));
 
       expect(deletedCourses).toHaveLength(0);
+    });
+
+    it("clears a stale featured-course reference when deleting multiple draft courses", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const draftCourses = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      await setFeaturedCourseId(draftCourses[0].id);
+
+      await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: draftCourses.map((course) => course.id) })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(await getFeaturedCourseId()).toBeUndefined();
     });
 
     it("rejects deleting a selection that includes a private course", async () => {
@@ -3142,6 +3385,8 @@ describe("CourseController (e2e)", () => {
         })
         .where(eq(courses.id, course.id));
 
+      await app.get(CourseDurationService).refreshCourseDurationEstimates(course.id);
+
       const response = await request(app.getHttpServer())
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
@@ -3588,6 +3833,8 @@ describe("CourseController (e2e)", () => {
         status: "published",
         thumbnailS3Key: null,
         chapterCount: 1,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
       });
       const chapter = await chapterFactory.create({
         courseId: course.id,
@@ -3616,16 +3863,46 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 1,
+          estimatedDurationMinutes: 15,
         }),
       );
 
       const [courseWithEstimate] = await db
-        .select({ durationEstimates: courses.durationEstimates })
+        .select({
+          durationEstimates: courses.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${courses.durationEstimates})`,
+        })
         .from(courses)
         .where(eq(courses.id, course.id));
 
-      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalMinutes: 1 });
+      const [chapterWithEstimate] = await db
+        .select({
+          durationEstimates: chapters.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${chapters.durationEstimates})`,
+        })
+        .from(chapters)
+        .where(eq(chapters.id, chapter.id));
+      const [lessonWithEstimate] = await db
+        .select({
+          durationEstimates: lessons.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${lessons.durationEstimates})`,
+        })
+        .from(lessons)
+        .where(eq(lessons.id, lesson.id));
+
+      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalSeconds: 2 });
+      expect(courseWithEstimate.durationEstimatesType).toBe("object");
+      expect(Object.keys(courseWithEstimate.durationEstimates).sort()).toEqual(["en", "pl"]);
+      expect(chapterWithEstimate.durationEstimatesType).toBe("object");
+      expect(lessonWithEstimate.durationEstimatesType).toBe("object");
+      expect(chapterWithEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 2 },
+        pl: { totalSeconds: 2 },
+      });
+      expect(lessonWithEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 2 },
+        pl: { totalSeconds: 2 },
+      });
 
       await db
         .update(lessons)
@@ -3645,7 +3922,7 @@ describe("CourseController (e2e)", () => {
       expect(staleResponse.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 1,
+          estimatedDurationMinutes: 15,
         }),
       );
 
@@ -3667,16 +3944,49 @@ describe("CourseController (e2e)", () => {
       expect(refreshedResponse.body.data[0]).toEqual(
         expect.objectContaining({
           id: course.id,
-          estimatedDurationMinutes: 3,
+          estimatedDurationMinutes: 15,
         }),
       );
 
       const [courseWithRefreshedEstimate] = await db
-        .select({ durationEstimates: courses.durationEstimates })
+        .select({
+          durationEstimates: courses.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${courses.durationEstimates})`,
+        })
         .from(courses)
         .where(eq(courses.id, course.id));
 
-      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalMinutes).toBe(3);
+      const [chapterWithRefreshedEstimate] = await db
+        .select({
+          durationEstimates: chapters.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${chapters.durationEstimates})`,
+        })
+        .from(chapters)
+        .where(eq(chapters.id, chapter.id));
+      const [lessonWithRefreshedEstimate] = await db
+        .select({
+          durationEstimates: lessons.durationEstimates,
+          durationEstimatesType: sql<string>`jsonb_typeof(${lessons.durationEstimates})`,
+        })
+        .from(lessons)
+        .where(eq(lessons.id, lesson.id));
+
+      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalSeconds).toBe(150);
+      expect(courseWithRefreshedEstimate.durationEstimatesType).toBe("object");
+      expect(Object.keys(courseWithRefreshedEstimate.durationEstimates).sort()).toEqual([
+        "en",
+        "pl",
+      ]);
+      expect(chapterWithRefreshedEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 150 },
+        pl: { totalSeconds: 150 },
+      });
+      expect(chapterWithRefreshedEstimate.durationEstimatesType).toBe("object");
+      expect(lessonWithRefreshedEstimate.durationEstimates).toEqual({
+        en: { totalSeconds: 150 },
+        pl: { totalSeconds: 150 },
+      });
+      expect(lessonWithRefreshedEstimate.durationEstimatesType).toBe("object");
     });
   });
 

@@ -27,6 +27,7 @@ import { load as loadHtml } from "cheerio";
 import { addDays, endOfDay, startOfDay } from "date-fns";
 import {
   and,
+  asc,
   between,
   count,
   countDistinct,
@@ -84,6 +85,7 @@ import { EnvService } from "src/env/services/env.service";
 import {
   BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
+  CourseDurationRefreshRequestedEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
   DeleteCourseEvent,
@@ -182,6 +184,7 @@ import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  PublishedCourseLookupResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
   CourseOwnershipBody,
@@ -271,6 +274,12 @@ const getRequiredCourseUrgency = (
       () => STUDENT_COURSE_URGENCY.DUE_SOON,
     )
     .otherwise(() => STUDENT_COURSE_URGENCY.SCHEDULED);
+
+const studentCourseProgressOrder = sql<number>`CASE
+  WHEN ${courses.chapterCount} > 0
+    THEN COALESCE(${studentCourses.finishedChapterCount}, 0)::numeric / ${courses.chapterCount}
+  ELSE 0
+END`;
 
 @Injectable()
 export class CourseService {
@@ -510,6 +519,7 @@ export class CourseService {
         )
         .orderBy(
           sql`CASE WHEN ${studentCourses.completedAt} IS NULL THEN 0 ELSE 1 END`,
+          studentCourseProgressOrder,
           sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
         );
 
@@ -589,10 +599,14 @@ export class CourseService {
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<StudentCourseDashboardSummary> {
+    const continueCourseTitle = this.localizationService.getLocalizedSqlField(
+      courses.title,
+      language,
+    );
     const continueCourses = await this.db
       .select({
         courseId: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: continueCourseTitle,
         thumbnailS3Key: courses.thumbnailS3Key,
         completedChapterCount: studentCourses.finishedChapterCount,
         courseChapterCount: courses.chapterCount,
@@ -608,7 +622,12 @@ export class CourseService {
           inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
         ),
       )
-      .orderBy(desc(studentCourses.lastOpenedAt), desc(studentCourses.updatedAt))
+      .orderBy(
+        studentCourseProgressOrder,
+        asc(continueCourseTitle),
+        desc(studentCourses.lastOpenedAt),
+        desc(studentCourses.updatedAt),
+      )
       .limit(STUDENT_DASHBOARD_LIMITS.CONTINUE_COURSES);
 
     const requiredCourses = await this.db
@@ -1142,7 +1161,7 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
         courseIds,
         language,
         trx,
@@ -1151,7 +1170,7 @@ export class CourseService {
         const duration = durationEstimates[item.id];
         return {
           ...item,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
         };
       });
 
@@ -1313,7 +1332,7 @@ export class CourseService {
 
       const trailerUrls = await this.getCourseTrailerUrls(courseIds);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
         courseIds,
         language,
         trx,
@@ -1347,11 +1366,56 @@ export class CourseService {
         return {
           ...course,
           slug: slugsMap.get(course.id) || course.id,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
         };
       });
 
       return coursesWithDuration;
+    });
+  }
+
+  async getPublishedCourseLookup(query: {
+    title?: string;
+    page?: number;
+    perPage?: number;
+    language: SupportedLanguages;
+  }): Promise<{ data: PublishedCourseLookupResponse; pagination: Pagination }> {
+    const { title, page = 1, perPage = 20, language } = query;
+
+    return this.db.transaction(async (trx) => {
+      const localizedTitle = this.localizationService.getLocalizedSqlField(courses.title, language);
+      const conditions = [eq(courses.status, COURSE_STATUSES.PUBLISHED)];
+
+      if (title?.trim()) {
+        conditions.push(
+          this.localizationService.getLocalizedFieldSearchCondition(
+            courses.title,
+            `%${title.trim()}%`,
+            language,
+          ),
+        );
+      }
+
+      const data = await addPagination(
+        trx
+          .select({ id: courses.id, title: localizedTitle })
+          .from(courses)
+          .where(and(...conditions))
+          .orderBy(asc(localizedTitle))
+          .$dynamic(),
+        page,
+        perPage,
+      );
+
+      const [{ totalItems }] = await trx
+        .select({ totalItems: count() })
+        .from(courses)
+        .where(and(...conditions));
+
+      return {
+        data,
+        pagination: { totalItems, page, perPage },
+      };
     });
   }
 
@@ -2024,7 +2088,7 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
-    const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+    const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
       courseIds,
       language,
     );
@@ -2043,7 +2107,7 @@ export class CourseService {
             ? await this.getSignedCourseThumbnailUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
-          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationMinutes: duration ?? 0,
           slug: slugsMap.get(course.id) || course.id,
         };
       }),
@@ -2507,6 +2571,10 @@ export class CourseService {
           throw new ConflictException("Failed to update course");
         }
 
+        if (updatedCourse.status !== COURSE_STATUSES.PUBLISHED) {
+          await this.settingsService.clearFeaturedCoursesIfMatches(id, trx);
+        }
+
         if (!isPlaywrightTest && isStripeConfigured) {
           // --- create stripe product if it doesn't exist yet ---
           if (!updatedCourse.stripeProductId) {
@@ -2657,6 +2725,10 @@ export class CourseService {
         .update(courses)
         .set({ status: body.status })
         .where(inArray(courses.id, courseIdsToUpdate));
+
+      if (body.status !== COURSE_STATUSES.PUBLISHED) {
+        await this.settingsService.clearFeaturedCoursesIfMatches(courseIdsToUpdate, trx);
+      }
 
       const courseUpdateData = await processInBatches(
         snapshots,
@@ -3633,6 +3705,7 @@ export class CourseService {
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
+      await this.settingsService.clearFeaturedCoursesIfMatches(id, trx);
 
       if (isLumaConfigured) {
         await this.lumaService
@@ -3715,6 +3788,7 @@ export class CourseService {
       await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
       await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
       await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
+      await this.settingsService.clearFeaturedCoursesIfMatches(ids, trx);
 
       const deletedCourses = await trx.delete(courses).where(inArray(courses.id, ids)).returning();
 
@@ -5642,7 +5716,7 @@ export class CourseService {
       }
     });
 
-    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
+    await this.outboxPublisher.publish(new CourseDurationRefreshRequestedEvent({ courseId }));
 
     this.logger.debug(
       `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,

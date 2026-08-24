@@ -33,7 +33,7 @@ patchNestJsSwagger();
 applyFormats();
 
 async function bootstrap() {
-  startInstrumentation();
+  await startInstrumentation();
 
   if (process.env.SENTRY_DSN) {
     Sentry.init({
@@ -52,6 +52,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+  app.enableShutdownHooks();
 
   app.getHttpAdapter().getInstance().set("trust proxy", 1);
 

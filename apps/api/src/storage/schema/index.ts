@@ -434,6 +434,10 @@ export const chapters = pgTable(
     isFreemium: boolean("is_freemium").notNull().default(false),
     displayOrder: integer("display_order"),
     lessonCount: integer("lesson_count").notNull().default(0),
+    durationEstimates: jsonb("duration_estimates")
+      .$type<CourseDurationEstimatesByLanguage>()
+      .default({})
+      .notNull(),
     tenantId,
   },
   withTenantIdIndex("chapters", (table) => ({
@@ -459,6 +463,10 @@ export const lessons = pgTable(
     fileS3Key: varchar("file_s3_key", { length: 500 }),
     fileType: varchar("file_type", { length: 20 }),
     isExternal: boolean("is_external").default(false),
+    durationEstimates: jsonb("duration_estimates")
+      .$type<CourseDurationEstimatesByLanguage>()
+      .default({})
+      .notNull(),
     tenantId,
   },
   withTenantIdIndex("lessons", (table) => ({

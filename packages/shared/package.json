@@ -15,9 +15,9 @@
     "build": "tsup"
   },
   "devDependencies": {
-    "glob": "^11.0.3",
-    "tsup": "^8.0.2",
-    "typescript": "^5.9.3"
+    "glob": "11.0.3",
+    "tsup": "8.3.5",
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "@japro/luma-sdk": "0.2.15"

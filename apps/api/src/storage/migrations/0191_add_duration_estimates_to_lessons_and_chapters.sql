@@ -1,0 +1,2 @@
+ALTER TABLE "chapters" ADD COLUMN "duration_estimates" jsonb DEFAULT '{}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "lessons" ADD COLUMN "duration_estimates" jsonb DEFAULT '{}'::jsonb NOT NULL;

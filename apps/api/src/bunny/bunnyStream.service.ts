@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
 
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -13,17 +13,11 @@ import type { Readable } from "node:stream";
 import type {
   BunnyMp4DownloadResult,
   BunnyMp4FallbackResolution,
+  BunnyConfig,
+  BunnyVideoDetails,
 } from "src/bunny/bunnyStream.types";
 
 const BUNNY_MP4_FALLBACK_RESOLUTIONS: BunnyMp4FallbackResolution[] = [720, 480, 360, 240];
-
-type BunnyConfig = {
-  apiKey: string;
-  signingKey: string | null;
-  libraryId: string;
-  cdnUrl: string | null;
-  tokenSigningKey: string;
-};
 
 @Injectable()
 export class BunnyStreamService {
@@ -42,16 +36,16 @@ export class BunnyStreamService {
       return cachedConfig.cfg;
     }
 
-    const [apiKey, signingKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
+    const [apiKey, readOnlyApiKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
         .catch(() => this.configService.get("bunny.BUNNY_STREAM_API_KEY")),
 
       this.envService
-        .getEnv("BUNNY_STREAM_SIGNING_KEY")
+        .getEnv("BUNNY_STREAM_READ_ONLY_API_KEY")
         .then((r) => r.value)
-        .catch(() => this.configService.get("bunny.BUNNY_STREAM_SIGNING_KEY")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_READ_ONLY_API_KEY")),
 
       this.envService
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
@@ -81,6 +75,12 @@ export class BunnyStreamService {
       );
     }
 
+    if (!readOnlyApiKey) {
+      throw new InternalServerErrorException(
+        "BunnyStream configuration is missing read-only API key (BUNNY_STREAM_READ_ONLY_API_KEY).",
+      );
+    }
+
     if (!tokenSigningKey) {
       throw new InternalServerErrorException(
         "BunnyStream configuration is missing token signing key (BUNNY_STREAM_TOKEN_SIGNING_KEY).",
@@ -95,7 +95,7 @@ export class BunnyStreamService {
 
     const cfg: BunnyConfig = {
       apiKey,
-      signingKey,
+      readOnlyApiKey,
       libraryId,
       tokenSigningKey,
       cdnUrl,
@@ -118,11 +118,15 @@ export class BunnyStreamService {
   }
 
   async isConfigured(): Promise<boolean> {
-    const [apiKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
+    const [apiKey, readOnlyApiKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
         .catch(() => this.configService.get("bunny.BUNNY_STREAM_API_KEY")),
+      this.envService
+        .getEnv("BUNNY_STREAM_READ_ONLY_API_KEY")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_READ_ONLY_API_KEY")),
       this.envService
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
         .then((r) => r.value)
@@ -137,7 +141,7 @@ export class BunnyStreamService {
         .catch(() => this.configService.get("bunny.BUNNY_STREAM_TOKEN_SIGNING_KEY")),
     ]);
 
-    return Boolean(apiKey && libraryId && cdnUrl && tokenSigningKey);
+    return Boolean(apiKey && readOnlyApiKey && libraryId && cdnUrl && tokenSigningKey);
   }
 
   async getMediaConfigurationSignature(): Promise<string> {
@@ -247,6 +251,31 @@ export class BunnyStreamService {
     } catch (error) {
       throw new Error(`Failed to delete video: ${error.message}`);
     }
+  }
+
+  async getVideo(videoId: string): Promise<BunnyVideoDetails> {
+    const cfg = await this.getConfig();
+    const httpClient = this.createHttpClient(cfg);
+    const { data } = await httpClient.get<BunnyVideoDetails>(`/videos/${videoId}`);
+    return data;
+  }
+
+  async validateWebhookSignature(
+    rawBody: Buffer,
+    signature: string,
+    version: string,
+    algorithm: string,
+  ): Promise<boolean> {
+    if (version !== "v1" || algorithm !== "hmac-sha256") return false;
+    const cfg = await this.getConfig();
+    const expected = createHmac("sha256", cfg.readOnlyApiKey).update(rawBody).digest("hex");
+    const supplied = signature.trim();
+    if (!/^[0-9a-f]{64}$/.test(supplied)) return false;
+    const expectedBuffer = Buffer.from(expected, "utf8");
+    const actualBuffer = Buffer.from(supplied, "utf8");
+    return (
+      expectedBuffer.length === actualBuffer.length && timingSafeEqual(expectedBuffer, actualBuffer)
+    );
   }
 
   async getUrl(videoId: string): Promise<string> {

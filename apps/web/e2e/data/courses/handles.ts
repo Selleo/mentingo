@@ -12,6 +12,14 @@ export const COURSE_TAB_VALUES = {
 export type CourseTabValue = (typeof COURSE_TAB_VALUES)[keyof typeof COURSE_TAB_VALUES];
 export type CourseStatusFilterValue = CourseStatus | "all";
 
+export const COURSES_HEADER_HANDLES = {
+  FEATURED_COURSE_SELECT: "courses-header-featured-course-select",
+  FEATURED_COURSE_CLEAR: "courses-header-featured-course-clear",
+  FEATURED_COURSE_POPOVER: "courses-header-featured-course-popover",
+  FEATURED_COURSE_SEARCH: "courses-header-featured-course-search",
+  featuredCourseOption: (courseId: string) => `courses-header-featured-course-option-${courseId}`,
+} as const;
+
 export const COURSES_PAGE_HANDLES = {
   PAGE: "courses-page",
   HEADING: "courses-page-heading",

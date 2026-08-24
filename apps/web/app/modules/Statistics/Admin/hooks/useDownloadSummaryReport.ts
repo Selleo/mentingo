@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ApiClient } from "~/api/api-client";
 import { useToast } from "~/components/ui/use-toast";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import {
+  extractFilenameFromContentDisposition,
+  triggerBrowserDownload,
+} from "~/utils/downloadFile";
+
+import type { AxiosResponse } from "axios";
 
 export function useDownloadSummaryReport() {
   const { toast } = useToast();
@@ -14,28 +21,16 @@ export function useDownloadSummaryReport() {
     setIsDownloading(true);
 
     try {
-      const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
-      const response = await fetch(`${baseUrl}/api/report/summary?language=${language}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = (await ApiClient.api.reportControllerDownloadSummaryReport(
+        { language },
+        { format: "blob" },
+      )) as unknown as AxiosResponse<Blob>;
 
-      if (!response.ok) {
-        throw new Error("Failed to download report");
-      }
+      const filename =
+        extractFilenameFromContentDisposition(response.headers["content-disposition"]) ||
+        "summary-report.xlsx";
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const linkElement = document.createElement("a");
-      linkElement.href = url;
-
-      const today = new Date().toISOString().split("T")[0];
-      linkElement.download = `summary-report-${today}.xlsx`;
-
-      document.body.appendChild(linkElement);
-      linkElement.click();
-      document.body.removeChild(linkElement);
-      URL.revokeObjectURL(url);
+      triggerBrowserDownload(response.data, filename);
 
       toast({ description: t("adminStatisticsView.toast.reportDownloadSuccess") });
     } catch (error) {

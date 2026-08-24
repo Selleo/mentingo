@@ -1,17 +1,21 @@
 import { PERMISSIONS } from "@repo/shared";
+import { useQuery } from "@tanstack/react-query";
 import { type Ref, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import {
   useCurrentUser,
+  courseQueryOptions,
   useInfiniteAvailableCourseCategories,
   useInfiniteAvailableCourses,
   useInfiniteStudentCourses,
 } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
 import { usePermissions } from "~/hooks/usePermissions";
+import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import CoursesHeader from "./CoursesHeader";
@@ -30,6 +34,16 @@ type CategoryCoursesRowProps = {
   category: GetAllCategoriesResponse["data"][number];
   progressByCourseId: Record<string, number | undefined>;
   rowRef?: Ref<HTMLElement>;
+};
+
+type HeroCourse = {
+  id: string;
+  title: string;
+  thumbnailUrl?: string | null;
+  trailerUrl?: string | null;
+  estimatedDurationMinutes?: number;
+  lessonCount?: number;
+  slug: string;
 };
 
 const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCoursesRowProps) => {
@@ -115,6 +129,12 @@ const ModernCoursesView = () => {
 
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
+  const featuredCourseId = globalSettings?.featuredCourseId ?? null;
+  const { data: featuredCourse, isLoading: isFeaturedCourseLoading } = useQuery({
+    ...courseQueryOptions(featuredCourseId ?? "", language),
+    enabled: Boolean(featuredCourseId),
+  });
   const { hasAccess: canManageCourses } = usePermissions({
     required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
@@ -180,7 +200,35 @@ const ModernCoursesView = () => {
     }, {});
   }, [studentCourses]);
 
-  const { heroCourse, isHeroLoading } = useMemo(() => {
+  const { heroCourse, isHeroLoading } = useMemo<{
+    heroCourse?: HeroCourse;
+    isHeroLoading: boolean;
+  }>(() => {
+    if (featuredCourseId) {
+      if (featuredCourse) {
+        return {
+          heroCourse: {
+            id: featuredCourse.id,
+            title: featuredCourse.title,
+            thumbnailUrl: featuredCourse.thumbnailUrl,
+            trailerUrl: featuredCourse.trailerUrl,
+            estimatedDurationMinutes:
+              sumChapterDisplayDurations(
+                featuredCourse.chapters.map((chapter) => chapter.estimatedDurationSeconds),
+              ) / 60,
+            lessonCount: featuredCourse.chapters.reduce(
+              (total, chapter) => total + chapter.lessonCount,
+              0,
+            ),
+            slug: featuredCourse.slug,
+          },
+          isHeroLoading: false,
+        };
+      }
+
+      if (isFeaturedCourseLoading) return { heroCourse: undefined, isHeroLoading: true };
+    }
+
     const topHero = topCourses?.[0];
     if (topHero) return { heroCourse: topHero, isHeroLoading: false };
     if (isTopCoursesLoading) return { heroCourse: undefined, isHeroLoading: true };
@@ -201,6 +249,9 @@ const ModernCoursesView = () => {
     isTopCoursesLoading,
     isAvailableHeroCoursesLoading,
     isStudentCoursesLoading,
+    featuredCourse,
+    featuredCourseId,
+    isFeaturedCourseLoading,
   ]);
 
   const categoryObserverRef = useRef<IntersectionObserver | null>(null);
@@ -329,15 +380,11 @@ const ModernCoursesView = () => {
   };
 
   return (
-    <PageWrapper
-      isBarebones
-      className="w-full p-0 mb-4 overflow-x-hidden min-h-screen"
-      wrapperClassName="h-full"
-    >
+    <PageWrapper isBarebones className="mb-4 min-h-screen w-full p-0" wrapperClassName="h-full">
       <div className="min-h-screen">
         {canManageCourses && <CoursesHeader />}
 
-        {renderCourses()}
+        <div className="overflow-x-hidden">{renderCourses()}</div>
       </div>
     </PageWrapper>
   );

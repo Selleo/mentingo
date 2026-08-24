@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { COURSE_STATUSES, PERMISSIONS } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
@@ -12,6 +12,7 @@ import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { hasAllPermissions, hasPermission } from "~/common/permissions/permission.utils";
 import { cn } from "~/lib/utils";
+import { sumRemainingChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 import CourseCertificate from "../CourseCertificate";
@@ -222,11 +223,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   };
 
   const timeLeftSeconds = useMemo(
-    () =>
-      course.chapters
-        .flatMap((chapter) => chapter.lessons)
-        .filter((lesson) => lesson.status !== CHAPTER_PROGRESS_STATUSES.COMPLETED)
-        .reduce((total, lesson) => total + (lesson.estimatedDurationSeconds ?? 0), 0),
+    () => sumRemainingChapterDisplayDurations(course.chapters, CHAPTER_PROGRESS_STATUSES.COMPLETED),
     [course.chapters],
   );
 
@@ -246,6 +243,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         <ProgressStatCard
           completedChapterCount={course.completedChapterCount ?? 0}
           courseChapterCount={course.courseChapterCount}
+          isDraftCourse={course.status === COURSE_STATUSES.DRAFT}
           isAdminExperience={isAdminExperience}
           onEnterLearningMode={enterLearningMode}
           timeLeftSeconds={timeLeftSeconds}
