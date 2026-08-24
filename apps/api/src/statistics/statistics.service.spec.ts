@@ -77,7 +77,10 @@ describe("StatisticsService dashboard statistics", () => {
       total: 4,
       percentage: 50,
     });
-    expect(statisticsRepository.getDashboardTrainingCompletion).toHaveBeenCalledWith(undefined);
+    expect(statisticsRepository.getDashboardTrainingCompletion).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+    );
     expect(statisticsRepository.getDashboardIncompleteCourses).not.toHaveBeenCalled();
     expect(statisticsRepository.getDashboardDeadlineRiskCounts).not.toHaveBeenCalled();
   });
@@ -180,6 +183,7 @@ describe("StatisticsService dashboard statistics", () => {
       DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
       1,
       20,
+      undefined,
     );
     expect(statisticsRepository.getDashboardDeadlineRiskGroups).toHaveBeenCalledWith(
       contentCreator.userId,
@@ -191,6 +195,8 @@ describe("StatisticsService dashboard statistics", () => {
       DASHBOARD_DEADLINE_RISK_SORT_DIRECTIONS.ASC,
       1,
       20,
+      undefined,
+      undefined,
     );
   });
 });
