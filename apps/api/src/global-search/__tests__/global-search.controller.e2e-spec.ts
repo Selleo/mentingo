@@ -3,7 +3,6 @@ import {
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   LESSON_TYPES,
-  PROGRESS_STATUSES,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
@@ -19,6 +18,7 @@ import {
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { lessons, news, resourceEntity, resources, studentCourses } from "src/storage/schema";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -169,7 +169,7 @@ describe("GlobalSearchController (e2e)", () => {
     await searchIndexService.refreshCourse(course.id);
 
     const results = await search(
-      cookieFor(student, app),
+      await cookieFor(student, app),
       "Progress search",
       SUPPORTED_LANGUAGES.EN,
     );
