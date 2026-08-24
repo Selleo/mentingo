@@ -5612,6 +5612,7 @@
       "enter": "Włącz tryb nauki",
       "exit": "Wyjdź z trybu nauki"
     },
+    "draftCourseTooltip": "Kurs jest w wersji roboczej. Nie możesz się na niego zapisać ani kontynuować nauki.",
     "overview": {
       "courseSettings": "Ustawienia kursu",
       "manageCategories": "Zarządzaj kategoriami",

@@ -1,5 +1,5 @@
-import { DASHBOARD_WIDGET_SIZES } from "@repo/shared";
-import { LayoutGrid, Settings2 } from "lucide-react";
+import { DASHBOARD_WIDGET_SIZES, PERMISSIONS, hasPermission } from "@repo/shared";
+import { Download, LayoutGrid, Loader2, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { P, match } from "ts-pattern";
@@ -23,6 +23,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import Loader from "~/modules/common/Loader/Loader";
+import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { DashboardError } from "./components/DashboardError";
@@ -110,6 +111,9 @@ export default function HomeDashboardPage() {
   const { mutate: updateDashboardSettings } = useUpdateDashboardSettings();
   const { mutate: resetDashboardSettings, isPending: isRestoringDefault } =
     useResetDashboardSettings();
+  const { downloadReport, isDownloading } = useDownloadSummaryReport();
+
+  const canDownloadReport = hasPermission(currentUser?.permissions ?? [], PERMISSIONS.REPORT_READ);
 
   const visibleLayout = (isEditing ? draftWidgets : savedWidgets).filter(
     (widget) => widget.visible !== false,
@@ -164,9 +168,29 @@ export default function HomeDashboardPage() {
         <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <h1 className="h4">{t("dashboardHome.title")}</h1>
 
-          {!isError &&
-            (isEditing ? (
-              <div className="flex flex-wrap items-center gap-2">
+          {!isError && (
+            <div className="flex flex-wrap items-center gap-2">
+              {canDownloadReport && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="dashboard-report-download"
+                  onClick={() => void downloadReport()}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download className="mr-2 size-4" aria-hidden="true" />
+                  )}
+                  {t(
+                    isDownloading
+                      ? "adminStatisticsView.other.downloadingReport"
+                      : "adminStatisticsView.other.downloadReport",
+                  )}
+                </Button>
+              )}
+              {isEditing ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     type="button"
@@ -180,13 +204,14 @@ export default function HomeDashboardPage() {
                     {t("common.button.close")}
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <Button type="button" onClick={handleStartEditing}>
-                <Settings2 className="mr-2 size-4" aria-hidden="true" />
-                {t("dashboardHome.customize")}
-              </Button>
-            ))}
+              ) : (
+                <Button type="button" onClick={handleStartEditing}>
+                  <Settings2 className="mr-2 size-4" aria-hidden="true" />
+                  {t("dashboardHome.customize")}
+                </Button>
+              )}
+            </div>
+          )}
         </header>
 
         <div>

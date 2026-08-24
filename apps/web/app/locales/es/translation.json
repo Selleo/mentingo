@@ -5513,6 +5513,7 @@
       "enter": "Entrar en modo aprendizaje",
       "exit": "Salir del modo aprendizaje"
     },
+    "draftCourseTooltip": "Este curso se encuentra en estado de borrador. No puedes inscribirte en él ni seguir aprendiendo.",
     "overview": {
       "courseSettings": "Configuración del curso",
       "manageCategories": "Gestionar categorías",

@@ -1625,6 +1625,81 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(progress?.completedAt).toBeTruthy();
     });
+
+    it("rejects progress requests for draft courses", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: author.id,
+        lessonCount: 1,
+      });
+      const lesson = await createContentLesson(chapter.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const response = await request(app.getHttpServer())
+        .post("/api/studentLessonProgress")
+        .query({ id: lesson.id, language: "en" })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      expect(response.body.message).toBe("modernCourseView.draftCourseTooltip");
+
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.studentId, admin.id),
+            eq(studentLessonProgress.lessonId, lesson.id),
+          ),
+        );
+
+      expect(progress).toHaveLength(0);
+    });
+
+    it("allows an admin to preview a draft lesson without learning mode", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: author.id,
+        lessonCount: 1,
+      });
+      const lesson = await createContentLesson(chapter.id);
+
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: "en" })
+        .set("Cookie", cookies)
+        .expect(200);
+    });
   });
 
   describe("POST /api/lesson/evaluation-quiz - quiz feedback redaction", () => {

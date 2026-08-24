@@ -12,7 +12,7 @@ import CourseOverviewActions from "./CourseOverviewActions";
 const enrollCourse = vi.fn();
 let currentUser: { id: string } | undefined;
 let inviteOnlyRegistration = false;
-let course: { enrolled: boolean; id: string };
+let course: { enrolled: boolean; id: string; status: "draft" | "published" | "private" };
 let isAdminExperience = false;
 let canEditCourse = false;
 let isCourseStudentModeActive = false;
@@ -85,7 +85,7 @@ describe("CourseOverviewActions", () => {
     vi.clearAllMocks();
     currentUser = undefined;
     inviteOnlyRegistration = false;
-    course = { enrolled: false, id: "course-1" };
+    course = { enrolled: false, id: "course-1", status: "published" };
     isAdminExperience = false;
     canEditCourse = false;
     isCourseStudentModeActive = false;
@@ -125,11 +125,24 @@ describe("CourseOverviewActions", () => {
     expect(onToggleLearningMode).toHaveBeenCalledOnce();
   });
 
+  it("disables learning-mode entry for draft courses", async () => {
+    const onToggleLearningMode = vi.fn();
+    isAdminExperience = true;
+    course = { enrolled: false, id: "course-1", status: "draft" };
+
+    renderActions({ onToggleLearningMode });
+
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON)).toBeDisabled();
+    await userEvent.setup().click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON));
+
+    expect(onToggleLearningMode).not.toHaveBeenCalled();
+  });
+
   it("lets an enrolled learner continue learning", async () => {
     const user = userEvent.setup();
     const onContinueLearning = vi.fn();
     currentUser = { id: "user-1" };
-    course = { enrolled: true, id: "course-1" };
+    course = { enrolled: true, id: "course-1", status: "published" };
 
     renderActions({ onContinueLearning });
 
@@ -153,7 +166,7 @@ describe("CourseOverviewActions", () => {
 
   it("keeps course actions available on small screens", () => {
     currentUser = { id: "user-1" };
-    course = { enrolled: true, id: "course-1" };
+    course = { enrolled: true, id: "course-1", status: "published" };
 
     renderActions();
 

@@ -1,11 +1,12 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, COURSE_STATUSES, PERMISSIONS, hasPermission } from "@repo/shared";
 import { and, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
@@ -41,6 +42,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import {
   STUDENT_LESSON_PROGRESS_MESSAGE_KEYS,
+  type EnsureDraftCourseProgressAllowedParams,
   type LessonProgressAccessResult,
   type MarkLessonAsIncompleteParams,
   type MarkLessonProgressResult,
@@ -83,6 +85,13 @@ export class StudentLessonProgressService {
       userPermissions,
       dbInstance,
     );
+
+    this.ensureDraftCourseProgressAllowed({
+      courseStatus: accessCourseLessonWithDetails.courseStatus,
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+      userPermissions,
+    });
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
@@ -128,6 +137,13 @@ export class StudentLessonProgressService {
       userPermissions,
       dbInstance,
     );
+
+    this.ensureDraftCourseProgressAllowed({
+      courseStatus: accessCourseLessonWithDetails.courseStatus,
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+      userPermissions,
+    });
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
@@ -332,6 +348,13 @@ export class StudentLessonProgressService {
       dbInstance,
     );
 
+    this.ensureDraftCourseProgressAllowed({
+      courseStatus: accessCourseLessonWithDetails.courseStatus,
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+      userPermissions,
+    });
+
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
       isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
@@ -422,6 +445,13 @@ export class StudentLessonProgressService {
       userPermissions,
       dbInstance,
     );
+
+    this.ensureDraftCourseProgressAllowed({
+      courseStatus: accessCourseLessonWithDetails.courseStatus,
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+      userPermissions,
+    });
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
@@ -555,6 +585,22 @@ export class StudentLessonProgressService {
     access: { hasEnrollment: boolean; isCourseAuthor: boolean; isLearningModeActive: boolean },
   ) {
     return canTrackLessonProgress(userPermissions, access);
+  }
+
+  private ensureDraftCourseProgressAllowed({
+    courseStatus,
+    isCourseAuthor,
+    isLearningModeActive,
+    userPermissions,
+  }: EnsureDraftCourseProgressAllowedParams) {
+    if (courseStatus !== COURSE_STATUSES.DRAFT) return;
+
+    const canUpdateAllCourses = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
+    const isPreviewingAsCourseManager = canUpdateAllCourses || isCourseAuthor;
+
+    if (isPreviewingAsCourseManager && !isLearningModeActive) return;
+
+    throw new ForbiddenException("modernCourseView.draftCourseTooltip");
   }
 
   private async isLessonStudentModeEnabled(
@@ -881,7 +927,7 @@ export class StudentLessonProgressService {
     userId: UUIDType,
     dbInstance: DatabasePg = this.db,
   ) {
-    return dbInstance
+    const [accessCourseLesson] = await dbInstance
       .select({
         isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
@@ -890,6 +936,7 @@ export class StudentLessonProgressService {
         lessonType: sql<LessonTypes>`${lessons.type}`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
+        courseStatus: courses.status,
         isCourseAuthor: sql<boolean>`${courses.authorId} = ${userId}`,
       })
       .from(lessons)
@@ -908,6 +955,8 @@ export class StudentLessonProgressService {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(and(eq(lessons.id, id), isNull(users.deletedAt)));
+
+    return [accessCourseLesson];
   }
 
   async getUserCourseCompletionDetails(studentId: UUIDType, courseId: UUIDType) {
