@@ -361,7 +361,7 @@ export class UserService {
         targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN) ||
         targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
 
-      canViewContactDetails = canViewSelf || canManageUsers || targetIsAdmin;
+      canViewContactDetails = canViewSelf || canManageUsers || targetHasPublicProfile;
 
       const managerCourseScope = isGroupManager
         ? getGroupManagerCourseScopeCondition(currentUser, courses.id, [])
