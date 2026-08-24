@@ -126,6 +126,7 @@ describe("UsersController (e2e)", () => {
         requiresPasswordChange: false,
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         groups: [],
+        managedGroups: [],
       });
     });
 
