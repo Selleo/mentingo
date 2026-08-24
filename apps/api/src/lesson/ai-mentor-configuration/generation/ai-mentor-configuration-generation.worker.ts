@@ -45,13 +45,9 @@ export class AiMentorConfigurationGenerationWorker implements OnModuleDestroy {
 
   private async handleJob(job: Job<AiMentorConfigurationGenerationJobData>) {
     if (job.name !== AI_MENTOR_CONFIGURATION_GENERATION_JOB_NAME)
-      throw new Error(
-        `Unexpected AI Mentor configuration generation job name: ${job.name}`,
-      );
+      throw new Error(`Unexpected AI Mentor configuration generation job name: ${job.name}`);
 
-    return this.tenantDbRunnerService.runWithTenant(job.data.tenantId, () =>
-      this.process(job),
-    );
+    return this.tenantDbRunnerService.runWithTenant(job.data.tenantId, () => this.process(job));
   }
 
   private async process(job: Job<AiMentorConfigurationGenerationJobData>) {

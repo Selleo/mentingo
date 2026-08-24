@@ -128,9 +128,7 @@ export const getDeterministicAiMentorConfigurationValidation = (
     configuration.type === AI_MENTOR_TYPE.TEACHER &&
     typeof configuration.teachingStyle === "string" &&
     configuration.teachingStyle.trim().length > 0 &&
-    !Object.values(AI_MENTOR_TEACHING_STYLE).some(
-      (style) => style === configuration.teachingStyle,
-    )
+    !Object.values(AI_MENTOR_TEACHING_STYLE).some((style) => style === configuration.teachingStyle)
   )
     issues.push({
       code: "invalid_teaching_style",

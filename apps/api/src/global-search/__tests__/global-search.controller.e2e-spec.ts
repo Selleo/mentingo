@@ -1,5 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { ENTITY_TYPES, LESSON_TYPES, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  ENTITY_TYPES,
+  LESSON_TYPES,
+  PROGRESS_STATUSES,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -11,7 +18,7 @@ import {
 } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { lessons, news, resourceEntity, resources } from "src/storage/schema";
+import { lessons, news, resourceEntity, resources, studentCourses } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -120,6 +127,7 @@ describe("GlobalSearchController (e2e)", () => {
       "resources",
       "lessons",
       "chapters",
+      "student_courses",
       "courses",
       "news",
       "questions_and_answers",
@@ -139,6 +147,40 @@ describe("GlobalSearchController (e2e)", () => {
     const results = await search(cookie, "Searchable", SUPPORTED_LANGUAGES.EN);
 
     expect(results.categories).toEqual([expect.objectContaining({ id: category.id })]);
+  });
+
+  it("returns enrolled course progress in my course results", async () => {
+    const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+    const author = await userFactory.create();
+    const course = await courseFactory.create({
+      authorId: author.id,
+      title: "Progress search course",
+      chapterCount: 3,
+    });
+
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      progress: PROGRESS_STATUSES.IN_PROGRESS,
+      finishedChapterCount: 2,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      tenantId: student.tenantId,
+    });
+    await searchIndexService.refreshCourse(course.id);
+
+    const results = await search(
+      cookieFor(student, app),
+      "Progress search",
+      SUPPORTED_LANGUAGES.EN,
+    );
+
+    expect(results.myCourses).toEqual([
+      expect.objectContaining({
+        id: course.id,
+        completedChapterCount: 2,
+        courseChapterCount: 3,
+      }),
+    ]);
   });
 
   it("uses requested-language search documents when they exist and match", async () => {

@@ -18,8 +18,7 @@ export const AI_MENTOR_GENERATION_MODE = {
 export type AiMentorGenerationMode =
   (typeof AI_MENTOR_GENERATION_MODE)[keyof typeof AI_MENTOR_GENERATION_MODE];
 
-export const AI_MENTOR_GENERATION_STATUS =
-  AI_MENTOR_CONFIGURATION_GENERATION_STATUS;
+export const AI_MENTOR_GENERATION_STATUS = AI_MENTOR_CONFIGURATION_GENERATION_STATUS;
 
 export type AiMentorGenerationStatus =
   (typeof AI_MENTOR_GENERATION_STATUS)[keyof typeof AI_MENTOR_GENERATION_STATUS];
@@ -73,6 +72,5 @@ export type AiMentorGenerationViewState = {
   error?: string;
 };
 
-export type AiMentorGenerationSnapshot =
-  GetAiMentorConfigurationGenerationResponse["data"];
+export type AiMentorGenerationSnapshot = GetAiMentorConfigurationGenerationResponse["data"];
 export type AiMentorValidationResult = ValidateAiMentorConfigurationDraftResponse["data"];
