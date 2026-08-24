@@ -1882,7 +1882,7 @@
         "course_delete": "Delete courses.",
         "course_enrollment": "Manage course enrollments.",
         "course_statistics": "View course analytics and statistics.",
-        "group_manager_read": "View learner results for assigned managed groups.",
+        "managed_group_results_read": "View learner results for assigned managed groups.",
         "course_export": "Export course data.",
         "course_discussion_read": "View course discussions.",
         "course_discussion_message_create": "Create messages in course discussions.",

@@ -1879,7 +1879,7 @@
         "course_delete": "Gali trinti kursus.",
         "course_enrollment": "Gali valdyti registraciją į kursus.",
         "course_statistics": "Gali peržiūrėti kursų analizę ir statistiką.",
-        "group_manager_read": "Gali peržiūrėti priskirtų valdomų grupių besimokančiųjų rezultatus.",
+        "managed_group_results_read": "Gali peržiūrėti priskirtų valdomų grupių besimokančiųjų rezultatus.",
         "course_export": "Gali eksportuoti kursų duomenis.",
         "learning_mode_use": "Gali naudoti mokymosi režimo funkcijas.",
         "learning_progress_update": "Gali atnaujinti besimokančiojo pažangą.",

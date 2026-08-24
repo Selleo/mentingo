@@ -1880,7 +1880,7 @@
         "course_delete": "Kurse löschen.",
         "course_enrollment": "Kursanmeldungen verwalten.",
         "course_statistics": "Kursanalysen und -statistiken anzeigen.",
-        "group_manager_read": "Lernergebnisse für zugewiesene verwaltete Gruppen anzeigen.",
+        "managed_group_results_read": "Lernergebnisse für zugewiesene verwaltete Gruppen anzeigen.",
         "course_export": "Kursdaten exportieren.",
         "learning_mode_use": "Funktionen des Lernmodus verwenden.",
         "learning_progress_update": "Lernfortschritt aktualisieren.",

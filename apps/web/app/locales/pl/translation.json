@@ -2098,7 +2098,7 @@
         "course_delete": "Może usuwać kursy.",
         "course_enrollment": "Może zarządzać zapisami na kursy.",
         "course_statistics": "Może przeglądać analitykę i statystyki kursów.",
-        "group_manager_read": "Może przeglądać wyniki uczestników w przypisanych zarządzanych grupach.",
+        "managed_group_results_read": "Może przeglądać wyniki uczestników w przypisanych zarządzanych grupach.",
         "course_export": "Może eksportować dane kursów.",
         "course_discussion_read": "Może przeglądać dyskusje kursowe.",
         "course_discussion_message_create": "Może tworzyć wiadomości w dyskusjach kursowych.",

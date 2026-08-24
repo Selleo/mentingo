@@ -1885,7 +1885,7 @@
         "course_delete": "Může mazat kurzy.",
         "course_enrollment": "Může spravovat zápisy do kurzů.",
         "course_statistics": "Může zobrazit analýzy a statistiky kurzů.",
-        "group_manager_read": "Může zobrazit výsledky účastníků v přiřazených spravovaných skupinách.",
+        "managed_group_results_read": "Může zobrazit výsledky účastníků v přiřazených spravovaných skupinách.",
         "course_export": "Může exportovat data kurzů.",
         "learning_mode_use": "Může používat funkce režimu učení.",
         "learning_progress_update": "Může aktualizovat studijní postup.",

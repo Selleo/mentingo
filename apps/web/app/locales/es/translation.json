@@ -1874,7 +1874,7 @@
         "course_delete": "Eliminar cursos.",
         "course_enrollment": "Gestionar inscripciones a cursos.",
         "course_statistics": "Ver análisis y estadísticas del curso.",
-        "group_manager_read": "Ver los resultados de alumnos de los grupos gestionados asignados.",
+        "managed_group_results_read": "Ver los resultados de alumnos de los grupos gestionados asignados.",
         "course_export": "Exportar datos del curso.",
         "course_discussion_read": "Ver discusiones del curso.",
         "course_discussion_message_create": "Crear mensajes en las discusiones del curso.",
