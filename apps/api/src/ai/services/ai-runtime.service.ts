@@ -14,6 +14,7 @@ import {
   type ValidateAiJudgeConfigurationOptions,
 } from "@japro/luma-sdk";
 import { Injectable, Logger } from "@nestjs/common";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import { LUMA_CONFIGURATION_CACHE_TTL_MS } from "src/ai/ai-runtime.constants";
@@ -249,7 +250,7 @@ export class AiRuntimeService {
         const luma = await this.getLumaClient();
         const result = await luma.ai.generateMentorConfiguration(input);
         const schema =
-          input.configurationType === "teacher"
+          input.configurationType === AI_MENTOR_TYPE.TEACHER
             ? generatedAiMentorTeacherConfigurationFieldsSchema
             : generatedAiMentorRoleplayConfigurationFieldsSchema;
 
