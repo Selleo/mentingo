@@ -96,7 +96,9 @@ export class GlobalSearchRepository {
         ),
         thumbnailUrl: courses.thumbnailS3Key,
         courseChapterCount: courses.chapterCount,
-        completedChapterCount: sql<number>`0`,
+        completedChapterCount: options.enrolledStudentId
+          ? sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`
+          : sql<number>`0`,
       })
       .from(courses)
       .innerJoin(categories, eq(categories.id, courses.categoryId))

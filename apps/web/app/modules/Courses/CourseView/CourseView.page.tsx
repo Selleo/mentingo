@@ -75,15 +75,15 @@ export const clientLoader = async ({
     throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
 
-  await queryClient.ensureQueryData(courseQueryOptions(idOrSlug, language)).catch(
-    (error: unknown) => {
+  await queryClient
+    .ensureQueryData(courseQueryOptions(idOrSlug, language))
+    .catch((error: unknown) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         throw redirect("/courses", 302);
       }
 
       throw error;
-    },
-  );
+    });
 
   return null;
 };

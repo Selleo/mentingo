@@ -40,29 +40,27 @@ const getFieldValue = (
 ): string | null => {
   switch (field) {
     case "taskGoal":
-      return configuration.type === "teacher" ? configuration.taskGoal ?? null : null;
+      return configuration.type === "teacher" ? (configuration.taskGoal ?? null) : null;
     case "expertise":
-      return configuration.type === "teacher" ? configuration.expertise ?? null : null;
+      return configuration.type === "teacher" ? (configuration.expertise ?? null) : null;
     case "contentScope":
-      return configuration.type === "teacher" ? configuration.contentScope ?? null : null;
+      return configuration.type === "teacher" ? (configuration.contentScope ?? null) : null;
     case "teachingStyle":
-      return configuration.type === "teacher" ? configuration.teachingStyle ?? null : null;
+      return configuration.type === "teacher" ? (configuration.teachingStyle ?? null) : null;
     case "feedbackGuidance":
-      return configuration.type === "teacher" ? configuration.feedbackGuidance ?? null : null;
+      return configuration.type === "teacher" ? (configuration.feedbackGuidance ?? null) : null;
     case "scenario":
-      return configuration.type === "roleplay" ? configuration.scenario ?? null : null;
+      return configuration.type === "roleplay" ? (configuration.scenario ?? null) : null;
     case "aiRole":
-      return configuration.type === "roleplay" ? configuration.aiRole ?? null : null;
+      return configuration.type === "roleplay" ? (configuration.aiRole ?? null) : null;
     case "learnerRole":
-      return configuration.type === "roleplay" ? configuration.learnerRole ?? null : null;
+      return configuration.type === "roleplay" ? (configuration.learnerRole ?? null) : null;
     case "characterGoal":
-      return configuration.type === "roleplay" ? configuration.characterGoal ?? null : null;
+      return configuration.type === "roleplay" ? (configuration.characterGoal ?? null) : null;
     case "difficulty":
-      return configuration.type === "roleplay" ? configuration.difficulty ?? null : null;
+      return configuration.type === "roleplay" ? (configuration.difficulty ?? null) : null;
     case "factsAndConstraints":
-      return configuration.type === "roleplay"
-        ? configuration.factsAndConstraints ?? null
-        : null;
+      return configuration.type === "roleplay" ? (configuration.factsAndConstraints ?? null) : null;
     case "openingInstruction":
       return configuration.openingInstruction ?? null;
     case "additionalInstructions":
@@ -72,7 +70,6 @@ const getFieldValue = (
 
 const getChangeType = (before: string | null, after: string | null) => {
   if (before === null && after !== null) return AI_MENTOR_CONFIGURATION_DRAFT_CHANGE_TYPE.ADDED;
-  if (before !== null && after === null)
-    return AI_MENTOR_CONFIGURATION_DRAFT_CHANGE_TYPE.REMOVED;
+  if (before !== null && after === null) return AI_MENTOR_CONFIGURATION_DRAFT_CHANGE_TYPE.REMOVED;
   return AI_MENTOR_CONFIGURATION_DRAFT_CHANGE_TYPE.CHANGED;
 };

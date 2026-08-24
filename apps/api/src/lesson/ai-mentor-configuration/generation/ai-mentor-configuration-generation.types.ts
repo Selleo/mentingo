@@ -15,9 +15,7 @@ export type PreparedAiMentorConfigurationGeneration = {
 };
 
 export type AiMentorConfigurationGenerationExecutionOptions = {
-  reportProgress?: (
-    progress: AiMentorConfigurationGenerationProgressEvent,
-  ) => Promise<void> | void;
+  reportProgress?: (progress: AiMentorConfigurationGenerationProgressEvent) => Promise<void> | void;
   isCancelled?: () => Promise<boolean> | boolean;
   onDraft?: (draft: AiMentorConfigurationContent) => Promise<void> | void;
 };
@@ -34,7 +32,5 @@ export type AiMentorConfigurationGenerationStoredProgress = {
   latestDraft?: AiMentorConfigurationContent;
 };
 
-export type GenerateAiMentorConfigurationApplicationInput =
-  GenerateAiMentorConfigurationInput;
-export type GenerateAiMentorConfigurationApplicationResult =
-  AiMentorConfigurationGenerationResult;
+export type GenerateAiMentorConfigurationApplicationInput = GenerateAiMentorConfigurationInput;
+export type GenerateAiMentorConfigurationApplicationResult = AiMentorConfigurationGenerationResult;

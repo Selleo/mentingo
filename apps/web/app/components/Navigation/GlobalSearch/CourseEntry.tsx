@@ -1,7 +1,4 @@
 import { Link } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
-
-import { usePermissions } from "../../../hooks/usePermissions";
 
 import type { SearchResponse } from "~/api/generated-api";
 
@@ -12,13 +9,9 @@ export const CourseEntry = ({
   item: SearchResponse["data"]["allCourses"][number];
   onSelect: () => void;
 }) => {
-  const { hasAccess: canUpdateLearningProgress } = usePermissions({
-    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
-  });
-
   return (
     <Link
-      to={canUpdateLearningProgress ? `/course/${item.id}` : `/admin/beta-courses/${item.id}`}
+      to={`/course/${item.id}`}
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >

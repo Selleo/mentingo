@@ -22,6 +22,7 @@ The main workflow is direct: a user opens search from the navigation or keyboard
 - Respect the signed-in user's permissions so each user only sees result categories they are allowed to access.
 - Search every indexed language for learning and knowledge content so multilingual materials remain discoverable.
 - Show matched lesson attachment filenames when the search term matches an attached resource.
+- Show a learner's completed-chapter progress beside assigned course results.
 - Support keyboard opening, navigation, and selection for faster repeated use.
 
 ## End-User Value
@@ -32,11 +33,13 @@ The language-aware behavior improves multilingual delivery: users can search fro
 
 ## How It Works
 
-Users open the search dialog from the navigation, enter a term, and Mentingo requests matching results for the current interface language. Results are grouped by content type, and selecting a result takes the user to the relevant course, lesson, article, user, or administration area.
+Users open the search dialog from the navigation, enter a term, and Mentingo requests matching results for the current interface language. Results are grouped by content type, and selecting a result takes the user to the relevant course overview, lesson, article, user, or administration area.
 
 For indexed learning and knowledge content, Mentingo searches all language-specific documents attached to each item. The displayed title and category still use the user's selected interface language where those fields are localized, but a result can be found because its Polish, English, or other indexed text matched the query.
 
 Search visibility remains permission-aware. For example, users without user-management permissions do not receive user results, and course/lesson results follow the existing course access distinctions.
+
+When learners find an assigned course, the result includes the same completed-chapter count used by their course list, so the search result accurately reflects where they are in the course.
 
 ## Key Technical Context
 
@@ -45,9 +48,11 @@ Search visibility remains permission-aware. For example, users without user-mana
 - Indexed search documents live in the `search_documents` table and are refreshed by `SearchIndexService`.
 - Indexed content matching is language-inclusive: `search_documents` rows from every stored language can match, and the repository tracks which languages matched each result.
 - Permissions are enforced by the global-search endpoint and service-level result category checks.
+- Assigned-course progress is read from the learner's enrolled course record and is not shown for administrative or generally available course result groups.
 
 ## Test Evidence
 
 - API E2E coverage verifies requested-language search, non-requested-language search, matching another indexed language even when requested-language documents exist, and returning multiple entities that match through different indexed languages in one request.
 - API E2E coverage verifies that lesson attachment filename matches still resolve when the match comes from a non-requested-language document.
+- API E2E coverage verifies that an enrolled course result returns its stored completed-chapter count.
 - Existing frontend behavior is inferred from the global search dialog and query hook; no new frontend E2E coverage was added because the API contract did not change.

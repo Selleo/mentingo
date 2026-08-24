@@ -39,9 +39,7 @@ describe("AiMentorConfigurationValidatorService", () => {
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
     };
 
-    return new AiMentorConfigurationValidatorService(
-      promptService as unknown as PromptService,
-    );
+    return new AiMentorConfigurationValidatorService(promptService as unknown as PromptService);
   };
 
   it("derives a pass from warnings and validates the current type-specific target", async () => {
