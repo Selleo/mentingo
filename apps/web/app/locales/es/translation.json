@@ -2408,7 +2408,7 @@
         "charactersLeft": "Caracteres restantes",
         "reachedCharactersLimit": "Has alcanzado el límite de caracteres.",
         "reachedCharactersLimitHtml": "Demasiado formato. Reduzca la cantidad de formato para que se ajuste al límite.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 o Hevc (máx. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (máx. 50 MB)",
         "enableCertificate": "Habilitar certificado",
         "enableCertificateDescription": "Active esta opción para emitir certificados para este curso y configure su firma y vista previa a continuación.",
         "certificateValidity": "Validez del certificado",

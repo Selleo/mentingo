@@ -2636,7 +2636,7 @@
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (maksymalnie 50 MB)",
         "enableCertificate": "Włącz certyfikat",
         "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
         "certificateValidity": "Ważność certyfikatu",

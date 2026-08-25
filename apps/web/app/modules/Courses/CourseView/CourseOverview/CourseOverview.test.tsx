@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   updateCourse: vi.fn(),
   updateCourseMedia: vi.fn(),
   uploadVideo: vi.fn(),
+  toast: vi.fn(),
 }));
 
 const course = {
@@ -101,6 +102,10 @@ vi.mock("~/hooks/useTusVideoUpload", () => ({
   }),
 }));
 
+vi.mock("~/components/ui/use-toast", () => ({
+  useToast: () => ({ toast: mocks.toast }),
+}));
+
 vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
     course,
@@ -173,6 +178,16 @@ vi.mock("./CourseMediaModal", () => ({
         }
       >
         Select trailer
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          const file = new File(["video"], "large-trailer.mp4", { type: "video/mp4" });
+          Object.defineProperty(file, "size", { value: 50 * 1024 * 1024 + 1 });
+          onTrailerSelection(file);
+        }}
+      >
+        Select oversized trailer
       </button>
       <button type="button" onClick={() => onPositionChange(75)}>
         Change position
@@ -294,6 +309,30 @@ describe("CourseOverview", () => {
       );
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:course-image");
     });
+  });
+
+  it("shows a toast and skips trailers above the maximum file size", async () => {
+    const user = userEvent.setup();
+    renderWith().render(
+      <MemoryRouter>
+        <CourseOverview
+          idOrSlug="course-slug"
+          language="en"
+          onLanguageChange={vi.fn()}
+          openGenerateTranslationModal={false}
+          setOpenGenerateTranslationModal={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON));
+    await user.click(screen.getByRole("button", { name: "Select oversized trailer" }));
+
+    expect(mocks.toast).toHaveBeenCalledWith({
+      description: "Video file exceeds the maximum allowed size",
+      variant: "destructive",
+    });
+    expect(mocks.initVideoUpload).not.toHaveBeenCalled();
   });
 
   it("updates metadata from the shared form state", async () => {

@@ -2419,7 +2419,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 nebo Hevc (max. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",
