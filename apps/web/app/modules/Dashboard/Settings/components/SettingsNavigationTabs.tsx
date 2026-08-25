@@ -20,6 +20,7 @@ interface SettingsNavigationTabsProps {
   organizationContent?: React.ReactNode;
   customizePlatformContent?: React.ReactNode;
   hasConfigurationIssues?: boolean;
+  hasIntegrationsAvailable?: boolean;
 }
 
 export function SettingsNavigationTabs({
@@ -31,6 +32,7 @@ export function SettingsNavigationTabs({
   organizationContent,
   customizePlatformContent,
   hasConfigurationIssues,
+  hasIntegrationsAvailable = true,
 }: SettingsNavigationTabsProps) {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,7 +49,7 @@ export function SettingsNavigationTabs({
     ...(!hideAccountTab
       ? [{ value: SETTINGS_TABS.ACCOUNT, label: t("settings.tabs.account") }]
       : []),
-    ...(!hideAccountTab
+    ...(!hideAccountTab && hasIntegrationsAvailable
       ? [{ value: SETTINGS_TABS.INTEGRATIONS, label: t("settings.tabs.integrations") }]
       : []),
     ...(canManageSettings ? adminTabs : []),
@@ -132,13 +134,15 @@ export function SettingsNavigationTabs({
             </TabsContent>
           )}
 
-          <TabsContent
-            value={SETTINGS_TABS.INTEGRATIONS}
-            className="space-y-6"
-            data-testid={SETTINGS_PAGE_HANDLES.INTEGRATIONS_CONTENT}
-          >
-            {integrationsContent}
-          </TabsContent>
+          {hasIntegrationsAvailable && (
+            <TabsContent
+              value={SETTINGS_TABS.INTEGRATIONS}
+              className="space-y-6"
+              data-testid={SETTINGS_PAGE_HANDLES.INTEGRATIONS_CONTENT}
+            >
+              {integrationsContent}
+            </TabsContent>
+          )}
 
           <TabsContent
             value={SETTINGS_TABS.ORGANIZATION}

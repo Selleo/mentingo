@@ -98,6 +98,7 @@ export const useVideoCoverageTracker = (
   const pendingRangesRef = useRef<VideoCoverageRange[]>([]);
   const activeWatchSecondsDeltaRef = useRef(0);
   const previousSampleRef = useRef<{ videoTime: number; wallClock: number } | null>(null);
+  const isPlayingRef = useRef(false);
   const snapshotDurationSecondsRef = useRef(snapshot.durationSeconds);
   const isSeekingRef = useRef(false);
   const isFlushingRef = useRef(false);
@@ -299,7 +300,7 @@ export const useVideoCoverageTracker = (
       const previousSample = previousSampleRef.current;
       previousSampleRef.current = { videoTime: currentVideoTime, wallClock: now };
 
-      if (!previousSample || isSeekingRef.current || player.paused()) return;
+      if (!previousSample || isSeekingRef.current || !isPlayingRef.current) return;
 
       const mediaDelta = currentVideoTime - previousSample.videoTime;
       const wallDelta = (now - previousSample.wallClock) / 1000;
@@ -312,8 +313,15 @@ export const useVideoCoverageTracker = (
       }
     };
 
-    const handlePlay = () => resetPreviousSample();
-    const handlePause = () => void flush({ syncCompletionQueries: true });
+    const handlePlay = () => {
+      isPlayingRef.current = true;
+      resetPreviousSample();
+    };
+    const handlePause = () => {
+      isPlayingRef.current = false;
+      previousSampleRef.current = null;
+      void flush({ syncCompletionQueries: true });
+    };
     const handleSeeking = () => {
       isSeekingRef.current = true;
       previousSampleRef.current = null;
@@ -334,6 +342,7 @@ export const useVideoCoverageTracker = (
     player.on("seeked", handleSeeked);
     player.on("ended", handleEnded);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    isPlayingRef.current = !player.paused();
     resetPreviousSample();
 
     const flushInterval = window.setInterval(
@@ -350,6 +359,7 @@ export const useVideoCoverageTracker = (
       player.off("seeked", handleSeeked);
       player.off("ended", handleEnded);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      isPlayingRef.current = false;
       void flush({ syncCompletionQueries: true });
     };
   }, [enabled, flush, markRangeAsWatched, options.flushIntervalMs, player, resetPreviousSample]);

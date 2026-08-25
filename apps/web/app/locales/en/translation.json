@@ -3751,6 +3751,8 @@
       "completedSummary": "{{completed}} of {{total}} completed",
       "overviewAriaLabel": "Lesson video progress",
       "segmentAriaLabel": "Video {{index}} progress: {{progress}}% watched",
+      "requirementSingle": "Watch the entire video to complete this lesson.",
+      "requirementMultiple": "Watch all videos to complete this lesson.",
       "errors": {
         "resourceNotFound": "Video progress could not be saved for this lesson.",
         "unsupportedLessonType": "Video progress is only available for content lessons.",
@@ -3759,6 +3761,14 @@
         "trackingDisabled": "Video completion tracking is disabled for this course.",
         "accessDenied": "You do not have access to update video progress for this lesson."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Finish watching before leaving?",
+      "descriptionSingle": "This lesson requires the entire video to be watched before it can be completed.",
+      "descriptionMultiple": "This lesson requires all videos to be watched before it can be completed.",
+      "exitAnyway": "Exit anyway",
+      "continueWatching": "Continue watching",
+      "remember": "Dismiss for this course"
     },
     "playNext": {
       "title": "Up next",

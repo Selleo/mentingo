@@ -3752,6 +3752,8 @@
       "completedSummary": "Dokončeno {{completed}} z {{total}}",
       "overviewAriaLabel": "Průběh videí v lekci",
       "segmentAriaLabel": "Průběh videa {{index}}: zhlédnuto {{progress}} %",
+      "requirementSingle": "Pro dokončení této lekce zhlédněte celé video.",
+      "requirementMultiple": "Pro dokončení této lekce zhlédněte všechna videa.",
       "errors": {
         "resourceNotFound": "Postup videa pro tuto lekci se nepodařilo uložit.",
         "unsupportedLessonType": "Postup videa je dostupný pouze pro obsahové lekce.",
@@ -3760,6 +3762,14 @@
         "trackingDisabled": "Sledování dokončení videa je pro tento kurz vypnuto.",
         "accessDenied": "Nemáte přístup k aktualizaci postupu videa pro tuto lekci."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Dokončit sledování před odchodem?",
+      "descriptionSingle": "Před dokončením této lekce je nutné zhlédnout celé video.",
+      "descriptionMultiple": "Před dokončením této lekce je nutné zhlédnout všechna videa.",
+      "exitAnyway": "Přesto odejít",
+      "continueWatching": "Pokračovat ve sledování",
+      "remember": "Skrýt pro tento kurz"
     },
     "playNext": {
       "title": "Další",

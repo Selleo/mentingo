@@ -9,6 +9,7 @@ import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { pauseAllLessonVideos, resumeLessonVideo } from "~/components/VideoPlayer/Video";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -20,6 +21,7 @@ import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 import { LessonContentRenderer } from "./LessonContentRenderer";
 import { LessonVideoProgressStrip } from "./LessonVideoProgressStrip";
 import { createLessonVideoProgressStore } from "./LessonVideoProgressStrip.utils";
+import { RequiredVideoLeaveGuard } from "./RequiredVideoLeaveGuard";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
@@ -75,6 +77,7 @@ export const LessonContent = ({
       showCoverageMarkers: videoProgressPersistenceEnabled && videoCompletionTrackingEnabled,
       lessonId: lesson.id,
       language,
+      onVideoActivated: videoProgressStore.getState().markVideoActivated,
       onSnapshotChange: videoProgressStore.getState().publishSnapshot,
     }),
     [
@@ -301,7 +304,20 @@ export const LessonContent = ({
             lessonId={lesson.id}
             description={lesson.description}
             enabled={shouldUseCoverageCompletion}
+            showRequirementWarning={!lesson.lessonCompleted}
             store={videoProgressStore}
+          />
+
+          <RequiredVideoLeaveGuard
+            courseId={course.id}
+            userId={user?.id ?? ""}
+            lessonCompleted={Boolean(lesson.lessonCompleted)}
+            enabled={shouldUseCoverageCompletion}
+            store={videoProgressStore}
+            onPause={pauseAllLessonVideos}
+            onContinueWatching={(resourceEntityId) => {
+              if (resourceEntityId) resumeLessonVideo(resourceEntityId);
+            }}
           />
 
           <LessonContentRenderer

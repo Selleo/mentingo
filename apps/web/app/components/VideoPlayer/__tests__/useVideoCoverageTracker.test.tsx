@@ -136,6 +136,42 @@ describe("useVideoCoverageTracker", () => {
     });
   });
 
+  it("stops collecting coverage immediately when a pause event fires", async () => {
+    const player = new FakeVideoPlayer();
+
+    renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialBucketSizeSeconds: 1,
+      }),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(4.6);
+      player.emit("timeupdate");
+
+      // Some video providers update their paused state after emitting pause.
+      player.emit("pause");
+      now = 8_000;
+      player.setCurrentTime(7.6);
+      player.emit("timeupdate");
+    });
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        watchedRanges: [[0, 5]],
+        activeWatchSecondsDelta: 4.6,
+      }),
+    );
+  });
+
   it("does not count skipped time when the player seeks", async () => {
     const player = new FakeVideoPlayer();
 

@@ -10,6 +10,7 @@ import type {
   LessonVideoProgressStore,
   LessonVideoProgressStoreState,
 } from "./LessonVideoProgressStrip.types";
+import type { VideoCoverageSnapshot } from "~/components/VideoPlayer/videoCoverage.types";
 
 export const VIDEO_COMPLETION_COVERAGE_THRESHOLD = 0.9;
 
@@ -51,17 +52,44 @@ export const applyLessonVideoProgressSnapshotChange = (
   segments.map((segment) => {
     if (segment.resourceEntityId !== progressChange.resourceEntityId) return segment;
 
+    const watchedRanges = mergeVideoCoverageRanges([
+      ...segment.watchedRanges,
+      ...progressChange.snapshot.watchedRanges,
+    ]);
+
     return {
       ...segment,
-      coveragePercent: clampVideoProgress(progressChange.snapshot.coveragePercent),
-      isWatched: progressChange.snapshot.isWatched,
-      watchedRanges: mergeVideoCoverageRanges(progressChange.snapshot.watchedRanges),
-      durationSeconds: progressChange.snapshot.durationSeconds,
+      coveragePercent: Math.max(
+        clampVideoProgress(segment.coveragePercent),
+        clampVideoProgress(progressChange.snapshot.coveragePercent),
+      ),
+      isWatched: segment.isWatched || progressChange.snapshot.isWatched,
+      watchedRanges,
+      durationSeconds: progressChange.snapshot.durationSeconds ?? segment.durationSeconds,
     };
   });
 
 export const isLessonVideoProgressSegmentComplete = (segment: LessonVideoProgressSegment) =>
   segment.isWatched || segment.coveragePercent >= VIDEO_COMPLETION_COVERAGE_THRESHOLD;
+
+export const hasStartedLessonVideo = (segment: LessonVideoProgressSegment) =>
+  segment.coveragePercent > 0 || segment.watchedRanges.length > 0;
+
+export const getLessonVideoResumeTarget = (
+  segments: LessonVideoProgressSegment[],
+  lastActiveResourceEntityId: string | null,
+) => {
+  const incomplete = segments.filter((segment) => !isLessonVideoProgressSegmentComplete(segment));
+  const lastActive = incomplete.find(
+    (segment) => segment.resourceEntityId === lastActiveResourceEntityId,
+  );
+  if (lastActive?.resourceEntityId) return lastActive.resourceEntityId;
+
+  const started = incomplete.find(hasStartedLessonVideo);
+  if (started?.resourceEntityId) return started.resourceEntityId;
+
+  return incomplete.find((segment) => segment.resourceEntityId)?.resourceEntityId ?? null;
+};
 
 export const getFallbackDurationSeconds = (watchedRanges: VideoCoverageRange[]) => {
   const maxEnd = watchedRanges.reduce((duration, [, end]) => Math.max(duration, end), 0);
@@ -105,6 +133,29 @@ export const getLessonVideoProgressRangeStyle = ({
 export const createLessonVideoProgressStore = (): LessonVideoProgressStore => {
   const progressChangesByResourceId = new Map<string, LessonVideoProgressSnapshotChange>();
 
+  const mergeSnapshotChange = (
+    previous: LessonVideoProgressSnapshotChange | undefined,
+    next: LessonVideoProgressSnapshotChange,
+  ): LessonVideoProgressSnapshotChange => {
+    if (!previous) return next;
+
+    const snapshot: VideoCoverageSnapshot = {
+      ...next.snapshot,
+      coveragePercent: Math.max(
+        clampVideoProgress(previous.snapshot.coveragePercent),
+        clampVideoProgress(next.snapshot.coveragePercent),
+      ),
+      isWatched: previous.snapshot.isWatched || next.snapshot.isWatched,
+      watchedRanges: mergeVideoCoverageRanges([
+        ...previous.snapshot.watchedRanges,
+        ...next.snapshot.watchedRanges,
+      ]),
+      durationSeconds: next.snapshot.durationSeconds ?? previous.snapshot.durationSeconds,
+    };
+
+    return { ...next, snapshot };
+  };
+
   const applyStoredProgressChanges = (nextSegments: LessonVideoProgressSegment[]) => {
     return Array.from(progressChangesByResourceId.values()).reduce(
       (currentSegments, progressChange) =>
@@ -115,12 +166,18 @@ export const createLessonVideoProgressStore = (): LessonVideoProgressStore => {
 
   return createStore<LessonVideoProgressStoreState>((set) => ({
     segments: [],
+    lastActiveResourceEntityId: null,
     publishSnapshot: (change) => {
-      progressChangesByResourceId.set(change.resourceEntityId, change);
+      const mergedChange = mergeSnapshotChange(
+        progressChangesByResourceId.get(change.resourceEntityId),
+        change,
+      );
+      progressChangesByResourceId.set(change.resourceEntityId, mergedChange);
       set((state) => ({
-        segments: applyLessonVideoProgressSnapshotChange(state.segments, change),
+        segments: applyLessonVideoProgressSnapshotChange(state.segments, mergedChange),
       }));
     },
+    markVideoActivated: (resourceEntityId) => set({ lastActiveResourceEntityId: resourceEntityId }),
     reset: (nextSegments) => {
       set({ segments: applyStoredProgressChanges(nextSegments) });
     },

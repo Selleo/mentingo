@@ -28,4 +28,5 @@ export type VideoCoverageTrackingOptions = {
   initialBucketSizeSeconds?: number | null;
   flushIntervalMs?: number;
   onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+  onVideoActivated?: (resourceEntityId: string) => void;
 };

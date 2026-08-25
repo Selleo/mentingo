@@ -3746,6 +3746,8 @@
       "completedSummary": "{{completed}} von {{total}} abgeschlossen",
       "overviewAriaLabel": "Video-Fortschritt der Lektion",
       "segmentAriaLabel": "Fortschritt von Video {{index}}: {{progress}} % angesehen",
+      "requirementSingle": "Sehen Sie das gesamte Video an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Sehen Sie alle Videos an, um diese Lektion abzuschließen.",
       "errors": {
         "resourceNotFound": "Der Videofortschritt konnte für diese Lektion nicht gespeichert werden.",
         "unsupportedLessonType": "Videofortschritt ist nur für Inhaltslektionen verfügbar.",
@@ -3754,6 +3756,14 @@
         "trackingDisabled": "Video-Abschlussverfolgung ist für diesen Kurs deaktiviert.",
         "accessDenied": "Sie haben keinen Zugriff, um den Videofortschritt für diese Lektion zu aktualisieren."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Vor dem Verlassen weitersehen?",
+      "descriptionSingle": "Das gesamte Video muss angesehen werden, bevor diese Lektion abgeschlossen werden kann.",
+      "descriptionMultiple": "Alle Videos müssen angesehen werden, bevor diese Lektion abgeschlossen werden kann.",
+      "exitAnyway": "Trotzdem verlassen",
+      "continueWatching": "Weitersehen",
+      "remember": "Für diesen Kurs nicht mehr anzeigen"
     },
     "playNext": {
       "title": "Als nächstes",
