@@ -314,7 +314,7 @@ export function VoiceMentorModeOverlay({
                       </Button>
                     </div>
                     <div className="min-h-0 overflow-y-auto px-6 py-5 text-left text-sm leading-relaxed text-neutral-800">
-                      <Viewer content={taskDescription} />
+                      <Viewer content={taskDescription} style="prose" />
                     </div>
                   </motion.aside>
                 )}
