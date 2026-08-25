@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 
+import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
@@ -128,11 +129,12 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
               const userName = getUserDisplayName(user);
 
               return (
-                <button
+                <Button
                   key={user.id}
                   type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-neutral-50",
+                    "h-auto w-full justify-start gap-3 p-2 text-left hover:bg-neutral-50",
                     { "bg-neutral-50": index === highlightedIndex },
                   )}
                   data-testid={testIds?.mentionOption?.(user.id)}
@@ -149,7 +151,7 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
                   <span className="body-sm-md min-w-0 flex-1 truncate text-neutral-950">
                     {userName}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
