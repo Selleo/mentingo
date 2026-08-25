@@ -1631,7 +1631,8 @@
       "uploadScorm": "Laden Sie SCORM hoch",
       "createNew": "Neu erstellen",
       "deleteSelected": "Ausgewählte löschen",
-      "bulkEdit": "Massenbearbeitung"
+      "bulkEdit": "Massenbearbeitung",
+      "actions": "Kursaktionen"
     },
     "dropdown": {
       "changeCategory": "Kategorie ändern",

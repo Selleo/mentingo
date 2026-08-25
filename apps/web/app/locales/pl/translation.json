@@ -1849,7 +1849,8 @@
       "uploadScorm": "Prześlij SCORM",
       "createNew": "Utwórz nowy",
       "deleteSelected": "Usuń wybrane",
-      "bulkEdit": "Edytuj wiele"
+      "bulkEdit": "Edytuj wiele",
+      "actions": "Akcje kursu"
     },
     "dropdown": {
       "changeCategory": "Zmień kategorię",

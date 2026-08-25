@@ -1633,7 +1633,8 @@
       "uploadScorm": "Upload SCORM",
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
-      "bulkEdit": "Bulk edit"
+      "bulkEdit": "Bulk edit",
+      "actions": "Course actions"
     },
     "dropdown": {
       "changeCategory": "Change category",

@@ -1,4 +1,4 @@
-import { CopyCheck } from "lucide-react";
+import { CopyPlus, MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,6 +29,9 @@ interface BulkEditDropdownProps {
   disabled: boolean;
   triggerTestId?: string;
   triggerTranslationKey?: string;
+  triggerAriaLabel?: string;
+  iconOnly?: boolean;
+  stopTriggerPropagation?: boolean;
 }
 
 export const BulkEditDropdown = ({
@@ -36,6 +39,9 @@ export const BulkEditDropdown = ({
   disabled,
   triggerTestId,
   triggerTranslationKey = "adminUsersView.button.bulkEdit",
+  triggerAriaLabel,
+  iconOnly = false,
+  stopTriggerPropagation = false,
 }: BulkEditDropdownProps) => {
   const { t } = useTranslation();
 
@@ -46,45 +52,55 @@ export const BulkEditDropdown = ({
       <DropdownMenuTrigger asChild>
         <Button
           data-testid={triggerTestId}
-          variant="outline"
-          className="flex gap-2"
+          variant={iconOnly ? "ghost" : "outline"}
+          size={iconOnly ? "icon" : "default"}
+          className={cn("flex gap-2", { "size-9 p-0": iconOnly })}
           disabled={disabled}
+          aria-label={triggerAriaLabel ?? (iconOnly ? t(triggerTranslationKey) : undefined)}
+          onClick={stopTriggerPropagation ? (event) => event.stopPropagation() : undefined}
         >
-          <CopyCheck className="size-4" />
-          {t(triggerTranslationKey)}
-          <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
+          {iconOnly ? (
+            <MoreVertical className="size-4" aria-hidden="true" />
+          ) : (
+            <CopyPlus className="size-4" />
+          )}
+          {!iconOnly && t(triggerTranslationKey)}
+          {!iconOnly && (
+            <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
+          )}
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="w-80 rounded bg-white p-2 text-black shadow-lg transition-all duration-200"
+        className={cn(
+          "flex flex-col gap-1 rounded bg-white p-2 text-black shadow-lg transition-all duration-200",
+          {
+            "w-64": iconOnly,
+            "w-80": !iconOnly,
+          },
+        )}
         align="end"
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
       >
         {dropdownItems.map((item) => (
-          <DropdownMenuItem key={item.translationKey}>
-            <Button
-              data-testid={item.testId}
-              className={cn(
-                "body-sm w-full min-w-0 justify-start gap-3 text-neutral-950 hover:text-neutral-950",
-                { "text-error-700 hover:text-error-700": item.destructive },
+          <DropdownMenuItem
+            key={item.translationKey}
+            data-testid={item.testId}
+            className={cn(
+              "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-neutral-900 outline-none focus:bg-accent focus:text-accent-foreground",
+              { "text-error-700 focus:bg-error-50 focus:text-error-700": item.destructive },
+            )}
+            onSelect={item.action}
+          >
+            <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">
+              {item.iconName ? (
+                <Icon name={item.iconName} className="size-4" aria-hidden="true" />
+              ) : (
+                item.icon
               )}
-              onClick={item.action}
-              variant="ghost"
-            >
-              <span className="flex size-5 shrink-0 items-center justify-center [&>svg]:size-4 [&>svg]:shrink-0">
-                {item.iconName ? (
-                  <Icon
-                    name={item.iconName}
-                    className={cn("size-4 shrink-0 text-accent-foreground", {
-                      "text-error-700 hover:text-error-700": item.destructive,
-                    })}
-                  />
-                ) : (
-                  item.icon
-                )}
-              </span>
-              <span className="min-w-0 truncate">{t(item.translationKey)}</span>
-            </Button>
+            </span>
+            <span className="min-w-0 truncate">{t(item.translationKey)}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
