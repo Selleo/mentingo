@@ -1,5 +1,5 @@
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "~/components/ui/button";
@@ -140,7 +140,11 @@ type CarouselContentProps = React.HTMLAttributes<HTMLDivElement> & {
 const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
   ({ className, viewportClassName, viewportRef, onWheel, ...props }, ref) => {
     const { carouselRef, orientation, scrollNext, scrollPrev } = useCarousel();
-    const wheelState = React.useRef({ direction: 0, count: 0, timer: null as ReturnType<typeof setTimeout> | null });
+    const wheelState = React.useRef({
+      direction: 0,
+      count: 0,
+      timer: null as ReturnType<typeof setTimeout> | null,
+    });
 
     const setViewportRefs = React.useCallback(
       (node: HTMLDivElement | null) => {
@@ -268,9 +272,25 @@ CarouselPrevious.displayName = "CarouselPrevious";
 
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button> & { iconSize?: number; iconClassName?: string }
+  React.ComponentProps<typeof Button> & {
+    iconSize?: number;
+    iconClassName?: string;
+    loading?: boolean;
+  }
 >(
-  ({ className, variant = "outline", size = "icon", iconSize = 16, iconClassName, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = "outline",
+      size = "icon",
+      iconSize = 16,
+      iconClassName,
+      loading = false,
+      disabled,
+      ...props
+    },
+    ref,
+  ) => {
     const { scrollNext, canScrollNext } = useCarousel();
 
     return (
@@ -279,11 +299,15 @@ const CarouselNext = React.forwardRef<
         variant={variant}
         size={size}
         className={cn(className)}
-        disabled={!canScrollNext}
+        disabled={disabled ?? (loading || !canScrollNext)}
         onClick={scrollNext}
         {...props}
       >
-        <ChevronRight size={iconSize} className={cn("text-black", iconClassName)} />
+        {loading ? (
+          <Loader2 size={iconSize} className={cn("animate-spin text-black", iconClassName)} />
+        ) : (
+          <ChevronRight size={iconSize} className={cn("text-black", iconClassName)} />
+        )}
         <span className="sr-only">Next slide</span>
       </Button>
     );

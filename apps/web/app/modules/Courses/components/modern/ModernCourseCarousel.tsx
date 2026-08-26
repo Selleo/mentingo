@@ -95,7 +95,6 @@ const ModernCourseCarousel = ({
     };
 
     const fetchNextPageAtEnd = (nextCanScrollNext: boolean) => {
-      if (onWatchedSlideVisible) return;
       if (nextCanScrollNext) return;
       if (!hasNextPage || isFetchingNextPage || !fetchNextPage) return;
 
@@ -129,6 +128,17 @@ const ModernCourseCarousel = ({
     isFetchingNextPage,
     onWatchedSlideVisible,
   ]);
+
+  const handleNextClick = useCallback(() => {
+    if (carouselApi?.canScrollNext()) {
+      carouselApi.scrollNext();
+      return;
+    }
+
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage?.();
+    }
+  }, [carouselApi, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     const viewportNode = viewportRef.current;
@@ -206,9 +216,12 @@ const ModernCourseCarousel = ({
               className=" left-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
             />
           )}
-          {canScrollNext && (
+          {(canScrollNext || hasNextPage) && (
             <CarouselNext
               iconSize={24}
+              disabled={isFetchingNextPage ? true : !canScrollNext && !hasNextPage}
+              loading={isFetchingNextPage}
+              onClick={handleNextClick}
               className="right-2 absolute top-1/2 z-[160] border-none flex size-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
             />
           )}
@@ -220,7 +233,7 @@ const ModernCourseCarousel = ({
             className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto"
           />
         )}
-        {canScrollNext && (
+        {(canScrollNext || hasNextPage) && (
           <div
             aria-hidden
             data-testid="course-row-arrow-block-right"
@@ -232,7 +245,7 @@ const ModernCourseCarousel = ({
             <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
           </div>
         )}
-        {canScrollNext && (
+        {(canScrollNext || hasNextPage) && (
           <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
           </div>
