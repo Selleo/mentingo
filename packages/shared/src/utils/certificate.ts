@@ -166,8 +166,8 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     : `<div class="h-11" style="color:${escapeHtml(colorTheme.logoColor)};">${APP_LOGO_SVG}</div>`;
 
   const signatureImageMarkup = signatureImageUrl
-    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-16 w-full object-contain" />`
-    : "";
+    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-20 w-full object-contain" style="display:block;margin-bottom:8px;height:5rem;width:100%;object-fit:contain;" />`
+    : '<div class="mb-2 h-20 w-full" aria-hidden="true" style="margin-bottom:8px;height:5rem;width:100%;"></div>';
   const footerGapClass = expiryDate ? "gap-x-16" : "gap-x-52";
   const expiryDateMarkup = expiryDate
     ? `<div class="flex w-[280px] flex-col items-center">
