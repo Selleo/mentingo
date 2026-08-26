@@ -3843,6 +3843,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurs jest niedostępny",
+      "accessDescription": "Zaloguj się lub utwórz konto, aby przejść do kursu.",
+      "goToLogin": "Przejdź do logowania",
+      "goToCourseList": "Przejdź do listy kursów",
+      "goToHome": "Przejdź do strony głównej",
+      "notFoundTitle": "Nie znaleziono kursu",
+      "notFoundDescription": "Nie udało się znaleźć tego kursu."
+    },
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później",

@@ -3613,6 +3613,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurz není dostupný",
+      "accessDescription": "Přihlaste se nebo si vytvořte účet a pokračujte ke kurzu.",
+      "goToLogin": "Přejít k přihlášení",
+      "goToCourseList": "Přejít na seznam kurzů",
+      "goToHome": "Přejít na domovskou stránku",
+      "notFoundTitle": "Kurz nebyl nalezen",
+      "notFoundDescription": "Tento kurz se nepodařilo najít."
+    },
     "other": {
       "cannotFindCourses": "Nenašli jsme žádné kurzy",
       "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později",

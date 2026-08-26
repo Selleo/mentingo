@@ -14,11 +14,11 @@ describe("navigation history", () => {
     saveEntryToNavigationHistory(new Request("https://app.example.com/admin/courses?tab=all"));
 
     expect(useNavigationHistoryStore.getState().navigationHistory).toEqual([
-      expect.objectContaining({ pathname: "/admin/courses" }),
+      expect.objectContaining({ pathname: "/admin/courses?tab=all" }),
     ]);
     expect(JSON.parse(sessionStorage.getItem("navigation-history") ?? "{}")).toMatchObject({
       state: {
-        navigationHistory: [expect.objectContaining({ pathname: "/admin/courses" })],
+        navigationHistory: [expect.objectContaining({ pathname: "/admin/courses?tab=all" })],
       },
     });
   });

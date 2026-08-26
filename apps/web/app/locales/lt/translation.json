@@ -3608,6 +3608,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kursas nepasiekiamas",
+      "accessDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti kursą.",
+      "goToLogin": "Eiti į prisijungimą",
+      "goToCourseList": "Eiti į kursų sąrašą",
+      "goToHome": "Eiti į pagrindinį puslapį",
+      "notFoundTitle": "Kursas nerastas",
+      "notFoundDescription": "Šio kurso rasti nepavyko."
+    },
     "other": {
       "cannotFindCourses": "Neradome jokių kursų",
       "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau",

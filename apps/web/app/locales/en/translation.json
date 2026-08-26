@@ -3612,6 +3612,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "The course is unavailable",
+      "accessDescription": "Please sign in or create an account to continue to the course.",
+      "goToLogin": "Go to login",
+      "goToCourseList": "Go to course list",
+      "goToHome": "Go to home",
+      "notFoundTitle": "Course not found",
+      "notFoundDescription": "We could not find this course."
+    },
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",

@@ -1389,6 +1389,8 @@ export class CourseService {
     userPermissions: PermissionKey[] = [],
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
+    await this.ensureAnonymousCourseAccess(userId);
+
     const { courseId: id, slug: currentSlug } = match(
       await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
     )
@@ -1634,6 +1636,8 @@ export class CourseService {
     userId?: UUIDType,
     userPermissions: PermissionKey[] = [],
   ): Promise<CourseLookupResponse> {
+    await this.ensureAnonymousCourseAccess(userId);
+
     const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
 
     if (lookupResult.type === "notFound") {
@@ -1695,6 +1699,16 @@ export class CourseService {
         slug: value.slug,
       }))
       .exhaustive();
+  }
+
+  private async ensureAnonymousCourseAccess(userId?: UUIDType) {
+    if (userId) return;
+
+    const globalSettings = await this.settingsService.getPublicGlobalSettings();
+
+    if (!globalSettings.unregisteredUserCoursesAccessibility) {
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
+    }
   }
 
   async getBetaCourseById(
@@ -4050,6 +4064,7 @@ export class CourseService {
           categories.title,
           `%${filters.category}%`,
           language,
+          { baseTable: categories, fallbackToBaseLanguage: true },
         ),
       );
     }

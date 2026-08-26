@@ -15,6 +15,7 @@ export type EmbedLessonResource = {
 };
 
 export type AvailableCourseCategorySearchParams = {
+  userId?: string;
   title?: string;
   description?: string;
   searchQuery?: string;
