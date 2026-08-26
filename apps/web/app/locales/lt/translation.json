@@ -2413,7 +2413,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 arba Hevc (maks. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (maks. 50 MB)",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
-import { ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
+import { ENTITY_TYPES, MAX_COURSE_TRAILER_VIDEO_SIZE, PERMISSIONS } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { useToast } from "~/components/ui/use-toast";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { cn } from "~/lib/utils";
 import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
@@ -65,6 +66,7 @@ export default function CourseOverview({
   setOpenGenerateTranslationModal,
 }: CourseHeroProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const { course, isAdminExperience, isCourseStudentModeActive, isPreviewMode } =
     useCourseAccessProvider();
@@ -163,6 +165,17 @@ export default function CourseOverview({
   };
 
   const handleTrailerSelection = (file: File) => {
+    if (file.size > MAX_COURSE_TRAILER_VIDEO_SIZE) {
+      toast({
+        description: t("uploadFile.toast.videoTooLarge"),
+        variant: "destructive",
+      });
+
+      if (trailerInputRef.current) trailerInputRef.current.value = "";
+
+      return;
+    }
+
     setValue("trailerFile", file, { shouldDirty: true, shouldValidate: true });
   };
 

@@ -2416,7 +2416,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 or Hevc (max. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
