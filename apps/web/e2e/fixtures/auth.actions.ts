@@ -1,9 +1,37 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
 
 import { LOGIN_PAGE_HANDLES } from "../data/auth/handles";
 import { NAVIGATION_HANDLES } from "../data/navigation/handles";
 
 const LOGIN_URL = "/auth/login";
+
+export async function authenticateContext(
+  context: BrowserContext,
+  origin: string,
+  email: string,
+  password: string,
+) {
+  await context.clearCookies();
+
+  const response = await context.request.post(`${origin}/api/auth/login`, {
+    data: { email, password },
+    headers: {
+      Origin: origin,
+      Referer: `${origin}/`,
+    },
+  });
+
+  expect(response, `API login failed for ${email}`).toBeOK();
+
+  const currentUserResponse = await context.request.get(`${origin}/api/auth/current-user`, {
+    headers: {
+      Origin: origin,
+      Referer: `${origin}/`,
+    },
+  });
+
+  expect(currentUserResponse, `Authenticated user could not be loaded for ${email}`).toBeOK();
+}
 
 export async function login(
   page: Page,
