@@ -139,7 +139,7 @@ export default function LessonPreviewDialog({
             </DialogHeader>
             <div className="min-h-0 px-6 py-5">
               <div className="max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800">
-                <Viewer content={lesson.description ?? ""} />
+                <Viewer content={lesson.description ?? ""} style="prose" />
               </div>
             </div>
           </DialogContent>
