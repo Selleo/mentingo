@@ -16,7 +16,8 @@ The main workflow is simple: choose a course, duplicate it, review the placehold
 
 ## Feature Functions
 
-- Create an independent draft copy of an existing course from the admin course list.
+- Open a course action menu from the admin course list and create an independent draft copy of an existing course.
+- Use the same course action menu to change category, change status, or delete the course when managing an individual row.
 - Redirect the user immediately to the duplicated course placeholder while content is copied in the background.
 - Notify the initiating user when duplication is processing, completed, or failed.
 - Refresh course list and course editor data when duplication status changes.
@@ -40,7 +41,7 @@ The duplicate is designed as a separate course. It does not inherit enrollments,
 
 ## Key Technical Context
 
-- The admin course list adds a Duplicate row action in `apps/web/app/modules/Admin/Courses/Courses.page.tsx`, and the editor lock state is handled in `apps/web/app/modules/Admin/EditCourse/EditCourse.tsx`.
+- The admin course list exposes duplication alongside the existing single-course management actions in `apps/web/app/modules/Admin/Courses/Courses.page.tsx` and `CourseBulkActions.tsx`; the editor lock state is handled in `apps/web/app/modules/Admin/EditCourse/EditCourse.tsx`.
 - The API exposes `POST /api/course/:courseId/duplicate` and `GET /api/course/duplication-jobs/:jobId`, guarded by course creation permission and source-course manage access.
 - Background work runs through BullMQ in the `course-duplication` queue and executes under the source tenant context.
 - Realtime updates use shared `COURSE_DUPLICATION_SOCKET` constants and user-room websocket notifications.

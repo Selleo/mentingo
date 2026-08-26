@@ -1630,7 +1630,8 @@
       "uploadScorm": "Įkelti SCORM",
       "createNew": "Sukurti naują",
       "deleteSelected": "Ištrinti pasirinktus",
-      "bulkEdit": "Masinis redagavimas"
+      "bulkEdit": "Masinis redagavimas",
+      "actions": "Kurso veiksmai"
     },
     "dropdown": {
       "changeCategory": "Keisti kategoriją",

@@ -1636,7 +1636,8 @@
       "uploadScorm": "Nahrajte SCORM",
       "createNew": "Vytvořit nový",
       "deleteSelected": "Smazat vybrané",
-      "bulkEdit": "Hromadná úprava"
+      "bulkEdit": "Hromadná úprava",
+      "actions": "Akce kurzu"
     },
     "dropdown": {
       "changeCategory": "Změnit kategorii",

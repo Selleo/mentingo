@@ -1,6 +1,6 @@
 import { COURSE_STATUSES } from "@repo/shared";
 import { isEmpty } from "lodash-es";
-import { FilePenLine, Tags, Trash2 } from "lucide-react";
+import { CopyPlus, FilePenLine, Tags, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -46,6 +46,7 @@ import type { GetAllCategoriesResponse } from "~/api/generated-api";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
 enum BulkCourseAction {
+  Duplicate = "duplicate",
   ChangeCategory = "changeCategory",
   ChangeStatus = "changeStatus",
   Delete = "delete",
@@ -63,12 +64,18 @@ type CourseBulkActionsProps = {
   selectedCourseIds: string[];
   categories: CourseCategory[];
   onBulkActionComplete: () => void;
+  onDuplicateCourse?: (courseId: string) => void;
+  rowAction?: boolean;
+  triggerTestId?: string;
 };
 
 export const CourseBulkActions = ({
   selectedCourseIds,
   categories,
   onBulkActionComplete,
+  onDuplicateCourse,
+  rowAction = false,
+  triggerTestId,
 }: CourseBulkActionsProps) => {
   const [selectedBulkAction, setSelectedBulkAction] = useState<BulkCourseAction | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -155,6 +162,17 @@ export const CourseBulkActions = ({
   };
 
   const bulkDropdownItems: BulkEditDropdownItem[] = [
+    ...(onDuplicateCourse
+      ? [
+          {
+            icon: <CopyPlus className="size-4 shrink-0" />,
+            translationKey: "adminCourseDuplication.duplicate",
+            action: () => onDuplicateCourse(selectedCourseIds[0] ?? ""),
+            destructive: false,
+            testId: COURSES_PAGE_HANDLES.DUPLICATE_ACTION,
+          },
+        ]
+      : []),
     {
       icon: <Tags className="size-4 shrink-0" />,
       translationKey: "adminCoursesView.dropdown.changeCategory",
@@ -262,21 +280,30 @@ export const CourseBulkActions = ({
     (selectedBulkAction === BulkCourseAction.ChangeCategory && !selectedCategoryId);
 
   return (
-    <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-      <p
-        className={cn("text-sm", {
-          "text-neutral-900": !isEmpty(selectedCourseIds),
-          "text-neutral-500": isEmpty(selectedCourseIds),
-        })}
-      >
-        {t("common.other.selected")} ({selectedCourseIds.length})
-      </p>
+    <div
+      className={cn("ml-auto flex items-center gap-x-2 px-4 py-2", {
+        "flex items-center justify-end gap-2 p-0 text-right": rowAction,
+      })}
+    >
+      {!rowAction && (
+        <p
+          className={cn("text-sm", {
+            "text-neutral-900": !isEmpty(selectedCourseIds),
+            "text-neutral-500": isEmpty(selectedCourseIds),
+          })}
+        >
+          {t("common.other.selected")} ({selectedCourseIds.length})
+        </p>
+      )}
 
       <BulkEditDropdown
         dropdownItems={bulkDropdownItems}
         disabled={isEmpty(selectedCourseIds)}
-        triggerTestId={COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER}
+        triggerTestId={triggerTestId ?? COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER}
         triggerTranslationKey="adminCoursesView.button.bulkEdit"
+        triggerAriaLabel={t("adminCoursesView.button.actions")}
+        iconOnly={rowAction}
+        stopTriggerPropagation={rowAction}
       />
 
       <Dialog
@@ -286,10 +313,45 @@ export const CourseBulkActions = ({
         }}
       >
         <DialogPortal>
-          <DialogOverlay className="bg-primary-400 opacity-65" />
+          <DialogOverlay
+            className={cn("bg-primary-400 opacity-65", {
+              "course-row-action-overlay": rowAction,
+            })}
+            data-course-row-action={rowAction ? "true" : undefined}
+            onClick={
+              rowAction
+                ? (event) => {
+                    event.stopPropagation();
+                  }
+                : undefined
+            }
+            onPointerDown={
+              rowAction
+                ? (event) => {
+                    event.stopPropagation();
+                  }
+                : undefined
+            }
+          />
           <DialogContent
             data-testid={getDialogTestId()}
+            data-course-row-action={rowAction ? "true" : undefined}
             className="max-w-lg gap-0 overflow-hidden p-0"
+            overlayClassName={rowAction ? "course-row-action-overlay" : undefined}
+            onClick={
+              rowAction
+                ? (event) => {
+                    event.stopPropagation();
+                  }
+                : undefined
+            }
+            onPointerDown={
+              rowAction
+                ? (event) => {
+                    event.stopPropagation();
+                  }
+                : undefined
+            }
           >
             <div className="px-6 pb-4 pt-6">
               <DialogTitle className="pr-8 text-xl font-semibold text-neutral-950">
