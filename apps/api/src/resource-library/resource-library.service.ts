@@ -299,13 +299,14 @@ export class ResourceLibraryService {
     return { updatedIds, skippedIds, requiresConfirmation: false, affectedUsedAssetCount };
   }
 
-  async syncLessonAssetRelations(lessonId: UUIDType) {
-    const description = await this.resourceLibraryRepository.getLessonContent(lessonId);
+  async syncLessonAssetRelations(lessonId: UUIDType, dbInstance?: DatabasePg) {
+    const description = await this.resourceLibraryRepository.getLessonContent(lessonId, dbInstance);
 
     await this.syncEntityAssetRelations({
       entityId: lessonId,
       entityType: ENTITY_TYPES.LESSON,
       contents: getLocalizedRichTextEntries(description).map(([, content]) => content),
+      dbInstance,
     });
   }
 
@@ -419,21 +420,28 @@ export class ResourceLibraryService {
     entityId: UUIDType;
     entityType: RichTextAssetEntityType;
     contents: string[];
+    dbInstance?: DatabasePg;
   }) {
     const resourceIds = [
       ...new Set(params.contents.flatMap((content) => extractResourceIdsFromRichText(content))),
     ] as UUIDType[];
 
-    await this.db.transaction(async (trx) =>
+    const replaceRelations = (dbInstance: DatabasePg) =>
       this.resourceLibraryRepository.replaceEntityAttachmentRelations(
         {
           entityId: params.entityId,
           entityType: params.entityType,
           resourceIds,
         },
-        trx,
-      ),
-    );
+        dbInstance,
+      );
+
+    if (params.dbInstance) {
+      await replaceRelations(params.dbInstance);
+      return;
+    }
+
+    await this.db.transaction(replaceRelations);
   }
 
   private async removeAssetReferencesFromContent(resourceId: UUIDType, dbInstance: DatabasePg) {

@@ -17,11 +17,14 @@ type VideoJSType = ReturnType<typeof videojs>;
 type PlayerEvent = "timeupdate" | "play" | "pause" | "seeking" | "seeked" | "ended";
 
 class FakeVideoPlayer {
+  private readonly element = document.createElement("div");
   private listeners = new Map<PlayerEvent, Set<() => void>>();
   private videoTime = 0;
   private pausedValue = true;
 
-  constructor(private readonly durationValue = 100) {}
+  constructor(private readonly durationValue = 100) {
+    document.body.appendChild(this.element);
+  }
 
   on(eventName: PlayerEvent, listener: () => void) {
     const listeners = this.listeners.get(eventName) ?? new Set();
@@ -62,6 +65,23 @@ class FakeVideoPlayer {
   playbackRate() {
     return 1;
   }
+
+  el() {
+    return this.element;
+  }
+
+  isDisposed() {
+    return false;
+  }
+
+  disconnect() {
+    this.element.remove();
+  }
+
+  pause() {
+    this.pausedValue = true;
+    this.emit("pause");
+  }
 }
 
 const createProgressResponse = (watchedRanges: VideoCoverageRange[], durationSeconds = 100) => ({
@@ -97,6 +117,7 @@ describe("useVideoCoverageTracker", () => {
   });
 
   afterEach(() => {
+    document.body.replaceChildren();
     vi.restoreAllMocks();
   });
 
@@ -170,6 +191,145 @@ describe("useVideoCoverageTracker", () => {
         activeWatchSecondsDelta: 4.6,
       }),
     );
+  });
+
+  it("does not collect coverage when the player is paused without emitting a pause event", async () => {
+    const player = new FakeVideoPlayer();
+
+    const { result } = renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialBucketSizeSeconds: 1,
+      }),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(4.6);
+      player.emit("timeupdate");
+
+      player.setPaused(true);
+      now = 8_000;
+      player.setCurrentTime(7.6);
+      player.emit("timeupdate");
+    });
+
+    await act(async () => {
+      await result.current.flush();
+    });
+
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        watchedRanges: [[0, 5]],
+        activeWatchSecondsDelta: 4.6,
+      }),
+    );
+  });
+
+  it("stops a detached player before it can collect background coverage", async () => {
+    const player = new FakeVideoPlayer();
+
+    const { result } = renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialBucketSizeSeconds: 1,
+      }),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(4.6);
+      player.emit("timeupdate");
+
+      player.disconnect();
+      now = 8_000;
+      player.setCurrentTime(7.6);
+      player.emit("timeupdate");
+    });
+
+    await act(async () => {
+      await result.current.flush();
+    });
+
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        watchedRanges: [[0, 5]],
+        activeWatchSecondsDelta: 4.6,
+      }),
+    );
+  });
+
+  it("flushes progress collected after resuming when the previous pause save is in flight", async () => {
+    const player = new FakeVideoPlayer();
+    let resolveFirstSave: ((value: ReturnType<typeof createProgressResponse>) => void) | undefined;
+
+    mutateAsync
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstSave = resolve;
+          }),
+      )
+      .mockImplementationOnce((body: { watchedRanges: VideoCoverageRange[] }) =>
+        Promise.resolve(createProgressResponse(body.watchedRanges)),
+      );
+
+    const { result } = renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialBucketSizeSeconds: 1,
+      }),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(4.6);
+      player.emit("timeupdate");
+      player.setPaused(true);
+      player.emit("pause");
+    });
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(5);
+      player.emit("play");
+      now = 7_000;
+      player.setCurrentTime(7);
+      player.emit("timeupdate");
+      player.setPaused(true);
+      player.emit("pause");
+    });
+
+    await act(async () => {
+      resolveFirstSave?.(createProgressResponse([[0, 5]]));
+    });
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(2));
+    expect(mutateAsync).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        watchedRanges: [[5, 7]],
+        activeWatchSecondsDelta: 2,
+      }),
+    );
+    expect(result.current.snapshot.watchedRanges).toEqual([[0, 7]]);
   });
 
   it("does not count skipped time when the player seeks", async () => {

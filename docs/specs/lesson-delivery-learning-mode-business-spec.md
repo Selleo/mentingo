@@ -41,11 +41,13 @@ Learning-time tracking adds another reporting signal, helping teams understand b
 
 The lesson page loads the selected course and lesson in the active content language. It shows the lesson content, chapter context, navigation controls, and the course lesson sidebar. When an administrator or content creator enters learning mode from the course overview, Mentingo returns the course panel to the table of contents so an admin-only Statistics tab cannot leave the learner view empty.
 
+Moving between lessons reloads the selected lesson's learner-specific state before its content is mounted. This keeps the progress strip and video resume position aligned with the latest saved watched ranges instead of briefly reusing another lesson's player state or an older cached response.
+
 Each lesson type has its own completion behavior. Content and embed lessons can complete when opened or when required video content finishes. Quiz lessons depend on quiz submission and passing rules. AI mentor, SCORM, and live training lessons use their own lesson-specific state. When sequence mode is enabled, Mentingo blocks access to later lessons until earlier lessons are complete.
 
 For content videos, opening the video focuses the player so learners can use familiar playback shortcuts while the player is active, without those shortcuts taking over the rest of the lesson page. When video completion tracking is enabled, the lesson also shows a segmented progress strip with one part per video, helping learners spot which parts they have watched and which parts they still missed. A video segment turns green after the learner has watched enough of that video to satisfy the completion threshold.
 
-When a required-video lesson has started but is not complete, Mentingo explains below the progress strip that the learner must watch the entire video or all videos. Leaving through in-app navigation opens a confirmation dialog with an option to exit or continue watching. Continue watching keeps the learner on the lesson, returns to the most recently active incomplete video, and resumes from the current or saved unwatched position. Learners can remember their decision for the course; the preference is kept locally for that learner and course.
+When a required-video lesson has started but is not complete, Mentingo explains below the progress strip that the learner must watch the entire video or all videos. Leaving through in-app navigation opens a confirmation dialog with an option to exit or continue watching. Continue watching keeps the learner on the lesson, returns to the most recently active incomplete video, and resumes from the current or saved unwatched position. Pausing after continuing stops coverage collection immediately, while any progress already watched is saved in order without a delayed background update. Learners can remember their decision for the course; the preference is kept locally for that learner and course.
 
 While the learner studies, the page also runs the learning-time tracker. Completion events update lesson, chapter, and course progress and can trigger downstream completion behavior such as certificates, reporting updates, and the course-finished notification. Those course-level side effects happen when the course changes from incomplete to completed; repeated saves or runtime commits do not create another completion notification. The course progress card shows completed and total chapter counts in the interface language.
 
@@ -55,7 +57,9 @@ While the learner studies, the page also runs the learning-time tracker. Complet
 - The route is `/course/:courseId/lesson/:lessonId`.
 - Lesson rendering is centralized in `LessonContentRenderer`.
 - Rich-text lesson videos use the shared `VideoPlayer` component for playback controls, focused keyboard shortcuts, and watched-range tracking.
-- Video completion tracking stores watched ranges per lesson video and treats 90% watched coverage as completed.
+- Video completion tracking stores watched ranges per lesson video, serializes overlapping pause saves, ignores paused or detached player instances, and treats 90% watched coverage as completed.
+- Courses without an explicitly stored video-completion setting use the enabled default consistently when lessons are read and progress is saved.
+- Creating or updating rich-text lessons synchronizes referenced file and video attachments; lesson delivery also repairs a missing attachment relation before returning learner progress metadata.
 - The learner leave guard uses the existing watched-range snapshots and blocks only client-side navigation for incomplete required-video lessons.
 - Lesson access and progress updates use `PERMISSIONS.LEARNING_PROGRESS_UPDATE` and `PERMISSIONS.LEARNING_MODE_USE`.
 - Progress updates are handled through `apps/api/src/studentLessonProgress`.

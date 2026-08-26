@@ -208,6 +208,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         description: expect.stringContaining("Open content"),
         lessonCompleted: false,
         nextLessonId: null,
+        videoCompletionTrackingEnabled: true,
       });
     });
 
@@ -1234,6 +1235,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .expect(200);
 
       expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
+      expect(response.body.data.videoCompletionTrackingEnabled).toBe(true);
       expect(response.body.data.quizDetails).toBeDefined();
 
       if (response.body.data.quizDetails.questions) {

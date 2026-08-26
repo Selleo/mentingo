@@ -284,12 +284,28 @@ export const VideoPlayer = ({
   }, []);
 
   useEffect(() => {
-    if (!player || pauseRequestId === undefined) return;
+    if (
+      !player ||
+      pauseRequestId === undefined ||
+      player.isDisposed() ||
+      !player.el()?.isConnected
+    ) {
+      return;
+    }
+
     player.pause();
   }, [pauseRequestId, player]);
 
   useEffect(() => {
-    if (!player || resumeRequestId === undefined) return;
+    if (
+      !player ||
+      resumeRequestId === undefined ||
+      player.isDisposed() ||
+      !player.el()?.isConnected
+    ) {
+      return;
+    }
+
     void player.play()?.catch(() => undefined);
   }, [resumeRequestId, player]);
 

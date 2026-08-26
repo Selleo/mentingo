@@ -356,8 +356,8 @@ export class ResourceLibraryRepository {
       .onConflictDoNothing();
   }
 
-  async getLessonContent(lessonId: UUIDType) {
-    const [lesson] = await this.db
+  async getLessonContent(lessonId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [lesson] = await dbInstance
       .select({ description: lessons.description })
       .from(lessons)
       .where(eq(lessons.id, lessonId))

@@ -7,6 +7,7 @@ const logger = new Logger("FileDelivery");
 
 export const streamFileToResponse = (res: Response, file: FileStreamPayload) => {
   let streamTimeout: NodeJS.Timeout | undefined;
+  const req = res.req;
 
   const clearStreamTimeout = () => {
     if (!streamTimeout) return;
@@ -37,6 +38,11 @@ export const streamFileToResponse = (res: Response, file: FileStreamPayload) => 
     if (!res.writableEnded) destroyFileStream();
   };
 
+  const handleRequestAborted = () => {
+    clearStreamTimeout();
+    destroyFileStream();
+  };
+
   const resetStreamTimeout = () => {
     if (!file.streamTimeoutMs) return;
 
@@ -44,7 +50,6 @@ export const streamFileToResponse = (res: Response, file: FileStreamPayload) => 
 
     streamTimeout = setTimeout(() => {
       const message = `File stream timed out after ${file.streamTimeoutMs}ms`;
-      logger.error(message);
       file.stream.destroy(new Error(message));
     }, file.streamTimeoutMs);
   };
@@ -57,6 +62,7 @@ export const streamFileToResponse = (res: Response, file: FileStreamPayload) => 
   res.once("error", handleResponseError);
   res.once("close", handleResponseClose);
   res.once("finish", clearStreamTimeout);
+  req?.once("aborted", handleRequestAborted);
 
   res.setHeader("Accept-Ranges", file.acceptRanges ?? "bytes");
 

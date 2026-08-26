@@ -102,6 +102,7 @@ export const useVideoCoverageTracker = (
   const snapshotDurationSecondsRef = useRef(snapshot.durationSeconds);
   const isSeekingRef = useRef(false);
   const isFlushingRef = useRef(false);
+  const flushRequestedRef = useRef(false);
   const pendingLessonCompletionSyncRef = useRef(false);
   const completionSyncRequestedRef = useRef(false);
   const {
@@ -220,6 +221,10 @@ export const useVideoCoverageTracker = (
         completionSyncRequestedRef.current = true;
       }
 
+      if (isFlushingRef.current) {
+        flushRequestedRef.current = true;
+      }
+
       if (
         !currentOptions.enabled ||
         !currentOptions.lessonId ||
@@ -252,12 +257,26 @@ export const useVideoCoverageTracker = (
           language: currentOptions.language,
         });
 
-        setSnapshot({
-          coveragePercent: progress.coveragePercent,
-          watchedRanges: progress.watchedRanges,
-          isWatched: progress.isWatched,
-          durationSeconds: progress.durationSeconds,
-          bucketSizeSeconds: progress.bucketSizeSeconds,
+        setSnapshot((current) => {
+          const watchedRanges = mergeVideoCoverageRanges([
+            ...progress.watchedRanges,
+            ...current.watchedRanges,
+          ]);
+          const coveragePercent = progress.durationSeconds
+            ? Math.min(1, countVideoCoverageRangeUnits(watchedRanges) / progress.durationSeconds)
+            : current.coveragePercent;
+
+          return {
+            coveragePercent: Math.max(
+              progress.coveragePercent,
+              current.coveragePercent,
+              coveragePercent,
+            ),
+            watchedRanges,
+            isWatched: progress.isWatched || current.isWatched,
+            durationSeconds: progress.durationSeconds,
+            bucketSizeSeconds: progress.bucketSizeSeconds,
+          };
         });
 
         if (progress.lessonCompleted) {
@@ -280,6 +299,15 @@ export const useVideoCoverageTracker = (
         activeWatchSecondsDeltaRef.current += activeWatchSecondsDelta;
       } finally {
         isFlushingRef.current = false;
+
+        if (flushRequestedRef.current) {
+          flushRequestedRef.current = false;
+          const syncCompletionQueries = completionSyncRequestedRef.current;
+
+          queueMicrotask(() => {
+            void flush({ syncCompletionQueries });
+          });
+        }
       }
     },
     [player, syncPendingLessonCompletion, upsertVideoProgress],
@@ -289,8 +317,21 @@ export const useVideoCoverageTracker = (
     if (!enabled || !player) return;
 
     const handleTimeUpdate = () => {
+      if (player.isDisposed() || !player.el()?.isConnected) {
+        isPlayingRef.current = false;
+        previousSampleRef.current = null;
+
+        return;
+      }
+
       const currentVideoTime = player.currentTime();
       const now = performance.now();
+
+      if (player.paused()) {
+        isPlayingRef.current = false;
+        previousSampleRef.current = null;
+        return;
+      }
 
       if (typeof currentVideoTime !== "number" || !Number.isFinite(currentVideoTime)) {
         previousSampleRef.current = null;
@@ -342,8 +383,14 @@ export const useVideoCoverageTracker = (
     player.on("seeked", handleSeeked);
     player.on("ended", handleEnded);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    isPlayingRef.current = !player.paused();
-    resetPreviousSample();
+    const isPlayerConnected = !player.isDisposed() && Boolean(player.el()?.isConnected);
+    isPlayingRef.current = isPlayerConnected && !player.paused();
+
+    if (isPlayerConnected) {
+      resetPreviousSample();
+    } else {
+      previousSampleRef.current = null;
+    }
 
     const flushInterval = window.setInterval(
       () => void flush(),
