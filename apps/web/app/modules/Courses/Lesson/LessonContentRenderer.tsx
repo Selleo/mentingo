@@ -28,6 +28,7 @@ type LessonContentRendererProps = {
     lessonId: string;
     language: SupportedLanguages;
     onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onVideoActivated?: (resourceEntityId: string) => void;
   };
 };
 

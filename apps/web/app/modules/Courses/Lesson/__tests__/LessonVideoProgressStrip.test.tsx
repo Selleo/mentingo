@@ -6,6 +6,8 @@ import { renderWith } from "~/utils/testUtils";
 import { LessonVideoProgressStrip } from "../LessonVideoProgressStrip";
 import {
   createLessonVideoProgressStore,
+  getLessonVideoResumeTarget,
+  hasStartedLessonVideo,
   parseLessonVideoProgressSegments,
 } from "../LessonVideoProgressStrip.utils";
 
@@ -38,6 +40,14 @@ const lessonDescription = `
 `;
 
 describe("LessonVideoProgressStrip", () => {
+  it("selects the latest active incomplete video before earlier started videos", () => {
+    const segments = parseLessonVideoProgressSegments(lessonDescription);
+
+    expect(getLessonVideoResumeTarget(segments, "resource-one")).toBe("resource-one");
+    expect(getLessonVideoResumeTarget(segments, "resource-two")).toBe("resource-one");
+    expect(segments.some(hasStartedLessonVideo)).toBe(true);
+  });
+
   it("parses one segment per video node with watched range metadata", () => {
     expect(parseLessonVideoProgressSegments(lessonDescription)).toMatchObject([
       {
@@ -80,6 +90,7 @@ describe("LessonVideoProgressStrip", () => {
 
     expect(screen.getByText("Video progress")).toBeInTheDocument();
     expect(screen.getByText("1 of 3 completed")).toBeInTheDocument();
+    expect(screen.getByText("Watch all videos to complete this lesson.")).toBeInTheDocument();
     expect(progressBars[0]).toHaveAttribute("aria-valuenow", "30");
     expect(progressBars[0].querySelectorAll(".bg-primary-600")).toHaveLength(2);
     expect(progressBars[1]).toHaveAttribute("aria-valuenow", "90");
@@ -149,5 +160,48 @@ describe("LessonVideoProgressStrip", () => {
     await waitFor(() =>
       expect(screen.getAllByRole("progressbar")[0]).toHaveAttribute("aria-valuenow", "95"),
     );
+  });
+
+  it("does not erase live progress when a stale empty snapshot arrives", async () => {
+    const store = createLessonVideoProgressStore();
+
+    renderWith().render(
+      <LessonVideoProgressStrip
+        lessonId="lesson-id"
+        description={lessonDescription}
+        enabled
+        store={store}
+      />,
+    );
+
+    await waitFor(() => expect(screen.getAllByRole("progressbar")).toHaveLength(3));
+
+    act(() => {
+      store.getState().publishSnapshot({
+        resourceEntityId: "resource-one",
+        snapshot: {
+          coveragePercent: 0.5,
+          watchedRanges: [[0, 50]],
+          isWatched: false,
+          durationSeconds: 100,
+          bucketSizeSeconds: 1,
+        },
+      });
+      store.getState().publishSnapshot({
+        resourceEntityId: "resource-one",
+        snapshot: {
+          coveragePercent: 0,
+          watchedRanges: [],
+          isWatched: false,
+          durationSeconds: null,
+          bucketSizeSeconds: 1,
+        },
+      });
+    });
+
+    expect(screen.getAllByRole("progressbar")[0]).toHaveAttribute("aria-valuenow", "50");
+    expect(
+      screen.getAllByRole("progressbar")[0].querySelector(".bg-primary-600"),
+    ).toBeInTheDocument();
   });
 });

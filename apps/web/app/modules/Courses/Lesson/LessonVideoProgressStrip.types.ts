@@ -20,12 +20,15 @@ export type LessonVideoProgressStripProps = {
   lessonId: string;
   description: string | null;
   enabled: boolean;
+  showRequirementWarning?: boolean;
   store: LessonVideoProgressStore;
 };
 
 export type LessonVideoProgressStoreState = {
   segments: LessonVideoProgressSegment[];
+  lastActiveResourceEntityId: string | null;
   publishSnapshot: (change: LessonVideoProgressSnapshotChange) => void;
+  markVideoActivated: (resourceEntityId: string) => void;
   reset: (segments: LessonVideoProgressSegment[]) => void;
 };
 

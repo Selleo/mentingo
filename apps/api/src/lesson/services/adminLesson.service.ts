@@ -158,6 +158,8 @@ export class AdminLessonService {
       await this.cache.del(getContextKey(data.contextId));
     }
 
+    await this.resourceLibraryService.syncLessonAssetRelations(lesson.id, dbInstance);
+
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, dbInstance);
     await this.searchIndexService.refreshLesson(lesson.id, dbInstance);
 

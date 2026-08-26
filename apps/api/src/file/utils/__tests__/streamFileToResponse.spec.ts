@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { PassThrough, Writable } from "stream";
 
 import { Logger } from "@nestjs/common";
@@ -7,6 +8,7 @@ import { streamFileToResponse } from "../streamFileToResponse";
 import type { Response } from "express";
 
 class MockResponse extends Writable {
+  req = new EventEmitter();
   headersSent = false;
   headers = new Map<string, string>();
   statusCode = 200;
@@ -60,6 +62,18 @@ describe("streamFileToResponse", () => {
     streamFileToResponse(response as unknown as Response, { stream: fileStream });
 
     response.emit("close");
+
+    expect(fileStream.destroyed).toBe(true);
+    expect(loggerErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("destroys the file stream when the request is aborted", () => {
+    const fileStream = new PassThrough();
+    const response = new MockResponse();
+
+    streamFileToResponse(response as unknown as Response, { stream: fileStream });
+
+    response.req.emit("aborted");
 
     expect(fileStream.destroyed).toBe(true);
     expect(loggerErrorSpy).not.toHaveBeenCalled();

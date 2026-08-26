@@ -3691,6 +3691,8 @@
       "completedSummary": "{{completed}} de {{total}} completados",
       "overviewAriaLabel": "Progreso de los videos de la lección",
       "segmentAriaLabel": "Progreso del video {{index}}: {{progress}}% visto",
+      "requirementSingle": "Mira el vídeo completo para completar esta lección.",
+      "requirementMultiple": "Mira todos los vídeos para completar esta lección.",
       "errors": {
         "resourceNotFound": "No se pudo guardar el progreso del video para esta lección.",
         "unsupportedLessonType": "El progreso del video solo está disponible para lecciones de contenido.",
@@ -3699,6 +3701,14 @@
         "trackingDisabled": "El seguimiento de finalización de video está deshabilitado para este curso.",
         "accessDenied": "No tienes acceso para actualizar el progreso del video para esta lección."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "¿Continuar viendo antes de salir?",
+      "descriptionSingle": "Debes ver el vídeo completo antes de poder completar esta lección.",
+      "descriptionMultiple": "Debes ver todos los vídeos antes de poder completar esta lección.",
+      "exitAnyway": "Salir de todos modos",
+      "continueWatching": "Continuar viendo",
+      "remember": "No mostrar más en este curso"
     },
     "playNext": {
       "title": "A continuación",

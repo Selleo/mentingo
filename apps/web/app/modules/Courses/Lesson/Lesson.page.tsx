@@ -3,7 +3,7 @@ import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
+import { lessonQueryOptions, useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { courseQueryOptions, getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
@@ -48,6 +48,9 @@ export default function LessonPage() {
   const { data: user } = useCurrentUser();
 
   const [error, setError] = useState(false);
+  const [freshLessonRequestKey, setFreshLessonRequestKey] = useState<string | null>(null);
+
+  const lessonRequestKey = `${lessonId}:${language}:${user?.id ?? ""}`;
 
   const {
     data: lesson,
@@ -55,6 +58,26 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    setFreshLessonRequestKey(null);
+
+    void queryClient
+      .fetchQuery({
+        ...lessonQueryOptions(lessonId, language, user?.id ?? ""),
+        staleTime: 0,
+      })
+      .then(() => {
+        if (isCurrentRequest) setFreshLessonRequestKey(lessonRequestKey);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [language, lessonId, lessonRequestKey, user?.id]);
 
   useEffect(() => {
     if (!lesson?.id || !courseId) return;
@@ -85,7 +108,9 @@ export default function LessonPage() {
     );
   }
 
-  if (!lesson || !course) {
+  const isLessonReady = lesson?.id === lessonId && freshLessonRequestKey === lessonRequestKey;
+
+  if (!isLessonReady || !course) {
     const targetLessonType = course?.chapters
       .flatMap((chapter) => chapter.lessons)
       .find((courseLesson) => courseLesson.id === lessonId)?.type;
@@ -205,6 +230,7 @@ export default function LessonPage() {
                 </p>
               </div>
               <LessonContent
+                key={lesson.id}
                 lesson={lesson}
                 course={course}
                 lessonsAmount={currentChapter?.lessons.length ?? 0}

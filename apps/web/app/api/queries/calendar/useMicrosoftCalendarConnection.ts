@@ -15,6 +15,6 @@ export const microsoftCalendarConnectionQueryOptions = queryOptions({
     query.state.data?.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING ? 3_000 : false,
 });
 
-export function useMicrosoftCalendarConnection() {
-  return useQuery(microsoftCalendarConnectionQueryOptions);
+export function useMicrosoftCalendarConnection(enabled = true) {
+  return useQuery({ ...microsoftCalendarConnectionQueryOptions, enabled });
 }
