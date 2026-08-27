@@ -110,6 +110,24 @@ describe("AuthorModal", () => {
     expect(onSave).toHaveBeenCalledOnce();
   });
 
+  it("hides other courses for a read-only author", () => {
+    renderWith().render(
+      <AuthorModal
+        author={{ firstName: "Ada", lastName: "Lovelace" }}
+        isAdminExperience={false}
+        isSaving={false}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        onToggleShowAuthorSection={vi.fn()}
+        otherCourses={[]}
+        showOtherCourses={false}
+        showAuthorSectionDraft
+      />,
+    );
+
+    expect(screen.queryByText("Other courses")).not.toBeInTheDocument();
+  });
+
   it("lets admins transfer ownership inline from the author name", async () => {
     const user = userEvent.setup();
     const onTransferOwner = vi.fn().mockResolvedValue(undefined);

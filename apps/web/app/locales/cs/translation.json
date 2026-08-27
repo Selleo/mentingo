@@ -4739,6 +4739,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "sourceAuthorNotFound": "Autor zdrojoveho kurzu nebyl nalezen",
       "sourceCategoryNotFound": "Kategorie zdrojoveho kurzu nebyla nalezena",
       "courseNotFound": "Kurz nebyl nalezen",
       "chapterNotFound": "Kapitola nebyla nalezena",

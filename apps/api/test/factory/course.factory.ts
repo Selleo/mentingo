@@ -107,6 +107,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       currency: "usd",
       chapterCount: faker.number.int({ min: 1, max: 20 }),
       authorId: "", // Will be auto-created if empty
+      authorMetadata: null,
       categoryId: "", // Will be auto-created if empty
       courseType: COURSE_TYPE.DEFAULT,
       stripeProductId: null,

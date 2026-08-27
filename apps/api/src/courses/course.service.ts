@@ -13,6 +13,7 @@ import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
+  COURSE_ORIGIN_TYPES,
   COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
@@ -135,6 +136,7 @@ import {
   studentLessonProgress,
   tenants,
   users,
+  userDetails,
   courseStudentsStats,
   scormPackages,
 } from "src/storage/schema";
@@ -168,6 +170,7 @@ import {
   CourseStudentQuizResultsSortFields,
   EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
+import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
@@ -335,8 +338,8 @@ export class CourseService {
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
         description: this.localizationService.getLocalizedSqlField(courses.description, language),
         thumbnailUrl: courses.thumbnailS3Key,
-        author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-        authorAvatarUrl: sql<string>`${users.avatarReference}`,
+        author: courseAuthorNameSql(),
+        authorAvatarUrl: courseAuthorAvatarReferenceSql(),
         category: this.localizationService.getLocalizedSqlField(
           categories.title,
           language,
@@ -860,7 +863,6 @@ export class CourseService {
     if (!course) {
       throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
-
     return {
       lessonSequenceEnabled: course?.settings.lessonSequenceEnabled,
     };
@@ -1011,9 +1013,9 @@ export class CourseService {
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           authorId: sql<string>`${courses.authorId}`,
-          author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+          author: courseAuthorNameSql(),
           authorEmail: sql<string>`${users.email}`,
-          authorAvatarUrl: sql<string>`${users.avatarReference}`,
+          authorAvatarUrl: courseAuthorAvatarReferenceSql(),
           category: this.localizationService.getLocalizedSqlField(
             categories.title,
             language,
@@ -1221,9 +1223,9 @@ export class CourseService {
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
           learningOutcomes: this.getLocalizedLearningOutcomes(language, true),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
-          author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+          author: courseAuthorNameSql(),
           authorEmail: sql<string>`${users.email}`,
-          authorAvatarUrl: sql<string>`${users.avatarReference}`,
+          authorAvatarUrl: courseAuthorAvatarReferenceSql(),
           category: this.localizationService.getLocalizedSqlField(
             categories.title,
             language,
@@ -1441,6 +1443,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
+        authorMetadata: courses.authorMetadata,
         hasCertificate: courses.hasCertificate,
         hasFreeChapter: sql<boolean>`
           EXISTS (
@@ -1617,8 +1620,23 @@ export class CourseService {
     );
     const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
+    const { authorMetadata, ...courseData } = course;
+
+    const author = authorMetadata
+      ? {
+          firstName: authorMetadata.firstName,
+          lastName: authorMetadata.lastName,
+          jobTitle: authorMetadata.jobTitle,
+          description: authorMetadata.description,
+          profilePictureUrl: await this.userService.getUsersProfilePictureUrl(
+            authorMetadata.profilePictureReference,
+          ),
+        }
+      : await this.userService.getUserDetails(course.authorId, null);
+
     return {
-      ...course,
+      ...courseData,
+      author,
       thumbnailUrl: thumbnailUrl ?? undefined,
       estimatedDurationSeconds: durationHierarchy.totalSeconds,
 
@@ -1901,9 +1919,9 @@ export class CourseService {
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailUrl: courses.thumbnailS3Key,
         authorId: sql<string>`${courses.authorId}`,
-        author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        author: courseAuthorNameSql(),
         authorEmail: sql<string>`${users.email}`,
-        authorAvatarUrl: sql<string>`${users.avatarReference}`,
+        authorAvatarUrl: courseAuthorAvatarReferenceSql(),
         category: this.localizationService.getLocalizedSqlField(
           categories.title,
           language,
@@ -2281,6 +2299,7 @@ export class CourseService {
         currency: finalCurrency,
         courseType: isScormCourse ? COURSE_TYPE.SCORM : COURSE_TYPE.DEFAULT,
         authorId: currentUser.userId,
+        authorMetadata: await this.getAuthorMetadata(currentUser.userId, dbInstance),
         categoryId: createCourseBody.categoryId,
         stripeProductId: productId,
         stripePriceId: priceId,
@@ -3996,9 +4015,9 @@ export class CourseService {
       description: this.localizationService.getLocalizedSqlField(courses.description, language),
       thumbnailUrl: courses.thumbnailS3Key,
       authorId: sql<string>`${courses.authorId}`,
-      author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+      author: courseAuthorNameSql(),
       authorEmail: sql<string>`${users.email}`,
-      authorAvatarUrl: sql<string>`${users.avatarReference}`,
+      authorAvatarUrl: courseAuthorAvatarReferenceSql(),
       category: this.localizationService.getLocalizedSqlField(
         categories.title,
         language,
@@ -5514,13 +5533,16 @@ export class CourseService {
     await this.getCourseExists(courseId);
 
     const [course] = await this.db
-      .select({ authorId: courses.authorId })
+      .select({ authorId: courses.authorId, originType: courses.originType })
       .from(courses)
       .where(eq(courses.id, courseId))
       .limit(1);
 
     if (!course) {
       throw new NotFoundException("adminCourseView.errors.notFound.course");
+    }
+    if (course.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const [currentAuthor] = await this.db
@@ -5566,6 +5588,15 @@ export class CourseService {
 
     await this.getCourseExists(courseId);
 
+    const [course] = await this.db
+      .select({ originType: courses.originType })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (course?.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
+    }
+
     const courseOwnership = await this.getCourseOwnership(courseId);
 
     const candidate = courseOwnership.possibleCandidates.find(
@@ -5576,7 +5607,10 @@ export class CourseService {
     }
 
     await this.db.transaction(async (trx) => {
-      await trx.update(courses).set({ authorId: userId }).where(eq(courses.id, courseId));
+      await trx
+        .update(courses)
+        .set({ authorId: userId, authorMetadata: await this.getAuthorMetadata(userId, trx) })
+        .where(eq(courses.id, courseId));
 
       await trx
         .update(coursesSummaryStats)
@@ -5587,6 +5621,57 @@ export class CourseService {
         .set({ authorId: userId })
         .where(eq(courseStudentsStats.courseId, courseId));
     });
+
+    await this.masterCourseService.queueSyncForSourceCourse(courseId, "course.author.updated");
+  }
+
+  private async getAuthorMetadata(authorId: UUIDType, db = this.db) {
+    const [author] = await db
+      .select({
+        authorId: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profilePictureReference: users.avatarReference,
+        jobTitle: userDetails.jobTitle,
+        description: userDetails.description,
+      })
+      .from(users)
+      .leftJoin(userDetails, eq(userDetails.userId, users.id))
+      .where(eq(users.id, authorId))
+      .limit(1);
+
+    if (!author) throw new NotFoundException("masterCourse.error.sourceAuthorNotFound");
+
+    return author;
+  }
+
+  async refreshAuthorMetadata(authorId: UUIDType): Promise<void> {
+    const authorMetadata = await this.getAuthorMetadata(authorId);
+    const ownedCourses = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(
+        and(eq(courses.authorId, authorId), ne(courses.originType, COURSE_ORIGIN_TYPES.EXPORTED)),
+      );
+
+    if (!ownedCourses.length) return;
+
+    await this.db
+      .update(courses)
+      .set({ authorMetadata })
+      .where(
+        inArray(
+          courses.id,
+          ownedCourses.map((course) => course.id),
+        ),
+      );
+
+    await processInBatches(
+      ownedCourses,
+      (course) =>
+        this.masterCourseService.queueSyncForSourceCourse(course.id, "course.author.updated"),
+      { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+    );
   }
 
   private *translationCandidates(

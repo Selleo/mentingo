@@ -5430,6 +5430,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
+      "sourceAuthorNotFound": "Nie znaleziono autora kursu źródłowego",
       "sourceCategoryNotFound": "Nie znaleziono kategorii kursu źródłowego",
       "courseNotFound": "Nie znaleziono kursu",
       "chapterNotFound": "Nie znaleziono rozdziału",

@@ -4735,6 +4735,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "sourceAuthorNotFound": "Saltinio kurso autorius nerastas",
       "sourceCategoryNotFound": "Saltinio kurso kategorija nerasta",
       "courseNotFound": "Kursas nerastas",
       "chapterNotFound": "Skyrius nerastas",

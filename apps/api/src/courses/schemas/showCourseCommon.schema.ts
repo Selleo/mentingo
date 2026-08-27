@@ -9,6 +9,15 @@ import { coursesStatusOptions } from "./courseQuery";
 export const commonShowCourseSchema = Type.Object({
   archived: Type.Optional(Type.Boolean()),
   authorId: Type.Optional(UUIDSchema),
+  author: Type.Optional(
+    Type.Object({
+      firstName: Type.Union([Type.String(), Type.Null()]),
+      lastName: Type.Union([Type.String(), Type.Null()]),
+      jobTitle: Type.Union([Type.String(), Type.Null()]),
+      description: Type.Union([Type.String(), Type.Null()]),
+      profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+    }),
+  ),
   category: Type.String(),
   categoryId: Type.Optional(Type.String({ format: "uuid" })),
   chapters: Type.Array(showChapterSchema),

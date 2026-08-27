@@ -7,7 +7,6 @@ import { match } from "ts-pattern";
 import { useTransferCourseOwnership } from "~/api/mutations/admin/useTransferCourseOwnership";
 import { useCurrentUser } from "~/api/queries";
 import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwnershipCandidates";
-import { useUserDetails } from "~/api/queries/useUserDetails";
 import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -29,7 +28,8 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
   const [isEditingOwner, setIsEditingOwner] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  const { data: userDetails } = useUserDetails(course?.authorId ?? "");
+  const userDetails = course.author;
+
   const { data: currentUser } = useCurrentUser();
   const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
   const { hasAccess: canManageOwnCourses } = usePermissions({
@@ -49,7 +49,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     useTransferCourseOwnership();
   const { data: courseOwnershipCandidates } = useCourseOwnershipCandidates({
     id: course.id,
-    enabled: canManageUsers,
+    enabled: canManageUsers && !course.isContentReadonly,
   });
 
   const isNonAuthorContentCreator = canManageOwnCourses && currentUser?.id !== course.authorId;
@@ -77,7 +77,10 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     .otherwise(() => false);
 
   const canEditOwner =
-    canManageUsers && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;
+    canManageUsers &&
+    !course.isContentReadonly &&
+    !!course.id &&
+    !!courseOwnershipCandidates?.possibleCandidates?.length;
 
   const handleOwnerChange = async (value: string) => {
     if (!course?.id || value === course.authorId) {

@@ -5485,6 +5485,11 @@ describe("CourseController (e2e)", () => {
           .from(courses)
           .where(eq(courses.id, otherCourse.id));
         expect(updatedCourse.authorId).toBe(newOwner.id);
+        expect(updatedCourse.authorMetadata).toMatchObject({
+          authorId: newOwner.id,
+          firstName: newOwner.firstName,
+          lastName: newOwner.lastName,
+        });
         expect(untouchedCourse.authorId).toBe(otherAuthor.id);
 
         const [updatedSummary] = await db
@@ -5536,6 +5541,33 @@ describe("CourseController (e2e)", () => {
           .send({ courseId: course.id, userId: student.id })
           .set("Cookie", await cookieFor(admin, app))
           .expect(400);
+      });
+
+      it("rejects ownership transfer for shared courses", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+        const candidate = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          originType: "exported",
+        });
+
+        await request(app.getHttpServer())
+          .post("/api/course/course-ownership/transfer")
+          .send({ courseId: course.id, userId: candidate.id })
+          .set("Cookie", await cookieFor(admin, app))
+          .expect(403);
       });
 
       it("returns 403 for content creator without access", async () => {
