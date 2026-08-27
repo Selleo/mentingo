@@ -86,6 +86,18 @@ export class CourseFactory {
     return response.data.data;
   }
 
+  async shareWithTenant(id: string, targetTenantId: string) {
+    return this.apiClient.api.courseControllerExportMasterCourse(id, {
+      targetTenantIds: [targetTenantId],
+    });
+  }
+
+  async getMasterCourseExports(id: string) {
+    const response = await this.apiClient.api.courseControllerGetMasterCourseExports(id);
+
+    return response.data.data;
+  }
+
   async updateHasCertificate(id: string, hasCertificate: boolean) {
     await this.apiClient.api.courseControllerUpdateHasCertificate(id, { hasCertificate });
     return this.getById(id);

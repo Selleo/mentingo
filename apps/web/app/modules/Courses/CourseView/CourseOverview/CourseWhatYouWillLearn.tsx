@@ -1,4 +1,8 @@
-import { MAX_COURSE_LEARNING_OUTCOMES, type SupportedLanguages } from "@repo/shared";
+import {
+  COURSE_ORIGIN_TYPES,
+  MAX_COURSE_LEARNING_OUTCOMES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Check, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,6 +34,7 @@ export default function CourseWhatYouWillLearn({
 }: CourseWhatYouWillLearnProps) {
   const { t } = useTranslation();
   const { course, isAdminExperience } = useCourseAccessProvider();
+  const canEdit = isAdminExperience && course.originType !== COURSE_ORIGIN_TYPES.EXPORTED;
   const { mutateAsync: updateCourse, isPending } = useUpdateCourse();
 
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -46,7 +51,7 @@ export default function CourseWhatYouWillLearn({
     inputRefs.current[editingOutcomeIndex]?.focus();
   }, [editingOutcomeIndex]);
 
-  if (!isAdminExperience && courseOutcomes.length === 0) {
+  if (!canEdit && courseOutcomes.length === 0) {
     return null;
   }
 
@@ -118,7 +123,7 @@ export default function CourseWhatYouWillLearn({
         <span className="min-w-0 flex-1 whitespace-nowrap">
           {t("modernCourseView.overview.whatYouWillMaster")}
         </span>
-        {isAdminExperience && (
+        {canEdit && (
           <>
             <span className="text-lg font-medium text-white/80">
               {outcomesDraft.length}/{MAX_COURSE_LEARNING_OUTCOMES}
@@ -171,18 +176,16 @@ export default function CourseWhatYouWillLearn({
             ) : (
               <button
                 type="button"
-                disabled={!isAdminExperience || isPending}
+                disabled={!canEdit || isPending}
                 onClick={() => {
-                  if (isAdminExperience) {
-                    setEditingOutcomeIndex(index);
-                  }
+                  if (canEdit) setEditingOutcomeIndex(index);
                 }}
                 className={cn(
                   "min-h-7 flex-1 rounded-lg border-2 border-dashed border-transparent px-2 py-0.5 text-left text-base font-medium leading-6 text-white transition-all",
                   {
                     "cursor-pointer focus-visible:border-white focus-visible:bg-white focus-visible:bg-opacity-10 focus-visible:outline-none":
-                      isAdminExperience,
-                    "cursor-default disabled:opacity-100": !isAdminExperience,
+                      canEdit,
+                    "cursor-default disabled:opacity-100": !canEdit,
                   },
                 )}
               >
@@ -190,7 +193,7 @@ export default function CourseWhatYouWillLearn({
               </button>
             )}
 
-            {isAdminExperience && editingOutcomeIndex !== index && (
+            {canEdit && editingOutcomeIndex !== index && (
               <button
                 type="button"
                 onPointerDown={(event) => {

@@ -27,6 +27,7 @@ describe("CourseDescriptionModal", () => {
 
     renderWith().render(
       <CourseDescriptionModal
+        canEdit
         courseDescription="Course description"
         onChangeDescription={vi.fn()}
         onClose={onClose}

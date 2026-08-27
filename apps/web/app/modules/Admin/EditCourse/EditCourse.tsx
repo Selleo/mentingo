@@ -468,6 +468,7 @@ const EditCourse = () => {
                         }
                       }
                       isAIConfigured={isAIConfigured?.enabled ?? false}
+                      canAddLanguage={!isExportedCourse}
                       onChange={setCourseLanguage}
                       setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
                     />

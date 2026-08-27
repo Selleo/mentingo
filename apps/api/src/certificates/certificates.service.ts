@@ -12,6 +12,7 @@ import {
   buildCertificateMarkup,
   CERTIFICATE_ARCHIVE_REASONS,
   CERTIFICATE_RESET_SCOPES,
+  DEFAULT_CERTIFICATE_FONT_COLOR,
   CERTIFICATE_VALIDITY_TYPES,
   CERTIFICATE_VALIDITY_UNITS,
   PERMISSIONS,
@@ -527,7 +528,7 @@ export class CertificatesService implements OnModuleDestroy {
         this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
       ]);
 
-    const accentColor = certificate.certificateFontColor || imageSettings.primaryColor || "#1f2937";
+    const accentColor = certificate.certificateFontColor || DEFAULT_CERTIFICATE_FONT_COLOR;
     const certificateDate =
       certificate.issuedAt || certificate.completionDate || certificate.createdAt;
 
@@ -857,8 +858,7 @@ export class CertificatesService implements OnModuleDestroy {
   }
 
   private buildShareImageMarkup(context: ShareRenderContext): string {
-    const accentColor =
-      context.certificate.certificateFontColor || context.settings.primaryColor || "#1f2937";
+    const accentColor = context.certificate.certificateFontColor || DEFAULT_CERTIFICATE_FONT_COLOR;
 
     return buildCertificateMarkup({
       studentName: context.certificate.fullName || "",

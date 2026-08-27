@@ -12,6 +12,7 @@ import {
 import {
   AI_MENTOR_TYPE,
   COURSE_ORIGIN_TYPES,
+  DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   LESSON_TYPES,
   MASTER_COURSE_ENTITY_TYPES,
@@ -262,7 +263,7 @@ export class MasterCourseService {
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignature: null,
-      certificateFontColor: null,
+      certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
       certificateValidity: null,
     });
 
@@ -568,7 +569,7 @@ export class MasterCourseService {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
         certificateSignature: null,
-        certificateFontColor: null,
+        certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
         certificateValidity: null,
       });
 
@@ -1847,7 +1848,7 @@ export class MasterCourseService {
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignature: null,
-      certificateFontColor: null,
+      certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
       certificateValidity: null,
     });
 
