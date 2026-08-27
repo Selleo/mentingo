@@ -44,7 +44,6 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -64,6 +63,7 @@ import {
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import { int4multirange, tsvector } from "./custom-types";
+export * from "./quiz.schema";
 import {
   archived,
   availableLocales,
@@ -2403,6 +2403,13 @@ export const resourceEntity = pgTable(
       table.entityType,
       table.relationshipType,
     ),
+    assessmentQuestionPromptImageUniqueIdx: uniqueIndex(
+      "resource_entity_assessment_question_prompt_image_unique_idx",
+    )
+      .on(table.tenantId, table.entityId)
+      .where(
+        sql`${table.entityType} = 'assessment_question' AND ${table.relationshipType} = 'prompt_image'`,
+      ),
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
   })),
 );
