@@ -44,7 +44,7 @@ export default function LessonPage() {
   const { t } = useTranslation();
   const { courseId = "", lessonId = "" } = useParams();
 
-  const { language } = useLanguageStore();
+  const { language, setLanguage } = useLanguageStore();
   const { data: user } = useCurrentUser();
 
   const [error, setError] = useState(false);
@@ -58,6 +58,10 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
+
+  useEffect(() => {
+    if (course && !course.availableLocales.includes(language)) setLanguage(course.baseLanguage);
+  }, [course, language, setLanguage]);
 
   useEffect(() => {
     let isCurrentRequest = true;
