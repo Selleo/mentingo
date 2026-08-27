@@ -250,7 +250,10 @@ export class AuthService {
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+    const { isManagingTenant, isManagingTenantAdmin } = await this.getManagingTenantFlags(
+      user.tenantId,
+      permissions,
+    );
 
     const actor: ActorUserType = {
       userId: user.id,
@@ -273,6 +276,7 @@ export class AuthService {
         shouldVerifyMFA: true,
         requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
+        isManagingTenant,
         isManagingTenantAdmin,
       };
     }
@@ -285,6 +289,7 @@ export class AuthService {
       shouldVerifyMFA: false,
       requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
+      isManagingTenant,
       isManagingTenantAdmin,
     };
   }
@@ -303,7 +308,10 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(userId);
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, permissions);
+    const { isManagingTenant, isManagingTenantAdmin } = await this.getManagingTenantFlags(
+      tenantId,
+      permissions,
+    );
     const studentModeCourseIds = await this.getStudentModeCourseIds(userId, this.db);
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
@@ -312,6 +320,7 @@ export class AuthService {
         shouldVerifyMFA: true,
         requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
+        isManagingTenant,
         isManagingTenantAdmin,
         isSupportMode: false,
         studentModeCourseIds,
@@ -325,6 +334,7 @@ export class AuthService {
       shouldVerifyMFA: false,
       requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
+      isManagingTenant,
       isManagingTenantAdmin,
       isSupportMode: false,
       studentModeCourseIds,
@@ -353,7 +363,11 @@ export class AuthService {
       this.dbAdmin,
     );
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+    const { isManagingTenant, isManagingTenantAdmin } = await this.getManagingTenantFlags(
+      user.tenantId,
+      permissions,
+      this.dbAdmin,
+    );
     const studentModeCourseIds = await this.getStudentModeCourseIds(targetUserId, this.dbAdmin);
 
     return {
@@ -361,6 +375,7 @@ export class AuthService {
       shouldVerifyMFA: false,
       requiresPasswordChange: false,
       onboardingStatus,
+      isManagingTenant,
       isManagingTenantAdmin,
       isSupportMode: true,
       studentModeCourseIds,
@@ -939,7 +954,10 @@ export class AuthService {
       }),
     );
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+    const { isManagingTenant, isManagingTenantAdmin } = await this.getManagingTenantFlags(
+      user.tenantId,
+      permissions,
+    );
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
@@ -949,6 +967,7 @@ export class AuthService {
         shouldVerifyMFA: true,
         requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
+        isManagingTenant,
         isManagingTenantAdmin,
       };
     }
@@ -960,23 +979,27 @@ export class AuthService {
       shouldVerifyMFA: false,
       requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
+      isManagingTenant,
       isManagingTenantAdmin,
     };
   }
 
-  private async isManagingTenantAdmin(
+  private async getManagingTenantFlags(
     tenantId: UUIDType,
     permissions: PermissionKey[],
-  ): Promise<boolean> {
-    if (!permissions.includes(PERMISSIONS.TENANT_MANAGE)) return false;
-
-    const [tenant] = await this.db
+    database: DatabasePg = this.db,
+  ) {
+    const [tenant] = await database
       .select({ isManaging: tenants.isManaging })
       .from(tenants)
       .where(eq(tenants.id, tenantId))
       .limit(1);
 
-    return Boolean(tenant?.isManaging);
+    const isManagingTenant = Boolean(tenant?.isManaging);
+    return {
+      isManagingTenant,
+      isManagingTenantAdmin: isManagingTenant && permissions.includes(PERMISSIONS.TENANT_MANAGE),
+    };
   }
 
   private isMfaRoleEnforced(enforcedRoles: string[], roleSlugs: string[]): boolean {

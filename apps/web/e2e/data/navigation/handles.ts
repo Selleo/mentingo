@@ -4,6 +4,8 @@ export const NAVIGATION_HANDLES = {
   DASHBOARD_LINK: "navigation-dashboard-link",
   COURSES_GROUP: "navigation-courses-group",
   COURSES_LINK: "navigation-courses-link",
+  AUDIT_LINK: "navigation-audit-link",
+  BENCHMARK_LINK: "navigation-benchmark-link",
   LEARNING_PATHS_LINK: "navigation-learning-paths-link",
   CALENDAR_LINK: "navigation-calendar-link",
   CONTENT_GROUP: "navigation-content-toggle",

@@ -1359,6 +1359,20 @@
       "when": 1787219830731,
       "tag": "0193_rename_bunny_stream_signing_secret",
       "breakpoints": true
+    },
+    {
+      "idx": 194,
+      "version": "7",
+      "when": 1787772595914,
+      "tag": "0194_add_audit_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 195,
+      "version": "7",
+      "when": 1787772600236,
+      "tag": "0195_enable_audit_submissions_rls",
+      "breakpoints": true
     }
   ]
 }

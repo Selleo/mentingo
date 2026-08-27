@@ -37,6 +37,29 @@ describe("findMatchingRoute", () => {
     });
   });
 
+  it("should protect audit and benchmark routes with statistics permissions", () => {
+    expect(findMatchingRoute("audit")).toEqual({
+      anyOf: [PERMISSIONS.STATISTICS_READ_SELF, PERMISSIONS.STATISTICS_READ],
+    });
+    expect(findMatchingRoute("audit/individual")).toEqual({
+      allOf: [PERMISSIONS.STATISTICS_READ_SELF],
+    });
+    expect(findMatchingRoute("audit/school")).toEqual({
+      allOf: [PERMISSIONS.STATISTICS_READ],
+    });
+    expect(findMatchingRoute("benchmark")).toEqual({
+      allOf: [PERMISSIONS.STATISTICS_READ],
+    });
+    expect(
+      findMatchingRoute("audit/results/individual/00f83bc0-e7af-4435-af32-3be861ffd7f0"),
+    ).toEqual({
+      allOf: [PERMISSIONS.STATISTICS_READ_SELF],
+    });
+    expect(findMatchingRoute("audit/results/school/00f83bc0-e7af-4435-af32-3be861ffd7f0")).toEqual({
+      allOf: [PERMISSIONS.STATISTICS_READ],
+    });
+  });
+
   it("should find admin learning path routes", () => {
     expect(findMatchingRoute("admin/development-paths/new")).toEqual({
       allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
@@ -180,7 +203,11 @@ describe("mapNavigationItems", () => {
 describe("getNavigationConfig", () => {
   const t = ((key: string) => key) as TFunction;
 
-  const getCourseItems = (isLearningPathsEnabled: boolean, shouldShowLearningPaths: boolean) =>
+  const getCourseItems = (
+    isLearningPathsEnabled: boolean,
+    shouldShowLearningPaths: boolean,
+    isManagingTenant = false,
+  ) =>
     getNavigationConfig(
       t,
       false,
@@ -189,6 +216,7 @@ describe("getNavigationConfig", () => {
       false,
       isLearningPathsEnabled,
       shouldShowLearningPaths,
+      isManagingTenant,
     )[0].items;
 
   it("should hide learning paths when the feature is disabled", () => {
@@ -207,5 +235,32 @@ describe("getNavigationConfig", () => {
     const items = getCourseItems(true, true);
 
     expect(items.some((item) => item.path === "development-paths")).toBe(true);
+  });
+
+  it("should include Audit and Benchmark in the learner navigation", () => {
+    const items = getCourseItems(false, false);
+
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "audit",
+          iconName: "Target",
+          accessRequirement: {
+            anyOf: [PERMISSIONS.STATISTICS_READ_SELF, PERMISSIONS.STATISTICS_READ],
+          },
+        }),
+        expect.objectContaining({
+          path: "benchmark",
+          accessRequirement: { allOf: [PERMISSIONS.STATISTICS_READ] },
+        }),
+      ]),
+    );
+  });
+
+  it("hides Benchmark for the managing tenant but keeps Individual Audit available", () => {
+    const items = getCourseItems(false, false, true);
+
+    expect(items.some((item) => item.path === "audit")).toBe(true);
+    expect(items.some((item) => item.path === "benchmark")).toBe(false);
   });
 });

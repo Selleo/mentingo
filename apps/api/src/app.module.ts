@@ -21,6 +21,7 @@ import { AnalyticsModule } from "./analytics/analytics.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { ArticlesModule } from "./articles/articles.module";
 import { AudioModule } from "./audio/audio.module";
+import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
@@ -87,6 +88,7 @@ import type { RedisClient } from "src/redis";
 
 @Module({
   imports: [
+    AuditModule,
     ConfigModule.forRoot({
       load: [
         database,

@@ -650,6 +650,8 @@
     "progress": "Fortschritt",
     "findInApplication": "Finden Sie in der Anwendung",
     "courses": "Kurse",
+    "audit": "Audit",
+    "aiBenchmark": "Benchmark",
     "learningPaths": "Entwicklungspfade",
     "calendar": "Kalender",
     "content": "Inhalt",
@@ -668,6 +670,208 @@
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen"
+  },
+  "auditView": {
+    "title": "Audit",
+    "subtitle": "Bewerten Sie die KI-Bereitschaft für sich selbst oder Ihre Schule.",
+    "individual": {
+      "title": "Individuelles Audit",
+      "description": "Bewerten Sie Ihr eigenes KI-Wissen, Ihre Fähigkeiten und Ihr Selbstvertrauen.",
+      "start": "Individuelles Audit starten"
+    },
+    "school": {
+      "title": "Schul-Audit",
+      "description": "Bewerten Sie die gemeinsame KI-Bereitschaft Ihrer Schule.",
+      "start": "Schul-Audit starten"
+    },
+    "question": {
+      "number": "Frage {{current}} von {{total}}",
+      "firstAttempt": "Beantworten Sie diese Frage, um Ihren ersten Wert zu ermitteln.",
+      "previousScore": "Ihr vorheriger Wert war {{score}} %.",
+      "submit": "Audit abschließen",
+      "saving": "Speichern..."
+    },
+    "questions": {
+      "individual_ai_awareness": {
+        "title": "Wie gut verstehen Sie die Chancen und Grenzen von KI in der Bildung?"
+      },
+      "individual_tool_proficiency": {
+        "title": "Wie sicher wählen und nutzen Sie KI-Werkzeuge für Ihre tägliche Arbeit?"
+      },
+      "individual_ethical_understanding": {
+        "title": "Wie sicher erkennen und bewältigen Sie ethische Risiken bei der KI-Nutzung?"
+      },
+      "individual_curriculum_integration": {
+        "title": "Wie wirksam integrieren Sie KI in Unterricht, Lernen oder Lehrplanentwicklung?"
+      },
+      "individual_data_privacy": {
+        "title": "Wie sicher schützen Sie persönliche und schulische Daten bei der KI-Nutzung?"
+      },
+      "school_senior_leadership": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung in der Schulleitung?"
+      },
+      "school_science_technology": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung in Naturwissenschaften und Technik?"
+      },
+      "school_humanities": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung in den Geisteswissenschaften?"
+      },
+      "school_arts_creative": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung im Bereich Kunst und Kreativität?"
+      },
+      "school_administration": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung in der Verwaltung?"
+      },
+      "school_support_staff": {
+        "title": "Wie ausgereift ist die verantwortungsvolle KI-Nutzung beim Unterstützungspersonal?"
+      }
+    },
+    "scale": {
+      "level_1": "Noch nicht begonnen oder verstanden",
+      "level_2": "Erstes Bewusstsein mit begrenzter praktischer Nutzung",
+      "level_3": "In Entwicklung mit teilweise regelmäßiger Praxis",
+      "level_4": "Etabliert und sicher angewendet",
+      "level_5": "Verankert, überprüft und zur Anleitung anderer geeignet"
+    },
+    "complete": {
+      "title": "Audit abgeschlossen",
+      "description": "Ihre Antworten wurden gespeichert und Ihr Ergebnis ist verfügbar.",
+      "back": "Zurück zum Audit",
+      "benchmark": "Benchmark anzeigen"
+    },
+    "history": {
+      "title": "Frühere Audits",
+      "description": "Überprüfen Sie abgeschlossene individuelle und Schul-Audits.",
+      "completed": "Abgeschlossen am {{date}}",
+      "score": "Ergebnis: {{score}}%",
+      "empty": "Noch keine Audits abgeschlossen."
+    },
+    "result": {
+      "title": "Audit-Statistik",
+      "individualTitle": "Audit-Ergebnisse",
+      "schoolTitle": "Ergebnisse des Schul-Audits",
+      "individualSubtitle": "Individuelle Bewertung der KI-Bereitschaft — {{date}}",
+      "schoolSubtitle": "{{date}} — {{company}}",
+      "overallScore": "Gesamtergebnis",
+      "schoolScore": "Schulergebnis",
+      "categoryBreakdown": "Ergebnisse nach Kategorie",
+      "departmentScores": "Ergebnisse nach Abteilung",
+      "levels": {
+        "level1": "Stufe 1 — Kompetent",
+        "level2": "Stufe 2 — Befähigt",
+        "level3": "Stufe 3 — Regelkonform",
+        "level4": "Stufe 4 — Führend"
+      },
+      "meaning": {
+        "title": "Was das bedeutet",
+        "individual": "Ihr am höchsten bewerteter Bereich ist {{strongest}} ({{strongestScore}} %). Ihre wichtigsten Entwicklungsbereiche sind {{weakest}} ({{weakestScore}} %) und {{secondWeakest}} ({{secondWeakestScore}} %). Der folgende Lernplan konzentriert Ihre nächsten Schritte auf diese Lücken.",
+        "school": "Diese Selbsteinschätzung zeigt {{strongest}} als am höchsten bewertete Abteilung der Schule ({{strongestScore}} %). {{weakest}} ({{weakestScore}} %) und {{secondWeakest}} ({{secondWeakestScore}} %) sind die vorrangigen Bereiche. Der folgende Plan überführt diese Ergebnisse in praktische schulweite Maßnahmen."
+      },
+      "notFound": "Dieses Audit-Ergebnis wurde nicht gefunden."
+    },
+    "competencies": {
+      "ai_literacy": "KI-Kompetenz",
+      "ai_governance": "KI-Governance",
+      "ai_awareness": "KI-Verständnis",
+      "tool_proficiency": "Werkzeugkompetenz",
+      "ethical_understanding": "Ethisches Verständnis",
+      "curriculum_integration": "Lehrplanintegration",
+      "data_privacy": "Daten und Datenschutz",
+      "senior_leadership": "Schulleitung",
+      "science_technology": "Naturwissenschaften und Technik",
+      "humanities": "Geisteswissenschaften",
+      "arts_creative": "Kunst und Kreativität",
+      "administration": "Verwaltung",
+      "support_staff": "Unterstützungspersonal"
+    },
+    "roadmap": {
+      "individualTitle": "Ihr Lernplan",
+      "schoolTitle": "Schulischer Verbesserungsplan",
+      "description": "Basierend auf Ihrem Audit · wählen Sie unten Ihr Tempo",
+      "courses": "Kurse in diesem Plan",
+      "summary": "{{count}} Kurse · {{months}} Monate",
+      "month": "Monat {{period}}",
+      "monthShort": "{{months}} Mon.",
+      "courseCount_one": "{{count}} Kurs",
+      "courseCount_other": "{{count}} Kurse",
+      "priority": "Priorität",
+      "priorityArea": "{{area}} priorisieren",
+      "buildArea": "Sicherheit in {{area}} aufbauen",
+      "milestone": "Erster Meilenstein",
+      "completeLevel2": "Stufe 2 abschließen",
+      "level2Certificate": "Zertifizierung für Stufe 2",
+      "introduceLevel3": "Einführung in Stufe 3",
+      "deepenPractice": "Praxis vertiefen",
+      "level3Milestone": "Meilenstein für Stufe 3",
+      "level3Foundation": "Grundlagen für Stufe 3",
+      "leadShare": "Führen und Wissen teilen",
+      "aiPioneer": "Einführung zum KI-Pionier",
+      "quarters": {
+        "q1": "Q1 — Jan. bis März",
+        "q2": "Q2 — Apr. bis Juni",
+        "q3": "Q3 — Juli bis Sept.",
+        "q4": "Q4 — Okt. bis Dez."
+      },
+      "milestoneBadge": "Meilenstein",
+      "milestones": {
+        "enabledBadge": "Abzeichen „KI-befähigt“ erwerben",
+        "pioneerBadge": "Abzeichen „KI-Pionier“ erwerben"
+      },
+      "gaps": "vorrangige Lücken",
+      "confidence": "Sicherheit im Umgang mit KI",
+      "noCourse": "Für diese Phase ist kein weiterer Kurs verfügbar.",
+      "actions": {
+        "seniorStaff": {
+          "title": "Individuelle Audits für Schlüsselpersonen durchführen",
+          "description": "Eine Ausgangsbasis für die Schulleitung schaffen"
+        },
+        "workingGroup": {
+          "title": "Eine KI-Arbeitsgruppe einrichten",
+          "description": "Klare Verantwortung für verantwortungsvolle KI-Verbesserungen schaffen"
+        },
+        "rerunSchool": {
+          "title": "Schul-Audit wiederholen",
+          "description": "Fortschritt gegenüber der Ausgangsbasis messen"
+        },
+        "rerunIndividual": {
+          "title": "Individuelles Audit wiederholen",
+          "description": "Veränderungen Ihrer Bereitschaft verfolgen"
+        }
+      }
+    },
+    "toast": {
+      "saved": "Audit erfolgreich gespeichert.",
+      "saveError": "Das Audit konnte nicht gespeichert werden. Versuchen Sie es erneut."
+    },
+    "errors": {
+      "definitionOutdated": "Dieses Audit wurde geändert. Aktualisieren Sie die Seite und versuchen Sie es erneut.",
+      "invalidAnswers": "Einige Antworten sind ungültig. Aktualisieren Sie die Seite und versuchen Sie es erneut.",
+      "submissionNotFound": "Dieses Audit-Ergebnis wurde nicht gefunden.",
+      "schoolTenantRequired": "Schul-Audit und Benchmark sind nur für Schulorganisationen verfügbar."
+    }
+  },
+  "aiBenchmarkView": {
+    "title": "Benchmark",
+    "subtitle": "Vergleichen Sie Ihre Schule anhand abgeschlossener Audits mit anderen teilnehmenden Schulen.",
+    "stats": {
+      "score": "Ihr Ergebnis",
+      "average": "gegenüber {{score}} % Durchschnitt",
+      "rank": "Gesamtrang",
+      "participants": "Teilnehmende Schulen",
+      "improvement": "Verbesserung",
+      "previousAudit": "Seit dem vorherigen Schul-Audit"
+    },
+    "comparison": { "title": "Schulvergleich", "overall": "Gesamt" },
+    "courses": {
+      "title": "Empfohlene Kurse",
+      "description": "Vertiefen Sie praktische KI-Kenntnisse mit verfügbaren Kursen.",
+      "empty": "Noch keine veröffentlichten Kurse verfügbar."
+    },
+    "empty": {
+      "title": "Schließen Sie zuerst ein Schul-Audit ab",
+      "description": "Ihre Schule benötigt ein abgeschlossenes Audit für den Benchmark.",
+      "action": "Schul-Audit starten"
+    }
   },
   "microsoftCalendar": {
     "title": "Microsoft-Kalender",
@@ -4678,6 +4882,9 @@
     "settings": "Einstellungen",
     "providerInformation": "Anbieterinformationen",
     "courses": "Kurse",
+    "audit": "Audit",
+    "auditResult": "Audit-Statistik",
+    "aiBenchmark": "Benchmark",
     "profile": "Profil",
     "lesson": "Lektion",
     "lessonPreview": "Lektionsvorschau",

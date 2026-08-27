@@ -108,6 +108,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         isStripeConfigured?.enabled,
         isLearningPathsEnabled,
         shouldShowLearningPaths,
+        Boolean(user?.isManagingTenant && !user.isSupportMode),
       ),
     );
   }

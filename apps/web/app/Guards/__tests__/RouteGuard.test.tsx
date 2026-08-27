@@ -20,7 +20,7 @@ describe("RouteGuard", () => {
       data: {
         permissions: [PERMISSIONS.USER_MANAGE, PERMISSIONS.COURSE_UPDATE],
       },
-    } as ReturnType<typeof useCurrentUserSuspense>);
+    } as unknown as ReturnType<typeof useCurrentUserSuspense>);
 
     const RemixStub = createRemixStub([
       {
@@ -69,5 +69,36 @@ describe("RouteGuard", () => {
     renderWith({ withQuery: true }).render(<RemixStub initialEntries={["/admin/courses"]} />);
 
     expect(screen.queryByText("Protected Content")).toBeNull();
+  });
+
+  it("should not render school-only audit routes for the managing tenant", async () => {
+    vi.mocked(useCurrentUserSuspense).mockReturnValue({
+      data: {
+        permissions: [PERMISSIONS.STATISTICS_READ],
+        isManagingTenant: true,
+        isManagingTenantAdmin: false,
+        isSupportMode: false,
+      },
+    } as ReturnType<typeof useCurrentUserSuspense>);
+
+    const RemixStub = createRemixStub([
+      {
+        path: "/",
+        children: [
+          {
+            path: "audit/school",
+            Component: () => (
+              <RouteGuard>
+                <div>School Audit</div>
+              </RouteGuard>
+            ),
+          },
+        ],
+      },
+    ]);
+
+    renderWith({ withQuery: true }).render(<RemixStub initialEntries={["/audit/school"]} />);
+
+    expect(screen.queryByText("School Audit")).toBeNull();
   });
 });

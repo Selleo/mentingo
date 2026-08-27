@@ -18,6 +18,10 @@ export const routes: (
       route("", "modules/Navigation/NavigationWrapper.tsx", () => {
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");
+          route("audit", "modules/Audit/Audit.page.tsx");
+          route("audit/:type", "modules/Audit/AuditQuestion.page.tsx");
+          route("audit/results/:type/:id", "modules/Audit/AuditResult.page.tsx");
+          route("benchmark", "modules/Audit/AiBenchmark.page.tsx");
           route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
           route("development-paths", "modules/LearningPaths/LearningPaths.page.tsx");
           route("calendar", "modules/Calendar/Calendar.page.tsx");

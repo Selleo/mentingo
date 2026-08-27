@@ -86,6 +86,7 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data.email).toBe(user.email);
       expect(response.body.data).toHaveProperty("shouldVerifyMFA");
       expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenant");
       expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
       expect(response.headers["set-cookie"]).toBeDefined();
       expect(response.headers["set-cookie"].length).toBe(2);
@@ -494,6 +495,7 @@ describe("AuthController (e2e)", () => {
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
         groups: [],
+        isManagingTenant: false,
         isManagingTenantAdmin: false,
         isSupportMode: false,
         studentModeCourseIds: [],
@@ -812,6 +814,7 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toHaveProperty("email", user.email);
       expect(response.body.data).toHaveProperty("shouldVerifyMFA");
       expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenant");
       expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
       expect(response.headers["set-cookie"]).toBeDefined();
       expect(response.headers["set-cookie"].length).toBe(2);

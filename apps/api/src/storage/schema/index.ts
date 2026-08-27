@@ -123,6 +123,9 @@ import type {
   AiMentorTeachingStyle,
   AiMentorType,
   ResourceVisibility,
+  AuditAnswer,
+  AuditCompetency,
+  AuditType,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiMentorPracticeStatus } from "src/ai/ai-practice.types";
@@ -213,6 +216,44 @@ export const quizAttempts = pgTable(
     tenantId,
   },
   withTenantIdIndex("quiz_attempts"),
+);
+
+export const auditSubmissions = pgTable(
+  "audit_submissions",
+  {
+    ...id,
+    ...timestamps,
+    type: text("type").$type<AuditType>().notNull(),
+    definitionVersion: integer("definition_version").notNull(),
+    submittedById: uuid("submitted_by_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    answers: jsonb("answers").$type<AuditAnswer[]>().notNull(),
+    score: integer("score").notNull(),
+    competencyScores: jsonb("competency_scores")
+      .$type<Partial<Record<AuditCompetency, number>>>()
+      .notNull(),
+    completedAt: timestamp("completed_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("audit_submissions", (table) => ({
+    tenantTypeCompletedIdx: index("audit_submissions_tenant_type_completed_idx").on(
+      table.tenantId,
+      table.type,
+      table.completedAt,
+    ),
+    userTypeCompletedIdx: index("audit_submissions_user_type_completed_idx").on(
+      table.submittedById,
+      table.type,
+      table.completedAt,
+    ),
+  })),
 );
 
 export const credentials = pgTable(

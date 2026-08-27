@@ -1,6 +1,195 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/audits/individual/latest": {
+      "get": {
+        "operationId": "AuditController_getLatestIndividual",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLatestIndividualResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/individual/submissions": {
+      "post": {
+        "operationId": "AuditController_submitIndividual",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitIndividualBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitIndividualResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AuditController_getIndividualHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIndividualHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/individual/submissions/{id}": {
+      "get": {
+        "operationId": "AuditController_getIndividualSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIndividualSubmissionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/school/latest": {
+      "get": {
+        "operationId": "AuditController_getLatestSchool",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLatestSchoolResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/school/submissions": {
+      "post": {
+        "operationId": "AuditController_submitSchool",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSchoolBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitSchoolResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AuditController_getSchoolHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSchoolHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/school/submissions/{id}": {
+      "get": {
+        "operationId": "AuditController_getSchoolSubmission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSchoolSubmissionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/benchmark": {
+      "get": {
+        "operationId": "AuditController_getBenchmark",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBenchmarkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -18370,6 +18559,1166 @@
   "servers": [],
   "components": {
     "schemas": {
+      "GetLatestIndividualResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "type": {
+                    "anyOf": [
+                      {
+                        "const": "individual",
+                        "type": "string"
+                      },
+                      {
+                        "const": "school",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "definitionVersion": {
+                    "type": "integer"
+                  },
+                  "score": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "competencyScores": {
+                    "type": "object",
+                    "properties": {
+                      "ai_literacy": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ai_governance": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ai_awareness": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "tool_proficiency": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ethical_understanding": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "curriculum_integration": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "data_privacy": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "senior_leadership": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "science_technology": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "humanities": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "arts_creative": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "administration": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "support_staff": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "completedAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "definitionVersion",
+                  "score",
+                  "competencyScores",
+                  "completedAt"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SubmitIndividualBody": {
+        "type": "object",
+        "properties": {
+          "definitionVersion": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "answers": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": {
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                "optionId": {
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "questionId",
+                "optionId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "definitionVersion",
+          "answers"
+        ]
+      },
+      "SubmitIndividualResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "individual",
+                    "type": "string"
+                  },
+                  {
+                    "const": "school",
+                    "type": "string"
+                  }
+                ]
+              },
+              "definitionVersion": {
+                "type": "integer"
+              },
+              "score": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "competencyScores": {
+                "type": "object",
+                "properties": {
+                  "ai_literacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_governance": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_awareness": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "tool_proficiency": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ethical_understanding": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "curriculum_integration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "data_privacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "senior_leadership": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "science_technology": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "humanities": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "arts_creative": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "administration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "support_staff": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  }
+                }
+              },
+              "completedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "definitionVersion",
+              "score",
+              "competencyScores",
+              "completedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIndividualHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "individual",
+                      "type": "string"
+                    },
+                    {
+                      "const": "school",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "definitionVersion": {
+                  "type": "integer"
+                },
+                "score": {
+                  "minimum": 0,
+                  "maximum": 100,
+                  "type": "integer"
+                },
+                "competencyScores": {
+                  "type": "object",
+                  "properties": {
+                    "ai_literacy": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ai_governance": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ai_awareness": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "tool_proficiency": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ethical_understanding": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "curriculum_integration": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "data_privacy": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "senior_leadership": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "science_technology": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "humanities": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "arts_creative": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "administration": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "support_staff": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    }
+                  }
+                },
+                "completedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "definitionVersion",
+                "score",
+                "competencyScores",
+                "completedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIndividualSubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "individual",
+                    "type": "string"
+                  },
+                  {
+                    "const": "school",
+                    "type": "string"
+                  }
+                ]
+              },
+              "definitionVersion": {
+                "type": "integer"
+              },
+              "score": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "competencyScores": {
+                "type": "object",
+                "properties": {
+                  "ai_literacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_governance": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_awareness": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "tool_proficiency": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ethical_understanding": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "curriculum_integration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "data_privacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "senior_leadership": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "science_technology": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "humanities": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "arts_creative": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "administration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "support_staff": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  }
+                }
+              },
+              "completedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "definitionVersion",
+              "score",
+              "competencyScores",
+              "completedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLatestSchoolResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "type": {
+                    "anyOf": [
+                      {
+                        "const": "individual",
+                        "type": "string"
+                      },
+                      {
+                        "const": "school",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "definitionVersion": {
+                    "type": "integer"
+                  },
+                  "score": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "competencyScores": {
+                    "type": "object",
+                    "properties": {
+                      "ai_literacy": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ai_governance": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ai_awareness": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "tool_proficiency": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "ethical_understanding": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "curriculum_integration": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "data_privacy": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "senior_leadership": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "science_technology": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "humanities": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "arts_creative": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "administration": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "support_staff": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "completedAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "definitionVersion",
+                  "score",
+                  "competencyScores",
+                  "completedAt"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SubmitSchoolBody": {
+        "type": "object",
+        "properties": {
+          "definitionVersion": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "answers": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": {
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                "optionId": {
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "questionId",
+                "optionId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "definitionVersion",
+          "answers"
+        ]
+      },
+      "SubmitSchoolResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "individual",
+                    "type": "string"
+                  },
+                  {
+                    "const": "school",
+                    "type": "string"
+                  }
+                ]
+              },
+              "definitionVersion": {
+                "type": "integer"
+              },
+              "score": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "competencyScores": {
+                "type": "object",
+                "properties": {
+                  "ai_literacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_governance": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_awareness": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "tool_proficiency": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ethical_understanding": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "curriculum_integration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "data_privacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "senior_leadership": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "science_technology": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "humanities": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "arts_creative": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "administration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "support_staff": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  }
+                }
+              },
+              "completedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "definitionVersion",
+              "score",
+              "competencyScores",
+              "completedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetSchoolHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "individual",
+                      "type": "string"
+                    },
+                    {
+                      "const": "school",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "definitionVersion": {
+                  "type": "integer"
+                },
+                "score": {
+                  "minimum": 0,
+                  "maximum": 100,
+                  "type": "integer"
+                },
+                "competencyScores": {
+                  "type": "object",
+                  "properties": {
+                    "ai_literacy": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ai_governance": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ai_awareness": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "tool_proficiency": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "ethical_understanding": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "curriculum_integration": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "data_privacy": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "senior_leadership": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "science_technology": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "humanities": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "arts_creative": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "administration": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "support_staff": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    }
+                  }
+                },
+                "completedAt": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "definitionVersion",
+                "score",
+                "competencyScores",
+                "completedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetSchoolSubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "individual",
+                    "type": "string"
+                  },
+                  {
+                    "const": "school",
+                    "type": "string"
+                  }
+                ]
+              },
+              "definitionVersion": {
+                "type": "integer"
+              },
+              "score": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "competencyScores": {
+                "type": "object",
+                "properties": {
+                  "ai_literacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_governance": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ai_awareness": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "tool_proficiency": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "ethical_understanding": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "curriculum_integration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "data_privacy": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "senior_leadership": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "science_technology": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "humanities": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "arts_creative": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "administration": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "support_staff": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  }
+                }
+              },
+              "completedAt": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "definitionVersion",
+              "score",
+              "competencyScores",
+              "completedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetBenchmarkResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "currentScore": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "averageScore": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "improvement": {
+                "anyOf": [
+                  {
+                    "minimum": -100,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rank": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "participantCount": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "comparisons": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "improvement": {
+                      "anyOf": [
+                        {
+                          "minimum": -100,
+                          "maximum": 100,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "isCurrentTenant": {
+                      "type": "boolean"
+                    },
+                    "rank": {
+                      "minimum": 1,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "score",
+                    "improvement",
+                    "isCurrentTenant",
+                    "rank"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "currentScore",
+              "averageScore",
+              "improvement",
+              "rank",
+              "participantCount",
+              "comparisons"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "FileUploadResponse": {
         "type": "object",
         "properties": {
@@ -18900,6 +20249,9 @@
                   "providerInformation"
                 ]
               },
+              "isManagingTenant": {
+                "type": "boolean"
+              },
               "isManagingTenantAdmin": {
                 "type": "boolean"
               }
@@ -18917,6 +20269,7 @@
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
+              "isManagingTenant",
               "isManagingTenantAdmin"
             ]
           }
@@ -19046,6 +20399,9 @@
                   "providerInformation"
                 ]
               },
+              "isManagingTenant": {
+                "type": "boolean"
+              },
               "isManagingTenantAdmin": {
                 "type": "boolean"
               }
@@ -19063,6 +20419,7 @@
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
+              "isManagingTenant",
               "isManagingTenantAdmin"
             ]
           }
@@ -19514,6 +20871,9 @@
                   "providerInformation"
                 ]
               },
+              "isManagingTenant": {
+                "type": "boolean"
+              },
               "isManagingTenantAdmin": {
                 "type": "boolean"
               },
@@ -19578,6 +20938,7 @@
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
+              "isManagingTenant",
               "isManagingTenantAdmin",
               "isSupportMode",
               "studentModeCourseIds"
@@ -19800,6 +21161,9 @@
                   "providerInformation"
                 ]
               },
+              "isManagingTenant": {
+                "type": "boolean"
+              },
               "isManagingTenantAdmin": {
                 "type": "boolean"
               }
@@ -19817,6 +21181,7 @@
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
+              "isManagingTenant",
               "isManagingTenantAdmin"
             ]
           }
@@ -20055,6 +21420,9 @@
                   "providerInformation"
                 ]
               },
+              "isManagingTenant": {
+                "type": "boolean"
+              },
               "isManagingTenantAdmin": {
                 "type": "boolean"
               }
@@ -20072,6 +21440,7 @@
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
+              "isManagingTenant",
               "isManagingTenantAdmin"
             ]
           }

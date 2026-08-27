@@ -653,6 +653,8 @@
     "progress": "Progrès",
     "findInApplication": "Rechercher dans l'application",
     "courses": "Cours",
+    "audit": "Audit",
+    "aiBenchmark": "Benchmark",
     "learningPaths": "Parcours de développement",
     "calendar": "Calendrier",
     "content": "Contenu",
@@ -672,6 +674,220 @@
     "qa": "Questions et réponses",
     "tenants": "Organisations",
     "activityLogs": "Journaux d'activité"
+  },
+  "auditView": {
+    "title": "Audit",
+    "subtitle": "Évaluez votre préparation à l’IA ou celle de votre établissement.",
+    "individual": {
+      "title": "Audit individuel",
+      "description": "Évaluez vos connaissances, compétences et votre confiance en matière d’IA.",
+      "start": "Commencer l’audit individuel"
+    },
+    "school": {
+      "title": "Audit de l’établissement",
+      "description": "Évaluez la préparation collective à l’IA des équipes et services.",
+      "start": "Commencer l’audit de l’établissement"
+    },
+    "question": {
+      "number": "Question {{current}} sur {{total}}",
+      "firstAttempt": "Répondez à cette question pour établir votre premier score.",
+      "previousScore": "Votre score précédent était de {{score}} %.",
+      "submit": "Terminer l’audit",
+      "saving": "Enregistrement..."
+    },
+    "questions": {
+      "individual_ai_confidence": {
+        "title": "Avec quelle assurance utilisez-vous les outils d’IA dans votre travail quotidien ?",
+        "options": {
+          "level_1": "Pas encore à l’aise",
+          "level_2": "Un peu à l’aise",
+          "level_3": "Assez à l’aise",
+          "level_4": "Très à l’aise",
+          "level_5": "Très à l’aise et capable d’accompagner les autres"
+        }
+      },
+      "school_ai_policy_maturity": {
+        "title": "Quel est le niveau de maturité de la politique formelle d’utilisation responsable de l’IA de votre établissement ?",
+        "options": {
+          "level_1": "Aucune politique ni discussion active",
+          "level_2": "Les premières discussions ont commencé",
+          "level_3": "Un projet ou un pilote existe",
+          "level_4": "Une politique formelle a été adoptée",
+          "level_5": "La politique est adoptée et régulièrement révisée"
+        }
+      },
+      "individual_ai_awareness": {
+        "title": "How well do you understand the opportunities and limitations of AI in education?"
+      },
+      "individual_tool_proficiency": {
+        "title": "How confidently can you select and use AI tools for your daily work?"
+      },
+      "individual_ethical_understanding": {
+        "title": "How confidently can you identify and manage ethical risks when using AI?"
+      },
+      "individual_curriculum_integration": {
+        "title": "How effectively do you integrate AI into teaching, learning or curriculum planning?"
+      },
+      "individual_data_privacy": {
+        "title": "How confidently do you protect personal and school data when using AI tools?"
+      },
+      "school_senior_leadership": {
+        "title": "How mature is responsible AI adoption within Senior Leadership?"
+      },
+      "school_science_technology": {
+        "title": "How mature is responsible AI adoption within Science & Technology?"
+      },
+      "school_humanities": { "title": "How mature is responsible AI adoption within Humanities?" },
+      "school_arts_creative": {
+        "title": "How mature is responsible AI adoption within Arts & Creative?"
+      },
+      "school_administration": {
+        "title": "How mature is responsible AI adoption within Administration?"
+      },
+      "school_support_staff": {
+        "title": "How mature is responsible AI adoption among Support Staff?"
+      }
+    },
+    "scale": {
+      "level_1": "Not started or not yet understood",
+      "level_2": "Early awareness with limited practical use",
+      "level_3": "Developing with some consistent practice",
+      "level_4": "Established and used confidently",
+      "level_5": "Embedded, reviewed and able to guide others"
+    },
+    "complete": {
+      "title": "Audit terminé",
+      "description": "Vos réponses ont été enregistrées et votre score est disponible.",
+      "back": "Retour à l’Audit",
+      "benchmark": "Voir le Benchmark"
+    },
+    "history": {
+      "title": "Audits précédents",
+      "description": "Consultez les audits individuels et d’établissement terminés.",
+      "completed": "Terminé le {{date}}",
+      "score": "Score : {{score}}%",
+      "empty": "Aucun audit terminé pour le moment."
+    },
+    "result": {
+      "title": "Audit statistics",
+      "individualTitle": "Audit Results",
+      "schoolTitle": "School Audit Results",
+      "individualSubtitle": "Individual AI Readiness Assessment — {{date}}",
+      "schoolSubtitle": "{{date}} — {{company}}",
+      "overallScore": "Overall score",
+      "schoolScore": "School score",
+      "categoryBreakdown": "Category breakdown",
+      "departmentScores": "Department scores",
+      "levels": {
+        "level1": "Level 1 — Literate",
+        "level2": "Level 2 — Enabled",
+        "level3": "Level 3 — Compliant",
+        "level4": "Level 4 — Leading"
+      },
+      "meaning": {
+        "title": "What this means",
+        "individual": "You have a strong foundation in {{strongest}} ({{strongestScore}}%). Your main development areas are {{weakest}} ({{weakestScore}}%) and {{secondWeakest}} ({{secondWeakestScore}}%). The roadmap below focuses your next steps on those gaps.",
+        "school": "This administrator self-assessment shows {{strongest}} as the school’s strongest department ({{strongestScore}}%). {{weakest}} ({{weakestScore}}%) and {{secondWeakest}} ({{secondWeakestScore}}%) are the priority areas. The roadmap below turns those findings into a practical school-wide plan."
+      },
+      "notFound": "This audit result could not be found."
+    },
+    "competencies": {
+      "ai_literacy": "AI literacy",
+      "ai_governance": "AI governance",
+      "ai_awareness": "AI Awareness",
+      "tool_proficiency": "Tool Proficiency",
+      "ethical_understanding": "Ethical Understanding",
+      "curriculum_integration": "Curriculum Integration",
+      "data_privacy": "Data & Privacy",
+      "senior_leadership": "Senior Leadership",
+      "science_technology": "Science & Technology",
+      "humanities": "Humanities",
+      "arts_creative": "Arts & Creative",
+      "administration": "Administration",
+      "support_staff": "Support Staff"
+    },
+    "roadmap": {
+      "individualTitle": "Your Learning Roadmap",
+      "schoolTitle": "School Improvement Roadmap",
+      "description": "Based on your audit · select your pace below",
+      "courses": "Courses in this plan",
+      "summary": "{{count}} courses · {{months}} months",
+      "month": "Month {{period}}",
+      "monthShort": "{{months}}m",
+      "courseCount_one": "{{count}} course",
+      "courseCount_other": "{{count}} courses",
+      "priority": "Priority",
+      "priorityArea": "Prioritise {{area}}",
+      "buildArea": "Build confidence in {{area}}",
+      "milestone": "First milestone",
+      "completeLevel2": "Complete Level 2",
+      "level2Certificate": "Level 2 certification",
+      "introduceLevel3": "Introduction to Level 3",
+      "deepenPractice": "Deepen practice",
+      "level3Milestone": "Level 3 milestone",
+      "level3Foundation": "Level 3 foundation",
+      "leadShare": "Lead & share",
+      "aiPioneer": "AI Pioneer introduction",
+      "quarters": {
+        "q1": "Q1 — Jan to Mar",
+        "q2": "Q2 — Apr to Jun",
+        "q3": "Q3 — Jul to Sep",
+        "q4": "Q4 — Oct to Dec"
+      },
+      "milestoneBadge": "Milestone",
+      "milestones": {
+        "enabledBadge": "Earn AI Enabled Badge",
+        "pioneerBadge": "Earn AI Pioneer Badge"
+      },
+      "gaps": "priority gaps",
+      "confidence": "AI confidence",
+      "noCourse": "No additional course is available for this phase.",
+      "actions": {
+        "seniorStaff": {
+          "title": "Run Individual Audits for key staff",
+          "description": "Establish a baseline across school leadership"
+        },
+        "workingGroup": {
+          "title": "Establish an AI working group",
+          "description": "Give responsible AI improvement clear ownership"
+        },
+        "rerunSchool": {
+          "title": "Re-run the School Audit",
+          "description": "Measure progress against this baseline"
+        },
+        "rerunIndividual": {
+          "title": "Re-run the Individual Audit",
+          "description": "Track how your readiness score has changed"
+        }
+      }
+    },
+    "toast": {
+      "saved": "Audit enregistré.",
+      "saveError": "Impossible d’enregistrer l’audit. Réessayez."
+    }
+  },
+  "aiBenchmarkView": {
+    "title": "Benchmark",
+    "subtitle": "Comparez votre établissement aux autres participants à partir des audits terminés.",
+    "stats": {
+      "score": "Votre score",
+      "average": "contre une moyenne de {{score}} %",
+      "rank": "Classement général",
+      "participants": "Établissements participants",
+      "improvement": "Progression",
+      "previousAudit": "Depuis le précédent audit de l’établissement"
+    },
+    "comparison": { "title": "Comparaison des établissements", "overall": "Général" },
+    "courses": {
+      "title": "Cours suggérés",
+      "description": "Développez vos connaissances pratiques de l’IA avec les cours disponibles.",
+      "empty": "Aucun cours publié n’est encore disponible."
+    },
+    "empty": {
+      "title": "Terminez d’abord un audit de l’établissement",
+      "description": "Un audit terminé est nécessaire pour apparaître dans le comparatif.",
+      "action": "Commencer l’audit de l’établissement"
+    }
   },
   "microsoftCalendar": {
     "title": "Calendrier Microsoft",
@@ -4449,6 +4665,9 @@
     "settings": "Paramètres",
     "providerInformation": "Informations sur le fournisseur",
     "courses": "Cours",
+    "audit": "Audit",
+    "auditResult": "Statistiques de l’audit",
+    "aiBenchmark": "Benchmark",
     "profile": "Profil",
     "lesson": "Leçon",
     "lessonPreview": "Aperçu de la leçon",

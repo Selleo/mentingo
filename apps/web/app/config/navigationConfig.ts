@@ -47,6 +47,7 @@ export const getNavigationConfig = (
   isStripeConfigured = false,
   isLearningPathsEnabled = false,
   shouldShowLearningPaths = false,
+  isManagingTenant = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -74,6 +75,28 @@ export const getNavigationConfig = (
           },
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
+        {
+          label: t("navigationSideBar.audit"),
+          path: "audit",
+          iconName: "Target",
+          accessRequirement: {
+            anyOf: [PERMISSIONS.STATISTICS_READ_SELF, PERMISSIONS.STATISTICS_READ],
+          },
+          testId: NAVIGATION_HANDLES.AUDIT_LINK,
+        },
+        ...(!isManagingTenant
+          ? [
+              {
+                label: t("navigationSideBar.aiBenchmark"),
+                path: "benchmark",
+                iconName: "ChartNoAxes" as const,
+                accessRequirement: {
+                  allOf: [PERMISSIONS.STATISTICS_READ],
+                },
+                testId: NAVIGATION_HANDLES.BENCHMARK_LINK,
+              },
+            ]
+          : []),
         ...(isLearningPathsEnabled && shouldShowLearningPaths
           ? ([
               {

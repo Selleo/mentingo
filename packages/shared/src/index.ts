@@ -11,6 +11,7 @@ export * from "./constants/allowedAge";
 export * from "./constants/announcements";
 export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
+export * from "./constants/audit";
 export * from "./constants/calendar";
 export * from "./constants/certificate";
 export * from "./constants/course";

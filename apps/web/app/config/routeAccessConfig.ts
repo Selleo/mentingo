@@ -109,6 +109,24 @@ export const routeAccessConfig = createRouteConfig({
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,
+  audit: {
+    anyOf: [PERMISSIONS.STATISTICS_READ_SELF, PERMISSIONS.STATISTICS_READ],
+  },
+  "audit/individual": {
+    allOf: [PERMISSIONS.STATISTICS_READ_SELF],
+  },
+  "audit/school": {
+    allOf: [PERMISSIONS.STATISTICS_READ],
+  },
+  "audit/results/individual/:id": {
+    allOf: [PERMISSIONS.STATISTICS_READ_SELF],
+  },
+  "audit/results/school/:id": {
+    allOf: [PERMISSIONS.STATISTICS_READ],
+  },
+  benchmark: {
+    allOf: [PERMISSIONS.STATISTICS_READ],
+  },
   "development-paths": LEARNING_PATH_READ_ACCESS,
   calendar: CALENDAR_READ_ACCESS,
   "live-training/:id": LIVE_TRAINING_READ_ACCESS,

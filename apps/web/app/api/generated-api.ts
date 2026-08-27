@@ -9,6 +9,735 @@
  * ---------------------------------------------------------------
  */
 
+export interface GetLatestIndividualResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  } | null;
+}
+
+export interface SubmitIndividualBody {
+  /** @min 1 */
+  definitionVersion: number;
+  /**
+   * @maxItems 100
+   * @minItems 1
+   */
+  answers: {
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    questionId: string;
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    optionId: string;
+  }[];
+}
+
+export interface SubmitIndividualResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  };
+}
+
+export interface GetIndividualHistoryResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  }[];
+}
+
+export interface GetIndividualSubmissionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  };
+}
+
+export interface GetLatestSchoolResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  } | null;
+}
+
+export interface SubmitSchoolBody {
+  /** @min 1 */
+  definitionVersion: number;
+  /**
+   * @maxItems 100
+   * @minItems 1
+   */
+  answers: {
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    questionId: string;
+    /**
+     * @minLength 1
+     * @maxLength 100
+     */
+    optionId: string;
+  }[];
+}
+
+export interface SubmitSchoolResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  };
+}
+
+export interface GetSchoolHistoryResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  }[];
+}
+
+export interface GetSchoolSubmissionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "individual" | "school";
+    definitionVersion: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    score: number;
+    competencyScores: {
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_literacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_governance?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ai_awareness?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      tool_proficiency?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      ethical_understanding?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      curriculum_integration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      data_privacy?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      senior_leadership?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      science_technology?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      humanities?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      arts_creative?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      administration?: number;
+      /**
+       * @min 0
+       * @max 100
+       */
+      support_staff?: number;
+    };
+    /** @format date-time */
+    completedAt: string;
+  };
+}
+
+export interface GetBenchmarkResponse {
+  data: {
+    currentScore: number | null;
+    averageScore: number | null;
+    improvement: number | null;
+    rank: number | null;
+    /** @min 0 */
+    participantCount: number;
+    comparisons: {
+      name: string;
+      /**
+       * @min 0
+       * @max 100
+       */
+      score: number;
+      improvement: number | null;
+      isCurrentTenant: boolean;
+      /** @min 1 */
+      rank: number;
+    }[];
+  };
+}
+
 export interface FileUploadResponse {
   fileKey: string;
   fileUrl?: string;
@@ -140,6 +869,7 @@ export interface RegisterResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenant: boolean;
     isManagingTenantAdmin: boolean;
   };
 }
@@ -180,6 +910,7 @@ export interface LoginResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenant: boolean;
     isManagingTenantAdmin: boolean;
   };
 }
@@ -297,6 +1028,7 @@ export interface CurrentUserResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenant: boolean;
     isManagingTenantAdmin: boolean;
     isSupportMode: boolean;
     studentModeCourseIds: string[];
@@ -361,6 +1093,7 @@ export interface CreatePasswordResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenant: boolean;
     isManagingTenantAdmin: boolean;
   };
 }
@@ -423,6 +1156,7 @@ export interface HandleMagicLinkResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenant: boolean;
     isManagingTenantAdmin: boolean;
   };
 }
@@ -11288,6 +12022,136 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AuditControllerGetLatestIndividual
+     * @request GET:/api/audits/individual/latest
+     */
+    auditControllerGetLatestIndividual: (params: RequestParams = {}) =>
+      this.request<GetLatestIndividualResponse, any>({
+        path: `/api/audits/individual/latest`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerSubmitIndividual
+     * @request POST:/api/audits/individual/submissions
+     */
+    auditControllerSubmitIndividual: (data: SubmitIndividualBody, params: RequestParams = {}) =>
+      this.request<SubmitIndividualResponse, any>({
+        path: `/api/audits/individual/submissions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetIndividualHistory
+     * @request GET:/api/audits/individual/submissions
+     */
+    auditControllerGetIndividualHistory: (params: RequestParams = {}) =>
+      this.request<GetIndividualHistoryResponse, any>({
+        path: `/api/audits/individual/submissions`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetIndividualSubmission
+     * @request GET:/api/audits/individual/submissions/{id}
+     */
+    auditControllerGetIndividualSubmission: (id: string, params: RequestParams = {}) =>
+      this.request<GetIndividualSubmissionResponse, any>({
+        path: `/api/audits/individual/submissions/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetLatestSchool
+     * @request GET:/api/audits/school/latest
+     */
+    auditControllerGetLatestSchool: (params: RequestParams = {}) =>
+      this.request<GetLatestSchoolResponse, any>({
+        path: `/api/audits/school/latest`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerSubmitSchool
+     * @request POST:/api/audits/school/submissions
+     */
+    auditControllerSubmitSchool: (data: SubmitSchoolBody, params: RequestParams = {}) =>
+      this.request<SubmitSchoolResponse, any>({
+        path: `/api/audits/school/submissions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetSchoolHistory
+     * @request GET:/api/audits/school/submissions
+     */
+    auditControllerGetSchoolHistory: (params: RequestParams = {}) =>
+      this.request<GetSchoolHistoryResponse, any>({
+        path: `/api/audits/school/submissions`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetSchoolSubmission
+     * @request GET:/api/audits/school/submissions/{id}
+     */
+    auditControllerGetSchoolSubmission: (id: string, params: RequestParams = {}) =>
+      this.request<GetSchoolSubmissionResponse, any>({
+        path: `/api/audits/school/submissions/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuditControllerGetBenchmark
+     * @request GET:/api/audits/benchmark
+     */
+    auditControllerGetBenchmark: (params: RequestParams = {}) =>
+      this.request<GetBenchmarkResponse, any>({
+        path: `/api/audits/benchmark`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name FileControllerUploadFile
      * @request POST:/api/file
      */
@@ -12611,6 +13475,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     statisticsControllerGetDashboardDeadlineRisks: (
       query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         type?: "overdue" | "dueSoon";
         /**
          * @min 1
@@ -12623,8 +13489,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @default 20
          */
         perPage?: number;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -16547,13 +17411,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     announcementsControllerGetAllAnnouncements: (
       query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        feed?: "all" | "admin_announcements" | "system";
+        status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        feed?: "all" | "admin_announcements" | "system";
-        status?: "scheduled" | "published";
       },
       params: RequestParams = {},
     ) =>
@@ -16610,11 +17474,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         content?: string;
         search?: string;
         isRead?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /** @min 1 */
         perPage?: number;
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
@@ -17799,6 +18663,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -17818,6 +18683,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -18684,6 +19550,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         keyword?: string;
         email?: string;
+        resourceType?:
+          | "user"
+          | "course"
+          | "chapter"
+          | "lesson"
+          | "announcement"
+          | "group"
+          | "settings"
+          | "integration"
+          | "category"
+          | "qa"
+          | "news"
+          | "article"
+          | "articleSection"
+          | "live_training"
+          | "learning_path"
+          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -18743,23 +19626,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "play_scorm"
               | "complete_scorm"
             )[];
-        resourceType?:
-          | "user"
-          | "course"
-          | "chapter"
-          | "lesson"
-          | "announcement"
-          | "group"
-          | "settings"
-          | "integration"
-          | "category"
-          | "qa"
-          | "news"
-          | "article"
-          | "articleSection"
-          | "live_training"
-          | "learning_path"
-          | "scorm";
       },
       params: RequestParams = {},
     ) =>

@@ -656,6 +656,8 @@
     "progress": "Pokrok",
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
+    "audit": "Audit",
+    "aiBenchmark": "Benchmark",
     "learningPaths": "Rozvojové cesty",
     "calendar": "Kalendář",
     "content": "Obsah",
@@ -674,6 +676,220 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace"
+  },
+  "auditView": {
+    "title": "Audit",
+    "subtitle": "Zhodnoťte připravenost na AI u sebe nebo své školy.",
+    "individual": {
+      "title": "Individuální audit",
+      "description": "Zhodnoťte své znalosti, dovednosti a jistotu při práci s AI.",
+      "start": "Spustit individuální audit"
+    },
+    "school": {
+      "title": "Audit školy",
+      "description": "Zhodnoťte společnou připravenost zaměstnanců školy na AI.",
+      "start": "Spustit audit školy"
+    },
+    "question": {
+      "number": "Otázka {{current}} z {{total}}",
+      "firstAttempt": "Odpovězte na otázku a získejte první skóre.",
+      "previousScore": "Předchozí skóre bylo {{score}} %.",
+      "submit": "Dokončit audit",
+      "saving": "Ukládání..."
+    },
+    "questions": {
+      "individual_ai_confidence": {
+        "title": "Jak jistě používáte nástroje AI při každodenní práci?",
+        "options": {
+          "level_1": "Zatím si nejsem jistý/á",
+          "level_2": "Jsem si trochu jistý/á",
+          "level_3": "Jsem si středně jistý/á",
+          "level_4": "Jsem si velmi jistý/á",
+          "level_5": "Jsem si velmi jistý/á a umím vést ostatní"
+        }
+      },
+      "school_ai_policy_maturity": {
+        "title": "Jak rozvinutá je formální politika vaší školy pro odpovědné používání AI?",
+        "options": {
+          "level_1": "Žádná politika ani aktivní diskuse",
+          "level_2": "Začaly první diskuse",
+          "level_3": "Existuje návrh politiky nebo pilot",
+          "level_4": "Byla přijata formální politika",
+          "level_5": "Politika je přijata a pravidelně kontrolována"
+        }
+      },
+      "individual_ai_awareness": {
+        "title": "How well do you understand the opportunities and limitations of AI in education?"
+      },
+      "individual_tool_proficiency": {
+        "title": "How confidently can you select and use AI tools for your daily work?"
+      },
+      "individual_ethical_understanding": {
+        "title": "How confidently can you identify and manage ethical risks when using AI?"
+      },
+      "individual_curriculum_integration": {
+        "title": "How effectively do you integrate AI into teaching, learning or curriculum planning?"
+      },
+      "individual_data_privacy": {
+        "title": "How confidently do you protect personal and school data when using AI tools?"
+      },
+      "school_senior_leadership": {
+        "title": "How mature is responsible AI adoption within Senior Leadership?"
+      },
+      "school_science_technology": {
+        "title": "How mature is responsible AI adoption within Science & Technology?"
+      },
+      "school_humanities": { "title": "How mature is responsible AI adoption within Humanities?" },
+      "school_arts_creative": {
+        "title": "How mature is responsible AI adoption within Arts & Creative?"
+      },
+      "school_administration": {
+        "title": "How mature is responsible AI adoption within Administration?"
+      },
+      "school_support_staff": {
+        "title": "How mature is responsible AI adoption among Support Staff?"
+      }
+    },
+    "scale": {
+      "level_1": "Not started or not yet understood",
+      "level_2": "Early awareness with limited practical use",
+      "level_3": "Developing with some consistent practice",
+      "level_4": "Established and used confidently",
+      "level_5": "Embedded, reviewed and able to guide others"
+    },
+    "complete": {
+      "title": "Audit dokončen",
+      "description": "Odpovědi byly uloženy a skóre je připraveno.",
+      "back": "Zpět na Audit",
+      "benchmark": "Zobrazit Benchmark"
+    },
+    "history": {
+      "title": "Předchozí audity",
+      "description": "Prohlédněte si dokončené individuální a školní audity.",
+      "completed": "Dokončeno {{date}}",
+      "score": "Skóre: {{score}}%",
+      "empty": "Zatím nebyly dokončeny žádné audity."
+    },
+    "result": {
+      "title": "Audit statistics",
+      "individualTitle": "Audit Results",
+      "schoolTitle": "School Audit Results",
+      "individualSubtitle": "Individual AI Readiness Assessment — {{date}}",
+      "schoolSubtitle": "{{date}} — {{company}}",
+      "overallScore": "Overall score",
+      "schoolScore": "School score",
+      "categoryBreakdown": "Category breakdown",
+      "departmentScores": "Department scores",
+      "levels": {
+        "level1": "Level 1 — Literate",
+        "level2": "Level 2 — Enabled",
+        "level3": "Level 3 — Compliant",
+        "level4": "Level 4 — Leading"
+      },
+      "meaning": {
+        "title": "What this means",
+        "individual": "You have a strong foundation in {{strongest}} ({{strongestScore}}%). Your main development areas are {{weakest}} ({{weakestScore}}%) and {{secondWeakest}} ({{secondWeakestScore}}%). The roadmap below focuses your next steps on those gaps.",
+        "school": "This administrator self-assessment shows {{strongest}} as the school’s strongest department ({{strongestScore}}%). {{weakest}} ({{weakestScore}}%) and {{secondWeakest}} ({{secondWeakestScore}}%) are the priority areas. The roadmap below turns those findings into a practical school-wide plan."
+      },
+      "notFound": "This audit result could not be found."
+    },
+    "competencies": {
+      "ai_literacy": "AI literacy",
+      "ai_governance": "AI governance",
+      "ai_awareness": "AI Awareness",
+      "tool_proficiency": "Tool Proficiency",
+      "ethical_understanding": "Ethical Understanding",
+      "curriculum_integration": "Curriculum Integration",
+      "data_privacy": "Data & Privacy",
+      "senior_leadership": "Senior Leadership",
+      "science_technology": "Science & Technology",
+      "humanities": "Humanities",
+      "arts_creative": "Arts & Creative",
+      "administration": "Administration",
+      "support_staff": "Support Staff"
+    },
+    "roadmap": {
+      "individualTitle": "Your Learning Roadmap",
+      "schoolTitle": "School Improvement Roadmap",
+      "description": "Based on your audit · select your pace below",
+      "courses": "Courses in this plan",
+      "summary": "{{count}} courses · {{months}} months",
+      "month": "Month {{period}}",
+      "monthShort": "{{months}}m",
+      "courseCount_one": "{{count}} course",
+      "courseCount_other": "{{count}} courses",
+      "priority": "Priority",
+      "priorityArea": "Prioritise {{area}}",
+      "buildArea": "Build confidence in {{area}}",
+      "milestone": "First milestone",
+      "completeLevel2": "Complete Level 2",
+      "level2Certificate": "Level 2 certification",
+      "introduceLevel3": "Introduction to Level 3",
+      "deepenPractice": "Deepen practice",
+      "level3Milestone": "Level 3 milestone",
+      "level3Foundation": "Level 3 foundation",
+      "leadShare": "Lead & share",
+      "aiPioneer": "AI Pioneer introduction",
+      "quarters": {
+        "q1": "Q1 — Jan to Mar",
+        "q2": "Q2 — Apr to Jun",
+        "q3": "Q3 — Jul to Sep",
+        "q4": "Q4 — Oct to Dec"
+      },
+      "milestoneBadge": "Milestone",
+      "milestones": {
+        "enabledBadge": "Earn AI Enabled Badge",
+        "pioneerBadge": "Earn AI Pioneer Badge"
+      },
+      "gaps": "priority gaps",
+      "confidence": "AI confidence",
+      "noCourse": "No additional course is available for this phase.",
+      "actions": {
+        "seniorStaff": {
+          "title": "Run Individual Audits for key staff",
+          "description": "Establish a baseline across school leadership"
+        },
+        "workingGroup": {
+          "title": "Establish an AI working group",
+          "description": "Give responsible AI improvement clear ownership"
+        },
+        "rerunSchool": {
+          "title": "Re-run the School Audit",
+          "description": "Measure progress against this baseline"
+        },
+        "rerunIndividual": {
+          "title": "Re-run the Individual Audit",
+          "description": "Track how your readiness score has changed"
+        }
+      }
+    },
+    "toast": {
+      "saved": "Audit byl úspěšně uložen.",
+      "saveError": "Audit se nepodařilo uložit. Zkuste to znovu."
+    }
+  },
+  "aiBenchmarkView": {
+    "title": "Benchmark",
+    "subtitle": "Porovnejte svou školu s ostatními školami podle dokončených auditů.",
+    "stats": {
+      "score": "Vaše skóre",
+      "average": "oproti průměru {{score}} %",
+      "rank": "Celkové pořadí",
+      "participants": "Zapojené školy",
+      "improvement": "Zlepšení",
+      "previousAudit": "Od předchozího auditu školy"
+    },
+    "comparison": { "title": "Porovnání škol", "overall": "Celkem" },
+    "courses": {
+      "title": "Doporučené kurzy",
+      "description": "Rozvíjejte praktické znalosti AI pomocí dostupných kurzů.",
+      "empty": "Zatím nejsou dostupné žádné publikované kurzy."
+    },
+    "empty": {
+      "title": "Nejprve dokončete audit školy",
+      "description": "Škola potřebuje dokončený audit, aby byla zahrnuta do srovnání.",
+      "action": "Spustit audit školy"
+    }
   },
   "microsoftCalendar": {
     "title": "Kalendář Microsoft",
@@ -4686,6 +4902,9 @@
     "settings": "Nastavení",
     "providerInformation": "Informace o poskytovateli",
     "courses": "Kurzy",
+    "audit": "Audit",
+    "auditResult": "Statistiky auditu",
+    "aiBenchmark": "Benchmark",
     "profile": "Profil",
     "lesson": "Lekce",
     "lessonPreview": "Náhled lekce",

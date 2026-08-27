@@ -649,6 +649,8 @@
     "analytics": "Analityka",
     "progress": "Postępy",
     "courses": "Kursy",
+    "audit": "Audyt",
+    "aiBenchmark": "Benchmark",
     "calendar": "Kalendarz",
     "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
@@ -671,6 +673,209 @@
     "learningPaths": "Ścieżki Rozwoju",
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju"
+  },
+  "auditView": {
+    "title": "Audyt",
+    "subtitle": "Oceń gotowość do korzystania z AI — swoją lub swojej szkoły.",
+    "individual": {
+      "title": "Audyt indywidualny",
+      "description": "Oceń swoją wiedzę, umiejętności i pewność w korzystaniu z AI.",
+      "start": "Rozpocznij audyt indywidualny"
+    },
+    "school": {
+      "title": "Audyt szkoły",
+      "description": "Oceń zbiorową gotowość szkoły do korzystania z AI przez pracowników i działy.",
+      "start": "Rozpocznij audyt szkoły"
+    },
+    "question": {
+      "number": "Pytanie {{current}} z {{total}}",
+      "firstAttempt": "Odpowiedz na pytania, aby ustalić pierwszy wynik.",
+      "previousScore": "Poprzedni wynik: {{score}}%.",
+      "submit": "Zakończ audyt",
+      "saving": "Zapisywanie..."
+    },
+    "questions": {
+      "individual_ai_awareness": {
+        "title": "Jak dobrze rozumiesz możliwości i ograniczenia AI w edukacji?"
+      },
+      "individual_tool_proficiency": {
+        "title": "Jak pewnie dobierasz i wykorzystujesz narzędzia AI w codziennej pracy?"
+      },
+      "individual_ethical_understanding": {
+        "title": "Jak pewnie rozpoznajesz ryzyka etyczne związane z AI i nimi zarządzasz?"
+      },
+      "individual_curriculum_integration": {
+        "title": "Jak skutecznie włączasz AI do nauczania, uczenia się lub planowania programu?"
+      },
+      "individual_data_privacy": {
+        "title": "Jak pewnie chronisz dane osobowe i szkolne podczas korzystania z AI?"
+      },
+      "school_senior_leadership": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI wśród kadry kierowniczej?"
+      },
+      "school_science_technology": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI w naukach ścisłych i technologii?"
+      },
+      "school_humanities": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI w naukach humanistycznych?"
+      },
+      "school_arts_creative": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI w obszarze artystycznym?"
+      },
+      "school_administration": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI w administracji?"
+      },
+      "school_support_staff": {
+        "title": "Jaki jest poziom dojrzałości odpowiedzialnego wykorzystania AI wśród personelu pomocniczego?"
+      }
+    },
+    "scale": {
+      "level_1": "Brak działań lub zrozumienia",
+      "level_2": "Wstępna świadomość i ograniczona praktyka",
+      "level_3": "Rozwój i częściowo regularna praktyka",
+      "level_4": "Ugruntowana i pewna praktyka",
+      "level_5": "Pełne wdrożenie, przegląd i wspieranie innych"
+    },
+    "complete": {
+      "title": "Audyt zakończony",
+      "description": "Odpowiedzi zostały zapisane, a wynik jest gotowy.",
+      "back": "Wróć do Audytu",
+      "benchmark": "Zobacz Benchmark"
+    },
+    "history": {
+      "title": "Poprzednie audyty",
+      "description": "Przejrzyj ukończone audyty indywidualne i audyty szkoły.",
+      "completed": "Ukończono {{date}}",
+      "score": "Wynik: {{score}}%",
+      "empty": "Brak ukończonych audytów."
+    },
+    "result": {
+      "title": "Statystyki audytu",
+      "individualTitle": "Wyniki audytu",
+      "schoolTitle": "Wyniki audytu szkoły",
+      "individualSubtitle": "Indywidualna ocena gotowości AI — {{date}}",
+      "schoolSubtitle": "{{date}} — {{company}}",
+      "overallScore": "Wynik ogólny",
+      "schoolScore": "Wynik szkoły",
+      "categoryBreakdown": "Wyniki kategorii",
+      "departmentScores": "Wyniki działów",
+      "levels": {
+        "level1": "Poziom 1 — Świadomy",
+        "level2": "Poziom 2 — Aktywny",
+        "level3": "Poziom 3 — Zgodny",
+        "level4": "Poziom 4 — Lider"
+      },
+      "meaning": {
+        "title": "Co to oznacza",
+        "individual": "Najwyżej ocenionym obszarem jest {{strongest}} ({{strongestScore}}%). Główne obszary rozwoju to {{weakest}} ({{weakestScore}}%) oraz {{secondWeakest}} ({{secondWeakestScore}}%). Poniższy plan koncentruje się na tych lukach.",
+        "school": "Samoocena administratora wskazuje {{strongest}} jako najwyżej oceniony dział szkoły ({{strongestScore}}%). Priorytetowe obszary to {{weakest}} ({{weakestScore}}%) oraz {{secondWeakest}} ({{secondWeakestScore}}%). Poniższy plan przekłada te wyniki na działania."
+      },
+      "notFound": "Nie znaleziono wyniku tego audytu."
+    },
+    "competencies": {
+      "ai_literacy": "Znajomość AI",
+      "ai_governance": "Zarządzanie AI",
+      "ai_awareness": "Świadomość AI",
+      "tool_proficiency": "Biegłość w narzędziach",
+      "ethical_understanding": "Etyczne wykorzystanie",
+      "curriculum_integration": "Integracja z programem",
+      "data_privacy": "Dane i prywatność",
+      "senior_leadership": "Kadra kierownicza",
+      "science_technology": "Nauki ścisłe i technologia",
+      "humanities": "Nauki humanistyczne",
+      "arts_creative": "Sztuka i kreatywność",
+      "administration": "Administracja",
+      "support_staff": "Personel pomocniczy"
+    },
+    "roadmap": {
+      "individualTitle": "Twój plan nauki",
+      "schoolTitle": "Plan rozwoju szkoły",
+      "description": "Na podstawie audytu · wybierz tempo",
+      "courses": "Kursy w planie",
+      "summary": "{{count}} kursy · {{months}} mies.",
+      "month": "Miesiąc {{period}}",
+      "monthShort": "{{months}} mies.",
+      "courseCount_one": "{{count}} kurs",
+      "courseCount_few": "{{count}} kursy",
+      "courseCount_many": "{{count}} kursów",
+      "priority": "Priorytet",
+      "priorityArea": "Priorytet: {{area}}",
+      "buildArea": "Rozwijaj: {{area}}",
+      "milestone": "Pierwszy kamień milowy",
+      "completeLevel2": "Ukończenie poziomu 2",
+      "level2Certificate": "Certyfikacja poziomu 2",
+      "introduceLevel3": "Wprowadzenie do poziomu 3",
+      "deepenPractice": "Pogłębianie praktyki",
+      "level3Milestone": "Kamień milowy poziomu 3",
+      "level3Foundation": "Podstawy poziomu 3",
+      "leadShare": "Prowadź i dziel się wiedzą",
+      "aiPioneer": "Wprowadzenie do poziomu AI Pioneer",
+      "quarters": {
+        "q1": "Q1 — sty–mar",
+        "q2": "Q2 — kwi–cze",
+        "q3": "Q3 — lip–wrz",
+        "q4": "Q4 — paź–gru"
+      },
+      "milestoneBadge": "Kamień milowy",
+      "milestones": {
+        "enabledBadge": "Zdobądź odznakę AI Enabled",
+        "pioneerBadge": "Zdobądź odznakę AI Pioneer"
+      },
+      "gaps": "kluczowe luki",
+      "confidence": "pewność w AI",
+      "noCourse": "Brak dodatkowego kursu dla tego etapu.",
+      "actions": {
+        "seniorStaff": {
+          "title": "Przeprowadź audyty indywidualne kluczowych pracowników",
+          "description": "Ustal punkt wyjścia dla kadry kierowniczej"
+        },
+        "workingGroup": {
+          "title": "Utwórz grupę roboczą ds. AI",
+          "description": "Przypisz odpowiedzialność za rozwój AI"
+        },
+        "rerunSchool": {
+          "title": "Powtórz audyt szkoły",
+          "description": "Zmierz postęp względem wyniku bazowego"
+        },
+        "rerunIndividual": {
+          "title": "Powtórz audyt indywidualny",
+          "description": "Sprawdź zmianę swojego wyniku"
+        }
+      }
+    },
+    "toast": {
+      "saved": "Audyt został zapisany.",
+      "saveError": "Nie udało się zapisać audytu. Spróbuj ponownie."
+    },
+    "errors": {
+      "definitionOutdated": "Audyt został zmieniony. Odśwież stronę i spróbuj ponownie.",
+      "invalidAnswers": "Niektóre odpowiedzi są nieprawidłowe. Odśwież stronę i spróbuj ponownie.",
+      "submissionNotFound": "Nie znaleziono wyniku tego audytu.",
+      "schoolTenantRequired": "Audyt szkoły i Benchmark są dostępne tylko dla organizacji szkolnych."
+    }
+  },
+  "aiBenchmarkView": {
+    "title": "Benchmark",
+    "subtitle": "Porównaj swoją szkołę z innymi uczestniczącymi szkołami na podstawie ukończonych audytów.",
+    "stats": {
+      "score": "Twój wynik",
+      "average": "wobec średniej {{score}}%",
+      "rank": "Pozycja ogółem",
+      "participants": "Uczestniczące szkoły",
+      "improvement": "Poprawa",
+      "previousAudit": "Od poprzedniego audytu szkoły"
+    },
+    "comparison": { "title": "Porównanie szkół", "overall": "Ogółem" },
+    "courses": {
+      "title": "Sugerowane kursy",
+      "description": "Rozwijaj praktyczną wiedzę o AI dzięki kursom dostępnym w Twojej szkole.",
+      "empty": "Brak opublikowanych kursów."
+    },
+    "empty": {
+      "title": "Najpierw ukończ audyt szkoły",
+      "description": "Szkoła musi ukończyć audyt, aby znaleźć się w benchmarku.",
+      "action": "Rozpocznij audyt szkoły"
+    }
   },
   "microsoftCalendar": {
     "title": "Kalendarz Microsoft",
@@ -4965,6 +5170,9 @@
     "settings": "Ustawienia",
     "providerInformation": "Informacje o dostawcy",
     "courses": "Kursy",
+    "audit": "Audyt",
+    "auditResult": "Statystyki audytu",
+    "aiBenchmark": "Benchmark",
     "profile": "Profil",
     "lesson": "Lekcja",
     "lessonPreview": "Podgląd lekcji",

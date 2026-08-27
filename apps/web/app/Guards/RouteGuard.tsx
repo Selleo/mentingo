@@ -47,7 +47,11 @@ export const RouteGuard = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const hasAccess = checkRouteAccess(location.pathname.replace("/", ""), permissions);
+  const path = location.pathname.replace("/", "");
+  const isSchoolOnlyPath =
+    path === "audit/school" || path === "benchmark" || path.startsWith("audit/results/school/");
+  const isManagingTenant = data.isManagingTenant && !data.isSupportMode;
+  const hasAccess = checkRouteAccess(path, permissions) && !(isManagingTenant && isSchoolOnlyPath);
 
   useLayoutEffect(() => {
     if (!hasAccess) {

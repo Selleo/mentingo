@@ -26,6 +26,7 @@ export const currentUserResponseSchema = Type.Composite([
     shouldVerifyMFA: Type.Boolean(),
     requiresPasswordChange: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
+    isManagingTenant: Type.Boolean(),
     isManagingTenantAdmin: Type.Boolean(),
     isSupportMode: Type.Boolean(),
     studentModeCourseIds: Type.Array(UUIDSchema),
