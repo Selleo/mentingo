@@ -65,6 +65,7 @@ import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { QuestionsModule } from "./questions/question.module";
+import { QuizModule } from "./quiz/quiz.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
@@ -152,6 +153,7 @@ import type { RedisClient } from "src/redis";
     LessonModule,
     LessonVideoProgressModule,
     QuestionsModule,
+    QuizModule,
     StudentLessonProgressModule,
     FileModule,
     S3Module,
