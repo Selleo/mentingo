@@ -2,6 +2,15 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 
+export type CourseAuthorMetadata = {
+  authorId: UUIDType;
+  firstName: string | null;
+  lastName: string | null;
+  jobTitle: string | null;
+  description: string | null;
+  profilePictureReference: string | null;
+};
+
 export type CourseTranslationType = {
   id: string;
   base: string;

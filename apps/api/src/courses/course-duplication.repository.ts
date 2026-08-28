@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { DatabasePg, type UUIDType } from "src/common";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { DB } from "src/storage/db/db.providers";
-import { courses, coursesSummaryStats } from "src/storage/schema";
+import { courses, coursesSummaryStats, userDetails, users } from "src/storage/schema";
 
 import type {
   CourseDuplicationSourceCourse,
@@ -46,6 +46,20 @@ export class CourseDuplicationRepository {
     const { sourceCourse, title, authorId } = input;
 
     return this.db.transaction(async (trx) => {
+      const [author] = await trx
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profilePictureReference: users.avatarReference,
+          jobTitle: userDetails.jobTitle,
+          description: userDetails.description,
+        })
+        .from(users)
+        .leftJoin(userDetails, eq(userDetails.userId, users.id))
+        .where(eq(users.id, authorId))
+        .limit(1);
+
       const [createdCourse] = await trx
         .insert(courses)
         .values({
@@ -58,6 +72,16 @@ export class CourseDuplicationRepository {
           currency: sourceCourse.currency,
           courseType: sourceCourse.courseType,
           authorId,
+          authorMetadata: author
+            ? {
+                authorId: author.id,
+                firstName: author.firstName,
+                lastName: author.lastName,
+                jobTitle: author.jobTitle,
+                description: author.description,
+                profilePictureReference: author.profilePictureReference,
+              }
+            : null,
           categoryId: sourceCourse.categoryId,
           stripeProductId: null,
           stripePriceId: null,

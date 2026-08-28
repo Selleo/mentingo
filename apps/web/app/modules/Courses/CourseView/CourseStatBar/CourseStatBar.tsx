@@ -9,7 +9,6 @@ import { useCurrentUser } from "~/api/queries";
 import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
-import { useUserDetails } from "~/api/queries/useUserDetails";
 import { hasAllPermissions, hasPermission } from "~/common/permissions/permission.utils";
 import { cn } from "~/lib/utils";
 import { sumRemainingChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
@@ -80,7 +79,6 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   );
   const { mutateAsync: transferCourseOwnership, isPending: isTransferringOwner } =
     useTransferCourseOwnership();
-  const { data: author } = useUserDetails(course.authorId);
   const { mutate: toggleLearningMode } = useToggleCourseStudentMode(course.id);
 
   const { data: otherCourses = [] } = useContentCreatorCourses(
@@ -90,7 +88,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       excludeCourseId: course.id,
       language,
     },
-    true,
+    !course.isContentReadonly,
   );
 
   const { data: enrolledGroups } = useGroupsByCourseQuery(
@@ -99,12 +97,13 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   );
   const { data: courseOwnershipCandidates } = useCourseOwnershipCandidates({
     id: course.id,
-    enabled: canManageCourseOwnership,
+    enabled: canManageCourseOwnership && !course.isContentReadonly,
   });
   const groupDeadlineDueDate = enrolledGroups
     ?.filter((group) => group.isMandatory && group.dueDate)
     .map((group) => group.dueDate)
     .sort()[0];
+  const author = course.author;
   const deadlineDueDate = groupDeadlineDueDate ?? course.dueDate;
   const hasDeadline = Boolean(deadlineDueDate);
   const showDeadlineCard = isAdminExperience ? canManageDeadlines : hasDeadline;
@@ -113,6 +112,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const canEditOwner = Boolean(
     isAdminExperience &&
       canManageCourseOwnership &&
+      !course.isContentReadonly &&
       courseOwnershipCandidates?.possibleCandidates?.length,
   );
 
@@ -299,6 +299,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
           onTransferOwner={transferOwner}
           onToggleShowAuthorSection={toggleShowAuthorSectionDraft}
           otherCourses={otherCourses}
+          showOtherCourses={!course.isContentReadonly}
           showAuthorSectionDraft={showAuthorSectionDraft}
         />
       )}

@@ -4731,6 +4731,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Quellkurs nicht gefunden",
+      "sourceAuthorNotFound": "Autor des Quellkurses nicht gefunden",
       "sourceCategoryNotFound": "Quellkurs-Kategorie nicht gefunden",
       "courseNotFound": "Kurs nicht gefunden",
       "chapterNotFound": "Kapitel nicht gefunden",
