@@ -207,10 +207,7 @@ export class QuizAuthoringRepository {
     return db
       .select({
         ...getTableColumns(assessmentQuestionChoiceOptions),
-        label: this.localizationService.getFieldByLanguage(
-          assessmentQuestionChoiceOptions.label,
-          language,
-        ),
+        label: assessmentQuestionChoiceOptions.label,
       })
       .from(assessmentQuestionChoiceOptions)
       .where(
@@ -231,10 +228,7 @@ export class QuizAuthoringRepository {
     return db
       .select({
         ...getTableColumns(assessmentQuestionTrueFalseStatements),
-        statement: this.localizationService.getFieldByLanguage(
-          assessmentQuestionTrueFalseStatements.statement,
-          language,
-        ),
+        statement: assessmentQuestionTrueFalseStatements.statement,
       })
       .from(assessmentQuestionTrueFalseStatements)
       .where(
@@ -295,10 +289,7 @@ export class QuizAuthoringRepository {
     return db
       .select({
         ...getTableColumns(assessmentQuestionDragAndDropOptions),
-        label: this.localizationService.getFieldByLanguage(
-          assessmentQuestionDragAndDropOptions.label,
-          language,
-        ),
+        label: assessmentQuestionDragAndDropOptions.label,
       })
       .from(assessmentQuestionDragAndDropOptions)
       .where(

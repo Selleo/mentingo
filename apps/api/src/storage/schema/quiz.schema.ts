@@ -14,6 +14,7 @@ import {
   type AssessmentTextComparisonMode,
   type AssessmentGradingMode,
   type AssessmentQuestionType,
+  type SupportedLanguages,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -137,7 +138,7 @@ export const assessmentQuestionChoiceOptions = pgTable(
     questionId: uuid("question_id")
       .references(() => assessmentQuestions.id, { onDelete: "cascade" })
       .notNull(),
-    language: text("language").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
     displayOrder: integer("display_order").notNull(),
     isCorrect: boolean("is_correct").notNull(),
     label: text("label").notNull(),
@@ -169,7 +170,7 @@ export const assessmentQuestionTrueFalseStatements = pgTable(
     questionId: uuid("question_id")
       .references(() => assessmentQuestions.id, { onDelete: "cascade" })
       .notNull(),
-    language: text("language").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
     displayOrder: integer("display_order").notNull(),
     correctValue: boolean("correct_value").notNull(),
     statement: text("statement").notNull(),
@@ -284,7 +285,7 @@ export const assessmentQuestionBlankAnswerSets = pgTable(
     blankId: uuid("blank_id")
       .references(() => assessmentQuestionBlanks.id, { onDelete: "cascade" })
       .notNull(),
-    language: text("language").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
     preferredAnswer: text("preferred_answer").notNull(),
     acceptedAnswers: text("accepted_answers").array().notNull(),
     ...timestamps,
@@ -306,7 +307,7 @@ export const assessmentQuestionDragAndDropOptions = pgTable(
     questionId: uuid("question_id")
       .references(() => assessmentQuestions.id, { onDelete: "cascade" })
       .notNull(),
-    language: text("language").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
     label: text("label").notNull(),
     targetBlankId: uuid("target_blank_id").references(() => assessmentQuestionBlanks.id, {
       onDelete: "cascade",
@@ -343,7 +344,7 @@ export const assessmentAttempts = pgTable(
     assessmentId: uuid("assessment_id")
       .references(() => assessments.id, { onDelete: "cascade" })
       .notNull(),
-    language: text("language").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
     learnerId: uuid("learner_id")
       .references(() => users.id)
       .notNull(),
@@ -555,7 +556,7 @@ export const assessmentAttemptQuestionAnswerReviews = pgTable(
       .notNull(),
     awardedPoints: numeric("awarded_points", { precision: 8, scale: 2 }).notNull(),
     explanation: text("explanation").notNull(),
-    explanationLanguage: text("explanation_language").notNull(),
+    explanationLanguage: text("explanation_language").$type<SupportedLanguages>().notNull(),
     reviewedAt: timestampWithTimezone({ name: "reviewed_at" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
