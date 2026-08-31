@@ -6,6 +6,12 @@ type StreamingAudioPlayerOptions = {
   gain?: number;
   leadTimeSeconds?: number;
   onLevelChange?: (level: number) => void;
+  onPlaybackProgress?: (progress: AudioPlaybackProgress | null) => void;
+};
+
+export type AudioPlaybackProgress = {
+  turnId: string;
+  elapsedMs: number;
 };
 
 export class RealtimePCMPlayer {
@@ -14,6 +20,7 @@ export class RealtimePCMPlayer {
   private readonly leadTimeSeconds: number;
   private readonly gain: number;
   private readonly onLevelChange?: (level: number) => void;
+  private readonly onPlaybackProgress?: (progress: AudioPlaybackProgress | null) => void;
 
   private audioCtx: AudioContext | null = null;
   private gainNode: GainNode | null = null;
@@ -23,6 +30,8 @@ export class RealtimePCMPlayer {
   private levelMonitorFrame: number | null = null;
   private levelMonitorBuffer: Float32Array | null = null;
   private onIdle: (() => void) | null = null;
+  private activeTurnId: string | null = null;
+  private activeTurnStartTime: number | null = null;
 
   constructor({
     sampleRate = 44100,
@@ -30,12 +39,14 @@ export class RealtimePCMPlayer {
     gain = 1,
     leadTimeSeconds = 0.02,
     onLevelChange,
+    onPlaybackProgress,
   }: StreamingAudioPlayerOptions = {}) {
     this.sampleRate = sampleRate;
     this.channels = channels;
     this.gain = gain;
     this.leadTimeSeconds = leadTimeSeconds;
     this.onLevelChange = onLevelChange;
+    this.onPlaybackProgress = onPlaybackProgress;
   }
 
   async start() {
@@ -60,7 +71,7 @@ export class RealtimePCMPlayer {
     );
   }
 
-  async enqueue(chunk: StreamingAudioChunk) {
+  async enqueue(chunk: StreamingAudioChunk, turnId?: string) {
     if (!this.audioCtx || !this.gainNode) {
       await this.start();
     }
@@ -93,6 +104,10 @@ export class RealtimePCMPlayer {
     source.connect(this.gainNode);
 
     const startAt = Math.max(this.nextStartTime, this.audioCtx.currentTime + 0.005);
+    if (turnId && turnId !== this.activeTurnId) {
+      this.activeTurnId = turnId;
+      this.activeTurnStartTime = startAt;
+    }
     source.start(startAt);
     this.nextStartTime = startAt + audioBuffer.duration;
 
@@ -103,6 +118,7 @@ export class RealtimePCMPlayer {
       if (this.activeSources.size === 0) {
         this.stopLevelMonitor();
         this.onLevelChange?.(0);
+        this.onPlaybackProgress?.(null);
         this.onIdle?.();
       }
     };
@@ -130,7 +146,10 @@ export class RealtimePCMPlayer {
     this.activeSources.clear();
     this.nextStartTime = this.audioCtx.currentTime + this.leadTimeSeconds;
     this.stopLevelMonitor();
+    this.activeTurnId = null;
+    this.activeTurnStartTime = null;
     this.onLevelChange?.(0);
+    this.onPlaybackProgress?.(null);
   }
 
   async destroy() {
@@ -196,6 +215,12 @@ export class RealtimePCMPlayer {
 
       this.analyserNode.getFloatTimeDomainData(this.levelMonitorBuffer);
       this.onLevelChange?.(this.calculateRmsLevel(this.levelMonitorBuffer));
+      if (this.audioCtx && this.activeTurnId && this.activeTurnStartTime !== null) {
+        this.onPlaybackProgress?.({
+          turnId: this.activeTurnId,
+          elapsedMs: Math.max(0, (this.audioCtx.currentTime - this.activeTurnStartTime) * 1_000),
+        });
+      }
       this.levelMonitorFrame = requestAnimationFrame(updateLevel);
     };
 

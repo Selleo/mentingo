@@ -4118,6 +4118,11 @@
           "muted": "Wyciszony",
           "mutedHint": "Twój mikrofon jest wyciszony. Mentor Cię nie słyszy.",
           "youSaid": "Powiedziałeś/aś",
+          "recovery": {
+            "failedTitle": "Sesja głosowa została rozłączona",
+            "failedDescription": "Nie udało się przywrócić połączenia. Uruchom ponownie sesję głosową, aby kontynuować.",
+            "restart": "Uruchom ponownie"
+          },
           "states": {
             "idle": {
               "title": "Gotowe",

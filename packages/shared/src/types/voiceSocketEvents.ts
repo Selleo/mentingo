@@ -1,6 +1,18 @@
 import type { VoiceAction } from "../constants/voiceAction";
 
-export type { AudioStartedPayload } from "@japro/luma-sdk";
+export type {
+  AudioChunkedPayload,
+  AudioProtocolErrorPayload,
+  AudioReconnectPayload,
+  AudioRecoveryPayload,
+  AudioStartedPayload,
+} from "@japro/luma-sdk";
+
+import type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk";
+
+export type AudioRecoveryStartedPayload = {
+  attempt: number;
+};
 
 export type ClientSpeechBoundaryPayload = {
   sessionRunId: string;
@@ -28,10 +40,23 @@ export type AudioOutputLifecycleEventPayload = {
   turnId?: string;
 };
 
-export type MentorTranscriptionEventPayload = {
+export type LearnerTranscriptionEventPayload = {
   text: string;
+  turnId: string;
+  segmentId: string;
+  revision: number;
+  status: LearnerTranscriptStatus;
   jobId?: string;
 };
+
+export type AudioOutputAlignmentEventPayload = {
+  turnId: string;
+  sequence: number;
+  words: SpeechAlignmentWord[];
+};
+
+export type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk";
+export { LEARNER_TRANSCRIPT_STATUSES } from "@japro/luma-sdk";
 
 export type MentorResponseDeltaEventPayload = {
   text: string;

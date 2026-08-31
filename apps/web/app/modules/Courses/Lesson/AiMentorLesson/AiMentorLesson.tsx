@@ -171,7 +171,7 @@ const AiMentorLesson = ({
     void sendMessage({ text: message });
   }, [input, lesson.threadId, sendMessage]);
 
-  const handleVoiceMentorTranscription = useCallback(
+  const handleVoiceLearnerTranscription = useCallback(
     (text: string) => {
       voiceResponseMessageIdRef.current = null;
       appendVoiceMessage("user", text);
@@ -466,7 +466,7 @@ const AiMentorLesson = ({
                 }
                 mentorAvatarUrl={lesson.aiMentor?.avatarReferenceUrl}
                 handleSubmit={handleSubmit}
-                onMentorTranscription={handleVoiceMentorTranscription}
+                onLearnerTranscription={handleVoiceLearnerTranscription}
                 onMentorResponseDelta={handleVoiceMentorResponseDelta}
                 onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
                 onAudioInterrupted={invalidateCurrentThreadMessages}

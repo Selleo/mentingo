@@ -3885,6 +3885,11 @@
           "muted": "Ztlumeno",
           "mutedHint": "Váš mikrofon je ztlumený. Mentor vás neslyší.",
           "youSaid": "Řekl jsi",
+          "recovery": {
+            "failedTitle": "Hlasová relace byla odpojena",
+            "failedDescription": "Připojení se nepodařilo obnovit. Restartujte hlasovou relaci a pokračujte.",
+            "restart": "Restartovat relaci"
+          },
           "states": {
             "idle": {
               "title": "Připraveno",

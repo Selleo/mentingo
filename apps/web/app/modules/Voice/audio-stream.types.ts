@@ -1,19 +1,13 @@
 import { VOICE_SOCKET_EVENT } from "@repo/shared";
 
-export const AUDIO_CAPTURE_MODE = {
-  CONTINUOUS: "continuous",
-  VAD_SEGMENTED: "vad_segmented",
-} as const;
-
-export type AudioCaptureMode = (typeof AUDIO_CAPTURE_MODE)[keyof typeof AUDIO_CAPTURE_MODE];
-
 export const AUDIO_STREAM_EVENT = {
-  RECONNECT: "audio_reconnect",
+  RECONNECT: VOICE_SOCKET_EVENT.AUDIO_RECONNECT,
   START_ACCEPTED: VOICE_SOCKET_EVENT.AUDIO_STARTED,
-  RECOVERED: "audio:recovered",
-  RECONNECT_ERROR: "audio:reconnect_error",
-  CHUNK_ACCEPTED: "audio:chunked",
-  CHUNK_ERROR: "audio:chunk_error",
+  RECOVERY_STARTED: VOICE_SOCKET_EVENT.AUDIO_RECOVERY_STARTED,
+  RECOVERED: VOICE_SOCKET_EVENT.AUDIO_RECOVERED,
+  RECONNECT_ERROR: VOICE_SOCKET_EVENT.AUDIO_RECONNECT_ERROR,
+  CHUNK_ACCEPTED: VOICE_SOCKET_EVENT.AUDIO_CHUNK_ACCEPTED,
+  CHUNK_ERROR: VOICE_SOCKET_EVENT.AUDIO_CHUNK_ERROR,
 } as const;
 
 export const AUDIO_STREAM_MESSAGE_TYPE = {
@@ -28,11 +22,21 @@ export const AUDIO_SESSION_ERROR_CODE = {
 
 export type AudioStreamLifecycleEvents = {
   startAccepted?: string;
+  recoveryStarted?: string;
   recovered?: string;
   reconnectError?: string;
   chunkAccepted?: string;
   chunkError?: string;
 };
+
+export const VOICE_CONNECTION_STATE = {
+  CONNECTED: "connected",
+  RECOVERING: "recovering",
+  FAILED: "failed",
+} as const;
+
+export type VoiceConnectionState =
+  (typeof VOICE_CONNECTION_STATE)[keyof typeof VOICE_CONNECTION_STATE];
 
 export type AudioReconnectContext = {
   sessionRunId: string;

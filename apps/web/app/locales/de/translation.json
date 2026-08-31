@@ -3879,6 +3879,11 @@
           "muted": "Stumm",
           "mutedHint": "Ihr Mikrofon ist stummgeschaltet. Der Mentor kann Sie nicht hören.",
           "youSaid": "Du sagtest",
+          "recovery": {
+            "failedTitle": "Sprachsitzung wurde getrennt",
+            "failedDescription": "Die Verbindung konnte nicht wiederhergestellt werden. Starten Sie die Sprachsitzung neu, um fortzufahren.",
+            "restart": "Sitzung neu starten"
+          },
           "states": {
             "idle": {
               "title": "Bereit",

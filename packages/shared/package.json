@@ -20,6 +20,6 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@japro/luma-sdk": "file:/private/tmp/luma-sdk-voice-recovery/japro-luma-sdk-0.2.16.tgz"
+    "@japro/luma-sdk": "file:/private/tmp/mentingo-luma-sdk/japro-luma-sdk-0.2.16.tgz"
   }
 }

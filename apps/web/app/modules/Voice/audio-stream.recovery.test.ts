@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { RealtimePCMStreamerWorklet, type StreamProtocol } from "./audio-stream";
+import { VOICE_CONNECTION_STATE, type VoiceConnectionState } from "./audio-stream.types";
 
 type FakeSocket = {
   connected: boolean;
@@ -21,6 +22,8 @@ type StreamerInternals = {
   isSpeaking: boolean;
   emitSpeechStartBoundary: () => void;
   completeActiveSpeechSegment: () => void;
+  onRecoveryStarted: () => void;
+  onRecovered: (payload: unknown) => void;
   replayUnacknowledgedChunks: (expectedNextAudioSeq: number) => boolean;
   pumpOutbound: () => Promise<void>;
 };
@@ -43,8 +46,14 @@ const protocol: StreamProtocol<unknown, unknown> = {
   }),
 };
 
-const createStreamer = () => {
-  const streamer = new RealtimePCMStreamerWorklet(protocol);
+const createStreamer = (onRecoveryStateChange?: (state: VoiceConnectionState) => void) => {
+  const streamer = new RealtimePCMStreamerWorklet(
+    protocol,
+    undefined,
+    undefined,
+    undefined,
+    onRecoveryStateChange,
+  );
   const socket: FakeSocket = {
     connected: false,
     emitted: [],
@@ -61,6 +70,17 @@ const createStreamer = () => {
 };
 
 describe("RealtimePCMStreamerWorklet recovery", () => {
+  it("reports recovering and connected states around a successful recovery", () => {
+    const states: VoiceConnectionState[] = [];
+    const { internals, socket } = createStreamer((state) => states.push(state));
+    socket.connected = true;
+
+    internals.onRecoveryStarted();
+    internals.onRecovered({ sessionRunId: "run-1", nextAudioSeq: 1 });
+
+    expect(states).toEqual([VOICE_CONNECTION_STATE.RECOVERING, VOICE_CONNECTION_STATE.CONNECTED]);
+  });
+
   it("buffers speech boundaries while disconnected and sends them through the pump", async () => {
     const { internals, socket } = createStreamer();
 

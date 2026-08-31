@@ -13,7 +13,7 @@ type AiMentorPracticeComposerProps = {
   lessonId: string;
   mentorName: string;
   handleSubmit: () => void;
-  onMentorTranscription: (text: string) => void;
+  onLearnerTranscription: (text: string) => void;
   onMentorResponseCompleted: (text: string) => void;
   onAudioInterrupted: () => void;
   onAudioOutputCompleted: () => void;
@@ -35,7 +35,7 @@ export function AiMentorPracticeComposer({
   lessonId,
   mentorName,
   handleSubmit,
-  onMentorTranscription,
+  onLearnerTranscription,
   onMentorResponseCompleted,
   onAudioInterrupted,
   onAudioOutputCompleted,
@@ -58,7 +58,7 @@ export function AiMentorPracticeComposer({
         lessonId={lessonId}
         mentorName={mentorName}
         handleSubmit={handleSubmit}
-        onMentorTranscription={onMentorTranscription}
+        onLearnerTranscription={onLearnerTranscription}
         onMentorResponseCompleted={onMentorResponseCompleted}
         onAudioInterrupted={onAudioInterrupted}
         onAudioOutputCompleted={onAudioOutputCompleted}

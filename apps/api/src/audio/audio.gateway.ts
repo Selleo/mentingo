@@ -8,7 +8,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { PcmChunkMeta, VOICE_SOCKET_EVENT, type ClientSpeechBoundaryPayload } from "@repo/shared";
+import {
+  PcmChunkMeta,
+  VOICE_SOCKET_EVENT,
+  type AudioReconnectPayload,
+  type ClientSpeechBoundaryPayload,
+} from "@repo/shared";
 import { Server } from "socket.io";
 
 import { AudioService } from "src/audio/audio.service";
@@ -97,6 +102,15 @@ export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, Realtim
     @MessageBody() payload: ClientSpeechBoundaryPayload,
   ) {
     await this.audioService.clientSpeechEnd(client.id, payload);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.AUDIO_RECONNECT)
+  async reconnectAudio(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: AudioReconnectPayload,
+  ) {
+    return await this.audioService.reconnectAudio(client.id, client.data.user, payload);
   }
 
   @UseGuards(WsJwtGuard)

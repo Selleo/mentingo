@@ -96,19 +96,23 @@ export class AiRuntimeService {
   async streamMentorChat(
     input: MentorChatOptions,
     createCoreStream: () => Promise<AiStreamTextResult>,
+    abortSignal?: AbortSignal,
   ): Promise<AiMentorChatStreamResult> {
     const source = await this.resolveSource(AiCapability.AiMentorChat);
 
     if (source === AI_RUNTIME_SOURCES.LUMA) {
       try {
         const luma = await this.getLumaClient();
-        const response = await luma.mentor.streamChat(input);
+        const response = await luma.mentor.streamChat(input, { signal: abortSignal });
 
         return {
           source: AI_RUNTIME_SOURCES.LUMA,
           textStream: this.readLumaTextStream(response.data as unknown as AsyncIterable<Buffer>),
         };
       } catch (error) {
+        if (abortSignal?.aborted) {
+          throw error;
+        }
         this.logger.warn(
           `Luma mentor chat failed; falling back to core mentor chat: ${
             error instanceof Error ? error.message : String(error)

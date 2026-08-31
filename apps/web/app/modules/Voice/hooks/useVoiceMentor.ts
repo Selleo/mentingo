@@ -7,6 +7,8 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { RealtimePCMPlayer } from "../audio-player";
 import { RealtimePCMStreamerWorklet } from "../audio-stream";
+import { VOICE_CONNECTION_STATE, type VoiceConnectionState } from "../audio-stream.types";
+import { acceptMentorSpeechAlignment, resolveActiveWordIndex } from "../voice-mentor-presentation";
 import { voiceSocketProtocol } from "../voiceSocketProtocol";
 
 import {
@@ -20,6 +22,11 @@ import {
 } from "./voiceMentorTurnState";
 
 import type { StreamProtocol } from "../audio-stream";
+import type {
+  LearnerTranscriptRevision,
+  MentorSpeechAlignment,
+  MentorSpeechPresentation,
+} from "../voice-mentor-presentation.types";
 import type { Dispatch, SetStateAction } from "react";
 import type { Socket } from "socket.io-client";
 
@@ -27,7 +34,7 @@ type VoiceMentorProps = {
   lessonId: string;
   setInput: Dispatch<SetStateAction<string>>;
   onLevelChange: (level: number) => void;
-  onMentorTranscription?: (text: string) => void;
+  onLearnerTranscription?: (revision: LearnerTranscriptRevision) => void;
   onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioStarted?: () => void;
@@ -41,7 +48,7 @@ export function useVoiceMentor({
   lessonId,
   setInput,
   onLevelChange,
-  onMentorTranscription,
+  onLearnerTranscription,
   onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioStarted,
@@ -57,7 +64,7 @@ export function useVoiceMentor({
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onLevelChangeRef = useRef(onLevelChange);
   const setInputRef = useRef(setInput);
-  const onMentorTranscriptionRef = useRef(onMentorTranscription);
+  const onLearnerTranscriptionRef = useRef(onLearnerTranscription);
   const onMentorResponseDeltaRef = useRef(onMentorResponseDelta);
   const onMentorResponseCompletedRef = useRef(onMentorResponseCompleted);
   const onAudioStartedRef = useRef(onAudioStarted);
@@ -65,6 +72,7 @@ export function useVoiceMentor({
   const onAudioInterruptedRef = useRef(onAudioInterrupted);
   const onSpeechChunkSentRef = useRef(onSpeechChunkSent);
   const onMentorAudioLevelRef = useRef(onMentorAudioLevel);
+  const mentorSpeechAlignmentRef = useRef<MentorSpeechAlignment | null>(null);
   const showErrorToastRef = useRef<(translationKey: string) => void>(() => undefined);
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -72,6 +80,12 @@ export function useVoiceMentor({
   const [isRecording, setIsRecording] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [connectionState, setConnectionState] = useState<VoiceConnectionState>(
+    VOICE_CONNECTION_STATE.CONNECTED,
+  );
+  const [recoveryErrorCode, setRecoveryErrorCode] = useState<string | null>(null);
+  const [mentorSpeechPresentation, setMentorSpeechPresentation] =
+    useState<MentorSpeechPresentation | null>(null);
 
   useEffect(() => {
     onLevelChangeRef.current = onLevelChange;
@@ -82,8 +96,8 @@ export function useVoiceMentor({
   }, [setInput]);
 
   useEffect(() => {
-    onMentorTranscriptionRef.current = onMentorTranscription;
-  }, [onMentorTranscription]);
+    onLearnerTranscriptionRef.current = onLearnerTranscription;
+  }, [onLearnerTranscription]);
 
   useEffect(() => {
     onMentorResponseDeltaRef.current = onMentorResponseDelta;
@@ -144,6 +158,8 @@ export function useVoiceMentor({
       audioPlayerRef.current?.reset();
       clearInactivityTimer();
       clearTurnState();
+      mentorSpeechAlignmentRef.current = null;
+      setMentorSpeechPresentation(null);
       setIsRecording(false);
       setIsMuted(false);
     }
@@ -190,11 +206,45 @@ export function useVoiceMentor({
       voiceSocketProtocol as StreamProtocol<unknown, unknown>,
       (level) => onLevelChangeRef.current(level),
       handleChunkSent,
+      (code) => {
+        audioPlayerRef.current?.reset();
+        clearInactivityTimer();
+        clearTurnState();
+        onAudioInterruptedRef.current?.();
+        setRecoveryErrorCode(code);
+      },
+      (state) => {
+        setConnectionState(state);
+        if (state !== VOICE_CONNECTION_STATE.FAILED) {
+          setRecoveryErrorCode(null);
+        }
+      },
     );
     audioPlayerRef.current = new RealtimePCMPlayer({
       sampleRate: 44100,
       channels: 1,
       onLevelChange: (level) => onMentorAudioLevelRef.current?.(level),
+      onPlaybackProgress: (progress) => {
+        const alignment = mentorSpeechAlignmentRef.current;
+        if (!alignment) {
+          return;
+        }
+
+        const activeWordIndex = progress
+          ? resolveActiveWordIndex(alignment, progress.turnId, progress.elapsedMs)
+          : null;
+        setMentorSpeechPresentation((current) => {
+          if (
+            current?.turnId === alignment.turnId &&
+            current.sequence === alignment.sequence &&
+            current.activeWordIndex === activeWordIndex
+          ) {
+            return current;
+          }
+
+          return { ...alignment, activeWordIndex };
+        });
+      },
     });
     audioPlayerRef.current.setOnIdle(() => {
       finalizeTurnIfReady();
@@ -213,7 +263,16 @@ export function useVoiceMentor({
       restartInactivityTimer,
       clearInactivityTimer,
       finalizeTurnIfReady,
-      onMentorTranscription: (text) => onMentorTranscriptionRef.current?.(text),
+      closeLearnerTurn: () => streamerRef.current?.closeLearnerTurn(),
+      onLearnerTranscription: (text) => onLearnerTranscriptionRef.current?.(text),
+      onAudioOutputAlignment: (incoming) => {
+        const alignment = acceptMentorSpeechAlignment(mentorSpeechAlignmentRef.current, incoming);
+        mentorSpeechAlignmentRef.current = alignment;
+        setMentorSpeechPresentation((current) => ({
+          ...alignment,
+          activeWordIndex: current?.turnId === alignment.turnId ? current.activeWordIndex : null,
+        }));
+      },
       onMentorResponseDelta: (text) => onMentorResponseDeltaRef.current?.(text),
       onMentorResponseCompleted: (text) => onMentorResponseCompletedRef.current?.(text),
       onAudioStarted: () => onAudioStartedRef.current?.(),
@@ -232,6 +291,7 @@ export function useVoiceMentor({
       void audioPlayerRef.current?.destroy().catch(() => undefined);
       clearInactivityTimer();
       clearTurnState();
+      mentorSpeechAlignmentRef.current = null;
       audioPlayerRef.current = null;
       streamerRef.current = null;
       socketRef.current = null;
@@ -239,16 +299,19 @@ export function useVoiceMentor({
     };
   }, [teardownVoiceMentorCapture]);
 
-  const startVoiceMentor = async () => {
-    if (isRecording || isStarting || !streamerRef.current || !audioPlayerRef.current) return false;
-
+  const beginVoiceMentorCapture = async () => {
+    if (!streamerRef.current || !audioPlayerRef.current) return false;
     setIsStarting(true);
+    setConnectionState(VOICE_CONNECTION_STATE.CONNECTED);
+    setRecoveryErrorCode(null);
     try {
       if (inactivityTimerRef.current) {
         clearTimeout(inactivityTimerRef.current);
         inactivityTimerRef.current = null;
       }
       turnStateRef.current = createVoiceMentorTurnState();
+      mentorSpeechAlignmentRef.current = null;
+      setMentorSpeechPresentation(null);
       await audioPlayerRef.current.start();
       await streamerRef.current.start({
         voiceAction: VOICE_ACTION.VOICE_MENTOR,
@@ -264,6 +327,20 @@ export function useVoiceMentor({
     } finally {
       setIsStarting(false);
     }
+  };
+
+  const startVoiceMentor = async () => {
+    if (isRecording || isStarting) return false;
+
+    return beginVoiceMentorCapture();
+  };
+
+  const restartVoiceMentor = async () => {
+    if (connectionState !== VOICE_CONNECTION_STATE.FAILED || isStarting) {
+      return false;
+    }
+
+    return beginVoiceMentorCapture();
   };
 
   const stopVoiceMentor = async () => {
@@ -301,6 +378,8 @@ export function useVoiceMentor({
   const cancelVoiceMentor = async () => {
     try {
       await teardownVoiceMentorCapture();
+      setConnectionState(VOICE_CONNECTION_STATE.CONNECTED);
+      setRecoveryErrorCode(null);
       return true;
     } catch (error) {
       console.error("Failed to cancel voice mentor recording", error);
@@ -325,7 +404,11 @@ export function useVoiceMentor({
     isRecording,
     isStarting,
     isMuted,
+    connectionState,
+    recoveryErrorCode,
+    mentorSpeechPresentation,
     startVoiceMentor,
+    restartVoiceMentor,
     stopVoiceMentor,
     cancelVoiceMentor,
     triggerWelcomeMessage,

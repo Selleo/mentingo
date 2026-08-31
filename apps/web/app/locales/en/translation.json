@@ -3884,6 +3884,11 @@
           "muted": "Muted",
           "mutedHint": "Your microphone is muted. The mentor cannot hear you.",
           "youSaid": "You said",
+          "recovery": {
+            "failedTitle": "Voice session disconnected",
+            "failedDescription": "The connection could not be restored. Restart the voice session to continue.",
+            "restart": "Restart session"
+          },
           "states": {
             "idle": {
               "title": "Ready",

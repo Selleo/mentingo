@@ -1,8 +1,11 @@
+import { VOICE_ENDPOINTING_MODE, type VoiceEndpointingMode } from "@repo/shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RealtimePCMStreamerWorklet, type StreamProtocol } from "./audio-stream";
 
 type VadCallbacks = {
+  preSpeechPadMs: number;
+  redemptionMs: number;
   onFrameProcessed: (probabilities: { isSpeech: number }, frame: Float32Array) => void;
   onSpeechRealStart: () => void;
   onSpeechEnd: () => void;
@@ -37,6 +40,8 @@ type StreamerInternals = {
   sessionRunId: string | null;
   isSessionActive: boolean;
   captureGeneration: number;
+  endpointingMode: VoiceEndpointingMode;
+  keepClientVadTurnOpen: boolean;
   hasActiveSpeechSegment: boolean;
   pendingSamples: number[];
   outboundOperations: Array<{ operation: () => void; seq?: number }>;
@@ -45,12 +50,13 @@ type StreamerInternals = {
   onSessionMetadataCleared: () => void;
   onSocketConnect: () => void;
   onRecovered: (payload: unknown) => void;
+  completeActiveSpeechSegment: () => void;
   pumpOutbound: () => Promise<void>;
 };
 
 const protocol: StreamProtocol<unknown, unknown> = {
   buildStartEmit: () => ({ event: "start", args: [] }),
-  buildChunkEmit: ({ chunkMeta }) => ({ event: "chunk", args: [chunkMeta.seq] }),
+  buildChunkEmit: ({ chunkMeta }) => ({ event: "chunk", args: [chunkMeta] }),
   buildStopEmit: () => ({ event: "stop", args: [] }),
   buildCancelEmit: () => ({ event: "cancel", args: [] }),
   buildSpeechStartEmit: ({ boundary }) => ({ event: "speech.start", args: [boundary] }),
@@ -58,7 +64,7 @@ const protocol: StreamProtocol<unknown, unknown> = {
   buildReconnectEmit: ({ sessionRunId }) => ({ event: "reconnect", args: [sessionRunId] }),
 };
 
-const createHarness = async () => {
+const createHarness = async ({ keepClientVadTurnOpen = false } = {}) => {
   const streamer = new RealtimePCMStreamerWorklet(protocol);
   const internals = streamer as unknown as StreamerInternals;
   const socket: FakeSocket = {
@@ -74,6 +80,7 @@ const createHarness = async () => {
   internals.sessionRunId = "run-1";
   internals.isSessionActive = true;
   internals.captureGeneration = 1;
+  internals.keepClientVadTurnOpen = keepClientVadTurnOpen;
   await internals.ensureMicVad();
 
   const callbacks = vadHarness.callbacks.at(-1);
@@ -110,7 +117,23 @@ describe("RealtimePCMStreamerWorklet VAD end deferral", () => {
     socket.connected = true;
     await internals.pumpOutbound();
 
-    expect(socket.emitted.filter(({ event }) => event === "chunk")).toHaveLength(3);
+    const chunks = socket.emitted.filter(({ event }) => event === "chunk");
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]?.args[0]).toMatchObject({ samples: 512 });
+    expect(socket.emitted.filter(({ event }) => event === "speech.end")).toHaveLength(1);
+  });
+
+  it("flushes the final real samples without appending silence", async () => {
+    const { internals, socket } = await createHarness();
+    internals.hasActiveSpeechSegment = true;
+    internals.pendingSamples = [1, 2, 3];
+
+    internals.completeActiveSpeechSegment();
+    socket.connected = true;
+    await internals.pumpOutbound();
+
+    const chunk = socket.emitted.find(({ event }) => event === "chunk");
+    expect(chunk?.args[0]).toMatchObject({ samples: 3 });
     expect(socket.emitted.filter(({ event }) => event === "speech.end")).toHaveLength(1);
   });
 
@@ -184,5 +207,39 @@ describe("RealtimePCMStreamerWorklet VAD end deferral", () => {
     const { streamer } = await createHarness();
 
     await expect(streamer.start({})).rejects.toThrow("AUDIO_SESSION_ALREADY_ACTIVE");
+  });
+
+  it("uses VAD as boundaries while forwarding every real frame in an open learner turn", async () => {
+    const { callbacks, internals, socket, streamer } = await createHarness({
+      keepClientVadTurnOpen: true,
+    });
+    internals.endpointingMode = VOICE_ENDPOINTING_MODE.CLIENT_VAD;
+
+    expect(callbacks.redemptionMs).toBe(300);
+    expect(callbacks.preSpeechPadMs).toBe(500);
+
+    callbacks.onFrameProcessed({ isSpeech: 0 }, silentFrame());
+    callbacks.onSpeechRealStart();
+    callbacks.onSpeechEnd();
+    callbacks.onFrameProcessed({ isSpeech: 0 }, silentFrame());
+    callbacks.onSpeechRealStart();
+
+    socket.connected = true;
+    await internals.pumpOutbound();
+
+    expect(socket.emitted.filter(({ event }) => event === "chunk")).toHaveLength(2);
+    expect(socket.emitted.filter(({ event }) => event === "speech.start")).toHaveLength(2);
+    expect(socket.emitted.filter(({ event }) => event === "speech.end")).toHaveLength(1);
+
+    streamer.closeLearnerTurn();
+    callbacks.onFrameProcessed({ isSpeech: 0 }, silentFrame());
+    expect(internals.hasActiveSpeechSegment).toBe(false);
+    expect(internals.pendingSamples).toHaveLength(0);
+  });
+
+  it("retains VAD redemption for finite dictation segments", async () => {
+    const { callbacks } = await createHarness();
+
+    expect(callbacks.redemptionMs).toBe(700);
   });
 });

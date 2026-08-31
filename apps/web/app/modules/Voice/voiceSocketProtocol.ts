@@ -1,17 +1,15 @@
 import {
+  VOICE_ACTION,
+  VOICE_ENDPOINTING_MODE,
   VOICE_SOCKET_EVENT,
   type ClientSpeechBoundaryPayload,
   type VoiceAction,
   type PcmChunkMeta,
   type StreamInitPayload,
+  type VoiceEndpointingMode,
 } from "@repo/shared";
 
-import {
-  AUDIO_CAPTURE_MODE,
-  AUDIO_STREAM_EVENT,
-  AUDIO_STREAM_MESSAGE_TYPE,
-  type AudioCaptureMode,
-} from "./audio-stream.types";
+import { AUDIO_STREAM_EVENT, AUDIO_STREAM_MESSAGE_TYPE } from "./audio-stream.types";
 
 import type { SocketEmitSpec, StreamProtocol } from "./audio-stream";
 
@@ -19,7 +17,7 @@ export type VoiceStartContext = {
   voiceAction: VoiceAction;
   lessonId?: string;
   metadata?: Record<string, unknown>;
-  captureMode?: AudioCaptureMode;
+  endpointingMode?: VoiceEndpointingMode;
 };
 
 const buildVoiceStartEmit = (params: {
@@ -95,10 +93,12 @@ export const voiceSocketProtocol: StreamProtocol<VoiceStartContext, void> = {
       event: VOICE_SOCKET_EVENT.CLIENT_SPEECH_END,
       boundary,
     }),
-  resolveCaptureMode: (context) => context.captureMode ?? AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
+  resolveEndpointingMode: (context) => context.endpointingMode ?? VOICE_ENDPOINTING_MODE.CLIENT_VAD,
+  keepsClientVadTurnOpen: (context) => context.voiceAction === VOICE_ACTION.VOICE_MENTOR,
   buildReconnectEmit: buildVoiceReconnectEmit,
   lifecycleEvents: {
     startAccepted: AUDIO_STREAM_EVENT.START_ACCEPTED,
+    recoveryStarted: AUDIO_STREAM_EVENT.RECOVERY_STARTED,
     recovered: AUDIO_STREAM_EVENT.RECOVERED,
     reconnectError: AUDIO_STREAM_EVENT.RECONNECT_ERROR,
     chunkAccepted: AUDIO_STREAM_EVENT.CHUNK_ACCEPTED,

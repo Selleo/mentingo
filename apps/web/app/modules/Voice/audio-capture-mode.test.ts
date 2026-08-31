@@ -1,45 +1,57 @@
-import { VOICE_CAPTURE_PROFILE, type AudioStartedPayload } from "@repo/shared";
+import {
+  VOICE_CAPTURE_PROFILE,
+  VOICE_ENDPOINTING_MODE,
+  type AudioStartedPayload,
+} from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
-import { resolveAudioCaptureMode } from "./audio-capture-mode";
-import { AUDIO_CAPTURE_MODE } from "./audio-stream.types";
+import { resolveVoiceEndpointingMode } from "./audio-capture-mode";
 
-describe("resolveAudioCaptureMode", () => {
-  it("maps the backend continuous PCM profile to continuous capture", () => {
-    const captureProfile: AudioStartedPayload["transcriptionSessionPlan"]["captureProfile"] =
-      VOICE_CAPTURE_PROFILE.CONTINUOUS_PCM;
-
+describe("resolveVoiceEndpointingMode", () => {
+  it("uses client VAD when the backend assigns client-owned boundaries", () => {
     expect(
-      resolveAudioCaptureMode(
-        { transcriptionSessionPlan: { captureProfile } },
-        AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
+      resolveVoiceEndpointingMode(
+        {
+          transcriptionSessionPlan: {
+            boundarySource: VOICE_ENDPOINTING_MODE.CLIENT_VAD,
+          },
+        },
+        VOICE_ENDPOINTING_MODE.PROVIDER,
       ),
-    ).toBe(AUDIO_CAPTURE_MODE.CONTINUOUS);
+    ).toBe(VOICE_ENDPOINTING_MODE.CLIENT_VAD);
   });
 
-  it("keeps VAD segmented capture for the segmented profile", () => {
+  it("uses provider endpointing when the backend assigns provider-owned boundaries", () => {
+    expect(
+      resolveVoiceEndpointingMode(
+        {
+          transcriptionSessionPlan: {
+            boundarySource: VOICE_ENDPOINTING_MODE.PROVIDER,
+          },
+        },
+        VOICE_ENDPOINTING_MODE.CLIENT_VAD,
+      ),
+    ).toBe(VOICE_ENDPOINTING_MODE.PROVIDER);
+  });
+
+  it("supports legacy capture profiles when boundary ownership is absent", () => {
     const captureProfile: AudioStartedPayload["transcriptionSessionPlan"]["captureProfile"] =
       VOICE_CAPTURE_PROFILE.VAD_SEGMENTED;
 
     expect(
-      resolveAudioCaptureMode(
+      resolveVoiceEndpointingMode(
         { transcriptionSessionPlan: { captureProfile } },
-        AUDIO_CAPTURE_MODE.CONTINUOUS,
+        VOICE_ENDPOINTING_MODE.PROVIDER,
       ),
-    ).toBe(AUDIO_CAPTURE_MODE.VAD_SEGMENTED);
+    ).toBe(VOICE_ENDPOINTING_MODE.CLIENT_VAD);
   });
 
-  it("does not infer capture from transcription mode or provider", () => {
+  it("keeps the fallback when no endpointing contract is present", () => {
     expect(
-      resolveAudioCaptureMode(
-        {
-          transcriptionSessionPlan: {
-            effectiveTranscriptionMode: "realtime_stream",
-            providerAdapter: "gladia",
-          },
-        },
-        AUDIO_CAPTURE_MODE.VAD_SEGMENTED,
+      resolveVoiceEndpointingMode(
+        { transcriptionSessionPlan: { providerAdapter: "unknown" } },
+        VOICE_ENDPOINTING_MODE.CLIENT_VAD,
       ),
-    ).toBe(AUDIO_CAPTURE_MODE.VAD_SEGMENTED);
+    ).toBe(VOICE_ENDPOINTING_MODE.CLIENT_VAD);
   });
 });

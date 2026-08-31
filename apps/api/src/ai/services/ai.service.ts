@@ -281,6 +281,7 @@ export class AiService {
                 voiceSessionId: data.voiceSessionId,
               },
               createCoreStream,
+              data.abortSignal,
             );
 
             if (stream.source === AI_RUNTIME_SOURCES.CORE) return stream;

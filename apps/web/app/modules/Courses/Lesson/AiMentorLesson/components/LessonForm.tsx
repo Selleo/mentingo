@@ -1,4 +1,4 @@
-import { getUiMessageText } from "@repo/shared";
+import { getUiMessageText, LEARNER_TRANSCRIPT_STATUSES } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,11 +12,13 @@ import { VoiceMentorModeOverlay } from "~/modules/Courses/Lesson/AiMentorLesson/
 import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 import { useVoiceMentor } from "~/modules/Voice/hooks/useVoiceMentor";
 import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
+import { acceptLearnerTranscriptRevision } from "~/modules/Voice/voice-mentor-presentation";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
 import type { UIMessage } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import type { LearnerTranscriptRevision } from "~/modules/Voice/voice-mentor-presentation.types";
 
 const MENTOR_PLAYBACK_ACTIVITY_THRESHOLD = 0.01;
 
@@ -25,7 +27,7 @@ interface LessonFormProps {
   mentorName: string;
   mentorAvatarUrl?: string | null;
   handleSubmit: () => void;
-  onMentorTranscription?: (text: string) => void;
+  onLearnerTranscription?: (text: string) => void;
   onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioOutputCompleted?: () => void;
@@ -47,7 +49,7 @@ export const LessonForm = ({
   mentorName,
   mentorAvatarUrl,
   handleSubmit,
-  onMentorTranscription,
+  onLearnerTranscription,
   onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioOutputCompleted,
@@ -70,7 +72,7 @@ export const LessonForm = ({
   const [isVoiceJudgePending, setIsVoiceJudgePending] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const [mentorVoiceLevel, setMentorVoiceLevel] = useState(0);
-  const [latestTranscript, setLatestTranscript] = useState("");
+  const [latestTranscript, setLatestTranscript] = useState<LearnerTranscriptRevision | null>(null);
   const [latestResponse, setLatestResponse] = useState("");
   const mentorPlaybackActiveRef = useRef(false);
   const { data: lumaConfigured } = useLumaConfigured();
@@ -90,19 +92,26 @@ export const LessonForm = ({
     isRecording: isVoiceMentorMode,
     isStarting: isVoiceMentorStarting,
     isMuted: isVoiceMentorMuted,
+    connectionState: voiceMentorConnectionState,
     startVoiceMentor,
+    restartVoiceMentor,
     cancelVoiceMentor,
     triggerWelcomeMessage,
     setVoiceMentorMuted,
+    mentorSpeechPresentation,
   } = useVoiceMentor({
     lessonId,
     setInput,
     onLevelChange: setVoiceLevel,
-    onMentorTranscription: (text) => {
-      setLatestTranscript(text);
+    onLearnerTranscription: (revision) => {
+      setLatestTranscript((current) => acceptLearnerTranscriptRevision(current, revision));
+      if (revision.status !== LEARNER_TRANSCRIPT_STATUSES.FINAL) {
+        return;
+      }
+
       setLatestResponse("");
-      voiceModeUI.onMentorTranscriptionReceived();
-      onMentorTranscription?.(text);
+      voiceModeUI.onLearnerTranscriptionReceived();
+      onLearnerTranscription?.(revision.text);
     },
     onMentorResponseDelta: (text) => {
       setLatestResponse((previous) => previous + text);
@@ -190,7 +199,7 @@ export const LessonForm = ({
     if (!hasStarted) return;
 
     setIsVoiceMode(true);
-    setLatestTranscript("");
+    setLatestTranscript(null);
     setLatestResponse("");
     mentorPlaybackActiveRef.current = false;
     voiceModeUI.onMicCaptureStarted();
@@ -229,7 +238,7 @@ export const LessonForm = ({
       return;
     }
 
-    setLatestTranscript("");
+    setLatestTranscript(null);
     setLatestResponse("");
     voiceModeUI.onMicCaptureStarted();
   };
@@ -243,6 +252,20 @@ export const LessonForm = ({
     voiceModeUI.onMicCaptureStopped();
     setVoiceLevel(0);
     setMentorVoiceLevel(0);
+  };
+
+  const restartVoiceMentorMode = async () => {
+    setIsVoiceMentorAudioStarted(false);
+    setMentorVoiceLevel(0);
+    mentorPlaybackActiveRef.current = false;
+    const restarted = await restartVoiceMentor();
+    if (!restarted) {
+      return;
+    }
+
+    setLatestTranscript(null);
+    setLatestResponse("");
+    voiceModeUI.onMicCaptureStarted();
   };
 
   const closeVoiceOverlay = async () => {
@@ -353,8 +376,9 @@ export const LessonForm = ({
         state={voiceModeUI.voiceModeState}
         voiceLevel={voiceLevel}
         mentorVoiceLevel={mentorVoiceLevel}
-        transcript={latestTranscript}
+        learnerTranscript={latestTranscript}
         response={latestResponse}
+        mentorSpeech={mentorSpeechPresentation}
         mentorName={mentorName}
         mentorAvatarUrl={mentorAvatarUrl}
         hasTaskDescription={hasTaskDescription}
@@ -362,7 +386,10 @@ export const LessonForm = ({
         onJudge={() => void judgeVoiceMentorLesson()}
         isJudgePending={isJudgePending || isVoiceJudgePending}
         isMicMuted={isVoiceMentorMuted}
+        connectionState={voiceMentorConnectionState}
+        isRestarting={isVoiceMentorStarting}
         onMicMutedChange={(muted) => void setVoiceMentorMuted(muted)}
+        onRestart={() => void restartVoiceMentorMode()}
         onExit={() => void closeVoiceOverlay()}
       />
     </div>
