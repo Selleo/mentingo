@@ -78,6 +78,8 @@ export const LessonForm = ({
   const { data: lumaConfigured } = useLumaConfigured();
   const canUseVoiceMentor = allowVoiceMentor && Boolean(lumaConfigured?.voiceMentorEnabled);
   const voiceModeUI = useVoiceModeUIState();
+  const lastMentorMessage = [...messages].reverse().find((message) => message.role === "assistant");
+  const lastMentorResponse = lastMentorMessage ? getUiMessageText(lastMentorMessage) : "";
 
   const emojiRef = useRef<HTMLDivElement | null>(null);
   const hasTriggeredWelcomeRef = useRef(false);
@@ -233,13 +235,13 @@ export const LessonForm = ({
     setIsVoiceMentorAudioStarted(false);
     setMentorVoiceLevel(0);
     setShowEmojiPicker(false);
+    setLatestTranscript(null);
+    setLatestResponse(lastMentorResponse);
     const started = await startVoiceMentor();
     if (!started) {
       return;
     }
 
-    setLatestTranscript(null);
-    setLatestResponse("");
     voiceModeUI.onMicCaptureStarted();
   };
 
@@ -258,13 +260,13 @@ export const LessonForm = ({
     setIsVoiceMentorAudioStarted(false);
     setMentorVoiceLevel(0);
     mentorPlaybackActiveRef.current = false;
+    setLatestTranscript(null);
+    setLatestResponse(lastMentorResponse);
     const restarted = await restartVoiceMentor();
     if (!restarted) {
       return;
     }
 
-    setLatestTranscript(null);
-    setLatestResponse("");
     voiceModeUI.onMicCaptureStarted();
   };
 

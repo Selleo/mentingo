@@ -22,6 +22,7 @@ import {
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { useTusScormUpload } from "~/hooks/useTusScormUpload";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { ScormPackageUploadField } from "~/modules/Admin/Scorm/components/ScormPackageUploadField";
 import { isBrowserFile } from "~/utils/isBrowserFile";
 
@@ -59,9 +60,17 @@ export const ScormLessonForm = ({
   const { mutateAsync: updateScormLesson, isPending: isUpdatingScormLesson } =
     useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
-  const { setIsCurrectFormDirty } = useLeaveModal();
+  const {
+    isLeaveModalOpen,
+    closeLeaveModal,
+    isCurrentFormDirty,
+    setIsCurrectFormDirty,
+    setIsLeavingContent,
+    openLeaveModal,
+  } = useLeaveModal();
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const currentLanguageHasPackage = Boolean(
     lessonToEdit?.scormPackageLanguages?.includes(language),
   );
@@ -145,6 +154,36 @@ export const ScormLessonForm = ({
   const handleClear = () => {
     setSelectedFile(undefined);
     form.setValue("scormFile", undefined, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleCancel = () => {
+    if (isCurrentFormDirty) {
+      setIsCanceling(true);
+      setIsLeavingContent(true);
+      openLeaveModal();
+      return;
+    }
+    setContentTypeToDisplay(ContentTypes.EMPTY);
+  };
+
+  useEffect(() => {
+    if (!isCurrentFormDirty && isCanceling) {
+      setContentTypeToDisplay(ContentTypes.EMPTY);
+      setIsCanceling(false);
+      setIsLeavingContent(false);
+    }
+  }, [isCanceling, isCurrentFormDirty, setContentTypeToDisplay, setIsLeavingContent]);
+
+  const onCancelLeaveModal = () => {
+    closeLeaveModal();
+    setIsCanceling(false);
+    setIsLeavingContent(false);
+  };
+
+  const onDiscardLeaveModal = () => {
+    closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
   };
 
   const handleDelete = async () => {
@@ -271,11 +310,7 @@ export const ScormLessonForm = ({
                   : SCORM_LESSON_FORM_HANDLES.CANCEL_BUTTON
               }
               variant="outline"
-              onClick={
-                lessonToEdit
-                  ? () => setIsDeleteModalOpen(true)
-                  : () => setContentTypeToDisplay(ContentTypes.EMPTY)
-              }
+              onClick={lessonToEdit ? () => setIsDeleteModalOpen(true) : handleCancel}
               className={
                 lessonToEdit
                   ? "border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
@@ -297,6 +332,11 @@ export const ScormLessonForm = ({
           confirmButton: SCORM_LESSON_FORM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON,
           cancelButton: SCORM_LESSON_FORM_HANDLES.DELETE_DIALOG_CANCEL_BUTTON,
         }}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
     </div>
   );

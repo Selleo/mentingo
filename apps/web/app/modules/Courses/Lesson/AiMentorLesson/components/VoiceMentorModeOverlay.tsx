@@ -1,7 +1,7 @@
 import { VOICE_MODE_STATE, type VoiceModeState } from "@repo/shared";
 import { AlertTriangle, BookOpen, ClipboardCheck, Mic, MicOff, RefreshCw, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AgentAudioVisualizerAura } from "~/components/agents-ui/agent-audio-visualizer-aura";
@@ -75,6 +75,12 @@ export function VoiceMentorModeOverlay({
 }: VoiceMentorModeOverlayProps) {
   const { t } = useTranslation();
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
+  useEffect(() => {
+    if (open) {
+      setIsTaskPanelOpen(hasTaskDescription);
+    }
+  }, [hasTaskDescription, open]);
+
   const stateTitle: Record<VoiceModeState, string> = {
     [VOICE_MODE_STATE.IDLE]: t(
       "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.idle.title",

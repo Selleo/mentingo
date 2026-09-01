@@ -1,5 +1,5 @@
 import { isArray } from "lodash-es";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FormTextField } from "~/components/Form/FormTextField";
@@ -7,7 +7,9 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
 import { EMBED_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
@@ -37,8 +39,17 @@ export const EmbedLessonForm = ({
   language,
 }: EmbedLessonProps) => {
   const { t } = useTranslation();
+  const {
+    isLeaveModalOpen,
+    closeLeaveModal,
+    isCurrentFormDirty,
+    setIsCurrectFormDirty,
+    setIsLeavingContent,
+    openLeaveModal,
+  } = useLeaveModal();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const { form, onSubmit, onDelete } = useEmbedLessonForm({
     lessonToEdit,
@@ -48,6 +59,11 @@ export const EmbedLessonForm = ({
   });
 
   const resources = form.watch("resources");
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsCurrectFormDirty(isDirty);
+  }, [isDirty, setIsCurrectFormDirty]);
 
   const hasReachedMaxResources = useMemo(() => {
     return isArray(resources) && resources.length >= MAX_EMBED_LESSON_RESOURCES;
@@ -66,6 +82,36 @@ export const EmbedLessonForm = ({
 
   const handleDeleteLesson = () =>
     lessonToEdit ? setIsModalOpen(true) : () => setContentTypeToDisplay(ContentTypes.EMPTY);
+
+  const handleCancel = () => {
+    if (isCurrentFormDirty) {
+      setIsCanceling(true);
+      setIsLeavingContent(true);
+      openLeaveModal();
+      return;
+    }
+    setContentTypeToDisplay(ContentTypes.EMPTY);
+  };
+
+  useEffect(() => {
+    if (!isCurrentFormDirty && isCanceling) {
+      setContentTypeToDisplay(ContentTypes.EMPTY);
+      setIsCanceling(false);
+      setIsLeavingContent(false);
+    }
+  }, [isCanceling, isCurrentFormDirty, setContentTypeToDisplay, setIsLeavingContent]);
+
+  const onCancelLeaveModal = () => {
+    closeLeaveModal();
+    setIsCanceling(false);
+    setIsLeavingContent(false);
+  };
+
+  const onDiscardLeaveModal = () => {
+    closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
+  };
 
   const onCloseDeleteModal = () => setIsModalOpen(false);
 
@@ -143,7 +189,7 @@ export const EmbedLessonForm = ({
                     : EMBED_LESSON_FORM_HANDLES.CANCEL_BUTTON
                 }
                 type="button"
-                onClick={handleDeleteLesson}
+                onClick={lessonToEdit ? handleDeleteLesson : handleCancel}
                 className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
               >
                 {lessonToEdit ? t("common.button.delete") : t("common.button.cancel")}
@@ -157,6 +203,11 @@ export const EmbedLessonForm = ({
         onClose={onCloseDeleteModal}
         onDelete={onDelete}
         contentType={DeleteContentType.EMBED}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
     </Card>
   );

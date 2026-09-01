@@ -49,7 +49,6 @@ const ContentLessonForm = ({
   language,
 }: ContentLessonProps) => {
   const [contextId, setContextId] = useState<string | undefined>(undefined);
-  const [isValidated, setIsValidated] = useState(false);
 
   const { form, onSubmit, onDelete } = useContentLessonForm({
     chapterToEdit,
@@ -145,28 +144,14 @@ const ContentLessonForm = ({
     setIsCurrectFormDirty(isDirty);
   }, [isDirty, setIsCurrectFormDirty]);
 
-  const handleValidationSuccess = () => {
-    setIsValidated(true);
-  };
-
-  const handleValidationError = () => {
-    setIsValidated(false);
+  const onCancelLeaveModal = () => {
     closeLeaveModal();
-  };
-
-  const onValidateLeave = () => {
-    form.handleSubmit(handleValidationSuccess, handleValidationError)();
-  };
-
-  const onCloseLeaveModal = () => {
-    closeLeaveModal();
-    setIsCurrectFormDirty(false);
     setIsLeavingContent(false);
   };
 
-  const onSaveLeaveModal = () => {
-    form.handleSubmit(onSubmit)();
+  const onDiscardLeaveModal = () => {
     closeLeaveModal();
+    setIsCurrectFormDirty(false);
     setIsLeavingContent(false);
   };
 
@@ -283,10 +268,8 @@ const ContentLessonForm = ({
       />
       <LeaveConfirmationModal
         open={isLeaveModalOpen || false}
-        onClose={onCloseLeaveModal}
-        onSave={onSaveLeaveModal}
-        onValidate={onValidateLeave}
-        isValidated={isValidated}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
       {uploadDisplayModeDialog}
     </div>

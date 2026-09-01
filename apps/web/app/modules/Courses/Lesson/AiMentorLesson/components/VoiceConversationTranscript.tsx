@@ -1,6 +1,9 @@
 import { LEARNER_TRANSCRIPT_STATUSES } from "@repo/shared";
+import { useTranslation } from "react-i18next";
 
+import { useCurrentUserSuspense } from "~/api/queries";
 import { Icon } from "~/components/Icon";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 
 import type {
@@ -82,8 +85,13 @@ export function VoiceConversationTranscript({
   mentorName,
   mentorAvatarUrl,
 }: VoiceConversationTranscriptProps) {
+  const { t } = useTranslation();
+  const { data: currentUser } = useCurrentUserSuspense();
   const isLearnerPartial = learnerTranscript?.status === LEARNER_TRANSCRIPT_STATUSES.PARTIAL;
   const hasMentorSpeech = Boolean(mentorSpeech?.words.length);
+  const learnerDisplayName =
+    `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim() ||
+    t("studentCourseView.lesson.aiMentorLesson.userName");
 
   if (!learnerTranscript && !mentorResponse) {
     return <div className="h-24" aria-hidden="true" />;
@@ -92,19 +100,32 @@ export function VoiceConversationTranscript({
   return (
     <div className="mx-auto flex min-h-24 w-full max-w-3xl flex-col justify-end gap-3">
       {learnerTranscript && (
-        <div
-          aria-live={isLearnerPartial ? "polite" : "off"}
-          className={cn(
-            "ml-auto max-w-[82%] rounded-2xl rounded-br-md px-4 py-3 text-sm leading-relaxed",
-            {
-              "border border-neutral-200 bg-white/70 text-neutral-400": isLearnerPartial,
-              "border border-neutral-200 bg-white/90 text-neutral-900 shadow-sm": !isLearnerPartial,
-            },
-          )}
-        >
-          <span className={cn(!isLearnerPartial && "transcript-finalized-text")}>
-            {learnerTranscript.text}
-          </span>
+        <div className="flex max-w-[88%] self-start items-start gap-3">
+          <div className="mt-0.5 shrink-0">
+            <UserAvatar
+              userName={learnerDisplayName}
+              profilePictureUrl={currentUser?.profilePictureUrl}
+              className="size-9"
+            />
+          </div>
+          <div className="min-w-0 flex flex-col gap-1">
+            <span className="text-sm font-semibold text-primary-900">{learnerDisplayName}</span>
+            <div
+              aria-live={isLearnerPartial ? "polite" : "off"}
+              className={cn(
+                "w-fit max-w-full rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed",
+                {
+                  "border border-neutral-200 bg-white/70 text-neutral-400": isLearnerPartial,
+                  "border border-neutral-200 bg-white/90 text-neutral-900 shadow-sm":
+                    !isLearnerPartial,
+                },
+              )}
+            >
+              <span className={cn(!isLearnerPartial && "transcript-finalized-text")}>
+                {learnerTranscript.text}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -113,15 +134,18 @@ export function VoiceConversationTranscript({
           <div className="mt-0.5 shrink-0">
             <MentorAvatar mentorName={mentorName} mentorAvatarUrl={mentorAvatarUrl} />
           </div>
-          <div className="rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 text-sm leading-relaxed text-neutral-900 shadow-sm ring-1 ring-neutral-200/80">
-            {hasMentorSpeech && mentorSpeech ? (
-              <>
-                <span className="sr-only">{mentorResponse}</span>
-                <MentorTimedText speech={mentorSpeech} />
-              </>
-            ) : (
-              mentorResponse
-            )}
+          <div className="min-w-0 flex flex-col gap-1">
+            <span className="text-sm font-semibold text-primary-900">{mentorName}</span>
+            <div className="rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 text-sm leading-relaxed text-neutral-900 shadow-sm ring-1 ring-neutral-200/80">
+              {hasMentorSpeech && mentorSpeech ? (
+                <>
+                  <span className="sr-only">{mentorResponse}</span>
+                  <MentorTimedText speech={mentorSpeech} />
+                </>
+              ) : (
+                mentorResponse
+              )}
+            </div>
           </div>
         </div>
       )}

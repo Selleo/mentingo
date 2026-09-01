@@ -79,23 +79,8 @@ const QuizLessonForm = ({
 
   const [isCanceling, setIsCanceling] = useState(false);
 
-  const [isValidated, setIsValidated] = useState(false);
-
   const questions = form.watch("questions");
   const { isDirty } = form.formState;
-
-  const handleValidationSuccess = () => {
-    setIsValidated(true);
-  };
-
-  const handleValidationError = () => {
-    setIsValidated(false);
-    closeLeaveModal();
-  };
-
-  const onValidate = () => {
-    form.handleSubmit(handleValidationSuccess, handleValidationError)();
-  };
 
   const onCloseModal = () => {
     setIsDeleteModalOpen(false);
@@ -111,12 +96,13 @@ const QuizLessonForm = ({
 
   const onCancelModal = () => {
     closeLeaveModal();
-    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
   };
 
-  const onSaveModal = () => {
-    form.handleSubmit(onSubmit)();
+  const onDiscardModal = () => {
     closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
   };
 
   const onCancel = useCallback(() => {
@@ -142,16 +128,6 @@ const QuizLessonForm = ({
       setIsLeavingContent(false);
     }
   }, [isCurrentFormDirty, isCanceling, onCancel, setIsLeavingContent]);
-
-  useEffect(() => {
-    const handleSubmit = () => {
-      form.handleSubmit(() => setIsValidated(true))();
-    };
-
-    if (isLeaveModalOpen) {
-      handleSubmit();
-    }
-  }, [isLeaveModalOpen, form]);
 
   const addQuestion = useCallback(
     (questionType: QuestionType) => {
@@ -474,10 +450,8 @@ const QuizLessonForm = ({
       />
       <LeaveConfirmationModal
         open={isLeaveModalOpen || false}
-        onClose={onCancelModal}
-        onSave={onSaveModal}
-        onValidate={onValidate}
-        isValidated={isValidated}
+        onCancel={onCancelModal}
+        onDiscard={onDiscardModal}
       />
     </div>
   );
