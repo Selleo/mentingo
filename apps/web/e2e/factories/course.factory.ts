@@ -38,6 +38,7 @@ export class CourseFactory {
       language: input.language ?? "en",
       status: input.status ?? "draft",
       thumbnailS3Key: input.thumbnailS3Key,
+      learningOutcomes: input.learningOutcomes,
       priceInCents: input.priceInCents,
       currency: input.currency,
       isScorm: input.isScorm,

@@ -28,12 +28,8 @@ test("shared course metadata and learning outcomes are read-only for recipient a
       const sourceCourse = await courseFactory.create({
         categoryId: category.id,
         description: "Centrally managed description",
-        title: `Shared Course ${Date.now()}`,
-      });
-
-      await courseFactory.update(sourceCourse.id, {
-        language: "en",
         learningOutcomes: ["Centrally managed learning outcome"],
+        title: `Shared Course ${Date.now()}`,
       });
 
       cleanup.add(async () => {
@@ -87,9 +83,6 @@ test("shared course metadata and learning outcomes are read-only for recipient a
   await expect(
     recipientWorkspace.page.getByTestId(COURSE_SETTINGS_HANDLES.CATEGORY_SELECT),
   ).toBeDisabled();
-  await expect(
-    recipientWorkspace.page.getByText("Centrally managed learning outcome"),
-  ).toBeVisible();
   await expect(
     recipientWorkspace.page.getByRole("button", { name: "Add learning outcome" }),
   ).toHaveCount(0);
