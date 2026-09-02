@@ -353,7 +353,7 @@ export class LumaGeneratedCourseImportService {
           title: buildJsonbField(data.language, this.sanitizeText(question.title)),
           prompt: buildJsonbField(data.language, this.sanitizeText(question.description ?? "")),
           description: null,
-          displayOrder: question.questionIndex || questionDisplayIndex + 1,
+          displayOrder: questionDisplayIndex + 1,
           gradingMode:
             questionType === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
             questionType === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE
@@ -407,7 +407,7 @@ export class LumaGeneratedCourseImportService {
         options.map((option, index) => ({
           questionId: data.questionId,
           language: data.language,
-          displayOrder: option.optionIndex || index + 1,
+          displayOrder: index + 1,
           correctValue: Boolean(option.isCorrect),
           statement: this.sanitizeText(option.optionText),
         })),
@@ -420,7 +420,7 @@ export class LumaGeneratedCourseImportService {
         options.map((option, index) => ({
           questionId: data.questionId,
           language: data.language,
-          displayOrder: option.optionIndex || index + 1,
+          displayOrder: index + 1,
           isCorrect: Boolean(option.isCorrect),
           label: this.sanitizeText(option.optionText),
         })),
@@ -465,7 +465,7 @@ export class LumaGeneratedCourseImportService {
             language: data.language,
             label: this.sanitizeText(option.optionText),
             targetBlankId: option.blankAnswerId ?? null,
-            displayOrder: option.optionIndex || index + 1,
+            displayOrder: index + 1,
           })),
       );
     }
