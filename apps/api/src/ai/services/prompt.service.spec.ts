@@ -118,7 +118,18 @@ describe("PromptService learner-name personalization", () => {
 
   it("adds a system interruption marker to the next voice mentor prompt", async () => {
     const { service } = createService();
-    jest.spyOn(service, "loadPrompt").mockResolvedValue("VOICE_MENTOR_ADDON");
+    const loadPrompt = jest.spyOn(service, "loadPrompt").mockImplementation(async (id) => {
+      switch (id) {
+        case "voiceMentorAddon":
+          return "VOICE_MENTOR_ADDON";
+        case "voiceMentorInterruptionPolicy":
+          return "VOICE INTERRUPTION POLICY";
+        case "voiceMentorInterruptionEvent":
+          return "VOICE INTERRUPTION EVENT";
+        default:
+          throw new Error(`Unexpected prompt: ${id}`);
+      }
+    });
 
     const prompt = await service.buildPrompt(
       threadId,
@@ -132,7 +143,7 @@ describe("PromptService learner-name personalization", () => {
       expect.arrayContaining([
         expect.objectContaining({
           role: MESSAGE_ROLE.SYSTEM,
-          content: expect.stringContaining("[VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]"),
+          content: "VOICE INTERRUPTION EVENT",
         }),
       ]),
     );
@@ -140,10 +151,12 @@ describe("PromptService learner-name personalization", () => {
       expect.arrayContaining([
         expect.objectContaining({
           role: MESSAGE_ROLE.SYSTEM,
-          content: expect.stringContaining("Ignore interruption mentions in conversation history"),
+          content: "VOICE INTERRUPTION POLICY",
         }),
       ]),
     );
+    expect(loadPrompt).toHaveBeenCalledWith("voiceMentorInterruptionPolicy", {});
+    expect(loadPrompt).toHaveBeenCalledWith("voiceMentorInterruptionEvent", {});
   });
 
   it("adds learner delivery timing as a separate voice system message", async () => {
@@ -154,6 +167,8 @@ describe("PromptService learner-name personalization", () => {
           return "VOICE_MENTOR_ADDON";
         case "voiceMentorTimingAddon":
           return "VOICE_MENTOR_TIMING_ADDON";
+        case "voiceMentorInterruptionPolicy":
+          return "VOICE_INTERRUPTION_POLICY";
         default:
           throw new Error(`Unexpected prompt: ${id}`);
       }

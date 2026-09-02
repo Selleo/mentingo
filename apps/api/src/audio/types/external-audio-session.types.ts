@@ -2,12 +2,10 @@ import type {
   AudioChunkPayload,
   AudioOutputErrorData,
   ClientSpeechBoundaryPayload,
-  LumaSocket,
-} from "@japro/luma-sdk";
-import type {
   EXTERNAL_AUDIO_OPERATION,
   EXTERNAL_AUDIO_RECOVERY_STATE,
-} from "src/audio/constants/external-audio.constants";
+  LumaSocket,
+} from "@japro/luma-sdk";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -31,6 +29,8 @@ export type ExternalAudioOperation =
   | ExternalAudioChunkOperation
   | ExternalAudioSpeechBoundaryOperation;
 
+export type ExternalAudioTimeout = ReturnType<typeof setTimeout> | null;
+
 export type ExternalAudioSession = {
   sessionId: string;
   socket: LumaSocket;
@@ -45,9 +45,9 @@ export type ExternalAudioSession = {
   lastSentAudioSeq: number;
   unacknowledgedChunks: Map<number, ExternalAudioChunkOperation>;
   deferredOperations: ExternalAudioOperation[];
-  recoveryTimeout: ReturnType<typeof setTimeout> | null;
-  recoveryRetryTimeout: ReturnType<typeof setTimeout> | null;
-  clientDisconnectTimeout: ReturnType<typeof setTimeout> | null;
+  recoveryTimeout: ExternalAudioTimeout;
+  recoveryRetryTimeout: ExternalAudioTimeout;
+  clientDisconnectTimeout: ExternalAudioTimeout;
   activeTurnId: string | null;
   audioOutputErrors: Map<string, AudioOutputErrorData>;
   pendingInterruption: boolean;

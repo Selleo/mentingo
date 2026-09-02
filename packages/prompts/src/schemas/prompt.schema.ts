@@ -74,6 +74,10 @@ export const voiceMentorTimingAddonSchema = Type.Object({
   timingPrecision: Type.String({ minLength: 1 }),
 });
 
+export const voiceMentorInterruptionPolicySchema = Type.Object({}, { additionalProperties: false });
+
+export const voiceMentorInterruptionEventSchema = Type.Object({}, { additionalProperties: false });
+
 export const learnerNameAddonSchema = Type.Object({
   learnerFirstName: Type.String({ minLength: 1 }),
   language: Type.String({ minLength: 1 }),
@@ -127,6 +131,8 @@ export const PROMPT_MAP = {
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,
   voiceMentorTimingAddon: voiceMentorTimingAddonSchema,
+  voiceMentorInterruptionPolicy: voiceMentorInterruptionPolicySchema,
+  voiceMentorInterruptionEvent: voiceMentorInterruptionEventSchema,
   learnerNameAddon: learnerNameAddonSchema,
   aiJudgeConfigurationGeneratorBase: aiJudgeConfigurationGeneratorBaseSchema,
   aiJudgeConfigurationGeneratorCreate: aiJudgeConfigurationGeneratorModeSchema,

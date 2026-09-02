@@ -1,3 +1,4 @@
+import { LUMA_VOICE_TIMING_PRECISION, type LumaVoiceTimingPrecision } from "@japro/luma-sdk";
 import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
@@ -110,8 +111,7 @@ export class PromptService implements OnModuleInit {
         id: "",
         role: MESSAGE_ROLE.SYSTEM,
         userName: null,
-        content:
-          "VOICE INTERRUPTION POLICY: Treat an interruption as current only when this request contains the explicit marker [VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]. Ignore interruption mentions in conversation history because they describe earlier turns.",
+        content: await this.loadPrompt("voiceMentorInterruptionPolicy", {}),
       });
 
       if (voiceDeliveryContext) {
@@ -141,12 +141,15 @@ export class PromptService implements OnModuleInit {
       }
 
       if (voiceTurnWasInterrupted) {
+        const voiceMentorInterruptionEvent = await this.loadPrompt(
+          "voiceMentorInterruptionEvent",
+          {},
+        );
         metaMessages.push({
           id: "",
           role: MESSAGE_ROLE.SYSTEM,
           userName: null,
-          content:
-            "[VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED] The learner interrupted the previous mentor response in the current turn. Continue naturally from the conversation context and prioritize the learner's new message. Do not mention this internal event.",
+          content: voiceMentorInterruptionEvent,
         });
       }
     }
@@ -181,8 +184,11 @@ export class PromptService implements OnModuleInit {
     return history;
   }
 
-  private normalizeTimingPrecision(value: string): string {
-    return ["word", "segment", "boundary_estimate"].includes(value) ? value : "unknown";
+  private normalizeTimingPrecision(value: string): LumaVoiceTimingPrecision {
+    return (
+      Object.values(LUMA_VOICE_TIMING_PRECISION).find((precision) => precision === value) ??
+      LUMA_VOICE_TIMING_PRECISION.UNKNOWN
+    );
   }
 
   async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {

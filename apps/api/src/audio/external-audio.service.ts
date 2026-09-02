@@ -2,6 +2,13 @@ import {
   createLumaSocket,
   LUMA_AUDIO_ACTIONS,
   LUMA_AUDIO_FORMATS,
+  EXTERNAL_AUDIO_CLIENT_RECONNECT_GRACE_MS,
+  EXTERNAL_AUDIO_MAX_BUFFERED_CHUNKS,
+  EXTERNAL_AUDIO_MAX_RECOVERY_ATTEMPTS,
+  EXTERNAL_AUDIO_OPERATION,
+  EXTERNAL_AUDIO_RECOVERY_STATE,
+  EXTERNAL_AUDIO_RECOVERY_TIMEOUT_MS,
+  EXTERNAL_AUDIO_TERMINAL_RECOVERY_ERROR_CODES,
   LUMA_SOCKET_MESSAGE_TYPES,
   type AudioChunkPayload,
   type AudioChunkedPayload,
@@ -36,15 +43,6 @@ import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
-import {
-  EXTERNAL_AUDIO_CLIENT_RECONNECT_GRACE_MS,
-  EXTERNAL_AUDIO_MAX_BUFFERED_CHUNKS,
-  EXTERNAL_AUDIO_MAX_RECOVERY_ATTEMPTS,
-  EXTERNAL_AUDIO_OPERATION,
-  EXTERNAL_AUDIO_RECOVERY_STATE,
-  EXTERNAL_AUDIO_RECOVERY_TIMEOUT_MS,
-  EXTERNAL_AUDIO_TERMINAL_RECOVERY_ERROR_CODES,
-} from "src/audio/constants/external-audio.constants";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
