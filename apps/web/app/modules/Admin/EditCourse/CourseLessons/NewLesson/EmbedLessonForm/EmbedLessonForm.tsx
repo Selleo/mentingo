@@ -23,6 +23,7 @@ import type { SupportedLanguages } from "@repo/shared";
 
 type EmbedLessonProps = {
   lessonToEdit?: Lesson | null;
+  baseLanguageLesson?: Lesson | null;
   chapterToEdit: Chapter | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -31,6 +32,7 @@ type EmbedLessonProps = {
 
 export const EmbedLessonForm = ({
   lessonToEdit,
+  baseLanguageLesson,
   chapterToEdit,
   setContentTypeToDisplay,
   setSelectedLesson,
@@ -104,7 +106,10 @@ export const EmbedLessonForm = ({
               name="title"
               control={form.control}
               label={t("adminCourseView.curriculum.lesson.field.title")}
-              placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
+              placeholder={
+                baseLanguageLesson?.title ||
+                t("adminCourseView.curriculum.lesson.placeholder.title")
+              }
               required
             />
             <div className="space-y-3">

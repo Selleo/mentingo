@@ -138,6 +138,10 @@ const EditCourse = () => {
     dataUpdatedAt,
     error,
   } = useBetaCourseById(id, courseLanguage);
+  const baseLanguage = course?.baseLanguage ?? courseLanguage;
+  const { data: baseLanguageCourse } = useBetaCourseById(id, baseLanguage);
+  const baseLanguageChapters =
+    courseLanguage === baseLanguage ? undefined : (baseLanguageCourse?.chapters as Chapter[]);
   const { data: globalSettings } = useGlobalSettings();
   const courseType = course?.courseType ?? COURSE_TYPE.DEFAULT;
   const courseTabs = useEditCourseTabs({ courseType });
@@ -566,9 +570,10 @@ const EditCourse = () => {
                   isCourseGenerated={isCourseGenerated}
                   shouldClearCourseGenerationRuntime={shouldClearCourseGenerationRuntime}
                   chapters={course?.chapters as Chapter[]}
+                  baseLanguageChapters={baseLanguageChapters}
                   canRefetchChapterList={!!canRefetchChapterList}
                   language={courseLanguage}
-                  baseLanguage={course?.baseLanguage ?? courseLanguage}
+                  baseLanguage={baseLanguage}
                   coursePriceInCents={course?.priceInCents}
                   unregisteredUserCoursesAccessibility={Boolean(
                     globalSettings?.unregisteredUserCoursesAccessibility,

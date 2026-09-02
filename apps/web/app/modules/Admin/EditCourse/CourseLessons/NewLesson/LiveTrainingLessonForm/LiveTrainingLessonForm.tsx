@@ -27,6 +27,7 @@ type LiveTrainingLessonFormProps = {
   chapterToEdit: Chapter | null;
   language: SupportedLanguages;
   lessonToEdit: Lesson | null;
+  baseLanguageLesson: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
 };
@@ -35,6 +36,7 @@ export function LiveTrainingLessonForm({
   chapterToEdit,
   language,
   lessonToEdit,
+  baseLanguageLesson,
   setContentTypeToDisplay,
   setSelectedLesson,
 }: LiveTrainingLessonFormProps) {
@@ -110,9 +112,10 @@ export function LiveTrainingLessonForm({
                 name="title"
                 control={form.control}
                 label={t("adminCourseView.curriculum.lesson.liveTraining.lessonTitle")}
-                placeholder={t(
-                  "adminCourseView.curriculum.lesson.liveTraining.lessonTitlePlaceholder",
-                )}
+                placeholder={
+                  baseLanguageLesson?.title ||
+                  t("adminCourseView.curriculum.lesson.liveTraining.lessonTitlePlaceholder")
+                }
                 required
               />
 

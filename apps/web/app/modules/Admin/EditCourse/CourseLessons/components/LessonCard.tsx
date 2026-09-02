@@ -16,6 +16,7 @@ interface LessonCardProps {
   dragTrigger: ReactNode;
   selectedLesson: Lesson | null;
   isCourseGenerationLocked: boolean;
+  baseLanguageLesson?: Lesson;
 }
 
 const LessonCard = ({
@@ -24,8 +25,11 @@ const LessonCard = ({
   dragTrigger,
   selectedLesson,
   isCourseGenerationLocked,
+  baseLanguageLesson,
 }: LessonCardProps) => {
   const { t } = useTranslation();
+  const displayTitle = item.title || baseLanguageLesson?.title || "";
+  const isUsingBaseLanguageTitle = !item.title && Boolean(baseLanguageLesson?.title);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -50,7 +54,7 @@ const LessonCard = ({
       tabIndex={isCourseGenerationLocked ? -1 : 0}
       role="button"
       aria-disabled={isCourseGenerationLocked}
-      aria-label={`Lesson: ${item.title}`}
+      aria-label={`Lesson: ${displayTitle}`}
       className={cn(
         "flex gap-x-3 rounded-lg border bg-white p-3 hover:border-neutral-300 hover:bg-neutral-50",
         {
@@ -66,17 +70,20 @@ const LessonCard = ({
         <LessonTypeIcon type={item.type} className="size-6 shrink-0 text-primary-700" />
         <hgroup className="min-w-0">
           <p
-            className="text-l break-words"
-            title={item.title}
+            className={cn("text-l break-words", {
+              "text-neutral-500": isUsingBaseLanguageTitle,
+              "text-neutral-950": !isUsingBaseLanguageTitle,
+            })}
+            title={displayTitle}
             data-testid={CURRICULUM_HANDLES.lessonTitle(item.id)}
           >
             {item.type === LessonType.QUIZ ? (
               <>
-                {item.title}{" "}
+                {displayTitle}{" "}
                 <span className="text-neutral-600">({item.questions?.length || 0})</span>
               </>
             ) : (
-              item.title
+              displayTitle
             )}
           </p>
           <p

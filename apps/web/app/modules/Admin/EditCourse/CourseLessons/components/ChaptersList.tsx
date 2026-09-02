@@ -60,6 +60,7 @@ const getDisabledFreemiumTooltipKey = (reason: ChapterFreemiumDisabledReason | n
 
 interface ChapterCardProps {
   chapter: Chapter;
+  baseLanguageChapter?: Chapter;
   isOpen: boolean;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setSelectedChapter: (selectedChapter: Chapter | null) => void;
@@ -78,6 +79,7 @@ interface ChapterCardProps {
 
 const ChapterCard = ({
   chapter,
+  baseLanguageChapter,
   isOpen,
   setContentTypeToDisplay,
   setSelectedChapter,
@@ -100,6 +102,8 @@ const ChapterCard = ({
   const [isNewLesson, setIsNewLesson] = useState(false);
   const [pendingChapter, setPendingChapter] = useState<Chapter | null>(null);
   const { t } = useTranslation();
+  const displayTitle = chapter.title || baseLanguageChapter?.title || "";
+  const isUsingBaseLanguageTitle = !chapter.title && Boolean(baseLanguageChapter?.title);
 
   const isBaseLanguage = language === baseLanguage;
   const {
@@ -257,7 +261,14 @@ const ChapterCard = ({
             <div className="flex items-center gap-x-3">
               {dragTrigger}
               <hgroup className="flex w-full flex-col-reverse">
-                <h3 className="body-base-md text-neutral-950 break-all">{chapter.title}</h3>
+                <h3
+                  className={cn("body-base-md break-all", {
+                    "text-neutral-500": isUsingBaseLanguageTitle,
+                    "text-neutral-950": !isUsingBaseLanguageTitle,
+                  })}
+                >
+                  {displayTitle}
+                </h3>
                 <div className="body-sm-md text-neutral-800">
                   {t("adminCourseView.curriculum.other.chapter")} {chapter.displayOrder} •{" "}
                   {t("adminCourseView.curriculum.other.lessonNumber")} {chapter.lessons.length}
@@ -280,6 +291,7 @@ const ChapterCard = ({
                 language={language}
                 setSelectedChapter={setSelectedChapter}
                 chapter={chapter}
+                baseLanguageChapter={baseLanguageChapter}
                 isCourseGenerationLocked={isCourseGenerationLocked}
               />
             </AccordionContent>
@@ -396,6 +408,7 @@ const ChapterCard = ({
 
 type ChaptersListProps = {
   chapters: Sortable<Chapter>[];
+  baseLanguageChapters?: Chapter[];
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setSelectedChapter: (selectedChapter: Chapter | null) => void;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
@@ -436,6 +449,7 @@ function getChapterWithLatestLesson(chapters: Chapter[]): string | null {
 
 const ChaptersList = ({
   chapters,
+  baseLanguageChapters,
   setContentTypeToDisplay,
   setSelectedChapter,
   setSelectedLesson,
@@ -520,6 +534,7 @@ const ChaptersList = ({
             <ChapterCard
               key={chapter.sortableId}
               chapter={chapter}
+              baseLanguageChapter={baseLanguageChapters?.find(({ id }) => id === chapter.id)}
               isOpen={openItem === chapter.sortableId}
               setContentTypeToDisplay={setContentTypeToDisplay}
               setSelectedChapter={setSelectedChapter}

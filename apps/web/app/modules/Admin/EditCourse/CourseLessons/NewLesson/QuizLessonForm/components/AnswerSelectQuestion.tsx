@@ -14,8 +14,9 @@ import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
+import { findBaseLanguageOption } from "../quizTranslationPlaceholders";
 
-import type { QuestionOption } from "../QuizLessonForm.types";
+import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -23,12 +24,14 @@ type AnswerSelectQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 };
 
 const AnswerSelectQuestion = ({
   form,
   questionIndex,
   isStructureLocked = false,
+  baseLanguageQuestion,
 }: AnswerSelectQuestionProps) => {
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -135,6 +138,12 @@ const AnswerSelectQuestion = ({
                 }}
                 className="grid grid-cols-1"
                 renderItem={(item, index) => {
+                  const baseLanguageOption = findBaseLanguageOption(
+                    baseLanguageQuestion,
+                    watchedOptions,
+                    item,
+                    index,
+                  );
                   const optionError =
                     errors?.questions?.[questionIndex]?.options?.[index]?.optionText?.message;
 
@@ -155,7 +164,10 @@ const AnswerSelectQuestion = ({
                             onChange={(e) =>
                               handleOptionChange(index, "optionText", e.target.value)
                             }
-                            placeholder={`${t("adminCourseView.curriculum.lesson.placeholder.option")} ${index + 1}`}
+                            placeholder={
+                              baseLanguageOption?.optionText ||
+                              `${t("adminCourseView.curriculum.lesson.placeholder.option")} ${index + 1}`
+                            }
                             required
                             className="flex-1"
                           />
