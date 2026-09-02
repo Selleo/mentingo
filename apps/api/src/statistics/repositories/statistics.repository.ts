@@ -21,7 +21,9 @@ import {
   groups,
   groupUsers,
   lessons,
-  quizAttempts,
+  assessments,
+  assessmentAttempts,
+  assessmentAttemptQuestionAnswers,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -58,15 +60,32 @@ export class StatisticsRepository {
   async getQuizStats(userId: UUIDType) {
     const [quizStatsResult] = await this.db
       .select({
-        totalAttempts: sql<number>`count(*) :: INTEGER`,
-        totalCorrectAnswers: sql<number>`coalesce(SUM(${quizAttempts.correctAnswers}), 0) :: INTEGER`,
-        totalWrongAnswers: sql<number>`coalesce(SUM(${quizAttempts.wrongAnswers}), 0) :: INTEGER`,
-        totalQuestions: sql<number>`coalesce(SUM(${quizAttempts.correctAnswers} + ${quizAttempts.wrongAnswers}), 0) :: INTEGER`,
-        averageScore: sql<number>`coalesce(round(avg(${quizAttempts.score}), 2), 0) :: INTEGER`,
-        uniqueQuizzesTaken: sql<number>`coalesce(count(distinct ${quizAttempts.lessonId}), 0) :: INTEGER`,
+        totalAttempts: sql<number>`COUNT(DISTINCT ${assessmentAttempts.id}) :: INTEGER`,
+        totalCorrectAnswers: sql<number>`COALESCE(SUM(CASE
+          WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
+            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} > 0 THEN 1 ELSE 0 END
+          ELSE ${assessmentAttempts.awardedPoints}
+        END), 0)::INTEGER`,
+        totalWrongAnswers: sql<number>`COALESCE(SUM(CASE
+          WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
+            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) <= 0 THEN 1 ELSE 0 END
+          ELSE ${assessmentAttempts.availablePoints} - COALESCE(${assessmentAttempts.awardedPoints}, 0)
+        END), 0)::INTEGER`,
+        totalQuestions: sql<number>`COALESCE(SUM(CASE
+          WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
+            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.id} IS NULL THEN 0 ELSE 1 END
+          ELSE ${assessmentAttempts.availablePoints}
+        END), 0)::INTEGER`,
+        averageScore: sql<number>`COALESCE(ROUND(AVG(${assessmentAttempts.scorePercentage}), 2), 0) :: INTEGER`,
+        uniqueQuizzesTaken: sql<number>`COALESCE(COUNT(DISTINCT ${assessments.lessonId}), 0) :: INTEGER`,
       })
-      .from(quizAttempts)
-      .where(eq(quizAttempts.userId, userId));
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessmentAttempts.assessmentId, assessments.id))
+      .leftJoin(
+        assessmentAttemptQuestionAnswers,
+        eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
+      )
+      .where(eq(assessmentAttempts.learnerId, userId));
 
     return quizStatsResult;
   }
@@ -567,23 +586,27 @@ export class StatisticsRepository {
   async getAvgQuizScore(userId?: UUIDType) {
     return this.db
       .select({
-        correctAnswersCount: sql<number>`COALESCE(SUM(${quizAttempts.correctAnswers}), 0)::INTEGER`,
-        wrongAnswersCount: sql<number>`COALESCE(SUM(${quizAttempts.wrongAnswers}), 0)::INTEGER`,
+        correctAnswersCount: sql<number>`COALESCE(SUM(CASE
+          WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
+            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} > 0 THEN 1 ELSE 0 END
+          ELSE ${assessmentAttempts.awardedPoints}
+        END), 0)::INTEGER`,
+        wrongAnswersCount: sql<number>`COALESCE(SUM(CASE
+          WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
+            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) <= 0 THEN 1 ELSE 0 END
+          ELSE ${assessmentAttempts.availablePoints} - COALESCE(${assessmentAttempts.awardedPoints}, 0)
+        END), 0)::INTEGER`,
       })
-      .from(quizAttempts)
-      .innerJoin(courses, eq(quizAttempts.courseId, courses.id))
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessmentAttempts.assessmentId, assessments.id))
+      .innerJoin(lessons, eq(assessments.lessonId, lessons.id))
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .leftJoin(
+        assessmentAttemptQuestionAnswers,
+        eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
+      )
       .where(userId ? eq(courses.authorId, userId) : undefined);
-  }
-
-  async createQuizAttempt(data: {
-    userId: UUIDType;
-    courseId: UUIDType;
-    lessonId: UUIDType;
-    correctAnswers: number;
-    wrongAnswers: number;
-    score: number;
-  }) {
-    return this.db.insert(quizAttempts).values(data);
   }
 
   async upsertUserStatistic(userId: UUIDType, upsertUserStatistic: UserStatistic) {

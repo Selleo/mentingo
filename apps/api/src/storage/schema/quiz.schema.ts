@@ -19,7 +19,6 @@ import {
 import { sql } from "drizzle-orm";
 import {
   boolean,
-  check,
   index,
   integer,
   interval,
@@ -81,18 +80,6 @@ export const assessments = pgTable(
       table.tenantId,
       table.id,
     ),
-    passingScorePercentageCheck: check(
-      "assessments_passing_score_percentage_check",
-      sql`${table.passingScorePercentage} BETWEEN 0 AND 100`,
-    ),
-    attemptLimitModeCheck: check(
-      "assessments_attempt_limit_mode_check",
-      sql`(
-        (${table.attemptLimitMode} = 'none' AND ${table.maximumAttempts} IS NULL AND ${table.attemptCooldown} IS NULL)
-        OR (${table.attemptLimitMode} = 'lifetime' AND ${table.maximumAttempts} > 0 AND ${table.attemptCooldown} IS NULL)
-        OR (${table.attemptLimitMode} = 'cooldown_window' AND ${table.maximumAttempts} > 0 AND ${table.attemptCooldown} > interval '0')
-      )`,
-    ),
   })),
 );
 
@@ -120,14 +107,6 @@ export const assessmentQuestions = pgTable(
     assessmentDisplayOrderIdx: index(
       "assessment_questions_tenant_assessment_display_order_lookup_idx",
     ).on(table.tenantId, table.assessmentId, table.displayOrder),
-    displayOrderCheck: check(
-      "assessment_questions_display_order_check",
-      sql`${table.displayOrder} >= 1`,
-    ),
-    maximumPointsCheck: check(
-      "assessment_questions_maximum_points_check",
-      sql`${table.maximumPoints} > 0`,
-    ),
   })),
 );
 
@@ -152,14 +131,6 @@ export const assessmentQuestionChoiceOptions = pgTable(
     questionLanguageDisplayOrderIdx: index(
       "assessment_question_choice_options_tenant_question_language_display_order_lookup_idx",
     ).on(table.tenantId, table.questionId, table.language, table.displayOrder),
-    displayOrderCheck: check(
-      "assessment_question_choice_options_display_order_check",
-      sql`${table.displayOrder} >= 1`,
-    ),
-    labelCheck: check(
-      "assessment_question_choice_options_label_check",
-      sql`length(trim(${table.label})) > 0`,
-    ),
   })),
 );
 
@@ -184,14 +155,6 @@ export const assessmentQuestionTrueFalseStatements = pgTable(
     questionLanguageDisplayOrderIdx: index(
       "assessment_question_true_false_statements_tenant_question_language_display_order_lookup_idx",
     ).on(table.tenantId, table.questionId, table.language, table.displayOrder),
-    displayOrderCheck: check(
-      "assessment_question_true_false_statements_display_order_check",
-      sql`${table.displayOrder} >= 1`,
-    ),
-    statementCheck: check(
-      "assessment_question_true_false_statements_statement_check",
-      sql`length(trim(${table.statement})) > 0`,
-    ),
   })),
 );
 
@@ -218,14 +181,6 @@ export const assessmentQuestionScaleOptions = pgTable(
     questionDisplayOrderIdx: index(
       "assessment_question_scale_options_tenant_question_display_order_lookup_idx",
     ).on(table.tenantId, table.questionId, table.displayOrder),
-    scaleValueCheck: check(
-      "assessment_question_scale_options_scale_value_check",
-      sql`${table.scaleValue} BETWEEN 1 AND 5`,
-    ),
-    displayOrderCheck: check(
-      "assessment_question_scale_options_display_order_check",
-      sql`${table.displayOrder} >= 1`,
-    ),
   })),
 );
 
@@ -241,20 +196,7 @@ export const assessmentQuestionOpenTextSettings = pgTable(
     ...timestamps,
     tenantId,
   },
-  withTenantIdIndex("assessment_question_open_text_settings", (table) => ({
-    characterBoundsCheck: check(
-      "assessment_question_open_text_settings_character_bounds_check",
-      sql`${table.minimumCharacters} IS NULL OR ${table.minimumCharacters} >= 0`,
-    ),
-    maximumCharactersCheck: check(
-      "assessment_question_open_text_settings_maximum_characters_check",
-      sql`${table.maximumCharacters} IS NULL OR ${table.maximumCharacters} > 0`,
-    ),
-    characterOrderCheck: check(
-      "assessment_question_open_text_settings_character_order_check",
-      sql`${table.minimumCharacters} IS NULL OR ${table.maximumCharacters} IS NULL OR ${table.minimumCharacters} <= ${table.maximumCharacters}`,
-    ),
-  })),
+  withTenantIdIndex("assessment_question_open_text_settings"),
 );
 
 export const assessmentQuestionBlanks = pgTable(
@@ -326,14 +268,6 @@ export const assessmentQuestionDragAndDropOptions = pgTable(
     targetBlankIdx: index("assessment_question_drag_and_drop_options_tenant_target_blank_idx")
       .on(table.tenantId, table.targetBlankId)
       .where(sql`${table.targetBlankId} IS NOT NULL`),
-    displayOrderCheck: check(
-      "assessment_question_drag_and_drop_options_display_order_check",
-      sql`${table.displayOrder} >= 1`,
-    ),
-    labelCheck: check(
-      "assessment_question_drag_and_drop_options_label_check",
-      sql`length(trim(${table.label})) > 0`,
-    ),
   })),
 );
 
@@ -392,18 +326,6 @@ export const assessmentAttempts = pgTable(
       table.tenantId,
       table.gradingStatus,
       table.submittedAt,
-    ),
-    attemptNumberCheck: check(
-      "assessment_attempts_attempt_number_check",
-      sql`${table.attemptNumber} >= 1`,
-    ),
-    availablePointsCheck: check(
-      "assessment_attempts_available_points_check",
-      sql`${table.availablePoints} > 0`,
-    ),
-    scorePercentageCheck: check(
-      "assessment_attempts_score_percentage_check",
-      sql`${table.scorePercentage} IS NULL OR ${table.scorePercentage} BETWEEN 0 AND 100`,
     ),
   }),
 );
@@ -572,13 +494,5 @@ export const assessmentAttemptQuestionAnswerReviews = pgTable(
     reviewerCreatedIdx: index(
       "assessment_attempt_question_answer_reviews_tenant_reviewer_created_idx",
     ).on(table.tenantId, table.reviewerId, table.reviewedAt),
-    revisionNumberCheck: check(
-      "assessment_attempt_question_answer_reviews_revisionNumber_check",
-      sql`${table.revisionNumber} >= 1`,
-    ),
-    explanationCheck: check(
-      "assessment_attempt_question_answer_reviews_explanation_check",
-      sql`length(trim(${table.explanation})) > 0`,
-    ),
   })),
 );

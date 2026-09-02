@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
-import { and, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -155,7 +155,8 @@ export class QuizAuthoringRepository {
         ),
       })
       .from(assessmentQuestions)
-      .where(eq(assessmentQuestions.assessmentId, assessment.id));
+      .where(eq(assessmentQuestions.assessmentId, assessment.id))
+      .orderBy(asc(assessmentQuestions.displayOrder));
 
     const questionIds = questions.map(({ id }) => id);
 
@@ -276,7 +277,12 @@ export class QuizAuthoringRepository {
     return db
       .select()
       .from(assessmentQuestionBlanks)
-      .where(inArray(assessmentQuestionBlanks.questionId, questionIds));
+      .where(inArray(assessmentQuestionBlanks.questionId, questionIds))
+      .orderBy(
+        asc(assessmentQuestionBlanks.questionId),
+        asc(assessmentQuestionBlanks.createdAt),
+        asc(assessmentQuestionBlanks.id),
+      );
   }
 
   private async findDragAndDropOptions(
@@ -370,7 +376,6 @@ export class QuizAuthoringRepository {
       question.options.map((option) => ({
         ...option,
         language,
-        label: buildJsonbField(language, option.label),
         questionId: question.id,
       })),
     );
@@ -379,7 +384,6 @@ export class QuizAuthoringRepository {
       question.trueFalseStatements.map((statement) => ({
         ...statement,
         language,
-        statement: buildJsonbField(language, statement.statement),
         questionId: question.id,
       })),
     );
@@ -414,7 +418,6 @@ export class QuizAuthoringRepository {
       question.dragAndDropOptions.map((option) => ({
         ...option,
         language,
-        label: buildJsonbField(language, option.label),
         questionId: question.id,
       })),
     );
@@ -560,71 +563,71 @@ export class QuizAuthoringRepository {
     );
     const dragChanges = mapLocalizedQuestionChildChanges(existingDragOptions, dragRows);
 
-    await trx.delete(assessmentQuestionChoiceOptions).where(
-      and(
-        inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
-        inArray(
-          assessmentQuestionChoiceOptions.id,
-          choiceChanges.rowsToDelete.map(({ id }) => id),
+    if (choiceChanges.rowsToDelete.length)
+      await trx.delete(assessmentQuestionChoiceOptions).where(
+        and(
+          inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
+          inArray(
+            assessmentQuestionChoiceOptions.id,
+            choiceChanges.rowsToDelete.map(({ id }) => id),
+          ),
         ),
-      ),
-    );
+      );
 
-    await trx.delete(assessmentQuestionTrueFalseStatements).where(
-      and(
-        inArray(assessmentQuestionTrueFalseStatements.questionId, questionIds),
-        inArray(
-          assessmentQuestionTrueFalseStatements.id,
-          trueFalseChanges.rowsToDelete.map(({ id }) => id),
+    if (trueFalseChanges.rowsToDelete.length)
+      await trx.delete(assessmentQuestionTrueFalseStatements).where(
+        and(
+          inArray(assessmentQuestionTrueFalseStatements.questionId, questionIds),
+          inArray(
+            assessmentQuestionTrueFalseStatements.id,
+            trueFalseChanges.rowsToDelete.map(({ id }) => id),
+          ),
         ),
-      ),
-    );
+      );
 
     await trx
       .delete(assessmentQuestionOpenTextSettings)
       .where(inArray(assessmentQuestionOpenTextSettings.questionId, questionIds));
 
-    await trx.delete(assessmentQuestionDragAndDropOptions).where(
-      and(
-        inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds),
-        inArray(
-          assessmentQuestionDragAndDropOptions.id,
-          dragChanges.rowsToDelete.map(({ id }) => id),
+    if (dragChanges.rowsToDelete.length)
+      await trx.delete(assessmentQuestionDragAndDropOptions).where(
+        and(
+          inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds),
+          inArray(
+            assessmentQuestionDragAndDropOptions.id,
+            dragChanges.rowsToDelete.map(({ id }) => id),
+          ),
         ),
-      ),
-    );
+      );
+
+    for (const [temporaryIndex, option] of dragChanges.rowsToUpdate.entries()) {
+      await trx
+        .update(assessmentQuestionDragAndDropOptions)
+        .set({
+          targetBlankId: null,
+          displayOrder: -(temporaryIndex + 1),
+        })
+        .where(eq(assessmentQuestionDragAndDropOptions.id, option.id));
+    }
+
+    await this.syncBlanksAndAnswerSets(questions, language, trx);
 
     const openTextRows = questions.flatMap((question) =>
       question.openTextSettings ? [{ ...question.openTextSettings, questionId: question.id }] : [],
     );
 
     if (choiceChanges.rowsToCreate.length)
-      await trx.insert(assessmentQuestionChoiceOptions).values(
-        choiceChanges.rowsToCreate.map((option) => ({
-          ...option,
-          label: buildJsonbField(language, option.label),
-        })),
-      );
+      await trx.insert(assessmentQuestionChoiceOptions).values(choiceChanges.rowsToCreate);
 
     if (trueFalseChanges.rowsToCreate.length) {
-      await trx.insert(assessmentQuestionTrueFalseStatements).values(
-        trueFalseChanges.rowsToCreate.map((statement) => ({
-          ...statement,
-          statement: buildJsonbField(language, statement.statement),
-        })),
-      );
+      await trx.insert(assessmentQuestionTrueFalseStatements).values(trueFalseChanges.rowsToCreate);
     }
 
     if (openTextRows.length)
       await trx.insert(assessmentQuestionOpenTextSettings).values(openTextRows);
 
     if (dragChanges.rowsToCreate.length)
-      await trx.insert(assessmentQuestionDragAndDropOptions).values(
-        dragChanges.rowsToCreate.map((option) => ({
-          ...option,
-          label: buildJsonbField(language, option.label),
-        })),
-      );
+      await trx.insert(assessmentQuestionDragAndDropOptions).values(dragChanges.rowsToCreate);
 
     for (const option of choiceChanges.rowsToUpdate) {
       await trx
@@ -632,13 +635,7 @@ export class QuizAuthoringRepository {
         .set({
           displayOrder: option.displayOrder,
           isCorrect: option.isCorrect,
-          label: setJsonbField(
-            assessmentQuestionChoiceOptions.label,
-            language,
-            option.label,
-            true,
-            true,
-          ),
+          label: option.label,
         })
         .where(eq(assessmentQuestionChoiceOptions.id, option.id));
     }
@@ -649,13 +646,7 @@ export class QuizAuthoringRepository {
         .set({
           displayOrder: statement.displayOrder,
           correctValue: statement.correctValue,
-          statement: setJsonbField(
-            assessmentQuestionTrueFalseStatements.statement,
-            language,
-            statement.statement,
-            true,
-            true,
-          ),
+          statement: statement.statement,
         })
         .where(eq(assessmentQuestionTrueFalseStatements.id, statement.id));
     }
@@ -665,20 +656,13 @@ export class QuizAuthoringRepository {
         .update(assessmentQuestionDragAndDropOptions)
         .set({
           displayOrder: option.displayOrder,
-          label: setJsonbField(
-            assessmentQuestionDragAndDropOptions.label,
-            language,
-            option.label,
-            true,
-            true,
-          ),
+          label: option.label,
           targetBlankId: option.targetBlankId,
         })
         .where(eq(assessmentQuestionDragAndDropOptions.id, option.id));
     }
 
     await this.syncScaleOptions(questions, language, trx);
-    await this.syncBlanksAndAnswerSets(questions, language, trx);
 
     await this.clearPromptImageRelations(questions, trx);
   }

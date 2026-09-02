@@ -41,11 +41,10 @@ import {
   groupUsers,
   studentLessonProgress,
   studentChapterProgress,
-  studentQuestionAnswers,
   chapters,
   lessons,
-  questions,
-  quizAttempts,
+  assessments,
+  assessmentAttempts,
   scormAttempts,
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -861,25 +860,21 @@ export class CertificateRepository {
       .from(chapters)
       .where(eq(chapters.courseId, courseId));
 
-    const courseQuestionIds = dbInstance
-      .select({ id: questions.id })
-      .from(questions)
-      .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+    const courseAssessmentIds = dbInstance
+      .select({ id: assessments.id })
+      .from(assessments)
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .where(eq(chapters.courseId, courseId));
 
     await dbInstance
-      .delete(studentQuestionAnswers)
+      .delete(assessmentAttempts)
       .where(
         and(
-          inArray(studentQuestionAnswers.studentId, userIds),
-          inArray(studentQuestionAnswers.questionId, courseQuestionIds),
+          inArray(assessmentAttempts.assessmentId, courseAssessmentIds),
+          inArray(assessmentAttempts.learnerId, userIds),
         ),
       );
-
-    await dbInstance
-      .delete(quizAttempts)
-      .where(and(eq(quizAttempts.courseId, courseId), inArray(quizAttempts.userId, userIds)));
 
     await dbInstance
       .delete(scormAttempts)

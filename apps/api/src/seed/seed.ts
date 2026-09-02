@@ -1,5 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  COURSE_ENROLLMENT,
+  SYSTEM_ROLE_SLUGS,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { addDays, format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, count, eq, sql } from "drizzle-orm";
@@ -28,8 +35,9 @@ import {
   groupUsers,
   lessonLearningTime,
   lessons,
-  questions,
-  quizAttempts,
+  assessments,
+  assessmentAttempts,
+  assessmentQuestions,
   settings,
   studentChapterProgress,
   studentCourses,
@@ -531,11 +539,16 @@ async function createCoursesSummaryStats(courses: any[] = [], tenantId: UUIDType
 
 async function createQuizAttempts(userId: UUIDType, tenantId: UUIDType) {
   const quizzes = await db
-    .select({ courseId: courses.id, lessonId: lessons.id, questionCount: count(questions.id) })
+    .select({
+      assessmentId: assessments.id,
+      questionCount: count(assessmentQuestions.id),
+      passingScore: assessments.passingScorePercentage,
+    })
     .from(courses)
     .innerJoin(chapters, eq(courses.id, chapters.courseId))
     .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
-    .innerJoin(questions, eq(questions.lessonId, lessons.id))
+    .innerJoin(assessments, eq(assessments.lessonId, lessons.id))
+    .innerJoin(assessmentQuestions, eq(assessmentQuestions.assessmentId, assessments.id))
     .where(
       and(
         eq(courses.status, "published"),
@@ -543,23 +556,36 @@ async function createQuizAttempts(userId: UUIDType, tenantId: UUIDType) {
         eq(courses.tenantId, tenantId),
       ),
     )
-    .groupBy(courses.id, lessons.id);
+    .groupBy(assessments.id, assessments.passingScorePercentage);
 
   const createdQuizAttempts = quizzes.map((quiz) => {
     const correctAnswers = faker.number.int({ min: 0, max: quiz.questionCount });
 
+    const score = Math.round((correctAnswers / quiz.questionCount) * 100);
+    const now = new Date().toISOString();
     return {
-      userId,
-      courseId: quiz.courseId,
-      lessonId: quiz.lessonId,
-      correctAnswers: correctAnswers,
-      wrongAnswers: quiz.questionCount - correctAnswers,
-      score: Math.round((correctAnswers / quiz.questionCount) * 100),
+      assessmentId: quiz.assessmentId,
+      language: SUPPORTED_LANGUAGES.EN,
+      learnerId: userId,
+      attemptNumber: 1,
+      submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      result:
+        score >= Number(quiz.passingScore)
+          ? ASSESSMENT_ATTEMPT_RESULTS.PASSED
+          : ASSESSMENT_ATTEMPT_RESULTS.FAILED,
+      availablePoints: String(quiz.questionCount),
+      awardedPoints: String(correctAnswers),
+      scorePercentage: String(score),
+      hasQuestionLevelAnswers: false,
+      submittedAt: now,
+      gradedAt: now,
       tenantId,
     };
   });
 
-  return db.insert(quizAttempts).values(createdQuizAttempts);
+  if (createdQuizAttempts.length === 0) return;
+  return db.insert(assessmentAttempts).values(createdQuizAttempts);
 }
 
 function getLast12Months(): Array<{ month: number; year: number; formattedDate: string }> {

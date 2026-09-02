@@ -125,9 +125,9 @@ import {
   aiMentorTeacherConfigurations,
   lessonLearningTime,
   lessons,
-  questionAnswerOptions,
-  questions,
-  quizAttempts,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestions,
+  assessments,
   resourceEntity,
   resources,
   settings,
@@ -1554,7 +1554,7 @@ export class CourseService {
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
-                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${questions.id})
+                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${assessmentQuestions.id})
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
@@ -1562,7 +1562,8 @@ export class CourseService {
                   studentLessonProgress.lessonId
                 }
                   AND ${studentLessonProgress.studentId} = ${userId}
-                LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
+                LEFT JOIN ${assessments} ON ${assessments.lessonId} = ${lessons.id}
+                LEFT JOIN ${assessmentQuestions} ON ${assessments.id} = ${assessmentQuestions.assessmentId}
                 LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
                 GROUP BY
@@ -1790,7 +1791,24 @@ export class CourseService {
         const lessons: AdminLessonWithContentSchema[] =
           await this.adminChapterRepository.getBetaChapterLessons(chapter.id, language);
 
-        const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
+        const lessonsWithQuizAuthoringContent = await Promise.all(
+          lessons.map(async (lesson) => {
+            if (lesson.type !== LESSON_TYPES.QUIZ) return lesson;
+
+            const quizLesson = await this.adminLessonService.getQuizLessonForAuthoring(
+              lesson.id,
+              language,
+            );
+
+            if (!quizLesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+
+            return quizLesson;
+          }),
+        );
+
+        const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(
+          lessonsWithQuizAuthoringContent,
+        );
 
         return {
           ...chapter,
@@ -3613,7 +3631,6 @@ export class CourseService {
         : null;
 
     await this.db.transaction(async (trx) => {
-      await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
@@ -3696,7 +3713,6 @@ export class CourseService {
         : [];
 
     return this.db.transaction(async (trx) => {
-      await trx.delete(quizAttempts).where(inArray(quizAttempts.courseId, ids));
       await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
       await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
       await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
@@ -4971,9 +4987,10 @@ export class CourseService {
 
       const questionRows = lessonIds.length
         ? await trx
-            .select({ id: questions.id })
-            .from(questions)
-            .where(inArray(questions.lessonId, lessonIds))
+            .select({ id: assessmentQuestions.id })
+            .from(assessmentQuestions)
+            .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+            .where(inArray(assessments.lessonId, lessonIds))
         : [];
       const questionIds = questionRows.map(({ id }) => id);
 
@@ -5099,21 +5116,21 @@ export class CourseService {
 
       if (questionIds.length) {
         await trx
-          .update(questions)
+          .update(assessmentQuestions)
           .set({
-            title: deleteJsonbField(questions.title, language),
-            description: deleteJsonbField(questions.description, language),
-            solutionExplanation: deleteJsonbField(questions.solutionExplanation, language),
+            title: deleteJsonbField(assessmentQuestions.title, language),
+            description: deleteJsonbField(assessmentQuestions.description, language),
           })
-          .where(inArray(questions.id, questionIds));
+          .where(inArray(assessmentQuestions.id, questionIds));
 
         await trx
-          .update(questionAnswerOptions)
-          .set({
-            optionText: deleteJsonbField(questionAnswerOptions.optionText, language),
-            matchedWord: deleteJsonbField(questionAnswerOptions.matchedWord, language),
-          })
-          .where(inArray(questionAnswerOptions.questionId, questionIds));
+          .delete(assessmentQuestionChoiceOptions)
+          .where(
+            and(
+              inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
+              eq(assessmentQuestionChoiceOptions.language, language),
+            ),
+          );
       }
 
       await trx
@@ -5760,24 +5777,16 @@ export class CourseService {
             id: question.id,
             hasValue: Boolean(question.title?.length),
             baseValue: baseQuestion?.title,
-            field: questions.title,
-            idColumn: questions.id,
+            field: assessmentQuestions.title,
+            idColumn: assessmentQuestions.id,
           };
 
           yield {
             id: question.id,
             hasValue: Boolean(question.description?.length),
             baseValue: baseQuestion?.description,
-            field: questions.description,
-            idColumn: questions.id,
-          };
-
-          yield {
-            id: question.id,
-            hasValue: Boolean(question.solutionExplanation?.length),
-            baseValue: baseQuestion?.solutionExplanation,
-            field: questions.solutionExplanation,
-            idColumn: questions.id,
+            field: assessmentQuestions.description,
+            idColumn: assessmentQuestions.id,
           };
 
           const baseOptionMap = new Map(
@@ -5791,16 +5800,8 @@ export class CourseService {
               id: option.id,
               hasValue: Boolean(option.optionText?.length),
               baseValue: baseOption?.optionText,
-              field: questionAnswerOptions.optionText,
-              idColumn: questionAnswerOptions.id,
-            };
-
-            yield {
-              id: option.id,
-              hasValue: Boolean(option.matchedWord?.length),
-              baseValue: baseOption?.matchedWord,
-              field: questionAnswerOptions.matchedWord,
-              idColumn: questionAnswerOptions.id,
+              field: assessmentQuestionChoiceOptions.label,
+              idColumn: assessmentQuestionChoiceOptions.id,
             };
           }
         }
@@ -6096,7 +6097,7 @@ export class CourseService {
         };
       }
 
-      if (entry.field.table === questions) {
+      if (entry.field.table === assessmentQuestions) {
         const base = questionById.get(entry.id as UUIDType);
         if (base)
           getOrCreateQuestionGroup(base.chapterId, base.lessonId, base.questionId).fields.push(
@@ -6132,7 +6133,7 @@ export class CourseService {
         };
       }
 
-      if (entry.field.table === questionAnswerOptions) {
+      if (entry.field.table === assessmentQuestionChoiceOptions) {
         const base = optionById.get(entry.id as UUIDType);
         if (base)
           getOrCreateOptionGroup(

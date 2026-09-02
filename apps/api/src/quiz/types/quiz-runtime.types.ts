@@ -12,6 +12,32 @@ export type QuizDelivery = {
   questions: QuestionBody[];
 };
 
+export type QuizAttemptFeedback = {
+  attempt: {
+    id: UUIDType;
+    scorePercentage: string | null;
+  };
+  questionAnswers: Array<{
+    id: UUIDType;
+    questionId: UUIDType;
+    awardedPoints: string | null;
+  }>;
+  choiceSelections: Array<{ questionAnswerId: UUIDType; selectedOptionId: UUIDType }>;
+  statementAnswers: Array<{
+    questionAnswerId: UUIDType;
+    statementId: UUIDType;
+    submittedValue: boolean;
+  }>;
+  blankAnswers: Array<{
+    questionAnswerId: UUIDType;
+    blankId: UUIDType;
+    submittedText: string | null;
+    selectedDragOptionId: UUIDType | null;
+  }>;
+  scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
+  openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
+};
+
 export type PreparedQuizAttempt = {
   assessmentId: UUIDType;
   learnerId: UUIDType;

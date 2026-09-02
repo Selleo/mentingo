@@ -1,4 +1,7 @@
-import { LESSON_TYPES } from "@repo/shared";
+import { ASSESSMENT_QUESTION_TYPES, LESSON_TYPES } from "@repo/shared";
+import { match } from "ts-pattern";
+
+import { normalizeBlankPromptMarkers } from "./quiz-authoring-mapper.utils";
 
 import type {
   QuizAuthoringLocalizedQuestion,
@@ -24,6 +27,17 @@ const buildSolutionExplanation = (question: QuizAuthoringLocalizedQuestion) => {
 
 const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): AdminQuestionBody => {
   const solutionExplanation = buildSolutionExplanation(question);
+  const description = match(question.questionType)
+    .with(
+      ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT,
+      ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND,
+      () =>
+        normalizeBlankPromptMarkers(
+          question.prompt,
+          question.blanks.map(({ id }) => id),
+        ),
+    )
+    .otherwise(() => question.description ?? question.prompt);
 
   const options: NonNullable<AdminQuestionBody["options"]> = question.options.map((option) => ({
     id: option.id,
@@ -60,7 +74,10 @@ const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): Ad
     );
   }
 
-  if (question.blanks.length) {
+  if (
+    question.questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT &&
+    question.blanks.length
+  ) {
     options.push(
       ...question.blanks.map((blank, index) => {
         const answer = blank.answerSets[0]?.preferredAnswer ?? "";
@@ -79,10 +96,14 @@ const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): Ad
   if (question.dragAndDropOptions.length) {
     options.push(
       ...question.dragAndDropOptions.map((option) => ({
-        id: option.id,
+        // The legacy contract uses the blank marker ID as the ID of the
+        // correct draggable option. This preserves the blank-to-answer
+        // relationship when the admin payload is mapped back to the target
+        // model.
+        id: option.targetBlankId ?? option.id,
         optionText: option.label,
         displayOrder: option.displayOrder,
-        isCorrect: false,
+        isCorrect: option.targetBlankId !== null,
         matchedWord: null,
         scaleAnswer: null,
       })),
@@ -93,7 +114,7 @@ const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): Ad
     id: question.id,
     type: question.questionType as AdminQuestionBody["type"],
     title: question.title,
-    description: question.description ?? question.prompt,
+    description,
     displayOrder: question.displayOrder,
     ...(solutionExplanation ? { solutionExplanation } : {}),
     photoS3Key: question.photoS3Key,

@@ -11,8 +11,6 @@ import {
   courses,
   liveLessons,
   lessons,
-  questionAnswerOptions,
-  questions,
   resourceEntity,
   resources,
 } from "src/storage/schema";
@@ -21,19 +19,12 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 import { LESSON_TYPES } from "../lesson.type";
 
 import type {
-  AdminOptionBody,
-  AdminQuestionBody,
   CreateAiMentorLessonBody,
   CreateLessonBody,
-  CreateQuizLessonBody,
   UpdateLessonBody,
-  UpdateQuizLessonBody,
 } from "../lesson.schema";
 import type { CreateLiveLessonInput } from "../lesson.type";
 import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
-import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
-import type { QuestionType } from "src/questions/schema/question.types";
-
 @Injectable()
 export class AdminLessonRepository {
   constructor(
@@ -118,129 +109,6 @@ export class AdminLessonRepository {
       });
 
     return updatedLesson;
-  }
-
-  async getQuestionsWithOptions(
-    lessonId: UUIDType,
-    language: SupportedLanguages,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<
-    Array<
-      LessonActivityLogQuestion & {
-        options?: LessonActivityLogOption[];
-      }
-    >
-  > {
-    const questionsList = await dbInstance
-      .select({
-        id: questions.id,
-        type: sql<QuestionType>`${questions.type}`,
-        title: this.localizationService.getLocalizedSqlField(questions.title, language),
-        description: this.localizationService.getLocalizedSqlField(questions.description, language),
-        solutionExplanation: this.localizationService.getLocalizedSqlField(
-          questions.solutionExplanation,
-          language,
-        ),
-        displayOrder: questions.displayOrder,
-        photoS3Key: questions.photoS3Key,
-      })
-      .from(questions)
-      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
-      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .innerJoin(courses, eq(chapters.courseId, courses.id))
-      .where(eq(questions.lessonId, lessonId))
-      .orderBy(questions.displayOrder);
-
-    if (questionsList.length === 0) return [];
-
-    const options = await dbInstance
-      .select({
-        id: questionAnswerOptions.id,
-        questionId: questionAnswerOptions.questionId,
-        optionText: this.localizationService.getLocalizedSqlField(
-          questionAnswerOptions.optionText,
-          language,
-        ),
-        isCorrect: questionAnswerOptions.isCorrect,
-        displayOrder: questionAnswerOptions.displayOrder,
-        matchedWord: this.localizationService.getLocalizedSqlField(
-          questionAnswerOptions.matchedWord,
-          language,
-        ),
-        scaleAnswer: questionAnswerOptions.scaleAnswer,
-      })
-      .from(questionAnswerOptions)
-      .innerJoin(questions, eq(questionAnswerOptions.questionId, questions.id))
-      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
-      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .innerJoin(courses, eq(chapters.courseId, courses.id))
-      .where(
-        inArray(
-          questionAnswerOptions.questionId,
-          questionsList.map((question) => question.id),
-        ),
-      )
-      .orderBy(questionAnswerOptions.displayOrder);
-
-    type QuestionOption = (typeof options)[number];
-
-    const optionsByQuestion = options.reduce<Record<UUIDType, QuestionOption[]>>((acc, option) => {
-      acc[option.questionId] = [...(acc[option.questionId] ?? []), option];
-      return acc;
-    }, {});
-
-    return questionsList.map((question) => ({
-      ...question,
-      options: (optionsByQuestion[question.id] ?? []).map(
-        ({ questionId: _questionId, ...rest }) => rest,
-      ),
-    }));
-  }
-
-  async updateQuizLessonWithQuestionsAndOptions(
-    id: UUIDType,
-    data: UpdateQuizLessonBody,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    return dbInstance
-      .update(lessons)
-      .set({
-        title: setJsonbField(lessons.title, data.language, data.title),
-        type: LESSON_TYPES.QUIZ,
-        description: setJsonbField(lessons.description, data.language, data.description),
-        chapterId: data.chapterId,
-        thresholdScore: data.thresholdScore,
-        attemptsLimit: data.attemptsLimit,
-        quizCooldownInHours: data.quizCooldownInHours,
-      })
-      .where(eq(lessons.id, id));
-  }
-
-  async createQuizLessonWithQuestionsAndOptions(
-    data: CreateQuizLessonBody,
-    displayOrder: number,
-    language: SupportedLanguages,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [lesson] = await dbInstance
-      .insert(lessons)
-      .values({
-        title: buildJsonbField(language, data.title),
-        description: buildJsonbField(language, data.description),
-        type: LESSON_TYPES.QUIZ,
-        chapterId: data?.chapterId,
-        displayOrder,
-        thresholdScore: data.thresholdScore,
-        attemptsLimit: data.attemptsLimit,
-        quizCooldownInHours: data.quizCooldownInHours,
-      })
-      .returning({
-        ...getTableColumns(lessons),
-        title: sql<string>`lessons.title->>${language}`,
-        description: sql<string>`lessons.description->>${language}`,
-      });
-
-    return lesson;
   }
 
   async createAiMentorLesson(
@@ -472,116 +340,6 @@ export class AdminLessonRepository {
               `,
       })
       .where(eq(lessons.chapterId, chapterId));
-  }
-
-  async getExistingQuestions(lessonId: UUIDType, trx: DatabasePg) {
-    return trx
-      .select({
-        id: questions.id,
-        type: questions.type,
-        displayOrder: questions.displayOrder,
-      })
-      .from(questions)
-      .where(eq(questions.lessonId, lessonId));
-  }
-
-  async getExistingOptions(questionId: UUIDType, trx: DatabasePg) {
-    const existingOptions = await trx
-      .select({
-        id: questionAnswerOptions.id,
-        displayOrder: questionAnswerOptions.displayOrder,
-        isCorrect: questionAnswerOptions.isCorrect,
-        matchedWord: questionAnswerOptions.matchedWord,
-        scaleAnswer: questionAnswerOptions.scaleAnswer,
-      })
-      .from(questionAnswerOptions)
-      .where(eq(questionAnswerOptions.questionId, questionId));
-
-    return { existingOptions };
-  }
-
-  async updateOption(optionId: UUIDType, optionData: AdminOptionBody, trx: DatabasePg) {
-    const { id: _id, ...dataToUpdate } = optionData;
-
-    return trx
-      .update(questionAnswerOptions)
-      .set({
-        ...dataToUpdate,
-        optionText: setJsonbField(
-          questionAnswerOptions.optionText,
-          optionData.language,
-          optionData.optionText,
-        ),
-        matchedWord: setJsonbField(
-          questionAnswerOptions.matchedWord,
-          optionData.language,
-          optionData.matchedWord,
-        ),
-      })
-      .where(eq(questionAnswerOptions.id, optionId))
-      .returning();
-  }
-
-  async insertOption(questionId: UUIDType, optionData: AdminOptionBody, trx: DatabasePg) {
-    return trx
-      .insert(questionAnswerOptions)
-      .values({
-        questionId,
-        ...optionData,
-        optionText: buildJsonbField(optionData.language, optionData.optionText),
-        matchedWord: buildJsonbField(optionData.language, optionData.matchedWord),
-      })
-      .returning();
-  }
-
-  async deleteOptions(optionIds: UUIDType[], trx: DatabasePg) {
-    await trx.delete(questionAnswerOptions).where(inArray(questionAnswerOptions.id, optionIds));
-  }
-
-  async deleteQuestions(questionsToDelete: UUIDType[], trx: DatabasePg) {
-    await trx.delete(questions).where(inArray(questions.id, questionsToDelete));
-  }
-
-  async deleteQuestionOptions(questionsToDelete: UUIDType[], trx: DatabasePg) {
-    await trx
-      .delete(questionAnswerOptions)
-      .where(inArray(questionAnswerOptions.questionId, questionsToDelete));
-  }
-
-  async upsertQuestion(
-    questionData: AdminQuestionBody,
-    lessonId: UUIDType,
-    authorId: UUIDType,
-    trx: DatabasePg,
-    questionId?: UUIDType,
-  ): Promise<UUIDType> {
-    const [result] = await trx
-      .insert(questions)
-      .values({
-        id: questionId,
-        lessonId,
-        authorId,
-        ...questionData,
-        title: buildJsonbField(questionData.language, questionData.title),
-        description: buildJsonbField(questionData.language, questionData.description),
-      })
-      .onConflictDoUpdate({
-        target: questions.id,
-        set: {
-          lessonId,
-          authorId,
-          ...questionData,
-          title: setJsonbField(questions.title, questionData.language, questionData.title),
-          description: setJsonbField(
-            questions.description,
-            questionData.language,
-            questionData.description,
-          ),
-        },
-      })
-      .returning({ id: questions.id });
-
-    return result.id;
   }
 
   async getLessonResourcesForLesson(

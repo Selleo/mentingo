@@ -76,7 +76,7 @@ export const getVideoDurationSeconds = (
   return DURATION_DEFAULTS.videoMinutes * 60;
 };
 
-export const extractEmbeddedResourceIds = (content: string): string[] =>
+export const extractEmbeddedResourceIds = (content: string | null | undefined): string[] =>
   extractLessonResourceIds(content);
 
 export const emptyLanguageEstimates = (

@@ -285,17 +285,6 @@ export class StatisticsService {
     };
   }
 
-  async createQuizAttempt(data: {
-    userId: UUIDType;
-    courseId: UUIDType;
-    lessonId: UUIDType;
-    correctAnswers: number;
-    wrongAnswers: number;
-    score: number;
-  }) {
-    await this.statisticsRepository.createQuizAttempt(data);
-  }
-
   async updateUserActivity(userId: UUIDType) {
     const today = startOfDay(new Date());
     const formattedTodayDate = format(today, "yyyy-MM-dd");

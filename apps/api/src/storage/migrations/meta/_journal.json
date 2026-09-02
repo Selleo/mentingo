@@ -1380,6 +1380,34 @@
       "when": 1787814066671,
       "tag": "0196_backfill_course_author_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1788251932045,
+      "tag": "0197_add_assessment_quiz_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1788251938953,
+      "tag": "0198_enable_assessment_quiz_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 199,
+      "version": "7",
+      "when": 1788251943547,
+      "tag": "0199_backfill_assessment_quiz_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 200,
+      "version": "7",
+      "when": 1788256610137,
+      "tag": "0200_drop_legacy_quiz_tables",
+      "breakpoints": true
     }
   ]
 }

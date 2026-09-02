@@ -34,6 +34,7 @@ export interface InitVideoUploadBody {
     | "chapter"
     | "lesson"
     | "question"
+    | "assessment_question"
     | "news"
     | "articles"
     | "learning_path"

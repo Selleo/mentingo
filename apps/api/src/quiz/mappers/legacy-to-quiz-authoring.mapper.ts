@@ -11,6 +11,8 @@ import { validate as uuidValidate, v5 as uuidV5 } from "uuid";
 
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
+import { getBlankMarkerIds, replaceBlankMarkerIds } from "./quiz-authoring-mapper.utils";
+
 import type {
   QuizAuthoringInput,
   QuizAuthoringQuestion,
@@ -24,7 +26,6 @@ import type {
   UpdateQuizLessonBody,
 } from "src/lesson/lesson.schema";
 
-const BLANK_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
 const BLANK_MARKER_UUID_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 
 const toAssessmentQuestionType = (type: AdminQuestionBody["type"]) => {
@@ -101,9 +102,6 @@ export const mapLocalizedQuestionChildChanges = <
   };
 };
 
-const getBlankMarkerIds = (description: string | null | undefined) =>
-  [...(description?.matchAll(BLANK_MARKER_REGEX) ?? [])].map((match) => match[1]);
-
 const getBlankIdMap = (question: AdminQuestionBody) => {
   const markerIds = getBlankMarkerIds(question.description);
   const uniqueMarkerIds = [...new Set(markerIds)];
@@ -164,11 +162,6 @@ const mapBlanks = (question: AdminQuestionBody, blankIdMap: Map<string, string>)
   });
 };
 
-const normalizeFillPrompt = (prompt: string, blankIdMap: Map<string, string>) =>
-  prompt.replace(BLANK_MARKER_REGEX, (_, legacyId: string) => {
-    return `<blank-answer-${blankIdMap.get(legacyId) ?? legacyId}>`;
-  });
-
 const mapDragAndDropOptions = (
   options: AdminQuestionBody["options"],
   blankIdMap: Map<string, string>,
@@ -177,7 +170,10 @@ const mapDragAndDropOptions = (
     id: option.id ?? randomUUID(),
     label: option.optionText,
     targetBlankId: blankIdMap.get(option.id ?? "") ?? [...blankIdMap.values()][index] ?? null,
-    displayOrder: option.displayOrder ?? index + 1,
+    // Legacy DnD payloads can contain duplicate or zero display orders. The
+    // submitted array order is the source of truth and the target schema
+    // requires a unique order per question and language.
+    displayOrder: index + 1,
   }));
 
 const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQuestion => {
@@ -191,7 +187,7 @@ const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQ
     question.type === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND;
 
   const normalizedPrompt = isFillQuestion
-    ? normalizeFillPrompt(promptValue, blankIdMap)
+    ? replaceBlankMarkerIds(promptValue, blankIdMap)
     : promptValue;
 
   const blanks = mapBlanks(question, blankIdMap);

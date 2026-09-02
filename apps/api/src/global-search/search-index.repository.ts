@@ -11,8 +11,12 @@ import {
   learningPaths,
   lessons,
   news,
-  questionAnswerOptions,
-  questions,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestionTrueFalseStatements,
+  assessmentQuestionScaleOptions,
+  assessmentQuestionDragAndDropOptions,
+  assessmentQuestions,
+  assessments,
   questionsAndAnswers,
   resourceEntity,
   resources,
@@ -36,7 +40,7 @@ import type {
 } from "./global-search.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import type { AnyPgColumn, AnyPgTable } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -265,39 +269,23 @@ export class SearchIndexRepository {
       this.buildQuestionLocalizedFieldQuery({
         db,
         lessonIds,
-        fieldExpression: questions.title,
+        fieldExpression: assessmentQuestions.title,
         lateralAlias: "title",
-        documentType: sql<string>`'question_title:' || ${questions.id}::text`,
+        documentType: sql<string>`'question_title:' || ${assessmentQuestions.id}::text`,
         weight: SEARCH_DOCUMENT_WEIGHTS.B,
         metadata: sql<Record<string, unknown>>`
-          jsonb_build_object('sliceType', 'question_title', 'questionId', ${questions.id})
+          JSONB_BUILD_OBJECT('sliceType', 'question_title', 'questionId', ${assessmentQuestions.id})
         `,
       }),
       this.buildQuestionLocalizedFieldQuery({
         db,
         lessonIds,
-        fieldExpression: sql`COALESCE(${questions.description}, '{}'::jsonb)`,
+        fieldExpression: sql`COALESCE(${assessmentQuestions.prompt}, '{}'::jsonb)`,
         lateralAlias: "description",
-        documentType: sql<string>`'question_description:' || ${questions.id}::text`,
+        documentType: sql<string>`'question_description:' || ${assessmentQuestions.id}::text`,
         weight: SEARCH_DOCUMENT_WEIGHTS.C,
         metadata: sql<Record<string, unknown>>`
-          jsonb_build_object('sliceType', 'question_description', 'questionId', ${questions.id})
-        `,
-      }),
-      this.buildQuestionLocalizedFieldQuery({
-        db,
-        lessonIds,
-        fieldExpression: sql`COALESCE(${questions.solutionExplanation}, '{}'::jsonb)`,
-        lateralAlias: "explanation",
-        documentType: sql<string>`'question_solution_explanation:' || ${questions.id}::text`,
-        weight: SEARCH_DOCUMENT_WEIGHTS.C,
-        metadata: sql<Record<string, unknown>>`
-          jsonb_build_object(
-            'sliceType',
-            'question_solution_explanation',
-            'questionId',
-            ${questions.id}
-          )
+          JSONB_BUILD_OBJECT('sliceType', 'question_description', 'questionId', ${assessmentQuestions.id})
         `,
       }),
       this.buildAnswerOptionDocumentsQuery(db, lessonIds),
@@ -337,7 +325,7 @@ export class SearchIndexRepository {
         and(
           inArray(lessons.id, lessonIds),
           sql`${sql.raw(lateralAlias)}.lang = ANY(${courses.availableLocales})`,
-          sql`length(trim(${sql.raw(lateralAlias)}.value)) > 0`,
+          sql`LENGTH(TRIM(${sql.raw(lateralAlias)}.value)) > 0`,
         ),
       );
   }
@@ -354,8 +342,8 @@ export class SearchIndexRepository {
     return db
       .select(
         this.buildDocumentSelection({
-          tenantId: questions.tenantId,
-          entityId: questions.lessonId,
+          tenantId: assessmentQuestions.tenantId,
+          entityId: lessons.id,
           documentType,
           language: sql<SupportedLanguages>`${sql.raw(lateralAlias)}.lang`,
           content: sql<string>`${sql.raw(lateralAlias)}.value`,
@@ -363,8 +351,9 @@ export class SearchIndexRepository {
           metadata,
         }),
       )
-      .from(questions)
-      .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+      .from(assessmentQuestions)
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
@@ -383,45 +372,115 @@ export class SearchIndexRepository {
   }
 
   private buildAnswerOptionDocumentsQuery(db: DatabasePg, lessonIds: UUIDType[]) {
-    return db
-      .select(
-        this.buildDocumentSelection({
-          tenantId: questionAnswerOptions.tenantId,
-          entityId: questions.lessonId,
-          documentType: sql<string>`'answer_option:' || ${questionAnswerOptions.id}::text`,
-          language: sql<SupportedLanguages>`option_text.lang`,
-          content: sql<string>`option_text.value`,
-          weight: SEARCH_DOCUMENT_WEIGHTS.C,
-          metadata: sql<Record<string, unknown>>`
-          jsonb_build_object(
+    const buildOptionQuery = (
+      optionTable: AnyPgTable,
+      optionId: AnyPgColumn,
+      optionQuestionId: AnyPgColumn,
+      optionTenantId: AnyPgColumn,
+      optionLanguage: SQL | AnyPgColumn,
+      optionLabel: SQL | AnyPgColumn,
+    ) =>
+      db
+        .select(
+          this.buildDocumentSelection({
+            tenantId: optionTenantId,
+            entityId: lessons.id,
+            documentType: sql<string>`'answer_option:' || ${optionId}::text`,
+            language: sql<SupportedLanguages>`${optionLanguage}`,
+            content: sql<string>`${optionLabel}`,
+            weight: SEARCH_DOCUMENT_WEIGHTS.C,
+            metadata: sql<Record<string, unknown>>`
+          JSONB_BUILD_OBJECT(
             'sliceType',
             'answer_option',
             'questionId',
-            ${questions.id},
+            ${assessmentQuestions.id},
             'answerOptionId',
-            ${questionAnswerOptions.id}
+            ${optionId}
           )
         `,
+          }),
+        )
+        .from(optionTable)
+        .innerJoin(assessmentQuestions, eq(assessmentQuestions.id, optionQuestionId))
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .innerJoin(courses, eq(courses.id, chapters.courseId))
+        .where(
+          and(
+            inArray(lessons.id, lessonIds),
+            sql`${optionLanguage} = ANY(${courses.availableLocales})`,
+            sql`LENGTH(TRIM(${optionLabel})) > 0`,
+          ),
+        );
+
+    const scaleOptionQuery = db
+      .select(
+        this.buildDocumentSelection({
+          tenantId: assessmentQuestionScaleOptions.tenantId,
+          entityId: lessons.id,
+          documentType: sql<string>`'answer_option:' || ${assessmentQuestionScaleOptions.id}::text`,
+          language: sql<SupportedLanguages>`scale_locale.lang`,
+          content: sql<string>`scale_locale.value`,
+          weight: SEARCH_DOCUMENT_WEIGHTS.C,
+          metadata: sql<Record<string, unknown>>`
+            JSONB_BUILD_OBJECT(
+              'sliceType', 'answer_option',
+              'questionId', ${assessmentQuestions.id},
+              'answerOptionId', ${assessmentQuestionScaleOptions.id}
+            )
+          `,
         }),
       )
-      .from(questionAnswerOptions)
-      .innerJoin(questions, eq(questions.id, questionAnswerOptions.questionId))
-      .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+      .from(assessmentQuestionScaleOptions)
+      .innerJoin(
+        assessmentQuestions,
+        eq(assessmentQuestions.id, assessmentQuestionScaleOptions.questionId),
+      )
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
-          questionAnswerOptions.optionText,
-        )}) AS option_text(lang, value)`,
+        sql`LATERAL JSONB_EACH_TEXT(${this.asLocalizedJsonbObject(assessmentQuestionScaleOptions.label)}) AS scale_locale(lang, value)`,
         sql`true`,
       )
       .where(
         and(
           inArray(lessons.id, lessonIds),
-          sql`option_text.lang = ANY(${courses.availableLocales})`,
-          sql`length(trim(option_text.value)) > 0`,
+          sql`scale_locale.lang = ANY(${courses.availableLocales})`,
+          sql`LENGTH(TRIM(scale_locale.value)) > 0`,
         ),
       );
+
+    return unionAll(
+      buildOptionQuery(
+        assessmentQuestionChoiceOptions,
+        assessmentQuestionChoiceOptions.id,
+        assessmentQuestionChoiceOptions.questionId,
+        assessmentQuestionChoiceOptions.tenantId,
+        assessmentQuestionChoiceOptions.language,
+        assessmentQuestionChoiceOptions.label,
+      ),
+      buildOptionQuery(
+        assessmentQuestionTrueFalseStatements,
+        assessmentQuestionTrueFalseStatements.id,
+        assessmentQuestionTrueFalseStatements.questionId,
+        assessmentQuestionTrueFalseStatements.tenantId,
+        assessmentQuestionTrueFalseStatements.language,
+        assessmentQuestionTrueFalseStatements.statement,
+      ),
+      scaleOptionQuery,
+      buildOptionQuery(
+        assessmentQuestionDragAndDropOptions,
+        assessmentQuestionDragAndDropOptions.id,
+        assessmentQuestionDragAndDropOptions.questionId,
+        assessmentQuestionDragAndDropOptions.tenantId,
+        assessmentQuestionDragAndDropOptions.language,
+        assessmentQuestionDragAndDropOptions.label,
+      ),
+    );
   }
 
   private buildResourceDocumentsQuery(db: DatabasePg, lessonIds: UUIDType[]) {
@@ -432,7 +491,7 @@ export class SearchIndexRepository {
       )
     `;
     const content = sql<string>`
-      trim(concat_ws(' ', ${fileName}, COALESCE(${resources.title}->>locale.lang, '')))
+      TRIM(CONCAT_WS(' ', ${fileName}, COALESCE(${resources.title}->>locale.lang, '')))
     `;
 
     return db
@@ -445,7 +504,7 @@ export class SearchIndexRepository {
           content,
           weight: SEARCH_DOCUMENT_WEIGHTS.D,
           metadata: sql<Record<string, unknown>>`
-          jsonb_build_object(
+          JSONB_BUILD_OBJECT(
             'sliceType',
             'resource',
             'resourceId',

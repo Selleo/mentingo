@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
@@ -9,10 +9,16 @@ import {
   ASSESSMENT_TEXT_COMPARISON_MODES,
   type SupportedLanguages,
 } from "@repo/shared";
+import { escape } from "lodash";
 import { match } from "ts-pattern";
-import { validate as uuidValidate } from "uuid";
 
-import { mapQuizAttemptToRuntimeSubmissionResult } from "../mappers/quiz-runtime.mapper";
+import { BLANK_ANSWER_MARKER_REGEX } from "src/questions/fill-in-the-blanks.utils";
+
+import { normalizeBlankPromptMarkers } from "../mappers/quiz-authoring-mapper.utils";
+import {
+  mapQuizAttemptToRuntimeSubmissionResult,
+  mapQuizQuestionDescriptionForDelivery,
+} from "../mappers/quiz-runtime.mapper";
 import { QuizRuntimeRepository } from "../repositories/quiz-runtime.repository";
 
 import { QuizAuthoringService } from "./quiz-authoring.service";
@@ -24,10 +30,11 @@ import type {
 import type {
   PreparedQuizAttempt,
   QuizDelivery,
+  QuizAttemptFeedback,
   QuizRuntimeSubmissionResult,
   QuizSubmission,
 } from "../types/quiz-runtime.types";
-import type { UUIDType } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 import type { QuestionBody } from "src/lesson/lesson.schema";
 
 @Injectable()
@@ -40,23 +47,36 @@ export class QuizRuntimeService {
   async getQuizForDelivery(
     lessonId: UUIDType,
     language?: SupportedLanguages,
-  ): Promise<QuizDelivery | null> {
+    learnerId?: UUIDType,
+    includeFeedback = false,
+  ): Promise<QuizDelivery> {
     const quizDefinition = await this.quizAuthoringService.getQuizLessonForAuthoring(
       lessonId,
       language,
     );
 
-    if (!quizDefinition) return null;
+    if (!quizDefinition) throw new NotFoundException("common.toast.notFound");
+
+    const attemptFeedback =
+      includeFeedback && learnerId
+        ? await this.quizRuntimeRepository.findLatestAttemptFeedback(
+            quizDefinition.assessment.id,
+            learnerId,
+          )
+        : null;
 
     return {
       assessmentId: quizDefinition.assessment.id,
-      questions: quizDefinition.questions.map((question) => this.mapQuestionForDelivery(question)),
+      questions: quizDefinition.questions.map((question) =>
+        this.mapQuestionForDelivery(question, attemptFeedback),
+      ),
     };
   }
 
   async submitQuiz(
     submission: QuizSubmission,
     learnerId: UUIDType,
+    db?: DatabasePg,
   ): Promise<QuizRuntimeSubmissionResult> {
     const quizDefinition = await this.quizAuthoringService.getQuizLessonForAuthoring(
       submission.lessonId,
@@ -67,15 +87,75 @@ export class QuizRuntimeService {
       throw new BadRequestException("studentLessonView.validation.quizEvaluationFailed");
 
     const attemptData = this.prepareAttempt(quizDefinition, submission, learnerId);
-    const persistedAttempt = await this.quizRuntimeRepository.createSubmittedAttempt(attemptData);
+    const persistedAttempt = await this.quizRuntimeRepository.createSubmittedAttempt(
+      attemptData,
+      db,
+    );
 
     return mapQuizAttemptToRuntimeSubmissionResult(attemptData, persistedAttempt);
   }
 
-  private mapQuestionForDelivery(question: QuizAuthoringLocalizedQuestion): QuestionBody {
+  private mapQuestionForDelivery(
+    question: QuizAuthoringLocalizedQuestion,
+    attemptFeedback: QuizAttemptFeedback | null,
+  ): QuestionBody {
+    const deliveryQuestion = {
+      ...question,
+      prompt: normalizeBlankPromptMarkers(
+        question.prompt,
+        question.blanks.map(({ id }) => id),
+      ),
+    };
+    const questionAnswer = attemptFeedback?.questionAnswers.find(
+      (answer) => answer.questionId === question.id,
+    );
+    const hasFeedback = Boolean(questionAnswer);
+
+    const choiceSelections = new Set(
+      attemptFeedback?.choiceSelections
+        .filter(({ questionAnswerId }) => questionAnswerId === questionAnswer?.id)
+        .map(({ selectedOptionId }) => selectedOptionId),
+    );
+
+    const statementAnswers = attemptFeedback?.statementAnswers.filter(
+      (answer) => answer.questionAnswerId === questionAnswer?.id,
+    );
+    const blankAnswers = attemptFeedback?.blankAnswers.filter(
+      (answer) => answer.questionAnswerId === questionAnswer?.id,
+    );
+    const scaleSelection = attemptFeedback?.scaleSelections.find(
+      (selection) => selection.questionAnswerId === questionAnswer?.id,
+    );
+    const openTextAnswer = attemptFeedback?.openTextAnswers.find(
+      (answer) => answer.questionAnswerId === questionAnswer?.id,
+    );
+    const openTextFeedbackOption =
+      hasFeedback && openTextAnswer
+        ? this.mapDeliveryOption(
+            question.id,
+            questionAnswer!.id,
+            "",
+            1,
+            undefined,
+            true,
+            true,
+            true,
+            openTextAnswer.submittedText,
+          )
+        : null;
+
     const deliveryOptions = [
       ...question.options.map((option) =>
-        this.mapDeliveryOption(question.id, option.id, option.label, option.displayOrder),
+        this.mapDeliveryOption(
+          question.id,
+          option.id,
+          option.label,
+          option.displayOrder,
+          undefined,
+          hasFeedback,
+          choiceSelections.has(option.id),
+          option.isCorrect,
+        ),
       ),
       ...question.trueFalseStatements.map((statement) =>
         this.mapDeliveryOption(
@@ -83,6 +163,13 @@ export class QuizRuntimeService {
           statement.id,
           statement.statement,
           statement.displayOrder,
+          undefined,
+          hasFeedback,
+          statementAnswers?.some(({ statementId }) => statementId === statement.id) ?? false,
+          statement.correctValue,
+          statementAnswers
+            ?.find(({ statementId }) => statementId === statement.id)
+            ?.submittedValue.toString() ?? null,
         ),
       ),
       ...question.scaleOptions.map((option) =>
@@ -92,43 +179,151 @@ export class QuizRuntimeService {
           option.label,
           option.displayOrder,
           option.scaleValue,
+          hasFeedback,
+          scaleSelection?.selectedScaleOptionId === option.id,
+          false,
         ),
       ),
+      ...(question.questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT
+        ? question.blanks.map((blank, index) => {
+            const submittedBlankAnswer = blankAnswers?.find(
+              (answer) => answer.blankId === blank.id,
+            );
+            const preferredAnswer = blank.answerSets[0]?.preferredAnswer ?? null;
+
+            return this.mapDeliveryOption(
+              question.id,
+              blank.id,
+              hasFeedback ? preferredAnswer : null,
+              index + 1,
+              undefined,
+              hasFeedback,
+              Boolean(submittedBlankAnswer),
+              hasFeedback
+                ? this.isBlankAnswerCorrect(blank, submittedBlankAnswer?.submittedText)
+                : null,
+              submittedBlankAnswer?.submittedText ?? null,
+            );
+          })
+        : []),
       ...question.dragAndDropOptions.map((option) =>
-        this.mapDeliveryOption(question.id, option.id, option.label, option.displayOrder),
+        this.mapDeliveryOption(
+          question.id,
+          option.targetBlankId ?? option.id,
+          option.label,
+          option.displayOrder,
+          undefined,
+          hasFeedback,
+          Boolean(blankAnswers?.some((answer) => answer.selectedDragOptionId === option.id)),
+          hasFeedback
+            ? Boolean(
+                blankAnswers?.some((answer) => {
+                  const selectedOption = question.dragAndDropOptions.find(
+                    (dragOption) => dragOption.id === option.id,
+                  );
+                  return (
+                    answer.selectedDragOptionId === option.id &&
+                    selectedOption?.targetBlankId === answer.blankId
+                  );
+                }),
+              )
+            : null,
+        ),
       ),
+      ...(openTextFeedbackOption ? [openTextFeedbackOption] : []),
     ];
 
     return {
       id: question.id,
       type: question.questionType,
       title: question.title,
-      description: question.description,
+      description: mapQuizQuestionDescriptionForDelivery(deliveryQuestion),
       displayOrder: question.displayOrder,
-      solutionExplanation: null,
+      solutionExplanation: hasFeedback ? this.buildSolutionExplanation(deliveryQuestion) : null,
       photoS3Key: question.photoS3Key,
       options: deliveryOptions,
-      passQuestion: null,
+      passQuestion: hasFeedback ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
     };
   }
 
   private mapDeliveryOption(
     questionId: UUIDType,
     id: UUIDType,
-    optionText: string,
+    optionText: string | null,
     displayOrder: number,
     scaleAnswer?: number,
+    hasFeedback = false,
+    isStudentAnswer: boolean | null = null,
+    isCorrect: boolean | null = null,
+    studentAnswer: string | null = null,
   ) {
     return {
       id,
       optionText,
       displayOrder,
-      isStudentAnswer: null,
-      studentAnswer: null,
-      isCorrect: null,
+      isStudentAnswer: hasFeedback ? isStudentAnswer : null,
+      studentAnswer: hasFeedback ? (studentAnswer ?? (isStudentAnswer ? optionText : null)) : null,
+      isCorrect: hasFeedback ? isCorrect : null,
       questionId,
       ...(scaleAnswer === undefined ? {} : { scaleAnswer }),
     };
+  }
+
+  private isBlankAnswerCorrect(
+    blank: QuizAuthoringLocalizedQuestion["blanks"][number],
+    submittedText: string | null | undefined,
+  ) {
+    if (submittedText == null) return false;
+
+    return blank.answerSets.some((answerSet) => answerSet.acceptedAnswers.includes(submittedText));
+  }
+
+  private buildSolutionExplanation(question: QuizAuthoringLocalizedQuestion) {
+    return match(question.questionType)
+      .with(
+        ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT,
+        ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND,
+        () => this.buildFillInTheBlanksSolutionSentence(question),
+      )
+      .otherwise(() => this.buildAnswerListSolutionExplanation(question));
+  }
+
+  private buildAnswerListSolutionExplanation(question: QuizAuthoringLocalizedQuestion) {
+    const correctAnswers = [
+      ...question.options.filter((option) => option.isCorrect).map((option) => option.label),
+      ...question.trueFalseStatements
+        .filter((statement) => statement.correctValue)
+        .map((statement) => statement.statement),
+      ...question.blanks
+        .map((blank) => blank.answerSets[0]?.preferredAnswer)
+        .filter((answer): answer is string => Boolean(answer)),
+    ];
+
+    return correctAnswers.length ? `Correct answer: ${correctAnswers.join(", ")}` : null;
+  }
+
+  private buildFillInTheBlanksSolutionSentence(question: QuizAuthoringLocalizedQuestion) {
+    if (!question.prompt) return null;
+
+    let unresolvedBlank = false;
+    const sentence = question.prompt.replace(
+      BLANK_ANSWER_MARKER_REGEX,
+      (marker, blankId: UUIDType) => {
+        const blank = question.blanks.find((candidate) => candidate.id === blankId);
+        const correctAnswer =
+          blank?.answerSets[0]?.preferredAnswer ??
+          question.dragAndDropOptions.find((option) => option.targetBlankId === blankId)?.label;
+
+        if (!correctAnswer) {
+          unresolvedBlank = true;
+          return marker;
+        }
+
+        return `<strong>${escape(correctAnswer)}</strong>`;
+      },
+    );
+
+    return unresolvedBlank ? null : sentence;
   }
 
   private prepareAttempt(
@@ -321,10 +516,19 @@ export class QuizRuntimeService {
 
       if (!submittedAnswer || !("value" in submittedAnswer)) return false;
 
-      return quizQuestion.dragAndDropOptions.some(
-        (option) => option.id === submittedAnswer.value && option.targetBlankId === blank.id,
-      );
+      const selectedDragOption = this.findDragAndDropOption(quizQuestion, submittedAnswer.value);
+
+      return selectedDragOption?.targetBlankId === blank.id;
     });
+  }
+
+  private findDragAndDropOption(
+    quizQuestion: QuizAuthoringLocalizedQuestion,
+    submittedValue: string,
+  ) {
+    return quizQuestion.dragAndDropOptions.find(
+      (option) => option.id === submittedValue || option.label === submittedValue,
+    );
   }
 
   private findBlankAnswer(
@@ -448,20 +652,50 @@ export class QuizRuntimeService {
     answers: QuizSubmission["questionsAnswers"][number]["answers"],
     isDragAndDrop: boolean,
   ) {
-    for (const answer of answers) {
-      if (!("answerId" in answer) || !("value" in answer)) throw this.invalidSubmission();
+    for (const [answerIndex, answer] of answers.entries()) {
+      if (!("value" in answer)) throw this.invalidSubmission();
 
-      this.assertIdBelongsToQuestion(answer.answerId, quizQuestion.blanks);
+      const selectedDragOption = isDragAndDrop
+        ? this.findDragAndDropOption(quizQuestion, answer.value)
+        : undefined;
 
-      const selectedDragOptionId = isDragAndDrop ? this.assertUuid(answer.value) : null;
+      if (isDragAndDrop && !selectedDragOption) throw this.invalidSubmission();
+
+      const submittedBlank = this.resolveSubmittedBlank(
+        quizQuestion,
+        answer,
+        answerIndex,
+        selectedDragOption?.targetBlankId,
+      );
+
+      if (!submittedBlank) throw this.invalidSubmission();
 
       attemptData.blankAnswers.push({
         questionAnswerId,
-        blankId: answer.answerId,
-        submittedText: selectedDragOptionId ? null : answer.value,
-        selectedDragOptionId,
+        blankId: submittedBlank.id,
+        submittedText: selectedDragOption ? null : answer.value,
+        selectedDragOptionId: selectedDragOption?.id ?? null,
       });
     }
+  }
+
+  private resolveSubmittedBlank(
+    quizQuestion: QuizAuthoringLocalizedQuestion,
+    answer: QuizSubmission["questionsAnswers"][number]["answers"][number],
+    answerIndex: number,
+    targetBlankId?: UUIDType | null,
+  ) {
+    if (targetBlankId) {
+      const targetBlank = quizQuestion.blanks.find((blank) => blank.id === targetBlankId);
+      if (targetBlank) return targetBlank;
+    }
+
+    if ("answerId" in answer) {
+      const submittedBlank = quizQuestion.blanks.find((blank) => blank.id === answer.answerId);
+      if (submittedBlank) return submittedBlank;
+    }
+
+    return quizQuestion.blanks[answerIndex];
   }
 
   private mapOpenTextAnswer(
@@ -489,11 +723,6 @@ export class QuizRuntimeService {
     if (value === "true") return true;
     if (value === "false") return false;
     return null;
-  }
-
-  private assertUuid(value: string): UUIDType {
-    if (!uuidValidate(value)) throw this.invalidSubmission();
-    return value as UUIDType;
   }
 
   private invalidSubmission(): BadRequestException {

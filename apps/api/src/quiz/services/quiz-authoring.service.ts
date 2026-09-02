@@ -15,6 +15,8 @@ import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
 import { mapLegacyQuizAuthoringInput } from "../mappers/legacy-to-quiz-authoring.mapper";
+import { preserveExistingQuizAuthoringIds } from "../mappers/quiz-authoring-identity.mapper";
+import { filterItemsByQuestionId, getBlankMarkerIds } from "../mappers/quiz-authoring-mapper.utils";
 import { mapLocalizedQuizAuthoringReadModelToLegacy } from "../mappers/quiz-authoring-to-legacy.mapper";
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 
@@ -34,6 +36,17 @@ import type {
 type QuizAuthoringRows = NonNullable<
   Awaited<ReturnType<QuizAuthoringRepository["getQuizLessonForAuthoring"]>>
 >;
+
+const orderBlanksByPrompt = <Blank extends { id: UUIDType }>(prompt: string, blanks: Blank[]) => {
+  const blanksById = new Map(blanks.map((blank) => [blank.id, blank]));
+  const promptBlankIds = getBlankMarkerIds(prompt);
+  const orderedBlanks = promptBlankIds
+    .map((blankId) => blanksById.get(blankId))
+    .filter((blank): blank is Blank => Boolean(blank));
+  const orderedBlankIds = new Set(orderedBlanks.map((blank) => blank.id));
+
+  return [...orderedBlanks, ...blanks.filter((blank) => !orderedBlankIds.has(blank.id))];
+};
 
 @Injectable()
 export class QuizAuthoringService {
@@ -84,7 +97,48 @@ export class QuizAuthoringService {
   async updateQuizLesson(lessonId: UUIDType, input: UpdateQuizLessonBody) {
     this.validateQuestionTypes(input.questions);
 
-    const quizAuthoringInput = mapLegacyQuizAuthoringInput(input, lessonId);
+    const mappedQuizAuthoringInput = mapLegacyQuizAuthoringInput(input, lessonId);
+
+    const existingQuizAuthoringRows = await this.quizAuthoringRepository.getQuizLessonForAuthoring(
+      lessonId,
+      mappedQuizAuthoringInput.language,
+    );
+
+    if (
+      existingQuizAuthoringRows &&
+      !existingQuizAuthoringRows.assessment.availableLocales.includes(
+        mappedQuizAuthoringInput.language,
+      )
+    ) {
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    }
+
+    const existingQuestions = existingQuizAuthoringRows
+      ? this.mapQuizAuthoringRows(existingQuizAuthoringRows).questions
+      : [];
+
+    if (
+      input.questions !== undefined &&
+      existingQuizAuthoringRows &&
+      mappedQuizAuthoringInput.language !== existingQuizAuthoringRows.assessment.baseLanguage
+    ) {
+      this.validateTranslatedQuizStructure(
+        mappedQuizAuthoringInput.questions ?? [],
+        existingQuestions,
+      );
+    }
+
+    const quizAuthoringInput =
+      input.questions !== undefined
+        ? {
+            ...mappedQuizAuthoringInput,
+            questions: preserveExistingQuizAuthoringIds(
+              mappedQuizAuthoringInput.questions ?? [],
+              existingQuestions,
+            ),
+          }
+        : mappedQuizAuthoringInput;
+
     this.validateQuizAuthoringInput(quizAuthoringInput, {
       requireChapterId: false,
       requireQuestions: false,
@@ -173,9 +227,6 @@ export class QuizAuthoringService {
   private mapQuizAuthoringRows(rows: QuizAuthoringRows): QuizAuthoringLocalizedReadModel {
     const { lesson, assessment, questions } = rows;
 
-    const byQuestion = <T extends { questionId: string }>(items: T[], questionId: string) =>
-      items.filter((item) => item.questionId === questionId);
-
     return {
       lesson,
       assessment: {
@@ -187,54 +238,63 @@ export class QuizAuthoringService {
         baseLanguage: assessment.baseLanguage,
         availableLocales: assessment.availableLocales,
       },
-      questions: questions.map((question) => ({
-        id: question.id,
-        questionType: question.questionType,
-        displayOrder: question.displayOrder,
-        maximumPoints: question.maximumPoints,
-        gradingMode: question.gradingMode,
-        prompt: question.prompt,
-        title: question.title,
-        description: question.description || null,
-        photoS3Key:
-          rows.promptImages.find((image) => image.questionId === question.id)?.reference ?? null,
-        options: byQuestion(rows.choiceOptions, question.id).map((option) => ({
-          id: option.id,
-          displayOrder: option.displayOrder,
-          isCorrect: option.isCorrect,
-          label: option.label,
-        })),
-        trueFalseStatements: byQuestion(rows.trueFalseStatements, question.id).map((statement) => ({
-          id: statement.id,
-          displayOrder: statement.displayOrder,
-          correctValue: statement.correctValue,
-          statement: statement.statement,
-        })),
-        scaleOptions: byQuestion(rows.scaleOptions, question.id).map((option) => ({
-          id: option.id,
-          displayOrder: option.displayOrder,
-          scaleValue: option.scaleValue,
-          label: option.label,
-        })),
-        openTextSettings:
-          rows.openTextSettings.find((settings) => settings.questionId === question.id) ?? null,
-        blanks: byQuestion(rows.blanks, question.id).map((blank) => ({
-          id: blank.id,
-          textComparisonMode: blank.textComparisonMode,
-          answerSets: rows.answerSets
-            .filter((answerSet) => answerSet.blankId === blank.id)
-            .map((answerSet) => ({
-              preferredAnswer: answerSet.preferredAnswer,
-              acceptedAnswers: answerSet.acceptedAnswers,
-            })),
-        })),
-        dragAndDropOptions: byQuestion(rows.dragOptions, question.id).map((option) => ({
-          id: option.id,
-          label: option.label,
-          targetBlankId: option.targetBlankId,
-          displayOrder: option.displayOrder,
-        })),
-      })),
+      questions: questions.map((question) => {
+        const blanks = filterItemsByQuestionId(rows.blanks, question.id);
+        const orderedBlanks = orderBlanksByPrompt(question.prompt, blanks);
+
+        return {
+          id: question.id,
+          questionType: question.questionType,
+          displayOrder: question.displayOrder,
+          maximumPoints: question.maximumPoints,
+          gradingMode: question.gradingMode,
+          prompt: question.prompt,
+          title: question.title,
+          description: question.description || null,
+          photoS3Key:
+            rows.promptImages.find((image) => image.questionId === question.id)?.reference ?? null,
+          options: filterItemsByQuestionId(rows.choiceOptions, question.id).map((option) => ({
+            id: option.id,
+            displayOrder: option.displayOrder,
+            isCorrect: option.isCorrect,
+            label: option.label,
+          })),
+          trueFalseStatements: filterItemsByQuestionId(rows.trueFalseStatements, question.id).map(
+            (statement) => ({
+              id: statement.id,
+              displayOrder: statement.displayOrder,
+              correctValue: statement.correctValue,
+              statement: statement.statement,
+            }),
+          ),
+          scaleOptions: filterItemsByQuestionId(rows.scaleOptions, question.id).map((option) => ({
+            id: option.id,
+            displayOrder: option.displayOrder,
+            scaleValue: option.scaleValue,
+            label: option.label,
+          })),
+          openTextSettings:
+            rows.openTextSettings.find((settings) => settings.questionId === question.id) ?? null,
+          blanks: orderedBlanks.map((blank) => ({
+            id: blank.id,
+            textComparisonMode: blank.textComparisonMode,
+            answerSets: rows.answerSets
+              .filter((answerSet) => answerSet.blankId === blank.id)
+              .map((answerSet) => ({
+                preferredAnswer: answerSet.preferredAnswer,
+                acceptedAnswers: answerSet.acceptedAnswers,
+              })),
+          })),
+          dragAndDropOptions: filterItemsByQuestionId(rows.dragOptions, question.id).map(
+            (option) => ({
+              id: option.id,
+              label: option.label,
+              targetBlankId: option.targetBlankId,
+              displayOrder: option.displayOrder,
+            }),
+          ),
+        };
+      }),
     };
   }
 
@@ -260,6 +320,23 @@ export class QuizAuthoringService {
     questions: CreateQuizLessonBody["questions"] | UpdateQuizLessonBody["questions"],
   ) {
     if (questions?.some((question) => question.type === QUESTION_TYPE.MATCH_WORDS))
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+  }
+
+  private validateTranslatedQuizStructure(
+    translatedQuestions: QuizAuthoringQuestion[],
+    existingQuestions: ReturnType<QuizAuthoringService["mapQuizAuthoringRows"]>["questions"],
+  ) {
+    if (translatedQuestions.length !== existingQuestions.length)
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+
+    const hasStructureMismatch = translatedQuestions.some(
+      (question, index) =>
+        question.displayOrder !== existingQuestions[index]?.displayOrder ||
+        question.questionType !== existingQuestions[index]?.questionType,
+    );
+
+    if (hasStructureMismatch)
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
   }
 

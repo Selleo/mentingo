@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
-import { and, desc, eq, getTableColumns, isNull, ne, type SQL, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, isNull, ne, type SQL, sql } from "drizzle-orm";
 
 import {
   buildAiJudgeBlockingErrorEvaluationsSql,
@@ -22,8 +22,6 @@ import {
   chapters,
   courses,
   lessons,
-  questions,
-  quizAttempts,
   studentCourses,
   studentLessonProgress,
   studentChapterProgress,
@@ -37,7 +35,7 @@ import {
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { AdminQuestionBody, LessonsFilters } from "src/lesson/lesson.schema";
+import type { LessonsFilters } from "src/lesson/lesson.schema";
 import type { AiMentorEvaluationDetails, LessonTypes } from "src/lesson/lesson.type";
 import type * as schema from "src/storage/schema";
 
@@ -387,36 +385,6 @@ export class LessonRepository {
         fileS3Key: sql<string | undefined>`${lessons.fileS3Key}`,
         fileType: sql<string | undefined>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
-        questions: sql<AdminQuestionBody[]>`
-          COALESCE(
-            (
-              SELECT json_agg(questions_data)
-              FROM (
-                SELECT
-                  ${questions.id} AS id,
-                  ${this.localizationService.getLocalizedSqlField(
-                    questions.title,
-                    language,
-                  )} AS title,
-                  ${this.localizationService.getLocalizedSqlField(
-                    questions.description,
-                    language,
-                  )} AS description,
-                  ${questions.type} AS type,
-                  ${questions.photoS3Key} AS photoS3Key,
-                  ${this.localizationService.getLocalizedSqlField(
-                    questions.solutionExplanation,
-                    language,
-                  )} AS solutionExplanation,
-                  ${questions.displayOrder} AS displayOrder
-                FROM ${questions}
-                WHERE ${lessons.id} = ${questions.lessonId}
-                ORDER BY ${questions.displayOrder}
-              ) AS questions_data
-            ),
-            '[]'::json
-          )
-        `,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
@@ -488,25 +456,6 @@ export class LessonRepository {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
-  }
-
-  async getQuizResult(lessonId: UUIDType, quizScore: number, userId: UUIDType) {
-    return this.db
-      .select({
-        score: sql<number>`${quizAttempts.score}`,
-        correctAnswerCount: sql<number>`${quizAttempts.correctAnswers}`,
-        wrongAnswerCount: sql<number>`${quizAttempts.wrongAnswers}`,
-      })
-      .from(quizAttempts)
-      .where(
-        and(
-          eq(quizAttempts.lessonId, lessonId),
-          eq(quizAttempts.userId, userId),
-          eq(quizAttempts.score, quizScore),
-        ),
-      )
-      .orderBy(desc(quizAttempts.createdAt))
-      .limit(1);
   }
 
   async getResource(resourceId: UUIDType) {

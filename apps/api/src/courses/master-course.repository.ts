@@ -6,13 +6,31 @@ import {
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
   TENANT_STATUSES,
+  type LocalizedText,
   type MasterCourseEntityType,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  inArray,
+  isNull,
+  ne,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import {
+  buildJsonbFieldWithMultipleEntries,
+  getFirstJsonbObjectKey,
+  getFirstJsonbObjectValue,
+} from "src/common/helpers/sqlHelpers";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -34,8 +52,15 @@ import {
   lessons,
   masterCourseEntityMap,
   masterCourseExports,
-  questionAnswerOptions,
-  questions,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestionBlankAnswerSets,
+  assessmentQuestionBlanks,
+  assessmentQuestionDragAndDropOptions,
+  assessmentQuestionOpenTextSettings,
+  assessmentQuestionScaleOptions,
+  assessmentQuestionTrueFalseStatements,
+  assessmentQuestions,
+  assessments,
   resourceEntity,
   resources,
   scormPackages,
@@ -44,6 +69,7 @@ import {
   users,
 } from "src/storage/schema";
 
+import type { AnyPgColumn, AnyPgTable } from "drizzle-orm/pg-core";
 import type {
   AiMentorConfigurationInsert,
   AiMentorRoleplayConfigurationInsert,
@@ -54,6 +80,8 @@ import type {
   AiJudgeCriterionJsonbInsert,
   AiJudgeScoreGuidanceJsonbInsert,
   AiMentorLessonInsert,
+  AssessmentQuestionOpenTextSettingsValues,
+  AssessmentUpsertValues,
   CategoryJsonbInsert,
   CategoryJsonbUpdate,
   CourseSelect,
@@ -75,6 +103,13 @@ import type {
   ResourceJsonbInsert,
   ScormPackageInsert,
   ScormScoInsert,
+  DeleteStaleTargetQuestionDetailsValues,
+  RemoveScormPackagesForMappedTargetsParams,
+  UpsertTargetBlankAnswerSetValues,
+  UpsertTargetBlankValues,
+  UpsertTargetDragAndDropOptionValues,
+  UpsertTargetScaleOptionValues,
+  UpsertTargetTrueFalseStatementValues,
 } from "src/courses/types/master-course.types";
 
 @Injectable()
@@ -320,7 +355,11 @@ export class MasterCourseRepository {
   }
 
   async deleteMappedEntities(
-    targetTable: typeof chapters | typeof lessons | typeof questions | typeof questionAnswerOptions,
+    targetTable:
+      | typeof chapters
+      | typeof lessons
+      | typeof assessmentQuestions
+      | typeof assessmentQuestionChoiceOptions,
     targetIds: UUIDType[],
   ) {
     if (!targetIds.length) return;
@@ -366,20 +405,148 @@ export class MasterCourseRepository {
     if (!lessonIds.length) return [];
 
     return this.db
-      .select(getTableColumns(questions))
-      .from(questions)
-      .where(inArray(questions.lessonId, lessonIds))
-      .orderBy(questions.displayOrder);
+      .select({
+        ...getTableColumns(assessmentQuestions),
+        lessonId: assessments.lessonId,
+        type: assessmentQuestions.questionType,
+        prompt: sql<LocalizedText>`${assessmentQuestions.prompt}`,
+        title: sql<LocalizedText | null>`${assessmentQuestions.title}`,
+        description: sql<LocalizedText | null>`${assessmentQuestions.description}`,
+        solutionExplanation: sql<LocalizedText | null>`NULL`,
+        photoS3Key: resources.reference,
+        authorId: sql<UUIDType | null>`NULL`,
+      })
+      .from(assessmentQuestions)
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .leftJoin(
+        resourceEntity,
+        and(
+          eq(resourceEntity.entityId, assessmentQuestions.id),
+          eq(resourceEntity.entityType, ENTITY_TYPES.ASSESSMENT_QUESTION),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.PROMPT_IMAGE),
+        ),
+      )
+      .leftJoin(
+        resources,
+        and(eq(resources.id, resourceEntity.resourceId), eq(resources.archived, false)),
+      )
+      .where(inArray(assessments.lessonId, lessonIds))
+      .orderBy(assessmentQuestions.displayOrder);
+  }
+
+  async getSourceAssessments(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
+    return this.db
+      .select(getTableColumns(assessments))
+      .from(assessments)
+      .where(inArray(assessments.lessonId, lessonIds));
+  }
+
+  async getSourceOpenTextSettings(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+    return this.db
+      .select(getTableColumns(assessmentQuestionOpenTextSettings))
+      .from(assessmentQuestionOpenTextSettings)
+      .where(inArray(assessmentQuestionOpenTextSettings.questionId, questionIds));
+  }
+
+  async upsertTargetOpenTextSettings(values: AssessmentQuestionOpenTextSettingsValues) {
+    await this.db
+      .insert(assessmentQuestionOpenTextSettings)
+      .values(values)
+      .onConflictDoUpdate({
+        target: assessmentQuestionOpenTextSettings.questionId,
+        set: {
+          minimumCharacters: values.minimumCharacters,
+          maximumCharacters: values.maximumCharacters,
+          reviewerInstructions: values.reviewerInstructions,
+        },
+      });
+  }
+
+  async upsertTargetAssessment(values: AssessmentUpsertValues) {
+    await this.db
+      .insert(assessments)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [assessments.tenantId, assessments.lessonId],
+        set: {
+          passingScorePercentage: values.passingScorePercentage,
+          attemptLimitMode: values.attemptLimitMode,
+          maximumAttempts: values.maximumAttempts,
+          attemptCooldown: values.attemptCooldown,
+          feedbackMode: values.feedbackMode,
+          baseLanguage: values.baseLanguage,
+          availableLocales: values.availableLocales,
+        },
+      });
   }
 
   async getSourceOptions(questionIds: UUIDType[]) {
     if (!questionIds.length) return [];
 
     return this.db
-      .select(getTableColumns(questionAnswerOptions))
-      .from(questionAnswerOptions)
-      .where(inArray(questionAnswerOptions.questionId, questionIds))
-      .orderBy(questionAnswerOptions.displayOrder);
+      .select({
+        id: assessmentQuestionChoiceOptions.id,
+        questionId: assessmentQuestionChoiceOptions.questionId,
+        optionText: sql<LocalizedText>`JSONB_BUILD_OBJECT(
+          ${assessmentQuestionChoiceOptions.language},
+          ${assessmentQuestionChoiceOptions.label}
+        )`,
+        matchedWord: sql<LocalizedText | null>`NULL`,
+        isCorrect: assessmentQuestionChoiceOptions.isCorrect,
+        displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+        scaleAnswer: sql<number | null>`NULL`,
+        createdAt: assessmentQuestionChoiceOptions.createdAt,
+        updatedAt: assessmentQuestionChoiceOptions.updatedAt,
+        tenantId: assessmentQuestionChoiceOptions.tenantId,
+      })
+      .from(assessmentQuestionChoiceOptions)
+      .where(inArray(assessmentQuestionChoiceOptions.questionId, questionIds))
+      .orderBy(assessmentQuestionChoiceOptions.displayOrder);
+  }
+
+  async getSourceQuestionBlanks(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(assessmentQuestionBlanks))
+      .from(assessmentQuestionBlanks)
+      .where(inArray(assessmentQuestionBlanks.questionId, questionIds));
+  }
+
+  async getSourceBlankAnswerSets(blankIds: UUIDType[]) {
+    if (!blankIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(assessmentQuestionBlankAnswerSets))
+      .from(assessmentQuestionBlankAnswerSets)
+      .where(inArray(assessmentQuestionBlankAnswerSets.blankId, blankIds));
+  }
+
+  async getSourceDragAndDropOptions(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(assessmentQuestionDragAndDropOptions))
+      .from(assessmentQuestionDragAndDropOptions)
+      .where(inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds));
+  }
+
+  async getSourceScaleOptions(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+    return this.db
+      .select(getTableColumns(assessmentQuestionScaleOptions))
+      .from(assessmentQuestionScaleOptions)
+      .where(inArray(assessmentQuestionScaleOptions.questionId, questionIds));
+  }
+
+  async getSourceTrueFalseStatements(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+    return this.db
+      .select(getTableColumns(assessmentQuestionTrueFalseStatements))
+      .from(assessmentQuestionTrueFalseStatements)
+      .where(inArray(assessmentQuestionTrueFalseStatements.questionId, questionIds));
   }
 
   async getSourceAiMentors(lessonIds: UUIDType[]) {
@@ -558,6 +725,26 @@ export class MasterCourseRepository {
       );
   }
 
+  async getSourceQuestionResources(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+
+    return this.db
+      .select({
+        resource: getTableColumns(resources),
+        relation: getTableColumns(resourceEntity),
+      })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityType, ENTITY_TYPES.ASSESSMENT_QUESTION),
+          inArray(resourceEntity.entityId, questionIds),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.PROMPT_IMAGE),
+          eq(resources.archived, false),
+        ),
+      );
+  }
+
   async findTargetAuthor() {
     const [targetAuthor] = await this.db
       .select({ id: users.id })
@@ -666,31 +853,222 @@ export class MasterCourseRepository {
     await this.db.update(lessons).set(values).where(eq(lessons.id, lessonId));
   }
 
-  async createTargetQuestion(values: QuestionJsonbInsert): Promise<UUIDType> {
+  async createTargetQuestion(
+    values: QuestionJsonbInsert,
+    assessmentValues: AssessmentUpsertValues,
+  ): Promise<UUIDType> {
+    const lessonId = values.lessonId;
+
+    const [assessment] = await this.db
+      .insert(assessments)
+      .values(assessmentValues)
+      .onConflictDoNothing({ target: [assessments.tenantId, assessments.lessonId] })
+      .returning({ id: assessments.id });
+
+    const existingAssessment =
+      assessment ??
+      (
+        await this.db
+          .select({ id: assessments.id })
+          .from(assessments)
+          .where(eq(assessments.lessonId, lessonId))
+          .limit(1)
+      )[0];
+
     const [created] = await this.db
-      .insert(questions)
-      .values(values)
-      .returning({ id: questions.id });
+      .insert(assessmentQuestions)
+      .values({
+        assessmentId: existingAssessment.id,
+        questionType: values.type,
+        displayOrder: values.displayOrder,
+        prompt: values.prompt,
+        title: values.title,
+        description: values.description,
+        gradingMode: values.gradingMode,
+      })
+      .returning({ id: assessmentQuestions.id });
+
     return created.id;
   }
 
   async updateTargetQuestion(questionId: UUIDType, values: QuestionJsonbUpdate) {
-    await this.db.update(questions).set(values).where(eq(questions.id, questionId));
+    await this.db
+      .update(assessmentQuestions)
+      .set({
+        questionType: values.type,
+        displayOrder: values.displayOrder,
+        prompt: values.prompt,
+        title: values.title,
+        description: values.description,
+        gradingMode: values.gradingMode,
+      })
+      .where(eq(assessmentQuestions.id, questionId));
   }
 
   async createTargetOption(values: QuestionAnswerOptionJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db
-      .insert(questionAnswerOptions)
-      .values(values)
-      .returning({ id: questionAnswerOptions.id });
+      .insert(assessmentQuestionChoiceOptions)
+      .values({
+        questionId: values.questionId,
+        language: getFirstJsonbObjectKey<SupportedLanguages>(values.optionText),
+        label: getFirstJsonbObjectValue(values.optionText),
+        isCorrect: values.isCorrect,
+        displayOrder: values.displayOrder,
+      })
+      .returning({ id: assessmentQuestionChoiceOptions.id });
+
     return created.id;
   }
 
   async updateTargetOption(optionId: UUIDType, values: QuestionAnswerOptionJsonbUpdate) {
     await this.db
-      .update(questionAnswerOptions)
-      .set(values)
-      .where(eq(questionAnswerOptions.id, optionId));
+      .update(assessmentQuestionChoiceOptions)
+      .set({
+        ...(values.optionText ? { label: getFirstJsonbObjectValue(values.optionText) } : {}),
+        isCorrect: values.isCorrect,
+        displayOrder: values.displayOrder,
+      })
+      .where(eq(assessmentQuestionChoiceOptions.id, optionId));
+  }
+
+  async upsertTargetBlank(values: UpsertTargetBlankValues) {
+    await this.db
+      .insert(assessmentQuestionBlanks)
+      .values(values)
+      .onConflictDoUpdate({
+        target: assessmentQuestionBlanks.id,
+        set: {
+          questionId: values.questionId,
+          textComparisonMode: values.textComparisonMode as never,
+        },
+      });
+  }
+
+  async upsertTargetBlankAnswerSet(values: UpsertTargetBlankAnswerSetValues) {
+    await this.db
+      .insert(assessmentQuestionBlankAnswerSets)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [
+          assessmentQuestionBlankAnswerSets.tenantId,
+          assessmentQuestionBlankAnswerSets.blankId,
+          assessmentQuestionBlankAnswerSets.language,
+        ],
+        set: {
+          preferredAnswer: values.preferredAnswer,
+          acceptedAnswers: values.acceptedAnswers,
+        },
+      });
+  }
+
+  async upsertTargetDragAndDropOption(values: UpsertTargetDragAndDropOptionValues) {
+    await this.db
+      .insert(assessmentQuestionDragAndDropOptions)
+      .values(values)
+      .onConflictDoUpdate({
+        target: assessmentQuestionDragAndDropOptions.id,
+        set: {
+          questionId: values.questionId,
+          language: values.language,
+          label: values.label,
+          targetBlankId: values.targetBlankId,
+          displayOrder: values.displayOrder,
+        },
+      });
+  }
+
+  async upsertTargetScaleOption(values: UpsertTargetScaleOptionValues) {
+    await this.db
+      .insert(assessmentQuestionScaleOptions)
+      .values({
+        ...values,
+        label: buildJsonbFieldWithMultipleEntries(values.label),
+      })
+      .onConflictDoUpdate({
+        target: assessmentQuestionScaleOptions.id,
+        set: {
+          questionId: values.questionId,
+          scaleValue: values.scaleValue,
+          displayOrder: values.displayOrder,
+          label: buildJsonbFieldWithMultipleEntries(values.label),
+        },
+      });
+  }
+
+  async upsertTargetTrueFalseStatement(values: UpsertTargetTrueFalseStatementValues) {
+    await this.db
+      .insert(assessmentQuestionTrueFalseStatements)
+      .values(values)
+      .onConflictDoUpdate({
+        target: assessmentQuestionTrueFalseStatements.id,
+        set: {
+          questionId: values.questionId,
+          language: values.language,
+          displayOrder: values.displayOrder,
+          correctValue: values.correctValue,
+          statement: values.statement,
+        },
+      });
+  }
+
+  async deleteStaleTargetQuestionDetails(values: DeleteStaleTargetQuestionDetailsValues) {
+    if (!values.questionIds.length) return;
+
+    await this.deleteQuestionDetailRowsNotIn(
+      assessmentQuestionScaleOptions,
+      assessmentQuestionScaleOptions.questionId,
+      assessmentQuestionScaleOptions.id,
+      values.questionIds,
+      values.scaleOptionIds,
+    );
+    await this.deleteQuestionDetailRowsNotIn(
+      assessmentQuestionTrueFalseStatements,
+      assessmentQuestionTrueFalseStatements.questionId,
+      assessmentQuestionTrueFalseStatements.id,
+      values.questionIds,
+      values.trueFalseStatementIds,
+    );
+    await this.deleteQuestionDetailRowsNotIn(
+      assessmentQuestionDragAndDropOptions,
+      assessmentQuestionDragAndDropOptions.questionId,
+      assessmentQuestionDragAndDropOptions.id,
+      values.questionIds,
+      values.dragAndDropOptionIds,
+    );
+
+    await this.db
+      .delete(assessmentQuestionBlankAnswerSets)
+      .where(
+        values.blankIds.length
+          ? inArray(assessmentQuestionBlankAnswerSets.blankId, values.blankIds)
+          : sql`false`,
+      );
+    await this.db
+      .delete(assessmentQuestionBlanks)
+      .where(
+        values.blankIds.length
+          ? and(
+              inArray(assessmentQuestionBlanks.questionId, values.questionIds),
+              notInArray(assessmentQuestionBlanks.id, values.blankIds),
+            )
+          : inArray(assessmentQuestionBlanks.questionId, values.questionIds),
+      );
+  }
+
+  private async deleteQuestionDetailRowsNotIn(
+    table: AnyPgTable,
+    questionIdColumn: AnyPgColumn,
+    idColumn: AnyPgColumn,
+    questionIds: UUIDType[],
+    retainedIds: UUIDType[],
+  ) {
+    await this.db
+      .delete(table)
+      .where(
+        retainedIds.length
+          ? and(inArray(questionIdColumn, questionIds), notInArray(idColumn, retainedIds))
+          : inArray(questionIdColumn, questionIds),
+      );
   }
 
   async findAiMentorByLessonId(lessonId: UUIDType) {
@@ -905,6 +1283,19 @@ export class MasterCourseRepository {
       );
   }
 
+  async removeQuestionResourceRelations(questionIds: UUIDType[]) {
+    if (!questionIds.length) return;
+
+    await this.db
+      .delete(resourceEntity)
+      .where(
+        and(
+          eq(resourceEntity.entityType, ENTITY_TYPES.ASSESSMENT_QUESTION),
+          inArray(resourceEntity.entityId, questionIds),
+        ),
+      );
+  }
+
   async removeCourseResourceRelations(courseId: UUIDType) {
     await this.db
       .delete(resourceEntity)
@@ -938,10 +1329,7 @@ export class MasterCourseRepository {
     await this.db.insert(resourceEntity).values(values);
   }
 
-  async removeScormPackagesForMappedTargets(params: {
-    targetCourseId: UUIDType;
-    targetLessonIds: UUIDType[];
-  }) {
+  async removeScormPackagesForMappedTargets(params: RemoveScormPackagesForMappedTargetsParams) {
     const conditions = [
       and(
         eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),

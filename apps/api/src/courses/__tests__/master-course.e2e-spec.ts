@@ -6,6 +6,8 @@ import {
   AI_MENTOR_TYPE,
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
@@ -18,7 +20,6 @@ import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/
 import { MasterCourseService } from "src/courses/master-course.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -34,8 +35,9 @@ import {
   courses,
   lessons,
   masterCourseExports,
-  questionAnswerOptions,
-  questions,
+  assessments,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
   resourceEntity,
   resources,
   tenants,
@@ -250,8 +252,9 @@ describe("Master course export and sync (e2e)", () => {
       "master_course_exports",
       "resource_entity",
       "resources",
-      "question_answer_options",
-      "questions",
+      "assessment_question_choice_options",
+      "assessment_questions",
+      "assessments",
       "ai_judge_score_guidance",
       "ai_judge_blocking_errors",
       "ai_judge_criteria",
@@ -1488,47 +1491,52 @@ describe("Master course export and sync (e2e)", () => {
     const untouchedOptionId = faker.string.uuid();
 
     const { targetCourseId } = await setupAndExport({
-      beforeExport: async ({ sourceAdmin, sourceLessonId }) => {
+      beforeExport: async ({ sourceLessonId }) => {
         await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({
+              lessonId: sourceLessonId,
+              passingScorePercentage: "0",
+              baseLanguage: "en",
+              availableLocales: ["en", "pl"],
+            })
+            .returning({ id: assessments.id });
+
           const [question] = await db
-            .insert(questions)
+            .insert(assessmentQuestions)
             .values({
               id: faker.string.uuid(),
-              lessonId: sourceLessonId,
-              authorId: sourceAdmin.id,
-              type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
-              title: buildJsonbFieldWithMultipleEntries({
-                en: "Fill blank",
-                pl: "Uzupelnij luke",
+              assessmentId: assessment.id,
+              questionType: ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT,
+              gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+              prompt: buildJsonbFieldWithMultipleEntries({
+                en: `Answer <blank-answer-${sourceOptionId}> now`,
+                pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
+              title: buildJsonbFieldWithMultipleEntries({ en: "Fill blank", pl: "Uzupelnij luke" }),
               description: buildJsonbFieldWithMultipleEntries({
                 en: `Answer <blank-answer-${sourceOptionId}> now`,
                 pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
-              solutionExplanation: buildJsonbField("en", "Because it matches"),
               displayOrder: 1,
             })
-            .returning({ id: questions.id });
+            .returning({ id: assessmentQuestions.id });
 
-          await db.insert(questionAnswerOptions).values([
+          await db.insert(assessmentQuestionChoiceOptions).values([
             {
               id: sourceOptionId,
               questionId: question.id,
-              optionText: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
-              matchedWord: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
+              language: "en",
+              label: "Correct",
               isCorrect: true,
               displayOrder: 1,
             },
             {
               id: untouchedOptionId,
               questionId: question.id,
-              optionText: buildJsonbField("en", "Distractor"),
+              language: "en",
+              label: "Distractor",
               isCorrect: false,
               displayOrder: 2,
             },
@@ -1540,29 +1548,29 @@ describe("Master course export and sync (e2e)", () => {
     const targetQuestionData = await runAsTenant(targetTenantId, async () => {
       const [targetQuestion] = await db
         .select({
-          id: questions.id,
-          description: questions.description,
+          id: assessmentQuestions.id,
+          description: assessmentQuestions.description,
         })
-        .from(questions)
-        .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
         .where(eq(chapters.courseId, targetCourseId))
         .limit(1);
 
       const targetOptions = await db
         .select({
-          id: questionAnswerOptions.id,
-          optionText: questionAnswerOptions.optionText,
+          id: assessmentQuestionChoiceOptions.id,
+          optionText: assessmentQuestionChoiceOptions.label,
         })
-        .from(questionAnswerOptions)
-        .where(eq(questionAnswerOptions.questionId, targetQuestion.id));
+        .from(assessmentQuestionChoiceOptions)
+        .where(eq(assessmentQuestionChoiceOptions.questionId, targetQuestion.id));
 
       return { targetQuestion, targetOptions };
     });
 
     const targetCorrectOption = targetQuestionData.targetOptions.find((option) => {
-      const optionText = option.optionText as Record<string, string>;
-      return optionText.en === "Correct";
+      return option.optionText === "Correct";
     });
     const targetQuestionDescription = targetQuestionData.targetQuestion.description as Record<
       string,

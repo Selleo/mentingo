@@ -129,7 +129,11 @@ export class StudentLessonProgressService {
     language: SupportedLanguages;
     isQuizPassed?: boolean;
   }): Promise<MarkLessonProgressResult> {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(
+      id,
+      studentId,
+      dbInstance,
+    );
 
     const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
       id,
@@ -174,7 +178,7 @@ export class StudentLessonProgressService {
       language,
     );
 
-    const [lesson] = await this.db
+    const [lesson] = await dbInstance
       .select({
         id: lessons.id,
         type: lessons.type,
@@ -668,7 +672,7 @@ export class StudentLessonProgressService {
         studentId: userId,
         attempts: 1,
         isQuizPassed,
-        completedAt: sql`now()`,
+        completedAt: isCompleted ? sql`now()` : null,
         completedQuestionCount,
         quizScore,
         languageAnswered: lang,
