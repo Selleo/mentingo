@@ -13,9 +13,14 @@ export const getCourseQueryKey = (idOrSlug: string, language?: SupportedLanguage
   { id: idOrSlug, ...(language ? { language } : {}) },
 ];
 
-export const courseQueryOptions = (idOrSlug: string, language?: SupportedLanguages) =>
+export const courseQueryOptions = (
+  idOrSlug: string,
+  language?: SupportedLanguages,
+  enabled = true,
+) =>
   queryOptions({
     queryKey: getCourseQueryKey(idOrSlug, language),
+    enabled,
     queryFn: async () => {
       const response = await ApiClient.api.courseControllerGetCourse({
         id: idOrSlug ?? "",
@@ -26,8 +31,12 @@ export const courseQueryOptions = (idOrSlug: string, language?: SupportedLanguag
     select: (data: GetCourseResponse) => data.data,
   });
 
-export function useCourse(idOrSlug: string, language: SupportedLanguages = SUPPORTED_LANGUAGES.EN) {
-  return useQuery(courseQueryOptions(idOrSlug, language));
+export function useCourse(
+  idOrSlug: string,
+  language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
+  enabled = true,
+) {
+  return useQuery(courseQueryOptions(idOrSlug, language, enabled));
 }
 
 export function useCourseSuspense(

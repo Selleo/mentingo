@@ -129,7 +129,23 @@ export class LocalizationService {
     fieldColumn: AnyPgColumn,
     pattern: string,
     language?: SupportedLanguages,
+    options: {
+      baseTable?: BaseTable;
+      fallbackToBaseLanguage?: boolean;
+    } = {},
   ) {
+    if (language && options.fallbackToBaseLanguage) {
+      if (!options.baseTable) {
+        throw new Error("baseTable is required when fallbackToBaseLanguage is enabled");
+      }
+
+      return sql`${this.getLocalizedSqlField(
+        fieldColumn,
+        language,
+        options.baseTable,
+      )} ilike ${pattern}`;
+    }
+
     if (language) return sql`${this.getFieldByLanguage(fieldColumn, language)} ilike ${pattern}`;
 
     return sql`

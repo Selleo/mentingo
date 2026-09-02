@@ -107,6 +107,7 @@ export default function LessonPage() {
         title={t("studentLessonView.error.notAuthorizedTitle")}
         description={t("studentLessonView.error.notAuthorizedDescription")}
         actionLabel={t("studentLessonView.error.goBackToCourse")}
+        actionIcon="ArrowRight"
         to={`/course/${courseId}`}
       />
     );
