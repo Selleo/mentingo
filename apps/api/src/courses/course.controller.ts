@@ -108,6 +108,7 @@ import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
+import { CourseTranslationService } from "src/courses/services/course-translation.service";
 import {
   allCoursesValidation,
   availableCourseCategoriesValidation,
@@ -184,6 +185,7 @@ import type {
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
+    private readonly courseTranslationService: CourseTranslationService,
     private readonly courseScormExportService: CourseScormExportService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
@@ -556,7 +558,7 @@ export class CourseController {
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
-    const hasMissingTranslations = await this.courseService.hasMissingTranslations(
+    const hasMissingTranslations = await this.courseTranslationService.hasMissingTranslations(
       id,
       language,
       currentUser,
@@ -1212,7 +1214,7 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    await this.courseService.createLanguage(courseId, language, currentUser);
+    await this.courseTranslationService.createLanguage(courseId, language, currentUser);
   }
 
   @Delete("language/:courseId")
@@ -1248,7 +1250,11 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+    return this.courseTranslationService.generateMissingTranslations(
+      courseId,
+      language,
+      currentUser,
+    );
   }
 
   @Post(":courseId/scorm-export")
