@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a capability Mentingo should have
+labels: ["enhancement", "needs triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the situation, not the solution. Who is blocked, and what are they doing today instead?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Mentingo to do?
+    validations:
+      required: true
+  - type: dropdown
+    id: persona
+    attributes:
+      label: Who needs this?
+      options:
+        - L&D / HR team
+        - Compliance, security or risk owner
+        - Administrator running the platform
+        - Learner
+        - Developer building on top of Mentingo
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried or considered?
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to open a pull request for this

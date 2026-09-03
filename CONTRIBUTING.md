@@ -1,8 +1,6 @@
 # Contributing
 
-</div>
-
-We welcome contributions to Mentingo! Please check our Contributing Guide for guidelines about how to proceed.
+We welcome contributions to Mentingo!
 
 ### 📚 Naming Conventions: Branches, Commits, and Pull Requests
 
