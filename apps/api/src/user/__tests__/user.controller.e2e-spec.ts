@@ -216,6 +216,7 @@ describe("UsersController (e2e)", () => {
 
       const courseResponse = await request(app.getHttpServer())
         .get(`/api/course?id=${course.id}&language=en`)
+        .set("Cookie", testCookies)
         .expect(200);
 
       expect(courseResponse.body.data.author).toMatchObject({

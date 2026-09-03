@@ -16,6 +16,7 @@ import {
   COURSE_ORIGIN_TYPES,
   COURSE_STATUSES,
   COURSE_TYPE,
+  DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
@@ -2095,7 +2096,24 @@ export class CourseService {
     currentUser: CurrentUserType,
     certificateSignature?: Express.Multer.File | null,
   ) {
-    await this.masterCourseService.assertCourseContentEditable(courseId);
+    const certificateSettingKeys = [
+      "certificateValidity",
+      "applyValidityToExistingCertificates",
+      "certificateFontColor",
+      "removeCertificateSignature",
+      "certificateSignature",
+    ];
+    const attemptedSettingKeys = Object.entries(settings)
+      .filter(([, value]) => value !== undefined)
+      .map(([key]) => key);
+
+    if (certificateSignature) attemptedSettingKeys.push("certificateSignature");
+
+    await this.masterCourseService.assertCourseContentEditable(
+      courseId,
+      certificateSettingKeys,
+      attemptedSettingKeys,
+    );
 
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
@@ -2292,7 +2310,7 @@ export class CourseService {
         isScormCourse ? false : VIDEO_COMPLETION_TRACKING_ENABLED
       }::boolean,
       'certificateSignature', NULL,
-      'certificateFontColor', NULL,
+      'certificateFontColor', ${DEFAULT_CERTIFICATE_FONT_COLOR},
       'certificateValidity', NULL
     )`;
 

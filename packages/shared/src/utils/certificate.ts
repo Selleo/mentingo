@@ -11,15 +11,17 @@ export interface CertificateRenderTheme {
   logoColor: string;
 }
 
+export const DEFAULT_CERTIFICATE_FONT_COLOR = "#000000";
+
 export const defaultCertificateRenderTheme: CertificateRenderTheme = {
-  titleColor: "#1f2937",
-  certifyTextColor: "#374151",
-  nameColor: "#1f2937",
-  courseNameColor: "#1f2937",
-  bodyTextColor: "#4b5563",
-  labelTextColor: "#1f2937",
+  titleColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  certifyTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  nameColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  courseNameColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  bodyTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  labelTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
   lineColor: "#9ca3af",
-  logoColor: "#1f2937",
+  logoColor: DEFAULT_CERTIFICATE_FONT_COLOR,
 };
 
 export type BuildCertificateMarkupOptions = {

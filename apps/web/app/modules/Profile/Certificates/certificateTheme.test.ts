@@ -26,5 +26,6 @@ describe("certificateTheme", () => {
   it("returns default theme when certificate color is missing", () => {
     expect(getCertificateColorTheme(null)).toEqual(defaultCertificateColorTheme);
     expect(getCertificateColorTheme(undefined)).toEqual(defaultCertificateColorTheme);
+    expect(defaultCertificateColorTheme.titleColor).toBe("#000000");
   });
 });

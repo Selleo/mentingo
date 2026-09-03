@@ -32389,7 +32389,7 @@
                 ]
               },
               "certificateFontColor": {
-                "default": null,
+                "default": "#000000",
                 "anyOf": [
                   {
                     "type": "string"

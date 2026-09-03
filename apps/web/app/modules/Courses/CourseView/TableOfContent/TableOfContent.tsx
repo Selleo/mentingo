@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -59,6 +59,7 @@ export function TableOfContent({ language }: TableOfContentProps) {
     hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
   const shouldShowTabs = isAdminExperience || canShowChat || canShowStatistics;
   const hasMissingTranslations = missingTranslationsResponse?.data.hasMissingTranslations ?? false;
+  const canEditContent = isAdminExperience && course.originType !== COURSE_ORIGIN_TYPES.EXPORTED;
 
   const navigateToCourseEditor = () => {
     navigate(`/admin/beta-courses/${course.id}`);
@@ -75,7 +76,7 @@ export function TableOfContent({ language }: TableOfContentProps) {
       {shouldShowTabs && (
         <CourseOverviewTabs
           activeTab={activeTab}
-          canEditContent={isAdminExperience}
+          canEditContent={canEditContent}
           canShowChat={canShowChat}
           canShowStatistics={canShowStatistics}
           hasMissingTranslations={hasMissingTranslations}
