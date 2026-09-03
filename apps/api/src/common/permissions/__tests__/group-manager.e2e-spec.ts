@@ -544,8 +544,8 @@ describe("Group Manager authorization outcomes (e2e)", () => {
       .get(`/api/certificates/course/${fixture.visibleCourse.id}?language=en`)
       .set("Cookie", cookie)
       .expect(200);
-    expect(certificatesResponse.body.data).toHaveLength(1);
-    expect(certificatesResponse.body.data[0].groups).toEqual(
+    expect(certificatesResponse.body.data.data).toHaveLength(1);
+    expect(certificatesResponse.body.data.data[0].groups).toEqual(
       expect.arrayContaining(["Managed team", "Second managed team", "Unmanaged learner group"]),
     );
 
@@ -554,21 +554,21 @@ describe("Group Manager authorization outcomes (e2e)", () => {
       .query({ language: "en", search: "second managed" })
       .set("Cookie", cookie)
       .expect(200);
-    expect(groupSearchResponse.body.data).toHaveLength(1);
+    expect(groupSearchResponse.body.data.data).toHaveLength(1);
 
     const emailSearchResponse = await request(app.getHttpServer())
       .get(`/api/certificates/course/${fixture.visibleCourse.id}`)
       .query({ language: "en", search: fixture.assignedLearner.email })
       .set("Cookie", cookie)
       .expect(200);
-    expect(emailSearchResponse.body.data).toHaveLength(1);
+    expect(emailSearchResponse.body.data.data).toHaveLength(1);
 
     const emptySearchResponse = await request(app.getHttpServer())
       .get(`/api/certificates/course/${fixture.visibleCourse.id}`)
       .query({ language: "en", search: "missing learner" })
       .set("Cookie", cookie)
       .expect(200);
-    expect(emptySearchResponse.body.data).toEqual([]);
+    expect(emptySearchResponse.body.data.data).toEqual([]);
   });
 
   it("returns 404 for out-of-scope objects and filter IDs", async () => {
@@ -758,7 +758,7 @@ describe("Group Manager authorization outcomes (e2e)", () => {
       .expect(200);
 
     const statusByEmail = Object.fromEntries(
-      response.body.data.map((row: { learnerEmail: string; status: string }) => [
+      response.body.data.data.map((row: { learnerEmail: string; status: string }) => [
         row.learnerEmail,
         row.status,
       ]),
@@ -769,11 +769,11 @@ describe("Group Manager authorization outcomes (e2e)", () => {
       [expiredLearner.email]: COURSE_CERTIFICATE_STATUSES.EXPIRED,
       [revokedLearner.email]: COURSE_CERTIFICATE_STATUSES.REVOKED,
     });
-    expect(response.body.data.every((row: object) => !("certificateId" in row))).toBe(true);
+    expect(response.body.data.data.every((row: object) => !("certificateId" in row))).toBe(true);
     expect(fileServiceMock.getFileUrl).toHaveBeenCalledTimes(1);
     expect(fileServiceMock.getFileUrl).toHaveBeenCalledWith("certificate-signature.png");
     expect(
-      response.body.data.find(
+      response.body.data.data.find(
         (row: { learnerEmail: string }) => row.learnerEmail === revokedLearner.email,
       ).previewAllowed,
     ).toBe(false);
