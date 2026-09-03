@@ -1632,7 +1632,8 @@
       "uploadScorm": "Laden Sie SCORM hoch",
       "createNew": "Neu erstellen",
       "deleteSelected": "Ausgewählte löschen",
-      "bulkEdit": "Massenbearbeitung"
+      "bulkEdit": "Massenbearbeitung",
+      "actions": "Kursaktionen"
     },
     "dropdown": {
       "changeCategory": "Kategorie ändern",
@@ -2418,7 +2419,7 @@
         "charactersLeft": "Charaktere übrig",
         "reachedCharactersLimit": "Sie haben die Zeichenbeschränkung erreicht.",
         "reachedCharactersLimitHtml": "Zu viel Formatierung. Bitte reduzieren Sie die Formatierung, damit sie innerhalb des Limits liegt.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 oder Hevc (max. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
         "enableCertificate": "Zertifikat aktivieren",
         "enableCertificateDescription": "Aktivieren Sie diese Option, um Zertifikate für diesen Kurs auszustellen und konfigurieren Sie unten deren Signatur und Vorschau.",
         "certificateValidity": "Zertifikatsgültigkeit",
@@ -3626,6 +3627,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurs ist nicht verfügbar",
+      "accessDescription": "Melden Sie sich an oder erstellen Sie ein Konto, um zum Kurs zu gelangen.",
+      "goToLogin": "Zum Login",
+      "goToCourseList": "Zur Kursliste",
+      "goToHome": "Zur Startseite",
+      "notFoundTitle": "Kurs nicht gefunden",
+      "notFoundDescription": "Dieser Kurs konnte nicht gefunden werden."
+    },
     "other": {
       "cannotFindCourses": "Wir konnten keine Kurse finden",
       "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut",
@@ -3767,6 +3777,8 @@
       "completedSummary": "{{completed}} von {{total}} abgeschlossen",
       "overviewAriaLabel": "Video-Fortschritt der Lektion",
       "segmentAriaLabel": "Fortschritt von Video {{index}}: {{progress}} % angesehen",
+      "requirementSingle": "Sehen Sie das gesamte Video an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Sehen Sie alle Videos an, um diese Lektion abzuschließen.",
       "errors": {
         "resourceNotFound": "Der Videofortschritt konnte für diese Lektion nicht gespeichert werden.",
         "unsupportedLessonType": "Videofortschritt ist nur für Inhaltslektionen verfügbar.",
@@ -3775,6 +3787,14 @@
         "trackingDisabled": "Video-Abschlussverfolgung ist für diesen Kurs deaktiviert.",
         "accessDenied": "Sie haben keinen Zugriff, um den Videofortschritt für diese Lektion zu aktualisieren."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Vor dem Verlassen weitersehen?",
+      "descriptionSingle": "Das gesamte Video muss angesehen werden, bevor diese Lektion abgeschlossen werden kann.",
+      "descriptionMultiple": "Alle Videos müssen angesehen werden, bevor diese Lektion abgeschlossen werden kann.",
+      "exitAnyway": "Trotzdem verlassen",
+      "continueWatching": "Weitersehen",
+      "remember": "Für diesen Kurs nicht mehr anzeigen"
     },
     "playNext": {
       "title": "Als nächstes",
@@ -4742,6 +4762,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Quellkurs nicht gefunden",
+      "sourceAuthorNotFound": "Autor des Quellkurses nicht gefunden",
       "sourceCategoryNotFound": "Quellkurs-Kategorie nicht gefunden",
       "courseNotFound": "Kurs nicht gefunden",
       "chapterNotFound": "Kapitel nicht gefunden",

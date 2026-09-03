@@ -43,6 +43,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
+import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import {
   chapters,
   courses,
@@ -54,7 +55,10 @@ import {
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
-import { createLessonResourceIdRegex } from "../lesson-resource-references";
+import {
+  createLessonResourceIdRegex,
+  extractLessonResourceIds,
+} from "../lesson-resource-references";
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
 
@@ -89,6 +93,7 @@ export class LessonService {
     private readonly permissionsService: PermissionsService,
     private readonly liveTrainingService: LiveTrainingService,
     private readonly lessonVideoProgressService: LessonVideoProgressService,
+    private readonly resourceLibraryService: ResourceLibraryService,
   ) {}
 
   async getLessonById(
@@ -740,13 +745,31 @@ export class LessonService {
     actualLanguage: SupportedLanguages,
     userId?: UUIDType | null,
   ): Promise<LessonShow> {
-    const lessonResources = await this.fileService.getResourcesForEntity(
+    let lessonResources = await this.fileService.getResourcesForEntity(
       id,
       ENTITY_TYPES.LESSON,
       RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       actualLanguage,
       { quality: IMAGE_QUALITY.MD },
     );
+
+    const attachedResourceReferences = new Set(
+      lessonResources.flatMap((resource) => [resource.id, resource.resourceEntityId]),
+    );
+    const hasMissingResourceRelation = extractLessonResourceIds(lesson.description ?? "").some(
+      (resourceId) => !attachedResourceReferences.has(resourceId),
+    );
+
+    if (hasMissingResourceRelation) {
+      await this.resourceLibraryService.syncLessonAssetRelations(id);
+      lessonResources = await this.fileService.getResourcesForEntity(
+        id,
+        ENTITY_TYPES.LESSON,
+        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        actualLanguage,
+        { quality: IMAGE_QUALITY.MD },
+      );
+    }
 
     const videoResourceEntityIds = lessonResources
       .filter((resource) => resource.contentType?.startsWith("video/") && resource.resourceEntityId)

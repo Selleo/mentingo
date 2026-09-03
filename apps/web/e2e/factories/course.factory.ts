@@ -38,6 +38,7 @@ export class CourseFactory {
       language: input.language ?? "en",
       status: input.status ?? "draft",
       thumbnailS3Key: input.thumbnailS3Key,
+      learningOutcomes: input.learningOutcomes,
       priceInCents: input.priceInCents,
       currency: input.currency,
       isScorm: input.isScorm,
@@ -82,6 +83,18 @@ export class CourseFactory {
 
   async getSettings(id: string) {
     const response = await this.apiClient.api.courseControllerGetCourseSettings(id);
+
+    return response.data.data;
+  }
+
+  async shareWithTenant(id: string, targetTenantId: string) {
+    return this.apiClient.api.courseControllerExportMasterCourse(id, {
+      targetTenantIds: [targetTenantId],
+    });
+  }
+
+  async getMasterCourseExports(id: string) {
+    const response = await this.apiClient.api.courseControllerGetMasterCourseExports(id);
 
     return response.data.data;
   }

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS "group_manager_groups" (
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "courses" ALTER COLUMN "settings" SET DEFAULT '{"lessonSequenceEnabled":false,"quizFeedbackEnabled":true,"certificateSignature":null,"certificateFontColor":"#000000","certificateValidity":null,"videoCompletionTrackingEnabled":true}'::jsonb;--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "group_manager_groups" ADD CONSTRAINT "group_manager_groups_manager_user_id_users_id_fk" FOREIGN KEY ("manager_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION

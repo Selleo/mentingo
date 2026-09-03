@@ -1,5 +1,5 @@
 {
-  "id": "40e22b11-6820-4058-99f9-6c0af8655ce4",
+  "id": "46426a0e-8524-4c7c-9df5-26a482284656",
   "prevId": "43287f6a-7c98-4bb3-8cd5-b6f00bb7611f",
   "version": "7",
   "dialect": "postgresql",
@@ -5125,6 +5125,13 @@
           "notNull": true,
           "default": "'{}'::jsonb"
         },
+        "author_metadata": {
+          "name": "author_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'null'::jsonb"
+        },
         "thumbnail_s3_key": {
           "name": "thumbnail_s3_key",
           "type": "varchar(500)",
@@ -6903,148 +6910,6 @@
           ]
         }
       }
-    },
-    "public.group_manager_groups": {
-      "name": "group_manager_groups",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "manager_user_id": {
-          "name": "manager_user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "group_id": {
-          "name": "group_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "group_manager_groups_tenant_id_idx": {
-          "name": "group_manager_groups_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "group_manager_groups_manager_user_id_group_id_unique": {
-          "name": "group_manager_groups_manager_user_id_group_id_unique",
-          "columns": [
-            {
-              "expression": "manager_user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "group_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "group_manager_groups_group_id_idx": {
-          "name": "group_manager_groups_group_id_idx",
-          "columns": [
-            {
-              "expression": "group_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "group_manager_groups_manager_user_id_users_id_fk": {
-          "name": "group_manager_groups_manager_user_id_users_id_fk",
-          "tableFrom": "group_manager_groups",
-          "tableTo": "users",
-          "columnsFrom": [
-            "manager_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "group_manager_groups_group_id_groups_id_fk": {
-          "name": "group_manager_groups_group_id_groups_id_fk",
-          "tableFrom": "group_manager_groups",
-          "tableTo": "groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "group_manager_groups_tenant_id_tenants_id_fk": {
-          "name": "group_manager_groups_tenant_id_tenants_id_fk",
-          "tableFrom": "group_manager_groups",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     },
     "public.group_users": {
       "name": "group_users",

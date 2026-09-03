@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_TYPE, DEFAULT_CERTIFICATE_FONT_COLOR, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
@@ -107,6 +107,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       currency: "usd",
       chapterCount: faker.number.int({ min: 1, max: 20 }),
       authorId: "", // Will be auto-created if empty
+      authorMetadata: null,
       categoryId: "", // Will be auto-created if empty
       courseType: COURSE_TYPE.DEFAULT,
       stripeProductId: null,
@@ -120,7 +121,7 @@ export const createCourseFactory = (db: DatabasePg) => {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
-        certificateFontColor: null,
+        certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
         certificateValidity: null,
       },
     };

@@ -10,7 +10,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Copy } from "lucide-react";
 import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -143,8 +142,7 @@ const Courses = () => {
     });
   };
 
-  const { mutateAsync: duplicateCourse, isPending: isDuplicateCoursePending } =
-    useDuplicateCourse();
+  const { mutateAsync: duplicateCourse } = useDuplicateCourse();
 
   const handleDuplicateCourse = async (courseId: string) => {
     const {
@@ -280,19 +278,14 @@ const Courses = () => {
       id: "actions",
       header: "",
       cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={t("adminCourseDuplication.duplicate")}
-          disabled={isDuplicateCoursePending}
-          onClick={(event) => {
-            event.stopPropagation();
-            void handleDuplicateCourse(row.original.id);
-          }}
-        >
-          <Copy className="size-4" />
-        </Button>
+        <CourseBulkActions
+          selectedCourseIds={[row.original.id]}
+          categories={categories ?? []}
+          onBulkActionComplete={() => undefined}
+          onDuplicateCourse={(courseId) => void handleDuplicateCourse(courseId)}
+          rowAction
+          triggerTestId={COURSES_PAGE_HANDLES.rowActionsTrigger(row.original.id)}
+        />
       ),
       enableSorting: false,
     },
@@ -397,7 +390,17 @@ const Courses = () => {
                 data-course-id={row.original.id}
                 data-testid={COURSES_PAGE_HANDLES.row(row.original.id)}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => handleRowClick(row.original.id)}
+                onClick={(event) => {
+                  if (
+                    event.target instanceof HTMLElement &&
+                    (event.target.closest("[data-course-row-action]") ||
+                      event.target.closest(".course-row-action-overlay"))
+                  ) {
+                    return;
+                  }
+
+                  handleRowClick(row.original.id);
+                }}
                 className="cursor-pointer hover:bg-neutral-100"
               >
                 {row.getVisibleCells().map((cell, index) => (

@@ -1631,7 +1631,8 @@
       "uploadScorm": "Įkelti SCORM",
       "createNew": "Sukurti naują",
       "deleteSelected": "Ištrinti pasirinktus",
-      "bulkEdit": "Masinis redagavimas"
+      "bulkEdit": "Masinis redagavimas",
+      "actions": "Kurso veiksmai"
     },
     "dropdown": {
       "changeCategory": "Keisti kategoriją",
@@ -2417,7 +2418,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 arba Hevc (maks. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (maks. 50 MB)",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",
@@ -3627,6 +3628,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kursas nepasiekiamas",
+      "accessDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti kursą.",
+      "goToLogin": "Eiti į prisijungimą",
+      "goToCourseList": "Eiti į kursų sąrašą",
+      "goToHome": "Eiti į pagrindinį puslapį",
+      "notFoundTitle": "Kursas nerastas",
+      "notFoundDescription": "Šio kurso rasti nepavyko."
+    },
     "other": {
       "cannotFindCourses": "Neradome jokių kursų",
       "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau",
@@ -3768,6 +3778,8 @@
       "completedSummary": "Užbaigta {{completed}} iš {{total}}",
       "overviewAriaLabel": "Pamokos vaizdo įrašų eiga",
       "segmentAriaLabel": "{{index}} vaizdo įrašo eiga: peržiūrėta {{progress}}%",
+      "requirementSingle": "Peržiūrėkite visą vaizdo įrašą, kad užbaigtumėte šią pamoką.",
+      "requirementMultiple": "Peržiūrėkite visus vaizdo įrašus, kad užbaigtumėte šią pamoką.",
       "errors": {
         "resourceNotFound": "Nepavyko išsaugoti šios pamokos vaizdo įrašo pažangos.",
         "unsupportedLessonType": "Vaizdo įrašo pažanga pasiekiama tik turinio pamokoms.",
@@ -3776,6 +3788,14 @@
         "trackingDisabled": "Vaizdo įrašo užbaigimo sekimas šiame kurse išjungtas.",
         "accessDenied": "Neturite prieigos atnaujinti šios pamokos vaizdo įrašo pažangos."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Peržiūrėti prieš išeinant?",
+      "descriptionSingle": "Norint užbaigti šią pamoką, reikia peržiūrėti visą vaizdo įrašą.",
+      "descriptionMultiple": "Norint užbaigti šią pamoką, reikia peržiūrėti visus vaizdo įrašus.",
+      "exitAnyway": "Išeiti vis tiek",
+      "continueWatching": "Tęsti peržiūrą",
+      "remember": "Nerodyti šiame kurse"
     },
     "playNext": {
       "title": "Toliau",
@@ -4746,6 +4766,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "sourceAuthorNotFound": "Saltinio kurso autorius nerastas",
       "sourceCategoryNotFound": "Saltinio kurso kategorija nerasta",
       "courseNotFound": "Kursas nerastas",
       "chapterNotFound": "Skyrius nerastas",

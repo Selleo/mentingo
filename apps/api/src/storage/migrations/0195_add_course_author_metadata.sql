@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "author_metadata" jsonb DEFAULT 'null'::jsonb;

@@ -45,6 +45,8 @@ interface VideoPlayerProps {
   className?: string;
   provider: VideoProvider;
   coverageTracking?: VideoCoverageTrackingOptions;
+  pauseRequestId?: number;
+  resumeRequestId?: number;
 }
 
 type VideoJSType = ReturnType<typeof videojs>;
@@ -178,6 +180,8 @@ export const VideoPlayer = ({
   fill = true,
   className,
   coverageTracking,
+  pauseRequestId,
+  resumeRequestId,
 }: VideoPlayerProps) => {
   const [controlsVisible, setControlsVisible] = useState(true);
   const [player, setPlayer] = useState<VideoJSType | null>(null);
@@ -278,6 +282,32 @@ export const VideoPlayer = ({
 
     player.pause();
   }, []);
+
+  useEffect(() => {
+    if (
+      !player ||
+      pauseRequestId === undefined ||
+      player.isDisposed() ||
+      !player.el()?.isConnected
+    ) {
+      return;
+    }
+
+    player.pause();
+  }, [pauseRequestId, player]);
+
+  useEffect(() => {
+    if (
+      !player ||
+      resumeRequestId === undefined ||
+      player.isDisposed() ||
+      !player.el()?.isConnected
+    ) {
+      return;
+    }
+
+    void player.play()?.catch(() => undefined);
+  }, [resumeRequestId, player]);
 
   const seekBy = useCallback((player: VideoJSType, secondsDelta: number) => {
     const currentTime = getFiniteNumber(player.currentTime()) ?? 0;

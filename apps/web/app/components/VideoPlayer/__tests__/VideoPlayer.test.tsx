@@ -9,7 +9,7 @@ import { VideoPlayer } from "../VideoPlayer";
 type PlayerListener = () => void;
 
 class FakeVideoJsPlayer {
-  readonly element = document.createElement("div");
+  element: HTMLElement = document.createElement("div");
 
   private listeners = new Map<string, Set<PlayerListener>>();
   private videoTime = 20;
@@ -134,7 +134,10 @@ vi.mock("../hlsQualityControlComponent", () => ({
   addHlsQualityControlComponent: () => addHlsQualityControlComponent(),
 }));
 vi.mock("video.js", () => ({
-  default: vi.fn(() => player),
+  default: vi.fn((element: HTMLElement) => {
+    player.element = element;
+    return player;
+  }),
 }));
 
 const renderPlayer = async () => {
@@ -247,6 +250,26 @@ describe("VideoPlayer keyboard shortcuts", () => {
     playerContainer.appendChild(button);
 
     fireEvent.keyDown(screen.getByRole("button", { name: "Control" }), { key: " " });
+
+    expect(player.play).not.toHaveBeenCalled();
+    expect(player.pause).not.toHaveBeenCalled();
+  });
+
+  it("does not send playback commands to a detached player", async () => {
+    const view = renderWith({ withQuery: true }).render(
+      <VideoPlayer provider={VIDEO_EMBED_PROVIDERS.SELF} url="https://example.com/video.mp4" />,
+    );
+    await waitFor(() => expect(player.element).toBeInTheDocument());
+
+    player.element.remove();
+    view.rerender(
+      <VideoPlayer
+        provider={VIDEO_EMBED_PROVIDERS.SELF}
+        url="https://example.com/video.mp4"
+        pauseRequestId={1}
+        resumeRequestId={1}
+      />,
+    );
 
     expect(player.play).not.toHaveBeenCalled();
     expect(player.pause).not.toHaveBeenCalled();

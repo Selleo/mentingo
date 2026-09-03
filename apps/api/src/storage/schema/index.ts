@@ -130,6 +130,7 @@ import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-co
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
+import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -327,6 +328,7 @@ export const courses = pgTable(
     ...timestamps,
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     description: jsonb("description").$type<LocalizedText>().default({}).notNull(),
+    authorMetadata: jsonb("author_metadata").$type<CourseAuthorMetadata | null>().default(null),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
     status: coursesStatusEnum("status").$type<CourseStatus>().notNull().default("draft"),
     thumbnailPositionY: integer("thumbnail_position_y").notNull().default(50),

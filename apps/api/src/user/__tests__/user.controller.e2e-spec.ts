@@ -10,11 +10,13 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   createTokens,
   credentials,
+  courses,
   resetTokens,
   userDetails as userDetailsTable,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
@@ -33,6 +35,7 @@ describe("UsersController (e2e)", () => {
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let courseFactory: ReturnType<typeof createCourseFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let emailAdapter: EmailTestingAdapter;
 
@@ -44,6 +47,7 @@ describe("UsersController (e2e)", () => {
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
+    courseFactory = createCourseFactory(db);
     settingsFactory = createSettingsFactory(db);
     emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
   });
@@ -187,6 +191,41 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data.email).toBe(updateData.email);
     });
 
+    it("should refresh course author metadata when an admin updates an author", async () => {
+      const author = await userFactory.withContentCreatorSettings(db).create({
+        firstName: "Original",
+        lastName: "Author",
+      });
+      const course = await courseFactory.create({ authorId: author.id });
+
+      await request(app.getHttpServer())
+        .patch(`/api/user/admin?id=${author.id}`)
+        .set("Cookie", testCookies)
+        .send({ firstName: "Updated", lastName: "Author" })
+        .expect(200);
+
+      const [updatedCourse] = await db
+        .select({ authorMetadata: courses.authorMetadata })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(updatedCourse.authorMetadata).toMatchObject({
+        authorId: author.id,
+        firstName: "Updated",
+        lastName: "Author",
+      });
+
+      const courseResponse = await request(app.getHttpServer())
+        .get(`/api/course?id=${course.id}&language=en`)
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(courseResponse.body.data.author).toMatchObject({
+        firstName: "Updated",
+        lastName: "Author",
+      });
+    });
+
     it("should return 403 when updating another user", async () => {
       const anotherUser = await authService.register({
         email: "another@example.com",
@@ -200,6 +239,43 @@ describe("UsersController (e2e)", () => {
         .set("Cookie", testCookies)
         .send({ email: "newemail@example.com" })
         .expect(403);
+    });
+  });
+
+  describe("PATCH /user/profile", () => {
+    it("should refresh course author metadata when the author updates their profile", async () => {
+      const course = await courseFactory.create({ authorId: testUser.id });
+
+      await request(app.getHttpServer())
+        .patch("/api/user/details")
+        .set("Cookie", testCookies)
+        .send({ jobTitle: "Original title", description: "Original description" })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .patch("/api/user/profile")
+        .set("Cookie", testCookies)
+        .field(
+          "data",
+          JSON.stringify({
+            firstName: "Updated first name",
+            description: "Updated description",
+            jobTitle: "Updated title",
+          }),
+        )
+        .expect(200);
+
+      const [updatedCourse] = await db
+        .select({ authorMetadata: courses.authorMetadata })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(updatedCourse.authorMetadata).toMatchObject({
+        authorId: testUser.id,
+        firstName: "Updated first name",
+        jobTitle: "Updated title",
+        description: "Updated description",
+      });
     });
   });
 

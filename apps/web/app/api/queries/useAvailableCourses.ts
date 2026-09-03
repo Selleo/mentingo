@@ -22,7 +22,7 @@ type CourseParams = {
 
 type QueryOptions = {
   enabled?: boolean;
-  notifyOnChangeProps?: Array<"data" | "isLoading" | "hasNextPage">;
+  notifyOnChangeProps?: Array<"data" | "isLoading" | "hasNextPage" | "isFetchingNextPage">;
 };
 
 export const AVAILABLE_COURSES_QUERY_KEY = "available-courses";

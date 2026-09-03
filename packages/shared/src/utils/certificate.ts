@@ -11,15 +11,17 @@ export interface CertificateRenderTheme {
   logoColor: string;
 }
 
+export const DEFAULT_CERTIFICATE_FONT_COLOR = "#000000";
+
 export const defaultCertificateRenderTheme: CertificateRenderTheme = {
-  titleColor: "#1f2937",
-  certifyTextColor: "#374151",
-  nameColor: "#1f2937",
-  courseNameColor: "#1f2937",
-  bodyTextColor: "#4b5563",
-  labelTextColor: "#1f2937",
+  titleColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  certifyTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  nameColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  courseNameColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  bodyTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
+  labelTextColor: DEFAULT_CERTIFICATE_FONT_COLOR,
   lineColor: "#9ca3af",
-  logoColor: "#1f2937",
+  logoColor: DEFAULT_CERTIFICATE_FONT_COLOR,
 };
 
 export type BuildCertificateMarkupOptions = {
@@ -166,8 +168,8 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     : `<div class="h-11" style="color:${escapeHtml(colorTheme.logoColor)};">${APP_LOGO_SVG}</div>`;
 
   const signatureImageMarkup = signatureImageUrl
-    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-16 w-full object-contain" />`
-    : "";
+    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-20 w-full object-contain" style="display:block;margin-bottom:8px;height:5rem;width:100%;object-fit:contain;" />`
+    : '<div class="mb-2 h-20 w-full" aria-hidden="true" style="margin-bottom:8px;height:5rem;width:100%;"></div>';
   const footerGapClass = expiryDate ? "gap-x-16" : "gap-x-52";
   const expiryDateMarkup = expiryDate
     ? `<div class="flex w-[280px] flex-col items-center">

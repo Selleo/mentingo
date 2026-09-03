@@ -1634,7 +1634,8 @@
       "uploadScorm": "Upload SCORM",
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
-      "bulkEdit": "Bulk edit"
+      "bulkEdit": "Bulk edit",
+      "actions": "Course actions"
     },
     "dropdown": {
       "changeCategory": "Change category",
@@ -2420,7 +2421,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 or Hevc (max. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
@@ -3631,6 +3632,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "The course is unavailable",
+      "accessDescription": "Please sign in or create an account to continue to the course.",
+      "goToLogin": "Go to login",
+      "goToCourseList": "Go to course list",
+      "goToHome": "Go to home",
+      "notFoundTitle": "Course not found",
+      "notFoundDescription": "We could not find this course."
+    },
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",
@@ -3772,6 +3782,8 @@
       "completedSummary": "{{completed}} of {{total}} completed",
       "overviewAriaLabel": "Lesson video progress",
       "segmentAriaLabel": "Video {{index}} progress: {{progress}}% watched",
+      "requirementSingle": "Watch the entire video to complete this lesson.",
+      "requirementMultiple": "Watch all videos to complete this lesson.",
       "errors": {
         "resourceNotFound": "Video progress could not be saved for this lesson.",
         "unsupportedLessonType": "Video progress is only available for content lessons.",
@@ -3780,6 +3792,14 @@
         "trackingDisabled": "Video completion tracking is disabled for this course.",
         "accessDenied": "You do not have access to update video progress for this lesson."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Finish watching before leaving?",
+      "descriptionSingle": "This lesson requires the entire video to be watched before it can be completed.",
+      "descriptionMultiple": "This lesson requires all videos to be watched before it can be completed.",
+      "exitAnyway": "Exit anyway",
+      "continueWatching": "Continue watching",
+      "remember": "Dismiss for this course"
     },
     "playNext": {
       "title": "Up next",
@@ -5404,6 +5424,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Source course not found",
+      "sourceAuthorNotFound": "Source course author not found",
       "sourceCategoryNotFound": "Source course category not found",
       "courseNotFound": "Course not found",
       "chapterNotFound": "Chapter not found",

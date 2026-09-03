@@ -1,3 +1,4 @@
+import { COURSE_ORIGIN_TYPES, type CourseOriginType } from "@repo/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   updateCourse: vi.fn(),
   updateCourseMedia: vi.fn(),
   uploadVideo: vi.fn(),
+  toast: vi.fn(),
 }));
 
 const course = {
@@ -29,6 +31,7 @@ const course = {
   description: "Course description",
   estimatedDurationSeconds: 3_600,
   learningOutcomes: [],
+  originType: COURSE_ORIGIN_TYPES.REGULAR as CourseOriginType,
   thumbnailPositionY: 50,
   thumbnailUrl: "/course-image.jpg",
   title: "Course title",
@@ -101,6 +104,10 @@ vi.mock("~/hooks/useTusVideoUpload", () => ({
   }),
 }));
 
+vi.mock("~/components/ui/use-toast", () => ({
+  useToast: () => ({ toast: mocks.toast }),
+}));
+
 vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
     course,
@@ -115,11 +122,18 @@ vi.mock("~/modules/Admin/EditCourse/components/CourseLanguageSelector", () => ({
 }));
 
 vi.mock("./CourseCategoryEditor", () => ({
-  default: ({ onChange }: { onChange: (categoryId: string) => Promise<void> }) => (
-    <button type="button" onClick={() => void onChange("category-2")}>
-      Change category
-    </button>
-  ),
+  default: ({
+    canEdit,
+    onChange,
+  }: {
+    canEdit: boolean;
+    onChange: (categoryId: string) => Promise<void>;
+  }) =>
+    canEdit && (
+      <button type="button" onClick={() => void onChange("category-2")}>
+        Change category
+      </button>
+    ),
 }));
 
 vi.mock("./CourseDescriptionModal", () => ({
@@ -174,6 +188,16 @@ vi.mock("./CourseMediaModal", () => ({
       >
         Select trailer
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          const file = new File(["video"], "large-trailer.mp4", { type: "video/mp4" });
+          Object.defineProperty(file, "size", { value: 50 * 1024 * 1024 + 1 });
+          onTrailerSelection(file);
+        }}
+      >
+        Select oversized trailer
+      </button>
       <button type="button" onClick={() => onPositionChange(75)}>
         Change position
       </button>
@@ -198,21 +222,24 @@ vi.mock("./CourseSettingsDrawer", () => ({
 
 vi.mock("./CourseTitleEditor", () => ({
   default: ({
+    canEdit,
     onChange,
     onSave,
   }: {
+    canEdit: boolean;
     onChange: (title: string) => void;
     onSave: () => Promise<void>;
-  }) => (
-    <div>
-      <button type="button" onClick={() => onChange("Updated course title")}>
-        Change title
-      </button>
-      <button type="button" onClick={() => void onSave()}>
-        Save title
-      </button>
-    </div>
-  ),
+  }) =>
+    canEdit && (
+      <div>
+        <button type="button" onClick={() => onChange("Updated course title")}>
+          Change title
+        </button>
+        <button type="button" onClick={() => void onSave()}>
+          Save title
+        </button>
+      </div>
+    ),
 }));
 
 vi.mock("./CourseWhatYouWillLearn", () => ({
@@ -296,6 +323,30 @@ describe("CourseOverview", () => {
     });
   });
 
+  it("shows a toast and skips trailers above the maximum file size", async () => {
+    const user = userEvent.setup();
+    renderWith().render(
+      <MemoryRouter>
+        <CourseOverview
+          idOrSlug="course-slug"
+          language="en"
+          onLanguageChange={vi.fn()}
+          openGenerateTranslationModal={false}
+          setOpenGenerateTranslationModal={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON));
+    await user.click(screen.getByRole("button", { name: "Select oversized trailer" }));
+
+    expect(mocks.toast).toHaveBeenCalledWith({
+      description: "Video file exceeds the maximum allowed size",
+      variant: "destructive",
+    });
+    expect(mocks.initVideoUpload).not.toHaveBeenCalled();
+  });
+
   it("updates metadata from the shared form state", async () => {
     const user = userEvent.setup();
     mocks.updateCourse.mockResolvedValue(undefined);
@@ -349,5 +400,25 @@ describe("CourseOverview", () => {
         courseOverviewCache: { idOrSlug: "course-slug", language: "en" },
       });
     });
+  });
+
+  it("hides metadata and media editing for shared courses", () => {
+    course.originType = COURSE_ORIGIN_TYPES.EXPORTED;
+
+    renderWith().render(
+      <MemoryRouter>
+        <CourseOverview
+          idOrSlug="course-slug"
+          language="en"
+          onLanguageChange={vi.fn()}
+          openGenerateTranslationModal={false}
+          setOpenGenerateTranslationModal={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByTestId(COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change title" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change category" })).not.toBeInTheDocument();
   });
 });

@@ -27,17 +27,19 @@ export function NavigationHeader({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between 2xl:h-20 2xl:justify-center",
-        isSidebarCollapsed
-          ? "px-3 py-2 md:px-4 2xl:px-2 3xl:px-3"
-          : "px-4 py-3 md:px-6 2xl:p-0 3xl:px-8",
+        "flex w-full items-center justify-between 2xl:justify-center",
+        isSidebarCollapsed ? "py-2 2xl:my-4 px-1" : "px-4 py-3 2xl:my-4 md:px-4 2xl:p-0 3xl:px-6",
       )}
     >
       <Link to="/" aria-label="Go to homepage">
         {isSidebarCollapsed ? (
           <PlatformLogo variant="signet" className="size-10 md:size-12" alt="Go to homepage" />
         ) : (
-          <PlatformLogo variant="full" className="h-10 w-auto" alt="Go to homepage" />
+          <PlatformLogo
+            variant="full"
+            className="h-10 2xl:h-16 w-auto max-w-full"
+            alt="Go to homepage"
+          />
         )}
       </Link>
       <div className="flex gap-x-2">

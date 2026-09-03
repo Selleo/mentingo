@@ -10,6 +10,7 @@ import {
   defaultClasses,
   contentVariantClasses,
 } from "./styles";
+import { normalizeMarkdownCode } from "./viewer.utils";
 import { RICH_TEXT_VIEWER_VARIANT, type RichTextViewerVariant } from "./viewerTypes";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -27,6 +28,7 @@ type ViewerProps = {
     lessonId?: string;
     language?: SupportedLanguages;
     onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onVideoActivated?: (resourceEntityId: string) => void;
   };
 };
 
@@ -82,6 +84,7 @@ const Viewer = ({
 
   const editorClasses = cn(
     "h-full flex flex-col",
+    defaultClasses.codeBlock,
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,
@@ -99,10 +102,12 @@ const Viewer = ({
     );
   }, [handleVideoEnded, variant, videoCoverageTracking]);
 
+  const normalizedContent = useMemo(() => normalizeMarkdownCode(content), [content]);
+
   const editor = useEditor(
     {
       extensions,
-      content,
+      content: normalizedContent,
       editable: false,
       editorProps: {
         attributes: {
@@ -110,7 +115,7 @@ const Viewer = ({
         },
       },
     },
-    [content],
+    [normalizedContent],
   );
 
   if (!editor) return <></>;

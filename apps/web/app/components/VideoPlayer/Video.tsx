@@ -1,5 +1,5 @@
 import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useThumbnail } from "~/api/queries/useThumbnail";
 import { Icon } from "~/components/Icon";
@@ -25,9 +25,37 @@ type Props = {
   coverageTracking?: VideoCoverageTrackingOptions;
 };
 
+const VIDEO_PAUSE_EVENT = "mentingo:lesson-videos-pause";
+const VIDEO_RESUME_EVENT = "mentingo:lesson-video-resume";
+
+type ResumeVideoEvent = CustomEvent<{ resourceEntityId: string; requestId: number }>;
+
+let playbackRequestId = 0;
+
+export const pauseAllLessonVideos = () => {
+  if (typeof window === "undefined") return;
+
+  playbackRequestId += 1;
+  window.dispatchEvent(new CustomEvent(VIDEO_PAUSE_EVENT, { detail: playbackRequestId }));
+};
+
+export const resumeLessonVideo = (resourceEntityId: string) => {
+  if (typeof window === "undefined") return;
+
+  playbackRequestId += 1;
+  window.dispatchEvent(
+    new CustomEvent<ResumeVideoEvent["detail"]>(VIDEO_RESUME_EVENT, {
+      detail: { resourceEntityId, requestId: playbackRequestId },
+    }),
+  );
+};
+
 export function Video({ src, url, provider, index = null, onEnded, coverageTracking }: Props) {
   const [isActive, setIsActive] = useState(false);
+  const [pauseRequestId, setPauseRequestId] = useState<number>();
+  const [resumeRequestId, setResumeRequestId] = useState<number>();
   const [aspectRatio, setAspectRatio] = useState(DEFAULT_VIDEO_ASPECT_RATIO);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { data: thumbnailUrl } = useThumbnail(src, provider);
 
@@ -38,7 +66,35 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
     if (!resolvedUrl) return;
 
     setIsActive(true);
-  }, [resolvedUrl]);
+
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    if (coverageTracking?.resourceEntityId) {
+      coverageTracking.onVideoActivated?.(coverageTracking.resourceEntityId);
+    }
+  }, [coverageTracking, resolvedUrl]);
+
+  useEffect(() => {
+    const handlePause = (event: Event) => {
+      setPauseRequestId((event as CustomEvent<number>).detail);
+    };
+
+    const handleResume = (event: Event) => {
+      const detail = (event as ResumeVideoEvent).detail;
+      if (detail.resourceEntityId !== coverageTracking?.resourceEntityId) return;
+
+      setResumeRequestId(detail.requestId);
+      handleActivate();
+    };
+
+    window.addEventListener(VIDEO_PAUSE_EVENT, handlePause);
+    window.addEventListener(VIDEO_RESUME_EVENT, handleResume);
+
+    return () => {
+      window.removeEventListener(VIDEO_PAUSE_EVENT, handlePause);
+      window.removeEventListener(VIDEO_RESUME_EVENT, handleResume);
+    };
+  }, [coverageTracking?.resourceEntityId, handleActivate]);
 
   const handleThumbnailLoad = useCallback((event: SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = event.currentTarget;
@@ -80,7 +136,7 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
   );
 
   return (
-    <div className="w-full">
+    <div ref={containerRef} className="w-full">
       <div className="relative w-full overflow-hidden rounded-none bg-black" style={wrapperStyle}>
         {isActive && resolvedUrl ? (
           <div className="relative size-full rounded-none bg-black">
@@ -92,6 +148,8 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
               onAspectRatioChange={setAspectRatio}
               onEnded={handleEnded}
               coverageTracking={coverageTracking}
+              pauseRequestId={pauseRequestId}
+              resumeRequestId={resumeRequestId}
               className="size-full"
             />
           </div>

@@ -33,6 +33,7 @@ const CATEGORY_PAGE_SIZE = 4;
 type CategoryCoursesRowProps = {
   category: GetAllCategoriesResponse["data"][number];
   progressByCourseId: Record<string, number | undefined>;
+  userId?: string;
   rowRef?: Ref<HTMLElement>;
 };
 
@@ -46,19 +47,27 @@ type HeroCourse = {
   slug: string;
 };
 
-const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCoursesRowProps) => {
+const CategoryCoursesRow = ({
+  category,
+  progressByCourseId,
+  userId,
+  rowRef,
+}: CategoryCoursesRowProps) => {
   const { language } = useLanguageStore();
   const prefetchedAfterPageRef = useRef(0);
   const hasNextPageRef = useRef(false);
   const isCoursePageFetchQueuedRef = useRef(false);
-  const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteAvailableCourses(
-    {
-      category: category.title,
-      language,
-    },
-    COURSE_PAGE_SIZE,
-    { notifyOnChangeProps: ["data", "isLoading", "hasNextPage"] },
-  );
+  const previousVisibleCourseCountRef = useRef<number | null>(null);
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteAvailableCourses(
+      {
+        category: category.title,
+        language,
+        userId,
+      },
+      COURSE_PAGE_SIZE,
+      { notifyOnChangeProps: ["data", "isLoading", "hasNextPage", "isFetchingNextPage"] },
+    );
   const fetchNextPageRef = useRef(fetchNextPage);
 
   useEffect(() => {
@@ -71,8 +80,7 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
     [data],
   );
   const loadedCoursePages = data?.pages.length ?? 0;
-  const watchedSlideIndex =
-    loadedCoursePages > 1 ? (loadedCoursePages - 1) * COURSE_PAGE_SIZE : undefined;
+  const watchedSlideIndex = loadedCoursePages > 1 ? courses.length - 1 : undefined;
 
   const prefetchNextPageAfter = useCallback((currentPage: number) => {
     if (prefetchedAfterPageRef.current >= currentPage) return;
@@ -94,6 +102,18 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
 
     prefetchNextPageAfter(1);
   }, [data?.pages.length, prefetchNextPageAfter]);
+
+  useEffect(() => {
+    if (!data?.pages.length) return;
+
+    const previousVisibleCourseCount = previousVisibleCourseCountRef.current;
+    previousVisibleCourseCountRef.current = courses.length;
+
+    if (previousVisibleCourseCount === null) return;
+    if (courses.length > previousVisibleCourseCount) return;
+
+    prefetchNextPageAfter(loadedCoursePages);
+  }, [courses.length, data?.pages.length, loadedCoursePages, prefetchNextPageAfter]);
 
   const handleWatchedSlideVisible = useCallback(
     (slideIndex: number) => {
@@ -117,6 +137,9 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
       title={category.title}
       courses={courses}
       progressByCourseId={progressByCourseId}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
       watchSlideIndex={watchedSlideIndex}
       onWatchedSlideVisible={handleWatchedSlideVisible}
       rowRef={rowRef}
@@ -168,7 +191,10 @@ const ModernCoursesView = () => {
     hasNextPage: hasNextCategoriesPage,
     isFetchingNextPage: isFetchingNextCategoriesPage,
     fetchNextPage: fetchNextCategoriesPage,
-  } = useInfiniteAvailableCourseCategories({ language }, CATEGORY_PAGE_SIZE);
+  } = useInfiniteAvailableCourseCategories(
+    { language, userId: currentUser?.id },
+    CATEGORY_PAGE_SIZE,
+  );
 
   const categories = useMemo(
     () =>
@@ -365,6 +391,7 @@ const ModernCoursesView = () => {
                   key={category.id}
                   category={category}
                   progressByCourseId={progressByCourseId}
+                  userId={currentUser?.id}
                   rowRef={index === categories.length - 1 ? lastCategoryRowRef : undefined}
                 />
               )),

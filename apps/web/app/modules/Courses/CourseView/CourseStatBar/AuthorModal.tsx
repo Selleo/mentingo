@@ -51,6 +51,7 @@ type AuthorModalProps = {
   onTransferOwner?: (userId: string) => Promise<void>;
   onToggleShowAuthorSection: (visible: boolean) => void;
   otherCourses: OtherCourse[];
+  showOtherCourses?: boolean;
   showAuthorSectionDraft: boolean;
 };
 
@@ -66,6 +67,7 @@ export default function AuthorModal({
   onTransferOwner,
   onToggleShowAuthorSection,
   otherCourses,
+  showOtherCourses = true,
   showAuthorSectionDraft,
 }: AuthorModalProps) {
   const { t } = useTranslation();
@@ -166,44 +168,46 @@ export default function AuthorModal({
               <p className="leading-relaxed text-neutral-800">{author?.description}</p>
             </div>
 
-            <div>
-              <h4 className="mb-4 font-gothic text-xl font-bold text-neutral-950">
-                {t("modernCourseView.author.otherCourses")}
-              </h4>
-              <div className="max-h-96 space-y-3 overflow-y-auto pr-2">
-                {otherCourses.map((course) => (
-                  <Link
-                    key={course.id}
-                    to={`/course/${course.slug}`}
-                    onClick={onClose}
-                    className="group block cursor-pointer rounded-xl border border-neutral-200 p-4 transition-all hover:border-primary-700 hover:shadow-md"
-                  >
-                    <div className="mb-2">
-                      <h5 className="mb-1 font-bold leading-snug text-neutral-950 transition-colors group-hover:text-primary-700">
-                        {course.title}
-                      </h5>
-                      <span className="inline-block rounded bg-primary-100 px-2 py-1 text-xs font-semibold text-primary-700">
-                        {course.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-neutral-800">
-                      <div className="flex items-center gap-1">
-                        <Users className="size-3" />
-                        <span>{course.enrolledParticipantCount}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="size-3" />
-                        <span>
-                          {course.estimatedDurationMinutes != null
-                            ? formatDuration(course.estimatedDurationMinutes * 60, t)
-                            : (course.estimatedDurationFormatted ?? "—")}
+            {showOtherCourses && (
+              <div>
+                <h4 className="mb-4 font-gothic text-xl font-bold text-neutral-950">
+                  {t("modernCourseView.author.otherCourses")}
+                </h4>
+                <div className="max-h-96 space-y-3 overflow-y-auto pr-2">
+                  {otherCourses.map((course) => (
+                    <Link
+                      key={course.id}
+                      to={`/course/${course.slug}`}
+                      onClick={onClose}
+                      className="group block cursor-pointer rounded-xl border border-neutral-200 p-4 transition-all hover:border-primary-700 hover:shadow-md"
+                    >
+                      <div className="mb-2">
+                        <h5 className="mb-1 font-bold leading-snug text-neutral-950 transition-colors group-hover:text-primary-700">
+                          {course.title}
+                        </h5>
+                        <span className="inline-block rounded bg-primary-100 px-2 py-1 text-xs font-semibold text-primary-700">
+                          {course.category}
                         </span>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="flex items-center gap-4 text-xs text-neutral-800">
+                        <div className="flex items-center gap-1">
+                          <Users className="size-3" />
+                          <span>{course.enrolledParticipantCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="size-3" />
+                          <span>
+                            {course.estimatedDurationMinutes != null
+                              ? formatDuration(course.estimatedDurationMinutes * 60, t)
+                              : (course.estimatedDurationFormatted ?? "—")}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="mt-8 flex justify-end">
               <Button variant="outline" onClick={onClose} disabled={isSaving}>

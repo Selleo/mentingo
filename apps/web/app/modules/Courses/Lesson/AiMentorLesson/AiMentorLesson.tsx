@@ -300,7 +300,7 @@ const AiMentorLesson = ({
                   </DialogHeader>
                   <div className="min-h-0 px-6 py-5">
                     <div className={taskDescriptionViewerClassName}>
-                      <Viewer content={lesson.description ?? ""} />
+                      <Viewer content={lesson.description ?? ""} style="prose" />
                     </div>
                   </div>
                 </DialogContent>

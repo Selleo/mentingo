@@ -1,7 +1,9 @@
+import { Info } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
 
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { cn } from "~/lib/utils";
 
 import {
@@ -18,6 +20,7 @@ export const LessonVideoProgressStrip = ({
   lessonId,
   description,
   enabled,
+  showRequirementWarning = true,
   store,
 }: LessonVideoProgressStripProps) => {
   const { t } = useTranslation();
@@ -96,6 +99,18 @@ export const LessonVideoProgressStrip = ({
           );
         })}
       </div>
+      {showRequirementWarning && (
+        <Alert className="flex items-center mt-4 gap-3 border-primary-200 bg-primary-50 px-3 py-2.5 text-primary-950 [&>svg]:static [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-primary-600 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+          <Info aria-hidden="true" />
+          <AlertDescription className="text-sm font-medium text-primary-950">
+            {t(
+              segments.length === 1
+                ? "studentLessonView.videoProgress.requirementSingle"
+                : "studentLessonView.videoProgress.requirementMultiple",
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 };

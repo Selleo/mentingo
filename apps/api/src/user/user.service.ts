@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -52,6 +53,7 @@ import {
   userLacksAnyPermissionsCondition as buildUserLacksAnyPermissionsCondition,
 } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { CourseService } from "src/courses/course.service";
 import { ArchiveUsersEvent, CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
@@ -149,6 +151,7 @@ export class UserService {
     private statisticsService: StatisticsService,
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly wsGateway: WsGateway,
+    @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -425,6 +428,8 @@ export class UserService {
 
     const managedGroupsChanged = !this.haveSameIds(currentManagedGroupIds, nextManagedGroupIds);
     const shouldRevokeSession = rolesChanged || managedGroupsChanged;
+    const shouldRefreshCourseAuthorMetadata =
+      data.firstName !== undefined || data.lastName !== undefined;
 
     const updatedUser = await this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
@@ -487,6 +492,7 @@ export class UserService {
     });
 
     if (shouldRevokeSession) await this.revokeSessionsAndNotifyUsers([id]);
+    if (shouldRefreshCourseAuthorMetadata) await this.courseService.refreshAuthorMetadata(id);
 
     return updatedUser;
   }
@@ -506,6 +512,8 @@ export class UserService {
         set: data,
       })
       .returning();
+
+    await this.courseService.refreshAuthorMetadata(userId);
 
     return updatedUserDetails;
   }
@@ -558,6 +566,8 @@ export class UserService {
         await tx.update(userDetails).set(userDetailsUpdates).where(eq(userDetails.userId, id));
       }
     });
+
+    await this.courseService.refreshAuthorMetadata(id);
   }
 
   async changePassword(id: UUIDType, data: ChangePasswordBody) {

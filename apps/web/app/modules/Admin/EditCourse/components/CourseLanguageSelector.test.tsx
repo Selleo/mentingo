@@ -101,4 +101,29 @@ describe("CourseLanguageSelector", () => {
 
     expect(setOpenGenerateTranslationModal).toHaveBeenCalledWith(true);
   });
+
+  it("hides languages that can be added when adding languages is disabled", async () => {
+    const user = userEvent.setup();
+
+    renderWith().render(
+      <CourseLanguageSelector
+        courseLanguage="en"
+        course={{
+          id: "course-1",
+          baseLanguage: "en",
+          availableLocales: ["en"],
+        }}
+        canAddLanguage={false}
+        isAIConfigured={false}
+        onChange={vi.fn()}
+        setOpenGenerateTranslationModal={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByTestId(EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT));
+
+    expect(
+      screen.queryByTestId(EDIT_COURSE_PAGE_HANDLES.languageOption("de")),
+    ).not.toBeInTheDocument();
+  });
 });

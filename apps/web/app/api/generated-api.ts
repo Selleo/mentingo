@@ -2403,6 +2403,13 @@ export interface GetCourseResponse {
     archived?: boolean;
     /** @format uuid */
     authorId?: string;
+    author?: {
+      firstName: string | null;
+      lastName: string | null;
+      jobTitle: string | null;
+      description: string | null;
+      profilePictureUrl: string | null;
+    };
     category: string;
     /** @format uuid */
     categoryId?: string;
@@ -2782,7 +2789,7 @@ export interface GetCourseSettingsResponse {
     videoCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
-    /** @default null */
+    /** @default "#000000" */
     certificateFontColor: string | null;
     /** @default null */
     certificateValidity:

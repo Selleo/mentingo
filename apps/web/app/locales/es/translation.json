@@ -2412,7 +2412,7 @@
         "charactersLeft": "Caracteres restantes",
         "reachedCharactersLimit": "Has alcanzado el límite de caracteres.",
         "reachedCharactersLimitHtml": "Demasiado formato. Reduzca la cantidad de formato para que se ajuste al límite.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 o Hevc (máx. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (máx. 50 MB)",
         "enableCertificate": "Habilitar certificado",
         "enableCertificateDescription": "Active esta opción para emitir certificados para este curso y configure su firma y vista previa a continuación.",
         "certificateValidity": "Validez del certificado",
@@ -3571,6 +3571,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "El curso no está disponible",
+      "accessDescription": "Inicia sesión o crea una cuenta para continuar al curso.",
+      "goToLogin": "Ir al inicio de sesión",
+      "goToCourseList": "Ir a la lista de cursos",
+      "goToHome": "Ir al inicio",
+      "notFoundTitle": "Curso no encontrado",
+      "notFoundDescription": "No pudimos encontrar este curso."
+    },
     "other": {
       "cannotFindCourses": "No pudimos encontrar ningún curso.",
       "changeSearchCriteria": "Por favor cambie los criterios de búsqueda o vuelva a intentarlo más tarde.",
@@ -3712,6 +3721,8 @@
       "completedSummary": "{{completed}} de {{total}} completados",
       "overviewAriaLabel": "Progreso de los videos de la lección",
       "segmentAriaLabel": "Progreso del video {{index}}: {{progress}}% visto",
+      "requirementSingle": "Mira el vídeo completo para completar esta lección.",
+      "requirementMultiple": "Mira todos los vídeos para completar esta lección.",
       "errors": {
         "resourceNotFound": "No se pudo guardar el progreso del video para esta lección.",
         "unsupportedLessonType": "El progreso del video solo está disponible para lecciones de contenido.",
@@ -3720,6 +3731,14 @@
         "trackingDisabled": "El seguimiento de finalización de video está deshabilitado para este curso.",
         "accessDenied": "No tienes acceso para actualizar el progreso del video para esta lección."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "¿Continuar viendo antes de salir?",
+      "descriptionSingle": "Debes ver el vídeo completo antes de poder completar esta lección.",
+      "descriptionMultiple": "Debes ver todos los vídeos antes de poder completar esta lección.",
+      "exitAnyway": "Salir de todos modos",
+      "continueWatching": "Continuar viendo",
+      "remember": "No mostrar más en este curso"
     },
     "playNext": {
       "title": "A continuación",
@@ -5342,6 +5361,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Curso fuente no encontrado",
+      "sourceAuthorNotFound": "Autor del curso fuente no encontrado",
       "sourceCategoryNotFound": "Categoría del curso fuente no encontrada",
       "courseNotFound": "Curso no encontrado",
       "chapterNotFound": "Capítulo no encontrado",

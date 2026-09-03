@@ -2411,7 +2411,7 @@
         "charactersLeft": "Personnages restants",
         "reachedCharactersLimit": "Vous avez atteint la limite de caractères.",
         "reachedCharactersLimitHtml": "Trop de formatage. Veuillez réduire la quantité de formatage pour respecter la limite.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 ou Hevc (max. 200 Mo)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 Mo)",
         "enableCertificate": "Activer le certificat",
         "enableCertificateDescription": "Activez cette option pour émettre des certificats pour ce cours et configurez leur signature et leur aperçu ci-dessous.",
         "certificateValidity": "Validité du certificat",
@@ -5151,6 +5151,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Cours source introuvable",
+      "sourceAuthorNotFound": "Auteur du cours source introuvable",
       "sourceCategoryNotFound": "Catégorie de cours source introuvable",
       "courseNotFound": "Cours introuvable",
       "chapterNotFound": "Chapitre introuvable",

@@ -1637,7 +1637,8 @@
       "uploadScorm": "Nahrajte SCORM",
       "createNew": "Vytvořit nový",
       "deleteSelected": "Smazat vybrané",
-      "bulkEdit": "Hromadná úprava"
+      "bulkEdit": "Hromadná úprava",
+      "actions": "Akce kurzu"
     },
     "dropdown": {
       "changeCategory": "Změnit kategorii",
@@ -2423,7 +2424,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
-        "trailerUploadDetails": "MP4, MOV, MPEG-2 nebo Hevc (max. 200 MB)",
+        "trailerUploadDetails": "MP4, MOV (max. 50 MB)",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",
@@ -3632,6 +3633,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurz není dostupný",
+      "accessDescription": "Přihlaste se nebo si vytvořte účet a pokračujte ke kurzu.",
+      "goToLogin": "Přejít k přihlášení",
+      "goToCourseList": "Přejít na seznam kurzů",
+      "goToHome": "Přejít na domovskou stránku",
+      "notFoundTitle": "Kurz nebyl nalezen",
+      "notFoundDescription": "Tento kurz se nepodařilo najít."
+    },
     "other": {
       "cannotFindCourses": "Nenašli jsme žádné kurzy",
       "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později",
@@ -3773,6 +3783,8 @@
       "completedSummary": "Dokončeno {{completed}} z {{total}}",
       "overviewAriaLabel": "Průběh videí v lekci",
       "segmentAriaLabel": "Průběh videa {{index}}: zhlédnuto {{progress}} %",
+      "requirementSingle": "Pro dokončení této lekce zhlédněte celé video.",
+      "requirementMultiple": "Pro dokončení této lekce zhlédněte všechna videa.",
       "errors": {
         "resourceNotFound": "Postup videa pro tuto lekci se nepodařilo uložit.",
         "unsupportedLessonType": "Postup videa je dostupný pouze pro obsahové lekce.",
@@ -3781,6 +3793,14 @@
         "trackingDisabled": "Sledování dokončení videa je pro tento kurz vypnuto.",
         "accessDenied": "Nemáte přístup k aktualizaci postupu videa pro tuto lekci."
       }
+    },
+    "requiredVideoLeave": {
+      "title": "Dokončit sledování před odchodem?",
+      "descriptionSingle": "Před dokončením této lekce je nutné zhlédnout celé video.",
+      "descriptionMultiple": "Před dokončením této lekce je nutné zhlédnout všechna videa.",
+      "exitAnyway": "Přesto odejít",
+      "continueWatching": "Pokračovat ve sledování",
+      "remember": "Skrýt pro tento kurz"
     },
     "playNext": {
       "title": "Další",
@@ -4750,6 +4770,7 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "sourceAuthorNotFound": "Autor zdrojoveho kurzu nebyl nalezen",
       "sourceCategoryNotFound": "Kategorie zdrojoveho kurzu nebyla nalezena",
       "courseNotFound": "Kurz nebyl nalezen",
       "chapterNotFound": "Kapitola nebyla nalezena",

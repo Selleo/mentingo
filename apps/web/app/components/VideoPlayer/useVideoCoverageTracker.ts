@@ -98,9 +98,11 @@ export const useVideoCoverageTracker = (
   const pendingRangesRef = useRef<VideoCoverageRange[]>([]);
   const activeWatchSecondsDeltaRef = useRef(0);
   const previousSampleRef = useRef<{ videoTime: number; wallClock: number } | null>(null);
+  const isPlayingRef = useRef(false);
   const snapshotDurationSecondsRef = useRef(snapshot.durationSeconds);
   const isSeekingRef = useRef(false);
   const isFlushingRef = useRef(false);
+  const flushRequestedRef = useRef(false);
   const pendingLessonCompletionSyncRef = useRef(false);
   const completionSyncRequestedRef = useRef(false);
   const {
@@ -219,6 +221,10 @@ export const useVideoCoverageTracker = (
         completionSyncRequestedRef.current = true;
       }
 
+      if (isFlushingRef.current) {
+        flushRequestedRef.current = true;
+      }
+
       if (
         !currentOptions.enabled ||
         !currentOptions.lessonId ||
@@ -251,12 +257,26 @@ export const useVideoCoverageTracker = (
           language: currentOptions.language,
         });
 
-        setSnapshot({
-          coveragePercent: progress.coveragePercent,
-          watchedRanges: progress.watchedRanges,
-          isWatched: progress.isWatched,
-          durationSeconds: progress.durationSeconds,
-          bucketSizeSeconds: progress.bucketSizeSeconds,
+        setSnapshot((current) => {
+          const watchedRanges = mergeVideoCoverageRanges([
+            ...progress.watchedRanges,
+            ...current.watchedRanges,
+          ]);
+          const coveragePercent = progress.durationSeconds
+            ? Math.min(1, countVideoCoverageRangeUnits(watchedRanges) / progress.durationSeconds)
+            : current.coveragePercent;
+
+          return {
+            coveragePercent: Math.max(
+              progress.coveragePercent,
+              current.coveragePercent,
+              coveragePercent,
+            ),
+            watchedRanges,
+            isWatched: progress.isWatched || current.isWatched,
+            durationSeconds: progress.durationSeconds,
+            bucketSizeSeconds: progress.bucketSizeSeconds,
+          };
         });
 
         if (progress.lessonCompleted) {
@@ -279,6 +299,15 @@ export const useVideoCoverageTracker = (
         activeWatchSecondsDeltaRef.current += activeWatchSecondsDelta;
       } finally {
         isFlushingRef.current = false;
+
+        if (flushRequestedRef.current) {
+          flushRequestedRef.current = false;
+          const syncCompletionQueries = completionSyncRequestedRef.current;
+
+          queueMicrotask(() => {
+            void flush({ syncCompletionQueries });
+          });
+        }
       }
     },
     [player, syncPendingLessonCompletion, upsertVideoProgress],
@@ -288,8 +317,21 @@ export const useVideoCoverageTracker = (
     if (!enabled || !player) return;
 
     const handleTimeUpdate = () => {
+      if (player.isDisposed() || !player.el()?.isConnected) {
+        isPlayingRef.current = false;
+        previousSampleRef.current = null;
+
+        return;
+      }
+
       const currentVideoTime = player.currentTime();
       const now = performance.now();
+
+      if (player.paused()) {
+        isPlayingRef.current = false;
+        previousSampleRef.current = null;
+        return;
+      }
 
       if (typeof currentVideoTime !== "number" || !Number.isFinite(currentVideoTime)) {
         previousSampleRef.current = null;
@@ -299,7 +341,7 @@ export const useVideoCoverageTracker = (
       const previousSample = previousSampleRef.current;
       previousSampleRef.current = { videoTime: currentVideoTime, wallClock: now };
 
-      if (!previousSample || isSeekingRef.current || player.paused()) return;
+      if (!previousSample || isSeekingRef.current || !isPlayingRef.current) return;
 
       const mediaDelta = currentVideoTime - previousSample.videoTime;
       const wallDelta = (now - previousSample.wallClock) / 1000;
@@ -312,8 +354,15 @@ export const useVideoCoverageTracker = (
       }
     };
 
-    const handlePlay = () => resetPreviousSample();
-    const handlePause = () => void flush({ syncCompletionQueries: true });
+    const handlePlay = () => {
+      isPlayingRef.current = true;
+      resetPreviousSample();
+    };
+    const handlePause = () => {
+      isPlayingRef.current = false;
+      previousSampleRef.current = null;
+      void flush({ syncCompletionQueries: true });
+    };
     const handleSeeking = () => {
       isSeekingRef.current = true;
       previousSampleRef.current = null;
@@ -334,7 +383,14 @@ export const useVideoCoverageTracker = (
     player.on("seeked", handleSeeked);
     player.on("ended", handleEnded);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    resetPreviousSample();
+    const isPlayerConnected = !player.isDisposed() && Boolean(player.el()?.isConnected);
+    isPlayingRef.current = isPlayerConnected && !player.paused();
+
+    if (isPlayerConnected) {
+      resetPreviousSample();
+    } else {
+      previousSampleRef.current = null;
+    }
 
     const flushInterval = window.setInterval(
       () => void flush(),
@@ -350,6 +406,7 @@ export const useVideoCoverageTracker = (
       player.off("seeked", handleSeeked);
       player.off("ended", handleEnded);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      isPlayingRef.current = false;
       void flush({ syncCompletionQueries: true });
     };
   }, [enabled, flush, markRangeAsWatched, options.flushIntervalMs, player, resetPreviousSample]);

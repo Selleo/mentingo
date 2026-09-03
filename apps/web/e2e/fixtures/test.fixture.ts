@@ -24,7 +24,7 @@ import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../utils/m
 import { markAllOnboardingComplete } from "../utils/onboarding";
 import { buildLmsLocalhostTenantHost } from "../utils/tenant-host";
 
-import { login } from "./auth.actions";
+import { authenticateContext, login } from "./auth.actions";
 import { cleanupFixture } from "./cleanup.fixture";
 import { factoryFixture } from "./factory.fixture";
 import { pageFixture } from "./page.fixture";
@@ -91,6 +91,7 @@ export type TenantUserHandle = {
 };
 
 type WorkerTenantWorkspace = {
+  apiClient: FixtureApiClient;
   authStatePaths: Record<UserRole, string>;
   origin: string;
   tenant: TenantFactoryRecord;
@@ -257,9 +258,9 @@ const writeWorkerAuthState = async (
   try {
     if (origin) await addWorkspaceInitScript(context, origin);
 
-    const page = await context.newPage();
-    await login(page, email, ACCOUNT_PASSWORD, origin ? { origin } : undefined);
-    await apiClient.syncFromContext(context, origin ?? new URL(page.url()).origin);
+    const authOrigin = origin ?? new URL(DEFAULT_BASE_URL).origin;
+    await authenticateContext(context, authOrigin, email, ACCOUNT_PASSWORD);
+    await apiClient.syncFromContext(context, authOrigin);
     await markAllOnboardingComplete(apiClient);
     await context.storageState({ path });
   } finally {
@@ -318,6 +319,7 @@ export const test = mergedFixture.extend<
   {
     createWorkspaceContext: CreateWorkspaceContext;
     createWorkspacePage: CreateWorkspacePage;
+    workerTenantApiClient: FixtureApiClient;
     withReadonlyPage: WithAuthPage;
     withWorkerPage: WithAuthPage;
     createIsolatedWorkspace: CreateIsolatedWorkspace;
@@ -325,7 +327,7 @@ export const test = mergedFixture.extend<
   },
   {
     _ensureWorkerAuthReady: () => Promise<void>;
-    _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
+    _getWorkerTenantWorkspace: WorkerTenantWorkspace;
   }
 >({
   _ensureWorkerAuthReady: [
@@ -337,12 +339,11 @@ export const test = mergedFixture.extend<
           const apiClient = createFixtureApiClient();
           const origin = new URL(DEFAULT_BASE_URL).origin;
           const adminContext = await browser.newContext({ baseURL: origin });
-          const adminPage = await adminContext.newPage();
           const workerAuthStates: { email: string; path: string }[] = [];
 
           try {
             await addWorkspaceInitScript(adminContext, origin);
-            await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD, { origin });
+            await authenticateContext(adminContext, origin, ADMIN_EMAIL, ADMIN_PASSWORD);
 
             await apiClient.syncFromContext(adminContext, origin);
 
@@ -373,21 +374,21 @@ export const test = mergedFixture.extend<
   ],
   _getWorkerTenantWorkspace: [
     async ({ browser }, use, workerInfo) => {
-      let setupPromise: Promise<WorkerTenantWorkspace> | undefined;
       let cleanupApiClient: FixtureApiClient | undefined;
       let tenant: TenantFactoryRecord | undefined;
+      let workerTenantApiClient: FixtureApiClient | undefined;
 
-      await use(async () => {
-        setupPromise ??= (async () => {
+      try {
+        const workerTenantWorkspace = await (async () => {
           const origin = new URL(DEFAULT_BASE_URL).origin;
           const adminContext = await browser.newContext({ baseURL: origin });
-          const adminPage = await adminContext.newPage();
           const apiClient = createFixtureApiClient();
+          workerTenantApiClient = apiClient;
           cleanupApiClient = createFixtureApiClient();
 
           try {
             await addWorkspaceInitScript(adminContext, origin);
-            await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD);
+            await authenticateContext(adminContext, origin, ADMIN_EMAIL, ADMIN_PASSWORD);
             await apiClient.syncFromContext(adminContext, origin);
             await cleanupApiClient.syncFromContext(adminContext, origin);
 
@@ -420,12 +421,14 @@ export const test = mergedFixture.extend<
 
             const tenantAdminContext = await browser.newContext({ baseURL: workspaceOrigin });
             await addWorkspaceInitScript(tenantAdminContext, workspaceOrigin);
-            const tenantAdminPage = await tenantAdminContext.newPage();
 
             try {
-              await login(tenantAdminPage, tenantAdminEmail, tenantAdminPassword, {
-                origin: workspaceOrigin,
-              });
+              await authenticateContext(
+                tenantAdminContext,
+                workspaceOrigin,
+                tenantAdminEmail,
+                tenantAdminPassword,
+              );
               await apiClient.syncFromContext(tenantAdminContext, workspaceOrigin);
               await markAllOnboardingComplete(apiClient);
 
@@ -446,6 +449,7 @@ export const test = mergedFixture.extend<
               }
 
               return {
+                apiClient,
                 authStatePaths,
                 origin: workspaceOrigin,
                 tenant,
@@ -454,22 +458,23 @@ export const test = mergedFixture.extend<
               await tenantAdminContext.close();
             }
           } finally {
-            apiClient.clearCookies();
             await adminContext.close();
           }
         })();
 
-        return setupPromise;
-      });
+        await use(workerTenantWorkspace);
+      } finally {
+        workerTenantApiClient?.clearCookies();
 
-      if (cleanupApiClient) {
-        if (tenant) {
-          const cleanupTenantFactory =
-            createFixtureFactories(cleanupApiClient).createTenantFactory();
-          await cleanupTenantFactory.deactivate(tenant.id);
+        if (cleanupApiClient) {
+          if (tenant) {
+            const cleanupTenantFactory =
+              createFixtureFactories(cleanupApiClient).createTenantFactory();
+            await cleanupTenantFactory.deactivate(tenant.id);
+          }
+
+          cleanupApiClient.clearCookies();
         }
-
-        cleanupApiClient.clearCookies();
       }
     },
     { scope: "worker", timeout: 120 * 1000 },
@@ -479,7 +484,7 @@ export const test = mergedFixture.extend<
       _getWorkerTenantWorkspace,
       browser,
     }: {
-      _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
+      _getWorkerTenantWorkspace: WorkerTenantWorkspace;
       browser: Browser;
     },
     use: (value: CreateWorkspaceContext) => Promise<void>,
@@ -487,7 +492,7 @@ export const test = mergedFixture.extend<
     await use(async (options = {}) => {
       const origin = options.root
         ? new URL(DEFAULT_BASE_URL).origin
-        : (await _getWorkerTenantWorkspace()).origin;
+        : _getWorkerTenantWorkspace.origin;
       const context = await createWorkspaceBrowserContext(browser, origin, options);
 
       return { context, origin };
@@ -508,6 +513,9 @@ export const test = mergedFixture.extend<
       return { context, origin, page };
     });
   },
+  workerTenantApiClient: async ({ _getWorkerTenantWorkspace }, use) => {
+    await use(_getWorkerTenantWorkspace.apiClient);
+  },
   withWorkerPage: async (
     {
       _ensureWorkerAuthReady,
@@ -516,7 +524,7 @@ export const test = mergedFixture.extend<
       browser,
     }: {
       _ensureWorkerAuthReady: () => Promise<void>;
-      _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
+      _getWorkerTenantWorkspace: WorkerTenantWorkspace;
       apiClient: FixtureApiClient;
       browser: Browser;
     },
@@ -549,17 +557,20 @@ export const test = mergedFixture.extend<
           return;
         }
 
-        const workerTenantWorkspace = await _getWorkerTenantWorkspace();
-        const context = await createWorkspaceBrowserContext(browser, workerTenantWorkspace.origin, {
-          storageState: workerTenantWorkspace.authStatePaths[role],
-        });
+        const context = await createWorkspaceBrowserContext(
+          browser,
+          _getWorkerTenantWorkspace.origin,
+          {
+            storageState: _getWorkerTenantWorkspace.authStatePaths[role],
+          },
+        );
 
         try {
           const page = await context.newPage();
 
-          await apiClient.syncFromContext(context, workerTenantWorkspace.origin);
+          await apiClient.syncFromContext(context, _getWorkerTenantWorkspace.origin);
 
-          await run({ context, origin: workerTenantWorkspace.origin, page });
+          await run({ context, origin: _getWorkerTenantWorkspace.origin, page });
         } finally {
           await context.close();
         }

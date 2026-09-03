@@ -35,6 +35,7 @@ type VideoViewerOptions = {
     lessonId?: string;
     language?: SupportedLanguages;
     onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onVideoActivated?: (resourceEntityId: string) => void;
   };
 };
 
@@ -258,6 +259,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
           initialDurationSeconds: attrs.videoDurationSeconds,
           initialBucketSizeSeconds: attrs.videoBucketSizeSeconds,
           onSnapshotChange: videoCoverageTracking?.onSnapshotChange,
+          onVideoActivated: videoCoverageTracking?.onVideoActivated,
         }}
       />
     </NodeViewWrapper>
