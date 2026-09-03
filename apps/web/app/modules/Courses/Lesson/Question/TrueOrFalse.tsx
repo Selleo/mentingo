@@ -26,9 +26,9 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
       questionType="trueOrFalseQuestion"
       questionNumber={question.displayOrder ?? 0}
     >
-      {question.options?.map(({ optionText, id, studentAnswer, isStudentAnswer }, index) => {
+      {question.options?.map(({ optionText, id, studentAnswer, isCorrect }, index) => {
         const isAnswered = studentAnswer === "true" || studentAnswer === "false";
-        const isCorrectAnswer = Boolean(isStudentAnswer);
+        const isCorrectAnswer = isAnswered && studentAnswer === String(isCorrect);
 
         return (
           <div

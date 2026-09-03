@@ -63,6 +63,7 @@ export type CourseScormQuizOptionRow = {
   isCorrect: boolean;
   displayOrder: number | null;
   matchedWord: string | null;
+  targetBlankId: UUIDType | null;
 };
 
 export type CourseScormBuildLessonsByIdOptions = {

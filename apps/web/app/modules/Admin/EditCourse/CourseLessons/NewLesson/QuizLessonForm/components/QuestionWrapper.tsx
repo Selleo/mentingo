@@ -21,6 +21,7 @@ const QuestionWrapper = ({
   isOpen,
   handleToggle,
   isStructureLocked = false,
+  baseLanguageQuestion,
 }: {
   questionType: QuestionType;
   questionIndex: number;
@@ -31,6 +32,7 @@ const QuestionWrapper = ({
   isOpen: boolean;
   handleToggle: () => void;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 }) => {
   const isOpenQuestion =
     questionType === QuestionType.BRIEF_RESPONSE || questionType === QuestionType.DETAILED_RESPONSE;
@@ -62,6 +64,7 @@ const QuestionWrapper = ({
             item={item}
             isOpenQuestion={isOpenQuestion}
             isStructureLocked={isStructureLocked}
+            baseLanguageQuestion={baseLanguageQuestion}
           />
           {isOpen && <AccordionContent>{children}</AccordionContent>}
         </div>

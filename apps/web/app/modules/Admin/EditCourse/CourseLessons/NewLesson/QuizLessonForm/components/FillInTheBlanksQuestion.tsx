@@ -1,6 +1,7 @@
 import * as Accordion from "@radix-ui/react-accordion";
 import { Color } from "@tiptap/extension-color";
 import { Highlight } from "@tiptap/extension-highlight";
+import { Placeholder } from "@tiptap/extension-placeholder";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -18,10 +19,14 @@ import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
+import {
+  findBaseLanguageOption,
+  getBaseLanguageFillPromptPreview,
+} from "../quizTranslationPlaceholders";
 
 import { FillInTheBlanksButtonNode } from "./FillInTheBlanksButtonNode";
 
-import type { QuestionOption } from "../QuizLessonForm.types";
+import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -30,6 +35,7 @@ type FillInTheBlankQuestionProps = {
   questionIndex: number;
   questionType: QuestionType;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 };
 
 const SPECIAL_SYMBOLS = /[.*+?^${}()|[\]\\]/g;
@@ -76,6 +82,7 @@ const FillInTheBlanksQuestion = ({
   questionIndex,
   questionType,
   isStructureLocked = false,
+  baseLanguageQuestion,
 }: FillInTheBlankQuestionProps) => {
   const [newWord, setNewWord] = useState("");
   const [isAddingWord, setIsAddingWord] = useState(false);
@@ -85,17 +92,24 @@ const FillInTheBlanksQuestion = ({
   const errors = form.formState.errors;
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const baseLanguagePromptPreview = getBaseLanguageFillPromptPreview(baseLanguageQuestion);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Color,
-      TextStyle,
-      FillInTheBlanksButtonNode,
-      Highlight.configure({ multicolor: true }),
-    ],
-    content: form.getValues(`questions.${questionIndex}.description`) || "",
-  });
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit,
+        Color,
+        TextStyle,
+        FillInTheBlanksButtonNode,
+        Highlight.configure({ multicolor: true }),
+        Placeholder.configure({
+          placeholder: baseLanguagePromptPreview ?? "",
+        }),
+      ],
+      content: form.getValues(`questions.${questionIndex}.description`) || "",
+    },
+    [baseLanguagePromptPreview],
+  );
 
   const onDeleteQuestion = () => {
     handleRemoveQuestion();
@@ -396,6 +410,12 @@ const FillInTheBlanksQuestion = ({
               {currentOptions.map((option, index) => {
                 const isDraggable = !containsButtonForOption(option);
                 const optionId = getOptionId(option);
+                const baseLanguageOption = findBaseLanguageOption(
+                  baseLanguageQuestion,
+                  currentOptions,
+                  option,
+                  index,
+                );
 
                 return (
                   <div
@@ -423,6 +443,7 @@ const FillInTheBlanksQuestion = ({
                       {option.isCorrect && <Icon name="Success" />}
                       <Input
                         value={option.optionText}
+                        placeholder={baseLanguageOption?.optionText}
                         draggable={isDraggable}
                         onDragStart={(event) => handleDragStart(option, event)}
                         onChange={(event) => handleUpdateWord(index, event.target.value)}

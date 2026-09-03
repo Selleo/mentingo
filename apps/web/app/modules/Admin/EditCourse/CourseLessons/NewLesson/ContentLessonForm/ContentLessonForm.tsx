@@ -23,6 +23,7 @@ import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
+import { getBaseLanguageTextPlaceholder } from "~/modules/Admin/EditCourse/utils/baseLanguageText";
 
 import { CONTENT_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -37,6 +38,7 @@ type ContentLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
+  baseLanguageLesson: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
 };
@@ -45,6 +47,7 @@ const ContentLessonForm = ({
   setContentTypeToDisplay,
   chapterToEdit,
   lessonToEdit,
+  baseLanguageLesson,
   setSelectedLesson,
   language,
 }: ContentLessonProps) => {
@@ -209,7 +212,9 @@ const ContentLessonForm = ({
             data-testid={CONTENT_LESSON_FORM_HANDLES.TITLE_INPUT}
             control={form.control}
             name="title"
-            placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
+            placeholder={
+              baseLanguageLesson?.title || t("adminCourseView.curriculum.lesson.placeholder.title")
+            }
           />
           <FormField
             control={form.control}
@@ -225,6 +230,7 @@ const ContentLessonForm = ({
                     <ContentEditor
                       id="description"
                       content={field.value}
+                      placeholder={getBaseLanguageTextPlaceholder(baseLanguageLesson?.description)}
                       lessonId={lessonToEdit?.id}
                       allowFiles={!!lessonToEdit?.id || !!contextId}
                       acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}

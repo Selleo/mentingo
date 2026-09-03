@@ -39,6 +39,7 @@ type ScormLessonFormProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
+  baseLanguageLesson: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
 };
@@ -47,6 +48,7 @@ export const ScormLessonForm = ({
   setContentTypeToDisplay,
   chapterToEdit,
   lessonToEdit,
+  baseLanguageLesson,
   setSelectedLesson,
   language,
 }: ScormLessonFormProps) => {
@@ -178,7 +180,9 @@ export const ScormLessonForm = ({
             control={form.control}
             name="title"
             label={t("adminCourseView.curriculum.lesson.field.title")}
-            placeholder={t("adminCourseView.settings.placeholder.title")}
+            placeholder={
+              baseLanguageLesson?.title || t("adminCourseView.settings.placeholder.title")
+            }
             data-testid={SCORM_LESSON_FORM_HANDLES.TITLE_INPUT}
             required
           />

@@ -28,11 +28,11 @@ import {
   certificates,
   chapters,
   lessons,
-  questions,
+  assessments,
+  assessmentAttempts,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
-  studentQuestionAnswers,
 } from "../../storage/schema";
 import {
   CERTIFICATE_ACTIVITY_TRIGGERS,
@@ -720,16 +720,28 @@ describe("CertificatesController (e2e)", () => {
           displayOrder: 1,
         })
         .returning();
-      const [question] = await db
-        .insert(questions)
+      const [assessment] = await db
+        .insert(assessments)
         .values({
-          title: { en: "Question 1" },
           lessonId: lesson.id,
-          authorId: admin.id,
-          type: "single_choice",
-          displayOrder: 1,
+          passingScorePercentage: "80",
+          baseLanguage: "en",
+          availableLocales: ["en"],
         })
         .returning();
+      await db.insert(assessmentAttempts).values({
+        assessmentId: assessment.id,
+        language: "en",
+        learnerId: student.id,
+        attemptNumber: 1,
+        availablePoints: "1",
+        awardedPoints: "1",
+        scorePercentage: "100",
+        submissionStatus: "submitted",
+        gradingStatus: "graded",
+        result: "passed",
+        submittedAt: now,
+      });
 
       await db.insert(studentCourses).values({
         studentId: student.id,
@@ -759,13 +771,6 @@ describe("CertificatesController (e2e)", () => {
         completedAt: now,
         languageAnswered: "en",
       });
-      await db.insert(studentQuestionAnswers).values({
-        studentId: student.id,
-        questionId: question.id,
-        answer: { selected: "answer-a" },
-        isCorrect: true,
-      });
-
       const [createdCertificate] = await db
         .insert(certificates)
         .values({
@@ -837,11 +842,11 @@ describe("CertificatesController (e2e)", () => {
       expect(chapterProgress.completedAt).toBeNull();
       expect(chapterProgress.completedAsFreemium).toBe(false);
 
-      const quizAnswers = await db
+      const quizAttempts = await db
         .select()
-        .from(studentQuestionAnswers)
-        .where(eq(studentQuestionAnswers.studentId, student.id));
-      expect(quizAnswers).toHaveLength(0);
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.learnerId, student.id));
+      expect(quizAttempts).toHaveLength(0);
 
       const [activityLog] = await db
         .select()

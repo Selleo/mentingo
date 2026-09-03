@@ -5,13 +5,18 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -22,7 +27,6 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
@@ -31,16 +35,16 @@ import {
   chapters,
   courses,
   lessons,
-  quizAttempts,
-  questions,
-  questionAnswerOptions,
+  assessments,
+  assessmentAttempts,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
   courseStudentMode,
   resources,
   resourceEntity,
   settings,
   studentCourses,
   studentLessonProgress,
-  studentQuestionAnswers,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -114,14 +118,14 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     await truncateTables(baseDb, [
       "resource_entity",
       "resources",
-      "quiz_attempts",
+      "assessment_attempts",
+      "assessment_questions",
+      "assessment_question_choice_options",
+      "assessments",
       "course_student_mode",
       "courses",
       "chapters",
       "lessons",
-      "questions",
-      "question_answer_options",
-      "student_question_answers",
       "student_lesson_progress",
       "student_chapter_progress",
       "student_courses",
@@ -950,7 +954,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     });
   });
 
-  const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, authorId: UUIDType) => {
+  const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, _authorId: UUIDType) => {
     await db
       .update(chapters)
       .set({ lessonCount: 1, updatedAt: new Date().toISOString() })
@@ -974,29 +978,39 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       })
       .returning();
 
-    const [question1] = await db
-      .insert(questions)
+    const [assessment] = await db
+      .insert(assessments)
       .values({
         id: crypto.randomUUID(),
         lessonId: lesson.id,
-        authorId,
-        type: QUESTION_TYPE.SINGLE_CHOICE,
+        passingScorePercentage: "70",
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
+      })
+      .returning();
+
+    const [question1] = await db
+      .insert(assessmentQuestions)
+      .values({
+        id: crypto.randomUUID(),
+        assessmentId: assessment.id,
+        questionType: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+        gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+        prompt: buildJsonbField("en", "What is 2+2?"),
         title: buildJsonbField("en", "What is 2+2?"),
         description: buildJsonbField("en", "Simple math question"),
         displayOrder: 1,
-        solutionExplanation: buildJsonbField("en", "The answer is 4"),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       })
       .returning();
 
     const options = await db
-      .insert(questionAnswerOptions)
+      .insert(assessmentQuestionChoiceOptions)
       .values([
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "3"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "3",
           isCorrect: false,
           displayOrder: 1,
           createdAt: new Date().toISOString(),
@@ -1005,7 +1019,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "4"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "4",
           isCorrect: true,
           displayOrder: 2,
           createdAt: new Date().toISOString(),
@@ -1014,7 +1029,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "5"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "5",
           isCorrect: false,
           displayOrder: 3,
           createdAt: new Date().toISOString(),
@@ -1049,23 +1065,25 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   const buildQuizAnswers = async (lessonId: UUIDType) => {
     const quizQuestions = await db
-      .select({ id: questions.id })
-      .from(questions)
-      .where(eq(questions.lessonId, lessonId))
-      .orderBy(questions.displayOrder);
+      .select({ id: assessmentQuestions.id })
+      .from(assessmentQuestions)
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .where(eq(assessments.lessonId, lessonId))
+      .orderBy(assessmentQuestions.displayOrder);
 
     const questionsAnswers = await Promise.all(
       quizQuestions.map(async (question) => {
         const [correctOption] = await db
-          .select({ id: questionAnswerOptions.id })
-          .from(questionAnswerOptions)
+          .select({ id: assessmentQuestionChoiceOptions.id })
+          .from(assessmentQuestionChoiceOptions)
           .where(
             and(
-              eq(questionAnswerOptions.questionId, question.id),
-              eq(questionAnswerOptions.isCorrect, true),
+              eq(assessmentQuestionChoiceOptions.questionId, question.id),
+              eq(assessmentQuestionChoiceOptions.isCorrect, true),
+              eq(assessmentQuestionChoiceOptions.language, SUPPORTED_LANGUAGES.EN),
             ),
           )
-          .orderBy(questionAnswerOptions.displayOrder)
+          .orderBy(assessmentQuestionChoiceOptions.displayOrder)
           .limit(1);
 
         if (!correctOption) {
@@ -1121,20 +1139,22 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   };
 
   const resetQuizAttemptState = async (studentId: UUIDType, lessonId: UUIDType) => {
-    const quizQuestions = await db
-      .select({ id: questions.id })
-      .from(questions)
-      .where(eq(questions.lessonId, lessonId));
+    const quizAssessment = await db
+      .select({ id: assessments.id })
+      .from(assessments)
+      .where(eq(assessments.lessonId, lessonId))
+      .limit(1);
 
-    await db.delete(studentQuestionAnswers).where(
-      and(
-        eq(studentQuestionAnswers.studentId, studentId),
-        inArray(
-          studentQuestionAnswers.questionId,
-          quizQuestions.map((question) => question.id),
-        ),
-      ),
-    );
+    if (quizAssessment[0]) {
+      await db
+        .delete(assessmentAttempts)
+        .where(
+          and(
+            eq(assessmentAttempts.assessmentId, quizAssessment[0].id),
+            eq(assessmentAttempts.learnerId, studentId),
+          ),
+        );
+    }
 
     await db
       .delete(studentLessonProgress)
@@ -1169,16 +1189,26 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
       const { lesson } = await createQuizLesson(course.id, chapter.id, admin.id);
 
-      await db.insert(quizAttempts).values({
+      const [assessment] = await db
+        .select({ id: assessments.id })
+        .from(assessments)
+        .where(eq(assessments.lessonId, lesson.id))
+        .limit(1);
+
+      await db.insert(assessmentAttempts).values({
         id: crypto.randomUUID(),
-        userId: student.id,
-        courseId: course.id,
-        lessonId: lesson.id,
-        correctAnswers: 1,
-        wrongAnswers: 0,
-        score: 100,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        assessmentId: assessment.id,
+        language: SUPPORTED_LANGUAGES.EN,
+        learnerId: student.id,
+        attemptNumber: 1,
+        submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+        result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+        availablePoints: "1",
+        awardedPoints: "1",
+        scorePercentage: "100",
+        hasQuestionLevelAnswers: false,
+        submittedAt: new Date().toISOString(),
       });
 
       const response = await request(app.getHttpServer())
@@ -1196,9 +1226,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .from(lessons)
         .where(eq(lessons.id, lesson.id));
       const remainingQuizAttempts = await db
-        .select({ id: quizAttempts.id })
-        .from(quizAttempts)
-        .where(eq(quizAttempts.lessonId, lesson.id));
+        .select({ id: assessmentAttempts.id })
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.assessmentId, assessment.id));
 
       expect(deletedLessons).toHaveLength(0);
       expect(remainingQuizAttempts).toHaveLength(0);

@@ -40,6 +40,7 @@ import type { Sortable } from "~/components/SortableList/SortableList";
 
 interface CourseLessonsProps {
   chapters?: Chapter[];
+  baseLanguageChapters?: Chapter[];
   canRefetchChapterList: boolean;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
@@ -55,6 +56,7 @@ interface CourseLessonsProps {
 
 const CourseLessons = ({
   chapters,
+  baseLanguageChapters,
   canRefetchChapterList,
   language,
   baseLanguage,
@@ -91,6 +93,21 @@ const CourseLessons = ({
     !shouldUnmountCourseGenerationButton && !isCourseGenerationDisabled;
   const isCurriculumLocked =
     isCourseGenerationLocked || isBackgroundGenerating || isGenerationProcessing;
+
+  const baseLanguageLesson = useMemo(() => {
+    if (!selectedChapter || !selectedLesson) return null;
+
+    return (
+      baseLanguageChapters
+        ?.find(({ id }) => id === selectedChapter.id)
+        ?.lessons.find(({ id }) => id === selectedLesson.id) ?? null
+    );
+  }, [baseLanguageChapters, selectedChapter, selectedLesson]);
+
+  const baseLanguageChapter = useMemo(
+    () => baseLanguageChapters?.find(({ id }) => id === selectedChapter?.id) ?? null,
+    [baseLanguageChapters, selectedChapter?.id],
+  );
 
   useEffect(() => {
     if (!chapters) return;
@@ -176,6 +193,7 @@ const CourseLessons = ({
         <NewChapter
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapter={selectedChapter}
+          baseLanguageChapter={baseLanguageChapter}
           language={language}
         />
       ),
@@ -184,6 +202,7 @@ const CourseLessons = ({
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           setSelectedLesson={setSelectedLesson}
           language={language}
         />
@@ -196,6 +215,7 @@ const CourseLessons = ({
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           setSelectedLesson={setSelectedLesson}
           language={language}
           baseLanguage={baseLanguage}
@@ -206,6 +226,7 @@ const CourseLessons = ({
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           setSelectedLesson={setSelectedLesson}
           language={language}
           baseLanguage={baseLanguage}
@@ -214,6 +235,7 @@ const CourseLessons = ({
       [ContentTypes.EMBED_FORM]: (
         <EmbedLessonForm
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           chapterToEdit={selectedChapter}
           setContentTypeToDisplay={setContentTypeToDisplay}
           setSelectedLesson={setSelectedLesson}
@@ -223,6 +245,7 @@ const CourseLessons = ({
       [ContentTypes.SCORM_LESSON_FORM]: (
         <ScormLessonForm
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           chapterToEdit={selectedChapter}
           setContentTypeToDisplay={setContentTypeToDisplay}
           setSelectedLesson={setSelectedLesson}
@@ -232,6 +255,7 @@ const CourseLessons = ({
       [ContentTypes.LIVE_TRAINING_LESSON_FORM]: (
         <LiveTrainingLessonForm
           lessonToEdit={selectedLesson}
+          baseLanguageLesson={baseLanguageLesson}
           chapterToEdit={selectedChapter}
           setContentTypeToDisplay={setContentTypeToDisplay}
           setSelectedLesson={setSelectedLesson}
@@ -240,7 +264,15 @@ const CourseLessons = ({
       ),
     };
     return contentMap[contentTypeToDisplay] || null;
-  }, [contentTypeToDisplay, selectedChapter, selectedLesson, language, baseLanguage]);
+  }, [
+    contentTypeToDisplay,
+    selectedChapter,
+    selectedLesson,
+    baseLanguageLesson,
+    baseLanguageChapter,
+    language,
+    baseLanguage,
+  ]);
 
   const sortableChapters: Sortable<Chapter>[] = useMemo(
     () => chapters?.map((chapter) => ({ ...chapter, sortableId: chapter.id })) ?? [],
@@ -298,6 +330,7 @@ const CourseLessons = ({
             <ChaptersList
               canRefetchChapterList={canRefetchChapterList}
               chapters={shouldShowPreviewChapters ? sortablePreviewChapters : sortableChapters}
+              baseLanguageChapters={baseLanguageChapters}
               setContentTypeToDisplay={setContentTypeToDisplay}
               setSelectedChapter={setSelectedChapter}
               setSelectedLesson={setSelectedLesson}

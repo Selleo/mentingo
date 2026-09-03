@@ -7,6 +7,10 @@ import {
   AI_MENTOR_VOICE_MODE,
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TEACHING_STYLE,
+  ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_TEXT_COMPARISON_MODES,
   DEFAULT_AI_MENTOR_TYPE,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
@@ -34,19 +38,24 @@ import {
 } from "src/luma/luma-course-generation-sync.constants";
 import { LumaCourseGenerationSyncRepository } from "src/luma/luma-course-generation-sync.repository";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
+  assessmentQuestionBlanks,
+  assessmentQuestionBlankAnswerSets,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestionDragAndDropOptions,
+  assessmentQuestionOpenTextSettings,
+  assessmentQuestions,
+  assessmentQuestionTrueFalseStatements,
+  assessments,
   chapters,
   courses,
   lessons,
-  questionAnswerOptions,
-  questions,
 } from "src/storage/schema";
 
 import type { GeneratedCourseBundleResponse, GeneratedCourseResponse } from "@japro/luma-sdk";
-import type { AiMentorTTSPreset, AiMentorType } from "@repo/shared";
+import type { AssessmentQuestionType, AiMentorTTSPreset, AiMentorType } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type {
@@ -71,8 +80,6 @@ import type {
   LumaGeneratedCourseQuestionType,
   LumaAiMentorContextIngestion,
 } from "src/luma/luma.types";
-import type { QuestionType } from "src/questions/schema/question.types";
-
 @Injectable()
 export class LumaGeneratedCourseImportService {
   private readonly logger = new Logger(LumaGeneratedCourseImportService.name);
@@ -313,6 +320,19 @@ export class LumaGeneratedCourseImportService {
       (a, b) => a.questionIndex - b.questionIndex,
     );
 
+    const [assessment] = await data.trx
+      .insert(assessments)
+      .values({
+        lessonId: lesson.id,
+        passingScorePercentage: "0",
+        attemptLimitMode: ASSESSMENT_ATTEMPT_LIMIT_MODES.NONE,
+        maximumAttempts: null,
+        attemptCooldown: null,
+        baseLanguage: data.language,
+        availableLocales: [data.language],
+      })
+      .returning({ id: assessments.id });
+
     for (const [questionDisplayIndex, question] of sortedQuestions.entries()) {
       const questionType = this.mapQuestionType(question.type);
       const questionOptions = question.options ?? [];
@@ -326,23 +346,21 @@ export class LumaGeneratedCourseImportService {
       );
 
       const [createdQuestion] = await data.trx
-        .insert(questions)
+        .insert(assessmentQuestions)
         .values({
-          lessonId: lesson.id,
-          authorId: data.currentUser.userId,
-          type: questionType,
+          assessmentId: assessment.id,
+          questionType,
           title: buildJsonbField(data.language, this.sanitizeText(question.title)),
-          description: buildJsonbField(
-            data.language,
-            this.sanitizeText(question.description ?? ""),
-          ),
-          solutionExplanation: buildJsonbField(
-            data.language,
-            this.sanitizeText(question.solutionExplanation ?? ""),
-          ),
-          displayOrder: question.questionIndex || questionDisplayIndex + 1,
+          prompt: buildJsonbField(data.language, this.sanitizeText(question.description ?? "")),
+          description: null,
+          displayOrder: questionDisplayIndex + 1,
+          gradingMode:
+            questionType === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
+            questionType === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE
+              ? ASSESSMENT_GRADING_MODES.PARTICIPATION
+              : ASSESSMENT_GRADING_MODES.AUTOMATIC,
         })
-        .returning({ id: questions.id });
+        .returning({ id: assessmentQuestions.id });
 
       await this.insertQuestionOptions({
         questionId: createdQuestion.id,
@@ -368,32 +386,88 @@ export class LumaGeneratedCourseImportService {
   private async insertQuestionOptions(data: InsertQuestionOptionsData) {
     const options = [...(data.options ?? [])].sort((a, b) => a.optionIndex - b.optionIndex);
     const isBlankQuestion =
-      data.questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND ||
-      data.questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
+      data.questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND ||
+      data.questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT;
 
-    for (const [optionDisplayIndex, option] of options.entries()) {
-      const optionId = option.blankAnswerId ?? undefined;
-      const optionText = option.optionText;
+    if (
+      data.questionType === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
+      data.questionType === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE
+    ) {
+      await data.trx.insert(assessmentQuestionOpenTextSettings).values({
+        questionId: data.questionId,
+        minimumCharacters: null,
+        maximumCharacters: null,
+        reviewerInstructions: null,
+      });
+      return;
+    }
 
-      if (isBlankQuestion && optionId && !this.isUuid(optionId)) {
+    if (data.questionType === ASSESSMENT_QUESTION_TYPES.TRUE_OR_FALSE) {
+      await data.trx.insert(assessmentQuestionTrueFalseStatements).values(
+        options.map((option, index) => ({
+          questionId: data.questionId,
+          language: data.language,
+          displayOrder: index + 1,
+          correctValue: Boolean(option.isCorrect),
+          statement: this.sanitizeText(option.optionText),
+        })),
+      );
+      return;
+    }
+
+    if (!isBlankQuestion) {
+      await data.trx.insert(assessmentQuestionChoiceOptions).values(
+        options.map((option, index) => ({
+          questionId: data.questionId,
+          language: data.language,
+          displayOrder: index + 1,
+          isCorrect: Boolean(option.isCorrect),
+          label: this.sanitizeText(option.optionText),
+        })),
+      );
+      return;
+    }
+
+    const blankOptions = options.filter((option) => option.blankAnswerId);
+    const blankIds = [...new Set(blankOptions.map((option) => option.blankAnswerId!))];
+
+    for (const option of options) {
+      if (isBlankQuestion && option.blankAnswerId && !this.isUuid(option.blankAnswerId)) {
         throw new BadRequestException("luma.errors.invalidBlankAnswerId");
       }
+    }
 
-      if (!optionText) {
-        this.logger.warn(
-          `Generated quiz option has empty text: questionId=${data.questionId}, optionIndex=${
-            option.optionIndex
-          }, optionKeys=${this.getObjectKeysForLog(option)}`,
-        );
-      }
-
-      await data.trx.insert(questionAnswerOptions).values({
-        id: isBlankQuestion ? optionId : undefined,
+    await data.trx.insert(assessmentQuestionBlanks).values(
+      blankIds.map((blankId) => ({
+        id: blankId,
         questionId: data.questionId,
-        optionText: buildJsonbField(data.language, this.sanitizeText(optionText), true),
-        isCorrect: Boolean(option.isCorrect),
-        displayOrder: option.optionIndex || optionDisplayIndex + 1,
-      });
+        textComparisonMode: ASSESSMENT_TEXT_COMPARISON_MODES.NORMALIZED,
+      })),
+    );
+
+    await data.trx.insert(assessmentQuestionBlankAnswerSets).values(
+      blankOptions
+        .filter((option) => option.isCorrect && option.optionText)
+        .map((option) => ({
+          blankId: option.blankAnswerId!,
+          language: data.language,
+          preferredAnswer: this.sanitizeText(option.optionText),
+          acceptedAnswers: [this.sanitizeText(option.optionText)],
+        })),
+    );
+
+    if (data.questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND) {
+      await data.trx.insert(assessmentQuestionDragAndDropOptions).values(
+        options
+          .filter((option) => option.optionText)
+          .map((option, index) => ({
+            questionId: data.questionId,
+            language: data.language,
+            label: this.sanitizeText(option.optionText),
+            targetBlankId: option.blankAnswerId ?? null,
+            displayOrder: index + 1,
+          })),
+      );
     }
   }
 
@@ -767,23 +841,23 @@ export class LumaGeneratedCourseImportService {
     return AI_MENTOR_TTS_PRESET.MALE;
   }
 
-  private mapQuestionType(type: LumaGeneratedCourseQuestionType): QuestionType {
+  private mapQuestionType(type: LumaGeneratedCourseQuestionType): AssessmentQuestionType {
     switch (type) {
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.SINGLE_SELECT:
-        return QUESTION_TYPE.SINGLE_CHOICE;
+        return ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.MULTI_SELECT:
-        return QUESTION_TYPE.MULTIPLE_CHOICE;
+        return ASSESSMENT_QUESTION_TYPES.MULTIPLE_CHOICE;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.TRUE_OR_FALSE:
-        return QUESTION_TYPE.TRUE_OR_FALSE;
+        return ASSESSMENT_QUESTION_TYPES.TRUE_OR_FALSE;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.DETAILED_RESPONSE:
-        return QUESTION_TYPE.DETAILED_RESPONSE;
+        return ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.FILL_IN_THE_BLANKS:
-        return QUESTION_TYPE.FILL_IN_THE_BLANKS_DND;
+        return ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.GAP_FILL:
-        return QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
+        return ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT;
       case LUMA_GENERATED_COURSE_QUESTION_TYPES.BRIEF_RESPONSE:
       default:
-        return QUESTION_TYPE.BRIEF_RESPONSE;
+        return ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE;
     }
   }
 

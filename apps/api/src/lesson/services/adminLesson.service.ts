@@ -19,11 +19,9 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
-import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
@@ -42,8 +40,8 @@ import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
-import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
 import { AiJudgeConfigurationGraphService } from "../ai-judge-configuration/ai-judge-configuration-graph.service";
@@ -93,6 +91,7 @@ export class AdminLessonService {
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly resourceLibraryService: ResourceLibraryService,
+    private readonly quizAuthoringService: QuizAuthoringService,
     private readonly liveTrainingService: LiveTrainingService,
     private readonly searchIndexService: SearchIndexService,
     private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
@@ -522,12 +521,10 @@ export class AdminLessonService {
       data.chapterId,
     );
 
-    const lesson = await this.createQuizLessonWithQuestionsAndOptions(
-      data,
-      currentUser.userId,
-      language,
-      maxDisplayOrder + 1,
-    );
+    const lesson = await this.quizAuthoringService.createQuizLesson({
+      ...data,
+      displayOrder: maxDisplayOrder + 1,
+    });
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
@@ -616,7 +613,7 @@ export class AdminLessonService {
       });
     }
 
-    const { availableLocales, baseLanguage } = await this.localizationService.getBaseLanguage(
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
     );
@@ -634,13 +631,7 @@ export class AdminLessonService {
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
-    const updatedLessonId = await this.updateQuizLessonWithQuestionsAndOptions(
-      id,
-      data,
-      currentUser.userId,
-      data.language,
-      baseLanguage,
-    );
+    await this.quizAuthoringService.updateQuizLesson(id, data);
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -653,7 +644,11 @@ export class AdminLessonService {
       }),
     );
 
-    return updatedLessonId;
+    return id;
+  }
+
+  async getQuizLessonForAuthoring(lessonId: UUIDType, language: SupportedLanguages) {
+    return this.quizAuthoringService.getLegacyQuizLessonForAuthoring(lessonId, language);
   }
 
   async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUserType) {
@@ -924,256 +919,6 @@ export class AdminLessonService {
       await this.searchIndexService.refreshLesson(id, trx);
 
       return updatedLesson;
-    });
-  }
-
-  private async createQuizLessonWithQuestionsAndOptions(
-    data: CreateQuizLessonBody,
-    authorId: UUIDType,
-    language: SupportedLanguages,
-    displayOrder: number,
-  ) {
-    return await this.db.transaction(async (trx) => {
-      const lesson = await this.adminLessonRepository.createQuizLessonWithQuestionsAndOptions(
-        data,
-        displayOrder,
-        language,
-        trx,
-      );
-
-      if (!data.questions) return;
-
-      const questionsToInsert = data?.questions?.map((question) => ({
-        lessonId: lesson.id,
-        authorId,
-        type: question.type,
-        description: buildJsonbField(language, question.description),
-        title: buildJsonbField(language, question.title),
-        displayOrder: question.displayOrder,
-        solutionExplanation: buildJsonbField(language, question.solutionExplanation),
-        photoS3Key: question.photoS3Key,
-      }));
-
-      const insertedQuestions = await trx
-        .insert(questions)
-        .values(questionsToInsert)
-        .returning({
-          ...getTableColumns(questions),
-          description: sql<string>`questions.description->>${language}`,
-          title: sql<string>`questions.title->>${language}`,
-          solutionExplanation: sql<string>`questions.solution_explanation->>${language}`,
-        });
-
-      const optionsToInsert = insertedQuestions.flatMap(
-        (question, index) =>
-          data.questions?.[index].options?.map((option) => ({
-            id: option.id,
-            questionId: question.id,
-            optionText: buildJsonbField(language, option.optionText),
-            isCorrect: option.isCorrect,
-            displayOrder: option.displayOrder,
-            matchedWord: buildJsonbField(language, option.matchedWord),
-            scaleAnswer: option.scaleAnswer,
-          })) || [],
-      );
-
-      if (optionsToInsert.length > 0) {
-        await trx.insert(questionAnswerOptions).values(optionsToInsert);
-      }
-
-      await this.searchIndexService.refreshLesson(lesson.id, trx);
-
-      return lesson;
-    });
-  }
-
-  async updateQuizLessonWithQuestionsAndOptions(
-    id: UUIDType,
-    data: UpdateQuizLessonBody,
-    currentUserId: UUIDType,
-    language: SupportedLanguages,
-    baseLanguage: SupportedLanguages,
-  ) {
-    return await this.db.transaction(async (trx) => {
-      const { availableLocales } = await this.localizationService.getBaseLanguage(
-        ENTITY_TYPE.LESSON,
-        id,
-      );
-
-      if (!availableLocales.includes(data.language)) {
-        throw new BadRequestException("adminCourseView.toast.languageNotSupported");
-      }
-
-      await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
-
-      const existingQuestions = await this.adminLessonRepository.getExistingQuestions(id, trx);
-      const existingQuestionIds = existingQuestions.map((question) => question.id);
-
-      const inputQuestionIds = data.questions
-        ? data.questions.map((question) => question.id).filter(Boolean)
-        : [];
-
-      const isTranslating = language !== baseLanguage;
-
-      if (existingQuestionIds.length !== inputQuestionIds.length && isTranslating) {
-        throw new BadRequestException(
-          "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-        );
-      }
-
-      const questionsToDelete = existingQuestionIds.filter(
-        (existingId) => !inputQuestionIds.includes(existingId),
-      );
-
-      if (questionsToDelete.length > 0) {
-        if (isTranslating) {
-          throw new BadRequestException(
-            "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-          );
-        }
-        await this.adminLessonRepository.deleteQuestions(questionsToDelete, trx);
-        await this.adminLessonRepository.deleteQuestionOptions(questionsToDelete, trx);
-      }
-
-      if (data.questions) {
-        for (const question of data.questions) {
-          if (isTranslating) {
-            if (!question.id || !existingQuestionIds.includes(question.id)) {
-              throw new BadRequestException(
-                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-              );
-            }
-
-            const existingQuestion = existingQuestions.find((q) => q.id === question.id);
-
-            if (
-              !existingQuestion ||
-              existingQuestion.type !== question.type ||
-              existingQuestion.displayOrder !== question.displayOrder
-            ) {
-              throw new BadRequestException(
-                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-              );
-            }
-          }
-
-          const questionData = {
-            type: question.type,
-            description: question.description || null,
-            title: question.title,
-            displayOrder: question.displayOrder,
-            solutionExplanation: question.solutionExplanation,
-            photoS3Key: question.photoS3Key,
-            language: data.language,
-          };
-
-          const questionId = await this.adminLessonRepository.upsertQuestion(
-            questionData,
-            id,
-            currentUserId,
-            trx,
-            question.id,
-          );
-
-          if (question.options) {
-            const { existingOptions } = await this.adminLessonRepository.getExistingOptions(
-              questionId,
-              trx,
-            );
-
-            const existingOptionIds = existingOptions.map((option) => option.id);
-            const inputOptionIds = question.options.map((option) => option.id).filter(Boolean);
-            const optionsToDelete = existingOptionIds.filter(
-              (existingId) => !inputOptionIds.includes(existingId),
-            );
-
-            if (optionsToDelete.length > 0) {
-              if (isTranslating) {
-                throw new BadRequestException(
-                  "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-                );
-              }
-              await this.adminLessonRepository.deleteOptions(optionsToDelete, trx);
-            }
-
-            for (const option of question.options) {
-              if (isTranslating) {
-                if (!option.id || !existingOptionIds.includes(option.id)) {
-                  throw new BadRequestException(
-                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-                  );
-                }
-
-                const existingOption = existingOptions.find(
-                  (existing) => existing.id === option.id,
-                );
-
-                if (!existingOption) {
-                  throw new BadRequestException(
-                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-                  );
-                }
-
-                const incomingIsCorrect =
-                  option.isCorrect === undefined ? existingOption.isCorrect : option.isCorrect;
-
-                const isTrueOrFalseQuestion = question.type === "true_or_false";
-                const isFillInTheBlank =
-                  question.type === "fill_in_the_blanks_text" ||
-                  question.type === "fill_in_the_blanks_dnd";
-                const isCorrectChanged =
-                  !isFillInTheBlank &&
-                  incomingIsCorrect !== existingOption.isCorrect &&
-                  (isTrueOrFalseQuestion || option.isCorrect !== undefined);
-
-                const scaleChanged =
-                  option.scaleAnswer !== undefined &&
-                  existingOption.scaleAnswer !== option.scaleAnswer;
-
-                if (isCorrectChanged || scaleChanged) {
-                  throw new BadRequestException(
-                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
-                  );
-                }
-              }
-
-              const optionData = {
-                id: option.id,
-                optionText: option.optionText,
-                isCorrect: option.isCorrect,
-                displayOrder: option.displayOrder,
-                matchedWord: option.matchedWord,
-                scaleAnswer: option.scaleAnswer,
-                language: data.language,
-              };
-
-              if (option.id && existingOptionIds.includes(option.id)) {
-                const result = await this.adminLessonRepository.updateOption(
-                  option.id,
-                  optionData,
-                  trx,
-                );
-                if (!result || result.length === 0) {
-                  throw new BadRequestException("adminCourseView.errors.lesson.optionUpdateFailed");
-                }
-              } else {
-                const result = await this.adminLessonRepository.insertOption(
-                  questionId,
-                  optionData,
-                  trx,
-                );
-                if (!result || result.length === 0) {
-                  throw new BadRequestException("adminCourseView.errors.lesson.optionInsertFailed");
-                }
-              }
-            }
-          }
-        }
-      }
-
-      await this.searchIndexService.refreshLesson(id, trx);
-
-      return id;
     });
   }
 
@@ -1536,10 +1281,11 @@ export class AdminLessonService {
       { quality: IMAGE_QUALITY.MD },
     );
 
-    const questions =
+    const quizLesson =
       lesson.type === LESSON_TYPES.QUIZ
-        ? await this.adminLessonRepository.getQuestionsWithOptions(lessonId, language)
-        : [];
+        ? await this.quizAuthoringService.getLegacyQuizLessonForAuthoring(lessonId, language)
+        : null;
+    const questions = quizLesson?.questions ?? [];
 
     return {
       id: lesson.id,

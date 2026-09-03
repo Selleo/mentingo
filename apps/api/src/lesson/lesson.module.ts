@@ -10,7 +10,7 @@ import { LiveTrainingModule } from "src/live-training/live-training.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsModule } from "src/permissions/permissions.module";
-import { QuestionsModule } from "src/questions/question.module";
+import { QuizModule } from "src/quiz/quiz.module";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
@@ -43,7 +43,7 @@ import { LessonService } from "./services/lesson.service";
   imports: [
     FileModule,
     SearchIndexModule,
-    QuestionsModule,
+    QuizModule,
     StudentLessonProgressModule,
     AiModule,
     IngestionModule,

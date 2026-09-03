@@ -1,3 +1,4 @@
+import type { SupportedLanguages } from "@repo/shared";
 import type {
   courses,
   questionsAndAnswers,
@@ -24,6 +25,12 @@ export const ENTITY_TYPE = {
 } as const;
 
 export type EntityType = (typeof ENTITY_TYPE)[keyof typeof ENTITY_TYPE];
+
+export type EntityLocalization = {
+  baseLanguage: SupportedLanguages;
+  language: SupportedLanguages;
+  availableLocales: SupportedLanguages[];
+};
 
 export type EntityField = "title" | "description";
 

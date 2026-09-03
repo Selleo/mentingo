@@ -120,6 +120,16 @@ export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<strin
   return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
 
+export const getFirstJsonbObjectKey = <T = string>(field: SqlExpression) =>
+  sql<T>`(
+    SELECT key FROM JSON_EACH_TEXT(${field}) LIMIT 1
+  )`;
+
+export const getFirstJsonbObjectValue = <T = string>(field: SqlExpression) =>
+  sql<T>`(
+    SELECT value FROM JSON_EACH_TEXT(${field}) LIMIT 1
+  )`;
+
 export function mergeJsonbField(existingField: SqlExpression, incomingField: SqlExpression) {
   return sql`
     CASE

@@ -15,6 +15,7 @@ import {
   DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   LESSON_TYPES,
+  type LocalizedText,
   MASTER_COURSE_ENTITY_TYPES,
   RESOURCE_VISIBILITY,
   PERMISSIONS,
@@ -51,7 +52,10 @@ import { isImageVariantReference } from "src/file/image-variants/image-variant.u
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import { VideoMetadataQueueService } from "src/file/video-metadata.queue.service";
 import { getBunnyVideoId } from "src/file/video-metadata.utils";
-import { rewriteBlankAnswerIds } from "src/questions/fill-in-the-blanks.utils";
+import {
+  BLANK_ANSWER_MARKER_REGEX,
+  rewriteBlankAnswerIds,
+} from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
   buildTenantResourceUrl,
@@ -67,7 +71,13 @@ import {
 } from "src/scorm/scorm-storage-paths";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
+import {
+  assessmentQuestionChoiceOptions,
+  assessmentQuestions,
+  chapters,
+  courses,
+  lessons,
+} from "src/storage/schema";
 import { normalizeJsonb, toJsonbBuildObject, toNullableJsonbBuildObject } from "src/utils/jsonb";
 
 import type { UUIDType } from "src/common";
@@ -88,6 +98,12 @@ import type {
   CreateOrQueueExportForTargetParams,
   CreateTargetCourseFromSourceParams,
   DuplicateResourcesParams,
+  DuplicateChaptersParams,
+  DuplicateCourseIntoExistingCourseParams,
+  DuplicateLessonsParams,
+  DuplicateOptionsParams,
+  DuplicateQuestionsParams,
+  AssessmentUpsertValues,
   EnsureCourseExportSyncedParams,
   GetTargetResourceEntityIdParams,
   GetTargetScormPackageEntityIdParams,
@@ -99,6 +115,7 @@ import type {
   ResolveTargetResourceReferenceParams,
   SourceSnapshot,
   SyncAiMentorsParams,
+  SyncAssessmentQuestionDetailsParams,
   SyncChaptersParams,
   SyncFillInTheBlanksQuestionReferencesParams,
   SyncLessonResourceReferencesParams,
@@ -229,12 +246,9 @@ export class MasterCourseService {
     return this.queueService.getJobStatus(jobId);
   }
 
-  async duplicateCourseIntoExistingCourse(params: {
-    sourceCourseId: UUIDType;
-    targetCourseId: UUIDType;
-    actorId: UUIDType;
-    tenantId: UUIDType;
-  }): Promise<void> {
+  async duplicateCourseIntoExistingCourse(
+    params: DuplicateCourseIntoExistingCourseParams,
+  ): Promise<void> {
     const sourceCourse = await this.masterCourseRepository.getCourseById(params.sourceCourseId);
     if (!sourceCourse) throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
 
@@ -330,6 +344,11 @@ export class MasterCourseService {
     });
 
     const optionMap = await this.duplicateOptions({ sourceSnapshot, questionMap });
+    const blankMap = await this.syncAssessmentQuestionDetails({
+      sourceSnapshot,
+      questionMap,
+      targetCourseId: params.targetCourseId,
+    });
     const aiMentorMap = await this.syncAiMentors({
       sourceSnapshot,
       lessonMap,
@@ -349,6 +368,7 @@ export class MasterCourseService {
 
     await this.duplicateResources({
       lessonMap,
+      questionMap,
       targetCourseId: params.targetCourseId,
       targetTenantId: params.tenantId,
       targetAuthorId: params.actorId,
@@ -366,6 +386,7 @@ export class MasterCourseService {
       sourceSnapshot,
       questionMap,
       optionMap,
+      blankMap,
     });
 
     await this.masterCourseRepository.updateTargetCourseChapterCount(
@@ -645,6 +666,11 @@ export class MasterCourseService {
         sourceSnapshot,
         questionMap,
       });
+      const blankMap = await this.syncAssessmentQuestionDetails({
+        sourceSnapshot,
+        questionMap,
+        targetCourseId: resolvedTargetCourseId,
+      });
 
       const aiMentorMap = await this.syncAiMentors({
         sourceSnapshot,
@@ -665,6 +691,7 @@ export class MasterCourseService {
       await this.syncResources({
         exportId: exportLink.id,
         lessonMap,
+        questionMap,
         targetCourseId: resolvedTargetCourseId,
         targetTenantId: exportLink.targetTenantId,
         targetAuthorId: targetAuthor.id,
@@ -682,6 +709,7 @@ export class MasterCourseService {
         sourceSnapshot,
         questionMap,
         optionMap,
+        blankMap,
       });
 
       await this.cleanupMissingMirroredEntities(exportLink.id, sourceSnapshot);
@@ -884,11 +912,7 @@ export class MasterCourseService {
     return chapterMap;
   }
 
-  private async duplicateChapters(params: {
-    sourceSnapshot: SourceSnapshot;
-    targetCourseId: UUIDType;
-    targetAuthorId: UUIDType;
-  }) {
+  private async duplicateChapters(params: DuplicateChaptersParams) {
     const chapterMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceChapter of params.sourceSnapshot.chapters) {
@@ -983,11 +1007,7 @@ export class MasterCourseService {
     return lessonMap;
   }
 
-  private async duplicateLessons(params: {
-    sourceSnapshot: SourceSnapshot;
-    chapterMap: Map<UUIDType, UUIDType>;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async duplicateLessons(params: DuplicateLessonsParams) {
     const lessonMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceLesson of params.sourceSnapshot.lessons) {
@@ -1042,40 +1062,53 @@ export class MasterCourseService {
   private async syncQuestions(params: SyncQuestionsParams) {
     const questionMap = new Map<UUIDType, UUIDType>();
 
+    await this.syncAssessmentSettings(params.sourceSnapshot, params.lessonMap);
+
     for (const sourceQuestion of params.sourceSnapshot.questions) {
       const mappedLessonId = params.lessonMap.get(sourceQuestion.lessonId);
       if (!mappedLessonId) continue;
+      const sourceAssessment = params.sourceSnapshot.assessments.find(
+        (assessment) => assessment.lessonId === sourceQuestion.lessonId,
+      );
+      if (!sourceAssessment) continue;
 
       const mappedId = await this.resolveOrCreateMappedTargetId(
         params.exportId,
         MASTER_COURSE_ENTITY_TYPES.QUESTION,
         sourceQuestion.id,
         () =>
-          this.masterCourseRepository.createTargetQuestion({
-            lessonId: mappedLessonId,
-            type: sourceQuestion.type,
-            description: toNullableJsonbBuildObject(sourceQuestion.description),
-            title: toJsonbBuildObject(sourceQuestion.title),
-            displayOrder: sourceQuestion.displayOrder,
-            solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
-            photoS3Key: this.getCopiedInternalReference(
-              params.resourceCollection,
-              "questions",
-              ENTITY_TYPES.QUESTION,
-              sourceQuestion.id,
-              "photoS3Key",
-              sourceQuestion.photoS3Key,
-            ),
-            authorId: params.targetAuthorId,
-          }),
+          this.masterCourseRepository.createTargetQuestion(
+            {
+              lessonId: mappedLessonId,
+              type: sourceQuestion.type,
+              prompt: toJsonbBuildObject(sourceQuestion.prompt),
+              description: toNullableJsonbBuildObject(sourceQuestion.description),
+              title: toJsonbBuildObject(sourceQuestion.title),
+              displayOrder: sourceQuestion.displayOrder,
+              gradingMode: sourceQuestion.gradingMode,
+              solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+              photoS3Key: this.getCopiedInternalReference(
+                params.resourceCollection,
+                "questions",
+                ENTITY_TYPES.QUESTION,
+                sourceQuestion.id,
+                "photoS3Key",
+                sourceQuestion.photoS3Key,
+              ),
+              authorId: params.targetAuthorId,
+            },
+            this.mapTargetAssessmentValues(sourceAssessment, mappedLessonId),
+          ),
       );
 
       await this.masterCourseRepository.updateTargetQuestion(mappedId, {
         lessonId: mappedLessonId,
         type: sourceQuestion.type,
+        prompt: toJsonbBuildObject(sourceQuestion.prompt),
         description: toNullableJsonbBuildObject(sourceQuestion.description),
         title: toJsonbBuildObject(sourceQuestion.title),
         displayOrder: sourceQuestion.displayOrder,
+        gradingMode: sourceQuestion.gradingMode,
         solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
         photoS3Key: this.getCopiedInternalReference(
           params.resourceCollection,
@@ -1093,17 +1126,18 @@ export class MasterCourseService {
     return questionMap;
   }
 
-  private async duplicateQuestions(params: {
-    sourceSnapshot: SourceSnapshot;
-    lessonMap: Map<UUIDType, UUIDType>;
-    targetAuthorId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async duplicateQuestions(params: DuplicateQuestionsParams) {
     const questionMap = new Map<UUIDType, UUIDType>();
+
+    await this.syncAssessmentSettings(params.sourceSnapshot, params.lessonMap);
 
     for (const sourceQuestion of params.sourceSnapshot.questions) {
       const mappedLessonId = params.lessonMap.get(sourceQuestion.lessonId);
       if (!mappedLessonId) continue;
+      const sourceAssessment = params.sourceSnapshot.assessments.find(
+        (assessment) => assessment.lessonId === sourceQuestion.lessonId,
+      );
+      if (!sourceAssessment) continue;
 
       const duplicatedQuestionValues = this.omitCopiedRowFields(sourceQuestion, [
         "id",
@@ -1114,27 +1148,69 @@ export class MasterCourseService {
         "tenantId",
       ] as const);
 
-      const targetQuestionId = await this.masterCourseRepository.createTargetQuestion({
-        ...duplicatedQuestionValues,
-        lessonId: mappedLessonId,
-        description: toNullableJsonbBuildObject(sourceQuestion.description),
-        title: toJsonbBuildObject(sourceQuestion.title),
-        solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
-        photoS3Key: this.getCopiedInternalReference(
-          params.resourceCollection,
-          "questions",
-          ENTITY_TYPES.QUESTION,
-          sourceQuestion.id,
-          "photoS3Key",
-          sourceQuestion.photoS3Key,
-        ),
-        authorId: params.targetAuthorId,
-      });
+      const targetQuestionId = await this.masterCourseRepository.createTargetQuestion(
+        {
+          ...duplicatedQuestionValues,
+          lessonId: mappedLessonId,
+          prompt: toJsonbBuildObject(sourceQuestion.prompt),
+          description: toNullableJsonbBuildObject(sourceQuestion.description),
+          title: toJsonbBuildObject(sourceQuestion.title),
+          solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+          photoS3Key: this.getCopiedInternalReference(
+            params.resourceCollection,
+            "questions",
+            ENTITY_TYPES.QUESTION,
+            sourceQuestion.id,
+            "photoS3Key",
+            sourceQuestion.photoS3Key,
+          ),
+          authorId: params.targetAuthorId,
+        },
+        this.mapTargetAssessmentValues(sourceAssessment, mappedLessonId),
+      );
 
       questionMap.set(sourceQuestion.id, targetQuestionId);
     }
 
     return questionMap;
+  }
+
+  private async syncAssessmentSettings(
+    sourceSnapshot: SourceSnapshot,
+    lessonMap: Map<UUIDType, UUIDType>,
+  ) {
+    for (const sourceAssessment of sourceSnapshot.assessments) {
+      const targetLessonId = lessonMap.get(sourceAssessment.lessonId);
+
+      if (!targetLessonId) continue;
+
+      await this.masterCourseRepository.upsertTargetAssessment({
+        lessonId: targetLessonId,
+        passingScorePercentage: sourceAssessment.passingScorePercentage,
+        attemptLimitMode: sourceAssessment.attemptLimitMode,
+        maximumAttempts: sourceAssessment.maximumAttempts,
+        attemptCooldown: sourceAssessment.attemptCooldown,
+        feedbackMode: sourceAssessment.feedbackMode,
+        baseLanguage: sourceAssessment.baseLanguage,
+        availableLocales: sourceAssessment.availableLocales,
+      });
+    }
+  }
+
+  private mapTargetAssessmentValues(
+    sourceAssessment: SourceSnapshot["assessments"][number],
+    targetLessonId: UUIDType,
+  ): AssessmentUpsertValues {
+    return {
+      lessonId: targetLessonId,
+      passingScorePercentage: sourceAssessment.passingScorePercentage,
+      attemptLimitMode: sourceAssessment.attemptLimitMode,
+      maximumAttempts: sourceAssessment.maximumAttempts,
+      attemptCooldown: sourceAssessment.attemptCooldown,
+      feedbackMode: sourceAssessment.feedbackMode,
+      baseLanguage: sourceAssessment.baseLanguage,
+      availableLocales: sourceAssessment.availableLocales,
+    };
   }
 
   private async syncOptions(params: SyncOptionsParams) {
@@ -1174,10 +1250,7 @@ export class MasterCourseService {
     return optionMap;
   }
 
-  private async duplicateOptions(params: {
-    sourceSnapshot: SourceSnapshot;
-    questionMap: Map<UUIDType, UUIDType>;
-  }) {
+  private async duplicateOptions(params: DuplicateOptionsParams) {
     const optionMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceOption of params.sourceSnapshot.options) {
@@ -1203,6 +1276,127 @@ export class MasterCourseService {
     }
 
     return optionMap;
+  }
+
+  private async syncAssessmentQuestionDetails(params: SyncAssessmentQuestionDetailsParams) {
+    const blankMap = new Map<UUIDType, UUIDType>();
+    const targetQuestionIds = [...params.questionMap.values()];
+    const targetScaleOptionIds = params.sourceSnapshot.assessmentQuestionScaleOptions.map(
+      ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+    );
+    const targetTrueFalseStatementIds =
+      params.sourceSnapshot.assessmentQuestionTrueFalseStatements.map(
+        ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+      );
+    const targetBlankIds = params.sourceSnapshot.assessmentQuestionBlanks.map(
+      ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+    );
+    const targetDragAndDropOptionIds =
+      params.sourceSnapshot.assessmentQuestionDragAndDropOptions.map(
+        ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+      );
+
+    await this.masterCourseRepository.deleteStaleTargetQuestionDetails({
+      questionIds: targetQuestionIds,
+      scaleOptionIds: targetScaleOptionIds,
+      trueFalseStatementIds: targetTrueFalseStatementIds,
+      blankIds: targetBlankIds,
+      dragAndDropOptionIds: targetDragAndDropOptionIds,
+    });
+
+    for (const sourceOption of params.sourceSnapshot.assessmentQuestionScaleOptions) {
+      const targetQuestionId = params.questionMap.get(sourceOption.questionId);
+
+      if (!targetQuestionId) continue;
+
+      await this.masterCourseRepository.upsertTargetScaleOption({
+        id: uuidv5(sourceOption.id, params.targetCourseId) as UUIDType,
+        questionId: targetQuestionId,
+        scaleValue: sourceOption.scaleValue,
+        displayOrder: sourceOption.displayOrder,
+        label: sourceOption.label as LocalizedText,
+      });
+    }
+
+    for (const sourceSettings of params.sourceSnapshot.assessmentQuestionOpenTextSettings) {
+      const targetQuestionId = params.questionMap.get(sourceSettings.questionId);
+
+      if (!targetQuestionId) continue;
+
+      await this.masterCourseRepository.upsertTargetOpenTextSettings({
+        questionId: targetQuestionId,
+        minimumCharacters: sourceSettings.minimumCharacters,
+        maximumCharacters: sourceSettings.maximumCharacters,
+        reviewerInstructions: sourceSettings.reviewerInstructions,
+      });
+    }
+
+    for (const sourceStatement of params.sourceSnapshot.assessmentQuestionTrueFalseStatements) {
+      const targetQuestionId = params.questionMap.get(sourceStatement.questionId);
+
+      if (!targetQuestionId) continue;
+
+      await this.masterCourseRepository.upsertTargetTrueFalseStatement({
+        id: uuidv5(sourceStatement.id, params.targetCourseId) as UUIDType,
+        questionId: targetQuestionId,
+        language: sourceStatement.language,
+        displayOrder: sourceStatement.displayOrder,
+        correctValue: sourceStatement.correctValue,
+        statement: sourceStatement.statement,
+      });
+    }
+
+    for (const sourceBlank of params.sourceSnapshot.assessmentQuestionBlanks) {
+      const targetQuestionId = params.questionMap.get(sourceBlank.questionId);
+
+      if (!targetQuestionId) continue;
+
+      const targetBlankId = uuidv5(sourceBlank.id, params.targetCourseId) as UUIDType;
+
+      await this.masterCourseRepository.upsertTargetBlank({
+        id: targetBlankId,
+        questionId: targetQuestionId,
+        textComparisonMode: sourceBlank.textComparisonMode,
+      });
+
+      blankMap.set(sourceBlank.id, targetBlankId);
+    }
+
+    for (const sourceAnswerSet of params.sourceSnapshot.assessmentQuestionBlankAnswerSets) {
+      const targetBlankId = blankMap.get(sourceAnswerSet.blankId);
+
+      if (!targetBlankId) continue;
+
+      await this.masterCourseRepository.upsertTargetBlankAnswerSet({
+        blankId: targetBlankId,
+        language: sourceAnswerSet.language,
+        preferredAnswer: sourceAnswerSet.preferredAnswer,
+        acceptedAnswers: sourceAnswerSet.acceptedAnswers,
+      });
+    }
+
+    for (const sourceOption of params.sourceSnapshot.assessmentQuestionDragAndDropOptions) {
+      const targetQuestionId = params.questionMap.get(sourceOption.questionId);
+
+      if (!targetQuestionId) continue;
+
+      const targetBlankId = sourceOption.targetBlankId
+        ? (blankMap.get(sourceOption.targetBlankId) ?? null)
+        : null;
+
+      if (targetBlankId) blankMap.set(sourceOption.id, targetBlankId);
+
+      await this.masterCourseRepository.upsertTargetDragAndDropOption({
+        id: uuidv5(sourceOption.id, params.targetCourseId) as UUIDType,
+        questionId: targetQuestionId,
+        language: sourceOption.language,
+        label: sourceOption.label,
+        targetBlankId,
+        displayOrder: sourceOption.displayOrder,
+      });
+    }
+
+    return blankMap;
   }
 
   private omitCopiedRowFields<T extends object, K extends keyof T>(
@@ -1766,7 +1960,7 @@ export class MasterCourseService {
   private async syncFillInTheBlanksQuestionReferences(
     params: SyncFillInTheBlanksQuestionReferencesParams,
   ) {
-    if (!params.optionMap.size) return;
+    if (!params.optionMap.size && !params.blankMap.size) return;
 
     for (const sourceQuestion of params.sourceSnapshot.questions) {
       if (!this.shouldRewriteBlankAnswerReferences(sourceQuestion)) continue;
@@ -1774,12 +1968,18 @@ export class MasterCourseService {
       const mappedQuestionId = params.questionMap.get(sourceQuestion.id);
       if (!mappedQuestionId) continue;
 
-      const description = this.rewriteLocalizedBlankAnswerIds(
-        sourceQuestion.description,
-        params.optionMap,
-      );
+      const blankMap = this.getQuestionBlankMarkerMap(sourceQuestion, params);
+      const description = this.rewriteLocalizedBlankAnswerIds(sourceQuestion.description, {
+        ...params,
+        blankMap,
+      });
+      const prompt = this.rewriteLocalizedBlankAnswerIds(sourceQuestion.prompt, {
+        ...params,
+        blankMap,
+      });
 
       await this.masterCourseRepository.updateTargetQuestion(mappedQuestionId, {
+        prompt: toJsonbBuildObject(prompt),
         description: toNullableJsonbBuildObject(description),
       });
     }
@@ -1821,8 +2021,46 @@ export class MasterCourseService {
     );
   }
 
-  private rewriteLocalizedBlankAnswerIds(value: unknown, optionMap: Map<UUIDType, UUIDType>) {
-    return mapLocalizedTextEntries(value, (content) => rewriteBlankAnswerIds(content, optionMap));
+  private rewriteLocalizedBlankAnswerIds(
+    value: unknown,
+    params: Pick<SyncFillInTheBlanksQuestionReferencesParams, "optionMap" | "blankMap">,
+  ) {
+    const idMap = new Map(params.optionMap);
+
+    for (const [sourceBlankId, targetBlankId] of params.blankMap) {
+      idMap.set(sourceBlankId, targetBlankId);
+    }
+
+    return mapLocalizedTextEntries(value, (content) => rewriteBlankAnswerIds(content, idMap));
+  }
+
+  private getQuestionBlankMarkerMap(
+    sourceQuestion: SourceSnapshot["questions"][number],
+    params: Pick<SyncFillInTheBlanksQuestionReferencesParams, "blankMap" | "sourceSnapshot">,
+  ) {
+    const questionBlanks = params.sourceSnapshot.assessmentQuestionBlanks.filter(
+      (blank) => blank.questionId === sourceQuestion.id,
+    );
+
+    const markerIds = [
+      ...new Set(
+        Object.values(sourceQuestion.description ?? {}).flatMap((content) =>
+          [...content.matchAll(BLANK_ANSWER_MARKER_REGEX)].map(([, markerId]) => markerId),
+        ),
+      ),
+    ];
+
+    const markerMap = new Map(params.blankMap);
+
+    markerIds.forEach((markerId, index) => {
+      const sourceBlank =
+        questionBlanks.find((blank) => blank.id === markerId) ?? questionBlanks[index];
+      const targetBlankId = sourceBlank ? params.blankMap.get(sourceBlank.id) : undefined;
+
+      if (targetBlankId) markerMap.set(markerId, targetBlankId);
+    });
+
+    return markerMap;
   }
 
   private buildSourceResourceCollection(
@@ -1933,6 +2171,17 @@ export class MasterCourseService {
         sourceEntityId: sourceAiMentor.lessonId,
         fieldPath: "aiMentorLessons.avatarReference",
         reference: sourceAiMentor.avatarReference,
+      });
+    }
+
+    for (const { resource, relation } of sourceSnapshot.questionResources) {
+      this.addExternalResourceReference(collection, {
+        group: "questions",
+        sourceEntityType: ENTITY_TYPES.ASSESSMENT_QUESTION,
+        sourceEntityId: relation.entityId,
+        relationshipType: relation.relationshipType,
+        resource,
+        relation,
       });
     }
 
@@ -2455,6 +2704,9 @@ export class MasterCourseService {
     if (resourceReference.source.entityType === ENTITY_TYPES.LESSON) {
       return params.lessonMap.get(resourceReference.source.entityId);
     }
+    if (resourceReference.source.entityType === ENTITY_TYPES.ASSESSMENT_QUESTION) {
+      return params.questionMap.get(resourceReference.source.entityId);
+    }
 
     return undefined;
   }
@@ -2472,8 +2724,10 @@ export class MasterCourseService {
 
   private async syncResources(params: SyncResourcesParams) {
     const targetLessonIds = Array.from(params.lessonMap.values());
+    const targetQuestionIds = Array.from(params.questionMap.values());
 
     await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
+    await this.masterCourseRepository.removeQuestionResourceRelations(targetQuestionIds);
     await this.masterCourseRepository.removeCourseResourceRelations(params.targetCourseId);
 
     const externalReferences = this.getExternalResourceReferences(params.resourceCollection);
@@ -2547,6 +2801,7 @@ export class MasterCourseService {
 
       const targetEntityId = this.getTargetResourceEntityId(resourceReference, {
         lessonMap: params.lessonMap,
+        questionMap: params.questionMap,
         targetCourseId: params.targetCourseId,
       });
 
@@ -2567,8 +2822,10 @@ export class MasterCourseService {
 
   private async duplicateResources(params: DuplicateResourcesParams) {
     const targetLessonIds = Array.from(params.lessonMap.values());
+    const targetQuestionIds = Array.from(params.questionMap.values());
 
     await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
+    await this.masterCourseRepository.removeQuestionResourceRelations(targetQuestionIds);
     await this.masterCourseRepository.removeCourseResourceRelations(params.targetCourseId);
 
     const externalReferences = this.getExternalResourceReferences(params.resourceCollection);
@@ -2605,6 +2862,7 @@ export class MasterCourseService {
       const targetResourceId = targetResourceIds.get(resourceReference.source.resourceId);
       const targetEntityId = this.getTargetResourceEntityId(resourceReference, {
         lessonMap: params.lessonMap,
+        questionMap: params.questionMap,
         targetCourseId: params.targetCourseId,
       });
 
@@ -2674,13 +2932,13 @@ export class MasterCourseService {
       exportId,
       MASTER_COURSE_ENTITY_TYPES.QUESTION,
       sourceSnapshot.questions.map((item) => item.id),
-      questions,
+      assessmentQuestions,
     );
     await this.cleanupMissingMappings(
       exportId,
       MASTER_COURSE_ENTITY_TYPES.OPTION,
       sourceSnapshot.options.map((item) => item.id),
-      questionAnswerOptions,
+      assessmentQuestionChoiceOptions,
     );
   }
 
@@ -2688,7 +2946,11 @@ export class MasterCourseService {
     exportId: UUIDType,
     entityType: MasterCourseEntityType,
     sourceIds: UUIDType[],
-    targetTable: typeof chapters | typeof lessons | typeof questions | typeof questionAnswerOptions,
+    targetTable:
+      | typeof chapters
+      | typeof lessons
+      | typeof assessmentQuestions
+      | typeof assessmentQuestionChoiceOptions,
   ) {
     const mappings = await this.masterCourseRepository.getMappings(exportId, entityType);
 

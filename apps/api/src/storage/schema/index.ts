@@ -44,8 +44,8 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
   pgTable,
+  pgEnum,
   text,
   timestamp,
   unique,
@@ -64,6 +64,7 @@ import {
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import { int4multirange, tsvector } from "./custom-types";
+export * from "./quiz.schema";
 import {
   archived,
   availableLocales,
@@ -192,28 +193,6 @@ export const userStatistics = pgTable(
     tenantId,
   },
   withTenantIdIndex("user_statistics"),
-);
-
-export const quizAttempts = pgTable(
-  "quiz_attempts",
-  {
-    ...id,
-    ...timestamps,
-    userId: uuid("user_id")
-      .references(() => users.id)
-      .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id)
-      .notNull(),
-    lessonId: uuid("lesson_id")
-      .references(() => lessons.id, { onDelete: "cascade" })
-      .notNull(),
-    correctAnswers: integer("correct_answers").notNull(),
-    wrongAnswers: integer("wrong_answers").notNull(),
-    score: integer("score").notNull(),
-    tenantId,
-  },
-  withTenantIdIndex("quiz_attempts"),
 );
 
 export const credentials = pgTable(
@@ -1379,66 +1358,6 @@ export const courseChatMessageReactions = pgTable(
   })),
 );
 
-export const questions = pgTable(
-  "questions",
-  {
-    ...id,
-    ...timestamps,
-    lessonId: uuid("lesson_id")
-      .references(() => lessons.id, { onDelete: "cascade" })
-      .notNull(),
-    authorId: uuid("author_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    type: text("type").notNull(),
-    title: jsonb("title").default({}).notNull(),
-    displayOrder: integer("display_order"),
-    photoS3Key: varchar("photo_s3_key", { length: 500 }),
-    description: jsonb("description"),
-    solutionExplanation: jsonb("solution_explanation"),
-    tenantId,
-  },
-  withTenantIdIndex("questions"),
-);
-
-export const questionAnswerOptions = pgTable(
-  "question_answer_options",
-  {
-    ...id,
-    ...timestamps,
-    questionId: uuid("question_id")
-      .references(() => questions.id, { onDelete: "cascade" })
-      .notNull(),
-    optionText: jsonb("option_text").default({}).notNull(),
-    isCorrect: boolean("is_correct").notNull(),
-    displayOrder: integer("display_order"),
-    matchedWord: jsonb("matched_word"),
-    scaleAnswer: integer("scale_answer"),
-    tenantId,
-  },
-  withTenantIdIndex("question_answer_options"),
-);
-
-export const studentQuestionAnswers = pgTable(
-  "student_question_answers",
-  {
-    ...id,
-    ...timestamps,
-    questionId: uuid("question_id")
-      .references(() => questions.id, { onDelete: "cascade" })
-      .notNull(),
-    studentId: uuid("student_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    answer: jsonb("answer").default({}),
-    isCorrect: boolean("is_correct"),
-    tenantId,
-  },
-  withTenantIdIndex("student_question_answers", (table) => ({
-    unq: unique().on(table.questionId, table.studentId),
-  })),
-);
-
 export const studentCourses = pgTable(
   "student_courses",
   {
@@ -2403,6 +2322,13 @@ export const resourceEntity = pgTable(
       table.entityType,
       table.relationshipType,
     ),
+    assessmentQuestionPromptImageUniqueIdx: uniqueIndex(
+      "resource_entity_assessment_question_prompt_image_unique_idx",
+    )
+      .on(table.tenantId, table.entityId)
+      .where(
+        sql`${table.entityType} = 'assessment_question' AND ${table.relationshipType} = 'prompt_image'`,
+      ),
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
   })),
 );
