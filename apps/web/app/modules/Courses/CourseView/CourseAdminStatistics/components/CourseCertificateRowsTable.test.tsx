@@ -11,20 +11,23 @@ const { certificatePreviewProps } = vi.hoisted(() => ({
 
 vi.mock("~/api/queries/useCourseCertificateRows", () => ({
   useCourseCertificateRows: () => ({
-    data: [
-      {
-        learnerName: "Alex Learner",
-        learnerEmail: "alex@example.com",
-        groups: ["Sales"],
-        status: "active",
-        issuedAt: "2026-08-20T10:00:00.000Z",
-        expiresAt: null,
-        courseTitle: "Product training",
-        certificateSignatureUrl: "https://example.test/signature.png",
-        certificateFontColor: "#123456",
-        previewAllowed: true,
-      },
-    ],
+    data: {
+      data: [
+        {
+          learnerName: "Alex Learner",
+          learnerEmail: "alex@example.com",
+          groups: ["Sales"],
+          status: "active",
+          issuedAt: "2026-08-20T10:00:00.000Z",
+          expiresAt: null,
+          courseTitle: "Product training",
+          certificateSignatureUrl: "https://example.test/signature.png",
+          certificateFontColor: "#123456",
+          previewAllowed: true,
+        },
+      ],
+      pagination: { totalItems: 1, page: 1, perPage: 20 },
+    },
     isFetching: false,
   }),
 }));

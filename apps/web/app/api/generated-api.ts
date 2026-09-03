@@ -7431,17 +7431,25 @@ export interface MarkLessonAsCompletedResponse {
 
 export interface GetCourseCertificateRowsResponse {
   data: {
-    learnerName: string;
-    learnerEmail: string;
-    groups: string[];
-    status: "not_earned" | "active" | "expired" | "revoked";
-    issuedAt: string | null;
-    expiresAt: string | null;
-    courseTitle: string;
-    certificateSignatureUrl: string | null;
-    certificateFontColor: string | null;
-    previewAllowed: boolean;
-  }[];
+    data: {
+      learnerName: string;
+      learnerEmail: string;
+      groups: string[];
+      status: "not_earned" | "active" | "expired" | "revoked";
+      issuedAt: string | null;
+      expiresAt: string | null;
+      courseTitle: string;
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+      previewAllowed: boolean;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    appliedFilters?: object;
+  };
 }
 
 export interface GetAllCertificatesResponse {
@@ -15610,6 +15618,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         search?: string;
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>

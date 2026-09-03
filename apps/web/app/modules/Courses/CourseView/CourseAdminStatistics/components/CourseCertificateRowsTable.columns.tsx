@@ -11,7 +11,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
 import type { GetCourseCertificateRowsResponse } from "~/api/generated-api";
 
-export type CourseCertificateRow = GetCourseCertificateRowsResponse["data"][number];
+export type CourseCertificateRow = GetCourseCertificateRowsResponse["data"]["data"][number];
 type BadgeVariant = "notStarted" | "success" | "inProgress" | "destructive";
 
 const STATUS_BADGE_VARIANTS: Record<CourseCertificateRow["status"], BadgeVariant> = {

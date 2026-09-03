@@ -110,6 +110,8 @@ export const courseCertificateRowSchema = Type.Object({
   previewAllowed: Type.Boolean(),
 });
 
-export const courseCertificateRowsSchema = Type.Array(courseCertificateRowSchema);
+export const courseCertificateRowsSchema = paginatedResponse(
+  Type.Array(courseCertificateRowSchema),
+);
 
 export const paginatedCertificatesSchema = paginatedResponse(allCertificatesSchema);

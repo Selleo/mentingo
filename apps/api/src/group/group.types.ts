@@ -1,5 +1,6 @@
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
+import type { UUIDType } from "src/common";
 import type {
   allGroupsSchema,
   createGroupSchema,
@@ -32,4 +33,9 @@ export type UpdateGroupBody = Static<typeof updateGroupSchema>;
 export type GroupCourseSettings = {
   isMandatory: boolean;
   dueDate?: Date | null;
+};
+
+export type LocalizedGroup = {
+  id: UUIDType;
+  name: string;
 };

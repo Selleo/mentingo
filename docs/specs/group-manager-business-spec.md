@@ -53,16 +53,15 @@ Removing the Group Manager role deletes all managed-group assignments. Re-adding
 Group Managers reuse the existing dashboard, the modern course overview at `/courses`, development-path, calendar, live-training, and course-statistics interfaces. They can open live-training details from the calendar when the training is within their managed scope and use the Sessions tab to review attendance for learners in their managed groups. Their default dashboard places the Event calendar at 4×2 beside Deadline risks and Training completion at 2×2 each; saved personal layouts remain unchanged. The modern overview shows only courses in their managed scope and uses a **Go to course** action instead of learner start/continue actions. Course enrollment, development-path self-enrollment, course-level progress badges inside development paths, payment, and personal **Your progress** controls are hidden, and they cannot enter `/admin/courses` or the admin layout. Course browsing does not start learning-time or progress tracking.
 
 The course-statistics certificate tab shows the effective certificate state, issue/expiry dates in the same day-month-year format used across certificate surfaces, and a preview action where allowed. The preview preserves the organization’s configured certificate background, platform logo, signature, and font color. It is screen-oriented and intentionally has no download or share control; screenshots cannot be technically prevented.
-Certificate-table searches are applied by the backend across learner names, email addresses, and localized group names, while retaining the manager's current learner scope.
+Certificate-table searches are applied by the backend across learner names, email addresses, and localized group names, while retaining the manager's current learner scope. Results are paginated so large learner populations remain responsive.
 
 ## Key Technical Context
 
 - The stable role slug is `group_manager`; scoped access is represented by `PERMISSIONS.MANAGED_GROUP_RESULTS_READ`.
 - Manager assignments are stored in `group_manager_groups` with tenant isolation and a unique manager/group pair.
-- Shared SQL scope helpers first resolve the authorized learner population through current `group_users` membership, then apply it to courses, learning paths, statistics, reports, calendar events, live training, and certificates.
+- Shared SQL scope helpers first resolve the authorized learner population through current `group_users` membership, then apply it to courses, learning paths, statistics, reports, calendar events, live training, and certificates. Certificate statistics enforce course access in the service layer and return paginated rows.
 - User API create/update payloads use `managedGroupIds`; user reads expose localized `managedGroups` separately from learner `groups`.
 - Assignment changes use the existing user activity-log/outbox and session-revocation flows.
-- The implementation decisions are recorded in `docs/decisions/issue-1799-group-manager.yaml`.
 
 ## Test Evidence
 

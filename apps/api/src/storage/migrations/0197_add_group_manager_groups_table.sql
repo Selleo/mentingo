@@ -28,4 +28,5 @@ END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "group_manager_groups_tenant_id_idx" ON "group_manager_groups" USING btree ("tenant_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "group_manager_groups_manager_user_id_group_id_unique" ON "group_manager_groups" USING btree ("manager_user_id","group_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "group_manager_groups_group_id_idx" ON "group_manager_groups" USING btree ("group_id");
+CREATE INDEX IF NOT EXISTS "group_manager_groups_group_id_idx" ON "group_manager_groups" USING btree ("group_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "group_users_group_id_user_id_idx" ON "group_users" USING btree ("group_id","user_id");

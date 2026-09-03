@@ -116,6 +116,7 @@ import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type { LocalizedGroup } from "src/group/group.types";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 import type { AdminOverdueCourseNotificationRecipient } from "src/user/types/admin-overdue-course-notification-recipient.type";
@@ -174,9 +175,7 @@ export class UserService {
         >`COALESCE(json_agg(DISTINCT ${permissionRoles.slug}) FILTER (WHERE ${permissionRoles.slug} IS NOT NULL), '[]')`.as(
           "roleSlugs",
         ),
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
@@ -273,18 +272,14 @@ export class UserService {
     const [user] = await dbInstance
       .select({
         ...getTableColumns(users),
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
           language,
           groups,
         )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
-        managedGroups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        managedGroups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           managedGroup.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           managedGroup.name,
@@ -1129,7 +1124,7 @@ export class UserService {
   private async getUserGroupsForSnapshot(
     userId: UUIDType,
     dbInstance: DatabasePg = this.db,
-  ): Promise<Array<{ id: UUIDType; name: string | null }>> {
+  ): Promise<LocalizedGroup[]> {
     const userGroups = await dbInstance
       .select({
         id: groups.id,
@@ -1140,13 +1135,13 @@ export class UserService {
       .where(eq(groupUsers.userId, userId))
       .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)));
 
-    return userGroups.map(({ id, name }) => ({ id, name }));
+    return userGroups.map(({ id, name }) => ({ id, name: name ?? "" }));
   }
 
   private async getManagedGroupsForSnapshot(
     userId: UUIDType,
     dbInstance: DatabasePg = this.db,
-  ): Promise<Array<{ id: UUIDType; name: string | null }>> {
+  ): Promise<LocalizedGroup[]> {
     return dbInstance
       .select({
         id: groups.id,
@@ -1155,7 +1150,8 @@ export class UserService {
       .from(groupManagerGroups)
       .innerJoin(groups, eq(groupManagerGroups.groupId, groups.id))
       .where(eq(groupManagerGroups.managerUserId, userId))
-      .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)));
+      .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)))
+      .then((managedGroups) => managedGroups.map(({ id, name }) => ({ id, name: name ?? "" })));
   }
 
   private async getManagedGroupIds(

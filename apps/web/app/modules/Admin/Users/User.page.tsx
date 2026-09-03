@@ -73,10 +73,11 @@ const User = () => {
   const selectedRoleSlugs = useWatch({
     control,
     name: "roleSlugs",
-    defaultValue: userRoleSlugs,
   });
 
-  const showManagedGroups = selectedRoleSlugs?.includes(SYSTEM_ROLE_SLUGS.GROUP_MANAGER);
+  const showManagedGroups = (selectedRoleSlugs ?? userRoleSlugs).includes(
+    SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+  );
 
   const userPermissionsUnion = useMemo(
     () =>

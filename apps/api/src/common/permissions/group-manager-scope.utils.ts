@@ -66,7 +66,7 @@ export const getGroupManagerCourseScopeCondition = (
     WHERE gmg_scope.manager_user_id = ${currentUser.userId}
       AND gmg_scope.tenant_id = ${currentUser.tenantId}
       AND sc_scope.course_id = ${courseId}
-      AND sc_scope.status = 'enrolled'
+      AND sc_scope.status = ${COURSE_ENROLLMENT.ENROLLED}
   )`;
 };
 

@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
   ConflictException,
   BadRequestException,
   Logger,
@@ -23,6 +24,7 @@ import {
   isSupportedLanguage,
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
+import { eq } from "drizzle-orm";
 import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 import { match } from "ts-pattern";
@@ -34,7 +36,10 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { DEFAULT_PAGE_SIZE, parsePagination } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
-import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
+import {
+  getGroupManagerLearnerScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
@@ -45,7 +50,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { studentCourses } from "src/storage/schema";
+import { courses, studentCourses } from "src/storage/schema";
 
 import { CertificateRepository } from "./certificate.repository";
 import {
@@ -158,24 +163,50 @@ export class CertificatesService implements OnModuleDestroy {
     );
   }
 
+  async assertCanViewCourseStatistics(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (
+      !shouldApplyGroupManagerScope(currentUser, [PERMISSIONS.COURSE_STATISTICS]) &&
+      !canUpdateCourseByAuthor(currentUser, course.authorId)
+    ) {
+      throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
+    }
+  }
+
   async getCourseCertificateRows(
     courseId: UUIDType,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
     search?: string,
+    page?: number,
+    perPage?: number,
   ) {
+    await this.assertCanViewCourseStatistics(courseId, currentUser);
+
     const learnerScope = getGroupManagerLearnerScopeCondition(
       currentUser,
       studentCourses.studentId,
       [PERMISSIONS.COURSE_STATISTICS],
     );
 
-    const { rows, hasScopedLearner } = await this.certificateRepository.getCourseCertificateRows(
-      courseId,
-      learnerScope,
-      language,
-      search,
-    );
+    const { rows, hasScopedLearner, totalItems } =
+      await this.certificateRepository.getCourseCertificateRows(
+        courseId,
+        learnerScope,
+        language,
+        search,
+        page ?? 1,
+        perPage ?? DEFAULT_PAGE_SIZE,
+      );
 
     if (learnerScope && !hasScopedLearner)
       throw new NotFoundException("adminCourseView.errors.notFound.course");
@@ -185,7 +216,7 @@ export class CertificatesService implements OnModuleDestroy {
       ? await this.fileService.getFileUrl(certificateSignature)
       : null;
 
-    return rows.map(({ certificateSignature: _certificateSignature, status, ...row }) => ({
+    const data = rows.map(({ certificateSignature: _certificateSignature, status, ...row }) => ({
       ...row,
       status,
       certificateSignatureUrl,
@@ -193,6 +224,11 @@ export class CertificatesService implements OnModuleDestroy {
         status === COURSE_CERTIFICATE_STATUSES.ACTIVE ||
         status === COURSE_CERTIFICATE_STATUSES.EXPIRED,
     }));
+
+    return {
+      data,
+      pagination: { totalItems, page: page ?? 1, perPage: perPage ?? DEFAULT_PAGE_SIZE },
+    };
   }
 
   async createCertificate(userId: UUIDType, courseId: UUIDType, trx?: DatabasePg) {

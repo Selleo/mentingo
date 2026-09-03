@@ -1840,6 +1840,7 @@ export const groupUsers = pgTable(
   },
   withTenantIdIndex("group_users", (table) => ({
     unq: unique().on(table.userId, table.groupId),
+    groupUserIdx: index("group_users_group_id_user_id_idx").on(table.groupId, table.userId),
   })),
 );
 

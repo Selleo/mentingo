@@ -182,6 +182,7 @@ import {
 } from "./schemas/courseQuery";
 import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
+import type { CourseStatisticsExpressionsParams } from "./course.types";
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
@@ -238,6 +239,7 @@ import type {
   CourseTranslationType,
 } from "src/courses/types/course.types";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type { LocalizedGroup } from "src/group/group.types";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -816,9 +818,7 @@ export class CourseService {
         enrolledAt: sql<
           string | null
         >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
@@ -4622,7 +4622,7 @@ export class CourseService {
       completedLessonsCountExpression,
       groupNameExpression,
       lastCompletedLessonName,
-    } = await this.getStudentCourseStatisticsExpressions(courseId, language, currentUser);
+    } = await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -4654,12 +4654,12 @@ export class CourseService {
       .groupBy(users.id)
       .orderBy(
         sortOrder(
-          await this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentProgressionSortField,
+          await this.getCourseStatisticsColumnToSortBy({
+            sort: sortedField as CourseStudentProgressionSortField,
             courseId,
             language,
             currentUser,
-          ),
+          }),
         ),
       );
 
@@ -4703,7 +4703,7 @@ export class CourseService {
     } = query;
 
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      await this.getStudentCourseStatisticsExpressions(courseId, language, currentUser);
+      await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -4723,12 +4723,12 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const order = sortOrder(
-      await this.getCourseStatisticsColumnToSortBy(
-        sortedField as CourseStudentQuizResultsSortField,
+      await this.getCourseStatisticsColumnToSortBy({
+        sort: sortedField as CourseStudentQuizResultsSortField,
         courseId,
         language,
         currentUser,
-      ),
+      }),
     );
 
     conditions.push(...(await this.getStatisticsConditions({ groupId }, undefined, currentUser)));
@@ -4826,19 +4826,19 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions(
+    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions({
       courseId,
       language,
       currentUser,
-    );
+    });
 
     const order = sortOrder(
-      await this.getCourseStatisticsColumnToSortBy(
-        sortedField as CourseStudentAiMentorResultsSortField,
+      await this.getCourseStatisticsColumnToSortBy({
+        sort: sortedField as CourseStudentAiMentorResultsSortField,
         courseId,
         language,
         currentUser,
-      ),
+      }),
     );
 
     conditions.push(...(await this.getStatisticsConditions({ groupId }, undefined, currentUser)));
@@ -4908,15 +4908,17 @@ export class CourseService {
     };
   }
 
-  private async getCourseStatisticsColumnToSortBy(
+  private async getCourseStatisticsColumnToSortBy({
+    sort,
+    courseId,
+    language,
+    currentUser,
+  }: CourseStatisticsExpressionsParams & {
     sort:
       | CourseStudentProgressionSortField
       | CourseStudentQuizResultsSortField
-      | CourseStudentAiMentorResultsSortField,
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    currentUser?: CurrentUserType,
-  ) {
+      | CourseStudentAiMentorResultsSortField;
+  }) {
     const {
       lastAttemptExpression,
       studentNameExpression,
@@ -4925,7 +4927,7 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       lastCompletedLessonName,
-    } = await this.getStudentCourseStatisticsExpressions(courseId, language, currentUser);
+    } = await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
@@ -4957,11 +4959,11 @@ export class CourseService {
     }
   }
 
-  private async getStudentCourseStatisticsExpressions(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    currentUser?: CurrentUserType,
-  ) {
+  private async getStudentCourseStatisticsExpressions({
+    courseId,
+    language,
+    currentUser,
+  }: CourseStatisticsExpressionsParams) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -4995,7 +4997,7 @@ export class CourseService {
 
     const groupNamesQuery = this.db
       .select({
-        groups: sql<Array<{ id: string; name: string }>>`json_agg(
+        groups: sql<LocalizedGroup[]>`json_agg(
           json_build_object(
             'id', ${groups.id},
             'name', ${localizedGroupName}
@@ -5005,7 +5007,7 @@ export class CourseService {
       .from(groups)
       .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
       .where(and(eq(groupUsers.userId, users.id), managedGroupCondition));
-    const groupNameExpression = sql<Array<{ id: string; name: string }>>`(${groupNamesQuery})`;
+    const groupNameExpression = sql<LocalizedGroup[]>`(${groupNamesQuery})`;
 
     const lastAttemptExpression = sql<string>`(
           SELECT TO_CHAR(MAX(slp.updated_at), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')

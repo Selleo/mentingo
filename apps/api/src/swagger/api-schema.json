@@ -8759,6 +8759,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -53848,102 +53866,136 @@
         "type": "object",
         "properties": {
           "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "learnerName": {
-                  "type": "string"
-                },
-                "learnerEmail": {
-                  "type": "string"
-                },
-                "groups": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "not_earned",
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "learnerName": {
                       "type": "string"
                     },
-                    {
-                      "const": "active",
+                    "learnerEmail": {
                       "type": "string"
                     },
-                    {
-                      "const": "expired",
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "not_earned",
+                          "type": "string"
+                        },
+                        {
+                          "const": "active",
+                          "type": "string"
+                        },
+                        {
+                          "const": "expired",
+                          "type": "string"
+                        },
+                        {
+                          "const": "revoked",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "issuedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "expiresAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "courseTitle": {
                       "type": "string"
                     },
-                    {
-                      "const": "revoked",
-                      "type": "string"
+                    "certificateSignatureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "certificateFontColor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "previewAllowed": {
+                      "type": "boolean"
                     }
+                  },
+                  "required": [
+                    "learnerName",
+                    "learnerEmail",
+                    "groups",
+                    "status",
+                    "issuedAt",
+                    "expiresAt",
+                    "courseTitle",
+                    "certificateSignatureUrl",
+                    "certificateFontColor",
+                    "previewAllowed"
                   ]
-                },
-                "issuedAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "expiresAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "courseTitle": {
-                  "type": "string"
-                },
-                "certificateSignatureUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "certificateFontColor": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "previewAllowed": {
-                  "type": "boolean"
                 }
               },
-              "required": [
-                "learnerName",
-                "learnerEmail",
-                "groups",
-                "status",
-                "issuedAt",
-                "expiresAt",
-                "courseTitle",
-                "certificateSignatureUrl",
-                "certificateFontColor",
-                "previewAllowed"
-              ]
-            }
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalItems": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "type": "number"
+                  },
+                  "perPage": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalItems",
+                  "page",
+                  "perPage"
+                ]
+              },
+              "appliedFilters": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {}
+                }
+              }
+            },
+            "required": [
+              "data",
+              "pagination"
+            ]
           }
         },
         "required": [

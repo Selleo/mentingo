@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCourseCertificateRows } from "~/api/queries/useCourseCertificateRows";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { Pagination } from "~/components/Pagination/Pagination";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import {
   Table,
@@ -20,6 +21,7 @@ import CertificatePreview from "~/modules/Profile/Certificates/CertificatePrevie
 import { getCourseCertificateColumns } from "./CourseCertificateRowsTable.columns";
 
 import type { CourseCertificateRow } from "./CourseCertificateRowsTable.columns";
+import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 
 type CourseCertificateRowsTableProps = {
   courseId: string;
@@ -30,12 +32,16 @@ export function CourseCertificateRowsTable({ courseId, search }: CourseCertifica
   const { t } = useTranslation();
 
   const language = useLanguageStore((state) => state.language);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
 
-  const { data: rows = [], isFetching } = useCourseCertificateRows(courseId, language, search);
+  const { data, isFetching } = useCourseCertificateRows(courseId, language, search, page, perPage);
+  const rows = data?.data ?? [];
   const { data: globalSettings } = useGlobalSettings();
   const [preview, setPreview] = useState<CourseCertificateRow | null>(null);
 
   const columns = useMemo(() => getCourseCertificateColumns(t, setPreview), [t]);
+  const totalItems = data?.pagination.totalItems ?? 0;
 
   const table = useReactTable({
     getRowId: (row) => row.learnerEmail,
@@ -87,6 +93,18 @@ export function CourseCertificateRowsTable({ courseId, search }: CourseCertifica
           </TableBody>
         </Table>
       </div>
+
+      <Pagination
+        className="border-t"
+        totalItems={totalItems}
+        itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
+        currentPage={page}
+        onPageChange={setPage}
+        onItemsPerPageChange={(value) => {
+          setPage(1);
+          setPerPage(Number(value));
+        }}
+      />
 
       <Dialog open={Boolean(preview)} onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent

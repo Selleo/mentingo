@@ -1,5 +1,5 @@
 {
-  "id": "d7c65157-481c-4262-8f6b-8ee116464927",
+  "id": "f8430f8b-1a82-4160-9e1c-03507b076052",
   "prevId": "9b1fef3b-dd70-4f05-858e-7b4ca9de494b",
   "version": "7",
   "dialect": "postgresql",
@@ -7104,6 +7104,27 @@
           "columns": [
             {
               "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "group_users_group_id_user_id_idx": {
+          "name": "group_users_group_id_user_id_idx",
+          "columns": [
+            {
+              "expression": "group_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

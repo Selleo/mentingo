@@ -15,6 +15,7 @@ import {
 import {
   eq,
   and,
+  count,
   countDistinct,
   ilike,
   sql,
@@ -113,6 +114,8 @@ export class CertificateRepository {
     learnerScope: SQL | undefined,
     language: SupportedLanguages,
     search?: string,
+    page = 1,
+    perPage = 20,
   ) {
     const normalizedSearch = search?.trim();
 
@@ -162,28 +165,40 @@ export class CertificateRepository {
           searchCondition,
         ),
       )
+      .orderBy(studentCourses.id)
+      .limit(perPage)
+      .offset((page - 1) * perPage)
       .as("matched_certificate_learners");
 
-    const hasScopedLearner = learnerScope
-      ? exists(
-          this.db
-            .select({ id: studentCourses.id })
-            .from(studentCourses)
-            .innerJoin(users, eq(users.id, studentCourses.studentId))
-            .where(
-              and(
-                eq(studentCourses.courseId, courseId),
-                eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-                isNull(users.deletedAt),
-                learnerScope,
-              ),
-            ),
-        )
-      : sql<boolean>`TRUE`;
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+          learnerScope,
+          searchCondition,
+        ),
+      );
+
+    const [{ scopedLearnerCount }] = await this.db
+      .select({ scopedLearnerCount: count() })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+          learnerScope,
+        ),
+      );
 
     const queryRows = await this.db
       .select({
-        hasScopedLearner,
         studentCourseId: matchedLearners.studentCourseId,
         learnerName: sql<string | null>`
           CASE
@@ -239,22 +254,25 @@ export class CertificateRepository {
         ),
       )
       .where(eq(courses.id, courseId))
-      .orderBy(matchedLearners.firstName, matchedLearners.lastName, matchedLearners.email);
+      .orderBy(matchedLearners.firstName, matchedLearners.lastName, matchedLearners.email)
+      .limit(perPage)
+      .offset((page - 1) * perPage);
 
     return {
-      hasScopedLearner: queryRows[0]?.hasScopedLearner ?? false,
-      rows: queryRows.flatMap(({ hasScopedLearner: _hasScopedLearner, studentCourseId, ...row }) =>
-        studentCourseId
-          ? [
-              {
-                ...row,
-                learnerName: row.learnerName!,
-                learnerEmail: row.learnerEmail!,
-                status: row.status!,
-              },
-            ]
-          : [],
-      ),
+      hasScopedLearner: !learnerScope || scopedLearnerCount > 0,
+      totalItems,
+      rows: queryRows.flatMap(({ studentCourseId, ...row }) => {
+        if (!studentCourseId || !row.learnerName || !row.learnerEmail || !row.status) return [];
+
+        return [
+          {
+            ...row,
+            learnerName: row.learnerName,
+            learnerEmail: row.learnerEmail,
+            status: row.status,
+          },
+        ];
+      }),
     };
   }
 
