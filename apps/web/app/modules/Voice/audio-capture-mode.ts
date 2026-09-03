@@ -4,6 +4,8 @@ import {
   type VoiceEndpointingMode,
 } from "@repo/shared";
 
+import { readString } from "./audio-utils";
+
 export function resolveVoiceEndpointingMode(
   payload: unknown,
   fallback: VoiceEndpointingMode,
@@ -28,20 +30,4 @@ export function resolveVoiceEndpointingMode(
   }
 
   return fallback;
-}
-
-function readString(payload: unknown, ...path: string[]): string | null {
-  let current: unknown = payload;
-  for (const key of path) {
-    if (!isRecord(current)) {
-      return null;
-    }
-    current = current[key];
-  }
-
-  return typeof current === "string" && current.length > 0 ? current : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }

@@ -29,6 +29,7 @@ export * from "./constants/loginPageDocuments";
 export * from "./constants/lumaCourseGeneration";
 export * from "./constants/lumaFileIngestion";
 export * from "./constants/masterCourse";
+export * from "./constants/messageRole";
 export * from "./constants/newsSettings";
 export * from "./constants/permissions";
 export * from "./constants/qaSettings";

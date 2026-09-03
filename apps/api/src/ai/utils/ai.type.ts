@@ -1,3 +1,6 @@
+export { MESSAGE_ROLE } from "@repo/shared";
+export type { MessageRole } from "@repo/shared";
+
 export const OPENAI_MODELS = {
   BASIC: "gpt-5.4-mini",
   VOICE: "gpt-5.4-nano",
@@ -15,13 +18,3 @@ export const THREAD_STATUS = {
 } as const;
 
 export type ThreadStatus = (typeof THREAD_STATUS)[keyof typeof THREAD_STATUS];
-
-export const MESSAGE_ROLE = {
-  SYSTEM: "system",
-  USER: "user",
-  MENTOR: "assistant",
-  TOOL: "tool",
-  SUMMARY: "summary",
-} as const;
-
-export type MessageRole = (typeof MESSAGE_ROLE)[keyof typeof MESSAGE_ROLE];

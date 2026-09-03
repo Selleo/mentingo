@@ -23,9 +23,16 @@ describe("LumaGeneratedCourseImportService", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer with a budget objection.",
-        taskDescription: "Handle the objection and agree a next step.",
-        type: "ROLEPLAY",
+        taskDescription: "Practice handling a customer's budget objection.",
+        aiMentorConfiguration: {
+          type: "roleplay",
+          scenario: "A customer raises a budget objection.",
+          aiRole: "Customer",
+          learnerRole: "Sales representative",
+          characterGoal: "Reach a practical next step.",
+          difficulty: "realistic",
+          additionalInstructions: "Act as a customer with a budget objection.",
+        },
         ttsPreset: "female",
         aiJudgeConfiguration: {
           taskGoal: "Handle the objection and agree a next step",
@@ -59,15 +66,31 @@ describe("LumaGeneratedCourseImportService", () => {
     expect(aiMentor.aiJudgeConfiguration.taskGoal).toBe(
       "Handle the objection and agree a next step",
     );
+    expect(aiMentor.taskDescription).toBe("Practice handling a customer's budget objection.");
+
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor)).toMatchObject({
+      type: "roleplay",
+      scenario: "A customer raises a budget objection.",
+      aiRole: "Customer",
+      learnerRole: "Sales representative",
+      characterGoal: "Reach a practical next step.",
+      difficulty: "realistic",
+      additionalInstructions: "Act as a customer with a budget objection.",
+    });
   });
 
   it("rejects a generated AI Mentor lesson without a valid Judge configuration", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer.",
-        taskDescription: "Practice the conversation.",
-        type: "ROLEPLAY",
+        aiMentorConfiguration: {
+          type: "roleplay",
+          scenario: "Practice the conversation.",
+          aiRole: "Customer",
+          learnerRole: "Sales representative",
+          characterGoal: "Reach a practical next step.",
+          difficulty: "realistic",
+        },
         ttsPreset: "female",
       },
     } as unknown as LumaGeneratedCourseLesson;

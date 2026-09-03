@@ -1,5 +1,5 @@
 import { isArray } from "lodash-es";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FormTextField } from "~/components/Form/FormTextField";
@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
-import { useLeaveModal } from "~/context/LeaveModalContext";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
@@ -39,17 +39,7 @@ export const EmbedLessonForm = ({
   language,
 }: EmbedLessonProps) => {
   const { t } = useTranslation();
-  const {
-    isLeaveModalOpen,
-    closeLeaveModal,
-    isCurrentFormDirty,
-    setIsCurrectFormDirty,
-    setIsLeavingContent,
-    openLeaveModal,
-  } = useLeaveModal();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCanceling, setIsCanceling] = useState(false);
 
   const { form, onSubmit, onDelete } = useEmbedLessonForm({
     lessonToEdit,
@@ -57,6 +47,17 @@ export const EmbedLessonForm = ({
     setContentTypeToDisplay,
     language,
   });
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const {
+    handleCancel,
+    isLeaveModalOpen,
+    onCancelLeaveModal,
+    onDiscardLeaveModal,
+    setIsCurrectFormDirty,
+  } = useLessonLeaveConfirmation(leaveLessonForm);
 
   const resources = form.watch("resources");
   const { isDirty } = form.formState;
@@ -82,36 +83,6 @@ export const EmbedLessonForm = ({
 
   const handleDeleteLesson = () =>
     lessonToEdit ? setIsModalOpen(true) : () => setContentTypeToDisplay(ContentTypes.EMPTY);
-
-  const handleCancel = () => {
-    if (isCurrentFormDirty) {
-      setIsCanceling(true);
-      setIsLeavingContent(true);
-      openLeaveModal();
-      return;
-    }
-    setContentTypeToDisplay(ContentTypes.EMPTY);
-  };
-
-  useEffect(() => {
-    if (!isCurrentFormDirty && isCanceling) {
-      setContentTypeToDisplay(ContentTypes.EMPTY);
-      setIsCanceling(false);
-      setIsLeavingContent(false);
-    }
-  }, [isCanceling, isCurrentFormDirty, setContentTypeToDisplay, setIsLeavingContent]);
-
-  const onCancelLeaveModal = () => {
-    closeLeaveModal();
-    setIsCanceling(false);
-    setIsLeavingContent(false);
-  };
-
-  const onDiscardLeaveModal = () => {
-    closeLeaveModal();
-    setIsCurrectFormDirty(false);
-    setIsLeavingContent(false);
-  };
 
   const onCloseDeleteModal = () => setIsModalOpen(false);
 

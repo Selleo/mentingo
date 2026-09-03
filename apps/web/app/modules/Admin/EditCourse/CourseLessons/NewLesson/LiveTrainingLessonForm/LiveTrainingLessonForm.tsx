@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { useLeaveModal } from "~/context/LeaveModalContext";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { LiveTrainingFormFields } from "~/modules/LiveTraining/components/LiveTrainingFormFields";
@@ -42,16 +42,7 @@ export function LiveTrainingLessonForm({
 }: LiveTrainingLessonFormProps) {
   const { t } = useTranslation();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
-  const {
-    isLeaveModalOpen,
-    closeLeaveModal,
-    isCurrentFormDirty,
-    setIsCurrectFormDirty,
-    setIsLeavingContent,
-    openLeaveModal,
-  } = useLeaveModal();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isCanceling, setIsCanceling] = useState(false);
   const {
     canCreateLiveTraining,
     currentLanguageHasLiveTraining,
@@ -79,36 +70,12 @@ export function LiveTrainingLessonForm({
   const isEditMode = Boolean(lessonToEdit);
   const linkedLiveTrainingId = lessonToEdit?.liveTrainingId ?? null;
   const shouldShowAssignmentTabs = !isEditMode || !currentLanguageHasLiveTraining;
-
-  const handleCancel = () => {
-    if (isCurrentFormDirty) {
-      setIsCanceling(true);
-      setIsLeavingContent(true);
-      openLeaveModal();
-      return;
-    }
-    setContentTypeToDisplay(ContentTypes.EMPTY);
-  };
-
-  useEffect(() => {
-    if (!isCurrentFormDirty && isCanceling) {
-      setContentTypeToDisplay(ContentTypes.EMPTY);
-      setIsCanceling(false);
-      setIsLeavingContent(false);
-    }
-  }, [isCanceling, isCurrentFormDirty, setContentTypeToDisplay, setIsLeavingContent]);
-
-  const onCancelLeaveModal = () => {
-    closeLeaveModal();
-    setIsCanceling(false);
-    setIsLeavingContent(false);
-  };
-
-  const onDiscardLeaveModal = () => {
-    closeLeaveModal();
-    setIsCurrectFormDirty(false);
-    setIsLeavingContent(false);
-  };
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const { handleCancel, isLeaveModalOpen, onCancelLeaveModal, onDiscardLeaveModal } =
+    useLessonLeaveConfirmation(leaveLessonForm);
 
   const handleDelete = async () => {
     if (!lessonToEdit || !chapterToEdit) return;

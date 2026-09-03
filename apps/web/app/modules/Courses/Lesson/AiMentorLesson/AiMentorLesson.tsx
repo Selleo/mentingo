@@ -1,6 +1,6 @@
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
-import { createTextUiMessage, getUiMessageText, toUiMessageRole } from "@repo/shared";
+import { createTextUiMessage, getUiMessageText, MESSAGE_ROLE, toUiMessageRole } from "@repo/shared";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -197,7 +197,7 @@ const AiMentorLesson = ({
             ...prev,
             createTextUiMessage<UIMessage>({
               id: messageId,
-              role: "assistant",
+              role: MESSAGE_ROLE.MENTOR,
               content: text,
             }),
           ];

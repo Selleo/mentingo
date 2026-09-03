@@ -20,6 +20,6 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@japro/luma-sdk": "0.2.17"
+    "@japro/luma-sdk": "0.2.18"
   }
 }

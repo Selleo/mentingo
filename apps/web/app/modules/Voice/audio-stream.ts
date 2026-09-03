@@ -11,6 +11,7 @@ import {
   type AudioStreamLifecycleEvents,
   type VoiceConnectionState,
 } from "./audio-stream.types";
+import { isRecord, readString } from "./audio-utils";
 import {
   advanceVadEndDeferral,
   beginVadEndDeferral,
@@ -991,17 +992,6 @@ export class RealtimePCMStreamerWorklet {
   }
 }
 
-function readString(payload: unknown, ...path: string[]): string | null {
-  let current: unknown = payload;
-  for (const key of path) {
-    if (!isRecord(current)) {
-      return null;
-    }
-    current = current[key];
-  }
-  return typeof current === "string" && current.length > 0 ? current : null;
-}
-
 function readNonNegativeInteger(payload: unknown, ...path: string[]): number | null {
   let current: unknown = payload;
   for (const key of path) {
@@ -1011,10 +1001,6 @@ function readNonNegativeInteger(payload: unknown, ...path: string[]): number | n
     current = current[key];
   }
   return typeof current === "number" && Number.isInteger(current) && current >= 0 ? current : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function resampleAudio(audio: Float32Array, sourceSampleRate: number, targetSampleRate: number) {

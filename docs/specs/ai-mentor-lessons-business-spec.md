@@ -21,7 +21,7 @@ AI-assisted authoring prepares reviewable Mentor behavior and completion-conditi
 ## Feature Functions
 
 - Create interactive AI mentor lessons from the curriculum builder.
-- Configure the learner task, mentor name, avatar, Teacher or Roleplay experience, focused behavior fields, required Judge task goal, optional scored criteria and blocking errors, and supporting files.
+- Configure the learner-facing task description separately from the mentor's internal Teacher or Roleplay behavior, alongside the mentor name, avatar, focused behavior fields, Judge task goal, optional scored criteria and blocking errors, and supporting files.
 - Warn creators before leaving any lesson editor with unsaved changes, with explicit options to keep editing or leave without saving.
 - Generate Teacher or Roleplay behavior from a focused creator brief without letting AI choose or change the selected experience type.
 - Improve or quality-check the complete unsaved Mentor configuration currently open in the editor.

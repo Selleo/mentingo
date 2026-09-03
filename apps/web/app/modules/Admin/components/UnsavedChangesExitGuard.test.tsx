@@ -18,7 +18,7 @@ vi.mock("@remix-run/react", () => ({
   useBlocker: () => mocks.blocker,
 }));
 
-import { UnsavedChangesExitGuard } from "./UnsavedChangesExitGuard";
+import { BLOCKER_STATES, UnsavedChangesExitGuard } from "./UnsavedChangesExitGuard";
 
 describe("UnsavedChangesExitGuard", () => {
   const renderGuard = () =>
@@ -33,7 +33,7 @@ describe("UnsavedChangesExitGuard", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.blocker.state = "blocked";
+    mocks.blocker.state = BLOCKER_STATES.BLOCKED;
   });
 
   it("offers a clear cancel action for a blocked navigation", async () => {

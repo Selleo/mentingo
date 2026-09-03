@@ -20,6 +20,10 @@ type UnsavedChangesExitGuardProps = {
   leaveLabel: string;
 };
 
+export const BLOCKER_STATES = {
+  BLOCKED: "blocked",
+} as const;
+
 export function UnsavedChangesExitGuard({
   enabled,
   dialogTitle,
@@ -41,18 +45,18 @@ export function UnsavedChangesExitGuard({
   );
 
   useEffect(() => {
-    setIsDialogOpen(blocker.state === "blocked");
+    setIsDialogOpen(blocker.state === BLOCKER_STATES.BLOCKED);
   }, [blocker.state]);
 
   const cancelNavigation = () => {
-    if (blocker.state === "blocked") {
+    if (blocker.state === BLOCKER_STATES.BLOCKED) {
       blocker.reset();
     }
     setIsDialogOpen(false);
   };
 
   const proceedNavigation = () => {
-    if (blocker.state === "blocked") {
+    if (blocker.state === BLOCKER_STATES.BLOCKED) {
       blocker.proceed();
     }
     setIsDialogOpen(false);

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useLeaveModal } from "~/context/LeaveModalContext";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import { useTusScormUpload } from "~/hooks/useTusScormUpload";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
@@ -60,17 +60,8 @@ export const ScormLessonForm = ({
   const { mutateAsync: updateScormLesson, isPending: isUpdatingScormLesson } =
     useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
-  const {
-    isLeaveModalOpen,
-    closeLeaveModal,
-    isCurrentFormDirty,
-    setIsCurrectFormDirty,
-    setIsLeavingContent,
-    openLeaveModal,
-  } = useLeaveModal();
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isCanceling, setIsCanceling] = useState(false);
   const currentLanguageHasPackage = Boolean(
     lessonToEdit?.scormPackageLanguages?.includes(language),
   );
@@ -83,6 +74,17 @@ export const ScormLessonForm = ({
       scormFile: undefined,
     },
   });
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const {
+    handleCancel,
+    isLeaveModalOpen,
+    onCancelLeaveModal,
+    onDiscardLeaveModal,
+    setIsCurrectFormDirty,
+  } = useLessonLeaveConfirmation(leaveLessonForm);
 
   const { isDirty } = form.formState;
 
@@ -154,36 +156,6 @@ export const ScormLessonForm = ({
   const handleClear = () => {
     setSelectedFile(undefined);
     form.setValue("scormFile", undefined, { shouldDirty: true, shouldValidate: true });
-  };
-
-  const handleCancel = () => {
-    if (isCurrentFormDirty) {
-      setIsCanceling(true);
-      setIsLeavingContent(true);
-      openLeaveModal();
-      return;
-    }
-    setContentTypeToDisplay(ContentTypes.EMPTY);
-  };
-
-  useEffect(() => {
-    if (!isCurrentFormDirty && isCanceling) {
-      setContentTypeToDisplay(ContentTypes.EMPTY);
-      setIsCanceling(false);
-      setIsLeavingContent(false);
-    }
-  }, [isCanceling, isCurrentFormDirty, setContentTypeToDisplay, setIsLeavingContent]);
-
-  const onCancelLeaveModal = () => {
-    closeLeaveModal();
-    setIsCanceling(false);
-    setIsLeavingContent(false);
-  };
-
-  const onDiscardLeaveModal = () => {
-    closeLeaveModal();
-    setIsCurrectFormDirty(false);
-    setIsLeavingContent(false);
   };
 
   const handleDelete = async () => {
