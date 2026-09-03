@@ -1384,15 +1384,15 @@
     {
       "idx": 197,
       "version": "7",
-      "when": 1788420678328,
-      "tag": "0197_add_group_manager_groups_after_course_author_metadata",
+      "when": 1788421829464,
+      "tag": "0197_add_group_manager_groups_table",
       "breakpoints": true
     },
     {
       "idx": 198,
       "version": "7",
-      "when": 1788420682825,
-      "tag": "0198_enable_group_manager_groups_rls_after_course_author_metadata",
+      "when": 1788421880061,
+      "tag": "0198_enable_group_manager_rls",
       "breakpoints": true
     }
   ]
