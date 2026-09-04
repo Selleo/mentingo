@@ -4,13 +4,14 @@ import { describe, expect, it } from "vitest";
 import CourseHeroImage from "./CourseHeroImage";
 
 describe("CourseHeroImage", () => {
-  it("keeps the hero landscape at mobile and desktop breakpoints", () => {
+  it("uses content-driven height on mobile and a landscape ratio from small screens up", () => {
     render(<CourseHeroImage alt="Course hero" />);
 
     const hero = screen.getByRole("img", { name: "Course hero" }).parentElement;
 
-    expect(hero).toHaveClass("aspect-video");
+    expect(hero).toHaveClass("aspect-auto");
     expect(hero).toHaveClass("min-h-[22rem]");
+    expect(hero).toHaveClass("sm:aspect-video");
     expect(hero).toHaveClass("md:aspect-[21/9]");
   });
 

@@ -16,7 +16,7 @@ export default function CourseHeroImage({
   imageUrl,
 }: CourseHeroImageProps) {
   return (
-    <div className="group relative grid aspect-video min-h-[22rem] w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-hidden sm:min-h-0 md:aspect-[21/9]">
+    <div className="group relative grid aspect-auto min-h-[22rem] w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-hidden sm:aspect-video sm:min-h-0 md:aspect-[21/9]">
       <div
         role="img"
         aria-label={alt}
