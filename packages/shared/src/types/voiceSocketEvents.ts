@@ -6,9 +6,9 @@ export type {
   AudioReconnectPayload,
   AudioRecoveryPayload,
   AudioStartedPayload,
-} from "@japro/luma-sdk";
+} from "@japro/luma-sdk/contracts";
 
-import type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk";
+import type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk/contracts";
 
 export type AudioRecoveryStartedPayload = {
   attempt: number;
@@ -55,8 +55,8 @@ export type AudioOutputAlignmentEventPayload = {
   words: SpeechAlignmentWord[];
 };
 
-export type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk";
-export { LEARNER_TRANSCRIPT_STATUSES } from "@japro/luma-sdk";
+export type { LearnerTranscriptStatus, SpeechAlignmentWord } from "@japro/luma-sdk/contracts";
+export { LEARNER_TRANSCRIPT_STATUSES } from "@japro/luma-sdk/contracts";
 
 export type MentorResponseDeltaEventPayload = {
   text: string;
