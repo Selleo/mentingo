@@ -43,6 +43,7 @@ test("admin course controls remain accessible on a small screen", async ({
     await expect(settingsButton).toBeVisible();
     await expect(editMediaButton).toBeVisible();
     await expect(languageSelect).toBeVisible();
+    await expect(heroContent).toBeVisible();
     await expect(courseActions).toBeVisible();
     await expect(learningModeButton).toBeVisible();
     await expect(detailsButton).toBeVisible();
@@ -56,7 +57,6 @@ test("admin course controls remain accessible on a small screen", async ({
       editMediaButton,
       languageSelect,
       hero,
-      heroContent,
       heroTitle,
       courseActions,
       learningModeButton,
