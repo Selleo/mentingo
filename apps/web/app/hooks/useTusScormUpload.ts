@@ -26,6 +26,5 @@ export const useTusScormUpload = () => {
   return {
     uploadScormPackage,
     isUploading: tusUpload.isUploading,
-    uploadProgress: tusUpload.uploadProgress,
   };
 };
