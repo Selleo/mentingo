@@ -13,6 +13,7 @@ import { AI_MENTOR_CONFIGURATION_GENERATION_PURPOSE } from "../ai-mentor-configu
 import { AiMentorConfigurationGeneratorService } from "./ai-mentor-configuration-generator.service";
 
 import type { PromptService } from "src/ai/services/prompt.service";
+import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 
 jest.mock("@langfuse/tracing", () => ({
   observe: (callback: () => unknown) => callback,
@@ -71,15 +72,21 @@ describe("AiMentorConfigurationGeneratorService", () => {
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
     };
+    const aiRuntimeService = {
+      generateMentorConfiguration: jest.fn(
+        async (_input: unknown, generateCore: () => Promise<object>) => generateCore(),
+      ),
+    };
     const service = new AiMentorConfigurationGeneratorService(
       promptService as unknown as PromptService,
+      aiRuntimeService as unknown as AiRuntimeService,
     );
 
-    return { generateText, promptService, service };
+    return { aiRuntimeService, generateText, promptService, service };
   };
 
   it("uses the creator-selected Teacher type without asking the model to return it", async () => {
-    const { generateText, service } = createService(teacherFields);
+    const { aiRuntimeService, generateText, service } = createService(teacherFields);
 
     const result = await service.generate({
       mode: AI_MENTOR_CONFIGURATION_GENERATION_MODE.CREATE,
@@ -97,6 +104,10 @@ describe("AiMentorConfigurationGeneratorService", () => {
     });
     expect(providerOptions).toEqual({ openai: { reasoningEffort: "medium" } });
     expect(result).toEqual({ type: AI_MENTOR_TYPE.TEACHER, ...teacherFields });
+    expect(aiRuntimeService.generateMentorConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({ configurationType: AI_MENTOR_TYPE.TEACHER }),
+      expect.any(Function),
+    );
     expect(generateText.mock.calls[0][0].output.schema()).not.toHaveProperty("properties.type");
   });
 

@@ -5298,6 +5298,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Le quiz généré contient un identifiant de réponse vide non valide. Veuillez réessayer la génération de cours.",
+      "invalidAiMentorConfiguration": "La leçon AI Mentor générée contient une configuration de mentor non valide. Veuillez réessayer la génération de cours.",
       "invalidAiJudgeConfiguration": "La leçon AI Mentor générée contient une configuration d’évaluation non valide. Veuillez réessayer la génération de cours."
     }
   },

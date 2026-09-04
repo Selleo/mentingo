@@ -5553,6 +5553,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu.",
+      "invalidAiMentorConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci mentora. Zkuste kurz vygenerovat znovu.",
       "invalidAiJudgeConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci hodnocení. Zkuste kurz vygenerovat znovu."
     }
   },
