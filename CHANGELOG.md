@@ -1,3 +1,65 @@
+<a name="v4.19.0"></a>
+
+## [v4.19.0] - 04.09.2026
+
+### Features:
+
+- make AI Mentor voice conversations faster and more reliable ([#1924](https://github.com/Selleo/mentingo/issues/1924))
+
+- introduce a group manager role for managing assigned user groups ([#1927](https://github.com/Selleo/mentingo/issues/1927))
+
+### Bug Fixes:
+
+- restore reliable frontend end-to-end tests ([#1954](https://github.com/Selleo/mentingo/issues/1954))
+
+- prevent course overview hero image from flickering ([#1950](https://github.com/Selleo/mentingo/issues/1950))
+
+- keep resource library buttons responsive while videos are uploading ([#1949](https://github.com/Selleo/mentingo/issues/1949))
+
+- display breadcrumb navigation in the correct language ([#1942](https://github.com/Selleo/mentingo/issues/1942))
+
+- ensure the mention picker stays fully visible in course discussions ([#1930](https://github.com/Selleo/mentingo/issues/1930))
+
+- ensure global search course progress is correctly displayed ([#1928](https://github.com/Selleo/mentingo/issues/1928))
+
+- prevent course progress in draft mode and restore the summary generation button ([#1925](https://github.com/Selleo/mentingo/issues/1925))
+
+- migrate Langfuse tracing to v4 ([#1912](https://github.com/Selleo/mentingo/issues/1912))
+
+- propagate AI Mentor custom voices through course sharing ([#1874](https://github.com/Selleo/mentingo/issues/1874))
+
+### Chores:
+
+- improve the look of To-do and AI Mentor tiles on the dashboard ([#1948](https://github.com/Selleo/mentingo/issues/1948))
+
+- improve the default dashboard tile order for a more intuitive layout ([#1947](https://github.com/Selleo/mentingo/issues/1947))
+
+- prevent editing course details for shared courses ([#1943](https://github.com/Selleo/mentingo/issues/1943))
+
+- improve course access handling and refresh error page styling ([#1939](https://github.com/Selleo/mentingo/issues/1939))
+
+- improve logo appearance and consistency in navigation ([#1938](https://github.com/Selleo/mentingo/issues/1938))
+
+- improve rich text styling in content lesson ([#1937](https://github.com/Selleo/mentingo/issues/1937))
+
+- show the correct course author when sharing courses ([#1940](https://github.com/Selleo/mentingo/issues/1940))
+
+- make horizontally scrolling through course lists smoother with improved preloading ([#1933](https://github.com/Selleo/mentingo/issues/1933))
+
+- ensure AI Mentor task description heading styles display correctly ([#1932](https://github.com/Selleo/mentingo/issues/1932))
+
+- improve certificate signature quality and appearance ([#1929](https://github.com/Selleo/mentingo/issues/1929))
+
+- make duplicating courses smoother and more intuitive ([#1931](https://github.com/Selleo/mentingo/issues/1931))
+
+- show a clear error when a course trailer file is too large ([#1934](https://github.com/Selleo/mentingo/issues/1934))
+
+- improve learner experience with required video progress ([#1936](https://github.com/Selleo/mentingo/issues/1936))
+
+### Documentation:
+
+- update bunny configuration information ([#1951](https://github.com/Selleo/mentingo/issues/1951))
+
 <a name="v4.18.0"></a>
 
 ## [v4.18.0] - 20.08.2026
@@ -13,6 +75,10 @@
 - prevent course loading flicker and improve the responsive course overview ([#1918](https://github.com/Selleo/mentingo/issues/1918))
 
 - improve learner progress tracking and dashboard clarity for AI Mentor practice ([#1909](https://github.com/Selleo/mentingo/issues/1909))
+
+### Documentation:
+
+- update changelog for version v4.18.0
 
 <a name="v4.17.1"></a>
 
@@ -1820,11 +1886,27 @@
 
 - implement admin notifications about finished course ([#630](https://github.com/Selleo/mentingo/issues/630))
 
+### Bug Fixes:
+
+- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
+
+### Documentation:
+
+- update changelog for version v3.4.0
+
+<a name="v3.3.0"></a>
+
+## [v3.3.0] - 16.09.2025
+
+### Features:
+
 - generate certificates ([#538](https://github.com/Selleo/mentingo/issues/538))
 
 ### Bug Fixes:
 
-- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
+- failing api tests and api e2e tests
+
+- mfa after sso login
 
 - add fetch depth of 0 to deploy ([#645](https://github.com/Selleo/mentingo/issues/645))
 
@@ -1832,7 +1914,7 @@
 
 ### Documentation:
 
-- update changelog for version v3.4.0
+- update changelog for version v3.3.0
 
 - update changelog for version learn-v2025.09.12
 
@@ -3196,7 +3278,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.18.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.19.0...HEAD
+[v4.19.0]: https://github.com/Selleo/mentingo/compare/v4.18.0...v4.19.0
 [v4.18.0]: https://github.com/Selleo/mentingo/compare/v4.17.1...v4.18.0
 [v4.17.1]: https://github.com/Selleo/mentingo/compare/v4.17.0...v4.17.1
 [v4.17.0]: https://github.com/Selleo/mentingo/compare/v4.16.0...v4.17.0
@@ -3247,7 +3330,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
-[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.4.0
+[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
+[v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0
