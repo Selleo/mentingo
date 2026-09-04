@@ -5534,6 +5534,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "The generated quiz contains an invalid blank answer id. Please retry course generation.",
+      "invalidAiMentorConfiguration": "The generated AI Mentor lesson contains an invalid mentor configuration. Please retry course generation.",
       "invalidAiJudgeConfiguration": "The generated AI Mentor lesson contains an invalid assessment configuration. Please retry course generation."
     }
   },

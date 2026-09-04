@@ -79,6 +79,67 @@ describe("LumaGeneratedCourseImportService", () => {
     });
   });
 
+  it("imports all required Teacher configuration fields", () => {
+    const lesson = {
+      aiMentor: {
+        name: "Product Coach",
+        taskDescription: "Practice explaining the product value proposition.",
+        aiMentorConfiguration: {
+          type: "teacher",
+          taskGoal: "Explain the product value proposition.",
+          expertise: "B2B product sales",
+          contentScope: "The product catalogue and customer outcomes",
+          teachingStyle: "guided_discovery",
+          feedbackGuidance: "Ask for evidence before correcting the learner.",
+        },
+        ttsPreset: "male",
+        aiJudgeConfiguration: {
+          taskGoal: "Explain the product value proposition",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+      },
+    } as unknown as LumaGeneratedCourseLesson;
+
+    const aiMentor = createService()["getAiMentor"](lesson);
+
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor)).toEqual({
+      type: "teacher",
+      taskGoal: "Explain the product value proposition.",
+      expertise: "B2B product sales",
+      contentScope: "The product catalogue and customer outcomes",
+      teachingStyle: "guided_discovery",
+      feedbackGuidance: "Ask for evidence before correcting the learner.",
+      openingInstruction: null,
+      additionalInstructions: null,
+    });
+  });
+
+  it("rejects a generated AI Mentor lesson without a valid Mentor configuration", () => {
+    const lesson = {
+      aiMentor: {
+        name: "Product Coach",
+        taskDescription: "Practice explaining the product value proposition.",
+        aiMentorConfiguration: {
+          type: "teacher",
+          taskGoal: "Explain the product value proposition.",
+        },
+        ttsPreset: "male",
+        aiJudgeConfiguration: {
+          taskGoal: "Explain the product value proposition",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+      },
+    } as unknown as LumaGeneratedCourseLesson;
+
+    expect(() => createService()["getAiMentor"](lesson)).toThrow(
+      new BadRequestException("luma.errors.invalidAiMentorConfiguration"),
+    );
+  });
+
   it("rejects a generated AI Mentor lesson without a valid Judge configuration", () => {
     const lesson = {
       aiMentor: {

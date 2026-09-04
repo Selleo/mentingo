@@ -5508,6 +5508,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren.",
+      "invalidAiMentorConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Mentor-Konfiguration. Bitte generiere den Kurs erneut.",
       "invalidAiJudgeConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Bewertungskonfiguration. Bitte generiere den Kurs erneut."
     }
   },

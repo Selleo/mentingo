@@ -5571,6 +5571,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Wygenerowany quiz zawiera nieprawidłowy identyfikator pustego miejsca. Spróbuj ponownie wygenerować kurs.",
+      "invalidAiMentorConfiguration": "Wygenerowana lekcja AI Mentora zawiera nieprawidłową konfigurację mentora. Spróbuj ponownie wygenerować kurs.",
       "invalidAiJudgeConfiguration": "Wygenerowana lekcja AI Mentora zawiera nieprawidłową konfigurację oceny. Spróbuj ponownie wygenerować kurs."
     }
   },

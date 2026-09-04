@@ -5467,6 +5467,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "El cuestionario generado contiene una identificación de respuesta en blanco no válida. Vuelva a intentar generar el curso.",
+      "invalidAiMentorConfiguration": "La lección de Mentor de IA generada contiene una configuración de mentor no válida. Vuelva a generar el curso.",
       "invalidAiJudgeConfiguration": "La lección de Mentor de IA generada contiene una configuración de evaluación no válida. Vuelva a generar el curso."
     }
   },

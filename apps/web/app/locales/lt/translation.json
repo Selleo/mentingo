@@ -5512,6 +5512,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą.",
+      "invalidAiMentorConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama mentoriaus konfigūracija. Bandykite generuoti kursą dar kartą.",
       "invalidAiJudgeConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama vertinimo konfigūracija. Bandykite generuoti kursą dar kartą."
     }
   },

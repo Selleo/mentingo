@@ -17,6 +17,7 @@ import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { AiJudgeConfigurationGraphService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-graph.service";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
+import { aiMentorConfigurationContentSchema } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 import { AiMentorConfigurationGraphService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonRepository } from "src/lesson/repositories/adminLesson.repository";
@@ -276,6 +277,12 @@ export class LumaGeneratedCourseImportService {
     if (
       !aiMentor ||
       typeof aiMentor !== "object" ||
+      !("aiMentorConfiguration" in aiMentor) ||
+      !Value.Check(aiMentorConfigurationContentSchema, aiMentor.aiMentorConfiguration)
+    )
+      throw new BadRequestException("luma.errors.invalidAiMentorConfiguration");
+
+    if (
       !("aiJudgeConfiguration" in aiMentor) ||
       !Value.Check(aiJudgeConfigurationInputSchema, aiMentor.aiJudgeConfiguration)
     )
