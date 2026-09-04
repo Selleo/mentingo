@@ -17,6 +17,7 @@ type CertificateQueryParams = {
   userId?: string;
   courseId?: string;
   language?: SupportedLanguages;
+  enabled?: boolean;
 };
 
 export const certificatesQueryOptions = (params: CertificatesParams) => ({
@@ -36,7 +37,7 @@ export const certificatesQueryOptions = (params: CertificatesParams) => ({
 
 export const certificateQueryOptions = (params: CertificateQueryParams) => ({
   queryKey: ["certificate", params.userId, params.courseId, { language: params.language }],
-  enabled: !!params.userId && !!params.courseId,
+  enabled: !!params.userId && !!params.courseId && params.enabled !== false,
   queryFn: async () => {
     const response = await ApiClient.api.certificatesControllerGetCertificate({
       userId: params.userId,

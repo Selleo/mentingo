@@ -20,6 +20,7 @@ import { CertificateValidityImpactDialog } from "~/modules/Admin/EditCourse/Cour
 import { CertificateValiditySection } from "~/modules/Admin/EditCourse/CourseSettings/components/CertificateValiditySection";
 import { useCertificateValiditySettings } from "~/modules/Admin/EditCourse/CourseSettings/components/useCertificateValiditySettings";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -89,7 +90,7 @@ export default function CertificateModal({
     isUpdatingCourseSettings && Boolean(updateCourseSettingsVariables?.data.certificateSignature);
   const isSignatureInputBusy = isLoadingSettings || isUpdatingCourseSettings;
   const previewCompletionDate = useMemo(() => {
-    return new Date().toLocaleDateString("en-GB").replaceAll("/", ".");
+    return formatCertificateDate(new Date().toISOString());
   }, []);
 
   useEffect(() => {

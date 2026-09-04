@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, Logger, NotFoundException, type OnModuleInit } from "@nestjs/common";
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { inArray, or, sql } from "drizzle-orm";
 import { validate as uuidValidate } from "uuid";
@@ -6,18 +6,24 @@ import { validate as uuidValidate } from "uuid";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import {
+  getGroupManagerGroupScopeCondition,
+  getGroupManagerLearnerScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
-import { groups, lessonLearningTime, users } from "src/storage/schema";
+import { groups, groupUsers, lessonLearningTime, users } from "src/storage/schema";
 import { WsGateway } from "src/websocket";
 
 import type { createCache } from "cache-manager";
 import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LearningTimeStatisticsSortField } from "src/learning-time/learning-time.schema";
 import type { LearningTimeQuery } from "src/learning-time/learning-time.types";
 import type { LearningTimeJobData } from "src/queue/queue.types";
@@ -278,17 +284,61 @@ export class LearningTimeService implements OnModuleInit {
     });
   }
 
-  async getLearningTimeStatistics(courseId: UUIDType, query: LearningTimeQuery = {}) {
+  async getLearningTimeStatistics(
+    courseId: UUIDType,
+    query: LearningTimeQuery = {},
+    currentUser?: CurrentUserType,
+  ) {
     const { page = 1, perPage = DEFAULT_PAGE_SIZE, sort = "studentName", searchQuery = "" } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
     const availableUserIds = await this.getFilteredUserIds(query);
 
+    if (currentUser && shouldApplyGroupManagerScope(currentUser, [PERMISSIONS.COURSE_STATISTICS])) {
+      if (
+        query.groupId &&
+        !(await this.learningTimeRepository.isGroupManagedByUser(query.groupId, currentUser.userId))
+      ) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+
+      if (
+        query.userId &&
+        !(await this.learningTimeRepository.isLearnerManagedByUser(
+          query.userId,
+          currentUser.userId,
+        ))
+      ) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+    }
+
     const conditions: SQL<unknown>[] = [];
 
+    if (currentUser) {
+      const managerScope = getGroupManagerLearnerScopeCondition(
+        currentUser,
+        lessonLearningTime.userId,
+        [PERMISSIONS.COURSE_STATISTICS],
+      );
+
+      if (managerScope) conditions.push(managerScope);
+    }
+
     if (searchQuery) {
+      const groupNameSearchCondition = this.localizationService.getLocalizedFieldSearchCondition(
+        groups.name,
+        `%${searchQuery}%`,
+      );
+
       const searchCondition = or(
         getUserNameSearchCondition(searchQuery),
-        this.localizationService.getLocalizedFieldSearchCondition(groups.name, `%${searchQuery}%`),
+        sql`EXISTS (
+          SELECT 1
+          FROM ${groupUsers}
+          INNER JOIN ${groups} ON ${groups.id} = ${groupUsers.groupId}
+          WHERE ${groupUsers.userId} = ${lessonLearningTime.userId}
+            AND ${groupNameSearchCondition}
+        )`,
       );
 
       if (searchCondition) {
@@ -296,9 +346,10 @@ export class LearningTimeService implements OnModuleInit {
       }
     }
 
-    if (availableUserIds.length) {
+    if (query.userId || query.groupId) {
+      if (!availableUserIds.length) conditions.push(sql`FALSE`);
       const usersCondition = inArray(lessonLearningTime.userId, availableUserIds);
-      if (usersCondition) {
+      if (availableUserIds.length && usersCondition) {
         conditions.push(usersCondition);
       }
     }
@@ -337,10 +388,27 @@ export class LearningTimeService implements OnModuleInit {
     return this.learningTimeRepository.getLearningTimeForCourse(courseId);
   }
 
-  async getFilterOptions(courseId: UUIDType, language?: SupportedLanguages) {
-    const groups = await this.learningTimeRepository.getGroupsInCourse(courseId, language);
+  async getFilterOptions(
+    courseId: UUIDType,
+    language?: SupportedLanguages,
+    currentUser?: CurrentUserType,
+  ) {
+    const conditions: SQL[] = [];
 
-    return { groups };
+    if (currentUser) {
+      const managerScope = getGroupManagerGroupScopeCondition(currentUser, groups.id, [
+        PERMISSIONS.COURSE_STATISTICS,
+      ]);
+
+      if (managerScope) conditions.push(managerScope);
+    }
+    const groupOptions = await this.learningTimeRepository.getGroupsInCourse(
+      courseId,
+      language,
+      conditions,
+    );
+
+    return { groups: groupOptions };
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
@@ -375,6 +443,7 @@ export class LearningTimeService implements OnModuleInit {
 
   private canTrackLearningTime(socket: AuthenticatedSocket) {
     return (
+      hasPermission(socket.data.user.permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE) &&
       !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE) &&
       !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE_OWN)
     );

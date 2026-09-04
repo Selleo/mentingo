@@ -342,7 +342,8 @@
       "admin": "Admin",
       "contentCreator": "Inhaltsersteller",
       "trainer": "Trainer",
-      "student": "Student"
+      "student": "Student",
+      "groupManager": "Gruppenmanager"
     },
     "languages": {
       "en": "Englisch",
@@ -1887,6 +1888,7 @@
         "course_delete": "Kurse löschen.",
         "course_enrollment": "Kursanmeldungen verwalten.",
         "course_statistics": "Kursanalysen und -statistiken anzeigen.",
+        "managed_group_results_read": "Lernergebnisse für zugewiesene verwaltete Gruppen anzeigen.",
         "course_export": "Kursdaten exportieren.",
         "learning_mode_use": "Funktionen des Lernmodus verwenden.",
         "learning_progress_update": "Lernfortschritt aktualisieren.",
@@ -2020,7 +2022,7 @@
   },
   "adminUserView": {
     "header": "Neuen Benutzer erstellen",
-    "subHeader": "Geben Sie die Details ein, um einen neuen Benutzer zu erstellen. Klicken Sie auf Speichern, wenn Sie fertig sind.",
+    "managedGroupsTooltip": "Die ausgewählten Gruppen bestimmen, welche Kurse, Fortschritte, Ergebnisse, Lernzeiten und Zertifikate der Lernenden dieser Benutzer als Gruppenmanager einsehen kann.",
     "editUserHeader": "Benutzerinformationen",
     "tabs": {
       "information": "Benutzerinformationen",
@@ -2033,7 +2035,8 @@
     "placeholder": {
       "role": "Wählen Sie eine Rolle aus",
       "groupId": "Wählen Sie eine Gruppe aus",
-      "language": "Wählen Sie eine Sprache aus"
+      "language": "Wählen Sie eine Sprache aus",
+      "managedGroups": "Verwaltete Gruppen auswählen"
     },
     "field": {
       "firstName": "Vorname",
@@ -2042,7 +2045,8 @@
       "role": "Rolle",
       "language": "Sprache",
       "status": "Status",
-      "groups": "Gruppe"
+      "groups": "Gruppe",
+      "managedGroups": "Verwaltete Gruppen"
     },
     "toast": {
       "userCreatedSuccessfully": "Benutzer erfolgreich erstellt",
@@ -3389,7 +3393,23 @@
         "progress": "Fortschritt",
         "quizResults": "Quizergebnisse",
         "aiMentorResults": "Ergebnisse des KI-Mentors",
-        "learningTime": "Lernzeit"
+        "learningTime": "Lernzeit",
+        "certificates": "Zertifikate"
+      },
+      "certificates": {
+        "learner": "Lernender",
+        "email": "E-Mail",
+        "groups": "Gruppen",
+        "status": "Status",
+        "expiry": "Ablauf",
+        "preview": "Zertifikat ansehen",
+        "empty": "Keine eingeschriebenen Lernenden gefunden.",
+        "statuses": {
+          "not_earned": "Nicht erworben",
+          "active": "Aktiv",
+          "expired": "Abgelaufen",
+          "revoked": "Widerrufen"
+        }
       },
       "field": {
         "studentName": "Student",
@@ -3708,6 +3728,7 @@
       "single": "Einzel",
       "multiple": "Mehrere",
       "fillInTheBlanks": "Füllen Sie die Lücken aus.",
+      "notAnswered": "Nicht beantwortet",
       "selectQuestion": "Frage auswählen.",
       "trueOrFalseQuestion": "Wahre oder falsche Frage.",
       "multipleChoice": "Multiple-Choice-Frage.",
@@ -4193,7 +4214,8 @@
       "admin": "Administrator",
       "student": "Student",
       "content_creator": "Inhaltsersteller",
-      "trainer": "Trainer"
+      "trainer": "Trainer",
+      "group_manager": "Gruppenmanager"
     },
     "switch": {
       "enabled": "Ermöglicht",

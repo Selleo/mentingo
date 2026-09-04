@@ -55,7 +55,7 @@ export class QuestionRepository {
               QUESTION_TYPE.DETAILED_RESPONSE
             }) AND ${isCompleted} THEN
               ARRAY[json_build_object(
-                'id', ${studentQuestionAnswers.id},
+                'id', COALESCE(${studentQuestionAnswers.id}, ${questions.id}),
                 'optionText', '',
                 'isCorrect', TRUE,
                 'displayOrder', 1,

@@ -117,7 +117,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
 }));
 
 vi.mock("./ProgressStatCard", () => ({
-  default: () => null,
+  default: () => <div>Your progress</div>,
 }));
 
 vi.mock("../CourseCertificate", () => ({
@@ -217,6 +217,16 @@ describe("CourseStatBar", () => {
       screen.queryByRole("button", { name: "Open deadline settings" }),
     ).not.toBeInTheDocument();
     expect(mocks.useGroupsByCourseQuery).toHaveBeenCalledWith("", "en");
+  });
+
+  it("hides personal progress from Group Managers", () => {
+    mocks.permissions = [PERMISSIONS.MANAGED_GROUP_RESULTS_READ];
+    mocks.courseAccessState.canEditCourse = false;
+    mocks.courseAccessState.isAdminExperience = false;
+
+    renderWith().render(<CourseStatBar language="en" />);
+
+    expect(screen.queryByText("Your progress")).not.toBeInTheDocument();
   });
 
   it("shows an assigned deadline as read-only to an unauthenticated visitor", () => {

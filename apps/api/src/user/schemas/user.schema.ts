@@ -77,6 +77,14 @@ export const userSchema = Type.Composite([
         name: Type.String(),
       }),
     ),
+    managedGroups: Type.Optional(
+      Type.Array(
+        Type.Object({
+          id: UUIDSchema,
+          name: Type.String(),
+        }),
+      ),
+    ),
   }),
 ]);
 

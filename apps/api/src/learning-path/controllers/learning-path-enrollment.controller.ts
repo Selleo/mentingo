@@ -42,7 +42,7 @@ export class LearningPathEnrollmentController {
   constructor(private readonly learningPathService: LearningPathService) {}
 
   @Get(":learningPathId/enroll-users")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },

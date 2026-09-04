@@ -32,16 +32,21 @@ type CourseHeroProps = {
 };
 
 const getGridClassName = ({
+  showProgressCard,
   showAuthorCard,
   showCertificateCard,
   showDeadlineCard,
 }: {
+  showProgressCard: boolean;
   showAuthorCard: boolean;
   showCertificateCard: boolean;
   showDeadlineCard: boolean;
 }) => {
   const visibleCards =
-    1 + Number(showDeadlineCard) + Number(showCertificateCard) + Number(showAuthorCard);
+    Number(showProgressCard) +
+    Number(showDeadlineCard) +
+    Number(showCertificateCard) +
+    Number(showAuthorCard);
 
   if (visibleCards === 1) return "grid-cols-1";
   if (visibleCards === 2) return "grid-cols-1 sm:grid-cols-2";
@@ -60,6 +65,10 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const canManageCourseOwnership = hasPermission(
     currentUser?.permissions,
     PERMISSIONS.COURSE_UPDATE,
+  );
+  const showProgressCard = !hasPermission(
+    currentUser?.permissions,
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
   );
 
   const hasCertificate = Boolean(course.hasCertificate);
@@ -223,20 +232,23 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       className={cn(
         "grid gap-3 md:gap-4",
         getGridClassName({
+          showProgressCard,
           showAuthorCard,
           showCertificateCard,
           showDeadlineCard,
         }),
       )}
     >
-      <ProgressStatCard
-        completedChapterCount={course.completedChapterCount ?? 0}
-        courseChapterCount={course.courseChapterCount}
-        isDraftCourse={course.status === COURSE_STATUSES.DRAFT}
-        isAdminExperience={isAdminExperience}
-        onEnterLearningMode={enterLearningMode}
-        timeLeftSeconds={timeLeftSeconds}
-      />
+      {showProgressCard && (
+        <ProgressStatCard
+          completedChapterCount={course.completedChapterCount ?? 0}
+          courseChapterCount={course.courseChapterCount}
+          isDraftCourse={course.status === COURSE_STATUSES.DRAFT}
+          isAdminExperience={isAdminExperience}
+          onEnterLearningMode={enterLearningMode}
+          timeLeftSeconds={timeLeftSeconds}
+        />
+      )}
 
       {showDeadlineCard && (
         <DeadlineStatCard

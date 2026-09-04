@@ -36,6 +36,7 @@ import {
   CourseStudentsProgressTable,
   CourseStudentsQuizResultsTable,
 } from "./components";
+import { CourseCertificateRowsTable } from "./components/CourseCertificateRowsTable";
 import { CourseStudentsAiMentorResultsTable } from "./components/CourseStudentsAiMentorResults";
 import {
   CourseAdminStatisticsTabs,
@@ -90,6 +91,7 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
   );
 
   const [learningTimeParams, setLearningTimeParams] = useState<CourseLearningTimeFilterQuery>({});
+  const [certificateSearch, setCertificateSearch] = useState<string>();
 
   const [aiMentorSearchParams, setAiMentorSearchParams] =
     useState<CourseStudentsAiMentorResultsQueryParams>({});
@@ -259,6 +261,8 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
         return aiMentorSearchParams.search;
       case "learningTime":
         return learningTimeParams.search;
+      case "certificates":
+        return certificateSearch;
       default:
         return undefined;
     }
@@ -277,6 +281,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
         break;
       case "learningTime":
         handleLearningTimeFilterChange(name, value);
+        break;
+      case "certificates":
+        setCertificateSearch(value as string | undefined);
         break;
     }
   };
@@ -341,9 +348,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
           <Tabs value={activeTab} className="h-full">
             <div className="flex items-start gap-2 flex-col pb-6">
               <h6 className="h6">{t("adminCourseView.statistics.details")}</h6>
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 w-full">
-                <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
-                  <div className="max-w-[248px] min-w-52 shrink-0">
+              <div className="flex w-full flex-col gap-3">
+                <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="w-full sm:w-[360px] sm:shrink-0">
                     <SearchFilter
                       filters={filterConfig}
                       values={{ search: getSearchValue() }}
@@ -423,26 +430,29 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
                     ))
                     .otherwise(() => null)}
                 </div>
-                <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50 flex items-center">
-                  {visibleStatisticsTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab}
-                      data-testid={
-                        {
-                          progress: COURSE_STATISTICS_HANDLES.PROGRESS_TAB,
-                          quizResults: COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TAB,
-                          aiMentorResults: COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TAB,
-                          learningTime: COURSE_STATISTICS_HANDLES.LEARNING_TIME_TAB,
-                        }[tab]
-                      }
-                      className="h-full grow md:w-fit"
-                      value={tab}
-                      onClick={() => setActiveTab(tab)}
-                    >
-                      {t(`adminCourseView.statistics.tabs.${tab}`)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="w-full overflow-x-auto pb-1">
+                  <TabsList className="flex h-[42px] min-w-full w-max items-center justify-start rounded-sm bg-primary-50 p-1">
+                    {visibleStatisticsTabs.map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        data-testid={
+                          {
+                            progress: COURSE_STATISTICS_HANDLES.PROGRESS_TAB,
+                            quizResults: COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TAB,
+                            aiMentorResults: COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TAB,
+                            learningTime: COURSE_STATISTICS_HANDLES.LEARNING_TIME_TAB,
+                            certificates: undefined,
+                          }[tab]
+                        }
+                        className="h-full grow"
+                        value={tab}
+                        onClick={() => setActiveTab(tab)}
+                      >
+                        {t(`adminCourseView.statistics.tabs.${tab}`)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
               </div>
             </div>
             <TabsContent value={CourseAdminStatisticsTabs.progress}>
@@ -477,6 +487,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
                 searchParams={learningTimeParams}
                 onFilterChange={handleLearningTimeFilterChange}
               />
+            </TabsContent>
+            <TabsContent value={CourseAdminStatisticsTabs.certificates}>
+              <CourseCertificateRowsTable courseId={courseId} search={certificateSearch} />
             </TabsContent>
           </Tabs>
         </CardContent>

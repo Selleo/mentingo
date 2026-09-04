@@ -1,11 +1,14 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
+import { UUIDSchema } from "src/common";
+
 export const createUserSchema = Type.Object({
   email: Type.String({ format: "email" }),
   firstName: Type.String({ minLength: 1, maxLength: 64 }),
   lastName: Type.String({ minLength: 1, maxLength: 64 }),
   roleSlugs: Type.Array(Type.String()),
+  managedGroupIds: Type.Optional(Type.Array(UUIDSchema)),
   language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
 });
 

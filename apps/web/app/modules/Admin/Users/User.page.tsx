@@ -1,9 +1,9 @@
 import { useParams } from "@remix-run/react";
-import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { startCase } from "lodash-es";
-import { KeyRound, UserCircle2 } from "lucide-react";
+import { Info, KeyRound, UserCircle2 } from "lucide-react";
 import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useAdminUpdateUser } from "~/api/mutations/admin/useAdminUpdateUser";
@@ -16,6 +16,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { PermissionsMatrix } from "~/modules/Admin/Users/components/PermissionsMatrix";
 import { buildPermissionsUnionForRoleSlugs } from "~/modules/Admin/Users/utils/permissionsMatrix";
 import Loader from "~/modules/common/Loader/Loader";
@@ -61,7 +62,22 @@ const User = () => {
 
   const permissionsOrder = useMemo(() => Object.values(PERMISSIONS) as PermissionKey[], []);
 
+  const getFieldLabel = (field: keyof UpdateUserBody) => {
+    if (field === "archived") return t("adminUserView.field.status");
+    if (field === "roleSlugs") return t("adminUsersView.dropdown.roles");
+    return startCase(t(`adminUserView.field.${field}`));
+  };
+
   const userRoleSlugs = useMemo(() => user?.roleSlugs ?? [], [user]);
+
+  const selectedRoleSlugs = useWatch({
+    control,
+    name: "roleSlugs",
+  });
+
+  const showManagedGroups = (selectedRoleSlugs ?? userRoleSlugs).includes(
+    SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+  );
 
   const userPermissionsUnion = useMemo(
     () =>
@@ -180,16 +196,38 @@ const User = () => {
                 {displayedFields.map((field) => (
                   <div key={field} className={field === "email" ? "md:col-span-2" : ""}>
                     <Label className="mb-2 inline-block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                      {field === "archived"
-                        ? t("adminUserView.field.status")
-                        : field === "roleSlugs"
-                          ? t("adminUsersView.dropdown.roles")
-                          : startCase(t(`adminUserView.field.${field}`))}
+                      {getFieldLabel(field)}
                     </Label>
                     <UserInfo name={field} control={control} isEditing user={user} />
                   </div>
                 ))}
               </div>
+              {showManagedGroups && (
+                <section className="mt-6 border-t border-neutral-200 pt-5">
+                  <div className="mb-4 flex items-center gap-2">
+                    <h4 className="h6 text-neutral-950">
+                      {t("adminUserView.field.managedGroups")}
+                    </h4>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="rounded-full text-neutral-500 hover:text-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                            aria-label={t("adminUserView.managedGroupsTooltip")}
+                          >
+                            <Info className="size-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          {t("adminUserView.managedGroupsTooltip")}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <UserInfo name="managedGroupIds" control={control} isEditing user={user} />
+                </section>
+              )}
             </form>
           </TabsContent>
           <TabsContent value="permissions" className="pt-4">

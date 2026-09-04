@@ -69,9 +69,18 @@ import {
 } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import {
+  getGroupManagerCourseScopeCondition,
+  getGroupManagerGroupScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
+import {
+  getRestrictedIdsCondition,
+  getRestrictedIdsSqlFragment,
+} from "src/common/utils/restrictedIds";
 import { CourseDurationService } from "src/courses/course-duration.service";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
@@ -119,12 +128,12 @@ import {
   courses,
   coursesSummaryStats,
   groups,
+  groupManagerGroups,
   groupUsers,
   aiMentorConfigurations,
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
-  lessonLearningTime,
   lessons,
   questionAnswerOptions,
   questions,
@@ -173,6 +182,7 @@ import {
 } from "./schemas/courseQuery";
 import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
+import type { CourseStatisticsExpressionsParams } from "./course.types";
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
@@ -229,6 +239,7 @@ import type {
   CourseTranslationType,
 } from "src/courses/types/course.types";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type { LocalizedGroup } from "src/group/group.types";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -319,6 +330,7 @@ export class CourseService {
       sort = CourseSortFields.title,
       currentUserId,
       currentUserPermissions = [],
+      currentUser,
       language,
     } = query;
 
@@ -326,12 +338,13 @@ export class CourseService {
 
     const conditions = this.getFiltersConditions(filters, false, language);
 
-    const canUpdateAnyCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE);
-    const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
+    const accessCondition = this.getCourseListAccessCondition({
+      currentUser,
+      currentUserId,
+      currentUserPermissions,
+    });
 
-    if (currentUserId && canUpdateOwnCourse && !canUpdateAnyCourse) {
-      conditions.push(eq(courses.authorId, currentUserId));
-    }
+    if (accessCondition) conditions.push(accessCondition);
 
     const queryDB = this.db
       .select({
@@ -423,6 +436,31 @@ export class CourseService {
         perPage,
       },
     };
+  }
+
+  private getCourseListAccessCondition({
+    currentUser,
+    currentUserId,
+    currentUserPermissions,
+  }: Pick<CoursesQuery, "currentUser" | "currentUserId" | "currentUserPermissions">):
+    | SQL
+    | undefined {
+    if (hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE)) return undefined;
+
+    const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
+    const ownCourseCondition =
+      currentUserId && canUpdateOwnCourse ? eq(courses.authorId, currentUserId) : undefined;
+
+    if (
+      !currentUser ||
+      !hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+    ) {
+      return ownCourseCondition;
+    }
+
+    const managedCourseCondition = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+
+    return or(ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
   }
 
   async getCoursesForUser(
@@ -780,9 +818,7 @@ export class CourseService {
         enrolledAt: sql<
           string | null
         >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
@@ -1386,14 +1422,78 @@ export class CourseService {
     });
   }
 
+  private async resolveGroupManagerCoursePreview({
+    courseId,
+    courseAuthorId,
+    currentUser,
+  }: {
+    courseId: UUIDType;
+    courseAuthorId: UUIDType;
+    currentUser?: CurrentUserType;
+  }): Promise<boolean> {
+    if (
+      !currentUser ||
+      !hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+    ) {
+      return false;
+    }
+
+    const { permissions, userId } = currentUser;
+
+    const hasCourseManagementAccess =
+      hasPermission(permissions, PERMISSIONS.COURSE_UPDATE) ||
+      hasPermission(permissions, PERMISSIONS.USER_MANAGE) ||
+      (hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) && userId === courseAuthorId);
+
+    if (hasCourseManagementAccess) return false;
+
+    const managerCourseScope = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+
+    const canLearn = hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE);
+
+    const [managedCourses, ownEnrollments] = await Promise.all([
+      this.db
+        .select({ id: courses.id })
+        .from(courses)
+        .where(and(eq(courses.id, courseId), managerCourseScope)),
+      canLearn
+        ? this.db
+            .select({ id: studentCourses.id })
+            .from(studentCourses)
+            .where(
+              and(
+                eq(studentCourses.courseId, courseId),
+                eq(studentCourses.studentId, userId),
+                eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+              ),
+            )
+            .limit(1)
+        : Promise.resolve([]),
+    ]);
+
+    const hasManagedCourseAccess = managedCourses.length > 0;
+    const hasLearnerAccess = ownEnrollments.length > 0;
+
+    if (
+      !hasManagedCourseAccess &&
+      !hasLearnerAccess &&
+      !hasPermission(permissions, PERMISSIONS.COURSE_READ)
+    ) {
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
+    }
+
+    return hasManagedCourseAccess && !hasLearnerAccess;
+  }
+
   async getCourse(
     idOrSlug: UUIDType | string,
-    userId: UUIDType,
-    userPermissions: PermissionKey[] = [],
+    currentUser: CurrentUserType | undefined,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
-    await this.ensureAnonymousCourseAccess(userId);
+    await this.ensureAnonymousCourseAccess(currentUser?.userId);
 
+    const userId = currentUser?.userId ?? "00000000-0000-0000-0000-000000000000";
+    const userPermissions = currentUser?.permissions ?? [];
     const { courseId: id, slug: currentSlug } = match(
       await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
     )
@@ -1408,6 +1508,12 @@ export class CourseService {
       .where(eq(courses.id, id));
 
     if (!courseAccess) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    const isManagerPreview = await this.resolveGroupManagerCoursePreview({
+      courseId: id,
+      courseAuthorId: courseAccess.authorId,
+      currentUser,
+    });
 
     const canManageCourses =
       hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE) ||
@@ -1646,6 +1752,7 @@ export class CourseService {
       trailerUrl,
       chapters: chaptersWithDuration,
       slug: currentSlug,
+      isManagerPreview,
     };
   }
 
@@ -4208,8 +4315,23 @@ export class CourseService {
   async getCourseStatistics(
     id: UUIDType,
     query: CourseStatisticsQueryBody,
+    currentUser: CurrentUserType,
   ): Promise<CourseStatisticsResponse> {
-    const userIds = await this.getUserIdsByGroup(query.groupId);
+    const learnerScope = await this.getCourseStatisticsLearnerScope(query.groupId, currentUser);
+
+    const userIds = learnerScope.userIds;
+
+    const scopedStudentCondition = getRestrictedIdsCondition(
+      learnerScope.restricted,
+      userIds,
+      studentCourses.studentId,
+    );
+
+    const scopedAliasCondition = getRestrictedIdsSqlFragment(
+      learnerScope.restricted,
+      userIds,
+      sql.raw("sc.student_id"),
+    );
 
     const [courseStats] = await this.db
       .select({
@@ -4227,6 +4349,7 @@ export class CourseService {
               FROM ${studentCourses} AS sc
               JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
               WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+              ${scopedAliasCondition}
             ) AS stats
           ),
           0
@@ -4245,7 +4368,7 @@ export class CourseService {
             JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
             JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
             WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-            ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
+            ${scopedAliasCondition}
           ) AS stats
         ),
         0
@@ -4259,7 +4382,7 @@ export class CourseService {
               FROM ${studentCourses} AS sc
               JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
               WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-              ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
+              ${scopedAliasCondition}
               GROUP BY sc.progress
             ) AS progress_counts
           ),
@@ -4274,14 +4397,15 @@ export class CourseService {
           eq(coursesSummaryStats.courseId, id),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(users.deletedAt),
-          ...(userIds.length ? [inArray(studentCourses.studentId, userIds)] : []),
+          scopedStudentCondition,
         ),
       );
 
     const courseLearningTime = await this.learningTimeRepository.getCourseTotalLearningTime(
       id,
-      userIds.length ? [inArray(lessonLearningTime.userId, userIds)] : [],
+      learnerScope.restricted ? userIds : undefined,
     );
+
     return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
   }
 
@@ -4292,11 +4416,21 @@ export class CourseService {
     const [course] = await this.db
       .select({ authorId: courses.authorId })
       .from(courses)
-      .where(eq(courses.id, courseId));
+      .where(
+        and(
+          eq(courses.id, courseId),
+          getGroupManagerCourseScopeCondition(currentUser, courses.id, [
+            PERMISSIONS.COURSE_STATISTICS,
+          ]),
+        ),
+      );
 
     if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
-    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+    if (
+      !shouldApplyGroupManagerScope(currentUser, [PERMISSIONS.COURSE_STATISTICS]) &&
+      !canUpdateCourseByAuthor(currentUser, course.authorId)
+    ) {
       throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
     }
   }
@@ -4305,10 +4439,13 @@ export class CourseService {
     courseId: UUIDType,
     query: CourseStatisticsQueryBody,
     language: SupportedLanguages,
+    currentUser: CurrentUserType,
   ): Promise<CourseAverageQuizScoresResponse> {
-    const groupStudentIds = query.groupId ? await this.getUserIdsByGroup(query.groupId) : [];
+    const learnerScope = await this.getCourseStatisticsLearnerScope(query.groupId, currentUser);
 
-    if (query.groupId && groupStudentIds.length === 0) {
+    const groupStudentIds = learnerScope.userIds;
+
+    if (learnerScope.restricted && groupStudentIds.length === 0) {
       return { averageScoresPerQuiz: [] };
     }
 
@@ -4333,8 +4470,12 @@ export class CourseService {
       exists(activeEnrollment),
     ];
 
-    if (groupStudentIds.length) {
-      conditions.push(inArray(studentLessonProgress.studentId, groupStudentIds));
+    if (learnerScope.restricted) {
+      conditions.push(
+        groupStudentIds.length
+          ? inArray(studentLessonProgress.studentId, groupStudentIds)
+          : sql`FALSE`,
+      );
     }
 
     const quizAverages = this.db
@@ -4387,7 +4528,20 @@ export class CourseService {
   private async getStatisticsConditions(
     query: CourseStatisticsQueryBody,
     source: AnyPgColumn = studentCourses.studentId,
+    currentUser?: CurrentUserType,
   ) {
+    if (currentUser) {
+      const learnerScope = await this.getCourseStatisticsLearnerScope(query.groupId, currentUser);
+
+      const scopeCondition = getRestrictedIdsCondition(
+        learnerScope.restricted,
+        learnerScope.userIds,
+        source,
+      );
+
+      return scopeCondition ? [scopeCondition] : [];
+    }
+
     const conditions = [];
 
     if (query.groupId) {
@@ -4406,7 +4560,50 @@ export class CourseService {
     return (await this.learningTimeRepository.getStudentsByGroup(groupId)).map(({ id }) => id);
   }
 
-  async getStudentsProgress(query: CourseStudentProgressionQuery) {
+  private async getCourseStatisticsLearnerScope(
+    groupId: UUIDType | undefined,
+    currentUser: CurrentUserType,
+  ): Promise<{ restricted: boolean; userIds: UUIDType[] }> {
+    const isManagerScoped = shouldApplyGroupManagerScope(currentUser, [
+      PERMISSIONS.COURSE_STATISTICS,
+    ]);
+
+    if (!isManagerScoped) {
+      return {
+        restricted: Boolean(groupId),
+        userIds: await this.getUserIdsByGroup(groupId),
+      };
+    }
+
+    if (groupId) {
+      const [assignment] = await this.db
+        .select({ id: groupManagerGroups.id })
+        .from(groupManagerGroups)
+        .where(
+          and(
+            eq(groupManagerGroups.managerUserId, currentUser.userId),
+            eq(groupManagerGroups.groupId, groupId),
+          ),
+        );
+
+      if (!assignment) throw new NotFoundException("common.toast.notFound");
+    }
+
+    const authorizedLearners = await this.db
+      .selectDistinct({ userId: groupUsers.userId })
+      .from(groupManagerGroups)
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupManagerGroups.groupId))
+      .where(
+        and(
+          eq(groupManagerGroups.managerUserId, currentUser.userId),
+          groupId ? eq(groupUsers.groupId, groupId) : undefined,
+        ),
+      );
+
+    return { restricted: true, userIds: authorizedLearners.map(({ userId }) => userId) };
+  }
+
+  async getStudentsProgress(query: CourseStudentProgressionQuery, currentUser: CurrentUserType) {
     const {
       courseId,
       sort = CourseStudentProgressionSortFields.studentName,
@@ -4425,7 +4622,7 @@ export class CourseService {
       completedLessonsCountExpression,
       groupNameExpression,
       lastCompletedLessonName,
-    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
+    } = await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -4434,12 +4631,13 @@ export class CourseService {
       isNull(users.deletedAt),
     ];
 
-    conditions.push(...(await this.getStatisticsConditions({ groupId })));
+    conditions.push(...(await this.getStatisticsConditions({ groupId }, undefined, currentUser)));
 
     const studentsProgress = await this.db
       .select({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
+        studentEmail: users.email,
         studentAvatarKey: users.avatarReference,
         groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
@@ -4456,11 +4654,12 @@ export class CourseService {
       .groupBy(users.id)
       .orderBy(
         sortOrder(
-          await this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentProgressionSortField,
+          await this.getCourseStatisticsColumnToSortBy({
+            sort: sortedField as CourseStudentProgressionSortField,
             courseId,
             language,
-          ),
+            currentUser,
+          }),
         ),
       );
 
@@ -4491,7 +4690,7 @@ export class CourseService {
     };
   }
 
-  async getStudentsQuizResults(query: CourseStudentQuizResultsQuery) {
+  async getStudentsQuizResults(query: CourseStudentQuizResultsQuery, currentUser: CurrentUserType) {
     const {
       courseId,
       page = 1,
@@ -4504,7 +4703,7 @@ export class CourseService {
     } = query;
 
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      await this.getStudentCourseStatisticsExpressions(courseId, language);
+      await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -4524,19 +4723,21 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const order = sortOrder(
-      await this.getCourseStatisticsColumnToSortBy(
-        sortedField as CourseStudentQuizResultsSortField,
+      await this.getCourseStatisticsColumnToSortBy({
+        sort: sortedField as CourseStudentQuizResultsSortField,
         courseId,
         language,
-      ),
+        currentUser,
+      }),
     );
 
-    conditions.push(...(await this.getStatisticsConditions({ groupId })));
+    conditions.push(...(await this.getStatisticsConditions({ groupId }, undefined, currentUser)));
 
     const quizResults = await this.db
-      .select({
+      .selectDistinct({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
+        studentEmail: users.email,
         studentAvatarKey: users.avatarReference,
         lessonId: sql<UUIDType>`${lessons.id}`,
         quizName: quizNameExpression,
@@ -4557,7 +4758,9 @@ export class CourseService {
       .offset((page - 1) * perPage);
 
     const [{ totalCount }] = await this.db
-      .select({ totalCount: count() })
+      .select({
+        totalCount: sql<number>`COUNT(DISTINCT (${studentLessonProgress.studentId}, ${studentLessonProgress.lessonId}))::INTEGER`,
+      })
       .from(studentLessonProgress)
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
@@ -4586,7 +4789,10 @@ export class CourseService {
     };
   }
 
-  async getStudentsAiMentorResults(query: CourseStudentAiMentorResultsQuery) {
+  async getStudentsAiMentorResults(
+    query: CourseStudentAiMentorResultsQuery,
+    currentUser: CurrentUserType,
+  ) {
     const {
       courseId,
       page = 1,
@@ -4620,25 +4826,28 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions(
+    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions({
       courseId,
       language,
-    );
+      currentUser,
+    });
 
     const order = sortOrder(
-      await this.getCourseStatisticsColumnToSortBy(
-        sortedField as CourseStudentAiMentorResultsSortField,
+      await this.getCourseStatisticsColumnToSortBy({
+        sort: sortedField as CourseStudentAiMentorResultsSortField,
         courseId,
         language,
-      ),
+        currentUser,
+      }),
     );
 
-    conditions.push(...(await this.getStatisticsConditions({ groupId })));
+    conditions.push(...(await this.getStatisticsConditions({ groupId }, undefined, currentUser)));
 
     const quizResults = await this.db
-      .select({
+      .selectDistinct({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
+        studentEmail: users.email,
         studentAvatarKey: users.avatarReference,
         lessonId: sql<UUIDType>`${lessons.id}`,
         lessonName: lessonNameExpression,
@@ -4663,7 +4872,9 @@ export class CourseService {
       .where(and(...conditions));
 
     const [{ totalCount }] = await this.db
-      .select({ totalCount: count() })
+      .select({
+        totalCount: sql<number>`COUNT(DISTINCT (${studentLessonProgress.studentId}, ${studentLessonProgress.lessonId}))::INTEGER`,
+      })
       .from(aiMentorStudentLessonProgress)
       .leftJoin(
         studentLessonProgress,
@@ -4697,14 +4908,17 @@ export class CourseService {
     };
   }
 
-  private async getCourseStatisticsColumnToSortBy(
+  private async getCourseStatisticsColumnToSortBy({
+    sort,
+    courseId,
+    language,
+    currentUser,
+  }: CourseStatisticsExpressionsParams & {
     sort:
       | CourseStudentProgressionSortField
       | CourseStudentQuizResultsSortField
-      | CourseStudentAiMentorResultsSortField,
-    courseId: UUIDType,
-    language: SupportedLanguages,
-  ) {
+      | CourseStudentAiMentorResultsSortField;
+  }) {
     const {
       lastAttemptExpression,
       studentNameExpression,
@@ -4713,7 +4927,7 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       lastCompletedLessonName,
-    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
+    } = await this.getStudentCourseStatisticsExpressions({ courseId, language, currentUser });
 
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
@@ -4745,10 +4959,11 @@ export class CourseService {
     }
   }
 
-  private async getStudentCourseStatisticsExpressions(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-  ) {
+  private async getStudentCourseStatisticsExpressions({
+    courseId,
+    language,
+    currentUser,
+  }: CourseStatisticsExpressionsParams) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -4770,29 +4985,29 @@ export class CourseService {
             AND slp.completed_at IS NOT NULL
         ), 0)::float`;
 
-    const groupNameExpression = sql<Array<{ id: string; name: string }>>`(
-          SELECT json_agg(
-            json_build_object(
-              'id',
-              g.id,
-              'name',
-              COALESCE(
-                CASE
-                  WHEN g.available_locales @> ARRAY[${language}]::text[]
-                    THEN COALESCE(
-                      g.name::jsonb ->> ${language}::text,
-                      g.name::jsonb ->> g.base_language::text
-                    )
-                  ELSE g.name::jsonb ->> g.base_language::text
-                END,
-                ''
-              )
-            )
+    const managedGroupCondition = currentUser
+      ? getGroupManagerGroupScopeCondition(currentUser, groups.id, [PERMISSIONS.COURSE_STATISTICS])
+      : undefined;
+
+    const localizedGroupName = this.localizationService.getLocalizedSqlField(
+      groups.name,
+      language,
+      groups,
+    );
+
+    const groupNamesQuery = this.db
+      .select({
+        groups: sql<LocalizedGroup[]>`json_agg(
+          json_build_object(
+            'id', ${groups.id},
+            'name', ${localizedGroupName}
           )
-          FROM ${groups} AS g
-          JOIN ${groupUsers} AS gu ON gu.group_id = g.id
-          WHERE gu.user_id = ${users.id}
-        )`;
+        )`,
+      })
+      .from(groups)
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
+      .where(and(eq(groupUsers.userId, users.id), managedGroupCondition));
+    const groupNameExpression = sql<LocalizedGroup[]>`(${groupNamesQuery})`;
 
     const lastAttemptExpression = sql<string>`(
           SELECT TO_CHAR(MAX(slp.updated_at), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')

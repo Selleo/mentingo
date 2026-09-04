@@ -92,7 +92,7 @@ export class LiveTrainingController {
   constructor(private readonly liveTrainingService: LiveTrainingService) {}
 
   @Get()
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "query", name: "page", schema: liveTrainingListQuerySchema.properties.page },
@@ -139,7 +139,7 @@ export class LiveTrainingController {
   }
 
   @Get(":id")
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -306,7 +306,7 @@ export class LiveTrainingController {
   }
 
   @Get(":id/resources/:resourceId/download")
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },

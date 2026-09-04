@@ -1,4 +1,5 @@
 import { Link, useParams } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useEnrollCourse } from "~/api/mutations";
@@ -12,6 +13,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { CopyUrlButton } from "~/components/CopyUrlButton/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -34,6 +36,11 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
   const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
+
+  const isGroupManager = hasPermission(
+    currentUser?.permissions ?? [],
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+  );
 
   const handleEnrollCourse = async () => {
     await enrollCourse({ id: course?.id }).then(() => {
@@ -84,18 +91,19 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
-        {course.priceInCents && course.currency && course.stripePriceId ? (
-          <PaymentModal
-            courseCurrency={course.currency}
-            coursePrice={course.priceInCents}
-            courseTitle={course.title}
-            courseDescription={course.description}
-            courseId={course.id}
-            coursePriceId={course.stripePriceId}
-          />
-        ) : (
-          renderEnrollButton()
-        )}
+        {!isGroupManager &&
+          (course.priceInCents && course.currency && course.stripePriceId ? (
+            <PaymentModal
+              courseCurrency={course.currency}
+              coursePrice={course.priceInCents}
+              courseTitle={course.title}
+              courseDescription={course.description}
+              courseId={course.id}
+              coursePriceId={course.stripePriceId}
+            />
+          ) : (
+            renderEnrollButton()
+          ))}
       </div>
     </>
   );

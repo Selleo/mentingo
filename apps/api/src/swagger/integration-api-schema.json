@@ -2033,6 +2033,25 @@
                     "name"
                   ]
                 }
+              },
+              "managedGroups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -2074,6 +2093,13 @@
           "roleSlugs": {
             "type": "array",
             "items": {
+              "type": "string"
+            }
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -2162,6 +2188,13 @@
                 "type": "null"
               }
             ]
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           },
           "email": {
             "format": "email",

@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  COURSE_ENROLLMENT,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
@@ -19,6 +20,7 @@ import { isNumber } from "lodash";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
@@ -100,18 +102,67 @@ export class LessonService {
     currentUser: CurrentUserType | null,
     language?: SupportedLanguages,
   ): Promise<LessonShow> {
-    if (!currentUser || !hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_READ])) {
+    if (!currentUser) {
+      return this.getPublicLessonById(id, language);
+    }
+
+    let isManagerPreview = false;
+
+    if (hasAnyPermission(currentUser.permissions, [PERMISSIONS.MANAGED_GROUP_RESULTS_READ])) {
+      const managerCourseScope = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+
+      const [authorizedLesson] = await this.db
+        .select({ id: lessons.id, authorId: courses.authorId, courseId: courses.id })
+        .from(lessons)
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .innerJoin(courses, eq(courses.id, chapters.courseId))
+        .where(and(eq(lessons.id, id), managerCourseScope));
+
+      const [ownEnrollment] = authorizedLesson
+        ? await this.db
+            .select({ id: studentCourses.id })
+            .from(studentCourses)
+            .where(
+              and(
+                eq(studentCourses.courseId, authorizedLesson.courseId),
+                eq(studentCourses.studentId, currentUser.userId),
+                eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+              ),
+            )
+            .limit(1)
+        : [];
+
+      const hasBroaderCourseAccess =
+        hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_UPDATE]) ||
+        (Boolean(ownEnrollment) &&
+          hasAnyPermission(currentUser.permissions, [PERMISSIONS.LEARNING_PROGRESS_UPDATE])) ||
+        (hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_UPDATE_OWN]) &&
+          authorizedLesson?.authorId === currentUser.userId);
+
+      isManagerPreview = !!authorizedLesson && !hasBroaderCourseAccess;
+
+      if (
+        !authorizedLesson &&
+        !hasBroaderCourseAccess &&
+        !hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_READ])
+      ) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+    }
+
+    if (
+      !isManagerPreview &&
+      !hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_READ])
+    ) {
       return this.getPublicLessonById(id, language);
     }
 
     const effectiveUserId = userId ?? currentUser.userId;
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
-    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(
-      id,
-      effectiveUserId,
-      isStudent,
-    );
+    const hasLessonAccess =
+      isManagerPreview ||
+      (await this.lessonRepository.getHasLessonAccess(id, effectiveUserId, isStudent));
 
     if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
@@ -134,13 +185,14 @@ export class LessonService {
 
     if (!lesson) throw new NotFoundException("common.toast.notFound");
 
-    if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
+    if (!isManagerPreview && isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     if (
-      lesson.type === LESSON_TYPES.QUIZ ||
-      lesson.type === LESSON_TYPES.CONTENT ||
-      lesson.type === LESSON_TYPES.AI_MENTOR
+      !isManagerPreview &&
+      (lesson.type === LESSON_TYPES.QUIZ ||
+        lesson.type === LESSON_TYPES.CONTENT ||
+        lesson.type === LESSON_TYPES.AI_MENTOR)
     ) {
       await this.studentLessonProgressService.markLessonAsStarted(
         lesson.id,
@@ -153,7 +205,7 @@ export class LessonService {
       return this.getContentLessonWithResources(lesson, id, actualLanguage, effectiveUserId);
     }
 
-    if (lesson.type === LESSON_TYPES.AI_MENTOR) {
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && !isManagerPreview) {
       const { data: thread } = await this.aiService.getThreadWithSetup({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
@@ -179,6 +231,24 @@ export class LessonService {
         userLanguage: thread.userLanguage,
         status: thread.status,
       };
+    }
+
+    if (lesson.type === LESSON_TYPES.AI_MENTOR) {
+      let avatarUrl = undefined;
+
+      if (lesson.aiMentor?.avatarReferenceUrl) {
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReferenceUrl, {
+          quality: IMAGE_QUALITY.XXS,
+        });
+      }
+
+      return {
+        ...lesson,
+        aiMentor: {
+          name: lesson.aiMentor?.name ?? "AI Mentor",
+          avatarReferenceUrl: avatarUrl,
+        },
+      } as LessonShow;
     }
 
     if (lesson.type === LESSON_TYPES.EMBED) {

@@ -18,10 +18,16 @@ import {
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
+import { and, eq, inArray } from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { DatabasePg, type Pagination, type UUIDType } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  getGroupManagerLearnerScopeCondition,
+  getGroupManagerLearningPathScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import {
   LearningPathCourseAddedEvent,
@@ -40,7 +46,7 @@ import { SearchIndexService } from "src/global-search/search-index.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { learningPaths } from "src/storage/schema";
+import { groupManagerGroups, learningPaths as learningPathsTable, users } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES, type ProgressStatus } from "src/utils/types/progress.type";
 
@@ -97,7 +103,14 @@ export class LearningPathService {
   }
 
   private assertReadPermission(currentUser: CurrentUserType) {
-    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_READ);
+    if (
+      !hasAnyPermission(currentUser.permissions, [
+        PERMISSIONS.LEARNING_PATH_READ,
+        PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+      ])
+    ) {
+      throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
+    }
   }
 
   private assertUpdatePermission(currentUser: CurrentUserType, learningPath: ExistingLearningPath) {
@@ -236,12 +249,12 @@ export class LearningPathService {
 
     if (language) {
       const titleUpdate = setJsonbField(
-        learningPaths.title,
+        learningPathsTable.title,
         language,
         updateLearningPathData.title,
       );
       const descriptionUpdate = setJsonbField(
-        learningPaths.description,
+        learningPathsTable.description,
         language,
         updateLearningPathData.description,
       );
@@ -415,6 +428,11 @@ export class LearningPathService {
     const canReadAll = this.canReadAllLearningPaths(currentUser);
     const canReadOwn = this.canReadOwnLearningPaths(currentUser);
     const studentScopedUserId = canReadAll ? undefined : currentUser.userId;
+    const managerScope = getGroupManagerLearningPathScopeCondition(
+      currentUser,
+      learningPathsTable.id,
+      [PERMISSIONS.LEARNING_PATH_READ],
+    );
 
     const learningPaths = await this.learningPathRepository.getLearningPaths({
       page,
@@ -422,10 +440,11 @@ export class LearningPathService {
       language,
       searchQuery,
       visibility: {
-        canReadAll,
+        canReadAll: canReadAll || !!managerScope,
         canReadOwn,
         studentId: currentUser.userId,
       },
+      scopeCondition: managerScope,
     });
 
     const learningPathIds = learningPaths.data.map((learningPath) => learningPath.id);
@@ -479,6 +498,22 @@ export class LearningPathService {
     this.assertReadPermission(currentUser);
 
     const learningPath = await this.ensureLearningPathExists(learningPathId);
+
+    const managerScope = getGroupManagerLearningPathScopeCondition(
+      currentUser,
+      learningPathsTable.id,
+      [PERMISSIONS.LEARNING_PATH_READ],
+    );
+
+    if (managerScope) {
+      const [authorizedPath] = await this.db
+        .select({ id: learningPathsTable.id })
+        .from(learningPathsTable)
+        .where(and(eq(learningPathsTable.id, learningPathId), managerScope));
+
+      if (!authorizedPath) throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
     const progressState = await this.learningPathRepository.getLearningPathProgressState(
       learningPathId,
       currentUser.userId,
@@ -879,12 +914,58 @@ export class LearningPathService {
     },
     currentUser: CurrentUserType,
   ) {
-    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
+    const isManagerScope = shouldApplyGroupManagerScope(currentUser, [
+      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+    ]);
+
+    if (!isManagerScope) {
+      this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
+    }
+
     await this.ensureLearningPathExists(learningPathId);
+
+    const pathScope = getGroupManagerLearningPathScopeCondition(
+      currentUser,
+      learningPathsTable.id,
+      [PERMISSIONS.LEARNING_PATH_ENROLLMENT],
+    );
+
+    if (pathScope) {
+      const [authorizedPath] = await this.db
+        .select({ id: learningPathsTable.id })
+        .from(learningPathsTable)
+        .where(and(eq(learningPathsTable.id, learningPathId), pathScope));
+
+      if (!authorizedPath) throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    const learnerScope = getGroupManagerLearnerScopeCondition(currentUser, users.id, [
+      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+    ]);
+
+    if (learnerScope && query.groups?.length) {
+      const requestedGroupIds = [...new Set(query.groups)];
+
+      const managedGroups = await this.db
+        .select({ id: groupManagerGroups.groupId })
+        .from(groupManagerGroups)
+        .where(
+          and(
+            eq(groupManagerGroups.managerUserId, currentUser.userId),
+            inArray(groupManagerGroups.groupId, requestedGroupIds),
+          ),
+        );
+
+      if (managedGroups.length !== requestedGroupIds.length) {
+        throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+      }
+    }
 
     return this.learningPathRepository.getStudentsWithEnrollmentDate({
       learningPathId,
       ...query,
+      learnerScope,
+      managedByUserId: learnerScope ? currentUser.userId : undefined,
     });
   }
 

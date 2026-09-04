@@ -7,6 +7,13 @@ export const CERTIFICATE_STATUSES = {
   ARCHIVED: "archived",
 } as const;
 
+export const COURSE_CERTIFICATE_STATUSES = {
+  NOT_EARNED: "not_earned",
+  ACTIVE: "active",
+  EXPIRED: "expired",
+  REVOKED: "revoked",
+} as const;
+
 export const CERTIFICATE_ARCHIVE_REASONS = {
   EXPIRED: "expired",
   MANUAL_RESET: "manual_reset",
@@ -30,6 +37,8 @@ export const CERTIFICATE_RESET_SCOPES = {
 } as const;
 
 export type CertificateStatus = (typeof CERTIFICATE_STATUSES)[keyof typeof CERTIFICATE_STATUSES];
+export type CourseCertificateStatus =
+  (typeof COURSE_CERTIFICATE_STATUSES)[keyof typeof COURSE_CERTIFICATE_STATUSES];
 export type CertificateArchiveReason =
   (typeof CERTIFICATE_ARCHIVE_REASONS)[keyof typeof CERTIFICATE_ARCHIVE_REASONS];
 export type CertificateValidityType =

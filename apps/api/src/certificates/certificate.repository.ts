@@ -4,15 +4,18 @@ import {
   CERTIFICATE_STATUSES,
   CERTIFICATE_VALIDITY_TYPES,
   CERTIFICATE_VALIDITY_UNITS,
+  COURSE_CERTIFICATE_STATUSES,
   COURSE_ENROLLMENT,
   SUPPORTED_LANGUAGES,
   type CertificateArchiveReason,
+  type CourseCertificateStatus,
   type CertificateValidity,
   type SupportedLanguages,
 } from "@repo/shared";
 import {
   eq,
   and,
+  count,
   countDistinct,
   ilike,
   sql,
@@ -23,9 +26,11 @@ import {
   getTableColumns,
   or,
   type SQL,
+  exists,
 } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import { addPagination } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
@@ -102,6 +107,173 @@ export class CertificateRepository {
       .orderBy(sortOrder(certificates.createdAt));
 
     return addPagination(queryDB.$dynamic(), page, perPage);
+  }
+
+  async getCourseCertificateRows(
+    courseId: UUIDType,
+    learnerScope: SQL | undefined,
+    language: SupportedLanguages,
+    search?: string,
+    page = 1,
+    perPage = 20,
+  ) {
+    const normalizedSearch = search?.trim();
+
+    const groupNameSearchCondition = normalizedSearch
+      ? this.localizationService.getLocalizedFieldSearchCondition(
+          groups.name,
+          `%${normalizedSearch}%`,
+          language,
+        )
+      : undefined;
+
+    const groupSearchCondition = groupNameSearchCondition
+      ? exists(
+          this.db
+            .select({ id: groupUsers.id })
+            .from(groupUsers)
+            .innerJoin(groups, eq(groups.id, groupUsers.groupId))
+            .where(and(eq(groupUsers.userId, users.id), groupNameSearchCondition)),
+        )
+      : undefined;
+
+    const searchCondition = normalizedSearch
+      ? or(
+          getUserNameSearchCondition(normalizedSearch),
+          ilike(users.email, `%${normalizedSearch}%`),
+          groupSearchCondition,
+        )
+      : undefined;
+
+    const matchedLearners = this.db
+      .select({
+        studentCourseId: studentCourses.id,
+        studentId: studentCourses.studentId,
+        courseId: studentCourses.courseId,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+      })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+          learnerScope,
+          searchCondition,
+        ),
+      )
+      .orderBy(studentCourses.id)
+      .limit(perPage)
+      .offset((page - 1) * perPage)
+      .as("matched_certificate_learners");
+
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+          learnerScope,
+          searchCondition,
+        ),
+      );
+
+    const [{ scopedLearnerCount }] = await this.db
+      .select({ scopedLearnerCount: count() })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
+          learnerScope,
+        ),
+      );
+
+    const queryRows = await this.db
+      .select({
+        studentCourseId: matchedLearners.studentCourseId,
+        learnerName: sql<string | null>`
+          CASE
+            WHEN ${matchedLearners.studentCourseId} IS NULL THEN NULL
+            ELSE CONCAT(${matchedLearners.firstName}, ' ', ${matchedLearners.lastName})
+          END
+        `,
+        learnerEmail: matchedLearners.email,
+        groups: sql<string[]>`COALESCE((
+              SELECT json_agg(DISTINCT ${this.localizationService.getLocalizedSqlField(
+                groups.name,
+                language,
+                groups,
+              )})
+              FROM ${groupUsers} gu_certificate_groups
+              INNER JOIN ${groups} ON ${groups.id} = gu_certificate_groups.group_id
+              WHERE gu_certificate_groups.user_id = ${matchedLearners.studentId}
+            ), '[]'::json)`,
+        status: sql<CourseCertificateStatus | null>`
+          CASE
+            WHEN ${matchedLearners.studentCourseId} IS NULL THEN NULL
+            WHEN ${certificates.id} IS NULL THEN ${COURSE_CERTIFICATE_STATUSES.NOT_EARNED}
+            WHEN ${certificates.status} = ${CERTIFICATE_STATUSES.ACTIVE}
+              AND (${certificates.expiresAt} IS NULL OR ${certificates.expiresAt} > NOW())
+              THEN ${COURSE_CERTIFICATE_STATUSES.ACTIVE}
+            WHEN ${certificates.archiveReason} = ${CERTIFICATE_ARCHIVE_REASONS.EXPIRED}
+              OR ${certificates.expiresAt} <= NOW()
+              THEN ${COURSE_CERTIFICATE_STATUSES.EXPIRED}
+            ELSE ${COURSE_CERTIFICATE_STATUSES.REVOKED}
+          END
+        `,
+        issuedAt: certificates.issuedAt,
+        expiresAt: certificates.expiresAt,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+        certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
+        certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+      })
+      .from(courses)
+      .leftJoin(matchedLearners, eq(matchedLearners.courseId, courses.id))
+      .leftJoin(
+        certificates,
+        and(
+          eq(certificates.userId, matchedLearners.studentId),
+          eq(certificates.courseId, matchedLearners.courseId),
+          sql`${certificates.id} = (
+            SELECT latest_certificate.id
+            FROM certificates latest_certificate
+            WHERE latest_certificate.user_id = ${matchedLearners.studentId}
+              AND latest_certificate.course_id = ${matchedLearners.courseId}
+            ORDER BY latest_certificate.created_at DESC, latest_certificate.id DESC
+            LIMIT 1
+          )`,
+        ),
+      )
+      .where(eq(courses.id, courseId))
+      .orderBy(matchedLearners.firstName, matchedLearners.lastName, matchedLearners.email)
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+
+    return {
+      hasScopedLearner: !learnerScope || scopedLearnerCount > 0,
+      totalItems,
+      rows: queryRows.flatMap(({ studentCourseId, ...row }) => {
+        if (!studentCourseId || !row.learnerName || !row.learnerEmail || !row.status) return [];
+
+        return [
+          {
+            ...row,
+            learnerName: row.learnerName,
+            learnerEmail: row.learnerEmail,
+            status: row.status,
+          },
+        ];
+      }),
+    };
   }
 
   async countByUserId(userId: string, trx?: DatabasePg) {

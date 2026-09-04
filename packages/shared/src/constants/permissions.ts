@@ -3,6 +3,7 @@ export const SYSTEM_ROLE_SLUGS = {
   STUDENT: "student",
   CONTENT_CREATOR: "content_creator",
   TRAINER: "trainer",
+  GROUP_MANAGER: "group_manager",
 } as const;
 
 export type SystemRoleSlug = (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS];
@@ -21,6 +22,7 @@ export const PERMISSIONS = {
   CATEGORY_MANAGE: "category.manage",
   GROUP_READ: "group.read",
   GROUP_MANAGE: "group.manage",
+  MANAGED_GROUP_RESULTS_READ: "managed_group_results.read",
   LEARNING_PATH_READ: "learning_path.read",
   LEARNING_PATH_CREATE: "learning_path.create",
   LEARNING_PATH_UPDATE: "learning_path.update",
@@ -94,6 +96,22 @@ export const PERMISSIONS = {
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
+  [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: [
+    PERMISSIONS.ACCOUNT_READ_SELF,
+    PERMISSIONS.ACCOUNT_UPDATE_SELF,
+    PERMISSIONS.USER_READ_SELF,
+    PERMISSIONS.SETTINGS_READ_SELF,
+    PERMISSIONS.SETTINGS_UPDATE_SELF,
+    PERMISSIONS.ENV_READ_PUBLIC,
+    PERMISSIONS.CATEGORY_READ,
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    PERMISSIONS.DASHBOARD_READ,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.ANNOUNCEMENT_READ,
+    PERMISSIONS.NEWS_READ_PUBLIC,
+    PERMISSIONS.ARTICLE_READ_PUBLIC,
+    PERMISSIONS.QA_READ_PUBLIC,
+  ],
   [SYSTEM_ROLE_SLUGS.STUDENT]: [
     PERMISSIONS.ACCOUNT_READ_SELF,
     PERMISSIONS.ACCOUNT_UPDATE_SELF,
@@ -284,5 +302,6 @@ export const SYSTEM_RULE_SET_SLUGS = {
   [SYSTEM_ROLE_SLUGS.STUDENT]: "student-default",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "content_creator-default",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "trainer-default",
+  [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "group_manager-default",
   [SYSTEM_ROLE_SLUGS.ADMIN]: "admin-default",
 } as const;

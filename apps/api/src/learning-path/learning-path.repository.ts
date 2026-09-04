@@ -20,6 +20,7 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   getTableColumns,
   ilike,
   inArray,
@@ -44,6 +45,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courses,
   groupLearningPaths,
+  groupManagerGroups,
   groups,
   groupUsers,
   learningPathCourses,
@@ -230,7 +232,14 @@ export class LearningPathRepository {
   }
 
   async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
-    const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
+    const {
+      page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
+      language,
+      searchQuery,
+      visibility,
+      scopeCondition,
+    } = query;
 
     const studentLearningPathJoinCondition =
       visibility && !visibility.canReadAll
@@ -246,7 +255,7 @@ export class LearningPathRepository {
         );
 
     const searchCondition = this.buildLearningPathSearchCondition(searchQuery, language);
-    const whereCondition = and(visibilityCondition, searchCondition);
+    const whereCondition = and(visibilityCondition, searchCondition, scopeCondition);
 
     const queriedLearningPaths = await dbInstance
       .select({
@@ -599,8 +608,24 @@ export class LearningPathRepository {
       groups: groupFilters,
       page = 1,
       perPage = DEFAULT_PAGE_SIZE,
+      learnerScope,
+      managedByUserId,
     } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
+    const managedGroupCondition = managedByUserId
+      ? exists(
+          dbInstance
+            .select({ id: groupManagerGroups.id })
+            .from(groupManagerGroups)
+            .where(
+              and(
+                eq(groupManagerGroups.managerUserId, managedByUserId),
+                eq(groupManagerGroups.groupId, groups.id),
+                eq(groupManagerGroups.tenantId, groups.tenantId),
+              ),
+            ),
+        )
+      : undefined;
 
     const hasLearningPathAdminPermissions = userHasAnyPermissionsCondition(
       dbInstance,
@@ -622,6 +647,7 @@ export class LearningPathRepository {
       eq(users.archived, false),
       isNull(users.deletedAt),
       not(hasLearningPathAdminPermissions),
+      learnerScope,
     ];
 
     if (keyword) {
@@ -677,7 +703,7 @@ export class LearningPathRepository {
         ),
       )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .leftJoin(groups, and(eq(groupUsers.groupId, groups.id), managedGroupCondition))
       .where(and(...conditions))
       .groupBy(users.id, studentLearningPaths.enrolledAt, studentLearningPaths.enrollmentType)
       .orderBy(sortOrder(this.getEnrolledStudentsColumnToSortBy(sortedField)))
@@ -695,7 +721,7 @@ export class LearningPathRepository {
         ),
       )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .leftJoin(groups, and(eq(groupUsers.groupId, groups.id), managedGroupCondition))
       .where(and(...conditions));
 
     return {

@@ -39,6 +39,12 @@ export const liveTrainingSessionParticipantRowSchema = Type.Object({
   joinCount: Type.Number(),
 });
 
+export const managedLiveTrainingSessionParticipantCountsRowSchema = Type.Object({
+  sessionId: UUIDSchema,
+  activeParticipantCount: Type.Number(),
+  uniqueParticipantCount: Type.Number(),
+});
+
 export const liveTrainingAttendanceRowSchema = Type.Object({
   id: UUIDSchema,
   participantId: UUIDSchema,
@@ -79,6 +85,9 @@ export const liveTrainingLessonCompletionRowSchema = Type.Object({
 export type LiveTrainingSessionRow = Static<typeof liveTrainingSessionRowSchema>;
 export type LiveTrainingSessionParticipantRow = Static<
   typeof liveTrainingSessionParticipantRowSchema
+>;
+export type ManagedLiveTrainingSessionParticipantCountsRow = Static<
+  typeof managedLiveTrainingSessionParticipantCountsRowSchema
 >;
 export type LiveTrainingAttendanceRow = Static<typeof liveTrainingAttendanceRowSchema>;
 export type LiveTrainingSessionTenantRow = Static<typeof liveTrainingSessionTenantRowSchema>;

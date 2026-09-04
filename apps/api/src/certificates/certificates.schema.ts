@@ -1,4 +1,8 @@
-import { CERTIFICATE_RESET_SCOPES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  CERTIFICATE_RESET_SCOPES,
+  COURSE_CERTIFICATE_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema, paginatedResponse } from "src/common";
@@ -90,5 +94,24 @@ export const certificateDashboardSummarySchema = Type.Object({
     Type.Null(),
   ]),
 });
+
+export const courseCertificateStatusSchema = Type.Enum(COURSE_CERTIFICATE_STATUSES);
+
+export const courseCertificateRowSchema = Type.Object({
+  learnerName: Type.String(),
+  learnerEmail: Type.String(),
+  groups: Type.Array(Type.String()),
+  status: courseCertificateStatusSchema,
+  issuedAt: Type.Union([Type.String(), Type.Null()]),
+  expiresAt: Type.Union([Type.String(), Type.Null()]),
+  courseTitle: Type.String(),
+  certificateSignatureUrl: Type.Union([Type.String(), Type.Null()]),
+  certificateFontColor: Type.Union([Type.String(), Type.Null()]),
+  previewAllowed: Type.Boolean(),
+});
+
+export const courseCertificateRowsSchema = paginatedResponse(
+  Type.Array(courseCertificateRowSchema),
+);
 
 export const paginatedCertificatesSchema = paginatedResponse(allCertificatesSchema);

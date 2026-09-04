@@ -50,7 +50,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     ],
   });
   const { hasAccess: canReadLearningPaths } = usePermissions({
-    required: [PERMISSIONS.LEARNING_PATH_READ],
+    required: [PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
   });
 
   const { t } = useTranslation();

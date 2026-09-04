@@ -12,6 +12,7 @@ import type {
   resetCourseCertificatesResponseSchema,
   resetCourseCertificatesSchema,
   singleCertificateSchema,
+  courseCertificateRowsSchema,
 } from "./certificates.schema";
 import type { CertificateArchiveReason, SupportedLanguages } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
@@ -34,6 +35,7 @@ export type CertificateValidityImpactResponse = Static<
 
 export type AllCertificatesResponse = Static<typeof allCertificatesSchema>;
 export type CertificateDashboardSummary = Static<typeof certificateDashboardSummarySchema>;
+export type CourseCertificateRowsResponse = Static<typeof courseCertificateRowsSchema>;
 
 export type CertificatesQuery = {
   userId: UUIDType;

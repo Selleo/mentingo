@@ -27,7 +27,7 @@ describe("findMatchingRoute", () => {
 
   it("should find learning path routes", () => {
     expect(findMatchingRoute("development-paths")).toEqual({
-      anyOf: [PERMISSIONS.LEARNING_PATH_READ],
+      anyOf: [PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
     });
   });
 
@@ -207,5 +207,15 @@ describe("getNavigationConfig", () => {
     const items = getCourseItems(true, true);
 
     expect(items.some((item) => item.path === "development-paths")).toBe(true);
+  });
+
+  it("should link Group Managers to the regular courses route", () => {
+    const items = getCourseItems(false, false);
+    const coursesItem = items.find((item) => item.path === "courses");
+
+    expect(coursesItem?.accessRequirement).toEqual({
+      anyOf: [PERMISSIONS.COURSE_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
+    });
+    expect(items.some((item) => item.path === "admin/courses")).toBe(false);
   });
 });

@@ -70,7 +70,7 @@ export const getNavigationConfig = (
           path: "courses",
           iconName: "Course",
           accessRequirement: {
-            anyOf: [PERMISSIONS.COURSE_READ],
+            anyOf: [PERMISSIONS.COURSE_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
           },
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },

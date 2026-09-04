@@ -22,6 +22,7 @@ import { LearningPathsEmptyState } from "./components/LearningPathsEmptyState";
 import { LearningPathsPageHeader } from "./components/LearningPathsPageHeader";
 import { StudentLearningPathCard } from "./components/StudentLearningPathCard";
 import { useStudentLearningPathsPage } from "./hooks/useStudentLearningPathsPage";
+import { getLearningPathViewerAccess } from "./utils/learningPathViewerAccess";
 
 import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 
@@ -54,7 +55,13 @@ export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
   return queryClient.fetchQuery(learningPathsQueryOptions({ language, searchQuery }));
 };
 
-function StudentLearningPathsPage() {
+function StudentLearningPathsPage({
+  canSelfEnroll,
+  showCourseProgress,
+}: {
+  canSelfEnroll: boolean;
+  showCourseProgress: boolean;
+}) {
   const { t } = useTranslation();
   const { language, learningPaths, enrollLearningPath, isEnrollPending } =
     useStudentLearningPathsPage();
@@ -82,6 +89,8 @@ function StudentLearningPathsPage() {
               language={language}
               isPending={isEnrollPending}
               onEnroll={enrollLearningPath}
+              canSelfEnroll={canSelfEnroll}
+              showCourseProgress={showCourseProgress}
             />
           ))}
         </div>
@@ -117,5 +126,9 @@ export default function LearningPathsPage() {
 
   if (globalSettings?.learningPathsEnabled === false) return null;
 
-  return canAccessLearningPathAdmin ? <AdminLearningPathsPage /> : <StudentLearningPathsPage />;
+  return canAccessLearningPathAdmin ? (
+    <AdminLearningPathsPage />
+  ) : (
+    <StudentLearningPathsPage {...getLearningPathViewerAccess(permissions)} />
+  );
 }

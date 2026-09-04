@@ -214,6 +214,7 @@ export interface CurrentUserResponse {
       | "category.manage"
       | "group.read"
       | "group.manage"
+      | "managed_group_results.read"
       | "learning_path.read"
       | "learning_path.create"
       | "learning_path.update"
@@ -1658,6 +1659,11 @@ export interface GetUserByIdResponse {
       id: string;
       name: string;
     }[];
+    managedGroups?: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
   };
 }
 
@@ -1679,6 +1685,7 @@ export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1719,6 +1726,7 @@ export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1835,6 +1843,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   roleSlugs: string[];
+  managedGroupIds?: string[];
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
@@ -2471,6 +2480,7 @@ export interface GetCourseResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     dueDate: string | null;
+    isManagerPreview?: boolean;
   };
 }
 
@@ -2936,6 +2946,7 @@ export interface GetCourseStudentsProgressResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     groups:
       | {
@@ -2960,6 +2971,7 @@ export interface GetCourseStudentsQuizResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -2981,6 +2993,7 @@ export interface GetCourseStudentsAiMentorResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -7413,6 +7426,29 @@ export interface ValidateAiMentorConfigurationDraftResponse {
 export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetCourseCertificateRowsResponse {
+  data: {
+    data: {
+      learnerName: string;
+      learnerEmail: string;
+      groups: string[];
+      status: "not_earned" | "active" | "expired" | "revoked";
+      issuedAt: string | null;
+      expiresAt: string | null;
+      courseTitle: string;
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+      previewAllowed: boolean;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    appliedFilters?: object;
   };
 }
 
@@ -15565,6 +15601,33 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkLessonAsCompletedResponse, any>({
         path: `/api/studentLessonProgress`,
         method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCourseCertificateRows
+     * @request GET:/api/certificates/course/{courseId}
+     */
+    certificatesControllerGetCourseCertificateRows: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        search?: string;
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseCertificateRowsResponse, any>({
+        path: `/api/certificates/course/${courseId}`,
+        method: "GET",
         query: query,
         format: "json",
         ...params,

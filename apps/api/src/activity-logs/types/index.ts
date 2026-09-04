@@ -190,6 +190,7 @@ export type UserActivityLogSnapshot = {
   role?: string | null;
   archived?: boolean | null;
   groups?: Array<{ id: UUIDType; name?: string | null }>;
+  managedGroups?: Array<{ id: UUIDType; name?: string | null }>;
 };
 
 export type SettingsActivityLogSnapshot = {

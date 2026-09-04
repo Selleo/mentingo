@@ -1380,6 +1380,20 @@
       "when": 1787814066671,
       "tag": "0196_backfill_course_author_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1788423815067,
+      "tag": "0197_add_group_manager_groups_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1788423822416,
+      "tag": "0198_enable_group_manager_rls",
+      "breakpoints": true
     }
   ]
 }

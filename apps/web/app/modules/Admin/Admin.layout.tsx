@@ -1,10 +1,11 @@
 import { type MetaFunction, Outlet, redirect, useLocation, useNavigate } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { Suspense, useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
+import { hasAnyPermission } from "~/common/permissions/permission.utils";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
@@ -34,25 +35,10 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 };
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
-  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
-  const { hasAccess: canManageOwnCourses } = usePermissions({
-    required: PERMISSIONS.COURSE_UPDATE_OWN,
-  });
-  const { hasAccess: canAccessLearningPathAdmin } = usePermissions({
-    required: [
-      PERMISSIONS.LEARNING_PATH_CREATE,
-      PERMISSIONS.LEARNING_PATH_UPDATE,
-      PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
-      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
-      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
-      PERMISSIONS.LEARNING_PATH_DELETE,
-      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
-      PERMISSIONS.LEARNING_PATH_EXPORT,
-    ],
-  });
+  const { permissions } = usePermissions();
   const navigate = useNavigate();
 
-  const isAllowed = canManageUsers || canManageOwnCourses || canAccessLearningPathAdmin;
+  const isAllowed = canAccessAdminLayout(permissions);
 
   useLayoutEffect(() => {
     if (!isAllowed) {
@@ -64,6 +50,22 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 
   return <>{children}</>;
 };
+
+const ADMIN_LAYOUT_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.USER_MANAGE,
+  PERMISSIONS.COURSE_UPDATE_OWN,
+  PERMISSIONS.LEARNING_PATH_CREATE,
+  PERMISSIONS.LEARNING_PATH_UPDATE,
+  PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+  PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+  PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+  PERMISSIONS.LEARNING_PATH_DELETE,
+  PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+  PERMISSIONS.LEARNING_PATH_EXPORT,
+];
+
+export const canAccessAdminLayout = (permissions: PermissionKey[]) =>
+  hasAnyPermission(permissions, ADMIN_LAYOUT_PERMISSIONS);
 
 export const shouldHideTopbarAndSidebar = (pathname: string) =>
   match(pathname)

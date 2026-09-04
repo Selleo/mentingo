@@ -827,6 +827,7 @@ export class SettingsService {
       SYSTEM_ROLE_SLUGS.ADMIN,
       SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
       SYSTEM_ROLE_SLUGS.TRAINER,
+      SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
       SYSTEM_ROLE_SLUGS.STUDENT,
     ];
     const primaryRole = rolePriority.find((roleSlug) => roleSet.has(roleSlug));
