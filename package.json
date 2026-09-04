@@ -1,5 +1,5 @@
 {
-  "name": "lms-core",
+  "name": "mentingo",
   "private": true,
   "scripts": {
     "build": "turbo build",

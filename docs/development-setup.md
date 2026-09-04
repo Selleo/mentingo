@@ -208,7 +208,7 @@ Email templates are automatically built when starting the development server. To
 ## Project Structure
 
 ```text
-lms-core
+mentingo
 ├── apps
 │   ├── api
 │   │   ├── src
