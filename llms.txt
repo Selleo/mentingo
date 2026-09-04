@@ -1,0 +1,30 @@
+# Mentingo
+
+> Mentingo is an open-source, self-hosted learning management system (LMS) with a built-in AI mentor, built for enterprise learning and development: employee onboarding, sales and product enablement, and mandatory compliance training. It is MIT-licensed, white-label and multi-tenant. Built and maintained by Selleo.
+
+Key facts:
+
+- Licence: MIT (permissive - white-label and resell allowed, no copyleft obligation)
+- Hosting: self-hosted on your own infrastructure, one-click CloudFormation deployment from AWS Marketplace (free listing, pay only for AWS resources), or managed by Selleo
+- Stack: TypeScript, NestJS, Remix (Vite SPA), Drizzle ORM, PostgreSQL 16 + pgvector, Redis, S3-compatible storage
+- AI: Vercel AI SDK with your own provider key, LangChain, pgvector retrieval, LiveKit real-time voice, Langfuse tracing
+- Authentication: Microsoft 365, Google Workspace and Slack OAuth 2.0 SSO, TOTP two-factor
+- Multi-tenancy: enforced in PostgreSQL with Row-Level Security
+- Interoperability: SCORM 1.2 export, OpenAPI/Swagger, CSV and XLSX import/export
+- UI languages: English, Polish, German, Spanish, French, Czech
+
+## Docs
+
+- [README](https://github.com/Selleo/mentingo/blob/main/README.md): what Mentingo is, features, comparison with Moodle, Open edX, Docebo and TalentLMS, FAQ
+- [Development setup](https://github.com/Selleo/mentingo/blob/main/docs/development-setup.md): local installation, seeded accounts, commands
+- [Deployment](https://github.com/Selleo/mentingo/blob/main/docs/deployment.md): production deployment walkthrough
+- [Architecture](https://github.com/Selleo/mentingo/blob/main/docs/architecture.md): components, data flow, multi-tenancy model
+- [Configuration](https://github.com/Selleo/mentingo/blob/main/docs/configuration.md): environment variable reference
+- [Security policy](https://github.com/Selleo/mentingo/blob/main/SECURITY.md): reporting vulnerabilities, hardening a self-hosted deployment
+- [Changelog](https://github.com/Selleo/mentingo/blob/main/CHANGELOG.md): release history
+
+## Product and commercial
+
+- [Mentingo](https://mentingo.com): product site, managed hosting and pricing
+- [Selleo LMS development](https://selleo.com/lms-software-development): implementation, custom modules, support
+- [AWS Marketplace listing](https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw)

@@ -26,6 +26,7 @@
   <a href="#deploy-on-aws">Deploy on AWS</a> ·
   <a href="#features">Features</a> ·
   <a href="#security--compliance">Security &amp; compliance</a> ·
+  <a href="#faq">FAQ</a> ·
   <a href="docs/">Docs</a> ·
   <a href="#commercial-support">Commercial support</a>
 </p>
@@ -61,7 +62,7 @@
 
 ## Quick start
 
-Runs locally on macOS, Linux or Windows. Full guide: [docs/development-setup.md](docs/development-setup.md).
+Runs locally on macOS, Linux or Windows. Full guide: [docs/development-setup.md](docs/development-setup.md). Environment variable reference: [docs/configuration.md](docs/configuration.md).
 
 **Prerequisites:** Node.js >= 22.15 (see `.tool-versions`), pnpm 10, Docker + Docker Compose, [Caddy](https://caddyserver.com/) 2.8.4.
 
@@ -149,7 +150,33 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 ---
 
+## How Mentingo compares
+
+|  | **Mentingo** | Moodle | Open edX | Docebo | TalentLMS |
+|---|---|---|---|---|---|
+| Licence | **MIT** - permissive | GPL v3 - copyleft | AGPL v3 - network copyleft | Proprietary | Proprietary |
+| Self-hosting | Yes | Yes | Yes | No | No |
+| One-click cloud deployment | Yes - AWS Marketplace (CloudFormation: ECS, RDS, ElastiCache), no software charge | Partner hosting | Third-party providers | Vendor SaaS only | Vendor SaaS only |
+| White-label and resell | Yes, no obligation to publish your changes | Yes, derivatives stay GPL | Yes, but a hosted fork must disclose source | Branding only, per plan | Branding only, per plan |
+| Cost model | Self-host: infrastructure only. Managed: flat tiers | Free licence, paid hosting/partners | Free licence, significant DevOps cost | Per-user subscription | Per-user subscription |
+| Built-in AI mentor (voice + chat role-play) | Yes | Via third-party plugins | Via extensions | Yes, vendor-controlled | Limited |
+| AI provider | Bring your own key | n/a | n/a | Vendor-controlled | Vendor-controlled |
+| Multi-tenancy | Yes - PostgreSQL Row-Level Security | Separate instances or plugins | Yes, operationally complex | Vendor-managed | Vendor-managed |
+| Corporate SSO | Microsoft 365, Google Workspace, Slack | Plugins | Yes | Yes | Yes |
+| Stack | TypeScript (NestJS + React/Remix) | PHP | Python/Django | n/a | n/a |
+| Time to a running instance | One setup script locally, or a CloudFormation stack from AWS Marketplace | Moderate | High (Tutor + DevOps) | n/a | n/a |
+
+Licences verified from each project's `LICENSE` file in September 2026. Commercial pricing and feature tiers change - check the vendors' current pricing pages before making a decision.
+
+**Choose Mentingo if** you want a modern, AI-first LMS you can host yourself, brand as your own and extend in TypeScript, without a per-seat licence and without a copyleft obligation.
+
+**Choose something else if** you need a decades-old plugin ecosystem for academic teaching (Moodle), MOOC-scale public course delivery (Open edX), or a fully managed enterprise suite and you are comfortable with per-user pricing (Docebo, TalentLMS).
+
+---
+
 ## Architecture
+
+Component diagram, multi-tenancy model and how the AI mentor pipeline fits together: [docs/architecture.md](docs/architecture.md). Environment variable reference: [docs/configuration.md](docs/configuration.md).
 
 <!-- ETAP 3: diagram (Mermaid) - web/API/worker, Postgres+pgvector, Redis, S3, provider AI, LiveKit -->
 
@@ -235,6 +262,74 @@ Found a vulnerability? Please read [SECURITY.md](SECURITY.md) - do not open a pu
 - **Localisation.** Six UI languages shipped; translations live in `apps/web/app/locales/<lang>/translation.json` - adding one is a pull request, not a licence upgrade.
 
 Contributions welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) and the [Discussions](https://github.com/Selleo/mentingo/discussions) board.
+
+---
+
+## FAQ
+
+### What is Mentingo?
+
+Mentingo is an open-source, self-hosted learning management system (LMS) with a built-in AI mentor. It is built for corporate learning and development - employee onboarding, product and sales enablement, and mandatory compliance training - rather than for academic course delivery.
+
+### Is Mentingo really free?
+
+The software is free under the MIT licence. You can run it, modify it, rebrand it and even resell it without paying a licence fee. What you pay for is the infrastructure you run it on, and optionally a managed hosting or implementation contract with Selleo.
+
+### Can I self-host Mentingo?
+
+Yes - self-hosting is the default. You need Node.js 22, PostgreSQL 16 with the pgvector extension, Redis and any S3-compatible object storage. [docs/deployment.md](docs/deployment.md) walks through a production deployment on Hetzner Cloud with AWS for DNS and container registry, but nothing ties the platform to those providers.
+
+### Can I run Mentingo without setting up servers myself?
+
+Yes, in two ways. Mentingo is listed on the [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw) as a container image with a CloudFormation template that provisions ECS, RDS and ElastiCache in your own AWS account - the listing itself is free of charge, you pay only for the AWS resources, and it lands on your existing AWS bill instead of going through a new vendor procurement cycle. Alternatively, Selleo will host and operate Mentingo for you on a flat tiered subscription.
+
+### How is Mentingo different from Moodle?
+
+Moodle is a mature, plugin-driven platform designed for education, licensed under GPL v3 and written in PHP. Mentingo is a TypeScript platform designed for corporate L&D, licensed under MIT, with an AI mentor, multi-tenancy and white-labelling in the core rather than in plugins. If you need a large academic plugin ecosystem, choose Moodle. If you need a modern, brandable corporate training platform you can extend yourself, choose Mentingo.
+
+### Is Mentingo a free alternative to Docebo?
+
+It covers the same job - corporate training, compliance and analytics with AI support - without a per-user subscription and without giving up control of your data. The trade-off is that you operate it yourself, or pay someone to operate it for you. Docebo is a managed suite with a longer feature list and a matching bill.
+
+### Does Mentingo support SCORM?
+
+Mentingo can export courses as SCORM 1.2 packages, so content you build here can be handed to another LMS. <!-- TODO(weryfikacja): czy jest import SCORM? jeśli tak, dopisać zdanie. jeśli nie - zostaw jak jest -->
+
+### Which AI provider does Mentingo use, and where does my data go?
+
+You configure the provider and supply your own API key - OpenAI is supported out of the box through the Vercel AI SDK. In a self-hosted deployment, prompts and learner content go from your server to the provider you chose and nowhere else; nothing is routed through Selleo. Every model call is traced locally with Langfuse, so you can audit what the mentor said, what it cost and how long it took.
+
+### Can I use Mentingo for compliance and mandatory training?
+
+Yes. Courses can be given expiry intervals with automated re-enrolment and reminder schedules, completion records are kept per learner and exportable, and each tenant's data is isolated at the database level with PostgreSQL Row-Level Security. Whether that satisfies a specific regulation is a question for your compliance team and your deployment, not for the software alone.
+
+### Does Mentingo support single sign-on?
+
+Yes - OAuth 2.0 with Microsoft 365, Google Workspace and Slack, plus email and password with TOTP two-factor authentication.
+
+### Can one installation serve several companies or brands?
+
+Yes. Multi-tenancy is built in and enforced in PostgreSQL with Row-Level Security, with per-tenant domains and branding. This is what makes Mentingo usable by holding structures, group companies and B2B training vendors.
+
+### How much does it cost to run?
+
+<!-- ETAP 3, decyzja 6: wstawić realny footprint zmierzony pakietem k6, np.:
+"A 500-active-user deployment fits comfortably on a 4 vCPU / 8 GB server with 50 GB of storage - around EUR 40 per month on Hetzner, plus object storage, video CDN and your AI provider usage."
+Bez tej liczby zostaw akapit poniżej. -->
+
+That depends on the number of active learners, how much video you serve and how heavily you use AI. The repository ships a k6 performance suite (`pnpm perf:load`, `perf:stress`, `perf:spike`, `perf:soak`) so you can size a deployment against your own numbers before committing to it.
+
+### Can I white-label Mentingo and resell it?
+
+Yes. The MIT licence permits commercial use, modification and redistribution, and does not require you to publish your changes. Domains, logo, colours and styles are configurable per tenant.
+
+### What languages does the interface support?
+
+English, Polish, German, Spanish, French and Czech. Translations live in `apps/web/app/locales/<lang>/translation.json` - adding a language is a pull request.
+
+### Who builds and maintains Mentingo?
+
+[Selleo](https://selleo.com), a product engineering company. Mentingo is a real product with a managed offering, not an abandoned demo repository - see [CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ---
 
