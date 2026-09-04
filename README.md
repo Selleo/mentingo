@@ -247,7 +247,7 @@ Contributions welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) and the [Discussi
 
 ## Commercial support
 
-Mentingo is free to self-host under the MIT licence, and it is maintained by [Selleo](https://selleo.com) - a product engineering team that has been building learning platforms since 2010.
+Mentingo is free to self-host under the MIT licence, and it is maintained by [Selleo](https://selleo.com) - a product engineering team that has been building learning platforms since 2005.
 
 | | |
 |---|---|
