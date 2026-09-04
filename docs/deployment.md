@@ -224,6 +224,62 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     - Attach the `tenant-client-docker` policy.
     - Generate and save the access keys for this user as well. You will use these on the Hetzner server.
 
+#### **2.4 Bunny.net Video Streaming Setup**
+
+Bunny Stream is optional. Mentingo uses S3-compatible storage when Bunny Stream is not
+configured. If you want Bunny Stream for video uploads and playback, configure one Bunny Stream
+video library for the tenant before starting the API container.
+
+1.  In the [Bunny.net dashboard](https://dash.bunny.net/), create a **Stream Video Library**.
+    Note the following values from the library:
+
+    - **Library ID**
+    - **API key**
+    - **Read-only API key**
+    - **CDN hostname** (for example, `vz-<id>-<region>.b-cdn.net`)
+    - **CDN token authentication key**
+
+2.  Configure the library webhook. Set **Webhook URL** to:
+
+    ```text
+    https://<client-domain>/api/file/bunny/webhook
+    ```
+
+    Save the webhook and make sure the API is publicly reachable over HTTPS. The webhook endpoint
+    is public, but it must remain behind the production HTTPS domain.
+
+3.  In the library's general settings, use the following playback and security configuration:
+
+    - **Enable direct play**: enabled
+    - **Allowed domains**: add `*.<client-domain>` (for example, `*.mentingo.com`)
+    - **Block direct URL file access**: enabled
+    - **Embed view token authentication**: disabled
+    - **CDN token authentication**: enabled
+
+    The CDN token authentication setting must be enabled because Mentingo signs playback and
+    thumbnail URLs with `BUNNY_STREAM_TOKEN_SIGNING_KEY`.
+
+4.  If using Bunny Stream, copy its values to the API environment file on the server
+    (`.env.prd.api`):
+
+    ```env
+    # OPTIONAL: BUNNY STREAM (leave unset when using S3-compatible storage)
+    BUNNY_STREAM_API_KEY="<bunny_library_api_key>"
+    BUNNY_STREAM_READ_ONLY_API_KEY="<bunny_library_read_only_api_key>"
+    BUNNY_STREAM_LIBRARY_ID="<bunny_library_id>"
+    BUNNY_STREAM_CDN_URL="<bunny_cdn_hostname>"
+    BUNNY_STREAM_TOKEN_SIGNING_KEY="<bunny_cdn_token_authentication_key>"
+    ```
+
+5.  Restart the API container after changing the environment file:
+
+    ```bash
+    docker compose up -d app
+    ```
+
+    Verify the integration by uploading a video from Mentingo and checking that Bunny sends a
+    processing webhook to `/api/file/bunny/webhook`.
+
 ---
 
 ### **Part 3: GitHub & CI/CD Configuration** 👨‍💻
@@ -639,6 +695,13 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     S3_ACCESS_KEY_ID="<hetzner_storage_access_key>"
     S3_SECRET_ACCESS_KEY="<hetzner_storage_secret_key>"
     S3_BUCKET_NAME="<bucket-name>"
+
+    # OPTIONAL: BUNNY STREAM (leave unset when using S3-compatible storage)
+    BUNNY_STREAM_API_KEY="<bunny_library_api_key>"
+    BUNNY_STREAM_READ_ONLY_API_KEY="<bunny_library_read_only_api_key>"
+    BUNNY_STREAM_LIBRARY_ID="<bunny_library_id>"
+    BUNNY_STREAM_CDN_URL="<bunny_cdn_hostname>"
+    BUNNY_STREAM_TOKEN_SIGNING_KEY="<bunny_cdn_token_authentication_key>"
 
     # STRIPE & SENTRY
     STRIPE_SECRET_KEY=
