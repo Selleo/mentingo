@@ -228,7 +228,7 @@ export function AiMentorPracticeConversation({
                 lessonId={id}
                 mentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
                 handleSubmit={handleSubmit}
-                onMentorTranscription={(text) => appendVoiceMessage("user", text)}
+                onLearnerTranscription={(text) => appendVoiceMessage("user", text)}
                 onMentorResponseCompleted={(text) => appendVoiceMessage("assistant", text)}
                 onAudioInterrupted={invalidateMessages}
                 onAudioOutputCompleted={invalidateMessages}

@@ -3216,11 +3216,12 @@
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
           "fillInTheBlanksSentenceTip": "Napište větu a vložte do ní slova.",
           "fillInTheBlanksWordTip": "Vytvořte a vložte slovo do věty.",
-          "leaveContentHeader": "Opravdu chcete opustit tento editor otázek?",
-          "leaveContentBody": "Smaže veškerý neuložený postup",
+          "leaveContentHeader": "Opustit editor lekce?",
+          "leaveContentBody": "Máte neuložené změny. Pokud nyní odejdete, budou ztraceny.",
+          "leaveContentCancel": "Pokračovat v úpravách",
+          "leaveContentDiscard": "Opustit bez uložení",
           "dropOrClick": "Přetáhněte obrázek sem nebo jej nahrajte kliknutím",
           "allowedFormats": "PNG, JPG nebo SVG",
-          "leaveContentBodyValidate": "Pokud chcete uložit změny, musíte nejprve ověřit formulář",
           "aiMentorInstructionsTooltip": "Popište, jak by se měl AI Mentor chovat během lekce. Zahrňte kontext, roli nebo scénář, který by AI měla následovat. To určuje, jak bude AI vést konverzaci.",
           "updateAiMentorAvatarDescription": "Nahrajte nový obrázek pro AI mentora nebo odeberte aktuální.",
           "updateAiMentorAvatar": "Aktualizujte avatar AI mentora",
@@ -3926,6 +3927,11 @@
           "muted": "Ztlumeno",
           "mutedHint": "Váš mikrofon je ztlumený. Mentor vás neslyší.",
           "youSaid": "Řekl jsi",
+          "recovery": {
+            "failedTitle": "Hlasová relace byla odpojena",
+            "failedDescription": "Připojení se nepodařilo obnovit. Restartujte hlasovou relaci a pokračujte.",
+            "restart": "Restartovat relaci"
+          },
           "states": {
             "idle": {
               "title": "Připraveno",
@@ -5553,6 +5559,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu.",
+      "invalidAiMentorConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci mentora. Zkuste kurz vygenerovat znovu.",
       "invalidAiJudgeConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci hodnocení. Zkuste kurz vygenerovat znovu."
     }
   },

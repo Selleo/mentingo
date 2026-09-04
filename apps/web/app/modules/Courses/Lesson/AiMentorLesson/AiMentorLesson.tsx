@@ -1,6 +1,6 @@
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
-import { createTextUiMessage, getUiMessageText, toUiMessageRole } from "@repo/shared";
+import { createTextUiMessage, getUiMessageText, MESSAGE_ROLE, toUiMessageRole } from "@repo/shared";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -95,6 +95,7 @@ const AiMentorLesson = ({
   const [latestEvaluation, setLatestEvaluation] = useState<AiMentorEvaluation | null>(null);
   const [input, setInput] = useState("");
   const taskDialogLessonIdRef = useRef<string | null>(null);
+  const voiceResponseMessageIdRef = useRef<string | null>(null);
 
   const transport = useMemo(
     () => createAiMentorChatTransport(lesson.threadId ?? ""),
@@ -170,18 +171,73 @@ const AiMentorLesson = ({
     void sendMessage({ text: message });
   }, [input, lesson.threadId, sendMessage]);
 
-  const handleVoiceMentorTranscription = useCallback(
+  const handleVoiceLearnerTranscription = useCallback(
     (text: string) => {
+      voiceResponseMessageIdRef.current = null;
       appendVoiceMessage("user", text);
     },
     [appendVoiceMessage],
   );
 
+  const handleVoiceMentorResponseDelta = useCallback(
+    (text: string) => {
+      if (!text) {
+        return;
+      }
+
+      const messageId =
+        voiceResponseMessageIdRef.current ??
+        `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      voiceResponseMessageIdRef.current = messageId;
+
+      setMessages((prev) => {
+        const existingMessage = prev.find((message) => message.id === messageId);
+        if (!existingMessage) {
+          return [
+            ...prev,
+            createTextUiMessage<UIMessage>({
+              id: messageId,
+              role: MESSAGE_ROLE.MENTOR,
+              content: text,
+            }),
+          ];
+        }
+
+        return prev.map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                parts: [{ type: "text" as const, text: getUiMessageText(message) + text }],
+              }
+            : message,
+        );
+      });
+    },
+    [setMessages],
+  );
+
   const handleVoiceMentorResponseCompleted = useCallback(
     (text: string) => {
-      appendVoiceMessage("assistant", text);
+      const messageId = voiceResponseMessageIdRef.current;
+      voiceResponseMessageIdRef.current = null;
+
+      if (!messageId) {
+        appendVoiceMessage("assistant", text);
+        return;
+      }
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                parts: [{ type: "text" as const, text }],
+              }
+            : message,
+        ),
+      );
     },
-    [appendVoiceMessage],
+    [appendVoiceMessage, setMessages],
   );
 
   const handleJudge = useCallback(async () => {
@@ -410,7 +466,8 @@ const AiMentorLesson = ({
                 }
                 mentorAvatarUrl={lesson.aiMentor?.avatarReferenceUrl}
                 handleSubmit={handleSubmit}
-                onMentorTranscription={handleVoiceMentorTranscription}
+                onLearnerTranscription={handleVoiceLearnerTranscription}
+                onMentorResponseDelta={handleVoiceMentorResponseDelta}
                 onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
                 onAudioInterrupted={invalidateCurrentThreadMessages}
                 onAudioOutputCompleted={invalidateCurrentThreadMessages}

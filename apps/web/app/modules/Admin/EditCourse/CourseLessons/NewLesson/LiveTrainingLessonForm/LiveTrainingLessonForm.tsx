@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
@@ -9,7 +9,9 @@ import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { LiveTrainingFormFields } from "~/modules/LiveTraining/components/LiveTrainingFormFields";
 
 import { LIVE_TRAINING_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
@@ -68,6 +70,12 @@ export function LiveTrainingLessonForm({
   const isEditMode = Boolean(lessonToEdit);
   const linkedLiveTrainingId = lessonToEdit?.liveTrainingId ?? null;
   const shouldShowAssignmentTabs = !isEditMode || !currentLanguageHasLiveTraining;
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const { handleCancel, isLeaveModalOpen, onCancelLeaveModal, onDiscardLeaveModal } =
+    useLessonLeaveConfirmation(leaveLessonForm);
 
   const handleDelete = async () => {
     if (!lessonToEdit || !chapterToEdit) return;
@@ -250,11 +258,7 @@ export function LiveTrainingLessonForm({
                   }
                   type="button"
                   variant="outline"
-                  onClick={
-                    isEditMode
-                      ? () => setIsDeleteModalOpen(true)
-                      : () => setContentTypeToDisplay(ContentTypes.EMPTY)
-                  }
+                  onClick={isEditMode ? () => setIsDeleteModalOpen(true) : handleCancel}
                   className={
                     isEditMode
                       ? "border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
@@ -278,6 +282,11 @@ export function LiveTrainingLessonForm({
           confirmButton: LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON,
           cancelButton: LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_DIALOG_CANCEL_BUTTON,
         }}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
     </Card>
   );

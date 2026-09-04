@@ -2,10 +2,28 @@ import {
   createLumaSocket,
   LUMA_AUDIO_ACTIONS,
   LUMA_AUDIO_FORMATS,
+  EXTERNAL_AUDIO_CLIENT_RECONNECT_GRACE_MS,
+  EXTERNAL_AUDIO_MAX_BUFFERED_CHUNKS,
+  EXTERNAL_AUDIO_MAX_RECOVERY_ATTEMPTS,
+  EXTERNAL_AUDIO_OPERATION,
+  EXTERNAL_AUDIO_RECOVERY_STATE,
+  EXTERNAL_AUDIO_RECOVERY_TIMEOUT_MS,
+  EXTERNAL_AUDIO_TERMINAL_RECOVERY_ERROR_CODES,
   LUMA_SOCKET_MESSAGE_TYPES,
   type AudioChunkPayload,
+  type AudioChunkedPayload,
+  type AudioStartedPayload,
+  type AudioOutputErrorPayload,
+  type AudioOutputCompletePayload,
+  type AudioOutputAlignmentPayload,
+  type AudioOutputInterruptedPayload,
+  type AudioProtocolErrorPayload,
+  type AudioReconnectPayload,
+  type AudioRecoveryPayload,
   type AudioStopPayload,
-  type MentorTranscriptionPayload,
+  type ClientSpeechBoundaryPayload as LumaClientSpeechBoundaryPayload,
+  type LearnerTranscriptionPayload,
+  LEARNER_TRANSCRIPT_STATUSES,
   type StartAudioPayload,
   TRANSCRIPTION_MODES,
 } from "@japro/luma-sdk";
@@ -36,30 +54,44 @@ import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realti
 import type {
   AiMentorTTSPreset,
   AudioSpeechEventPayload,
+  AudioOutputAlignmentEventPayload,
+  ClientSpeechBoundaryPayload,
+  MentorResponseDeltaEventPayload,
   MentorResponseCompletedEventPayload,
-  MentorTranscriptionEventPayload,
+  LearnerTranscriptionEventPayload,
   PcmChunkMeta,
   SupportedLanguages,
 } from "@repo/shared";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { SendTTSTriggerBody, StartAudioBody } from "src/audio/types/audio.types";
-import type { ExternalAudioSession } from "src/audio/types/external-audio-session.types";
+import type {
+  ExternalAudioChunkOperation,
+  ExternalAudioSession,
+  ExternalAudioSpeechBoundaryOperation,
+} from "src/audio/types/external-audio-session.types";
 import type { ExternalAudioStartResult } from "src/audio/types/external-audio.types";
 import type { UUIDType } from "src/common";
 import type { WsUser } from "src/websocket/websocket.types";
 
 type VoiceMentorSocketHandlers = {
+  connect: () => void;
   disconnect: () => void;
-  audioStarted: () => void;
-  mentorTranscription: (payload: MentorTranscriptionPayload) => Promise<void>;
+  audioStarted: (payload: AudioStartedPayload) => void;
+  audioChunked: (payload: AudioChunkedPayload) => void;
+  audioChunkError: (payload: AudioProtocolErrorPayload) => void;
+  audioRecovered: (payload: AudioRecoveryPayload) => void;
+  audioReconnectError: (payload: AudioProtocolErrorPayload) => void;
+  learnerTranscription: (payload: LearnerTranscriptionPayload) => Promise<void>;
+  audioOutputAlignment: (payload: AudioOutputAlignmentPayload) => void;
   audioOutputChunk: (payload: { data: AudioSpeechEventPayload }) => void;
-  audioOutputInterrupted: () => void;
-  audioOutputComplete: () => void;
+  audioOutputInterrupted: (payload: AudioOutputInterruptedPayload) => void;
+  audioOutputError: (payload: AudioOutputErrorPayload) => void;
+  audioOutputComplete: (payload: AudioOutputCompletePayload) => void;
 };
 
 @Injectable()
 export class ExternalAudioService {
   private readonly logger = new Logger(ExternalAudioService.name);
-  private static readonly MENTOR_DELTA_FLUSH_MIN_CHARS = 48;
   private static readonly MENTOR_DELTA_FLUSH_MAX_CHARS = 140;
 
   constructor(
@@ -102,7 +134,117 @@ export class ExternalAudioService {
       },
     };
 
-    session.socket.sendAudioChunk(audioChunkPayload, bytes);
+    const operation = {
+      type: EXTERNAL_AUDIO_OPERATION.CHUNK,
+      payload: audioChunkPayload,
+      bytes: Buffer.from(bytes),
+    } as const;
+
+    if (
+      !session.unacknowledgedChunks.has(meta.seq) &&
+      session.unacknowledgedChunks.size >= EXTERNAL_AUDIO_MAX_BUFFERED_CHUNKS
+    ) {
+      this.failRecovery(session, "AUDIO_SEQUENCE_RECOVERY_BUFFER_FULL");
+      return false;
+    }
+
+    session.unacknowledgedChunks.set(meta.seq, operation);
+    if (session.recoveryState === EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING) {
+      session.deferredOperations.push(operation);
+      return true;
+    }
+
+    if (!session.socket.connected) {
+      session.deferredOperations.push(operation);
+      this.beginRecovery(session);
+      return true;
+    }
+
+    this.sendChunkOperation(session, operation);
+    return true;
+  }
+
+  async clientSpeechStart(
+    sessionId: string,
+    payload: ClientSpeechBoundaryPayload,
+  ): Promise<boolean> {
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const boundary: LumaClientSpeechBoundaryPayload = {
+      type: LUMA_SOCKET_MESSAGE_TYPES.CLIENT_SPEECH_START,
+      sessionRunId: payload.sessionRunId,
+      boundarySeq: payload.boundarySeq,
+      tsMs: Math.trunc(payload.tsMs),
+      lastAudioSeq: payload.lastAudioSeq,
+    };
+    this.sendOrDeferBoundary(session, {
+      type: EXTERNAL_AUDIO_OPERATION.SPEECH_START,
+      payload: boundary,
+    });
+    return true;
+  }
+
+  async clientSpeechEnd(sessionId: string, payload: ClientSpeechBoundaryPayload): Promise<boolean> {
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const boundary: LumaClientSpeechBoundaryPayload = {
+      type: LUMA_SOCKET_MESSAGE_TYPES.CLIENT_SPEECH_END,
+      sessionRunId: payload.sessionRunId,
+      boundarySeq: payload.boundarySeq,
+      tsMs: Math.trunc(payload.tsMs),
+      lastAudioSeq: payload.lastAudioSeq,
+    };
+    this.sendOrDeferBoundary(session, {
+      type: EXTERNAL_AUDIO_OPERATION.SPEECH_END,
+      payload: boundary,
+    });
+    return true;
+  }
+
+  hasSession(sessionId: string): boolean {
+    return this.sessionStore.has(sessionId);
+  }
+
+  reconnectAudio(sessionId: string, currentUser: WsUser, payload: AudioReconnectPayload): boolean {
+    const session = this.sessionStore.findBySessionRunId(payload.sessionRunId);
+    if (
+      !session ||
+      session.currentUser.userId !== currentUser.userId ||
+      session.currentUser.tenantId !== currentUser.tenantId
+    ) {
+      return false;
+    }
+
+    if (session.clientDisconnectTimeout) {
+      clearTimeout(session.clientDisconnectTimeout);
+      session.clientDisconnectTimeout = null;
+    }
+
+    this.sessionStore.rebind(session, sessionId);
+    session.recoveryAttempt = Math.max(session.recoveryAttempt, payload.attempt - 1);
+    this.beginRecovery(session);
+    this.requestRecovery(session);
+    return true;
+  }
+
+  handleClientDisconnect(sessionId: string): boolean {
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    if (session.clientDisconnectTimeout) {
+      clearTimeout(session.clientDisconnectTimeout);
+    }
+    session.clientDisconnectTimeout = setTimeout(() => {
+      this.clearSession(session.sessionId);
+    }, EXTERNAL_AUDIO_CLIENT_RECONNECT_GRACE_MS);
     return true;
   }
 
@@ -128,6 +270,7 @@ export class ExternalAudioService {
       return;
     }
 
+    this.clearRecoveryTimers(session);
     session.socket.removeAllListeners();
     session.socket.disconnect();
     this.sessionStore.delete(sessionId);
@@ -208,15 +351,29 @@ export class ExternalAudioService {
       threadId: threadData.thread.id,
       lessonId: payload.lessonId,
       userId: currentUser.userId,
+      sessionRunId: null,
+      recoveryState: EXTERNAL_AUDIO_RECOVERY_STATE.CONNECTED,
+      recoveryAttempt: 0,
+      recoveryRequestPending: false,
+      lastSentAudioSeq: -1,
+      unacknowledgedChunks: new Map(),
+      deferredOperations: [],
+      recoveryTimeout: null,
+      recoveryRetryTimeout: null,
+      clientDisconnectTimeout: null,
       activeTurnId: null,
+      audioOutputErrors: new Map(),
+      pendingInterruption: false,
+      interruptedTurnIds: new Set(),
+      activeMentorStream: null,
     };
 
     this.registerVoiceMentorHandlers(session);
+    this.sessionStore.set(session);
 
     socket.connect();
     socket.startAudio(this.buildStartAudioPayload(payload, lessonLanguage, voiceStartConfig));
 
-    this.sessionStore.set(session);
     return { ok: true };
   }
 
@@ -224,10 +381,17 @@ export class ExternalAudioService {
     const { socket } = session;
     const handlers = this.createVoiceMentorSocketHandlers(session);
 
+    socket.on("connect", handlers.connect);
     socket.on("disconnect", handlers.disconnect);
-    socket.onMentorTranscription(handlers.mentorTranscription);
+    socket.onAudioChunked(handlers.audioChunked);
+    socket.onAudioChunkError(handlers.audioChunkError);
+    socket.onAudioRecovered(handlers.audioRecovered);
+    socket.onAudioReconnectError(handlers.audioReconnectError);
+    socket.onLearnerTranscription(handlers.learnerTranscription);
+    socket.onAudioOutputAlignment(handlers.audioOutputAlignment);
     socket.onAudioOutputChunk(handlers.audioOutputChunk);
     socket.onAudioOutputInterrupted(handlers.audioOutputInterrupted);
+    socket.onAudioOutputError(handlers.audioOutputError);
     socket.onAudioOutputComplete(handlers.audioOutputComplete);
     socket.onAudioStarted(handlers.audioStarted);
   }
@@ -235,17 +399,72 @@ export class ExternalAudioService {
   private createVoiceMentorSocketHandlers(
     session: ExternalAudioSession,
   ): VoiceMentorSocketHandlers {
-    const { sessionId } = session;
-
     return {
+      connect: () => {
+        if (
+          session.sessionRunId &&
+          session.recoveryState === EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING
+        ) {
+          this.requestRecovery(session);
+        }
+      },
       disconnect: () => {
-        this.sessionStore.delete(sessionId);
+        if (session.sessionRunId) {
+          this.beginRecovery(session);
+        }
       },
-      audioStarted: () => {
-        this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, {});
+      audioStarted: (payload) => {
+        session.sessionRunId = payload.sessionRunId;
+        session.recoveryAttempt = 0;
+        session.recoveryState = EXTERNAL_AUDIO_RECOVERY_STATE.CONNECTED;
+        this.acknowledgeChunks(session, payload.nextAudioSeq);
+        this.realtimePublisher.emitToRoom(
+          VOICE_SOCKET_EVENT.AUDIO_STARTED,
+          session.sessionId,
+          payload,
+        );
       },
-      mentorTranscription: async (payload) => {
-        await this.handleMentorTranscription(sessionId, payload);
+      audioChunked: (payload) => {
+        if (payload.sessionRunId !== session.sessionRunId) {
+          return;
+        }
+
+        this.acknowledgeChunks(session, payload.nextAudioSeq);
+        this.realtimePublisher.emitToRoom(
+          VOICE_SOCKET_EVENT.AUDIO_CHUNK_ACCEPTED,
+          session.sessionId,
+          payload,
+        );
+      },
+      audioChunkError: (payload) => {
+        this.realtimePublisher.emitToRoom(
+          VOICE_SOCKET_EVENT.AUDIO_CHUNK_ERROR,
+          session.sessionId,
+          payload,
+        );
+        this.beginRecovery(session);
+        this.requestRecovery(session);
+      },
+      audioRecovered: (payload) => {
+        this.handleRecovered(session, payload);
+      },
+      audioReconnectError: (payload) => {
+        this.handleReconnectError(session, payload);
+      },
+      learnerTranscription: async (payload) => {
+        await this.handleLearnerTranscription(session.sessionId, payload);
+      },
+      audioOutputAlignment: (payload) => {
+        const nextPayload: AudioOutputAlignmentEventPayload = {
+          turnId: payload.jobId,
+          sequence: payload.data.sequence,
+          words: payload.data.words,
+        };
+        this.realtimePublisher.emitToRoom(
+          VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT,
+          session.sessionId,
+          nextPayload,
+        );
       },
       audioOutputChunk: (payload) => {
         if (!session.activeTurnId) {
@@ -259,36 +478,286 @@ export class ExternalAudioService {
           sampleRate: payload.data.sampleRate,
           turnId: session.activeTurnId,
         };
-        this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_SPEECH, sessionId, nextPayload);
+        this.realtimePublisher.emitToRoom(
+          VOICE_SOCKET_EVENT.AUDIO_SPEECH,
+          session.sessionId,
+          nextPayload,
+        );
       },
-      audioOutputInterrupted: () => {
+      audioOutputInterrupted: (payload) => {
+        const reportedTurnId = payload.data.interruptedTurnId;
+        const activeStreamTurnId = session.activeMentorStream?.turnId ?? null;
+        const interruptedTurnId = reportedTurnId === null ? activeStreamTurnId : reportedTurnId;
         const nextPayload = {
-          turnId: session.activeTurnId ?? undefined,
+          turnId: interruptedTurnId ?? undefined,
         };
         this.realtimePublisher.emitToRoom(
           VOICE_SOCKET_EVENT.AUDIO_INTERRUPTED,
-          sessionId,
+          session.sessionId,
           nextPayload,
         );
-        session.activeTurnId = null;
+        const interruptedCurrentTurn =
+          interruptedTurnId !== null &&
+          (session.activeTurnId === interruptedTurnId || activeStreamTurnId === interruptedTurnId);
+        if (interruptedCurrentTurn) {
+          session.pendingInterruption = true;
+        }
+        if (interruptedTurnId && activeStreamTurnId === interruptedTurnId) {
+          session.interruptedTurnIds.add(interruptedTurnId);
+          session.activeMentorStream?.abortController.abort("MENTOR_RESPONSE_INTERRUPTED");
+        }
+        if (interruptedTurnId) {
+          session.audioOutputErrors.delete(interruptedTurnId);
+        }
+        if (session.activeTurnId === interruptedTurnId) {
+          session.activeTurnId = null;
+        }
       },
-      audioOutputComplete: () => {
+      audioOutputError: (payload) => {
+        if (!session.activeTurnId || payload.jobId !== session.activeTurnId) {
+          return;
+        }
+
+        session.audioOutputErrors.set(payload.jobId, payload.data);
+        if (session.activeMentorStream?.turnId === payload.jobId) {
+          session.activeMentorStream.abortController.abort("TTS_STREAM_ERROR");
+        }
+        this.logger.warn(
+          `Luma audio output failed for mentor turn ${payload.jobId} in session ${session.sessionId}: ${payload.data.code}`,
+        );
+      },
+      audioOutputComplete: (payload) => {
+        const completedTurnId =
+          session.activeTurnId && payload.jobId === session.activeTurnId
+            ? session.activeTurnId
+            : null;
         const nextPayload = {
-          turnId: session.activeTurnId ?? undefined,
+          turnId: completedTurnId ?? undefined,
         };
         this.realtimePublisher.emitToRoom(
           VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED,
-          sessionId,
+          session.sessionId,
           nextPayload,
         );
-        session.activeTurnId = null;
+        if (completedTurnId) {
+          session.audioOutputErrors.delete(completedTurnId);
+        }
+        if (session.activeTurnId === completedTurnId) {
+          session.activeTurnId = null;
+        }
       },
     };
   }
 
-  private async handleMentorTranscription(
+  private sendChunkOperation(
+    session: ExternalAudioSession,
+    operation: ExternalAudioChunkOperation,
+  ): void {
+    session.socket.sendAudioChunk(operation.payload, operation.bytes);
+    session.lastSentAudioSeq = Math.max(session.lastSentAudioSeq, operation.payload.meta.seq);
+  }
+
+  private sendOrDeferBoundary(
+    session: ExternalAudioSession,
+    operation: ExternalAudioSpeechBoundaryOperation,
+  ): void {
+    if (
+      session.recoveryState === EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING ||
+      !session.socket.connected
+    ) {
+      session.deferredOperations.push(operation);
+      this.beginRecovery(session);
+      return;
+    }
+
+    this.sendBoundaryOperation(session, operation);
+  }
+
+  private sendBoundaryOperation(
+    session: ExternalAudioSession,
+    operation: ExternalAudioSpeechBoundaryOperation,
+  ): void {
+    if (operation.type === EXTERNAL_AUDIO_OPERATION.SPEECH_START) {
+      session.socket.sendClientSpeechStart(operation.payload);
+      return;
+    }
+
+    session.socket.sendClientSpeechEnd(operation.payload);
+  }
+
+  private beginRecovery(session: ExternalAudioSession): void {
+    if (session.recoveryState === EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING) {
+      return;
+    }
+
+    session.recoveryState = EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING;
+    this.realtimePublisher.emitToRoom(
+      VOICE_SOCKET_EVENT.AUDIO_RECOVERY_STARTED,
+      session.sessionId,
+      { attempt: session.recoveryAttempt + 1 },
+    );
+    session.recoveryTimeout = setTimeout(() => {
+      this.failRecovery(session, "AUDIO_RECOVERY_TIMEOUT");
+    }, EXTERNAL_AUDIO_RECOVERY_TIMEOUT_MS);
+  }
+
+  private requestRecovery(session: ExternalAudioSession): void {
+    if (
+      !session.sessionRunId ||
+      !session.socket.connected ||
+      session.recoveryRequestPending ||
+      session.recoveryState !== EXTERNAL_AUDIO_RECOVERY_STATE.RECOVERING
+    ) {
+      return;
+    }
+
+    if (session.recoveryAttempt >= EXTERNAL_AUDIO_MAX_RECOVERY_ATTEMPTS) {
+      this.failRecovery(session, "AUDIO_RECOVERY_ATTEMPTS_EXHAUSTED");
+      return;
+    }
+
+    session.recoveryAttempt += 1;
+    session.recoveryRequestPending = true;
+    session.socket.reconnectAudio({
+      type: LUMA_SOCKET_MESSAGE_TYPES.AUDIO_RECONNECT,
+      sessionRunId: session.sessionRunId,
+      lastSentAudioSeq: Math.max(0, session.lastSentAudioSeq),
+      attempt: session.recoveryAttempt,
+    });
+  }
+
+  private handleRecovered(session: ExternalAudioSession, payload: AudioRecoveryPayload): void {
+    if (payload.sessionRunId !== session.sessionRunId) {
+      this.failRecovery(session, "AUDIO_SESSION_RUN_MISMATCH");
+      return;
+    }
+
+    session.recoveryRequestPending = false;
+    this.clearRecoveryAttemptTimers(session);
+    this.acknowledgeChunks(session, payload.nextAudioSeq);
+
+    const deferredChunkSequences = new Set(
+      session.deferredOperations.flatMap((operation) =>
+        operation.type === EXTERNAL_AUDIO_OPERATION.CHUNK ? [operation.payload.meta.seq] : [],
+      ),
+    );
+    const replayOperations = [...session.unacknowledgedChunks.values()]
+      .filter(
+        (operation) =>
+          operation.payload.meta.seq >= payload.nextAudioSeq &&
+          !deferredChunkSequences.has(operation.payload.meta.seq),
+      )
+      .sort((left, right) => left.payload.meta.seq - right.payload.meta.seq);
+    const firstReplaySequence = replayOperations[0]?.payload.meta.seq;
+    if (
+      payload.nextAudioSeq <= session.lastSentAudioSeq &&
+      firstReplaySequence !== payload.nextAudioSeq
+    ) {
+      this.failRecovery(session, "AUDIO_SEQUENCE_RECOVERY_BUFFER_MISS");
+      return;
+    }
+
+    for (const operation of replayOperations) {
+      this.sendChunkOperation(session, operation);
+    }
+
+    const deferredOperations = session.deferredOperations.splice(0);
+    for (const operation of deferredOperations) {
+      if (
+        operation.type === EXTERNAL_AUDIO_OPERATION.CHUNK &&
+        operation.payload.meta.seq < payload.nextAudioSeq
+      ) {
+        continue;
+      }
+
+      if (operation.type === EXTERNAL_AUDIO_OPERATION.CHUNK) {
+        this.sendChunkOperation(session, operation);
+        continue;
+      }
+
+      this.sendBoundaryOperation(session, operation);
+    }
+
+    session.recoveryState = EXTERNAL_AUDIO_RECOVERY_STATE.CONNECTED;
+    session.recoveryAttempt = 0;
+    this.realtimePublisher.emitToRoom(
+      VOICE_SOCKET_EVENT.AUDIO_RECOVERED,
+      session.sessionId,
+      payload,
+    );
+  }
+
+  private handleReconnectError(
+    session: ExternalAudioSession,
+    payload: AudioProtocolErrorPayload,
+  ): void {
+    session.recoveryRequestPending = false;
+    const isTerminal = EXTERNAL_AUDIO_TERMINAL_RECOVERY_ERROR_CODES.some(
+      (code) => code === payload.code,
+    );
+    if (isTerminal || session.recoveryAttempt >= EXTERNAL_AUDIO_MAX_RECOVERY_ATTEMPTS) {
+      this.failRecovery(session, payload.code);
+      return;
+    }
+
+    if (session.recoveryRetryTimeout) {
+      clearTimeout(session.recoveryRetryTimeout);
+    }
+    const retryDelayMs = Math.min(250 * session.recoveryAttempt, 2_000);
+    session.recoveryRetryTimeout = setTimeout(() => {
+      session.recoveryRetryTimeout = null;
+      this.requestRecovery(session);
+    }, retryDelayMs);
+  }
+
+  private acknowledgeChunks(session: ExternalAudioSession, nextAudioSeq: number): void {
+    for (const sequence of session.unacknowledgedChunks.keys()) {
+      if (sequence < nextAudioSeq) {
+        session.unacknowledgedChunks.delete(sequence);
+      }
+    }
+  }
+
+  private failRecovery(session: ExternalAudioSession, code: string): void {
+    if (session.recoveryState === EXTERNAL_AUDIO_RECOVERY_STATE.FAILED) {
+      return;
+    }
+
+    session.recoveryState = EXTERNAL_AUDIO_RECOVERY_STATE.FAILED;
+    this.clearRecoveryTimers(session);
+    this.logger.warn(`Luma audio recovery failed for session ${session.sessionId}: ${code}`);
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_RECONNECT_ERROR, session.sessionId, {
+      type: LUMA_SOCKET_MESSAGE_TYPES.AUDIO_RECONNECT,
+      sessionId: session.sessionId,
+      sessionRunId: session.sessionRunId ?? undefined,
+      attempt: session.recoveryAttempt,
+      code,
+    });
+    this.clearSession(session.sessionId);
+  }
+
+  private clearRecoveryAttemptTimers(session: ExternalAudioSession): void {
+    if (session.recoveryTimeout) {
+      clearTimeout(session.recoveryTimeout);
+      session.recoveryTimeout = null;
+    }
+    if (session.recoveryRetryTimeout) {
+      clearTimeout(session.recoveryRetryTimeout);
+      session.recoveryRetryTimeout = null;
+    }
+  }
+
+  private clearRecoveryTimers(session: ExternalAudioSession): void {
+    this.clearRecoveryAttemptTimers(session);
+    if (session.clientDisconnectTimeout) {
+      clearTimeout(session.clientDisconnectTimeout);
+      session.clientDisconnectTimeout = null;
+    }
+  }
+
+  private async handleLearnerTranscription(
     sessionId: string,
-    payload: MentorTranscriptionPayload,
+    payload: LearnerTranscriptionPayload,
   ): Promise<void> {
     const session = this.sessionStore.get(sessionId);
     if (!session) {
@@ -300,14 +769,32 @@ export class ExternalAudioService {
       return;
     }
 
-    session.activeTurnId = payload.jobId ?? null;
-
-    this.emitMentorTranscription(sessionId, {
+    this.emitLearnerTranscription(sessionId, {
       text,
       jobId: payload.jobId,
+      turnId: payload.data.turnId,
+      segmentId: payload.data.segmentId,
+      revision: payload.data.revision,
+      status: payload.data.status,
     });
 
+    if (payload.data.status === LEARNER_TRANSCRIPT_STATUSES.PARTIAL) {
+      return;
+    }
+
+    const voiceDeliveryContext = this.resolveVoiceDeliveryContext(payload.data.timing);
+
+    session.activeTurnId = payload.jobId ?? null;
+    const voiceTurnWasInterrupted = session.pendingInterruption;
+    session.pendingInterruption = false;
+    const abortController = new AbortController();
+    session.activeMentorStream = {
+      turnId: payload.jobId,
+      abortController,
+    };
+
     let shouldForwardMentorText = true;
+    let stoppedByAudioOutputError = false;
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
         const stream = await this.aiService.streamMessage(
@@ -317,8 +804,11 @@ export class ExternalAudioService {
             lessonId: session.lessonId,
             voiceSessionId: sessionId,
             voiceTurnId: payload.jobId,
+            voiceTurnWasInterrupted,
+            voiceDeliveryContext,
+            abortSignal: abortController.signal,
           },
-          OPENAI_MODELS.BASIC,
+          OPENAI_MODELS.VOICE,
           session.currentUser,
           true,
         );
@@ -328,6 +818,10 @@ export class ExternalAudioService {
         let pendingDeltaChunk = "";
         let seq = 1;
         for await (const delta of stream.textStream) {
+          if (shouldForwardMentorText && session.audioOutputErrors.has(payload.jobId)) {
+            stoppedByAudioOutputError = true;
+            break;
+          }
           if (!delta) continue;
 
           responseText += delta;
@@ -340,11 +834,56 @@ export class ExternalAudioService {
           if (shouldForwardMentorText) {
             seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
           }
+          this.emitMentorResponseDelta(sessionId, {
+            text: this.sanitizeMentorResponseDelta(pendingDeltaChunk),
+            jobId: payload.jobId,
+          });
           pendingDeltaChunk = "";
+        }
+
+        const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
+        if (wasInterrupted) {
+          session.audioOutputErrors.delete(payload.jobId);
+          this.emitMentorResponseCompleted(sessionId, {
+            text: "",
+            jobId: payload.jobId,
+            reason: "error",
+          });
+          if (session.activeTurnId === payload.jobId) {
+            session.activeTurnId = null;
+          }
+          return;
+        }
+
+        const audioOutputError = session.audioOutputErrors.get(payload.jobId);
+        if (shouldForwardMentorText && (stoppedByAudioOutputError || audioOutputError)) {
+          session.audioOutputErrors.delete(payload.jobId);
+          session.socket.sendMentorTextError({
+            type: "mentor.text.error",
+            jobId: payload.jobId,
+            code: audioOutputError?.code ?? "AUDIO_OUTPUT_ERROR",
+            message: audioOutputError?.message ?? "Mentor audio output failed",
+            retryable: audioOutputError?.retryable ?? false,
+          });
+          this.emitMentorResponseCompleted(sessionId, {
+            text: "",
+            jobId: payload.jobId,
+            reason: "error",
+          });
+          if (session.activeTurnId === payload.jobId) {
+            session.activeTurnId = null;
+          }
+          return;
         }
 
         if (shouldForwardMentorText && pendingDeltaChunk.length > 0) {
           seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
+        }
+        if (pendingDeltaChunk.length > 0) {
+          this.emitMentorResponseDelta(sessionId, {
+            text: this.sanitizeMentorResponseDelta(pendingDeltaChunk),
+            jobId: payload.jobId,
+          });
         }
 
         if (shouldForwardMentorText) {
@@ -364,6 +903,41 @@ export class ExternalAudioService {
     } catch (error) {
       this.logger.error("Failed to stream mentor response", error);
 
+      const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
+      if (wasInterrupted) {
+        session.audioOutputErrors.delete(payload.jobId);
+        this.emitMentorResponseCompleted(sessionId, {
+          text: "",
+          jobId: payload.jobId,
+          reason: "error",
+        });
+        if (session.activeTurnId === payload.jobId) {
+          session.activeTurnId = null;
+        }
+        return;
+      }
+
+      const audioOutputError = session.audioOutputErrors.get(payload.jobId);
+      if (shouldForwardMentorText && audioOutputError) {
+        session.audioOutputErrors.delete(payload.jobId);
+        session.socket.sendMentorTextError({
+          type: "mentor.text.error",
+          jobId: payload.jobId,
+          code: audioOutputError.code,
+          message: audioOutputError.message,
+          retryable: audioOutputError.retryable,
+        });
+        this.emitMentorResponseCompleted(sessionId, {
+          text: "",
+          jobId: payload.jobId,
+          reason: "error",
+        });
+        if (session.activeTurnId === payload.jobId) {
+          session.activeTurnId = null;
+        }
+        return;
+      }
+
       if (shouldForwardMentorText) {
         session.socket.sendMentorTextEnd({
           type: "mentor.text.end",
@@ -376,19 +950,108 @@ export class ExternalAudioService {
         jobId: payload.jobId,
         reason: "error",
       });
+    } finally {
+      if (session.activeMentorStream?.turnId === payload.jobId) {
+        session.activeMentorStream = null;
+      }
     }
   }
 
+  private resolveVoiceDeliveryContext(
+    timing: LearnerTranscriptionPayload["data"]["timing"],
+  ): AiVoiceDeliveryContext | undefined {
+    if (!timing) {
+      return undefined;
+    }
+
+    const requiredValues = [
+      timing.elapsedMs,
+      timing.speechMs,
+      timing.pauseCount,
+      timing.longestPauseMs,
+      timing.segmentCount,
+      timing.wordCount,
+    ];
+    if (requiredValues.some((value) => this.toNonNegativeInteger(value) === undefined)) {
+      return undefined;
+    }
+
+    const timingPrecision = timing.timingPrecision?.trim();
+    if (!timingPrecision) {
+      return undefined;
+    }
+
+    return {
+      elapsedMs: this.toNonNegativeInteger(timing.elapsedMs) as number,
+      speechMs: this.toNonNegativeInteger(timing.speechMs) as number,
+      pauseCount: this.toNonNegativeInteger(timing.pauseCount) as number,
+      longestPauseMs: this.toNonNegativeInteger(timing.longestPauseMs) as number,
+      averagePauseMs: this.toOptionalNonNegativeInteger(timing.averagePauseMs),
+      segmentCount: this.toNonNegativeInteger(timing.segmentCount) as number,
+      wordCount: this.toNonNegativeInteger(timing.wordCount) as number,
+      wordsPerMinute: this.toOptionalNonNegativeInteger(timing.wordsPerMinute),
+      timingPrecision,
+    };
+  }
+
+  private toNonNegativeInteger(value: unknown): number | undefined {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return undefined;
+    }
+
+    return Math.max(0, Math.trunc(value));
+  }
+
+  private toOptionalNonNegativeInteger(value: unknown): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    return this.toNonNegativeInteger(value) ?? null;
+  }
+
   private shouldFlushMentorDeltaChunk(chunk: string): boolean {
+    if (this.hasIncompleteVoiceControlTag(chunk)) {
+      return false;
+    }
+
     if (chunk.length >= ExternalAudioService.MENTOR_DELTA_FLUSH_MAX_CHARS) {
       return true;
     }
 
-    if (chunk.length < ExternalAudioService.MENTOR_DELTA_FLUSH_MIN_CHARS) {
-      return false;
+    return /[.!?]\s*$/.test(chunk) || /\s$/.test(chunk);
+  }
+
+  private hasIncompleteVoiceControlTag(text: string): boolean {
+    const lastOpeningBracket = text.lastIndexOf("<");
+    const lastClosingBracket = text.lastIndexOf(">");
+    if (lastOpeningBracket > lastClosingBracket) {
+      const trailingTag = text.slice(lastOpeningBracket);
+      if (/^<\/?(?:emotion|break|spell)\b/i.test(trailingTag)) {
+        return true;
+      }
     }
 
-    return /[.!?]\s*$/.test(chunk) || /\s$/.test(chunk);
+    const normalizedText = text.toLowerCase();
+    const lastSpellOpening = normalizedText.lastIndexOf("<spell");
+    const lastSpellClosing = normalizedText.lastIndexOf("</spell>");
+    if (lastSpellOpening > lastSpellClosing) {
+      return true;
+    }
+
+    return normalizedText.lastIndexOf("[laughter") > normalizedText.lastIndexOf("]");
+  }
+
+  private sanitizeMentorResponseDelta(text: string): string {
+    const leadingWhitespace = text.match(/^\s*/)?.[0] ?? "";
+    const trailingWhitespace = text.match(/\s*$/)?.[0] ?? "";
+    const strippedText = stripVoiceControlTags(text);
+
+    if (!strippedText) {
+      return "";
+    }
+
+    return `${leadingWhitespace}${strippedText}${trailingWhitespace}`;
   }
 
   private sendMentorTextDeltaChunk(
@@ -407,11 +1070,22 @@ export class ExternalAudioService {
     return seq + 1;
   }
 
-  private emitMentorTranscription(
+  private emitLearnerTranscription(
     sessionId: string,
-    payload: MentorTranscriptionEventPayload,
+    payload: LearnerTranscriptionEventPayload,
   ): void {
-    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION, sessionId, payload);
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.LEARNER_TRANSCRIPTION, sessionId, payload);
+  }
+
+  private emitMentorResponseDelta(
+    sessionId: string,
+    payload: MentorResponseDeltaEventPayload,
+  ): void {
+    if (!payload.text) {
+      return;
+    }
+
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA, sessionId, payload);
   }
 
   private emitMentorResponseCompleted(

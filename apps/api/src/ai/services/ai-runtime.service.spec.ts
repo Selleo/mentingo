@@ -120,6 +120,58 @@ describe("AiRuntimeService", () => {
     expect(result).toEqual(lumaResult);
   });
 
+  it("passes the abort signal to a Luma mentor stream", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const abortController = new AbortController();
+    const input = {
+      messages: [{ role: "user" as const, content: "Continue" }],
+      temperature: 0.2,
+    };
+    const streamChat = jest.fn().mockResolvedValue({
+      data: (async function* () {
+        yield Buffer.from("response");
+      })(),
+    });
+    const createCoreStream = jest.fn();
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ mentor: { streamChat } }),
+    });
+
+    const result = await service.streamMentorChat(input, createCoreStream, abortController.signal);
+
+    expect(streamChat).toHaveBeenCalledWith(input, { signal: abortController.signal });
+    expect(createCoreStream).not.toHaveBeenCalled();
+    expect(result.source).toBe(AI_RUNTIME_SOURCES.LUMA);
+  });
+
+  it("does not fall back to Core when an interrupted Luma stream is aborted", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const abortController = new AbortController();
+    abortController.abort("MENTOR_RESPONSE_INTERRUPTED");
+    const cancellation = new Error("canceled");
+    const streamChat = jest.fn().mockRejectedValue(cancellation);
+    const createCoreStream = jest.fn();
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ mentor: { streamChat } }),
+    });
+
+    await expect(
+      service.streamMentorChat(
+        {
+          messages: [{ role: "user", content: "Continue" }],
+          temperature: 0.2,
+        },
+        createCoreStream,
+        abortController.signal,
+      ),
+    ).rejects.toBe(cancellation);
+    expect(createCoreStream).not.toHaveBeenCalled();
+  });
+
   it("falls back to Core when Luma returns the legacy Judge shape", async () => {
     const service = new AiRuntimeService({} as EnvService);
     const coreResult: AiJudgeModelResult = {

@@ -3210,11 +3210,12 @@
           "embedLessonDescription": "Externe Ressource (z. B. Google Form, Canva-Präsentation oder YouTube-Livestream).",
           "fillInTheBlanksSentenceTip": "Schreiben Sie einen Satz und fügen Sie Wörter ein.",
           "fillInTheBlanksWordTip": "Bilden Sie das Wort und fügen Sie es in einen Satz ein.",
-          "leaveContentHeader": "Sind Sie sicher, dass Sie diesen Frageneditor verlassen möchten?",
-          "leaveContentBody": "Dadurch werden alle nicht gespeicherten Fortschritte gelöscht",
+          "leaveContentHeader": "Diesen Lektionseditor verlassen?",
+          "leaveContentBody": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt gehen, gehen sie verloren.",
+          "leaveContentCancel": "Weiter bearbeiten",
+          "leaveContentDiscard": "Ohne Speichern verlassen",
           "dropOrClick": "Legen Sie das Bild hier ab oder klicken Sie zum Hochladen",
           "allowedFormats": "PNG, JPG oder SVG",
-          "leaveContentBodyValidate": "Wenn Sie die Änderungen speichern möchten, müssen Sie zunächst das Formular validieren",
           "aiMentorInstructionsTooltip": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll. Geben Sie den Kontext, die Rolle oder das Szenario an, dem die KI folgen soll. Dies definiert, wie die KI das Gespräch leiten wird.",
           "updateAiMentorAvatarDescription": "Laden Sie ein neues Bild für den KI-Mentor hoch oder entfernen Sie das aktuelle.",
           "updateAiMentorAvatar": "Aktualisieren Sie den Avatar des KI-Mentors",
@@ -3920,6 +3921,11 @@
           "muted": "Stumm",
           "mutedHint": "Ihr Mikrofon ist stummgeschaltet. Der Mentor kann Sie nicht hören.",
           "youSaid": "Du sagtest",
+          "recovery": {
+            "failedTitle": "Sprachsitzung wurde getrennt",
+            "failedDescription": "Die Verbindung konnte nicht wiederhergestellt werden. Starten Sie die Sprachsitzung neu, um fortzufahren.",
+            "restart": "Sitzung neu starten"
+          },
           "states": {
             "idle": {
               "title": "Bereit",
@@ -5545,6 +5551,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren.",
+      "invalidAiMentorConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Mentor-Konfiguration. Bitte generiere den Kurs erneut.",
       "invalidAiJudgeConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Bewertungskonfiguration. Bitte generiere den Kurs erneut."
     }
   },

@@ -3154,11 +3154,12 @@
           "embedLessonDescription": "Recurso externo (por ejemplo, formulario Google, presentación Canva o transmisión en vivo YouTube).",
           "fillInTheBlanksSentenceTip": "Escribe una oración y coloca palabras en ella.",
           "fillInTheBlanksWordTip": "Crea y coloca la palabra en la oración.",
-          "leaveContentHeader": "¿Estás seguro de que quieres salir de este editor de preguntas?",
-          "leaveContentBody": "Eliminará todo el progreso no guardado.",
+          "leaveContentHeader": "¿Salir del editor de la lección?",
+          "leaveContentBody": "Tienes cambios sin guardar. Si sales ahora, se perderán.",
+          "leaveContentCancel": "Seguir editando",
+          "leaveContentDiscard": "Salir sin guardar",
           "dropOrClick": "Suelta la imagen aquí o haz clic para subirla.",
           "allowedFormats": "PNG, JPG o SVG",
-          "leaveContentBodyValidate": "Si desea guardar los cambios, primero debe validar el formulario",
           "aiMentorInstructionsTooltip": "Describe cómo debe comportarse el mentor de IA durante la lección. Incluya el contexto, rol o escenario que debe seguir la IA. Esto define cómo la IA guiará la conversación.",
           "updateAiMentorAvatarDescription": "Cargue una nueva imagen para el mentor de IA o elimine la actual.",
           "updateAiMentorAvatar": "Actualizar avatar de mentor de IA",
@@ -5508,6 +5509,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "El cuestionario generado contiene una identificación de respuesta en blanco no válida. Vuelva a intentar generar el curso.",
+      "invalidAiMentorConfiguration": "La lección de Mentor de IA generada contiene una configuración de mentor no válida. Vuelva a generar el curso.",
       "invalidAiJudgeConfiguration": "La lección de Mentor de IA generada contiene una configuración de evaluación no válida. Vuelva a generar el curso."
     }
   },

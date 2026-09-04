@@ -21,7 +21,7 @@ The main workflow starts in an empty course. The creator opens the curriculum ta
 - Let creators attach supported source files so the AI service can use internal context while drafting.
 - Show generation progress in the curriculum builder while the course structure is being created.
 - Add generated chapters and lessons directly into the course so creators can continue editing them with existing authoring tools.
-- Support generated content, quiz, and AI mentor lesson shapes when the AI output includes them.
+- Support generated content, quiz, and AI mentor lesson shapes, including a separate learner-facing task description for AI mentor lessons.
 - Keep generated work inside the base-language curriculum flow.
 - Make generation available only when Luma course generation is configured and the course has no chapters.
 

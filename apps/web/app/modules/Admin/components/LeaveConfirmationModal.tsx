@@ -1,68 +1,42 @@
 import { useTranslation } from "react-i18next";
 
-import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import {
-  DialogOverlay,
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
 } from "~/components/ui/dialog";
 
 type LeaveConfirmationModalProps = {
   open: boolean;
-  onClose: () => void;
-  onSave: () => void;
-  onValidate: () => void;
-  isValidated: boolean;
+  onCancel: () => void;
+  onDiscard: () => void;
 };
 
-const LeaveConfirmationModal = ({
-  open,
-  onClose,
-  onSave,
-  isValidated,
-  onValidate,
-}: LeaveConfirmationModalProps) => {
+const LeaveConfirmationModal = ({ open, onCancel, onDiscard }: LeaveConfirmationModalProps) => {
   const { t } = useTranslation();
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogOverlay className="bg-primary-400 opacity-65" />
-      <DialogContent className="max-w-[40%] p-12">
-        <div className="flex items-start gap-4">
-          <Icon name="Warning" className="mt-0.5 size-5 text-yellow-600" />
-          <div>
-            <DialogTitle className="text-xl font-semibold text-neutral-900">
-              {t("adminCourseView.curriculum.lesson.other.leaveContentHeader")}
-            </DialogTitle>
-            <DialogDescription className="mt-2 text-sm text-neutral-600">
-              {t("adminCourseView.curriculum.lesson.other.leaveContentBody")}
-            </DialogDescription>
-            {!isValidated && (
-              <DialogDescription className="mt-2 text-sm text-neutral-600">
-                {t("adminCourseView.curriculum.lesson.other.leaveContentBodyValidate")}
-              </DialogDescription>
-            )}
-            <div className="mt-8 flex gap-4">
-              {!isValidated ? (
-                <Button onClick={onValidate} className="rounded px-4 py-2">
-                  {t("common.button.validate")}
-                </Button>
-              ) : (
-                <Button onClick={onSave} className="rounded px-4 py-2">
-                  {t("common.button.save")}
-                </Button>
-              )}
-              <Button
-                onClick={onClose}
-                className="bg-neutrals-200 rounded border border-neutral-300 px-4 py-2 text-primary-800"
-              >
-                {t("common.button.ignore")}
-              </Button>
-            </div>
-          </div>
-        </div>
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {t("adminCourseView.curriculum.lesson.other.leaveContentHeader")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("adminCourseView.curriculum.lesson.other.leaveContentBody")}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t("adminCourseView.curriculum.lesson.other.leaveContentCancel")}
+          </Button>
+          <Button type="button" variant="destructive" onClick={onDiscard}>
+            {t("adminCourseView.curriculum.lesson.other.leaveContentDiscard")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

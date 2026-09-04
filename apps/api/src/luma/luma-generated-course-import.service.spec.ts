@@ -23,9 +23,16 @@ describe("LumaGeneratedCourseImportService", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer with a budget objection.",
-        taskDescription: "Handle the objection and agree a next step.",
-        type: "ROLEPLAY",
+        taskDescription: "Practice handling a customer's budget objection.",
+        aiMentorConfiguration: {
+          type: "roleplay",
+          scenario: "A customer raises a budget objection.",
+          aiRole: "Customer",
+          learnerRole: "Sales representative",
+          characterGoal: "Reach a practical next step.",
+          difficulty: "realistic",
+          additionalInstructions: "Act as a customer with a budget objection.",
+        },
         ttsPreset: "female",
         aiJudgeConfiguration: {
           taskGoal: "Handle the objection and agree a next step",
@@ -59,15 +66,92 @@ describe("LumaGeneratedCourseImportService", () => {
     expect(aiMentor.aiJudgeConfiguration.taskGoal).toBe(
       "Handle the objection and agree a next step",
     );
+    expect(aiMentor.taskDescription).toBe("Practice handling a customer's budget objection.");
+
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor)).toMatchObject({
+      type: "roleplay",
+      scenario: "A customer raises a budget objection.",
+      aiRole: "Customer",
+      learnerRole: "Sales representative",
+      characterGoal: "Reach a practical next step.",
+      difficulty: "realistic",
+      additionalInstructions: "Act as a customer with a budget objection.",
+    });
+  });
+
+  it("imports all required Teacher configuration fields", () => {
+    const lesson = {
+      aiMentor: {
+        name: "Product Coach",
+        taskDescription: "Practice explaining the product value proposition.",
+        aiMentorConfiguration: {
+          type: "teacher",
+          taskGoal: "Explain the product value proposition.",
+          expertise: "B2B product sales",
+          contentScope: "The product catalogue and customer outcomes",
+          teachingStyle: "guided_discovery",
+          feedbackGuidance: "Ask for evidence before correcting the learner.",
+        },
+        ttsPreset: "male",
+        aiJudgeConfiguration: {
+          taskGoal: "Explain the product value proposition",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+      },
+    } as unknown as LumaGeneratedCourseLesson;
+
+    const aiMentor = createService()["getAiMentor"](lesson);
+
+    expect(createService()["buildImportedAiMentorConfiguration"](aiMentor)).toEqual({
+      type: "teacher",
+      taskGoal: "Explain the product value proposition.",
+      expertise: "B2B product sales",
+      contentScope: "The product catalogue and customer outcomes",
+      teachingStyle: "guided_discovery",
+      feedbackGuidance: "Ask for evidence before correcting the learner.",
+      openingInstruction: null,
+      additionalInstructions: null,
+    });
+  });
+
+  it("rejects a generated AI Mentor lesson without a valid Mentor configuration", () => {
+    const lesson = {
+      aiMentor: {
+        name: "Product Coach",
+        taskDescription: "Practice explaining the product value proposition.",
+        aiMentorConfiguration: {
+          type: "teacher",
+          taskGoal: "Explain the product value proposition.",
+        },
+        ttsPreset: "male",
+        aiJudgeConfiguration: {
+          taskGoal: "Explain the product value proposition",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+      },
+    } as unknown as LumaGeneratedCourseLesson;
+
+    expect(() => createService()["getAiMentor"](lesson)).toThrow(
+      new BadRequestException("luma.errors.invalidAiMentorConfiguration"),
+    );
   });
 
   it("rejects a generated AI Mentor lesson without a valid Judge configuration", () => {
     const lesson = {
       aiMentor: {
         name: "Customer",
-        aiMentorInstructions: "Act as a customer.",
-        taskDescription: "Practice the conversation.",
-        type: "ROLEPLAY",
+        aiMentorConfiguration: {
+          type: "roleplay",
+          scenario: "Practice the conversation.",
+          aiRole: "Customer",
+          learnerRole: "Sales representative",
+          characterGoal: "Reach a practical next step.",
+          difficulty: "realistic",
+        },
         ttsPreset: "female",
       },
     } as unknown as LumaGeneratedCourseLesson;

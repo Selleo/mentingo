@@ -38,6 +38,8 @@ export const LEARNING_HANDLES = {
   AI_MENTOR_VOICE_OVERLAY_TASK_PANEL: "learning-ai-mentor-voice-overlay-task-panel",
   AI_MENTOR_VOICE_OVERLAY_CHECK_BUTTON: "learning-ai-mentor-voice-overlay-check-button",
   AI_MENTOR_VOICE_OVERLAY_EXIT_BUTTON: "learning-ai-mentor-voice-overlay-exit-button",
+  AI_MENTOR_VOICE_OVERLAY_RECOVERY_STATUS: "learning-ai-mentor-voice-overlay-recovery-status",
+  AI_MENTOR_VOICE_OVERLAY_RESTART_BUTTON: "learning-ai-mentor-voice-overlay-restart-button",
   LESSON_SIDEBAR: "learning-lesson-sidebar",
   lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
   lessonSidebarBlockedIndicator: (lessonId: string) =>

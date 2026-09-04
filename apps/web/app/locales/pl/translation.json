@@ -3444,9 +3444,10 @@
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
           "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
           "fillInTheBlanksWordTip": "Utwórz i przeciągnij słowo do zdania.",
-          "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
-          "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
-          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
+          "leaveContentHeader": "Opuścić edytor lekcji?",
+          "leaveContentBody": "Masz niezapisane zmiany. Jeśli teraz wyjdziesz, zostaną utracone.",
+          "leaveContentCancel": "Kontynuuj edytowanie",
+          "leaveContentDiscard": "Wyjdź bez zapisywania",
           "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
           "aiMentorTypeTooltip": "Zachowuje się jak postać w scenariuszu, ale w trakcie sceny zadaje pytania i pomaga wyciągać wnioski.\n Przykład: „Co zrobiłbyś teraz w roli menadżera?”",
           "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania - jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
@@ -4159,6 +4160,11 @@
           "muted": "Wyciszony",
           "mutedHint": "Twój mikrofon jest wyciszony. Mentor Cię nie słyszy.",
           "youSaid": "Powiedziałeś/aś",
+          "recovery": {
+            "failedTitle": "Sesja głosowa została rozłączona",
+            "failedDescription": "Nie udało się przywrócić połączenia. Uruchom ponownie sesję głosową, aby kontynuować.",
+            "restart": "Uruchom ponownie"
+          },
           "states": {
             "idle": {
               "title": "Gotowe",
@@ -5608,6 +5614,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Wygenerowany quiz zawiera nieprawidłowy identyfikator pustego miejsca. Spróbuj ponownie wygenerować kurs.",
+      "invalidAiMentorConfiguration": "Wygenerowana lekcja AI Mentora zawiera nieprawidłową konfigurację mentora. Spróbuj ponownie wygenerować kurs.",
       "invalidAiJudgeConfiguration": "Wygenerowana lekcja AI Mentora zawiera nieprawidłową konfigurację oceny. Spróbuj ponownie wygenerować kurs."
     }
   },

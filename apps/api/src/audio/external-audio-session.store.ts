@@ -18,6 +18,18 @@ export class ExternalAudioSessionStore {
     this.sessions.set(session.sessionId, session);
   }
 
+  findBySessionRunId(sessionRunId: string): ExternalAudioSession | undefined {
+    return [...this.sessions.values()].find((session) => session.sessionRunId === sessionRunId);
+  }
+
+  rebind(session: ExternalAudioSession, sessionId: string): string {
+    const previousSessionId = session.sessionId;
+    this.sessions.delete(previousSessionId);
+    session.sessionId = sessionId;
+    this.sessions.set(sessionId, session);
+    return previousSessionId;
+  }
+
   delete(sessionId: string): void {
     this.sessions.delete(sessionId);
   }

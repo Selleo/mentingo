@@ -1,4 +1,4 @@
-import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
+import { LEARNER_TRANSCRIPT_STATUSES, VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 
 import {
   onVoiceMentorAudioChunk,
@@ -10,9 +10,11 @@ import type { VoiceMentorTurnState } from "./voiceMentorTurnState";
 import type { RealtimePCMPlayer } from "../audio-player";
 import type {
   AudioOutputLifecycleEventPayload,
+  AudioOutputAlignmentEventPayload,
   AudioSpeechEventPayload,
+  MentorResponseDeltaEventPayload,
   MentorResponseCompletedEventPayload,
-  MentorTranscriptionEventPayload,
+  LearnerTranscriptionEventPayload,
   StopAudioEventPayload,
 } from "@repo/shared";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
@@ -27,8 +29,10 @@ type VoiceMentorSocketHandlerDependencies = {
   restartInactivityTimer: () => void;
   clearInactivityTimer: () => void;
   finalizeTurnIfReady: () => void;
-  onAudioChunkReceived?: () => void;
-  onMentorTranscription?: (text: string) => void;
+  closeLearnerTurn: () => void;
+  onLearnerTranscription?: (revision: LearnerTranscriptionEventPayload) => void;
+  onAudioOutputAlignment?: (alignment: AudioOutputAlignmentEventPayload) => void;
+  onMentorResponseDelta?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
   onAudioStarted?: () => void;
   onAudioInterrupted?: () => void;
@@ -38,7 +42,9 @@ type SocketEventHandlerMap = {
   [VOICE_SOCKET_EVENT.AUDIO_STARTED]: () => void;
   [VOICE_SOCKET_EVENT.STOP_AUDIO]: (payload: StopAudioEventPayload) => void;
   [VOICE_SOCKET_EVENT.AUDIO_SPEECH]: (payload: AudioSpeechEventPayload) => Promise<void>;
-  [VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION]: (payload: MentorTranscriptionEventPayload) => void;
+  [VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT]: (payload: AudioOutputAlignmentEventPayload) => void;
+  [VOICE_SOCKET_EVENT.LEARNER_TRANSCRIPTION]: (payload: LearnerTranscriptionEventPayload) => void;
+  [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA]: (payload: MentorResponseDeltaEventPayload) => void;
   [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED]: (
     payload: MentorResponseCompletedEventPayload,
   ) => void;
@@ -50,7 +56,9 @@ export const SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS = [
   VOICE_SOCKET_EVENT.AUDIO_STARTED,
   VOICE_SOCKET_EVENT.STOP_AUDIO,
   VOICE_SOCKET_EVENT.AUDIO_SPEECH,
-  VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION,
+  VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT,
+  VOICE_SOCKET_EVENT.LEARNER_TRANSCRIPTION,
+  VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA,
   VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED,
   VOICE_SOCKET_EVENT.AUDIO_INTERRUPTED,
   VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED,
@@ -66,8 +74,10 @@ export function createVoiceMentorSocketHandlers({
   restartInactivityTimer,
   clearInactivityTimer,
   finalizeTurnIfReady,
-  onAudioChunkReceived,
-  onMentorTranscription,
+  closeLearnerTurn,
+  onLearnerTranscription,
+  onAudioOutputAlignment,
+  onMentorResponseDelta,
   onMentorResponseCompleted,
   onAudioStarted,
   onAudioInterrupted,
@@ -117,17 +127,29 @@ export function createVoiceMentorSocketHandlers({
         return;
       }
 
-      await audioPlayerRef.current?.enqueue(bytes);
-      onAudioChunkReceived?.();
+      await audioPlayerRef.current?.enqueue(bytes, data.turnId);
       restartInactivityTimer();
     },
-    [VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION]: (payload) => {
+    [VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT]: (payload) => {
+      onAudioOutputAlignment?.(payload);
+    },
+    [VOICE_SOCKET_EVENT.LEARNER_TRANSCRIPTION]: (payload) => {
       const text = payload.text?.trim();
       if (!text) {
         return;
       }
 
-      onMentorTranscription?.(text);
+      onLearnerTranscription?.({ ...payload, text });
+      if (payload.status === LEARNER_TRANSCRIPT_STATUSES.FINAL) {
+        closeLearnerTurn();
+      }
+    },
+    [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA]: (payload) => {
+      if (typeof payload.text !== "string" || payload.text.length === 0) {
+        return;
+      }
+
+      onMentorResponseDelta?.(payload.text);
     },
     [VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED]: (payload) => {
       if (payload.reason !== "complete") {

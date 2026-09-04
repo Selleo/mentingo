@@ -3211,11 +3211,12 @@
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
           "fillInTheBlanksSentenceTip": "Parašykite sakinį ir įrašykite į jį žodžius.",
           "fillInTheBlanksWordTip": "Sukurkite ir įmeskite žodį į sakinį.",
-          "leaveContentHeader": "Ar tikrai norite išeiti iš šios klausimų redagavimo priemonės?",
-          "leaveContentBody": "Bus ištrinta visa neišsaugota eiga",
+          "leaveContentHeader": "Išeiti iš pamokos redaktoriaus?",
+          "leaveContentBody": "Turite neišsaugotų pakeitimų. Jei išeisite dabar, jie bus prarasti.",
+          "leaveContentCancel": "Tęsti redagavimą",
+          "leaveContentDiscard": "Išeiti neišsaugojus",
           "dropOrClick": "Nuvilkite vaizdą čia arba spustelėkite, kad įkeltumėte",
           "allowedFormats": "PNG, JPG arba SVG",
-          "leaveContentBodyValidate": "Jei norite išsaugoti pakeitimus, pirmiausia turite patvirtinti formą",
           "aiMentorInstructionsTooltip": "Apibūdinkite, kaip AI mentorius turėtų elgtis pamokos metu. Įtraukite kontekstą, vaidmenį ar scenarijų, kurio AI turėtų laikytis. Tai apibrėžia, kaip AI vadovaus pokalbiui.",
           "updateAiMentorAvatarDescription": "Įkelkite naują AI mentoriaus vaizdą arba pašalinkite esamą.",
           "updateAiMentorAvatar": "Atnaujinkite AI mentoriaus avatarą",
@@ -3921,6 +3922,11 @@
           "muted": "Nutildyta",
           "mutedHint": "Jūsų mikrofonas nutildytas. Mentorius jūsų negirdi.",
           "youSaid": "Tu sakei",
+          "recovery": {
+            "failedTitle": "Balso sesija atsijungė",
+            "failedDescription": "Ryšio atkurti nepavyko. Paleiskite balso sesiją iš naujo, kad tęstumėte.",
+            "restart": "Paleisti sesiją iš naujo"
+          },
           "states": {
             "idle": {
               "title": "Paruošta",
@@ -5549,6 +5555,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą.",
+      "invalidAiMentorConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama mentoriaus konfigūracija. Bandykite generuoti kursą dar kartą.",
       "invalidAiJudgeConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama vertinimo konfigūracija. Bandykite generuoti kursą dar kartą."
     }
   },

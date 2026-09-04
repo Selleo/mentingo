@@ -1,5 +1,5 @@
 import { isArray } from "lodash-es";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FormTextField } from "~/components/Form/FormTextField";
@@ -7,7 +7,9 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
 import { EMBED_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
@@ -37,7 +39,6 @@ export const EmbedLessonForm = ({
   language,
 }: EmbedLessonProps) => {
   const { t } = useTranslation();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { form, onSubmit, onDelete } = useEmbedLessonForm({
@@ -46,8 +47,24 @@ export const EmbedLessonForm = ({
     setContentTypeToDisplay,
     language,
   });
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const {
+    handleCancel,
+    isLeaveModalOpen,
+    onCancelLeaveModal,
+    onDiscardLeaveModal,
+    setIsCurrectFormDirty,
+  } = useLessonLeaveConfirmation(leaveLessonForm);
 
   const resources = form.watch("resources");
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsCurrectFormDirty(isDirty);
+  }, [isDirty, setIsCurrectFormDirty]);
 
   const hasReachedMaxResources = useMemo(() => {
     return isArray(resources) && resources.length >= MAX_EMBED_LESSON_RESOURCES;
@@ -143,7 +160,7 @@ export const EmbedLessonForm = ({
                     : EMBED_LESSON_FORM_HANDLES.CANCEL_BUTTON
                 }
                 type="button"
-                onClick={handleDeleteLesson}
+                onClick={lessonToEdit ? handleDeleteLesson : handleCancel}
                 className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
               >
                 {lessonToEdit ? t("common.button.delete") : t("common.button.cancel")}
@@ -157,6 +174,11 @@ export const EmbedLessonForm = ({
         onClose={onCloseDeleteModal}
         onDelete={onDelete}
         contentType={DeleteContentType.EMBED}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
     </Card>
   );

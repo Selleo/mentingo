@@ -1,3 +1,4 @@
+import { LUMA_VOICE_TIMING_PRECISION, type LumaVoiceTimingPrecision } from "@japro/luma-sdk";
 import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
@@ -18,6 +19,7 @@ import { aiMentorThreads } from "src/storage/schema";
 import type { OnModuleInit } from "@nestjs/common";
 import type { promptId } from "@repo/prompts";
 import type { Static } from "@sinclair/typebox";
+import type { AiVoiceDeliveryContext } from "src/ai/ai-chat.types";
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
 import type { CompiledTemplate } from "src/ai/utils/prompt.type";
@@ -62,6 +64,8 @@ export class PromptService implements OnModuleInit {
     content: string,
     isVoiceMentor: boolean = false,
     tempMessageId?: string,
+    voiceTurnWasInterrupted: boolean = false,
+    voiceDeliveryContext?: AiVoiceDeliveryContext,
   ) {
     const { history } = await this.messageService.findMessageHistory(threadId, false);
 
@@ -102,6 +106,52 @@ export class PromptService implements OnModuleInit {
         userName: null,
         content: voiceMentorAddon,
       });
+
+      metaMessages.push({
+        id: "",
+        role: MESSAGE_ROLE.SYSTEM,
+        userName: null,
+        content: await this.loadPrompt("voiceMentorInterruptionPolicy", {}),
+      });
+
+      if (voiceDeliveryContext) {
+        const voiceMentorTimingAddon = await this.loadPrompt("voiceMentorTimingAddon", {
+          elapsedMs: voiceDeliveryContext.elapsedMs,
+          speechMs: voiceDeliveryContext.speechMs,
+          pauseCount: voiceDeliveryContext.pauseCount,
+          longestPauseMs: voiceDeliveryContext.longestPauseMs,
+          averagePauseMs:
+            voiceDeliveryContext.averagePauseMs === null
+              ? "not available"
+              : `${voiceDeliveryContext.averagePauseMs} milliseconds`,
+          segmentCount: voiceDeliveryContext.segmentCount,
+          wordCount: voiceDeliveryContext.wordCount,
+          wordsPerMinute:
+            voiceDeliveryContext.wordsPerMinute === null
+              ? "not available"
+              : `${voiceDeliveryContext.wordsPerMinute} words per minute`,
+          timingPrecision: this.normalizeTimingPrecision(voiceDeliveryContext.timingPrecision),
+        });
+        metaMessages.push({
+          id: "",
+          role: MESSAGE_ROLE.SYSTEM,
+          userName: null,
+          content: voiceMentorTimingAddon,
+        });
+      }
+
+      if (voiceTurnWasInterrupted) {
+        const voiceMentorInterruptionEvent = await this.loadPrompt(
+          "voiceMentorInterruptionEvent",
+          {},
+        );
+        metaMessages.push({
+          id: "",
+          role: MESSAGE_ROLE.SYSTEM,
+          userName: null,
+          content: voiceMentorInterruptionEvent,
+        });
+      }
     }
 
     if (summary) {
@@ -132,6 +182,13 @@ export class PromptService implements OnModuleInit {
     );
 
     return history;
+  }
+
+  private normalizeTimingPrecision(value: string): LumaVoiceTimingPrecision {
+    return (
+      Object.values(LUMA_VOICE_TIMING_PRECISION).find((precision) => precision === value) ??
+      LUMA_VOICE_TIMING_PRECISION.UNKNOWN
+    );
   }
 
   async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {

@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useLeaveModal } from "~/context/LeaveModalContext";
+import { useLessonLeaveConfirmation } from "~/hooks/useLessonLeaveConfirmation";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
@@ -66,36 +66,22 @@ const QuizLessonForm = ({
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [openQuestionIndexes, setOpenQuestionIndexes] = useState<Set<string>>(new Set());
-  const {
-    isLeaveModalOpen,
-    closeLeaveModal,
-    setIsCurrectFormDirty,
-    isCurrentFormDirty,
-    openLeaveModal,
-    setIsLeavingContent,
-  } = useLeaveModal();
 
   const isStructureLocked = Boolean(lessonToEdit && language !== baseLanguage);
-
-  const [isCanceling, setIsCanceling] = useState(false);
-
-  const [isValidated, setIsValidated] = useState(false);
+  const leaveLessonForm = useCallback(
+    () => setContentTypeToDisplay(ContentTypes.EMPTY),
+    [setContentTypeToDisplay],
+  );
+  const {
+    handleCancel,
+    isLeaveModalOpen,
+    onCancelLeaveModal,
+    onDiscardLeaveModal,
+    setIsCurrectFormDirty,
+  } = useLessonLeaveConfirmation(leaveLessonForm);
 
   const questions = form.watch("questions");
   const { isDirty } = form.formState;
-
-  const handleValidationSuccess = () => {
-    setIsValidated(true);
-  };
-
-  const handleValidationError = () => {
-    setIsValidated(false);
-    closeLeaveModal();
-  };
-
-  const onValidate = () => {
-    form.handleSubmit(handleValidationSuccess, handleValidationError)();
-  };
 
   const onCloseModal = () => {
     setIsDeleteModalOpen(false);
@@ -108,50 +94,6 @@ const QuizLessonForm = ({
   useEffect(() => {
     setIsCurrectFormDirty(isDirty);
   }, [isDirty, setIsCurrectFormDirty]);
-
-  const onCancelModal = () => {
-    closeLeaveModal();
-    setIsCurrectFormDirty(false);
-  };
-
-  const onSaveModal = () => {
-    form.handleSubmit(onSubmit)();
-    closeLeaveModal();
-  };
-
-  const onCancel = useCallback(() => {
-    if (isCurrentFormDirty) {
-      setIsCanceling(true);
-      setIsLeavingContent(true);
-      openLeaveModal();
-      return;
-    }
-    setContentTypeToDisplay(ContentTypes.EMPTY);
-  }, [
-    isCurrentFormDirty,
-    setIsCanceling,
-    setIsLeavingContent,
-    openLeaveModal,
-    setContentTypeToDisplay,
-  ]);
-
-  useEffect(() => {
-    if (!isCurrentFormDirty && isCanceling) {
-      onCancel();
-      setIsCanceling(false);
-      setIsLeavingContent(false);
-    }
-  }, [isCurrentFormDirty, isCanceling, onCancel, setIsLeavingContent]);
-
-  useEffect(() => {
-    const handleSubmit = () => {
-      form.handleSubmit(() => setIsValidated(true))();
-    };
-
-    if (isLeaveModalOpen) {
-      handleSubmit();
-    }
-  }, [isLeaveModalOpen, form]);
 
   const addQuestion = useCallback(
     (questionType: QuestionType) => {
@@ -457,7 +399,7 @@ const QuizLessonForm = ({
                   data-testid={QUIZ_LESSON_FORM_HANDLES.CANCEL_BUTTON}
                   className="bg-color-white border border-neutral-300 text-error-700"
                   type="button"
-                  onClick={onCancel}
+                  onClick={handleCancel}
                 >
                   {t("common.button.cancel")}
                 </Button>
@@ -474,10 +416,8 @@ const QuizLessonForm = ({
       />
       <LeaveConfirmationModal
         open={isLeaveModalOpen || false}
-        onClose={onCancelModal}
-        onSave={onSaveModal}
-        onValidate={onValidate}
-        isValidated={isValidated}
+        onCancel={onCancelLeaveModal}
+        onDiscard={onDiscardLeaveModal}
       />
     </div>
   );

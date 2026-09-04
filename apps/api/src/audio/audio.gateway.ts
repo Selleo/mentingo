@@ -8,7 +8,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { PcmChunkMeta, VOICE_SOCKET_EVENT } from "@repo/shared";
+import {
+  PcmChunkMeta,
+  VOICE_SOCKET_EVENT,
+  type AudioReconnectPayload,
+  type ClientSpeechBoundaryPayload,
+} from "@repo/shared";
 import { Server } from "socket.io";
 
 import { AudioService } from "src/audio/audio.service";
@@ -79,6 +84,33 @@ export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, Realtim
     @MessageBody("bytes") bytes: Buffer,
   ) {
     await this.audioService.audioChunk(client.id, meta, bytes);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.CLIENT_SPEECH_START)
+  async clientSpeechStart(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ClientSpeechBoundaryPayload,
+  ) {
+    await this.audioService.clientSpeechStart(client.id, payload);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.CLIENT_SPEECH_END)
+  async clientSpeechEnd(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ClientSpeechBoundaryPayload,
+  ) {
+    await this.audioService.clientSpeechEnd(client.id, payload);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.AUDIO_RECONNECT)
+  async reconnectAudio(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: AudioReconnectPayload,
+  ) {
+    return await this.audioService.reconnectAudio(client.id, client.data.user, payload);
   }
 
   @UseGuards(WsJwtGuard)

@@ -1,19 +1,30 @@
 import { VOICE_MODE_STATE, type VoiceModeState } from "@repo/shared";
-import { BookOpen, ClipboardCheck, Mic, MicOff, X } from "lucide-react";
+import { AlertTriangle, BookOpen, ClipboardCheck, Mic, MicOff, RefreshCw, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AgentAudioVisualizerAura } from "~/components/agents-ui/agent-audio-visualizer-aura";
 import { AgentAudioVisualizerWave } from "~/components/agents-ui/agent-audio-visualizer-wave";
-import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import {
+  VOICE_CONNECTION_STATE,
+  type VoiceConnectionState,
+} from "~/modules/Voice/audio-stream.types";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
+import { VoiceConversationTranscript } from "./VoiceConversationTranscript";
+
+import type {
+  LearnerTranscriptRevision,
+  MentorSpeechPresentation,
+} from "~/modules/Voice/voice-mentor-presentation.types";
+
 const VOICE_VISUALIZER_COLOR = "var(--primary)";
+const VOICE_ACTIVITY_THRESHOLD = 0.04;
 const MOBILE_CONTROL_CLASS_NAME =
   "size-12 rounded-full bg-white text-primary-800 shadow-none transition-transform hover:scale-105 hover:bg-primary-50 hover:text-primary-800";
 const MOBILE_CHECK_CLASS_NAME =
@@ -24,8 +35,9 @@ type VoiceMentorModeOverlayProps = {
   state: VoiceModeState;
   voiceLevel: number;
   mentorVoiceLevel: number;
-  transcript: string;
+  learnerTranscript: LearnerTranscriptRevision | null;
   response: string;
+  mentorSpeech: MentorSpeechPresentation | null;
   mentorName: string;
   mentorAvatarUrl?: string | null;
   hasTaskDescription: boolean;
@@ -33,72 +45,21 @@ type VoiceMentorModeOverlayProps = {
   onJudge: () => void;
   isJudgePending: boolean;
   isMicMuted: boolean;
+  connectionState: VoiceConnectionState;
+  isRestarting: boolean;
   onMicMutedChange: (muted: boolean) => void;
+  onRestart: () => void;
   onExit: () => void;
 };
-
-type VoiceConversationMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
-
-function VoiceMentorAvatar({
-  mentorName,
-  mentorAvatarUrl,
-}: {
-  mentorName: string;
-  mentorAvatarUrl?: string | null;
-}) {
-  if (mentorAvatarUrl) {
-    return (
-      <img src={mentorAvatarUrl} alt={mentorName} className="size-8 rounded-full object-cover" />
-    );
-  }
-
-  return (
-    <div className="flex size-10 items-center justify-center rounded-full bg-primary-100 shadow-sm ring-1 ring-primary-100">
-      <Icon name="AiMentor" className="size-7 p-1 text-primary-600" aria-label={mentorName} />
-    </div>
-  );
-}
-
-function VoiceConversationBubble({
-  message,
-  mentorName,
-  mentorAvatarUrl,
-}: {
-  message: VoiceConversationMessage;
-  mentorName: string;
-  mentorAvatarUrl?: string | null;
-}) {
-  if (message.role === "user") {
-    return (
-      <div className="ml-auto max-w-[82%] rounded-2xl rounded-br-md bg-primary-700 px-4 py-3 text-sm leading-relaxed text-contrast shadow-sm">
-        {message.content}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex max-w-[86%] items-start gap-3">
-      <div className="mt-1 shrink-0">
-        <VoiceMentorAvatar mentorName={mentorName} mentorAvatarUrl={mentorAvatarUrl} />
-      </div>
-      <div className="rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 text-sm leading-relaxed text-neutral-900 shadow-sm ring-1 ring-primary-100/80">
-        {message.content}
-      </div>
-    </div>
-  );
-}
 
 export function VoiceMentorModeOverlay({
   open,
   state,
   voiceLevel,
   mentorVoiceLevel,
-  transcript,
+  learnerTranscript,
   response,
+  mentorSpeech,
   mentorName,
   mentorAvatarUrl,
   hasTaskDescription,
@@ -106,11 +67,20 @@ export function VoiceMentorModeOverlay({
   onJudge,
   isJudgePending,
   isMicMuted,
+  connectionState,
+  isRestarting,
   onMicMutedChange,
+  onRestart,
   onExit,
 }: VoiceMentorModeOverlayProps) {
   const { t } = useTranslation();
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
+  useEffect(() => {
+    if (open) {
+      setIsTaskPanelOpen(hasTaskDescription);
+    }
+  }, [hasTaskDescription, open]);
+
   const stateTitle: Record<VoiceModeState, string> = {
     [VOICE_MODE_STATE.IDLE]: t(
       "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.idle.title",
@@ -125,28 +95,17 @@ export function VoiceMentorModeOverlay({
       "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.speaking.title",
     ),
   };
-  const isListening = state === VOICE_MODE_STATE.LISTENING && !isMicMuted;
-  const voiceVolume = isListening ? Math.max(0, Math.min(1, voiceLevel)) : 0;
+  const isLocalVoiceActive = voiceLevel >= VOICE_ACTIVITY_THRESHOLD;
+  const isListening = !isMicMuted && (state === VOICE_MODE_STATE.LISTENING || isLocalVoiceActive);
+  const voiceVolume = !isMicMuted ? Math.max(0, Math.min(1, voiceLevel)) : 0;
   const mentorVolume =
     state === VOICE_MODE_STATE.SPEAKING ? Math.max(0, Math.min(1, mentorVoiceLevel)) : 0;
   const auraState = state === VOICE_MODE_STATE.SPEAKING ? "speaking" : "thinking";
+  const isConnectionUnavailable = connectionState !== VOICE_CONNECTION_STATE.CONNECTED;
   const micButtonVariant = isMicMuted ? "outline" : "primary";
   const micButtonLabel = isMicMuted
     ? t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.muted")
     : t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.micOn");
-  const visibleBottomMessages = [
-    transcript && {
-      id: "voice-transcript",
-      role: "user" as const,
-      content: transcript,
-    },
-    response && {
-      id: "voice-response",
-      role: "assistant" as const,
-      content: response,
-    },
-  ].filter((message): message is VoiceConversationMessage => Boolean(message));
-
   return (
     <AnimatePresence>
       {open && (
@@ -183,7 +142,7 @@ export function VoiceMentorModeOverlay({
                   type="button"
                   variant="primary"
                   onClick={onJudge}
-                  disabled={isJudgePending}
+                  disabled={isJudgePending || isConnectionUnavailable}
                   className="h-10 min-w-28 gap-2 rounded-xl px-4"
                 >
                   <ClipboardCheck className="size-4" />
@@ -199,6 +158,7 @@ export function VoiceMentorModeOverlay({
                       : t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.mute")
                   }
                   onClick={() => onMicMutedChange(!isMicMuted)}
+                  disabled={isConnectionUnavailable}
                   className={cn("h-10 min-w-28 gap-2 rounded-xl px-4", {
                     "bg-white/85": isMicMuted,
                   })}
@@ -217,6 +177,37 @@ export function VoiceMentorModeOverlay({
                 </Button>
               </div>
             </div>
+
+            {connectionState === VOICE_CONNECTION_STATE.FAILED && (
+              <div
+                data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_RECOVERY_STATUS}
+                role="alert"
+                className="mb-4 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-900 shadow-sm sm:flex-row sm:items-center"
+              >
+                <AlertTriangle className="size-5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">
+                    {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.recovery.failedTitle")}
+                  </p>
+                  <p className="text-sm text-red-800">
+                    {t(
+                      "studentCourseView.lesson.aiMentorLesson.voiceOverlay.recovery.failedDescription",
+                    )}
+                  </p>
+                </div>
+                <Button
+                  data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_RESTART_BUTTON}
+                  type="button"
+                  variant="primary"
+                  disabled={isRestarting}
+                  onClick={onRestart}
+                  className="h-9 shrink-0 gap-2 rounded-lg px-3"
+                >
+                  <RefreshCw className={cn("size-4", isRestarting && "animate-spin")} />
+                  {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.recovery.restart")}
+                </Button>
+              </div>
+            )}
 
             <div className="relative flex min-h-0 flex-1 flex-col">
               <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
@@ -273,16 +264,13 @@ export function VoiceMentorModeOverlay({
                   </motion.div>
                 </div>
 
-                <div className="mx-auto grid w-full max-w-3xl gap-4">
-                  {visibleBottomMessages.map((message) => (
-                    <VoiceConversationBubble
-                      key={message.id}
-                      message={message}
-                      mentorName={mentorName}
-                      mentorAvatarUrl={mentorAvatarUrl}
-                    />
-                  ))}
-                </div>
+                <VoiceConversationTranscript
+                  learnerTranscript={learnerTranscript}
+                  mentorResponse={response}
+                  mentorSpeech={mentorSpeech}
+                  mentorName={mentorName}
+                  mentorAvatarUrl={mentorAvatarUrl}
+                />
               </div>
 
               <AnimatePresence initial={false}>
@@ -344,7 +332,7 @@ export function VoiceMentorModeOverlay({
               size="icon"
               aria-label={t("studentCourseView.lesson.aiMentorLesson.check")}
               onClick={onJudge}
-              disabled={isJudgePending}
+              disabled={isJudgePending || isConnectionUnavailable}
               className={MOBILE_CHECK_CLASS_NAME}
             >
               <ClipboardCheck className="size-5" />
@@ -361,6 +349,7 @@ export function VoiceMentorModeOverlay({
                   : t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.mute")
               }
               onClick={() => onMicMutedChange(!isMicMuted)}
+              disabled={isConnectionUnavailable}
               className={MOBILE_CONTROL_CLASS_NAME}
             >
               {isMicMuted ? <MicOff className="size-5" /> : <Mic className="size-5" />}
