@@ -369,8 +369,8 @@ export function WidgetStudentAiMentorPractice({
             onRetry={() => void refetch()}
           />
         ) : !data ? (
-          <div className="flex min-h-0 flex-1 flex-col justify-between gap-4 p-4 sm:p-5">
-            <div className="max-w-2xl">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 sm:gap-4 sm:p-4">
+            <div className="max-w-2xl shrink-0">
               <p className="body-base-md text-neutral-950">
                 {t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
               </p>
@@ -378,7 +378,7 @@ export function WidgetStudentAiMentorPractice({
                 {t("aiMentorPractice.form.scenarioHint")}
               </p>
             </div>
-            <div className="mt-auto w-full">
+            <div className="mt-auto w-full shrink-0">
               <ScenarioComposer
                 compact={scenarioMaxRows === 1}
                 currentPlaceholder={
