@@ -6,8 +6,10 @@ import {
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
 } from "src/resource-library/resource-library.utils";
+import { normalizeJsonb } from "src/utils/jsonb";
 
 import type { UUIDType } from "src/common";
+import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseSelect, SourceSnapshot } from "src/courses/types/master-course.types";
 
 @Injectable()
@@ -15,14 +17,26 @@ export class MasterCourseSnapshotService {
   constructor(private readonly masterCourseRepository: MasterCourseRepository) {}
 
   async buildSourceSnapshot(sourceCourse: CourseSelect): Promise<SourceSnapshot | null> {
+    const storedAuthorMetadata = normalizeJsonb<CourseAuthorMetadata | null>(
+      sourceCourse.authorMetadata,
+      null,
+    );
+
+    const course = {
+      ...sourceCourse,
+      authorMetadata:
+        storedAuthorMetadata ??
+        (await this.masterCourseRepository.getCourseAuthorMetadata(sourceCourse.authorId)),
+    };
+
     const sourceCategoryRow =
-      await this.masterCourseRepository.getSourceCategoryWithBaseTitle(sourceCourse);
+      await this.masterCourseRepository.getSourceCategoryWithBaseTitle(course);
 
     if (!sourceCategoryRow) return null;
 
     const { baseTitle, ...sourceCategory } = sourceCategoryRow;
-    const chapterRows = await this.masterCourseRepository.getSourceChapters(sourceCourse.id);
-    const lessonRows = await this.masterCourseRepository.getSourceLessons(sourceCourse.id);
+    const chapterRows = await this.masterCourseRepository.getSourceChapters(course.id);
+    const lessonRows = await this.masterCourseRepository.getSourceLessons(course.id);
     const lessonIds = lessonRows.map((row) => row.id);
     const questionRows = await this.masterCourseRepository.getSourceQuestions(lessonIds);
     const questionIds = questionRows.map((row) => row.id);
@@ -71,7 +85,7 @@ export class MasterCourseSnapshotService {
       .filter((lesson) => lesson.type === LESSON_TYPES.SCORM)
       .map((lesson) => lesson.id);
     const scormPackageRows = await this.masterCourseRepository.getSourceScormPackages(
-      sourceCourse.id,
+      course.id,
       scormLessonIds,
     );
     const scormPackageIds = scormPackageRows.map((row) => row.id);
@@ -85,11 +99,11 @@ export class MasterCourseSnapshotService {
       this.getLessonContentResourceIds(lessonRows),
     );
     const courseResourceRows = await this.masterCourseRepository.getSourceCourseResources(
-      sourceCourse.id,
+      course.id,
     );
 
     return {
-      course: sourceCourse,
+      course,
       category: sourceCategory,
       categoryBaseTitle: baseTitle,
       chapters: chapterRows,

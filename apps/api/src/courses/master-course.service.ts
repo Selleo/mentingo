@@ -781,9 +781,8 @@ export class MasterCourseService {
 
     if (createdCategory) return createdCategory.id;
 
-    const conflictingCategory = await this.masterCourseRepository.findCategoryByBaseTitle(
+    const conflictingCategory = await this.masterCourseRepository.findCategoryByLocalizedTitle(
       sourceSnapshot.categoryBaseTitle,
-      sourceSnapshot.category.baseLanguage,
     );
 
     if (!conflictingCategory) {
