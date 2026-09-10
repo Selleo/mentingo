@@ -43,6 +43,15 @@ export const EMAIL_TEMPLATE_EVENTS = {
 
 export type EmailTemplateEvent = (typeof EMAIL_TEMPLATE_EVENTS)[keyof typeof EMAIL_TEMPLATE_EVENTS];
 
+export const EMAIL_TEMPLATE_STATUSES = {
+  DRAFT: "draft",
+  PUBLISHED: "published",
+  ARCHIVED: "archived",
+} as const;
+
+export type EmailTemplateStatus =
+  (typeof EMAIL_TEMPLATE_STATUSES)[keyof typeof EMAIL_TEMPLATE_STATUSES];
+
 export const EMAIL_TEMPLATE_VARIABLE_TYPES = {
   TEXT: "text",
   URL: "url",
@@ -95,6 +104,10 @@ export type EmailTemplateDocument = {
   type: "doc";
   content: readonly EmailTemplateBlockNode[];
 };
+
+export type LocalizedEmailTemplateContent = Partial<
+  Record<SupportedLanguages, EmailTemplateDocument>
+>;
 
 export type LocalizedEmailValue<T> = Record<SupportedLanguages, T>;
 

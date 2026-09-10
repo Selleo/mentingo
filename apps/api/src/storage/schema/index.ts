@@ -1,4 +1,10 @@
 import {
+  EMAIL_TEMPLATE_STATUSES,
+  type EmailTemplateEvent,
+  type EmailTemplateStatus,
+  type LocalizedEmailTemplateContent,
+} from "@repo/email-templates";
+import {
   COURSE_TYPE,
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
@@ -2997,5 +3003,32 @@ export const learningPathEntityMap = pgTable(
       table.entityType,
       table.sourceEntityId,
     ),
+  }),
+);
+
+export const emailTemplates = pgTable(
+  "email_templates",
+  {
+    ...id,
+    ...timestamps,
+    name: jsonb("name").$type<LocalizedText>().notNull(),
+    subject: jsonb("subject").$type<LocalizedText>().notNull(),
+    content: jsonb("content").$type<LocalizedEmailTemplateContent>().notNull(),
+    status: text("status")
+      .$type<EmailTemplateStatus>()
+      .notNull()
+      .default(EMAIL_TEMPLATE_STATUSES.DRAFT),
+    event: text("event").$type<EmailTemplateEvent>().notNull(),
+    baseLanguage,
+    availableLocales,
+    publishedAt: timestampWithTimezone({ name: "published_at" }),
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    tenantId,
+  },
+  (table) => ({
+    tenantEventIdx: index("email_templates_tenant_event_idx").on(table.tenantId, table.event),
+    publishedEventUniqueIdx: uniqueIndex("email_templates_published_event_unique_idx")
+      .on(table.tenantId, table.event)
+      .where(sql`${table.status} = 'published'`),
   }),
 );
