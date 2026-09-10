@@ -71,6 +71,48 @@ const generateIndexContent = () => {
           t.stringLiteral("./translations/courseDueDateReminder")
         )
       );
+
+      path.pushContainer(
+        "body",
+        t.exportNamedDeclaration(
+          null,
+          [
+            t.exportSpecifier(
+              t.identifier("EMAIL_SUBJECTS_TRANSLATIONS"),
+              t.identifier("EMAIL_SUBJECTS_TRANSLATIONS")
+            ),
+            t.exportSpecifier(t.identifier("getEmailSubject"), t.identifier("getEmailSubject")),
+          ],
+          t.stringLiteral("./email-subjects")
+        )
+      );
+
+      path.pushContainer(
+        "body",
+        t.exportNamedDeclaration(
+          null,
+          [
+            t.exportSpecifier(
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS"),
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS")
+            ),
+            t.exportSpecifier(
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT"),
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT")
+            ),
+            t.exportSpecifier(
+              t.identifier("getEmailTemplateDefinition"),
+              t.identifier("getEmailTemplateDefinition")
+            ),
+          ],
+          t.stringLiteral("./template-registry")
+        )
+      );
+
+      path.pushContainer(
+        "body",
+        t.exportAllDeclaration(t.stringLiteral("./template-registry.types"))
+      );
     },
   });
 

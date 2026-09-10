@@ -19338,6 +19338,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "email_template.manage",
+                      "type": "string"
+                    },
+                    {
                       "const": "env.read_public",
                       "type": "string"
                     },

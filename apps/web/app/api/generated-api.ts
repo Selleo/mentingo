@@ -208,6 +208,7 @@ export interface CurrentUserResponse {
       | "settings.read_self"
       | "settings.update_self"
       | "settings.manage"
+      | "email_template.manage"
       | "env.read_public"
       | "env.manage"
       | "category.read"

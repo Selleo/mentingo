@@ -44,3 +44,6 @@ export const UserShortInactivityEmail = emailTemplateFactory(UserShortInactivity
 import WelcomeEmailTemplate from "./templates/WelcomeEmail";
 export const WelcomeEmail = emailTemplateFactory(WelcomeEmailTemplate);
 export { getCourseDueDateReminderEmailTranslations } from "./translations/courseDueDateReminder";
+export { EMAIL_SUBJECTS_TRANSLATIONS, getEmailSubject } from "./email-subjects";
+export { EMAIL_TEMPLATE_DEFINITIONS, EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT, getEmailTemplateDefinition } from "./template-registry";
+export * from "./template-registry.types";
