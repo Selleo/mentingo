@@ -3,6 +3,7 @@ import { AI_THREAD_TYPES, MESSAGE_ROLE } from "@repo/shared";
 import { and, asc, count, desc, eq, gte, inArray, lt, max, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { parsePagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -104,8 +105,7 @@ export class AdminAiThreadsRepository {
   }
 
   async getThreadSummaries(adminAiThreadQuery: AdminAiThreadQuery) {
-    const page = adminAiThreadQuery.page ?? 1;
-    const perPage = adminAiThreadQuery.perPage ?? 20;
+    const { page, perPage } = parsePagination(adminAiThreadQuery.page, adminAiThreadQuery.perPage);
     const adminAiThreadSummaries = this.buildThreadSummariesQuery(adminAiThreadQuery).as(
       "admin_ai_thread_summaries",
     );

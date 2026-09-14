@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { AdminAiThreadsRepository } from "src/ai/repositories/admin-ai-threads.repository";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { FileService } from "src/file/file.service";
 
 import type {
@@ -12,6 +13,8 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AdminAiThreadsService {
+  private static readonly AVATAR_URL_BATCH_SIZE = 10;
+
   constructor(
     private readonly adminAiThreadsRepository: AdminAiThreadsRepository,
     private readonly fileService: FileService,
@@ -34,14 +37,13 @@ export class AdminAiThreadsService {
           .filter((avatarReference): avatarReference is string => Boolean(avatarReference)),
       ),
     ];
-    const avatarUrlsByReference = new Map(
-      await Promise.all(
-        avatarReferences.map(
-          async (avatarReference) =>
-            [avatarReference, await this.fileService.getFileUrl(avatarReference)] as const,
-        ),
-      ),
+    const avatarUrlEntries = await processInBatches(
+      avatarReferences,
+      async (avatarReference) =>
+        [avatarReference, await this.fileService.getFileUrl(avatarReference)] as const,
+      { batchSize: AdminAiThreadsService.AVATAR_URL_BATCH_SIZE },
     );
+    const avatarUrlsByReference = new Map(avatarUrlEntries);
     return {
       ...paginatedThreadSummaries,
       data: paginatedThreadSummaries.data.map(({ owner: threadOwner, ...threadSummary }) => ({
