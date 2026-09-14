@@ -812,10 +812,18 @@ export class AiService {
 
     try {
       for await (const delta of stream) {
+        if (data.abortSignal?.aborted) {
+          trace.getActiveSpan()?.end();
+          return;
+        }
         mentorContent += delta;
         yield delta;
       }
 
+      if (data.abortSignal?.aborted) {
+        trace.getActiveSpan()?.end();
+        return;
+      }
       const persistedContent = isVoiceMentor ? stripVoiceControlTags(mentorContent) : mentorContent;
       await this.persistMentorChatMessages({
         data,

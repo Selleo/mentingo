@@ -36,7 +36,8 @@ export type ExternalAudioSession = {
   socket: LumaSocket;
   currentUser: CurrentUserType;
   threadId: UUIDType;
-  lessonId: UUIDType;
+  lessonId?: UUIDType;
+  practiceSessionId?: UUIDType;
   userId: UUIDType;
   sessionRunId: string | null;
   recoveryState: ExternalAudioRecoveryState;

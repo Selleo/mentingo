@@ -52,7 +52,7 @@ type SocketEventHandlerMap = {
   [VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED]: (payload: AudioOutputLifecycleEventPayload) => void;
 };
 
-export const SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS = [
+export const SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS: readonly (keyof SocketEventHandlerMap)[] = [
   VOICE_SOCKET_EVENT.AUDIO_STARTED,
   VOICE_SOCKET_EVENT.STOP_AUDIO,
   VOICE_SOCKET_EVENT.AUDIO_SPEECH,

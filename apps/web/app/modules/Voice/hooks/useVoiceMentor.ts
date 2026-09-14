@@ -27,11 +27,12 @@ import type {
   MentorSpeechAlignment,
   MentorSpeechPresentation,
 } from "../voice-mentor-presentation.types";
+import type { VoiceMentorTarget } from "@repo/shared";
 import type { Dispatch, SetStateAction } from "react";
 import type { Socket } from "socket.io-client";
 
 type VoiceMentorProps = {
-  lessonId: string;
+  voiceTarget: VoiceMentorTarget;
   setInput: Dispatch<SetStateAction<string>>;
   onLevelChange: (level: number) => void;
   onLearnerTranscription?: (revision: LearnerTranscriptRevision) => void;
@@ -45,7 +46,7 @@ type VoiceMentorProps = {
 };
 
 export function useVoiceMentor({
-  lessonId,
+  voiceTarget,
   setInput,
   onLevelChange,
   onLearnerTranscription,
@@ -287,7 +288,7 @@ export function useVoiceMentor({
       for (const event of SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS) {
         socketRef.current?.off(event, handlers[event]);
       }
-      void streamerRef.current?.stop().catch(() => undefined);
+      void streamerRef.current?.cancel().catch(() => undefined);
       void audioPlayerRef.current?.destroy().catch(() => undefined);
       clearInactivityTimer();
       clearTurnState();
@@ -315,7 +316,7 @@ export function useVoiceMentor({
       await audioPlayerRef.current.start();
       await streamerRef.current.start({
         voiceAction: VOICE_ACTION.VOICE_MENTOR,
-        lessonId,
+        ...voiceTarget,
       });
 
       setIsRecording(true);

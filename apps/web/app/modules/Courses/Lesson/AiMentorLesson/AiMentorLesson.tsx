@@ -465,7 +465,7 @@ const AiMentorLesson = ({
 
             {isThreadActive && !isJudgePending && !hideControls && (
               <LessonForm
-                lessonId={lesson.id}
+                voiceTarget={{ lessonId: lesson.id }}
                 mentorName={
                   lesson.aiMentor?.name || t("studentCourseView.lesson.aiMentorLesson.aiMentorName")
                 }
