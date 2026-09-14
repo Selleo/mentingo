@@ -41,6 +41,7 @@ import {
   scormPackages,
   scormScos,
   tenants,
+  userDetails,
   users,
 } from "src/storage/schema";
 
@@ -93,6 +94,24 @@ export class MasterCourseRepository {
       .limit(1);
 
     return course;
+  }
+
+  async getCourseAuthorMetadata(authorId: UUIDType) {
+    const [author] = await this.db
+      .select({
+        authorId: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profilePictureReference: users.avatarReference,
+        jobTitle: userDetails.jobTitle,
+        description: userDetails.description,
+      })
+      .from(users)
+      .leftJoin(userDetails, eq(userDetails.userId, users.id))
+      .where(eq(users.id, authorId))
+      .limit(1);
+
+    return author;
   }
 
   async markCourseAsMaster(courseId: UUIDType) {
@@ -581,6 +600,16 @@ export class MasterCourseRepository {
       .select(getTableColumns(categories))
       .from(categories)
       .where(sql`COALESCE(${categories.title}::jsonb ->> ${baseLanguage}, '') = ${title}`)
+      .limit(1);
+
+    return existingCategory;
+  }
+
+  async findCategoryByLocalizedTitle(title: string) {
+    const [existingCategory] = await this.db
+      .select(getTableColumns(categories))
+      .from(categories)
+      .where(this.localizationService.getLocalizedFieldSearchCondition(categories.title, title))
       .limit(1);
 
     return existingCategory;

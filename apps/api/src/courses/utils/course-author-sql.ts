@@ -2,13 +2,23 @@ import { sql } from "drizzle-orm";
 
 import { courses, users } from "src/storage/schema";
 
+const normalizedCourseAuthorMetadataSql = () => sql`
+  CASE
+    WHEN jsonb_typeof(${courses.authorMetadata}::jsonb) = 'object'
+      THEN ${courses.authorMetadata}::jsonb
+    WHEN jsonb_typeof(${courses.authorMetadata}::jsonb) = 'string'
+      THEN (${courses.authorMetadata}::jsonb #>> '{}')::jsonb
+    ELSE '{}'::jsonb
+  END
+`;
+
 export const courseAuthorNameSql = () =>
   sql<string>`COALESCE(
     NULLIF(
       CONCAT_WS(
         ' ',
-        jsonb_extract_path_text(${courses.authorMetadata}::jsonb, 'firstName'),
-        jsonb_extract_path_text(${courses.authorMetadata}::jsonb, 'lastName')
+        jsonb_extract_path_text(${normalizedCourseAuthorMetadataSql()}, 'firstName'),
+        jsonb_extract_path_text(${normalizedCourseAuthorMetadataSql()}, 'lastName')
       ),
       ''
     ),
@@ -17,6 +27,9 @@ export const courseAuthorNameSql = () =>
 
 export const courseAuthorAvatarReferenceSql = () =>
   sql<string>`COALESCE(
-    jsonb_extract_path_text(${courses.authorMetadata}::jsonb, 'profilePictureReference'),
+    jsonb_extract_path_text(
+      ${normalizedCourseAuthorMetadataSql()},
+      'profilePictureReference'
+    ),
     ${users.avatarReference}
   )`;

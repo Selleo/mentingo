@@ -371,6 +371,14 @@ describe("Master course export and sync (e2e)", () => {
             en: ["Understand the source course"],
             pl: ["Zrozumiec kurs zrodlowy"],
           },
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: sourceAdmin.firstName,
+            lastName: sourceAdmin.lastName,
+            jobTitle: null,
+            description: null,
+            profilePictureReference: sourceAdmin.avatarReference,
+          },
           showAuthorSection: false,
           thumbnailPositionY: 72,
           availableLocales: ["en", "pl"],
@@ -597,8 +605,14 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
-    const { sourceCourseId, sourceChapterId, sourceLessonId, targetCourseId, targetCookie } =
-      await setupAndExport();
+    const {
+      sourceAdmin,
+      sourceCourseId,
+      sourceChapterId,
+      sourceLessonId,
+      targetCourseId,
+      targetCookie,
+    } = await setupAndExport();
 
     const targetCourseResponse = await withTenantHost(
       request(app.getHttpServer())
@@ -618,6 +632,19 @@ describe("Master course export and sync (e2e)", () => {
       "Master Source Lesson",
     );
 
+    const targetCoursesResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ page: 1, perPage: 100, language: "en" })
+        .set("Cookie", targetCookie),
+      TARGET_HOST,
+    ).expect(200);
+
+    expect(
+      targetCoursesResponse.body.data.find((course: { id: string }) => course.id === targetCourseId)
+        .author,
+    ).toBe(`${sourceAdmin.firstName} ${sourceAdmin.lastName}`);
+
     await runAsTenant(targetTenantId, async () => {
       const [targetCourse] = await db
         .select({
@@ -634,12 +661,18 @@ describe("Master course export and sync (e2e)", () => {
           baseLanguage: courses.baseLanguage,
           availableLocales: courses.availableLocales,
           categoryId: courses.categoryId,
+          authorMetadata: courses.authorMetadata,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
 
       expect(targetCourse).toBeDefined();
+      expect(targetCourse.authorMetadata).toMatchObject({
+        authorId: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+      });
       expect(targetCourse.title).toEqual({
         en: "Master Source Course",
         pl: "Kurs zrodlowy master",
