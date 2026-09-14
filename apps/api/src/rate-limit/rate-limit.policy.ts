@@ -11,6 +11,13 @@ export const TECHNICAL_PATH_MATCHERS = [
   /^\/api\/integration\/favicon-.*\.png$/,
 ];
 
+export const EMAIL_TEMPLATE_TEST_PATH = "/api/email-templates/test-send";
+export const EMAIL_TEMPLATE_TEST_POLICY: ResolvedRateLimitPolicy = {
+  key: "email-template.test",
+  limit: 5,
+  windowSec: RATE_LIMIT_WINDOW_SEC,
+};
+
 export const AUTH_PATHS_LIMIT_5_PER_MINUTE = new Set([
   "/api/auth/login",
   "/api/auth/forgot-password",

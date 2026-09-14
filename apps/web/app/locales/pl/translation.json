@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Uzupełnij nazwę, temat i treść w języku bazowym.",
+      "unsupportedEvent": "Nieobsługiwane zdarzenie e-mail.",
+      "unsupportedVariables": "Szablon zawiera nieobsługiwane zmienne.",
+      "missingMandatoryVariables": "Każde kompletne tłumaczenie musi zawierać wymagane linki akcji.",
+      "malformedVariables": "Nieprawidłowa składnia zmiennych.",
+      "invalidContent": "Nieprawidłowa treść e-maila.",
+      "invalidUrl": "Nieprawidłowy link w e-mailu.",
+      "httpsRequired": "Linki w e-mailach muszą używać HTTPS.",
+      "privateImageHost": "Obrazy nie mogą korzystać z lokalnych ani prywatnych hostów.",
+      "publicationConflict": "Opublikowano inny szablon dla tego zdarzenia. Spróbuj ponownie.",
+      "notFound": "Nie znaleziono szablonu e-maila.",
+      "createFailed": "Nie udało się utworzyć szablonu e-maila.",
+      "invalidCollection": "Nieprawidłowe dane kolekcji."
+    },
+    "warnings": {
+      "translationFallback": "Niekompletne tłumaczenia korzystają z języka bazowego.",
+      "missingHeader": "W tłumaczeniu brakuje nagłówka.",
+      "missingFooter": "W tłumaczeniu brakuje stopki."
+    }
+  },
   "dashboardHome": {
     "title": "Twój dashboard",
     "subtitle": "Najważniejsze informacje i działania związane z nauką zawsze pod ręką.",

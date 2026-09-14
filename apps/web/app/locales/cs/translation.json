@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Vyplňte název, předmět a obsah v základním jazyce.",
+      "unsupportedEvent": "Nepodporovaná e-mailová událost.",
+      "unsupportedVariables": "Šablona obsahuje nepodporované proměnné.",
+      "missingMandatoryVariables": "Každý úplný překlad musí obsahovat požadované odkazy na akce.",
+      "malformedVariables": "Neplatná syntaxe proměnných.",
+      "invalidContent": "Neplatný obsah e-mailu.",
+      "invalidUrl": "Neplatný odkaz v e-mailu.",
+      "httpsRequired": "Odkazy v e-mailech musí používat HTTPS.",
+      "privateImageHost": "Obrázky nesmí používat místní ani soukromé hostitele.",
+      "publicationConflict": "Pro tuto událost byla publikována jiná šablona. Zkuste to znovu.",
+      "notFound": "Šablona e-mailu nebyla nalezena.",
+      "createFailed": "Šablonu e-mailu se nepodařilo vytvořit.",
+      "invalidCollection": "Neplatná data kolekce."
+    },
+    "warnings": {
+      "translationFallback": "Neúplné překlady používají základní jazyk.",
+      "missingHeader": "V překladu chybí záhlaví.",
+      "missingFooter": "V překladu chybí zápatí."
+    }
+  },
   "dashboardHome": {
     "title": "Váš dashboard",
     "subtitle": "Nejdůležitější informace a vzdělávací aktivity vždy po ruce.",

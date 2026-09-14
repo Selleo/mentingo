@@ -2,8 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
+import sharp from "sharp";
 
 import { DatabasePg } from "src/common";
+import { EmailTemplateRenderingService } from "src/email-templates/services/email-template-rendering.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -15,6 +17,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 import type { EmailConfigSchema } from "src/common/configuration/email";
+import type { EmailTemplateSendOptions } from "src/email-templates/email-template.types";
 import type { DefaultEmailSettings } from "src/events/types";
 
 @Injectable()
@@ -28,6 +31,7 @@ export class EmailService {
     private settingsService: SettingsService,
     private readonly tenantRunner: TenantDbRunnerService,
     private configService: ConfigService,
+    private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
   ) {
     this.usingMailhogAdapter =
       this.configService.get<EmailConfigSchema["EMAIL_ADAPTER"]>("email.EMAIL_ADAPTER") ===
@@ -43,8 +47,8 @@ export class EmailService {
   }
 
   async sendEmailWithLogo(
-    email: Omit<Email, "from" | "attachments">,
-    options: { tenantId: UUIDType },
+    email: Omit<Email, "from">,
+    options: EmailTemplateSendOptions,
   ): Promise<void> {
     const { logoBuffer, borderCircleBuffer } = await this.tenantRunner.runWithTenant(
       options.tenantId,
@@ -54,14 +58,31 @@ export class EmailService {
       }),
     );
 
-    const attachments: Attachment[] = [];
+    const branding = options.template
+      ? await this.getDefaultEmailProperties(options.tenantId, undefined, options.template.language)
+      : undefined;
+    const customTemplate =
+      options.template && branding
+        ? await this.emailTemplateRenderingService.renderPublishedEmailTemplate(
+            options.tenantId,
+            options.template,
+            {
+              ...branding,
+              logoUrl: logoBuffer ? "cid:logo" : undefined,
+            },
+          )
+        : undefined;
+    const attachments: Attachment[] = [
+      ...(email.attachments ?? []),
+      ...(customTemplate?.attachments ?? []),
+    ];
 
     if (logoBuffer) {
       attachments.push({
         filename: "logo.png",
         content: logoBuffer,
         contentType: "image/png",
-        ...(this.usingMailhogAdapter ? {} : { cid: "logo" }),
+        cid: "logo",
       });
     }
 
@@ -76,10 +97,22 @@ export class EmailService {
 
     const payload = {
       ...(email as Email),
+      ...(customTemplate
+        ? { subject: customTemplate.subject, html: customTemplate.html, text: customTemplate.text }
+        : {}),
       from: this.fromEmail,
       attachments: attachments.length > 0 ? attachments : undefined,
     };
     await this.emailAdapter.sendMail(payload);
+  }
+
+  async getEmailPreviewLogo(tenantId: UUIDType): Promise<string | undefined> {
+    return this.tenantRunner.runWithTenant(tenantId, async () => {
+      const logo = await this.settingsService.getPlatformLogoBuffer();
+      if (!logo) return undefined;
+      const previewLogo = await sharp(logo).resize({ height: 64 }).png().toBuffer();
+      return `data:image/png;base64,${previewLogo.toString("base64")}`;
+    });
   }
 
   async getDefaultEmailProperties(

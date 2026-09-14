@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler } from "@nestjs/cqrs";
-import { FinishedCourseEmail, NewUserEmail } from "@repo/email-templates";
+import { EMAIL_TEMPLATE_EVENTS, FinishedCourseEmail, NewUserEmail } from "@repo/email-templates";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
@@ -70,7 +70,17 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
             text,
             html,
           },
-          { tenantId },
+          {
+            tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.ADMIN_NEW_USER,
+              language: defaultEmailSettings.language,
+              variables: {
+                user_name: `${firstName} ${lastName}`,
+                profile_link: `${baseOrigin}/profile/${user.id}`,
+              },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
@@ -108,7 +118,18 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
             text,
             html,
           },
-          { tenantId },
+          {
+            tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.ADMIN_FINISHED_COURSE,
+              language: defaultEmailSettings.language,
+              variables: {
+                user_name: userName,
+                course_name: courseTitle,
+                progress_link: `${baseOrigin}/course/${courseId}`,
+              },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },

@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Užpildykite pavadinimą, temą ir turinį pagrindine kalba.",
+      "unsupportedEvent": "Nepalaikomas el. pašto įvykis.",
+      "unsupportedVariables": "Šablone yra nepalaikomų kintamųjų.",
+      "missingMandatoryVariables": "Kiekviename užbaigtame vertime turi būti reikiamos veiksmų nuorodos.",
+      "malformedVariables": "Neteisinga kintamųjų sintaksė.",
+      "invalidContent": "Netinkamas el. laiško turinys.",
+      "invalidUrl": "Netinkama el. laiško nuoroda.",
+      "httpsRequired": "El. laiškų nuorodos turi naudoti HTTPS.",
+      "privateImageHost": "Vaizdai negali naudoti vietinių ar privačių serverių.",
+      "publicationConflict": "Šiam įvykiui paskelbtas kitas šablonas. Bandykite dar kartą.",
+      "notFound": "El. laiško šablonas nerastas.",
+      "createFailed": "Nepavyko sukurti el. laiško šablono.",
+      "invalidCollection": "Netinkami rinkinio duomenys."
+    },
+    "warnings": {
+      "translationFallback": "Neužbaigti vertimai naudoja pagrindinę kalbą.",
+      "missingHeader": "Vertime nėra antraštės.",
+      "missingFooter": "Vertime nėra poraštės."
+    }
+  },
   "dashboardHome": {
     "title": "Jūsų skydelis",
     "subtitle": "Svarbiausia mokymosi informacija ir veiksmai visada po ranka.",

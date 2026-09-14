@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Vervollständigen Sie Name, Betreff und Inhalt in der Basissprache.",
+      "unsupportedEvent": "Nicht unterstütztes E-Mail-Ereignis.",
+      "unsupportedVariables": "Die Vorlage enthält nicht unterstützte Variablen.",
+      "missingMandatoryVariables": "Jede vollständige Übersetzung muss die erforderlichen Aktionslinks enthalten.",
+      "malformedVariables": "Ungültige Variablensyntax.",
+      "invalidContent": "Ungültiger E-Mail-Inhalt.",
+      "invalidUrl": "Ungültiger E-Mail-Link.",
+      "httpsRequired": "E-Mail-Links müssen HTTPS verwenden.",
+      "privateImageHost": "Bilder dürfen keine lokalen oder privaten Hosts verwenden.",
+      "publicationConflict": "Für dieses Ereignis wurde eine andere Vorlage veröffentlicht. Versuchen Sie es erneut.",
+      "notFound": "E-Mail-Vorlage nicht gefunden.",
+      "createFailed": "Die E-Mail-Vorlage konnte nicht erstellt werden.",
+      "invalidCollection": "Ungültige Sammlungsdaten."
+    },
+    "warnings": {
+      "translationFallback": "Unvollständige Übersetzungen verwenden die Basissprache.",
+      "missingHeader": "Einer Übersetzung fehlt die Kopfzeile.",
+      "missingFooter": "Einer Übersetzung fehlt die Fußzeile."
+    }
+  },
   "dashboardHome": {
     "title": "Ihr Dashboard",
     "subtitle": "Die wichtigsten Lerninformationen und Aktionen immer griffbereit.",

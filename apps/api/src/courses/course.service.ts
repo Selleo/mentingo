@@ -9,7 +9,7 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { OverdueCoursesEmail } from "@repo/email-templates";
+import { EMAIL_TEMPLATE_EVENTS, OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
@@ -5450,7 +5450,17 @@ export class CourseService {
             text,
             html,
           },
-          { tenantId },
+          {
+            tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.ADMIN_OVERDUE_COURSES,
+              language: defaultEmailSettings.language,
+              variables: {
+                courses: coursesForLanguage,
+                courses_link: this.buildAdminCoursesUrl(tenantHost),
+              },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },

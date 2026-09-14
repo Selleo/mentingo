@@ -26,21 +26,20 @@ const generateIndexContent = () => {
         [
           t.importSpecifier(
             t.identifier("emailTemplateFactory"),
-            t.identifier("emailTemplateFactory")
+            t.identifier("emailTemplateFactory"),
           ),
         ],
-        t.stringLiteral("./email-factory")
+        t.stringLiteral("./email-factory"),
       );
       path.pushContainer("body", factoryImport);
 
       templateFiles.forEach((templateFile) => {
         const templateName = templateFile.replace(".tsx", "");
-        const variableName =
-          templateName.charAt(0).toUpperCase() + templateName.slice(1);
+        const variableName = templateName.charAt(0).toUpperCase() + templateName.slice(1);
 
         const importDeclaration = t.importDeclaration(
           [t.importDefaultSpecifier(t.identifier(`${variableName}Template`))],
-          t.stringLiteral(`./templates/${templateName}`)
+          t.stringLiteral(`./templates/${templateName}`),
         );
 
         const exportDeclaration = t.exportNamedDeclaration(
@@ -49,9 +48,9 @@ const generateIndexContent = () => {
               t.identifier(variableName),
               t.callExpression(t.identifier("emailTemplateFactory"), [
                 t.identifier(`${variableName}Template`),
-              ])
+              ]),
             ),
-          ])
+          ]),
         );
 
         path.pushContainer("body", importDeclaration);
@@ -65,11 +64,11 @@ const generateIndexContent = () => {
           [
             t.exportSpecifier(
               t.identifier("getCourseDueDateReminderEmailTranslations"),
-              t.identifier("getCourseDueDateReminderEmailTranslations")
+              t.identifier("getCourseDueDateReminderEmailTranslations"),
             ),
           ],
-          t.stringLiteral("./translations/courseDueDateReminder")
-        )
+          t.stringLiteral("./translations/courseDueDateReminder"),
+        ),
       );
 
       path.pushContainer(
@@ -79,12 +78,12 @@ const generateIndexContent = () => {
           [
             t.exportSpecifier(
               t.identifier("EMAIL_SUBJECTS_TRANSLATIONS"),
-              t.identifier("EMAIL_SUBJECTS_TRANSLATIONS")
+              t.identifier("EMAIL_SUBJECTS_TRANSLATIONS"),
             ),
             t.exportSpecifier(t.identifier("getEmailSubject"), t.identifier("getEmailSubject")),
           ],
-          t.stringLiteral("./email-subjects")
-        )
+          t.stringLiteral("./email-subjects"),
+        ),
       );
 
       path.pushContainer(
@@ -94,25 +93,31 @@ const generateIndexContent = () => {
           [
             t.exportSpecifier(
               t.identifier("EMAIL_TEMPLATE_DEFINITIONS"),
-              t.identifier("EMAIL_TEMPLATE_DEFINITIONS")
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS"),
             ),
             t.exportSpecifier(
               t.identifier("EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT"),
-              t.identifier("EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT")
+              t.identifier("EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT"),
             ),
             t.exportSpecifier(
               t.identifier("getEmailTemplateDefinition"),
-              t.identifier("getEmailTemplateDefinition")
+              t.identifier("getEmailTemplateDefinition"),
+            ),
+            t.exportSpecifier(
+              t.identifier("EMAIL_TEMPLATE_SYSTEM_VARIABLES"),
+              t.identifier("EMAIL_TEMPLATE_SYSTEM_VARIABLES"),
             ),
           ],
-          t.stringLiteral("./template-registry")
-        )
+          t.stringLiteral("./template-registry"),
+        ),
       );
 
       path.pushContainer(
         "body",
-        t.exportAllDeclaration(t.stringLiteral("./template-registry.types"))
+        t.exportAllDeclaration(t.stringLiteral("./template-registry.types")),
       );
+
+      path.pushContainer("body", t.exportAllDeclaration(t.stringLiteral("./template-renderer")));
     },
   });
 
@@ -126,7 +131,7 @@ const generateIndexContent = () => {
         minimal: true,
       },
     },
-    ast.program
+    ast.program,
   );
 
   return output.code;

@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Complétez le nom, l’objet et le contenu dans la langue de base.",
+      "unsupportedEvent": "Événement de courriel non pris en charge.",
+      "unsupportedVariables": "Le modèle contient des variables non prises en charge.",
+      "missingMandatoryVariables": "Chaque traduction complète doit contenir les liens d’action requis.",
+      "malformedVariables": "Syntaxe de variable incorrecte.",
+      "invalidContent": "Contenu du courriel incorrect.",
+      "invalidUrl": "Lien du courriel incorrect.",
+      "httpsRequired": "Les liens doivent utiliser HTTPS.",
+      "privateImageHost": "Les images ne peuvent pas utiliser des hôtes locaux ou privés.",
+      "publicationConflict": "Un autre modèle a été publié pour cet événement. Réessayez.",
+      "notFound": "Modèle de courriel introuvable.",
+      "createFailed": "Impossible de créer le modèle de courriel.",
+      "invalidCollection": "Données de collection incorrectes."
+    },
+    "warnings": {
+      "translationFallback": "Les traductions incomplètes utilisent la langue de base.",
+      "missingHeader": "Une traduction n’a pas d’en-tête.",
+      "missingFooter": "Une traduction n’a pas de pied de page."
+    }
+  },
   "dashboardHome": {
     "title": "Votre tableau de bord",
     "subtitle": "Les informations et actions d'apprentissage importantes à portée de main.",

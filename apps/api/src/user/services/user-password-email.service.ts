@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { CreatePasswordReminderEmail, PasswordRecoveryEmail } from "@repo/email-templates";
+import {
+  EMAIL_TEMPLATE_EVENTS,
+  CreatePasswordReminderEmail,
+  PasswordRecoveryEmail,
+} from "@repo/email-templates";
 import { nanoid } from "nanoid";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
@@ -240,6 +244,14 @@ export class UserPasswordEmailService {
         to: recipient.email,
         tenantId: recipient.tenantId,
         subject: getEmailSubject("passwordRecoveryEmail", recipient.defaultEmailSettings.language),
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY,
+          language: recipient.defaultEmailSettings.language,
+          variables: {
+            name: recipient.firstName,
+            reset_link: buildCreateNewPasswordLink(tenantOrigin, { resetToken }),
+          },
+        },
         text: emailTemplate.text,
         html: emailTemplate.html,
       });
@@ -278,6 +290,13 @@ export class UserPasswordEmailService {
         to: recipient.email,
         tenantId: recipient.tenantId,
         subject: getEmailSubject("passwordReminderEmail", recipient.defaultEmailSettings.language),
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
+          language: recipient.defaultEmailSettings.language,
+          variables: {
+            create_password_link: buildCreateNewPasswordLink(tenantOrigin, { createToken }),
+          },
+        },
         text: emailTemplate.text,
         html: emailTemplate.html,
       });
@@ -310,7 +329,7 @@ export class UserPasswordEmailService {
   private async sendPreparedEmails(emails: PreparedUserPasswordEmail[]) {
     await processInBatches(
       emails,
-      ({ to, subject, text, html, tenantId }) =>
+      ({ to, subject, text, html, tenantId, template }) =>
         this.emailService.sendEmailWithLogo(
           {
             to,
@@ -318,7 +337,7 @@ export class UserPasswordEmailService {
             text,
             html,
           },
-          { tenantId },
+          { tenantId, template },
         ),
       { batchSize: EMAIL_BATCH_SIZE },
     );

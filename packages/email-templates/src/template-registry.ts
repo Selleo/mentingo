@@ -1,12 +1,6 @@
-import {
-  CERTIFICATE_ARCHIVE_REASONS,
-  SUPPORTED_LANGUAGES,
-  type SupportedLanguages,
-} from "@repo/shared";
-import { snakeCase } from "lodash";
+import { CERTIFICATE_ARCHIVE_REASONS } from "@repo/shared";
 
-import type { EmailContent } from "./types";
-import { EMAIL_SUBJECTS_TRANSLATIONS, type EmailSubjectKey } from "./email-subjects";
+import { EMAIL_TEMPLATE_NAMES } from "./template-registry.constants";
 
 import { getAnnouncementEmailTranslations } from "./translations/announcementEmail";
 import { getCertificateExpirationWarningEmailTranslations } from "./translations/certificateExpirationWarning";
@@ -30,102 +24,27 @@ import { getWelcomeEmailTranslations } from "./translations/welcome";
 
 import {
   EMAIL_TEMPLATE_EVENTS,
-  EMAIL_TEMPLATE_BLOCK_TYPES,
-  type CreateEmailTemplateDefinitionInput,
   type EmailTemplateDefinition,
-  type EmailTemplateDocument,
   type EmailTemplateEvent,
   type EmailTemplateVariableDefinition,
-  type LocalizedEmailValue,
 } from "./template-registry.types";
+import {
+  buildNormalizedLocalizedSubjectTemplates,
+  buildSameLocalizedSubjectTemplates,
+  createEmailTemplateDefinition,
+  defineEmailTemplateVariable,
+} from "./utils/templateRegistry";
 
-const buildLocalizedValuesForSupportedLanguages = <T>(
-  factory: (language: SupportedLanguages) => T,
-): LocalizedEmailValue<T> => {
-  return Object.fromEntries(
-    Object.values(SUPPORTED_LANGUAGES).map((language) => [language, factory(language)]),
-  ) as LocalizedEmailValue<T>;
-};
-
-const buildNormalizedLocalizedSubjectTemplates = (
-  key: EmailSubjectKey,
-): LocalizedEmailValue<string> => {
-  return buildLocalizedValuesForSupportedLanguages((language) =>
-    EMAIL_SUBJECTS_TRANSLATIONS[key][language].replace(
-      /{{\s*([^{}]+?)\s*}}/g,
-      (_match, token: string) => `{{ ${snakeCase(token)} }}`,
-    ),
-  );
-};
-
-const buildSameLocalizedSubjectTemplates = (value: string): LocalizedEmailValue<string> =>
-  buildLocalizedValuesForSupportedLanguages(() => value);
-
-const defineEmailTemplateVariable = (
-  key: string,
-  label: string,
-  type: EmailTemplateVariableDefinition["type"],
-  sampleValue: EmailTemplateVariableDefinition["sampleValue"],
-  options: Pick<EmailTemplateVariableDefinition, "required"> = {},
-): EmailTemplateVariableDefinition => ({ key, label, type, sampleValue, ...options });
-
-const createParagraphNode = (text: string) => ({
-  type: "paragraph" as const,
-  content: text ? [{ type: "text" as const, text }] : undefined,
-});
-
-const documentFromContent = (content: EmailContent, buttonUrl: string): EmailTemplateDocument => ({
-  type: "doc",
-  content: [
-    { type: EMAIL_TEMPLATE_BLOCK_TYPES.HEADER, attrs: { source: "tenant_branding" } },
-    {
-      type: EMAIL_TEMPLATE_BLOCK_TYPES.HEADING,
-      content: [createParagraphNode(content.heading)],
-    },
-    {
-      type: EMAIL_TEMPLATE_BLOCK_TYPES.TEXT,
-      content: content.paragraphs.map(createParagraphNode),
-    },
-    {
-      type: EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON,
-      attrs: { label: content.buttonText, url: buttonUrl },
-    },
-    {
-      type: EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER,
-      attrs: { text: "Powered by {{ company_name }}" },
-    },
-  ],
-});
-
-const createDefinition = ({
-  event,
-  name,
-  description,
-  sourceTemplate,
-  subject,
-  variables,
-  getContent,
-  buttonUrl,
-}: CreateEmailTemplateDefinitionInput): EmailTemplateDefinition => ({
-  event,
-  name,
-  description,
-  sourceTemplate,
-  defaultLanguage: SUPPORTED_LANGUAGES.EN,
-  subjects: subject,
-  variables,
-  defaultDocuments: buildLocalizedValuesForSupportedLanguages((language) =>
-    getContentDocument(getContent(language), buttonUrl),
-  ),
-});
-
-const getContentDocument = (content: EmailContent, buttonUrl: string) =>
-  documentFromContent(content, buttonUrl);
+export const EMAIL_TEMPLATE_SYSTEM_VARIABLES: readonly EmailTemplateVariableDefinition[] = [
+  defineEmailTemplateVariable("company_name", "Company name", "text", "Mentingo", {
+    required: true,
+  }),
+];
 
 export const EMAIL_TEMPLATE_DEFINITIONS = [
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.WELCOME,
-    name: "Welcome",
+    name: EMAIL_TEMPLATE_NAMES.WELCOME,
     description: "Sent when a learner's account is created.",
     sourceTemplate: "WelcomeEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("welcomeEmail"),
@@ -143,9 +62,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     getContent: (language) => getWelcomeEmailTranslations(language),
     buttonUrl: "{{ courses_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY,
-    name: "Password recovery",
+    name: EMAIL_TEMPLATE_NAMES.PASSWORD_RECOVERY,
     description: "Sent when a learner requests a password reset.",
     sourceTemplate: "PasswordRecoveryEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("passwordRecoveryEmail"),
@@ -153,14 +72,15 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       defineEmailTemplateVariable("name", "Name", "text", "Alex", { required: true }),
       defineEmailTemplateVariable("reset_link", "Reset link", "url", "https://example.com/reset", {
         required: true,
+        requiredInTemplate: true,
       }),
     ],
     getContent: (language) => getPasswordRecoveryEmailTranslations(language, "{{ name }}"),
     buttonUrl: "{{ reset_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
-    name: "Password creation reminder",
+    name: EMAIL_TEMPLATE_NAMES.PASSWORD_REMINDER,
     description: "Sent when a user needs to finish creating a password.",
     sourceTemplate: "CreatePasswordReminderEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("passwordReminderEmail"),
@@ -170,15 +90,15 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "Create password link",
         "url",
         "https://example.com/password",
-        { required: true },
+        { required: true, requiredInTemplate: true },
       ),
     ],
     getContent: (language) => getCreatePasswordReminderEmailTranslations(language),
     buttonUrl: "{{ create_password_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_INVITE,
-    name: "User invitation",
+    name: EMAIL_TEMPLATE_NAMES.USER_INVITE,
     description: "Sent when a user is invited to the platform.",
     sourceTemplate: "UserInviteEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userInviteEmail"),
@@ -191,16 +111,16 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "Create password link",
         "url",
         "https://example.com/password",
-        { required: true },
+        { required: true, requiredInTemplate: true },
       ),
     ],
     getContent: (language) =>
       getUserInviteEmailTranslations(language, "{{ invited_by_user_name }}"),
     buttonUrl: "{{ create_password_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_FIRST_LOGIN,
-    name: "First login",
+    name: EMAIL_TEMPLATE_NAMES.USER_FIRST_LOGIN,
     description: "Sent after a learner's first successful login.",
     sourceTemplate: "UserFirstLoginEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userFirstLoginEmail"),
@@ -219,9 +139,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     getContent: (language) => getUserFirstLoginEmailTranslations(language, "{{ name }}"),
     buttonUrl: "{{ courses_url }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_ASSIGNED_TO_COURSE,
-    name: "Course assignment",
+    name: EMAIL_TEMPLATE_NAMES.USER_ASSIGNED_TO_COURSE,
     description: "Sent when a learner is assigned to a course.",
     sourceTemplate: "UserAssignedToCourseEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userCourseAssignmentEmail"),
@@ -253,9 +173,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       ),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_SHORT_INACTIVITY,
-    name: "Short inactivity reminder",
+    name: EMAIL_TEMPLATE_NAMES.USER_SHORT_INACTIVITY,
     description: "Sent when a learner has recently stopped progressing.",
     sourceTemplate: "UserShortInactivityEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userShortInactivityEmail"),
@@ -275,9 +195,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getUserShortInactivityEmailTranslations(language, "{{ course_name }}"),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_LONG_INACTIVITY,
-    name: "Long inactivity reminder",
+    name: EMAIL_TEMPLATE_NAMES.USER_LONG_INACTIVITY,
     description: "Sent when a learner has been inactive for a longer period.",
     sourceTemplate: "UserLongInactivityEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userLongInactivityEmail"),
@@ -296,9 +216,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     getContent: (language) => getUserLongInactivityEmailTranslations(language, "{{ course_name }}"),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_CHAPTER,
-    name: "Chapter completion",
+    name: EMAIL_TEMPLATE_NAMES.USER_FINISHED_CHAPTER,
     description: "Sent when a learner completes a chapter.",
     sourceTemplate: "UserFinishedChapterEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userChapterFinishedEmail"),
@@ -329,9 +249,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getUserFinishedChapterEmailTranslations(language, "{{ chapter_name }}", "{{ course_name }}"),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
-    name: "Course completion",
+    name: EMAIL_TEMPLATE_NAMES.USER_FINISHED_COURSE,
     description: "Sent when a learner completes a course.",
     sourceTemplate: "UserFinishedCourseEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("userCourseFinishedEmail"),
@@ -356,9 +276,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getUserFinishedCourseEmailTranslations(language, "{{ course_name }}", true),
     buttonUrl: "{{ button_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRATION_WARNING,
-    name: "Certificate expiration warning",
+    name: EMAIL_TEMPLATE_NAMES.CERTIFICATE_EXPIRATION_WARNING,
     description: "Sent before a learner's certificate expires.",
     sourceTemplate: "CertificateExpirationWarningEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("certificateExpirationWarningEmail"),
@@ -387,9 +307,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       ),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRED,
-    name: "Certificate expired",
+    name: EMAIL_TEMPLATE_NAMES.CERTIFICATE_EXPIRED,
     description: "Sent when a learner's certificate expires or is reset.",
     sourceTemplate: "CertificateExpiredEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("certificateExpiredEmail"),
@@ -424,9 +344,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       ),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ADMIN_NEW_USER,
-    name: "New user notification",
+    name: EMAIL_TEMPLATE_NAMES.ADMIN_NEW_USER,
     description: "Sent to administrators when a new user registers.",
     sourceTemplate: "NewUserEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("adminNewUserEmail"),
@@ -445,9 +365,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     getContent: (language) => getNewUserEmailTranslations(language, "{{ user_name }}"),
     buttonUrl: "{{ profile_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ADMIN_FINISHED_COURSE,
-    name: "Admin course completion notification",
+    name: EMAIL_TEMPLATE_NAMES.ADMIN_FINISHED_COURSE,
     description: "Sent to administrators when a learner completes a course.",
     sourceTemplate: "FinishedCourseEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("adminCourseFinishedEmail"),
@@ -470,9 +390,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getFinishedCourseEmailTranslations(language, "{{ user_name }}", "{{ course_name }}"),
     buttonUrl: "{{ progress_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ADMIN_OVERDUE_COURSES,
-    name: "Overdue courses notification",
+    name: EMAIL_TEMPLATE_NAMES.ADMIN_OVERDUE_COURSES,
     description: "Sent to administrators about learners with overdue courses.",
     sourceTemplate: "OverdueCoursesEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("adminOverdueCoursesEmail"),
@@ -483,12 +403,12 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "collection",
         [
           {
-            courseTitle: "{{ course_name }}",
+            courseTitle: "Leadership essentials",
             groups: [
               {
-                groupName: "{{ group_name }}",
-                dueDate: "{{ due_date }}",
-                students: [{ name: "{{ user_name }}", email: "{{ email }}" }],
+                groupName: "New managers",
+                dueDate: "2026-09-30",
+                students: [{ name: "Alex Morgan", email: "alex@example.com" }],
               },
             ],
           },
@@ -505,24 +425,15 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
     ],
-    getContent: (language) =>
-      getOverdueCoursesEmailTranslations(language, [
-        {
-          courseTitle: "{{ course_name }}",
-          groups: [
-            {
-              groupName: "{{ group_name }}",
-              dueDate: "{{ due_date }}",
-              students: [{ name: "{{ user_name }}", email: "{{ email }}" }],
-            },
-          ],
-        },
-      ]),
+    getContent: (language) => ({
+      ...getOverdueCoursesEmailTranslations(language, []),
+      paragraphs: ["{{ courses }}"],
+    }),
     buttonUrl: "{{ courses_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.COURSE_DUE_DATE_REMINDER,
-    name: "Course due-date reminder",
+    name: EMAIL_TEMPLATE_NAMES.COURSE_DUE_DATE_REMINDER,
     description: "Sent when a course deadline is approaching.",
     sourceTemplate: "CourseDueDateReminderEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("courseDueDateReminderEmail"),
@@ -550,23 +461,24 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getCourseDueDateReminderEmailTranslations(language, "{{ course_name }}", "{{ due_date }}", 3),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.MAGIC_LINK,
-    name: "Magic link",
+    name: EMAIL_TEMPLATE_NAMES.MAGIC_LINK,
     description: "Sent when a user requests a passwordless login link.",
     sourceTemplate: "MagicLinkEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("magicLinkEmail"),
     variables: [
       defineEmailTemplateVariable("magic_link", "Magic link", "url", "https://example.com/magic", {
         required: true,
+        requiredInTemplate: true,
       }),
     ],
     getContent: (language) => getMagicLinkEmailTranslations(language),
     buttonUrl: "{{ magic_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.COURSE_CHAT_MENTION,
-    name: "Course chat mention",
+    name: EMAIL_TEMPLATE_NAMES.COURSE_CHAT_MENTION,
     description: "Sent when a learner is mentioned in course chat.",
     sourceTemplate: "CourseChatMentionEmail",
     subject: buildNormalizedLocalizedSubjectTemplates("courseChatMentionEmail"),
@@ -600,9 +512,9 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     }),
     buttonUrl: "{{ course_link }}",
   }),
-  createDefinition({
+  createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ANNOUNCEMENT,
-    name: "Announcement",
+    name: EMAIL_TEMPLATE_NAMES.ANNOUNCEMENT,
     description: "Sent when an announcement is delivered by email.",
     sourceTemplate: "AnnouncementEmail",
     subject: buildSameLocalizedSubjectTemplates("{{ title }}"),
@@ -631,16 +543,16 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       getAnnouncementEmailTranslations(language, "{{ title }}", "{{ content }}"),
     buttonUrl: "{{ button_link }}",
   }),
-  ...(["started", "reminder", "ended"] as const).map((kind) =>
-    createDefinition({
-      event:
-        EMAIL_TEMPLATE_EVENTS[
-          `LIVE_TRAINING_${kind.toUpperCase()}` as
-            | "LIVE_TRAINING_STARTED"
-            | "LIVE_TRAINING_REMINDER"
-            | "LIVE_TRAINING_ENDED"
-        ],
-      name: `Live training ${kind}`,
+  ...(["started", "reminder", "ended"] as const).map((kind) => {
+    const eventKey = `LIVE_TRAINING_${kind.toUpperCase()}` as
+      | "LIVE_TRAINING_STARTED"
+      | "LIVE_TRAINING_REMINDER"
+      | "LIVE_TRAINING_ENDED";
+    const event = EMAIL_TEMPLATE_EVENTS[eventKey];
+
+    return createEmailTemplateDefinition({
+      event,
+      name: EMAIL_TEMPLATE_NAMES[eventKey],
       description: `Sent when a live training is ${kind}.`,
       sourceTemplate: `LiveTraining${kind.charAt(0).toUpperCase()}${kind.slice(1)}Email`,
       subject: buildSameLocalizedSubjectTemplates("{{ title }}"),
@@ -671,8 +583,8 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         buttonText: getLiveTrainingEmailButtonText(language),
       }),
       buttonUrl: "{{ live_training_link }}",
-    }),
-  ),
+    });
+  }),
 ] as const;
 
 export const EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT = Object.fromEntries(

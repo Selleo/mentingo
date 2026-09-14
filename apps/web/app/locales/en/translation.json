@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Complete the base-language name, subject, and content.",
+      "unsupportedEvent": "Unsupported email event.",
+      "unsupportedVariables": "The template contains unsupported variables.",
+      "missingMandatoryVariables": "Each complete translation must contain the required action links.",
+      "malformedVariables": "Invalid variable syntax.",
+      "invalidContent": "Invalid email content.",
+      "invalidUrl": "Invalid email link.",
+      "httpsRequired": "Email links must use HTTPS.",
+      "privateImageHost": "Images cannot use local or private hosts.",
+      "publicationConflict": "Another template was published for this event. Try again.",
+      "notFound": "Email template not found.",
+      "createFailed": "Could not create the email template.",
+      "invalidCollection": "Invalid collection data."
+    },
+    "warnings": {
+      "translationFallback": "Incomplete translations use the base language.",
+      "missingHeader": "A translation has no header.",
+      "missingFooter": "A translation has no footer."
+    }
+  },
   "dashboardHome": {
     "title": "Your dashboard",
     "subtitle": "Keep the most important learning information and actions within easy reach.",

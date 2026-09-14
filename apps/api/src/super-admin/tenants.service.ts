@@ -9,6 +9,7 @@ import { SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { EmailTemplateExampleService } from "src/email-templates/services/email-template-example.service";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
@@ -36,6 +37,7 @@ export class TenantsService {
     private readonly tenantsRepository: TenantsRepository,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly userService: UserService,
+    private readonly emailTemplateExampleService: EmailTemplateExampleService,
   ) {}
 
   async findAllTenants(
@@ -116,6 +118,7 @@ export class TenantsService {
         invitedByUserName,
         origin: createdTenant.host,
       });
+      await this.emailTemplateExampleService.ensureExampleEmailTemplate(createdTenant.id);
     });
 
     await invalidateCorsCache();

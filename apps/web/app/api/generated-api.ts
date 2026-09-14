@@ -8898,6 +8898,13144 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface SendTestEmailTemplateBody {
+  event:
+    | "welcome"
+    | "password_recovery"
+    | "password_reminder"
+    | "user_invite"
+    | "user_first_login"
+    | "user_assigned_to_course"
+    | "user_short_inactivity"
+    | "user_long_inactivity"
+    | "user_finished_chapter"
+    | "user_finished_course"
+    | "certificate_expiration_warning"
+    | "certificate_expired"
+    | "admin_new_user"
+    | "admin_finished_course"
+    | "admin_overdue_courses"
+    | "course_due_date_reminder"
+    | "magic_link"
+    | "course_chat_mention"
+    | "announcement"
+    | "live_training_started"
+    | "live_training_reminder"
+    | "live_training_ended";
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @default "en" */
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  subject: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  content: {
+    en?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    pl?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    de?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    lt?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    cs?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    es?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    fr?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+  };
+}
+
+export interface SendTestEmailTemplateResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface UploadEmailTemplateImageResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    src: string;
+    previewUrl: string;
+  };
+}
+
+export interface DuplicateEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface GetEmailTemplatesResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetDefaultEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface CopyDefaultEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface GetEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface CreateEmailTemplateBody {
+  event:
+    | "welcome"
+    | "password_recovery"
+    | "password_reminder"
+    | "user_invite"
+    | "user_first_login"
+    | "user_assigned_to_course"
+    | "user_short_inactivity"
+    | "user_long_inactivity"
+    | "user_finished_chapter"
+    | "user_finished_course"
+    | "certificate_expiration_warning"
+    | "certificate_expired"
+    | "admin_new_user"
+    | "admin_finished_course"
+    | "admin_overdue_courses"
+    | "course_due_date_reminder"
+    | "magic_link"
+    | "course_chat_mention"
+    | "announcement"
+    | "live_training_started"
+    | "live_training_reminder"
+    | "live_training_ended";
+  name: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  subject: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  content: {
+    en?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    pl?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    de?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    lt?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    cs?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    es?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    fr?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+  };
+  /** @default "en" */
+  baseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface CreateEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface UpdateEmailTemplateBody {
+  name?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  subject?: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  content?: {
+    en?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    pl?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    de?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    lt?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    cs?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    es?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    fr?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+  };
+}
+
+export interface UpdateEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface PublishEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface ArchiveEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface RestoreEmailTemplateResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface PreviewEmailTemplateBody {
+  event:
+    | "welcome"
+    | "password_recovery"
+    | "password_reminder"
+    | "user_invite"
+    | "user_first_login"
+    | "user_assigned_to_course"
+    | "user_short_inactivity"
+    | "user_long_inactivity"
+    | "user_finished_chapter"
+    | "user_finished_course"
+    | "certificate_expiration_warning"
+    | "certificate_expired"
+    | "admin_new_user"
+    | "admin_finished_course"
+    | "admin_overdue_courses"
+    | "course_due_date_reminder"
+    | "magic_link"
+    | "course_chat_mention"
+    | "announcement"
+    | "live_training_started"
+    | "live_training_reminder"
+    | "live_training_ended";
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @default "en" */
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  subject: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+    es?: string;
+    fr?: string;
+  };
+  content: {
+    en?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    pl?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    de?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    lt?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    cs?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    es?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+    fr?: {
+      type: "doc";
+      version: 1;
+      content: (
+        | {
+            type: "header";
+            attrs: {
+              source: "tenant_branding";
+            };
+          }
+        | {
+            type: "heading";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "text";
+            content: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+        | {
+            type: "button";
+            attrs: {
+              /** @minLength 1 */
+              label: string;
+              /** @minLength 1 */
+              url: string;
+            };
+          }
+        | {
+            type: "image";
+            attrs: {
+              /** @minLength 1 */
+              src: string;
+              alt: string;
+              /**
+               * @min 1
+               * @max 1200
+               */
+              width?: number;
+            };
+          }
+        | {
+            type: "divider";
+          }
+        | {
+            type: "spacer";
+            attrs: {
+              /**
+               * @min 0
+               * @max 200
+               */
+              height: number;
+            };
+          }
+        | {
+            type: "footer";
+            attrs: {
+              text: string;
+            };
+            content?: {
+              type: "paragraph";
+              content?: {
+                type: "text";
+                text: string;
+                marks?: (
+                  | {
+                      type: "bold";
+                    }
+                  | {
+                      type: "italic";
+                    }
+                  | {
+                      type: "link";
+                      attrs: {
+                        /** @minLength 1 */
+                        href: string;
+                      };
+                    }
+                )[];
+              }[];
+            }[];
+          }
+      )[];
+    };
+  };
+}
+
+export interface PreviewEmailTemplateResponse {
+  data: {
+    event:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    subject: string;
+    html: string;
+    text: string;
+    warnings: string[];
+  };
+}
+
 export interface PrepareAiMentorStatisticsProgressBody {
   /** @format uuid */
   lessonId: string;
@@ -17149,6 +30287,299 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       >({
         path: `/api/healthcheck`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerSendTestEmailTemplate
+     * @request POST:/api/email-templates/test-send
+     */
+    emailTemplateControllerSendTestEmailTemplate: (
+      data: SendTestEmailTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendTestEmailTemplateResponse, any>({
+        path: `/api/email-templates/test-send`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerUploadEmailTemplateImage
+     * @request POST:/api/email-templates/images
+     */
+    emailTemplateControllerUploadEmailTemplateImage: (
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadEmailTemplateImageResponse, any>({
+        path: `/api/email-templates/images`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerDuplicateEmailTemplate
+     * @request POST:/api/email-templates/{id}/duplicate
+     */
+    emailTemplateControllerDuplicateEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<DuplicateEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}/duplicate`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerGetEmailTemplates
+     * @request GET:/api/email-templates
+     */
+    emailTemplateControllerGetEmailTemplates: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetEmailTemplatesResponse, any>({
+        path: `/api/email-templates`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerCreateEmailTemplate
+     * @request POST:/api/email-templates
+     */
+    emailTemplateControllerCreateEmailTemplate: (
+      data: CreateEmailTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateEmailTemplateResponse, any>({
+        path: `/api/email-templates`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerGetDefaultEmailTemplate
+     * @request GET:/api/email-templates/defaults/{event}
+     */
+    emailTemplateControllerGetDefaultEmailTemplate: (
+      event:
+        | "welcome"
+        | "password_recovery"
+        | "password_reminder"
+        | "user_invite"
+        | "user_first_login"
+        | "user_assigned_to_course"
+        | "user_short_inactivity"
+        | "user_long_inactivity"
+        | "user_finished_chapter"
+        | "user_finished_course"
+        | "certificate_expiration_warning"
+        | "certificate_expired"
+        | "admin_new_user"
+        | "admin_finished_course"
+        | "admin_overdue_courses"
+        | "course_due_date_reminder"
+        | "magic_link"
+        | "course_chat_mention"
+        | "announcement"
+        | "live_training_started"
+        | "live_training_reminder"
+        | "live_training_ended",
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDefaultEmailTemplateResponse, any>({
+        path: `/api/email-templates/defaults/${event}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerCopyDefaultEmailTemplate
+     * @request POST:/api/email-templates/defaults/{event}/copy
+     */
+    emailTemplateControllerCopyDefaultEmailTemplate: (
+      event:
+        | "welcome"
+        | "password_recovery"
+        | "password_reminder"
+        | "user_invite"
+        | "user_first_login"
+        | "user_assigned_to_course"
+        | "user_short_inactivity"
+        | "user_long_inactivity"
+        | "user_finished_chapter"
+        | "user_finished_course"
+        | "certificate_expiration_warning"
+        | "certificate_expired"
+        | "admin_new_user"
+        | "admin_finished_course"
+        | "admin_overdue_courses"
+        | "course_due_date_reminder"
+        | "magic_link"
+        | "course_chat_mention"
+        | "announcement"
+        | "live_training_started"
+        | "live_training_reminder"
+        | "live_training_ended",
+      params: RequestParams = {},
+    ) =>
+      this.request<CopyDefaultEmailTemplateResponse, any>({
+        path: `/api/email-templates/defaults/${event}/copy`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerGetEmailTemplate
+     * @request GET:/api/email-templates/{id}
+     */
+    emailTemplateControllerGetEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<GetEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerUpdateEmailTemplate
+     * @request PATCH:/api/email-templates/{id}
+     */
+    emailTemplateControllerUpdateEmailTemplate: (
+      id: string,
+      data: UpdateEmailTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerUpdateBaseLanguage
+     * @request PATCH:/api/email-templates/{id}/base-language
+     */
+    emailTemplateControllerUpdateBaseLanguage: (
+      id: string,
+      data: UpdateBaseLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateBaseLanguageResponse, any>({
+        path: `/api/email-templates/${id}/base-language`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerPublishEmailTemplate
+     * @request POST:/api/email-templates/{id}/publish
+     */
+    emailTemplateControllerPublishEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<PublishEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}/publish`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerArchiveEmailTemplate
+     * @request POST:/api/email-templates/{id}/archive
+     */
+    emailTemplateControllerArchiveEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<ArchiveEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}/archive`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerRestoreEmailTemplate
+     * @request POST:/api/email-templates/{id}/restore
+     */
+    emailTemplateControllerRestoreEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<RestoreEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}/restore`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerPreviewEmailTemplate
+     * @request POST:/api/email-templates/preview
+     */
+    emailTemplateControllerPreviewEmailTemplate: (
+      data: PreviewEmailTemplateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<PreviewEmailTemplateResponse, any>({
+        path: `/api/email-templates/preview`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

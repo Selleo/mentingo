@@ -57,6 +57,7 @@ export type ResourceRelationshipType =
   (typeof RESOURCE_RELATIONSHIP_TYPES)[keyof typeof RESOURCE_RELATIONSHIP_TYPES];
 
 export const RESOURCE_CATEGORIES = {
+  EMAIL_TEMPLATE: "email-templates",
   NEWS: "news",
   ARTICLES: "articles",
   LESSON: "lesson",

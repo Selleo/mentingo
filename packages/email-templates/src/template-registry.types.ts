@@ -16,6 +16,13 @@ export const EMAIL_TEMPLATE_BLOCK_TYPES = {
 export type EmailTemplateBlockType =
   (typeof EMAIL_TEMPLATE_BLOCK_TYPES)[keyof typeof EMAIL_TEMPLATE_BLOCK_TYPES];
 
+export const EMAIL_TEMPLATE_HEADER_SOURCES = {
+  TENANT_BRANDING: "tenant_branding",
+} as const;
+
+export type EmailTemplateHeaderSource =
+  (typeof EMAIL_TEMPLATE_HEADER_SOURCES)[keyof typeof EMAIL_TEMPLATE_HEADER_SOURCES];
+
 export const EMAIL_TEMPLATE_EVENTS = {
   WELCOME: "welcome",
   PASSWORD_RECOVERY: "password_recovery",
@@ -71,6 +78,7 @@ export type EmailTemplateVariableDefinition = {
   label: string;
   type: EmailTemplateVariableType;
   required?: boolean;
+  requiredInTemplate?: boolean;
   sampleValue: EmailTemplateVariableValue;
 };
 
@@ -83,26 +91,63 @@ export const EMAIL_TEMPLATE_INLINE_MARK_TYPES = {
 export type EmailTemplateInlineMarkType =
   (typeof EMAIL_TEMPLATE_INLINE_MARK_TYPES)[keyof typeof EMAIL_TEMPLATE_INLINE_MARK_TYPES];
 
+export type EmailTemplateInlineMark =
+  | { type: typeof EMAIL_TEMPLATE_INLINE_MARK_TYPES.BOLD }
+  | { type: typeof EMAIL_TEMPLATE_INLINE_MARK_TYPES.ITALIC }
+  | {
+      type: typeof EMAIL_TEMPLATE_INLINE_MARK_TYPES.LINK;
+      attrs: { href: string };
+    };
+
 export type EmailTemplateInlineNode = {
   type: "text";
   text: string;
-  marks?: readonly { type: EmailTemplateInlineMarkType; attrs?: Record<string, string> }[];
+  marks?: EmailTemplateInlineMark[];
 };
 
 export type EmailTemplateParagraphNode = {
   type: "paragraph";
-  content?: readonly EmailTemplateInlineNode[];
+  content?: EmailTemplateInlineNode[];
 };
 
-export type EmailTemplateBlockNode = {
-  type: EmailTemplateBlockType;
-  attrs?: Readonly<Record<string, string | number | boolean | null>>;
-  content?: readonly EmailTemplateParagraphNode[];
-};
+export type EmailTemplateBlockNode =
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.HEADER;
+      attrs: { source: EmailTemplateHeaderSource };
+    }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.HEADING;
+      content: EmailTemplateParagraphNode[];
+    }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.TEXT;
+      content: EmailTemplateParagraphNode[];
+    }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON;
+      attrs: { label: string; url: string };
+    }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE;
+      attrs: { src: string; alt: string; width?: number };
+    }
+  | { type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.DIVIDER }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.SPACER;
+      attrs: { height: number };
+    }
+  | {
+      type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER;
+      attrs: { text: string };
+      content?: EmailTemplateParagraphNode[];
+    };
+
+export const EMAIL_TEMPLATE_DOCUMENT_VERSION = 1 as const;
 
 export type EmailTemplateDocument = {
   type: "doc";
-  content: readonly EmailTemplateBlockNode[];
+  version: typeof EMAIL_TEMPLATE_DOCUMENT_VERSION;
+  content: EmailTemplateBlockNode[];
 };
 
 export type LocalizedEmailTemplateContent = Partial<
@@ -113,7 +158,7 @@ export type LocalizedEmailValue<T> = Record<SupportedLanguages, T>;
 
 export type CreateEmailTemplateDefinitionInput = {
   event: EmailTemplateEvent;
-  name: string;
+  name: LocalizedEmailValue<string>;
   description: string;
   sourceTemplate: string;
   subject: LocalizedEmailValue<string>;
@@ -124,7 +169,7 @@ export type CreateEmailTemplateDefinitionInput = {
 
 export type EmailTemplateDefinition = {
   event: EmailTemplateEvent;
-  name: string;
+  name: LocalizedEmailValue<string>;
   description: string;
   sourceTemplate: string;
   defaultLanguage: "en";

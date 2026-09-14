@@ -1,4 +1,26 @@
 {
+  "emailTemplates": {
+    "errors": {
+      "incompleteBaseLanguage": "Completa el nombre, el asunto y el contenido en el idioma base.",
+      "unsupportedEvent": "Evento de correo no admitido.",
+      "unsupportedVariables": "La plantilla contiene variables no admitidas.",
+      "missingMandatoryVariables": "Cada traducción completa debe incluir los enlaces de acción obligatorios.",
+      "malformedVariables": "Sintaxis de variables no válida.",
+      "invalidContent": "Contenido del correo no válido.",
+      "invalidUrl": "Enlace de correo no válido.",
+      "httpsRequired": "Los enlaces deben usar HTTPS.",
+      "privateImageHost": "Las imágenes no pueden usar servidores locales o privados.",
+      "publicationConflict": "Se publicó otra plantilla para este evento. Inténtalo de nuevo.",
+      "notFound": "Plantilla de correo no encontrada.",
+      "createFailed": "No se pudo crear la plantilla de correo.",
+      "invalidCollection": "Datos de colección no válidos."
+    },
+    "warnings": {
+      "translationFallback": "Las traducciones incompletas usan el idioma base.",
+      "missingHeader": "Una traducción no tiene encabezado.",
+      "missingFooter": "Una traducción no tiene pie de página."
+    }
+  },
   "dashboardHome": {
     "title": "Tu dashboard",
     "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
