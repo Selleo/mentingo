@@ -34,7 +34,7 @@ async function mockConversations(page: Page) {
     if (/\/api\/(?:admin\/ai-threads|ai\/)/.test(request.url()) && request.method() !== "GET")
       mutations.push(request.url());
   });
-  await page.route("**/api/admin/ai-threads**", async (route) => {
+  await page.route(/\/api\/admin\/ai-threads(?:\/|\?|$)/, async (route) => {
     const url = new URL(route.request().url());
     const pageNumber = Number(url.searchParams.get("page") || 1);
     if (url.pathname.endsWith("/messages")) {
@@ -118,7 +118,7 @@ test("admin sees an unavailable transcript and can return to the list", async ({
 }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
     await mockConversations(page);
-    await page.route(`**/api/admin/ai-threads/${THREAD_ID}?*`, (route) =>
+    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}(?:\\?|$)`), (route) =>
       route.fulfill({ status: 404, json: { message: "Not found" } }),
     );
     await page.setViewportSize({ width: 390, height: 844 });
