@@ -139,7 +139,11 @@ describe("Practice voice sessions", () => {
     );
     expect(createLumaSocket).toHaveBeenCalledWith(
       expect.objectContaining({
-        socketData: { sessionId: "socket-1", userId: user.userId, lessonId: "" },
+        socketData: {
+          sessionId: "socket-1",
+          userId: user.userId,
+          lessonId: `practice:${practiceId}`,
+        },
       }),
     );
   });

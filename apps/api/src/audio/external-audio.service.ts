@@ -334,8 +334,8 @@ export class ExternalAudioService {
       socketData: {
         sessionId,
         userId: currentUser.userId,
-        // Luma requires this legacy metadata string even for non-lesson conversations.
-        lessonId: payload.lessonId ?? "",
+        // Identify Practice in Luma logs through its existing lesson metadata field.
+        lessonId: payload.lessonId ?? `practice:${payload.practiceSessionId}`,
       },
     });
 
