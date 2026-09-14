@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sitzung",
+    "context": "Kontext",
+    "activity": "Aktivität",
+    "filters": "Filter",
+    "details": "Details",
+    "selectConversation": "Gespräch auswählen",
+    "pageSize": "Gespräche pro Seite",
+    "conversation": "Gespräch",
+    "source": "Kurs",
+    "view": "Gespräch ansehen",
+    "title": "KI-Gespräche",
+    "description": "Übungssitzungen und KI-Mentor-Lektionen ansehen.",
+    "owner": "Benutzer",
+    "loading": "Wird geladen…",
+    "retry": "Erneut versuchen",
+    "noMatches": "Keine Gespräche entsprechen diesen Filtern.",
+    "loadMore": "Mehr laden",
+    "back": "Zurück zu Gesprächen",
+    "readOnly": "Schreibgeschütztes Gespräch",
+    "unavailable": "Dieses Gespräch ist nicht verfügbar.",
+    "untitled": "Gespräch ohne Titel",
+    "started": "Beginn",
+    "lastActivity": "Letzte Aktivität",
+    "language": "Sprache",
+    "result": "Bewertung ansehen",
+    "emptyTranscript": "Dieses Gespräch enthält noch keine Nachrichten.",
+    "messagesError": "Nachrichten konnten nicht geladen werden.",
+    "search": "Gesprächstitel suchen",
+    "type": "Typ",
+    "allTypes": "Alle Typen",
+    "status": "Status",
+    "allStatuses": "Alle Status",
+    "from": "Begonnen ab",
+    "to": "Begonnen bis",
+    "listError": "Gespräche konnten nicht geladen werden.",
+    "errors": { "invalidDateRange": "Das Enddatum muss nach dem Startdatum liegen." },
+    "empty": "Noch keine Gespräche.",
+    "types": {
+      "practice": "Übungssitzung",
+      "ai-mentor": "KI-Mentor-Lektion"
+    },
+    "statuses": {
+      "active": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "archived": "Archiviert"
+    }
+  },
   "dashboardHome": {
     "title": "Ihr Dashboard",
     "subtitle": "Die wichtigsten Lerninformationen und Aktionen immer griffbereit.",
@@ -1937,6 +1985,7 @@
         "live_training_start": "Live-Schulungssitzungen starten.",
         "live_training_end": "Live-Schulungssitzungen beenden.",
         "live_training_statistics": "Anwesenheit und Statistiken für Live-Schulungen anzeigen.",
+        "ai_thread_read": "Alle KI-Unterhaltungen und ihre gespeicherten Bewertungen anzeigen.",
         "activity_log_read": "Aktivitätsprotokolle anzeigen."
       }
     },

@@ -22,4 +22,5 @@ export const NAVIGATION_HANDLES = {
   PROFILE_LINK: "navigation-profile-link",
   SETTINGS_LINK: "navigation-settings-link",
   ACTIVITY_LOGS_LINK: "navigation-activity-logs-link",
+  AI_CONVERSATIONS_LINK: "navigation-ai-conversations-link",
 };

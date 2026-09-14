@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Session",
+    "context": "Contexte",
+    "activity": "Activité",
+    "filters": "Filtres",
+    "details": "Détails",
+    "selectConversation": "Sélectionnez une conversation",
+    "pageSize": "Conversations par page",
+    "conversation": "Conversation",
+    "source": "Cours",
+    "view": "Voir la conversation",
+    "title": "Conversations IA",
+    "description": "Consultez les sessions de pratique et les leçons avec le mentor IA.",
+    "owner": "Utilisateur",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "noMatches": "Aucune conversation ne correspond à ces filtres.",
+    "loadMore": "Charger plus",
+    "back": "Retour aux conversations",
+    "readOnly": "Conversation en lecture seule",
+    "unavailable": "Cette conversation est indisponible.",
+    "untitled": "Conversation sans titre",
+    "started": "Début",
+    "lastActivity": "Dernière activité",
+    "language": "Langue",
+    "result": "Voir l’évaluation",
+    "emptyTranscript": "Cette conversation ne contient pas encore de messages.",
+    "messagesError": "Impossible de charger les messages.",
+    "search": "Rechercher des titres de conversations",
+    "type": "Type",
+    "allTypes": "Tous les types",
+    "status": "Statut",
+    "allStatuses": "Tous les statuts",
+    "from": "Commencées à partir du",
+    "to": "Commencées jusqu’au",
+    "listError": "Impossible de charger les conversations.",
+    "errors": { "invalidDateRange": "La date de fin doit être postérieure à la date de début." },
+    "empty": "Aucune conversation pour le moment.",
+    "types": {
+      "practice": "Session de pratique",
+      "ai-mentor": "Leçon avec le mentor IA"
+    },
+    "statuses": {
+      "active": "En cours",
+      "completed": "Terminée",
+      "archived": "Archivée"
+    }
+  },
   "dashboardHome": {
     "title": "Votre tableau de bord",
     "subtitle": "Les informations et actions d'apprentissage importantes à portée de main.",
@@ -1936,6 +1984,7 @@
         "live_training_start": "Démarrez des sessions de formation en direct.",
         "live_training_end": "Terminez les sessions de formation en direct.",
         "live_training_statistics": "Consultez la participation aux formations en direct et les statistiques.",
+        "ai_thread_read": "Afficher toutes les conversations avec l’IA et leurs évaluations enregistrées.",
         "activity_log_read": "Afficher les journaux d'activité.",
         "course_ai_generation": "Générez une structure et du contenu de cours avec des outils d'IA."
       }

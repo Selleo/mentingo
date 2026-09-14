@@ -261,6 +261,7 @@ export interface CurrentUserResponse {
       | "file.delete"
       | "resource_library.manage"
       | "ai.use"
+      | "ai_thread.read"
       | "announcement.read"
       | "announcement.create"
       | "announcement.delete"
@@ -7873,6 +7874,100 @@ export interface JudgeThreadResponse {
       learnerSafeFeedback: string;
     }[];
   };
+}
+
+export interface GetAdminAiThreadSummariesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "practice" | "ai-mentor";
+    practiceSessionId: string | null;
+    aiMentorLessonId: string | null;
+    lessonId: string | null;
+    courseId: string | null;
+    courseTitle: string | null;
+    title: string;
+    openingPreview: string | null;
+    owner: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+    };
+    status: "active" | "completed" | "archived";
+    language: string;
+    createdAt: string;
+    lastActivityAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAdminAiThreadDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "practice" | "ai-mentor";
+    practiceSessionId: string | null;
+    aiMentorLessonId: string | null;
+    lessonId: string | null;
+    courseId: string | null;
+    courseTitle: string | null;
+    title: string;
+    openingPreview: string | null;
+    owner: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+    };
+    status: "active" | "completed" | "archived";
+    language: string;
+    createdAt: string;
+    lastActivityAt: string;
+  } & {
+    evaluation: {
+      passed: boolean;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        criterionId: string | null;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        blockingErrorId: string | null;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+  };
+}
+
+export interface GetAdminAiThreadMessagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    createdAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetAllAssignedDocumentsForLessonResponse {
@@ -16125,6 +16220,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/ai/retake/${lessonId}`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
 

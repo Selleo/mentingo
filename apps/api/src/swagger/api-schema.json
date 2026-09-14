@@ -9677,6 +9677,266 @@
         }
       }
     },
+    "/api/admin/ai-threads": {
+      "get": {
+        "operationId": "AdminAiThreadsController_getAdminAiThreadSummaries",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "practice",
+                  "type": "string"
+                },
+                {
+                  "const": "ai-mentor",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "active",
+                  "type": "string"
+                },
+                {
+                  "const": "completed",
+                  "type": "string"
+                },
+                {
+                  "const": "archived",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminAiThreadSummariesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ai-threads/{threadId}": {
+      "get": {
+        "operationId": "AdminAiThreadsController_getAdminAiThreadDetails",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminAiThreadDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ai-threads/{threadId}/messages": {
+      "get": {
+        "operationId": "AdminAiThreadsController_getAdminAiThreadMessages",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminAiThreadMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ingestion/ingest": {
       "post": {
         "operationId": "IngestionController_ingest",
@@ -19547,6 +19807,10 @@
                     },
                     {
                       "const": "ai.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai_thread.read",
                       "type": "string"
                     },
                     {
@@ -56526,6 +56790,571 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetAdminAiThreadSummariesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "practice",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai-mentor",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "practiceSessionId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aiMentorLessonId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "lessonId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "courseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "openingPreview": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "owner": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "profilePictureUrl"
+                  ]
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "archived",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "language": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastActivityAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "practiceSessionId",
+                "aiMentorLessonId",
+                "lessonId",
+                "courseId",
+                "courseTitle",
+                "title",
+                "openingPreview",
+                "owner",
+                "status",
+                "language",
+                "createdAt",
+                "lastActivityAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetAdminAiThreadDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "type": {
+                    "anyOf": [
+                      {
+                        "const": "practice",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ai-mentor",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "practiceSessionId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "aiMentorLessonId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lessonId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "courseId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "courseTitle": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "openingPreview": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "owner": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "archived",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "lastActivityAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "practiceSessionId",
+                  "aiMentorLessonId",
+                  "lessonId",
+                  "courseId",
+                  "courseTitle",
+                  "title",
+                  "openingPreview",
+                  "owner",
+                  "status",
+                  "language",
+                  "createdAt",
+                  "lastActivityAt"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "evaluation": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "passed": {
+                            "type": "boolean"
+                          },
+                          "score": {
+                            "type": "integer"
+                          },
+                          "maxScore": {
+                            "type": "integer"
+                          },
+                          "percentage": {
+                            "type": "integer"
+                          },
+                          "criteria": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "criterionId": {
+                                  "anyOf": [
+                                    {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "awardedScore": {
+                                  "type": "integer"
+                                },
+                                "maxScore": {
+                                  "type": "integer"
+                                },
+                                "status": {
+                                  "anyOf": [
+                                    {
+                                      "const": "not_met",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "partial",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "met",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "learnerSafeFeedback": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "criterionId",
+                                "title",
+                                "awardedScore",
+                                "maxScore",
+                                "status",
+                                "learnerSafeFeedback"
+                              ]
+                            }
+                          },
+                          "blockingErrors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "blockingErrorId": {
+                                  "anyOf": [
+                                    {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "learnerSafeFeedback": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "blockingErrorId",
+                                "description",
+                                "learnerSafeFeedback"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "passed",
+                          "score",
+                          "maxScore",
+                          "percentage",
+                          "criteria",
+                          "blockingErrors"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "evaluation"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAdminAiThreadMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "role": {
+                  "anyOf": [
+                    {
+                      "const": "user",
+                      "type": "string"
+                    },
+                    {
+                      "const": "assistant",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "content": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "GetAllAssignedDocumentsForLessonResponse": {

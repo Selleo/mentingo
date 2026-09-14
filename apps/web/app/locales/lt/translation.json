@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sesija",
+    "context": "Kontekstas",
+    "activity": "Veikla",
+    "filters": "Filtrai",
+    "details": "Išsami informacija",
+    "selectConversation": "Pasirinkite pokalbį",
+    "pageSize": "Pokalbiai puslapyje",
+    "conversation": "Pokalbis",
+    "source": "Kursas",
+    "view": "Peržiūrėti pokalbį",
+    "title": "DI pokalbiai",
+    "description": "Peržiūrėkite praktikos sesijas ir DI mentoriaus pamokas.",
+    "owner": "Naudotojas",
+    "loading": "Įkeliama…",
+    "retry": "Bandyti dar kartą",
+    "noMatches": "Nė vienas pokalbis neatitinka šių filtrų.",
+    "loadMore": "Įkelti daugiau",
+    "back": "Grįžti į pokalbius",
+    "readOnly": "Tik skaitomas pokalbis",
+    "unavailable": "Šis pokalbis nepasiekiamas.",
+    "untitled": "Pokalbis be pavadinimo",
+    "started": "Pradžia",
+    "lastActivity": "Paskutinė veikla",
+    "language": "Kalba",
+    "result": "Peržiūrėti vertinimą",
+    "emptyTranscript": "Šiame pokalbyje dar nėra žinučių.",
+    "messagesError": "Nepavyko įkelti žinučių.",
+    "search": "Ieškoti pokalbių pavadinimų",
+    "type": "Tipas",
+    "allTypes": "Visi tipai",
+    "status": "Būsena",
+    "allStatuses": "Visos būsenos",
+    "from": "Pradėti nuo",
+    "to": "Pradėti iki",
+    "listError": "Nepavyko įkelti pokalbių.",
+    "errors": { "invalidDateRange": "Pabaigos data turi būti vėlesnė už pradžios datą." },
+    "empty": "Pokalbių dar nėra.",
+    "types": {
+      "practice": "Praktikos sesija",
+      "ai-mentor": "DI mentoriaus pamoka"
+    },
+    "statuses": {
+      "active": "Vyksta",
+      "completed": "Baigtas",
+      "archived": "Archyvuotas"
+    }
+  },
   "dashboardHome": {
     "title": "Jūsų skydelis",
     "subtitle": "Svarbiausia mokymosi informacija ir veiksmai visada po ranka.",
@@ -1936,6 +1984,7 @@
         "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
         "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
+        "ai_thread_read": "Gali peržiūrėti visus pokalbius su DI ir jų išsaugotus vertinimus.",
         "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
       }
     },

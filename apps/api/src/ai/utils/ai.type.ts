@@ -1,5 +1,5 @@
-export { MESSAGE_ROLE } from "@repo/shared";
-export type { MessageRole } from "@repo/shared";
+export { AI_THREAD_STATUSES as THREAD_STATUS, MESSAGE_ROLE } from "@repo/shared";
+export type { AiThreadStatus as ThreadStatus, MessageRole } from "@repo/shared";
 
 export const OPENAI_MODELS = {
   BASIC: "gpt-5.4-mini",
@@ -10,11 +10,3 @@ export const OPENAI_MODELS = {
 } as const;
 
 export type OpenAIModels = (typeof OPENAI_MODELS)[keyof typeof OPENAI_MODELS];
-
-export const THREAD_STATUS = {
-  ACTIVE: "active",
-  COMPLETED: "completed",
-  ARCHIVED: "archived",
-} as const;
-
-export type ThreadStatus = (typeof THREAD_STATUS)[keyof typeof THREAD_STATUS];

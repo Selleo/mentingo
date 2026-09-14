@@ -1066,8 +1066,14 @@ export const aiMentorThreads = pgTable(
     tenantId,
   },
   withTenantIdIndex("ai_mentor_threads", (table) => ({
-    practiceSessionUniqueIdx: uniqueIndex("ai_mentor_threads_practice_session_unique_idx").on(
-      table.practiceSessionId,
+    practiceSessionUniqueIdx: uniqueIndex("ai_mentor_threads_practice_session_unique_idx")
+      .on(table.practiceSessionId)
+      .where(sql`${table.status} <> 'archived'`),
+    practiceSessionIdx: index("ai_mentor_threads_practice_session_idx").on(table.practiceSessionId),
+    createdAtIdx: index("ai_mentor_threads_tenant_created_at_idx").on(
+      table.tenantId,
+      table.createdAt,
+      table.id,
     ),
     sourceCheck: check(
       "ai_mentor_threads_exactly_one_source_check",
@@ -1120,7 +1126,13 @@ export const aiMentorThreadMessages = pgTable(
     archived: boolean("archived").default(false),
     tenantId,
   },
-  withTenantIdIndex("ai_mentor_thread_messages"),
+  withTenantIdIndex("ai_mentor_thread_messages", (table) => ({
+    threadCreatedAtIdx: index("ai_mentor_thread_messages_thread_created_at_idx").on(
+      table.threadId,
+      table.createdAt,
+      table.id,
+    ),
+  })),
 );
 
 export const aiJudgeConfigurations = pgTable(

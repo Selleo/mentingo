@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
 import { AI_MENTOR_TYPE, PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import _ from "lodash";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
@@ -62,6 +62,7 @@ import type {
   AiTranscriptionResult,
   AiUiMessageStream,
 } from "src/ai/ai-chat.types";
+import type { AiPracticeReplayMessage } from "src/ai/ai-practice.types";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -176,6 +177,7 @@ export class AiService {
       async () => {
         const existingThread = await this.aiRepository.findThread([
           eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
+          inArray(aiMentorThreads.status, [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED]),
           eq(aiMentorThreads.userId, data.userId),
         ]);
 
@@ -363,6 +365,39 @@ export class AiService {
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
+    const content = await this.generateWelcomeMessage(systemPrompt);
+    await this.aiRepository.insertMessage({
+      tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, content),
+      threadId,
+      role: MESSAGE_ROLE.MENTOR,
+      content,
+    });
+  }
+
+  async preparePracticeReplay(
+    threadId: UUIDType,
+    userId: UUIDType,
+  ): Promise<AiPracticeReplayMessage[]> {
+    const systemPrompt = await this.promptService.buildSystemPrompt(
+      { threadId, userId },
+      AI_MENTOR_TYPE.ROLEPLAY,
+    );
+    const welcome = await this.generateWelcomeMessage(systemPrompt);
+    return [
+      {
+        role: MESSAGE_ROLE.SYSTEM,
+        content: systemPrompt,
+        tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt),
+      },
+      {
+        role: MESSAGE_ROLE.MENTOR,
+        content: welcome,
+        tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, welcome),
+      },
+    ];
+  }
+
+  private async generateWelcomeMessage(systemPrompt: string) {
     const welcomeMessagePrompt = await this.promptService.loadPrompt("welcomePrompt", {
       systemPrompt,
     });
@@ -396,14 +431,7 @@ export class AiService {
       { name: "Start Conversation", asType: "generation" },
     )();
 
-    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
-
-    await this.aiRepository.insertMessage({
-      threadId,
-      content,
-      tokenCount,
-      role: MESSAGE_ROLE.MENTOR,
-    });
+    return content;
   }
 
   async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {

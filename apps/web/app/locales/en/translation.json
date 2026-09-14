@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Session",
+    "context": "Context",
+    "activity": "Activity",
+    "filters": "Filters",
+    "details": "Details",
+    "selectConversation": "Select a conversation",
+    "pageSize": "Conversations per page",
+    "conversation": "Conversation",
+    "source": "Course",
+    "view": "View conversation",
+    "title": "AI conversations",
+    "description": "Review practice sessions and AI Mentor lessons.",
+    "owner": "User",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "noMatches": "No conversations match these filters.",
+    "loadMore": "Load more",
+    "back": "Back to conversations",
+    "readOnly": "Read-only conversation",
+    "unavailable": "This conversation is unavailable.",
+    "untitled": "Untitled conversation",
+    "started": "Started",
+    "lastActivity": "Last activity",
+    "language": "Language",
+    "result": "View evaluation",
+    "emptyTranscript": "No messages in this conversation yet.",
+    "messagesError": "Could not load messages.",
+    "search": "Search conversation titles",
+    "type": "Type",
+    "allTypes": "All types",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "from": "Started from",
+    "to": "Started until",
+    "listError": "Could not load conversations.",
+    "errors": { "invalidDateRange": "The end date must be after the start date." },
+    "empty": "No conversations yet.",
+    "types": {
+      "practice": "Practice session",
+      "ai-mentor": "AI Mentor lesson"
+    },
+    "statuses": {
+      "active": "In progress",
+      "completed": "Completed",
+      "archived": "Archived"
+    }
+  },
   "dashboardHome": {
     "title": "Your dashboard",
     "subtitle": "Keep the most important learning information and actions within easy reach.",
@@ -1938,6 +1986,7 @@
         "live_training_start": "Start live training sessions.",
         "live_training_end": "End live training sessions.",
         "live_training_statistics": "View live training attendance and statistics.",
+        "ai_thread_read": "View all AI conversations and their saved evaluations.",
         "activity_log_read": "View activity logs.",
         "course_ai_generation": "Generate course structure and content with AI tools."
       }

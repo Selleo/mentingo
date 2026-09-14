@@ -221,6 +221,22 @@ export const getNavigationConfig = (
         },
       ],
     },
+    {
+      title: t("aiConversations.title"),
+      icon: "AiMentor",
+      isExpandable: false,
+      testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
+      restrictedAccessRequirement: { allOf: [PERMISSIONS.AI_THREAD_READ] },
+      restrictedManagingTenantAdmin: false,
+      items: [
+        {
+          label: t("aiConversations.title"),
+          path: "admin/ai-conversations",
+          iconName: "AiMentor",
+          testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
+        },
+      ],
+    },
   ];
 };
 

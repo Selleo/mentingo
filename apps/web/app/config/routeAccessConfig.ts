@@ -164,6 +164,12 @@ export const routeAccessConfig = createRouteConfig({
   "admin/activity-logs": {
     allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
   },
+  "admin/ai-conversations": {
+    allOf: [PERMISSIONS.AI_THREAD_READ],
+  },
+  "admin/ai-conversations/:threadId": {
+    allOf: [PERMISSIONS.AI_THREAD_READ],
+  },
   "super-admin/*": {
     allOf: [PERMISSIONS.TENANT_MANAGE],
   },

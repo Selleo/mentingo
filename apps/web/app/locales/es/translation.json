@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sesión",
+    "context": "Contexto",
+    "activity": "Actividad",
+    "filters": "Filtros",
+    "details": "Detalles",
+    "selectConversation": "Selecciona una conversación",
+    "pageSize": "Conversaciones por página",
+    "conversation": "Conversación",
+    "source": "Curso",
+    "view": "Ver conversación",
+    "title": "Conversaciones con IA",
+    "description": "Revisa sesiones de práctica y lecciones con el mentor de IA.",
+    "owner": "Usuario",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "noMatches": "Ninguna conversación coincide con estos filtros.",
+    "loadMore": "Cargar más",
+    "back": "Volver a las conversaciones",
+    "readOnly": "Conversación de solo lectura",
+    "unavailable": "Esta conversación no está disponible.",
+    "untitled": "Conversación sin título",
+    "started": "Inicio",
+    "lastActivity": "Última actividad",
+    "language": "Idioma",
+    "result": "Ver evaluación",
+    "emptyTranscript": "Esta conversación aún no tiene mensajes.",
+    "messagesError": "No se pudieron cargar los mensajes.",
+    "search": "Buscar títulos de conversaciones",
+    "type": "Tipo",
+    "allTypes": "Todos los tipos",
+    "status": "Estado",
+    "allStatuses": "Todos los estados",
+    "from": "Iniciadas desde",
+    "to": "Iniciadas hasta",
+    "listError": "No se pudieron cargar las conversaciones.",
+    "errors": { "invalidDateRange": "La fecha final debe ser posterior a la fecha inicial." },
+    "empty": "Aún no hay conversaciones.",
+    "types": {
+      "practice": "Sesión de práctica",
+      "ai-mentor": "Lección con mentor de IA"
+    },
+    "statuses": {
+      "active": "En curso",
+      "completed": "Completada",
+      "archived": "Archivada"
+    }
+  },
   "dashboardHome": {
     "title": "Tu dashboard",
     "subtitle": "La información y las acciones de aprendizaje más importantes siempre a mano.",
@@ -1929,6 +1977,7 @@
         "live_training_start": "Iniciar sesiones de entrenamiento en vivo.",
         "live_training_end": "Finalizar las sesiones de entrenamiento en vivo.",
         "live_training_statistics": "Vea la asistencia y las estadísticas de entrenamiento en vivo.",
+        "ai_thread_read": "Ver todas las conversaciones con IA y sus evaluaciones guardadas.",
         "activity_log_read": "Ver registros de actividad.",
         "course_ai_generation": "Genere la estructura y el contenido del curso con herramientas de inteligencia artificial."
       }

@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sesja",
+    "context": "Kontekst",
+    "activity": "Aktywność",
+    "filters": "Filtry",
+    "details": "Szczegóły",
+    "selectConversation": "Wybierz rozmowę",
+    "pageSize": "Rozmowy na stronę",
+    "conversation": "Rozmowa",
+    "source": "Kurs",
+    "view": "Zobacz rozmowę",
+    "title": "Rozmowy AI",
+    "description": "Przeglądaj sesje treningowe i lekcje z Mentorem AI.",
+    "owner": "Użytkownik",
+    "loading": "Ładowanie…",
+    "retry": "Spróbuj ponownie",
+    "noMatches": "Żadne rozmowy nie pasują do tych filtrów.",
+    "loadMore": "Wczytaj więcej",
+    "back": "Powrót do rozmów",
+    "readOnly": "Rozmowa tylko do odczytu",
+    "unavailable": "Ta rozmowa jest niedostępna.",
+    "untitled": "Rozmowa bez tytułu",
+    "started": "Rozpoczęcie",
+    "lastActivity": "Ostatnia aktywność",
+    "language": "Język",
+    "result": "Zobacz ocenę",
+    "emptyTranscript": "Ta rozmowa nie zawiera jeszcze wiadomości.",
+    "messagesError": "Nie udało się wczytać wiadomości.",
+    "search": "Szukaj tytułów rozmów",
+    "type": "Typ",
+    "allTypes": "Wszystkie typy",
+    "status": "Status",
+    "allStatuses": "Wszystkie statusy",
+    "from": "Rozpoczęte od",
+    "to": "Rozpoczęte do",
+    "listError": "Nie udało się wczytać rozmów.",
+    "errors": { "invalidDateRange": "Data końcowa musi przypadać po dacie początkowej." },
+    "empty": "Brak rozmów.",
+    "types": {
+      "practice": "Sesja treningowa",
+      "ai-mentor": "Lekcja z Mentorem AI"
+    },
+    "statuses": {
+      "active": "W toku",
+      "completed": "Zakończona",
+      "archived": "Archiwalna"
+    }
+  },
   "dashboardHome": {
     "title": "Twój dashboard",
     "subtitle": "Najważniejsze informacje i działania związane z nauką zawsze pod ręką.",
@@ -2154,6 +2202,7 @@
         "live_training_start": "Może rozpoczynać sesje szkolenia live.",
         "live_training_end": "Może kończyć sesje szkolenia live.",
         "live_training_statistics": "Może przeglądać obecność i statystyki szkoleń live.",
+        "ai_thread_read": "Może przeglądać wszystkie rozmowy z AI i ich zapisane oceny.",
         "activity_log_read": "Może przeglądać dziennik aktywności.",
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI."
       }

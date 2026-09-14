@@ -7,6 +7,7 @@ export * from "./constants/aiMentorGeneration";
 export * from "./constants/aiMentorPractice";
 export * from "./constants/aiMentorTypes";
 export * from "./constants/aiMentorVoice";
+export * from "./constants/aiThreads";
 export * from "./constants/allowedAge";
 export * from "./constants/announcements";
 export * from "./constants/articlesSettings";

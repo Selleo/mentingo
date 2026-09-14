@@ -141,8 +141,8 @@ export class AiRepository {
     return lessonId ?? { lessonId: null };
   }
 
-  async createThread(data: ThreadBody) {
-    const [thread] = await this.db
+  async createThread(data: ThreadBody, dbInstance: DatabasePg = this.db) {
+    const [thread] = await dbInstance
       .insert(aiMentorThreads)
       .values(data)
       .returning({
@@ -251,10 +251,10 @@ export class AiRepository {
     return newSummary;
   }
 
-  async insertMessage(data: ThreadMessageBody) {
-    return this.db
+  async insertMessage(data: ThreadMessageBody, dbInstance: DatabasePg = this.db) {
+    return dbInstance
       .insert(aiMentorThreadMessages)
-      .values({ ...data, createdAt: sql`clock_timestamp()` })
+      .values({ ...data, createdAt: sql`CLOCK_TIMESTAMP()` })
       .returning();
   }
 
@@ -350,7 +350,13 @@ export class AiRepository {
     return this.db
       .select(this.getPracticeSessionSelection())
       .from(aiMentorPracticeSessions)
-      .leftJoin(aiMentorThreads, eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id))
+      .leftJoin(
+        aiMentorThreads,
+        and(
+          eq(aiMentorThreads.practiceSessionId, aiMentorPracticeSessions.id),
+          inArray(aiMentorThreads.status, [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED]),
+        ),
+      )
       .leftJoin(
         aiJudgeConfigurations,
         eq(aiJudgeConfigurations.practiceSessionId, aiMentorPracticeSessions.id),
@@ -535,17 +541,32 @@ export class AiRepository {
     });
   }
 
-  async resetPracticeConversation(sessionId: UUIDType) {
-    return this.db.transaction(async (trx) => {
-      await trx.delete(aiMentorThreads).where(eq(aiMentorThreads.practiceSessionId, sessionId));
-      const [session] = await trx
-        .update(aiMentorPracticeSessions)
-        .set({ status: AI_MENTOR_PRACTICE_STATUSES.READY, errorCode: null })
-        .where(eq(aiMentorPracticeSessions.id, sessionId))
-        .returning();
+  async lockPracticeSession(sessionId: UUIDType, transaction: DatabasePg) {
+    const [session] = await transaction
+      .select()
+      .from(aiMentorPracticeSessions)
+      .where(eq(aiMentorPracticeSessions.id, sessionId))
+      .for("update");
+    return session;
+  }
 
-      return session;
-    });
+  async archiveCompletedPracticeThread(
+    sessionId: UUIDType,
+    expectedThreadId: UUIDType,
+    transaction: DatabasePg,
+  ) {
+    const [archivedThread] = await transaction
+      .update(aiMentorThreads)
+      .set({ status: THREAD_STATUS.ARCHIVED })
+      .where(
+        and(
+          eq(aiMentorThreads.id, expectedThreadId),
+          eq(aiMentorThreads.practiceSessionId, sessionId),
+          eq(aiMentorThreads.status, THREAD_STATUS.COMPLETED),
+        ),
+      )
+      .returning();
+    return archivedThread;
   }
 
   async findJudgeRubricByThreadId(
@@ -746,6 +767,17 @@ export class AiRepository {
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
 
+    return thread;
+  }
+
+  async completeActiveThread(threadId: UUIDType, transaction: DatabasePg) {
+    const [thread] = await transaction
+      .update(aiMentorThreads)
+      .set({ status: THREAD_STATUS.COMPLETED })
+      .where(
+        and(eq(aiMentorThreads.id, threadId), eq(aiMentorThreads.status, THREAD_STATUS.ACTIVE)),
+      )
+      .returning({ id: aiMentorThreads.id });
     return thread;
   }
 

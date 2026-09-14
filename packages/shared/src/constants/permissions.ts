@@ -69,6 +69,7 @@ export const PERMISSIONS = {
   FILE_DELETE: "file.delete",
   RESOURCE_LIBRARY_MANAGE: "resource_library.manage",
   AI_USE: "ai.use",
+  AI_THREAD_READ: "ai_thread.read",
   ANNOUNCEMENT_READ: "announcement.read",
   ANNOUNCEMENT_CREATE: "announcement.create",
   ANNOUNCEMENT_DELETE: "announcement.delete",
@@ -221,6 +222,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.ANNOUNCEMENT_READ,
   ],
   [SYSTEM_ROLE_SLUGS.ADMIN]: [
+    PERMISSIONS.AI_THREAD_READ,
     PERMISSIONS.ACCOUNT_READ_SELF,
     PERMISSIONS.ACCOUNT_UPDATE_SELF,
     PERMISSIONS.USER_READ_SELF,

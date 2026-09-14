@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Inject,
   NotFoundException,
 } from "@nestjs/common";
 import {
@@ -30,7 +31,9 @@ import {
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildAiPracticeJudgeConfiguration } from "src/ai/utils/build-ai-practice-judge-configuration";
 import { buildAiPracticeMentorConfiguration } from "src/ai/utils/build-ai-practice-mentor-configuration";
+import { DatabasePg } from "src/common";
 import { EnvService } from "src/env/services/env.service";
+import { DB } from "src/storage/db/db.providers";
 
 import type {
   AiMentorPracticeSessionResponse,
@@ -48,6 +51,7 @@ export class AiPracticeService {
     private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiService: AiService,
     private readonly envService: EnvService,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async getToday(currentUser: CurrentUserType): Promise<AiMentorPracticeSessionResponse | null> {
@@ -129,11 +133,34 @@ export class AiPracticeService {
     )
       throw new ConflictException("common.toast.somethingWentWrong");
 
-    await this.aiRepository.resetPracticeConversation(session.id);
-    await this.aiService.getPracticeThreadWithSetup({
-      practiceSessionId: session.id,
-      userId: session.userId,
-      userLanguage: session.language,
+    if (!session.threadId) throw new ConflictException("common.toast.somethingWentWrong");
+    const messages = await this.aiService.preparePracticeReplay(session.threadId, session.userId);
+    const expectedThreadId = session.threadId;
+    await this.db.transaction(async (transaction) => {
+      const lockedSession = await this.aiRepository.lockPracticeSession(session.id, transaction);
+      if (!lockedSession || lockedSession.status !== AI_MENTOR_PRACTICE_STATUSES.READY)
+        throw new ConflictException("common.toast.somethingWentWrong");
+      const archivedThread = await this.aiRepository.archiveCompletedPracticeThread(
+        session.id,
+        expectedThreadId,
+        transaction,
+      );
+      if (!archivedThread) throw new ConflictException("common.toast.somethingWentWrong");
+      const replacementThread = await this.aiRepository.createThread(
+        {
+          practiceSessionId: session.id,
+          userId: lockedSession.userId,
+          userLanguage: lockedSession.language,
+          status: THREAD_STATUS.ACTIVE,
+        },
+        transaction,
+      );
+      for (const message of messages) {
+        await this.aiRepository.insertMessage(
+          { ...message, threadId: replacementThread.id },
+          transaction,
+        );
+      }
     });
 
     const replayed = await this.aiRepository.findPracticeSessionById(session.id);
