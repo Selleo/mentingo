@@ -4,6 +4,10 @@ export type StreamInitPayload = {
   format: "pcm_s16le";
 };
 
+export type VoiceMentorTarget =
+  | { lessonId: string; practiceSessionId?: never; threadId?: never }
+  | { lessonId?: never; practiceSessionId: string; threadId: string };
+
 export type PcmChunkMeta = {
   seq: number;
   sr: number;
