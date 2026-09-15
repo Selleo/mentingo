@@ -35,20 +35,17 @@
 
 ---
 
-<!-- ETAP 4 (zespół produktowy): odkomentować po dodaniu 5-6 zrzutów 1600px szerokości + GIF ~30 s w docs/assets/.
-     Kolejność ma znaczenie - to jest pierwsza rzecz, którą ogląda HR Director.
-
 ## Screenshots
 
 |  |  |
 |---|---|
-| ![Learner course view](docs/assets/screenshot-course.png) <br/> **Course view** - distraction-free learning | ![AI Mentor](docs/assets/screenshot-ai-mentor.png) <br/> **AI Mentor** - real-time voice and chat role-play |
-| ![Admin dashboard](docs/assets/screenshot-admin.png) <br/> **Admin** - groups, access, org hierarchy | ![Compliance report](docs/assets/screenshot-reporting.png) <br/> **Reporting** - completion and recertification evidence |
+| ![Course catalog](docs/assets/screenshot-course-catalog.png) <br/> **Course catalog** - continue learning, top courses, one click in | ![Lesson content](docs/assets/screenshot-lesson.png) <br/> **Lesson view** - distraction-free content with video |
+| ![AI Mentor](docs/assets/screenshot-ai-mentor.jpg) <br/> **AI Mentor** - real-time role-play, scored automatically | ![Assessment](docs/assets/screenshot-quiz.jpg) <br/> **Assessment engine** - scenario-based questions, not just recall |
+| ![Admin dashboard](docs/assets/screenshot-admin.jpg) <br/> **Admin dashboard** - deadlines, to-do list, AI mentor practice | ![Certificate settings](docs/assets/screenshot-certificate.jpg) <br/> **Recertification** - expiring certificates, signature and validity period |
 
-> 30-second product tour: [docs/assets/mentingo-tour.gif](docs/assets/mentingo-tour.gif)
+<!-- ETAP 4: dodać 30-sekundowy GIF z tour po nagraniu, np. > 30-second product tour: [docs/assets/mentingo-tour.gif](docs/assets/mentingo-tour.gif) -->
 
 ---
--->
 
 ## Who is it for
 
