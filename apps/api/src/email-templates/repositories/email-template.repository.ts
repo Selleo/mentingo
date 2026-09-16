@@ -1,12 +1,14 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { EMAIL_TEMPLATE_STATUSES, type EmailTemplateEvent } from "@repo/email-templates";
-import { and, count, desc, eq, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { mergeJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB } from "src/storage/db/db.providers";
 import { emailTemplates } from "src/storage/schema";
 
-export type EmailTemplateRecord = typeof emailTemplates.$inferSelect;
+import type { EmailTemplateRecord, EmailTemplateTranslationUpdate } from "../email-template.types";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 @Injectable()
 export class EmailTemplateRepository {
@@ -40,7 +42,11 @@ export class EmailTemplateRepository {
   }
 
   async findEmailTemplateById(id: UUIDType) {
-    const [template] = await this.db.select().from(emailTemplates).where(eq(emailTemplates.id, id));
+    const [template] = await this.db
+      .select()
+      .from(emailTemplates)
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)));
+
     return template;
   }
 
@@ -50,6 +56,7 @@ export class EmailTemplateRepository {
       .from(emailTemplates)
       .where(
         and(
+          isNull(emailTemplates.deletedAt),
           eq(emailTemplates.event, event),
           eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
         ),
@@ -70,13 +77,64 @@ export class EmailTemplateRepository {
       .onConflictDoNothing({ target: emailTemplates.id });
   }
 
+  async deleteEmailTemplate(id: UUIDType) {
+    const now = new Date().toISOString();
+
+    await this.db
+      .update(emailTemplates)
+      .set({
+        deletedAt: now,
+        status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
+        archivedAt: now,
+      })
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)));
+  }
+
   async updateEmailTemplate(id: UUIDType, values: Partial<typeof emailTemplates.$inferInsert>) {
     const [template] = await this.db
       .update(emailTemplates)
       .set(values)
-      .where(eq(emailTemplates.id, id))
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .returning();
     return template;
+  }
+
+  async updateEmailTemplateTranslations(id: UUIDType, values: EmailTemplateTranslationUpdate) {
+    const { name, subject, content, ...metadata } = values;
+
+    const [template] = await this.db
+      .update(emailTemplates)
+      .set({
+        ...metadata,
+        name: this.patchLocalizedText(emailTemplates.name, name),
+        subject: this.patchLocalizedText(emailTemplates.subject, subject),
+        content: content
+          ? mergeJsonbField(
+              this.getLocalizedJsonObject(emailTemplates.content),
+              sql`${content}::jsonb`,
+            )
+          : undefined,
+      })
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
+      .returning();
+    return template;
+  }
+
+  private patchLocalizedText(
+    column: typeof emailTemplates.name | typeof emailTemplates.subject,
+    translations: EmailTemplateTranslationUpdate["name"],
+  ) {
+    if (!translations) return undefined;
+
+    return Object.entries(translations).reduce(
+      (field, [language, value]) => setJsonbField(field, language, value, true, true) ?? field,
+      this.getLocalizedJsonObject(column),
+    );
+  }
+
+  private getLocalizedJsonObject(column: AnyPgColumn) {
+    return sql`CASE WHEN jsonb_typeof(${column}) = 'string'
+      THEN (${column} #>> '{}')::jsonb ELSE ${column} END`;
   }
 
   publishEmailTemplate(id: UUIDType, event: EmailTemplateEvent) {
@@ -93,6 +151,7 @@ export class EmailTemplateRepository {
         })
         .where(
           and(
+            isNull(emailTemplates.deletedAt),
             eq(emailTemplates.event, event),
             eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
             ne(emailTemplates.id, id),
@@ -107,7 +166,7 @@ export class EmailTemplateRepository {
           archivedAt: null,
           updatedAt: now,
         })
-        .where(eq(emailTemplates.id, id))
+        .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
         .returning();
 
       return template;
@@ -124,7 +183,7 @@ export class EmailTemplateRepository {
     const [template] = await transaction
       .select({ event: emailTemplates.event })
       .from(emailTemplates)
-      .where(eq(emailTemplates.id, id));
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)));
 
     if (!template) throw new NotFoundException("emailTemplates.errors.notFound");
     return template.event;
@@ -134,7 +193,7 @@ export class EmailTemplateRepository {
     const [template] = await transaction
       .select()
       .from(emailTemplates)
-      .where(eq(emailTemplates.id, id))
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
       .for("update");
 
     if (!template) throw new NotFoundException("emailTemplates.errors.notFound");
@@ -142,7 +201,10 @@ export class EmailTemplateRepository {
   }
 
   private async countEmailTemplateOverrides(transaction: DatabasePg) {
-    const [{ totalItems }] = await transaction.select({ totalItems: count() }).from(emailTemplates);
+    const [{ totalItems }] = await transaction
+      .select({ totalItems: count() })
+      .from(emailTemplates)
+      .where(isNull(emailTemplates.deletedAt));
     return totalItems;
   }
 
@@ -150,6 +212,7 @@ export class EmailTemplateRepository {
     return transaction
       .select()
       .from(emailTemplates)
+      .where(isNull(emailTemplates.deletedAt))
       .orderBy(desc(emailTemplates.updatedAt), desc(emailTemplates.id))
       .offset(offset)
       .limit(limit);

@@ -1398,14 +1398,14 @@
     {
       "idx": 199,
       "version": "7",
-      "when": 1789032455811,
+      "when": 1789468118163,
       "tag": "0199_add_email_templates_table",
       "breakpoints": true
     },
     {
       "idx": 200,
       "version": "7",
-      "when": 1789032564993,
+      "when": 1789468136292,
       "tag": "0200_enable_email_templates_rls",
       "breakpoints": true
     }

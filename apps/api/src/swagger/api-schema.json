@@ -11991,6 +11991,33 @@
         }
       }
     },
+    "/api/email-templates/images/{id}": {
+      "get": {
+        "operationId": "EmailTemplateController_getEmailTemplateImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEmailTemplateImageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/email-templates/test-send": {
       "post": {
         "operationId": "EmailTemplateController_sendTestEmailTemplate",
@@ -12428,6 +12455,31 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateEmailTemplateResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "EmailTemplateController_deleteEmailTemplate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteEmailTemplateResponse"
                 }
               }
             }
@@ -62894,6 +62946,35 @@
           "data"
         ]
       },
+      "GetEmailTemplateImageResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "resourceId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "src": {
+                "type": "string"
+              },
+              "previewUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "resourceId",
+              "src",
+              "previewUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "SendTestEmailTemplateBody": {
         "additionalProperties": false,
         "type": "object",
@@ -63425,6 +63506,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -63929,6 +64024,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -64433,6 +64542,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -64937,6 +65060,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -65441,6 +65578,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -65945,6 +66096,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -66449,6 +66614,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -67268,6 +67447,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -67772,6 +67965,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -68276,6 +68483,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -68780,6 +69001,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -69284,6 +69519,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -69788,6 +70037,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -70292,6 +70555,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -71248,6 +71525,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -71752,6 +72043,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -72256,6 +72561,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -72760,6 +73079,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -73264,6 +73597,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -73768,6 +74115,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -74272,6 +74633,20 @@
                                   "type": {
                                     "const": "divider",
                                     "type": "string"
+                                  },
+                                  "attrs": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "height": {
+                                        "minimum": 1,
+                                        "maximum": 200,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "height"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -75253,6 +75628,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -75757,6 +76146,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -76261,6 +76664,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -76765,6 +77182,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -77269,6 +77700,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -77773,6 +78218,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -78277,6 +78736,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -79231,6 +79704,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -79735,6 +80222,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -80239,6 +80740,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -80743,6 +81258,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -81247,6 +81776,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -81751,6 +82294,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -82255,6 +82812,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -83209,6 +83780,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -83713,6 +84298,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -84217,6 +84816,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -84721,6 +85334,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -85225,6 +85852,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -85729,6 +86370,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -86233,6 +86888,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -87086,6 +87755,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -87590,6 +88273,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -88094,6 +88791,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -88598,6 +89309,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -89102,6 +89827,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -89606,6 +90345,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -90110,6 +90863,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -90912,6 +91679,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -91416,6 +92197,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -91920,6 +92715,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -92424,6 +93233,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -92928,6 +93751,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -93432,6 +94269,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -93936,6 +94787,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -94697,6 +95562,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -95201,6 +96080,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -95705,6 +96598,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -96209,6 +97116,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -96713,6 +97634,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -97217,6 +98152,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -97721,6 +98670,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -98485,6 +99448,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -98989,6 +99966,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -99493,6 +100484,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -99997,6 +101002,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -100501,6 +101520,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -101005,6 +102038,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -101509,6 +102556,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -102463,6 +103524,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -102967,6 +104042,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -103471,6 +104560,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -103975,6 +105078,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -104479,6 +105596,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -104983,6 +106114,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -105487,6 +106632,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -106441,6 +107600,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -106945,6 +108118,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -107449,6 +108636,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -107953,6 +109154,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -108457,6 +109672,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -108961,6 +110190,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -109465,6 +110708,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -109820,6 +111077,17 @@
               "publishedAt",
               "archivedAt"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteEmailTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -110419,6 +111687,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -110923,6 +112205,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -111427,6 +112723,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -111931,6 +113241,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -112435,6 +113759,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -112939,6 +114277,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -113443,6 +114795,20 @@
                                 "type": {
                                   "const": "divider",
                                   "type": "string"
+                                },
+                                "attrs": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "height": {
+                                      "minimum": 1,
+                                      "maximum": 200,
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "height"
+                                  ]
                                 }
                               },
                               "required": [
@@ -114335,6 +115701,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -114839,6 +116219,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -115343,6 +116737,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -115847,6 +117255,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -116351,6 +117773,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -116855,6 +118291,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [
@@ -117359,6 +118809,20 @@
                             "type": {
                               "const": "divider",
                               "type": "string"
+                            },
+                            "attrs": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "height": {
+                                  "minimum": 1,
+                                  "maximum": 200,
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "height"
+                              ]
                             }
                           },
                           "required": [

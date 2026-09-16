@@ -3,6 +3,17 @@ import { PERMISSIONS } from "@repo/shared";
 import { checkRouteAccess } from "../RouteGuard";
 
 describe("checkRouteAccess", () => {
+  it("requires email-template permission for every builder route", () => {
+    for (const route of [
+      "admin/email-templates",
+      "admin/email-templates/defaults/welcome",
+      "admin/email-templates/template-id",
+    ]) {
+      expect(checkRouteAccess(route, [PERMISSIONS.EMAIL_TEMPLATE_MANAGE])).toBe(true);
+      expect(checkRouteAccess(route, [PERMISSIONS.USER_MANAGE])).toBe(false);
+      expect(checkRouteAccess(route, [])).toBe(false);
+    }
+  });
   it("should allow access to exact matching routes", () => {
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE])).toBe(true);
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE_OWN])).toBe(true);

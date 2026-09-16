@@ -38,7 +38,6 @@ describe("EmailTemplateTestService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    previewEmailTemplate.mockResolvedValue({ language: SUPPORTED_LANGUAGES.EN });
     enqueue.mockResolvedValue({ id: "job-1" });
   });
 
@@ -55,11 +54,20 @@ describe("EmailTemplateTestService", () => {
       userId: actor.userId,
     });
     expect(sendEmailWithLogo).not.toHaveBeenCalled();
+    expect(previewEmailTemplate).not.toHaveBeenCalled();
+    expect(renderSampleEmailTemplate).not.toHaveBeenCalled();
   });
 
   it("rejects invalid unsaved content before queueing", async () => {
-    previewEmailTemplate.mockRejectedValueOnce(new Error("invalid"));
-    await expect(service.enqueueTestEmailTemplate(body, actor)).rejects.toThrow("invalid");
+    await expect(
+      service.enqueueTestEmailTemplate(
+        {
+          ...body,
+          subject: { en: "{{ unsupported_variable }}" },
+        },
+        actor,
+      ),
+    ).rejects.toThrow("emailTemplates.errors.unsupportedVariables");
     expect(enqueue).not.toHaveBeenCalled();
   });
 

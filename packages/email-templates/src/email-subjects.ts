@@ -1,5 +1,7 @@
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 
+import type { EmailSubjectKey } from "./email-subjects.types";
+
 export const EMAIL_SUBJECTS_TRANSLATIONS = {
   welcomeEmail: {
     en: "Welcome to our platform!",
@@ -173,8 +175,6 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     fr: "Vous avez été mentionné(e) dans {{courseName}}",
   },
 } as const;
-
-export type EmailSubjectKey = keyof typeof EMAIL_SUBJECTS_TRANSLATIONS;
 
 export const getEmailSubject = (
   key: EmailSubjectKey,

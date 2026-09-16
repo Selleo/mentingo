@@ -1,3 +1,4 @@
+import { ConflictException } from "@nestjs/common";
 import {
   EMAIL_TEMPLATE_DEFINITIONS,
   EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT,
@@ -8,10 +9,8 @@ import { EmailTemplateValidationService } from "./email-template-validation.serv
 import { EmailTemplateService } from "./email-template.service";
 
 import type { EmailTemplateAssetService } from "./email-template-asset.service";
-import type {
-  EmailTemplateRepository,
-  EmailTemplateRecord,
-} from "../repositories/email-template.repository";
+import type { EmailTemplateRecord } from "../email-template.types";
+import type { EmailTemplateRepository } from "../repositories/email-template.repository";
 import type { EmailService } from "src/common/emails/emails.service";
 
 describe("EmailTemplateService mutation validation", () => {
@@ -21,6 +20,7 @@ describe("EmailTemplateService mutation validation", () => {
   const updateEmailTemplate = jest.fn();
   const publishEmailTemplate = jest.fn();
   const createEmailTemplate = jest.fn();
+  const deleteEmailTemplate = jest.fn();
   const findEmailTemplateOverridePageWithTotal = jest.fn();
   let service: EmailTemplateService;
 
@@ -41,6 +41,7 @@ describe("EmailTemplateService mutation validation", () => {
       updatedAt: "2026-09-11T00:00:00Z",
       publishedAt: "2026-09-11T00:00:00Z",
       archivedAt: null,
+      deletedAt: null,
     };
     const repository = {
       withLockedEmailTemplate: jest.fn(async (_id, callback) => {
@@ -52,13 +53,22 @@ describe("EmailTemplateService mutation validation", () => {
         }
       }),
       updateEmailTemplate,
+      updateEmailTemplateTranslations: updateEmailTemplate,
       publishEmailTemplate,
       createEmailTemplate,
+      deleteEmailTemplate,
       findEmailTemplateOverridePageWithTotal,
     };
     updateEmailTemplate.mockImplementation(async (_id, values) => {
       expect(lockHeld).toBe(true);
-      return { ...template, ...values };
+      template = {
+        ...template,
+        ...values,
+        name: { ...template.name, ...values.name },
+        subject: { ...template.subject, ...values.subject },
+        content: { ...template.content, ...values.content },
+      };
+      return template;
     });
     publishEmailTemplate.mockImplementation(async () => {
       expect(lockHeld).toBe(true);
@@ -74,11 +84,42 @@ describe("EmailTemplateService mutation validation", () => {
     );
   });
 
+  it.each(Object.values(EMAIL_TEMPLATE_STATUSES))(
+    "deletes a %s template under the publication lock",
+    async (status) => {
+      template.status = status;
+      deleteEmailTemplate.mockImplementation(async () => {
+        expect(lockHeld).toBe(true);
+      });
+      await service.deleteEmailTemplate(template.id);
+      expect(deleteEmailTemplate).toHaveBeenCalledWith(template.id);
+    },
+  );
+
   it("rejects an incomplete update using the status read under the lock", async () => {
     await expect(service.updateEmailTemplate(template.id, { subject: { en: "" } })).rejects.toThrow(
       "emailTemplates.errors.incompleteBaseLanguage",
     );
     expect(updateEmailTemplate).not.toHaveBeenCalled();
+  });
+
+  it("preserves other locales when administrators save independent translations", async () => {
+    await service.updateEmailTemplate(template.id, { subject: { pl: "Nowy temat" } });
+    const result = await service.updateEmailTemplate(template.id, {
+      subject: { en: "New subject" },
+    });
+    expect(result.subject).toMatchObject({ pl: "Nowy temat", en: "New subject" });
+    expect(result.content).toEqual(definition.defaultDocuments);
+    expect(updateEmailTemplate.mock.calls[1][1].subject).toEqual({ en: "New subject" });
+  });
+
+  it("validates a partial translation against the latest stored body", async () => {
+    template.content = { ...template.content, pl: { type: "doc", version: 1, content: [] } };
+    const result = await service.updateEmailTemplate(template.id, {
+      subject: { en: "New subject" },
+    });
+    expect(result.subject.pl).toEqual(definition.subjects.pl);
+    expect(result.content.pl?.content).toEqual([]);
   });
 
   it.each([
@@ -140,6 +181,21 @@ describe("EmailTemplateService mutation validation", () => {
     expect(lockHeld).toBe(false);
   });
 
+  it("maps a publication uniqueness violation to a conflict and releases the lock", async () => {
+    publishEmailTemplate.mockRejectedValueOnce({ code: "23505" });
+    await expect(service.publishEmailTemplate(template.id)).rejects.toEqual(
+      new ConflictException("emailTemplates.errors.publicationConflict"),
+    );
+    expect(lockHeld).toBe(false);
+  });
+
+  it("preserves unexpected publication errors instead of reporting a conflict", async () => {
+    const failure = new Error("Database unavailable");
+    publishEmailTemplate.mockRejectedValueOnce(failure);
+    await expect(service.publishEmailTemplate(template.id)).rejects.toBe(failure);
+    expect(lockHeld).toBe(false);
+  });
+
   it("duplicates a published template as a new draft without publication metadata", async () => {
     createEmailTemplate.mockImplementation(async (values) => {
       expect(lockHeld).toBe(true);
@@ -149,6 +205,7 @@ describe("EmailTemplateService mutation validation", () => {
         id: "00000000-0000-4000-8000-000000000003",
         publishedAt: null,
         archivedAt: null,
+        deletedAt: null,
       };
     });
     const result = await service.duplicateEmailTemplate(template.id);

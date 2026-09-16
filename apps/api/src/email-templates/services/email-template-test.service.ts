@@ -20,14 +20,16 @@ export class EmailTemplateTestService {
   ) {}
 
   async enqueueTestEmailTemplate(body: PreviewEmailTemplateBody, currentUser: CurrentUserType) {
-    const preview = await this.emailTemplateService.previewEmailTemplate(
-      body,
-      currentUser.tenantId,
-      currentUser.userId,
+    this.emailTemplateValidationService.validateDraft(body.event, body.subject, body.content);
+    const language = this.emailTemplateValidationService.resolveEmailTemplateLanguage(
+      body.subject,
+      body.content,
+      body.language,
+      body.baseLanguage,
     );
     this.emailTemplateValidationService.validateRuntimeVariables(
       body.event,
-      body.content[preview.language]!,
+      body.content[language]!,
       this.emailTemplateValidationService.getSampleVariables(body.event),
     );
     const job = await this.queueService.enqueue<EmailTemplateTestJobData>(

@@ -12,6 +12,23 @@ describe("Email template request schema", () => {
     content: { en: definition.defaultDocuments.en },
   };
 
+  it.each([
+    [{ type: "divider" }, true],
+    [{ type: "divider", attrs: { height: 1 } }, true],
+    [{ type: "divider", attrs: { height: 12 } }, true],
+    [{ type: "divider", attrs: { height: 200 } }, true],
+    [{ type: "divider", attrs: { height: 0 } }, false],
+    [{ type: "divider", attrs: { height: 201 } }, false],
+    [{ type: "divider", attrs: { height: "12" } }, false],
+  ])("validates divider height: %j", (block, expected) => {
+    expect(
+      Value.Check(createEmailTemplateSchema, {
+        ...valid,
+        content: { en: { type: "doc", version: 1, content: [block] } },
+      }),
+    ).toBe(expected);
+  });
+
   it("accepts partial supported translations and rejects unknown languages", () => {
     expect(Value.Check(createEmailTemplateSchema, valid)).toBe(true);
     expect(Value.Check(createEmailTemplateSchema, { ...valid, name: { xx: "Hello" } })).toBe(false);

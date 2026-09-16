@@ -23,7 +23,7 @@ import { EmailTemplateRepository } from "../repositories/email-template.reposito
 import { EmailTemplateAssetService } from "./email-template-asset.service";
 import { EmailTemplateValidationService } from "./email-template-validation.service";
 
-import type { EmailTemplateRecord } from "../repositories/email-template.repository";
+import type { EmailTemplateRecord } from "../email-template.types";
 import type {
   CreateEmailTemplateBody,
   EmailTemplatePreviewResponse,
@@ -117,7 +117,7 @@ export class EmailTemplateService {
         this.emailTemplateValidationService.validateDraft(existing.event, subject, content);
       }
 
-      const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
+      const template = await this.emailTemplateRepository.updateEmailTemplateTranslations(id, {
         ...body,
         availableLocales: this.getLocalesWithDraftContent(subject, content),
         updatedAt: new Date().toISOString(),
@@ -186,6 +186,12 @@ export class EmailTemplateService {
     });
   }
 
+  async deleteEmailTemplate(id: UUIDType) {
+    return this.emailTemplateRepository.withLockedEmailTemplate(id, async () => {
+      await this.emailTemplateRepository.deleteEmailTemplate(id);
+    });
+  }
+
   async restoreEmailTemplate(id: UUIDType) {
     return this.emailTemplateRepository.withLockedEmailTemplate(id, async () => {
       const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
@@ -242,6 +248,9 @@ export class EmailTemplateService {
 
     const branding = await this.emailService.getDefaultEmailProperties(tenantId, userId, language);
     const previewLogo = await this.emailService.getEmailPreviewLogo(tenantId);
+    const previewBorderCircle = preview
+      ? await this.emailService.getEmailPreviewBorderCircle(tenantId)
+      : undefined;
     let logoUrl = previewLogo;
     if (!preview && previewLogo) logoUrl = "cid:logo";
     const rendered = renderEmailTemplate({
@@ -252,6 +261,7 @@ export class EmailTemplateService {
       branding: {
         ...branding,
         logoUrl,
+        borderCircleUrl: preview ? previewBorderCircle : "cid:border-circle",
       },
     });
 
@@ -385,9 +395,9 @@ export class EmailTemplateService {
     updates: UpdateEmailTemplateBody,
   ) {
     return {
-      name: updates.name ?? existingTemplate.name,
-      subject: updates.subject ?? existingTemplate.subject,
-      content: updates.content ?? existingTemplate.content,
+      name: { ...existingTemplate.name, ...updates.name },
+      subject: { ...existingTemplate.subject, ...updates.subject },
+      content: { ...existingTemplate.content, ...updates.content },
     };
   }
 

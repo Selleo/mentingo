@@ -15,6 +15,34 @@ describe("EmailTemplateValidationService", () => {
   const service = new EmailTemplateValidationService();
 
   it.each([
+    { type: "text", content: [] },
+    { type: "heading", content: [{ type: "paragraph", content: [{ type: "text", text: "   " }] }] },
+    { type: "footer", attrs: { text: "Old text" }, content: [{ type: "paragraph" }] },
+    { type: "button", attrs: { label: "   ", url: "https://example.com" } },
+    { type: "image", attrs: { src: "", alt: "" } },
+  ])("rejects empty blocks even alongside valid content: %j", (block) => {
+    expect(() =>
+      service.validateDraft(
+        EMAIL_TEMPLATE_EVENTS.WELCOME,
+        { en: "Hello" },
+        {
+          en: {
+            type: "doc",
+            version: EMAIL_TEMPLATE_DOCUMENT_VERSION,
+            content: [
+              {
+                type: "text",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Valid text" }] }],
+              },
+              block,
+            ],
+          } as EmailTemplateDocument,
+        },
+      ),
+    ).toThrow("emailTemplates.errors.invalidContent");
+  });
+
+  it.each([
     null,
     { type: "html", version: EMAIL_TEMPLATE_DOCUMENT_VERSION, content: [] },
     { type: "doc", version: 999, content: [] },

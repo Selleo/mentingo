@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS "email_templates" (
 	"available_locales" text[] DEFAULT ARRAY['en']::text[] NOT NULL,
 	"published_at" timestamp(3) with time zone,
 	"archived_at" timestamp(3) with time zone,
+	"deleted_at" timestamp(3) with time zone,
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint

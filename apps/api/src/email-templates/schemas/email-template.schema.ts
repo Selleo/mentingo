@@ -107,7 +107,15 @@ const emailTemplateBlockSchema = Type.Union([
     { additionalProperties: false },
   ),
   Type.Object(
-    { type: Type.Literal(EMAIL_TEMPLATE_BLOCK_TYPES.DIVIDER) },
+    {
+      type: Type.Literal(EMAIL_TEMPLATE_BLOCK_TYPES.DIVIDER),
+      attrs: Type.Optional(
+        Type.Object(
+          { height: Type.Number({ minimum: 1, maximum: 200 }) },
+          { additionalProperties: false },
+        ),
+      ),
+    },
     { additionalProperties: false },
   ),
   Type.Object(

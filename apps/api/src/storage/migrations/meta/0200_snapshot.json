@@ -1,6 +1,6 @@
 {
-  "id": "e3c3a8fb-9624-409a-b24b-ae5c0240abf9",
-  "prevId": "c5458317-29a6-4e88-b8d6-ed847e9b0447",
+  "id": "56431852-065d-4618-b817-5f1f3f04e54e",
+  "prevId": "7df25a9a-ab80-45c9-b39b-82ffc35066a8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -6151,6 +6151,12 @@
         },
         "archived_at": {
           "name": "archived_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false

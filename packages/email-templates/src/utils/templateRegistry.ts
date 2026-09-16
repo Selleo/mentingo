@@ -1,7 +1,8 @@
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { snakeCase } from "lodash";
 
-import { EMAIL_SUBJECTS_TRANSLATIONS, type EmailSubjectKey } from "../email-subjects";
+import { EMAIL_SUBJECTS_TRANSLATIONS } from "../email-subjects";
+import type { EmailSubjectKey } from "../email-subjects.types";
 import {
   EMAIL_TEMPLATE_BLOCK_TYPES,
   EMAIL_TEMPLATE_HEADER_SOURCES,

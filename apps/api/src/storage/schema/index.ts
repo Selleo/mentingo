@@ -3023,6 +3023,7 @@ export const emailTemplates = pgTable(
     availableLocales,
     publishedAt: timestampWithTimezone({ name: "published_at" }),
     archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    deletedAt: timestampWithTimezone({ name: "deleted_at" }),
     tenantId,
   },
   (table) => ({

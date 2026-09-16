@@ -30,6 +30,16 @@ export class EmailTemplateAssetService {
     private readonly emailTemplateAssetRepository: EmailTemplateAssetRepository,
   ) {}
 
+  async getEmailTemplateImage(id: UUIDType, tenantId: UUIDType) {
+    const resource = await this.getOwnedEmailTemplateAsset(id, tenantId);
+
+    return {
+      resourceId: id,
+      src: `asset:${id}`,
+      previewUrl: await this.fileService.getFileUrl(resource.reference),
+    };
+  }
+
   async uploadEmailTemplateImage(file: Express.Multer.File, currentUser: CurrentUserType) {
     if (!file) throw new BadRequestException("files.toast.invalidData");
 

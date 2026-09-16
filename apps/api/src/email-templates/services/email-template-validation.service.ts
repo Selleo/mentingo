@@ -40,11 +40,13 @@ export class EmailTemplateValidationService {
     const definition = this.getDefinition(event);
     for (const document of Object.values(content)) {
       this.validateEmailTemplateDocumentStructure(document);
+      this.assertNoEmptyEmailTemplateBlocks(document);
     }
-    const templateText = this.collectTemplateText(subject, content);
 
-    this.validateVariableSyntax(templateText);
-    this.validateTemplateVariables(templateText, definition);
+    for (const text of this.collectTemplateText(subject, content)) {
+      this.validateVariableSyntax(text);
+      this.validateTemplateVariables(text, definition);
+    }
 
     const sampleVariables = this.getSampleVariables(event);
 
@@ -109,12 +111,14 @@ export class EmailTemplateValidationService {
     ) {
       warnings.push("emailTemplates.warnings.translationFallback");
     }
+
     for (const document of Object.values(content)) {
       if (!document.content.some((block) => block.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADER))
         warnings.push("emailTemplates.warnings.missingHeader");
       if (!document.content.some((block) => block.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER))
         warnings.push("emailTemplates.warnings.missingFooter");
     }
+
     return [...new Set(warnings)];
   }
 
@@ -126,9 +130,11 @@ export class EmailTemplateValidationService {
   ) {
     const completeLocales = this.getCompleteLocales(subject, content);
     const resolvedLanguage = completeLocales.includes(language) ? language : baseLanguage;
+
     if (!completeLocales.includes(resolvedLanguage)) {
       throw new BadRequestException("emailTemplates.errors.incompleteBaseLanguage");
     }
+
     return resolvedLanguage;
   }
 
@@ -181,6 +187,7 @@ export class EmailTemplateValidationService {
     variables: Record<string, EmailTemplateVariableValue>,
   ) {
     this.validateEmailTemplateDocumentStructure(document);
+
     for (const definition of [
       ...EMAIL_TEMPLATE_SYSTEM_VARIABLES,
       ...this.getDefinition(event).variables,
@@ -208,6 +215,7 @@ export class EmailTemplateValidationService {
       if (typeof value !== expectedType)
         throw new BadRequestException("emailTemplates.errors.invalidContent");
     }
+
     this.assertRequiredActionLinks(event, document);
     this.validateEmailTemplateUrls(document, variables);
   }
@@ -254,8 +262,8 @@ export class EmailTemplateValidationService {
 
         if ("content" in block && block.content) {
           for (const paragraph of block.content) {
+            values.push((paragraph.content ?? []).map((node) => node.text).join(""));
             for (const node of paragraph.content ?? []) {
-              values.push(node.text);
               for (const mark of node.marks ?? []) {
                 if (mark.type === EMAIL_TEMPLATE_INLINE_MARK_TYPES.LINK) {
                   values.push(mark.attrs.href);
@@ -267,12 +275,37 @@ export class EmailTemplateValidationService {
       }
     }
 
-    return values.join("\n");
+    return values;
   }
 
   private validateEmailTemplateDocumentStructure(document: unknown) {
     if (!Value.Check(emailTemplateDocumentSchema, document)) {
       throw new BadRequestException("emailTemplates.errors.invalidContent");
+    }
+  }
+
+  private assertNoEmptyEmailTemplateBlocks(document: EmailTemplateDocument) {
+    for (const block of document.content) {
+      let hasContent = true;
+
+      if (
+        block.type === EMAIL_TEMPLATE_BLOCK_TYPES.TEXT ||
+        block.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADING
+      ) {
+        hasContent = block.content.some((paragraph) =>
+          paragraph.content?.some((node) => node.text.trim()),
+        );
+      }
+      if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER) {
+        hasContent = block.content
+          ? block.content.some((paragraph) => paragraph.content?.some((node) => node.text.trim()))
+          : Boolean(block.attrs.text.trim());
+      }
+      if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON)
+        hasContent = Boolean(block.attrs.label.trim());
+      if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE)
+        hasContent = Boolean(block.attrs.src.trim());
+      if (!hasContent) throw new BadRequestException("emailTemplates.errors.invalidContent");
     }
   }
 

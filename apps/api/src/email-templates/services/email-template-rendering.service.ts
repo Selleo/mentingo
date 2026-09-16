@@ -24,7 +24,7 @@ export class EmailTemplateRenderingService {
   async renderPublishedEmailTemplate(
     tenantId: UUIDType,
     context: EmailTemplateDeliveryContext,
-    branding: DefaultEmailSettings & { logoUrl?: string },
+    branding: DefaultEmailSettings & { logoUrl?: string; borderCircleUrl?: string },
   ) {
     return this.tenantRunner.runWithTenant(tenantId, async () => {
       const template = await this.emailTemplateRepository.findPublishedEmailTemplate(context.event);

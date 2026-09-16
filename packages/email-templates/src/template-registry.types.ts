@@ -131,7 +131,7 @@ export type EmailTemplateBlockNode =
       type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE;
       attrs: { src: string; alt: string; width?: number };
     }
-  | { type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.DIVIDER }
+  | { type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.DIVIDER; attrs?: { height: number } }
   | {
       type: typeof EMAIL_TEMPLATE_BLOCK_TYPES.SPACER;
       attrs: { height: number };

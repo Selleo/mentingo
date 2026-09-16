@@ -8898,6 +8898,15 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface GetEmailTemplateImageResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    src: string;
+    previewUrl: string;
+  };
+}
+
 export interface SendTestEmailTemplateBody {
   event:
     | "welcome"
@@ -9020,6 +9029,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9145,6 +9161,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9270,6 +9293,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9395,6 +9425,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9520,6 +9557,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9645,6 +9689,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9770,6 +9821,13 @@ export interface SendTestEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -9968,6 +10026,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10093,6 +10158,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10218,6 +10290,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10343,6 +10422,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10468,6 +10554,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10593,6 +10686,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10718,6 +10818,13 @@ export interface DuplicateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -10911,6 +11018,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11036,6 +11150,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11161,6 +11282,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11286,6 +11414,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11411,6 +11546,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11536,6 +11678,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11661,6 +11810,13 @@ export interface GetEmailTemplatesResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11860,6 +12016,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -11985,6 +12148,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12110,6 +12280,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12235,6 +12412,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12360,6 +12544,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12485,6 +12676,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12610,6 +12808,13 @@ export interface GetDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12803,6 +13008,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -12928,6 +13140,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13053,6 +13272,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13178,6 +13404,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13303,6 +13536,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13428,6 +13668,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13553,6 +13800,13 @@ export interface CopyDefaultEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13746,6 +14000,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13871,6 +14132,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -13996,6 +14264,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -14121,6 +14396,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -14246,6 +14528,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -14371,6 +14660,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -14496,6 +14792,13 @@ export interface GetEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -14677,6 +14980,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -14802,6 +15112,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -14927,6 +15244,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -15052,6 +15376,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -15177,6 +15508,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -15302,6 +15640,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -15427,6 +15772,13 @@ export interface CreateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -15612,6 +15964,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -15737,6 +16096,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -15862,6 +16228,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -15987,6 +16360,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -16112,6 +16492,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -16237,6 +16624,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -16362,6 +16756,13 @@ export interface CreateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -16520,6 +16921,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -16645,6 +17053,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -16770,6 +17185,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -16895,6 +17317,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -17020,6 +17449,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -17145,6 +17581,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -17270,6 +17713,13 @@ export interface UpdateEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -17453,6 +17903,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -17578,6 +18035,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -17703,6 +18167,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -17828,6 +18299,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -17953,6 +18431,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18078,6 +18563,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18203,6 +18695,13 @@ export interface UpdateEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18396,6 +18895,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18521,6 +19027,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18646,6 +19159,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18771,6 +19291,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -18896,6 +19423,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19021,6 +19555,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19146,6 +19687,13 @@ export interface PublishEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19339,6 +19887,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19464,6 +20019,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19589,6 +20151,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19714,6 +20283,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19839,6 +20415,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -19964,6 +20547,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20089,6 +20679,13 @@ export interface ArchiveEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20141,6 +20738,10 @@ export interface ArchiveEmailTemplateResponse {
     publishedAt: string | null;
     archivedAt: string | null;
   };
+}
+
+export interface DeleteEmailTemplateResponse {
+  data: boolean;
 }
 
 export interface RestoreEmailTemplateResponse {
@@ -20282,6 +20883,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20407,6 +21015,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20532,6 +21147,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20657,6 +21279,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20782,6 +21411,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -20907,6 +21543,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -21032,6 +21675,13 @@ export interface RestoreEmailTemplateResponse {
             }
           | {
               type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
             }
           | {
               type: "spacer";
@@ -21208,6 +21858,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21333,6 +21990,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21458,6 +22122,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21583,6 +22254,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21708,6 +22386,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21833,6 +22518,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -21958,6 +22650,13 @@ export interface PreviewEmailTemplateBody {
           }
         | {
             type: "divider";
+            attrs?: {
+              /**
+               * @min 1
+               * @max 200
+               */
+              height: number;
+            };
           }
         | {
             type: "spacer";
@@ -30294,6 +30993,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name EmailTemplateControllerGetEmailTemplateImage
+     * @request GET:/api/email-templates/images/{id}
+     */
+    emailTemplateControllerGetEmailTemplateImage: (id: string, params: RequestParams = {}) =>
+      this.request<GetEmailTemplateImageResponse, any>({
+        path: `/api/email-templates/images/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EmailTemplateControllerSendTestEmailTemplate
      * @request POST:/api/email-templates/test-send
      */
@@ -30499,6 +31212,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateControllerDeleteEmailTemplate
+     * @request DELETE:/api/email-templates/{id}
+     */
+    emailTemplateControllerDeleteEmailTemplate: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteEmailTemplateResponse, any>({
+        path: `/api/email-templates/${id}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

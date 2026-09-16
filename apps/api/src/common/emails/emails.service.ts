@@ -22,7 +22,6 @@ import type { DefaultEmailSettings } from "src/events/types";
 
 @Injectable()
 export class EmailService {
-  private readonly usingMailhogAdapter: boolean;
   private readonly fromEmail: string;
 
   constructor(
@@ -33,10 +32,6 @@ export class EmailService {
     private configService: ConfigService,
     private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
   ) {
-    this.usingMailhogAdapter =
-      this.configService.get<EmailConfigSchema["EMAIL_ADAPTER"]>("email.EMAIL_ADAPTER") ===
-      "mailhog";
-
     this.fromEmail = this.configService.get<EmailConfigSchema["SMTP_EMAIL_FROM"]>(
       "email.SMTP_EMAIL_FROM",
     ) as string;
@@ -69,6 +64,7 @@ export class EmailService {
             {
               ...branding,
               logoUrl: logoBuffer ? "cid:logo" : undefined,
+              borderCircleUrl: borderCircleBuffer ? "cid:border-circle" : undefined,
             },
           )
         : undefined;
@@ -91,7 +87,7 @@ export class EmailService {
         filename: "border-circle.png",
         content: borderCircleBuffer,
         contentType: "image/png",
-        ...(this.usingMailhogAdapter ? {} : { cid: "border-circle" }),
+        cid: "border-circle",
       });
     }
 
@@ -112,6 +108,13 @@ export class EmailService {
       if (!logo) return undefined;
       const previewLogo = await sharp(logo).resize({ height: 64 }).png().toBuffer();
       return `data:image/png;base64,${previewLogo.toString("base64")}`;
+    });
+  }
+
+  async getEmailPreviewBorderCircle(tenantId: UUIDType): Promise<string | undefined> {
+    return this.tenantRunner.runWithTenant(tenantId, async () => {
+      const borderCircle = await this.settingsService.getEmailBorderCircleBuffer();
+      return borderCircle ? `data:image/png;base64,${borderCircle.toString("base64")}` : undefined;
     });
   }
 

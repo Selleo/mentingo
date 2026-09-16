@@ -1,5 +1,5 @@
 {
-  "id": "c5458317-29a6-4e88-b8d6-ed847e9b0447",
+  "id": "7df25a9a-ab80-45c9-b39b-82ffc35066a8",
   "prevId": "53e82728-4964-4cc0-912e-dd56bc8f2259",
   "version": "7",
   "dialect": "postgresql",
@@ -6151,6 +6151,12 @@
         },
         "archived_at": {
           "name": "archived_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false

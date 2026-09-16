@@ -11,8 +11,9 @@ describe("EmailTemplateAssetService", () => {
   const id = "00000000-0000-4000-8000-000000000002";
   const findEmailTemplateAsset = jest.fn();
   const getRawFileBuffer = jest.fn();
+  const getFileUrl = jest.fn();
   const service = new EmailTemplateAssetService(
-    { getRawFileBuffer } as unknown as FileService,
+    { getRawFileBuffer, getFileUrl } as unknown as FileService,
     { findEmailTemplateAsset } as unknown as EmailTemplateAssetRepository,
   );
   const document: EmailTemplateDocument = {
@@ -35,6 +36,26 @@ describe("EmailTemplateAssetService", () => {
         .png()
         .toBuffer(),
     );
+  });
+
+  it("returns an authorized storage URL without rendering or downloading the image", async () => {
+    getFileUrl.mockResolvedValue("https://storage.example/signed-image");
+    expect(await service.getEmailTemplateImage(id, tenantId)).toEqual({
+      resourceId: id,
+      src: `asset:${id}`,
+      previewUrl: "https://storage.example/signed-image",
+    });
+    expect(findEmailTemplateAsset).toHaveBeenCalledWith(id, tenantId);
+    expect(getFileUrl).toHaveBeenCalledWith(`${tenantId}/email-templates/asset.png`);
+    expect(getRawFileBuffer).not.toHaveBeenCalled();
+  });
+
+  it("does not sign images outside the tenant's email assets", async () => {
+    findEmailTemplateAsset.mockResolvedValue(undefined);
+    await expect(service.getEmailTemplateImage(id, tenantId)).rejects.toThrow(
+      "files.toast.invalidData",
+    );
+    expect(getFileUrl).not.toHaveBeenCalled();
   });
 
   it("checks tenant ownership before reading storage", async () => {

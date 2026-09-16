@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -55,6 +56,20 @@ export class EmailTemplateController {
     private readonly emailTemplateAssetService: EmailTemplateAssetService,
     private readonly emailTemplateTestService: EmailTemplateTestService,
   ) {}
+
+  @Get("images/:id")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(emailTemplateImageResponseSchema),
+  })
+  async getEmailTemplateImage(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<EmailTemplateImageResponse>> {
+    return new BaseResponse(
+      await this.emailTemplateAssetService.getEmailTemplateImage(id, currentUser.tenantId),
+    );
+  }
 
   @Post("test-send")
   @Validate({
@@ -220,6 +235,16 @@ export class EmailTemplateController {
     @Param("id") id: UUIDType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
     return new BaseResponse(await this.emailTemplateService.archiveEmailTemplate(id));
+  }
+
+  @Delete(":id")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(Type.Boolean()),
+  })
+  async deleteEmailTemplate(@Param("id") id: UUIDType): Promise<BaseResponse<boolean>> {
+    await this.emailTemplateService.deleteEmailTemplate(id);
+    return new BaseResponse(true);
   }
 
   @Post(":id/restore")
