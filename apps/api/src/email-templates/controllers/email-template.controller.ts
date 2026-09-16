@@ -13,7 +13,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { EmailTemplateEvent } from "@repo/email-templates";
-import { PERMISSIONS } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -22,6 +22,8 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { parsePagination } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
 import { EMAIL_TEMPLATE_IMAGE_MAX_BYTES } from "../email-template.constants";
 import {
@@ -99,7 +101,13 @@ export class EmailTemplateController {
   })
   @Validate({ response: baseResponse(emailTemplateImageResponseSchema) })
   async uploadEmailTemplateImage(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        EMAIL_TEMPLATE_IMAGE_MAX_BYTES,
+      ).build({ fileIsRequired: true }),
+    )
+    file: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateImageResponse>> {
     return new BaseResponse(

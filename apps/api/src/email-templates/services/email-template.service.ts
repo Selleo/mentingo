@@ -232,6 +232,7 @@ export class EmailTemplateService {
     );
     const subject = body.subject[language]!;
     const document = body.content[language]!;
+    const variables = this.emailTemplateValidationService.getSampleVariables(body.event);
 
     await this.emailTemplateAssetService.validateEmailTemplateAssets(body.content, tenantId);
     const resolved = await this.emailTemplateAssetService.resolveEmailTemplateAssets(
@@ -239,32 +240,23 @@ export class EmailTemplateService {
       tenantId,
       preview,
     );
-    if (!preview)
+    if (!preview) {
       this.emailTemplateValidationService.validateRuntimeVariables(
         body.event,
         document,
-        this.emailTemplateValidationService.getSampleVariables(body.event),
-        body.subject[language]!,
+        variables,
+        subject,
       );
+    }
 
-    const branding = await this.emailService.getDefaultEmailProperties(tenantId, userId, language);
-    const previewLogo = await this.emailService.getEmailPreviewLogo(tenantId);
-    const previewBorderCircle = preview
-      ? await this.emailService.getEmailPreviewBorderCircle(tenantId)
-      : undefined;
-    let logoUrl = previewLogo;
-    if (!preview && previewLogo) logoUrl = "cid:logo";
+    const branding = await this.getSampleEmailBranding(tenantId, userId, language, preview);
     const rendered = renderEmailTemplate({
       event: body.event,
       language,
       document: resolved.document,
       subject,
-      variables: this.emailTemplateValidationService.getSampleVariables(body.event),
-      branding: {
-        ...branding,
-        logoUrl,
-        borderCircleUrl: preview ? previewBorderCircle : "cid:border-circle",
-      },
+      variables,
+      branding,
     });
 
     return {
@@ -297,6 +289,30 @@ export class EmailTemplateService {
       });
       return this.mapCreatedTemplate(template);
     });
+  }
+
+  private async getSampleEmailBranding(
+    tenantId: UUIDType,
+    userId: UUIDType,
+    language: SupportedLanguages,
+    preview: boolean,
+  ) {
+    const branding = await this.emailService.getDefaultEmailProperties(tenantId, userId, language);
+    const logoUrl = await this.emailService.getEmailPreviewLogo(tenantId);
+
+    if (preview) {
+      return {
+        ...branding,
+        logoUrl,
+        borderCircleUrl: await this.emailService.getEmailPreviewBorderCircle(tenantId),
+      };
+    }
+
+    return {
+      ...branding,
+      logoUrl: logoUrl ? "cid:logo" : logoUrl,
+      borderCircleUrl: "cid:border-circle",
+    };
   }
 
   private getDefaultEmailTemplatesForPage(offset: number, perPage: number, overrideCount: number) {
