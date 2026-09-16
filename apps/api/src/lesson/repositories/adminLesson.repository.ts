@@ -19,6 +19,7 @@ import {
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { LESSON_TYPES } from "../lesson.type";
+import { mergeQuizSettings, localizedQuizSettings } from "../quiz/quiz-settings";
 
 import type {
   AdminOptionBody,
@@ -45,6 +46,7 @@ export class AdminLessonRepository {
     return this.db
       .select({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(language),
         courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
@@ -72,6 +74,7 @@ export class AdminLessonRepository {
     return this.db
       .select({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(language),
         courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
@@ -96,6 +99,7 @@ export class AdminLessonRepository {
       })
       .returning({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(language),
         title: sql<string>`lessons.title->>${language}`,
         description: sql<string>`lessons.description->>${language}`,
       });
@@ -113,6 +117,7 @@ export class AdminLessonRepository {
       .where(eq(lessons.id, id))
       .returning({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(data.language),
         title: sql<string>`lessons.title->>${data.language}`,
         description: sql<string>`lessons.description->>${data.language}`,
       });
@@ -137,6 +142,7 @@ export class AdminLessonRepository {
         type: sql<QuestionType>`${questions.type}`,
         title: this.localizationService.getLocalizedSqlField(questions.title, language),
         description: this.localizationService.getLocalizedSqlField(questions.description, language),
+        feedback: this.localizationService.getLocalizedSqlField(questions.feedback, language),
         solutionExplanation: this.localizationService.getLocalizedSqlField(
           questions.solutionExplanation,
           language,
@@ -202,9 +208,16 @@ export class AdminLessonRepository {
     data: UpdateQuizLessonBody,
     dbInstance: DatabasePg = this.db,
   ) {
+    const [previous] = await dbInstance
+      .select({ settings: lessons.quizSettings })
+      .from(lessons)
+      .where(eq(lessons.id, id));
     return dbInstance
       .update(lessons)
       .set({
+        quizSettings: settingsToJSONBuildObject(
+          mergeQuizSettings(data.quizSettings, data.language, previous?.settings),
+        ),
         title: setJsonbField(lessons.title, data.language, data.title),
         type: LESSON_TYPES.QUIZ,
         description: setJsonbField(lessons.description, data.language, data.description),
@@ -227,6 +240,7 @@ export class AdminLessonRepository {
       .values({
         title: buildJsonbField(language, data.title),
         description: buildJsonbField(language, data.description),
+        quizSettings: settingsToJSONBuildObject(mergeQuizSettings(data.quizSettings, language)),
         type: LESSON_TYPES.QUIZ,
         chapterId: data?.chapterId,
         displayOrder,
@@ -236,6 +250,7 @@ export class AdminLessonRepository {
       })
       .returning({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(language),
         title: sql<string>`lessons.title->>${language}`,
         description: sql<string>`lessons.description->>${language}`,
       });
@@ -264,6 +279,7 @@ export class AdminLessonRepository {
       })
       .returning({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(language),
         title: sql<string>`lessons.title->>${language}::text`,
         description: sql<string>`lessons.description->>${language}::text`,
       });
@@ -290,6 +306,7 @@ export class AdminLessonRepository {
       .where(eq(lessons.id, id))
       .returning({
         ...getTableColumns(lessons),
+        quizSettings: localizedQuizSettings(data.language),
         title: sql<string>`lessons.title->>${data.language}`,
         description: sql<string>`lessons.description->>${data.language}`,
       });
@@ -562,6 +579,7 @@ export class AdminLessonRepository {
         lessonId,
         authorId,
         ...questionData,
+        feedback: buildJsonbField(questionData.language, questionData.feedback) ?? {},
         title: buildJsonbField(questionData.language, questionData.title),
         description: buildJsonbField(questionData.language, questionData.description),
       })
@@ -571,6 +589,13 @@ export class AdminLessonRepository {
           lessonId,
           authorId,
           ...questionData,
+          feedback: setJsonbField(
+            questions.feedback,
+            questionData.language,
+            questionData.feedback,
+            true,
+            true,
+          ),
           title: setJsonbField(questions.title, questionData.language, questionData.title),
           description: setJsonbField(
             questions.description,

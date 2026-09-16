@@ -22,6 +22,7 @@ export const liveTrainingVisibilityScopeSchema = Type.Enum(LIVE_TRAINING_VISIBIL
 export const liveTrainingStatusSchema = Type.Enum(LIVE_TRAINING_STATUSES);
 
 export const liveTrainingSettingsSchema = Type.Object({
+  registrationRequired: Type.Optional(Type.Boolean()),
   viewerPermissions: Type.Object({
     microphoneEnabled: Type.Boolean(),
     cameraEnabled: Type.Boolean(),
@@ -30,6 +31,7 @@ export const liveTrainingSettingsSchema = Type.Object({
 
 export const updateLiveTrainingSettingsSchema = Type.Partial(
   Type.Object({
+    registrationRequired: Type.Optional(Type.Boolean()),
     viewerPermissions: Type.Optional(
       Type.Partial(
         Type.Object({

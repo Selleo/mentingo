@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import {
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
@@ -31,6 +31,8 @@ import {
   studentCourses,
   users,
 } from "src/storage/schema";
+
+import { liveTrainingRegistrationCondition } from "../registrations/live-training-registration-access";
 
 import type {
   LiveTrainingAttendanceRow,
@@ -343,17 +345,36 @@ export class LiveTrainingSessionsRepository {
     liveTrainingId: UUIDType;
     startedByUserId: UUIDType;
   }): Promise<LiveTrainingCreatedSessionRow> {
-    const [row] = await this.db
-      .insert(liveTrainingSessions)
-      .values({
-        liveTrainingId: input.liveTrainingId,
-        startedAt: sql`CURRENT_TIMESTAMP`,
-        startedByUserId: input.startedByUserId,
-        status: LIVE_TRAINING_SESSION_STATUSES.WAITING,
-      })
-      .returning({ id: liveTrainingSessions.id });
-
-    return row;
+    return this.db.transaction(async (tx) => {
+      await tx
+        .select({ id: liveTrainings.id })
+        .from(liveTrainings)
+        .where(eq(liveTrainings.id, input.liveTrainingId))
+        .for("update");
+      const [active] = await tx
+        .select({ id: liveTrainingSessions.id })
+        .from(liveTrainingSessions)
+        .where(
+          and(
+            eq(liveTrainingSessions.liveTrainingId, input.liveTrainingId),
+            inArray(liveTrainingSessions.status, [
+              LIVE_TRAINING_SESSION_STATUSES.WAITING,
+              LIVE_TRAINING_SESSION_STATUSES.ACTIVE,
+            ]),
+          ),
+        );
+      if (active) throw new BadRequestException("liveTraining.errors.sessionAlreadyActive");
+      const [row] = await tx
+        .insert(liveTrainingSessions)
+        .values({
+          liveTrainingId: input.liveTrainingId,
+          startedAt: sql`CURRENT_TIMESTAMP`,
+          startedByUserId: input.startedByUserId,
+          status: LIVE_TRAINING_SESSION_STATUSES.WAITING,
+        })
+        .returning({ id: liveTrainingSessions.id });
+      return row;
+    });
   }
 
   async activateLiveTrainingSession(input: {
@@ -703,7 +724,12 @@ export class LiveTrainingSessionsRepository {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
-      .where(eq(liveLessons.liveTrainingId, liveTrainingId));
+      .where(
+        and(
+          eq(liveLessons.liveTrainingId, liveTrainingId),
+          liveTrainingRegistrationCondition(liveTrainingId, studentCourses.studentId),
+        ),
+      );
   }
 
   async updateParticipantAfterJoin(participantId: UUIDType, joinedAt: string) {

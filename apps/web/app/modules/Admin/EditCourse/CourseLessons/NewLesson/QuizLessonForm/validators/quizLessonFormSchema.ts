@@ -8,6 +8,24 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
       .string()
       .min(2, t("adminCourseView.curriculum.lesson.validation.titleMinLength"))
       .max(250, t("adminCourseView.curriculum.lesson.validation.titleMaxLength")),
+    quizSettings: z
+      .object({
+        shuffleQuestions: z.boolean().optional(),
+        shuffleAnswers: z.boolean().optional(),
+        availableFrom: z.string().datetime().nullable().optional(),
+        availableUntil: z.string().datetime().nullable().optional(),
+        timeLimitMinutes: z.number().int().min(1).max(1440).nullable().optional(),
+        passedFeedback: z.string().max(5000).optional(),
+        failedFeedback: z.string().max(5000).optional(),
+      })
+      .refine(
+        (settings) =>
+          !settings.availableFrom ||
+          !settings.availableUntil ||
+          settings.availableFrom < settings.availableUntil,
+        { message: t("quizPoc.errors.invalidDates"), path: ["availableUntil"] },
+      )
+      .optional(),
     thresholdScore: z.union([z.number().min(0).max(100), z.null()]).optional(),
     attemptsLimit: z.union([z.number().min(1).max(100), z.null()]).optional(),
     quizCooldownInHours: z.union([z.number().min(1).max(720), z.null()]).optional(),
@@ -27,6 +45,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             }),
           ),
           title: z.string().min(2).max(250),
+          feedback: z.string().max(5000).optional(),
           options: z
             .array(
               z.object({

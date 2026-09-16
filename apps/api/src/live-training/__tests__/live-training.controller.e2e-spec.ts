@@ -227,6 +227,84 @@ describe("LiveTrainingController (e2e)", () => {
     await enableLiveTraining();
   });
 
+  it("registers concurrently, promotes the waiting list and keeps attendees out of host permissions", async () => {
+    const admin = await createAdmin();
+    const training = await createOfflineLiveTraining(admin);
+    const adminCookie = await cookieFor(admin, app);
+    await request(app.getHttpServer())
+      .patch(`/api/live-training/${training.id}`)
+      .set("Cookie", adminCookie)
+      .send({ language, maxParticipants: 1, settings: { registrationRequired: true } })
+      .expect(200);
+    const first = await createStudent();
+    const second = await createStudent();
+    const cookies = await Promise.all([cookieFor(first, app), cookieFor(second, app)]);
+    const registrations = await Promise.all(
+      cookies.map((cookie) =>
+        request(app.getHttpServer())
+          .post(`/api/live-training/${training.id}/registration`)
+          .set("Cookie", cookie)
+          .expect(201),
+      ),
+    );
+    expect(registrations.map((response) => response.body.data.status).sort()).toEqual([
+      "registered",
+      "waitlisted",
+    ]);
+    const registeredIndex = registrations.findIndex(
+      (response) => response.body.data.status === "registered",
+    );
+    const waitingIndex = 1 - registeredIndex;
+    const detail = await request(app.getHttpServer())
+      .get(`/api/live-training/${training.id}`)
+      .query({ language })
+      .set("Cookie", cookies[waitingIndex])
+      .expect(200);
+    expect(detail.body.data.hostIds).toEqual([admin.id]);
+    await request(app.getHttpServer())
+      .get(`/api/live-training/${training.id}/registrations`)
+      .set("Cookie", cookies[waitingIndex])
+      .expect(403);
+    await request(app.getHttpServer())
+      .patch(`/api/live-training/${training.id}`)
+      .set("Cookie", adminCookie)
+      .send({ language, settings: { registrationRequired: false } })
+      .expect(400);
+    await request(app.getHttpServer())
+      .delete(`/api/live-training/${training.id}/registration`)
+      .set("Cookie", cookies[registeredIndex])
+      .expect(200);
+    const promoted = await request(app.getHttpServer())
+      .get(`/api/live-training/${training.id}`)
+      .query({ language })
+      .set("Cookie", cookies[waitingIndex])
+      .expect(200);
+    expect(promoted.body.data.registration).toMatchObject({
+      registeredCount: 1,
+      waitlistedCount: 0,
+      status: "registered",
+    });
+    await request(app.getHttpServer())
+      .post(`/api/live-training/${training.id}/registration`)
+      .set("Cookie", cookies[waitingIndex])
+      .expect(201);
+    const list = await request(app.getHttpServer())
+      .get(`/api/live-training/${training.id}/registrations`)
+      .set("Cookie", adminCookie)
+      .expect(200);
+    expect(list.body.data).toHaveLength(1);
+    await request(app.getHttpServer())
+      .patch(`/api/live-training/${training.id}`)
+      .set("Cookie", adminCookie)
+      .send({ language, hostUserIds: [admin.id] })
+      .expect(200);
+    const afterHostEdit = await request(app.getHttpServer())
+      .get(`/api/live-training/${training.id}/registrations`)
+      .set("Cookie", adminCookie)
+      .expect(200);
+    expect(afterHostEdit.body.data).toHaveLength(1);
+  });
+
   it("creates live training with calendar event, course link, and before/after resources", async () => {
     const admin = await createAdmin();
     const course = await createTestCourse(admin.id);

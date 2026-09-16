@@ -45,6 +45,8 @@ export const CONTENT_LESSON_FORM_HANDLES = {
 } as const;
 
 export const QUIZ_LESSON_FORM_HANDLES = {
+  settingInput: (name: string) => `curriculum-quiz-setting-${name}`,
+  questionFeedbackInput: (index: number) => `curriculum-quiz-question-feedback-${index}`,
   ROOT: "curriculum-quiz-lesson-form",
   TITLE_INPUT: "curriculum-quiz-lesson-title-input",
   SAVE_BUTTON: "curriculum-quiz-lesson-save-button",

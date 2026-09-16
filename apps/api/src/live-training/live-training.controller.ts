@@ -50,6 +50,12 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
 import { LiveTrainingService } from "./live-training.service";
 import {
+  registrationListResponseSchema,
+  registrationSummaryResponseSchema,
+  type RegistrationParticipant,
+  type RegistrationSummary,
+} from "./registrations/live-training-registration.schema";
+import {
   createLiveTrainingSchema,
   type CreateLiveTrainingBody,
 } from "./schemas/create-live-training.schema";
@@ -155,6 +161,45 @@ export class LiveTrainingController {
     const liveTraining = await this.liveTrainingService.getLiveTraining(id, language, currentUser);
 
     return new BaseResponse(liveTraining);
+  }
+
+  @Post(":id/registration")
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_JOIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: registrationSummaryResponseSchema,
+  })
+  async registerForTraining(
+    @Param("id") id: UUIDType,
+    @CurrentUser() user: CurrentUserType,
+  ): Promise<BaseResponse<RegistrationSummary>> {
+    return new BaseResponse(await this.liveTrainingService.changeRegistration(id, user, false));
+  }
+
+  @Delete(":id/registration")
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_JOIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: registrationSummaryResponseSchema,
+  })
+  async cancelRegistration(
+    @Param("id") id: UUIDType,
+    @CurrentUser() user: CurrentUserType,
+  ): Promise<BaseResponse<RegistrationSummary>> {
+    return new BaseResponse(await this.liveTrainingService.changeRegistration(id, user, true));
+  }
+
+  @Get(":id/registrations")
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: registrationListResponseSchema,
+  })
+  async getRegistrations(
+    @Param("id") id: UUIDType,
+    @CurrentUser() user: CurrentUserType,
+  ): Promise<BaseResponse<RegistrationParticipant[]>> {
+    return new BaseResponse(await this.liveTrainingService.getRegistrations(id, user));
   }
 
   @Post()

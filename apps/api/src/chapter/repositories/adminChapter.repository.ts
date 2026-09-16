@@ -4,6 +4,7 @@ import { and, eq, getTableColumns, gte, isNull, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { localizedQuizSettings } from "src/lesson/quiz/quiz-settings";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -141,6 +142,7 @@ export class AdminChapterRepository {
         fileType: sql<string>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
         isExternal: sql<boolean>`${lessons.isExternal}`,
+        quizSettings: localizedQuizSettings(language),
         thresholdScore: sql<number>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
@@ -155,6 +157,7 @@ export class AdminChapterRepository {
                 questions.description,
                 language,
               )},
+              'feedback', coalesce(${this.localizationService.getFieldByLanguage(questions.feedback, language)}, ''),
               'photoS3Key', ${questions.photoS3Key},
               'displayOrder', ${questions.displayOrder},
               'options', (

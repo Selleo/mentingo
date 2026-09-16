@@ -75,6 +75,7 @@ import {
   withTenantIdIndex,
 } from "./utils";
 
+import type { QuizSettings, QuizAttemptState } from "../../lesson/quiz/quiz.types";
 import type {
   CourseStatus,
   CourseType,
@@ -458,6 +459,7 @@ export const lessons = pgTable(
     type: varchar("type", { length: 20 }).notNull(),
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     description: jsonb("description").$type<LocalizedText>(),
+    quizSettings: jsonb("quiz_settings").$type<QuizSettings>().default({}).notNull(),
     thresholdScore: integer("threshold_score"),
     attemptsLimit: integer("attempts_limit"),
     quizCooldownInHours: integer("quiz_cooldown_in_hours"),
@@ -1396,6 +1398,7 @@ export const questions = pgTable(
     photoS3Key: varchar("photo_s3_key", { length: 500 }),
     description: jsonb("description"),
     solutionExplanation: jsonb("solution_explanation"),
+    feedback: jsonb("feedback").$type<LocalizedText>().default({}).notNull(),
     tenantId,
   },
   withTenantIdIndex("questions"),
@@ -1518,6 +1521,7 @@ export const studentLessonProgress = pgTable(
       .notNull(),
     completedQuestionCount: integer("completed_question_count").default(0).notNull(),
     quizScore: integer("quiz_score"),
+    quizAttemptState: jsonb("quiz_attempt_state").$type<QuizAttemptState>(),
     attempts: integer("attempts"),
     isQuizPassed: boolean("is_quiz_passed"),
     isStarted: boolean("is_started").default(false),

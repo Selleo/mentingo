@@ -341,6 +341,7 @@ const QuizLessonForm = ({
             />
 
             <QuizSettingsSection
+              isStructureLocked={isStructureLocked}
               form={form}
               lessonToEdit={lessonToEdit}
               questionsCount={questions?.length || 0}

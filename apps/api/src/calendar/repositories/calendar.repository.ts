@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import {
+  LIVE_TRAINING_MEMBER_ROLES as MEMBER_ROLES,
   CALENDAR_EVENT_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
   ENTITY_TYPES,
@@ -296,7 +297,12 @@ export class CalendarRepository {
       .innerJoin(liveTrainings, eq(liveTrainings.calendarEventId, calendarEvents.id))
       .innerJoin(liveTrainingMembers, eq(liveTrainingMembers.liveTrainingId, liveTrainings.id))
       .innerJoin(users, eq(users.id, liveTrainingMembers.userId))
-      .where(inArray(calendarEvents.id, eventIds));
+      .where(
+        and(
+          inArray(calendarEvents.id, eventIds),
+          sql`${liveTrainingMembers.role} <> ${MEMBER_ROLES.ATTENDEE}`,
+        ),
+      );
   }
 
   async getLiveTrainingAuthorRow(eventId: UUIDType) {

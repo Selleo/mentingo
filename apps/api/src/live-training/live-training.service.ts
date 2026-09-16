@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import {
   CALENDAR_EVENT_STATUSES,
+  SUPPORTED_LANGUAGES,
   DEFAULT_LIVE_TRAINING_SETTINGS,
   ENTITY_TYPES,
   LIVE_TRAINING_DELIVERY_TYPES,
@@ -51,6 +52,7 @@ import { calendarEvents, courses, liveTrainingLinks, liveTrainings } from "src/s
 
 import { LiveTrainingSessionsRepository } from "./live-training-sessions/live-training-sessions.repository";
 import { LiveTrainingRepository } from "./live-training.repository";
+import { LiveTrainingRegistrationRepository } from "./registrations/live-training-registration.repository";
 
 import type {
   CalendarEventUpdateInput,
@@ -81,12 +83,30 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 export class LiveTrainingService {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
+    private readonly registrations: LiveTrainingRegistrationRepository,
     private readonly liveTrainingRepository: LiveTrainingRepository,
     private readonly fileService: FileService,
     private readonly envService: EnvService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly liveTrainingSessionsRepository: LiveTrainingSessionsRepository,
   ) {}
+
+  async changeRegistration(id: UUIDType, currentUser: CurrentUserType, cancel: boolean) {
+    await this.getLiveTraining(id, SUPPORTED_LANGUAGES.EN, currentUser);
+    return this.registrations.change(id, currentUser.userId, cancel);
+  }
+
+  async getRegistrations(id: UUIDType, currentUser: CurrentUserType) {
+    const details = await this.getLiveTraining(id, SUPPORTED_LANGUAGES.EN, currentUser);
+    if (
+      !this.canManageAny(currentUser) &&
+      details.authorId !== currentUser.userId &&
+      !details.hostIds.includes(currentUser.userId)
+    ) {
+      throw new ForbiddenException("common.toast.forbidden");
+    }
+    return this.registrations.list(id);
+  }
 
   async getLiveTrainings(
     query: LiveTrainingListQuery,
@@ -455,15 +475,15 @@ export class LiveTrainingService {
       nextAvailableLocales,
     );
 
+    if (this.hasUpdateValues(liveTrainingUpdate)) {
+      await this.registrations.updateTraining(row.id, liveTrainingUpdate);
+    }
+
     if (this.hasUpdateValues(calendarEventUpdate)) {
       await this.liveTrainingRepository.updateCalendarEvent(
         row.calendarEventId,
         calendarEventUpdate,
       );
-    }
-
-    if (this.hasUpdateValues(liveTrainingUpdate)) {
-      await this.liveTrainingRepository.updateLiveTraining(row.id, liveTrainingUpdate);
     }
 
     if (hostUserIds !== undefined) {
@@ -749,6 +769,7 @@ export class LiveTrainingService {
       linkedLessonCount,
       currentSession,
       materials: visibleMaterials,
+      registration: await this.registrations.summary(id, currentUser.userId),
     };
   }
 
@@ -1344,6 +1365,8 @@ export class LiveTrainingService {
     baseSettings: LiveTrainingSettings = DEFAULT_LIVE_TRAINING_SETTINGS,
   ): LiveTrainingSettings {
     return {
+      registrationRequired:
+        settings?.registrationRequired ?? baseSettings.registrationRequired ?? false,
       viewerPermissions: {
         ...baseSettings.viewerPermissions,
         ...settings?.viewerPermissions,

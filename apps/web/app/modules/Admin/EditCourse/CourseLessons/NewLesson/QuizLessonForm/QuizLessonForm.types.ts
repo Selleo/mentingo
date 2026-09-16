@@ -22,6 +22,7 @@ export type QuestionOption = {
 };
 
 export type Question = {
+  feedback?: string;
   id?: string;
   sortableId: string;
   type: QuestionType;

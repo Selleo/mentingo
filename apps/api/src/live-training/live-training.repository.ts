@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  LIVE_TRAINING_MEMBER_ROLES as MEMBER_ROLES,
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
@@ -42,6 +43,7 @@ import {
   studentCourses,
   users,
 } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import type {
   CalendarEventUpdateInput,
@@ -78,6 +80,7 @@ export class LiveTrainingRepository {
       .insert(liveTrainings)
       .values({
         ...input.liveTraining,
+        settings: settingsToJSONBuildObject(input.liveTraining.settings),
         calendarEventId: calendarEvent.id,
       })
       .returning({ id: liveTrainings.id });
@@ -376,7 +379,12 @@ export class LiveTrainingRepository {
       })
       .from(liveTrainingMembers)
       .innerJoin(users, eq(users.id, liveTrainingMembers.userId))
-      .where(eq(liveTrainingMembers.liveTrainingId, id));
+      .where(
+        and(
+          eq(liveTrainingMembers.liveTrainingId, id),
+          sql`${liveTrainingMembers.role} <> ${MEMBER_ROLES.ATTENDEE}`,
+        ),
+      );
   }
 
   async getLiveTrainingLinkedCourseRows(
@@ -498,7 +506,12 @@ export class LiveTrainingRepository {
   async deleteHosts(liveTrainingId: UUIDType) {
     return this.db
       .delete(liveTrainingMembers)
-      .where(eq(liveTrainingMembers.liveTrainingId, liveTrainingId));
+      .where(
+        and(
+          eq(liveTrainingMembers.liveTrainingId, liveTrainingId),
+          sql`${liveTrainingMembers.role} <> ${MEMBER_ROLES.ATTENDEE}`,
+        ),
+      );
   }
 
   async insertHosts(liveTrainingId: UUIDType, hosts: LiveTrainingHostInput) {

@@ -73,7 +73,12 @@ export const deriveLiveTrainingUiActions = ({
       canManageSession &&
       canStartFromStatus &&
       !hasOpenSession,
-    canShowJoin: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_JOIN) && isJoinable,
+    canShowJoin:
+      hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_JOIN) &&
+      isJoinable &&
+      (!liveTraining.settings.registrationRequired ||
+        canManageSession ||
+        liveTraining.registration?.status === "registered"),
     canShowFinish:
       (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_END) || hasHostRole) &&
       canManageSession &&

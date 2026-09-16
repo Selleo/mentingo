@@ -34,6 +34,7 @@ import { AiMentorConfigurationGraphService } from "./ai-mentor-configuration/ser
 import { AiMentorConfigurationService } from "./ai-mentor-configuration/services/ai-mentor-configuration.service";
 import { AiMentorLessonTranslationService } from "./ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { LessonController } from "./lesson.controller";
+import { QuizAttemptRepository } from "./quiz/quiz-attempt.repository";
 import { AdminLessonRepository } from "./repositories/adminLesson.repository";
 import { LessonRepository } from "./repositories/lesson.repository";
 import { AdminLessonService } from "./services/adminLesson.service";
@@ -63,6 +64,7 @@ import { LessonService } from "./services/lesson.service";
     AiMentorConfigurationGenerationController,
   ],
   providers: [
+    QuizAttemptRepository,
     AiJudgeConfigurationRepository,
     AiJudgeConfigurationGenerationQueueService,
     AiJudgeConfigurationGenerationService,

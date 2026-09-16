@@ -2533,6 +2533,8 @@ export interface GetBetaCourseByIdResponse {
           title: string;
           displayOrder?: number;
           solutionExplanation?: string;
+          /** @maxLength 5000 */
+          feedback?: string;
           photoS3Key?: string | null;
           options?: {
             /** @format uuid */
@@ -2565,6 +2567,17 @@ export interface GetBetaCourseByIdResponse {
         } | null;
         liveTrainingId?: string | null;
         updatedAt?: string;
+        quizSettings?: {
+          shuffleQuestions?: boolean;
+          shuffleAnswers?: boolean;
+          availableFrom?: string | null;
+          availableUntil?: string | null;
+          timeLimitMinutes?: number | null;
+          /** @maxLength 5000 */
+          passedFeedback?: string;
+          /** @maxLength 5000 */
+          failedFeedback?: string;
+        };
       }[];
       completedLessonCount?: number;
       chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -3258,6 +3271,8 @@ export type BetaCreateChapterBody = {
       title: string;
       displayOrder?: number;
       solutionExplanation?: string;
+      /** @maxLength 5000 */
+      feedback?: string;
       photoS3Key?: string | null;
       options?: {
         /** @format uuid */
@@ -3290,6 +3305,17 @@ export type BetaCreateChapterBody = {
     } | null;
     liveTrainingId?: string | null;
     updatedAt?: string;
+    quizSettings?: {
+      shuffleQuestions?: boolean;
+      shuffleAnswers?: boolean;
+      availableFrom?: string | null;
+      availableUntil?: string | null;
+      timeLimitMinutes?: number | null;
+      /** @maxLength 5000 */
+      passedFeedback?: string;
+      /** @maxLength 5000 */
+      failedFeedback?: string;
+    };
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
@@ -3342,6 +3368,8 @@ export type UpdateChapterBody = ({
       title: string;
       displayOrder?: number;
       solutionExplanation?: string;
+      /** @maxLength 5000 */
+      feedback?: string;
       photoS3Key?: string | null;
       options?: {
         /** @format uuid */
@@ -3374,6 +3402,17 @@ export type UpdateChapterBody = ({
     } | null;
     liveTrainingId?: string | null;
     updatedAt?: string;
+    quizSettings?: {
+      shuffleQuestions?: boolean;
+      shuffleAnswers?: boolean;
+      availableFrom?: string | null;
+      availableUntil?: string | null;
+      timeLimitMinutes?: number | null;
+      /** @maxLength 5000 */
+      passedFeedback?: string;
+      /** @maxLength 5000 */
+      failedFeedback?: string;
+    };
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
@@ -3474,6 +3513,8 @@ export interface GetLessonByIdResponse {
         title: string;
         displayOrder?: number;
         solutionExplanation: string | null;
+        /** @maxLength 5000 */
+        feedback?: string;
         photoS3Key?: string | null;
         options?: {
           /** @format uuid */
@@ -3495,7 +3536,27 @@ export interface GetLessonByIdResponse {
       wrongAnswerCount: number | null;
       score: number | null;
     };
+    quizRequiresStart?: boolean;
+    quizAttempt?: {
+      id: string;
+      startedAt: string;
+      expiresAt: string | null;
+      status: "active" | "submitted" | "expired";
+      questionOrder: string[];
+      optionOrder: Record<string, string[]>;
+    } | null;
     lessonCompleted?: boolean;
+    quizSettings?: {
+      shuffleQuestions?: boolean;
+      shuffleAnswers?: boolean;
+      availableFrom?: string | null;
+      availableUntil?: string | null;
+      timeLimitMinutes?: number | null;
+      /** @maxLength 5000 */
+      passedFeedback?: string;
+      /** @maxLength 5000 */
+      failedFeedback?: string;
+    };
     thresholdScore: number | null;
     attemptsLimit: number | null;
     quizCooldownInHours: number | null;
@@ -3574,10 +3635,18 @@ export interface GetLessonByIdResponse {
           linkedCourseIds: string[];
         } & {
           settings: {
+            registrationRequired?: boolean;
             viewerPermissions: {
               microphoneEnabled: boolean;
               cameraEnabled: boolean;
             };
+          };
+          registration?: {
+            registeredCount: number;
+            waitlistedCount: number;
+            status: ("registered" | "waitlisted") | null;
+            position: number | null;
+            isOpen: boolean;
           };
           metadata: object;
           author: {
@@ -3674,6 +3743,8 @@ export type BetaCreateLessonBody = {
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -3756,6 +3827,7 @@ export interface BetaCreateLiveTrainingLessonBody {
      */
     maxParticipants?: number;
     settings?: {
+      registrationRequired?: boolean;
       viewerPermissions?: {
         microphoneEnabled?: boolean;
         cameraEnabled?: boolean;
@@ -3809,6 +3881,7 @@ export interface AttachLiveTrainingLessonBody {
      */
     maxParticipants?: number;
     settings?: {
+      registrationRequired?: boolean;
       viewerPermissions?: {
         microphoneEnabled?: boolean;
         cameraEnabled?: boolean;
@@ -3864,6 +3937,8 @@ export type BetaCreateAiMentorLessonBody = {
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -3995,6 +4070,8 @@ export type BetaUpdateAiMentorLessonBody = ({
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -4037,8 +4114,21 @@ export type BetaCreateQuizLessonBody = {
   type: string;
   description?: string;
   solutionExplanation?: string;
+  /** @maxLength 5000 */
+  feedback?: string;
   fileS3Key?: string;
   fileType?: string;
+  quizSettings?: {
+    shuffleQuestions?: boolean;
+    shuffleAnswers?: boolean;
+    availableFrom?: string | null;
+    availableUntil?: string | null;
+    timeLimitMinutes?: number | null;
+    /** @maxLength 5000 */
+    passedFeedback?: string;
+    /** @maxLength 5000 */
+    failedFeedback?: string;
+  };
   thresholdScore: number;
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
@@ -4061,6 +4151,8 @@ export type BetaCreateQuizLessonBody = {
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -4099,8 +4191,21 @@ export type BetaUpdateQuizLessonBody = ({
   type?: string;
   description?: string;
   solutionExplanation?: string;
+  /** @maxLength 5000 */
+  feedback?: string;
   fileS3Key?: string;
   fileType?: string;
+  quizSettings?: {
+    shuffleQuestions?: boolean;
+    shuffleAnswers?: boolean;
+    availableFrom?: string | null;
+    availableUntil?: string | null;
+    timeLimitMinutes?: number | null;
+    /** @maxLength 5000 */
+    passedFeedback?: string;
+    /** @maxLength 5000 */
+    failedFeedback?: string;
+  };
   thresholdScore?: number;
   attemptsLimit?: number | null;
   quizCooldownInHours?: number | null;
@@ -4123,6 +4228,8 @@ export type BetaUpdateQuizLessonBody = ({
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -4183,6 +4290,8 @@ export type BetaUpdateLessonBody = ({
     title: string;
     displayOrder?: number;
     solutionExplanation?: string;
+    /** @maxLength 5000 */
+    feedback?: string;
     photoS3Key?: string | null;
     options?: {
       /** @format uuid */
@@ -4237,9 +4346,46 @@ export interface RemoveLessonResponse {
   };
 }
 
+export interface StartQuizAttemptBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface StartQuizAttemptResponse {
+  data: {
+    id: string;
+    startedAt: string;
+    expiresAt: string | null;
+    status: "active" | "submitted" | "expired";
+    questionOrder: string[];
+    optionOrder: Record<string, string[]>;
+  } | null;
+}
+
+export interface ExpireQuizAttemptBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface ExpireQuizAttemptResponse {
+  data: {
+    id: string;
+    startedAt: string;
+    expiresAt: string | null;
+    status: "active" | "submitted" | "expired";
+    questionOrder: string[];
+    optionOrder: Record<string, string[]>;
+  } | null;
+}
+
 export interface EvaluationQuizBody {
   /** @format uuid */
   lessonId: string;
+  attemptId?: string;
   questionsAnswers: {
     /** @format uuid */
     questionId: string;
@@ -8069,10 +8215,18 @@ export interface GetLiveTrainingResponse {
     linkedCourseIds: string[];
   } & {
     settings: {
+      registrationRequired?: boolean;
       viewerPermissions: {
         microphoneEnabled: boolean;
         cameraEnabled: boolean;
       };
+    };
+    registration?: {
+      registeredCount: number;
+      waitlistedCount: number;
+      status: ("registered" | "waitlisted") | null;
+      position: number | null;
+      isOpen: boolean;
     };
     metadata: object;
     author: {
@@ -8141,6 +8295,36 @@ export interface GetLiveTrainingResponse {
   };
 }
 
+export interface RegisterForTrainingResponse {
+  data: {
+    registeredCount: number;
+    waitlistedCount: number;
+    status: ("registered" | "waitlisted") | null;
+    position: number | null;
+    isOpen: boolean;
+  };
+}
+
+export interface CancelRegistrationResponse {
+  data: {
+    registeredCount: number;
+    waitlistedCount: number;
+    status: ("registered" | "waitlisted") | null;
+    position: number | null;
+    isOpen: boolean;
+  };
+}
+
+export interface GetRegistrationsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    fullName: string;
+    status: "registered" | "waitlisted";
+    joinedAt: string;
+  }[];
+}
+
 export interface CreateLiveTrainingBody {
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -8165,6 +8349,7 @@ export interface CreateLiveTrainingBody {
    */
   maxParticipants?: number;
   settings?: {
+    registrationRequired?: boolean;
     viewerPermissions?: {
       microphoneEnabled?: boolean;
       cameraEnabled?: boolean;
@@ -8219,6 +8404,7 @@ export type UpdateLiveTrainingBody = {
    */
   maxParticipants?: number;
   settings?: {
+    registrationRequired?: boolean;
     viewerPermissions?: {
       microphoneEnabled?: boolean;
       cameraEnabled?: boolean;
@@ -8253,10 +8439,18 @@ export interface UpdateLiveTrainingResponse {
     linkedCourseIds: string[];
   } & {
     settings: {
+      registrationRequired?: boolean;
       viewerPermissions: {
         microphoneEnabled: boolean;
         cameraEnabled: boolean;
       };
+    };
+    registration?: {
+      registeredCount: number;
+      waitlistedCount: number;
+      status: ("registered" | "waitlisted") | null;
+      position: number | null;
+      isOpen: boolean;
     };
     metadata: object;
     author: {
@@ -8412,7 +8606,7 @@ export interface JoinCurrentSessionResponse {
     livekitUrl: string;
     token: string;
     identity: string;
-    role: "host" | "co_trainer" | "moderator" | "observer" | "admin";
+    role: "attendee" | "host" | "co_trainer" | "moderator" | "observer" | "admin";
     viewerPermissions: {
       microphoneEnabled: boolean;
       cameraEnabled: boolean;
@@ -8463,7 +8657,7 @@ export interface GetSessionResponse {
         fullName: string | null;
         profilePictureUrl: string | null;
       };
-      role: "host" | "co_trainer" | "moderator" | "observer" | "admin";
+      role: "attendee" | "host" | "co_trainer" | "moderator" | "observer" | "admin";
       firstJoinedAt: string | null;
       lastLeftAt: string | null;
       totalSeconds: number;
@@ -15162,6 +15356,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerStartQuizAttempt
+     * @request POST:/api/lesson/quiz-attempt/start
+     */
+    lessonControllerStartQuizAttempt: (data: StartQuizAttemptBody, params: RequestParams = {}) =>
+      this.request<StartQuizAttemptResponse, any>({
+        path: `/api/lesson/quiz-attempt/start`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerExpireQuizAttempt
+     * @request POST:/api/lesson/quiz-attempt/expire
+     */
+    lessonControllerExpireQuizAttempt: (data: ExpireQuizAttemptBody, params: RequestParams = {}) =>
+      this.request<ExpireQuizAttemptResponse, any>({
+        path: `/api/lesson/quiz-attempt/expire`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerEvaluationQuiz
      * @request POST:/api/lesson/evaluation-quiz
      */
@@ -16441,6 +16667,48 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/live-training/${id}`,
         method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerRegisterForTraining
+     * @request POST:/api/live-training/{id}/registration
+     */
+    liveTrainingControllerRegisterForTraining: (id: string, params: RequestParams = {}) =>
+      this.request<RegisterForTrainingResponse, any>({
+        path: `/api/live-training/${id}/registration`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerCancelRegistration
+     * @request DELETE:/api/live-training/{id}/registration
+     */
+    liveTrainingControllerCancelRegistration: (id: string, params: RequestParams = {}) =>
+      this.request<CancelRegistrationResponse, any>({
+        path: `/api/live-training/${id}/registration`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetRegistrations
+     * @request GET:/api/live-training/{id}/registrations
+     */
+    liveTrainingControllerGetRegistrations: (id: string, params: RequestParams = {}) =>
+      this.request<GetRegistrationsResponse, any>({
+        path: `/api/live-training/${id}/registrations`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

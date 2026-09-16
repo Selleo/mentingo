@@ -14,6 +14,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { aiJudgeConfigurationInputSchema } from "./ai-judge-configuration/ai-judge-configuration.schema";
 import { aiMentorConfigurationContentSchema } from "./ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 import { LESSON_TYPES } from "./lesson.type";
+import { quizSettingsSchema, quizAttemptSchema } from "./quiz/quiz.schema";
 
 import type { Static } from "@sinclair/typebox";
 
@@ -36,6 +37,7 @@ export const adminQuestionSchema = Type.Object({
   title: Type.String(),
   displayOrder: Type.Optional(Type.Number()),
   solutionExplanation: Type.Optional(Type.String()),
+  feedback: Type.Optional(Type.String({ maxLength: 5000 })),
   photoS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   options: Type.Optional(Type.Array(adminOptionSchema)),
   language: Type.Optional(supportedLanguagesSchema),
@@ -66,8 +68,10 @@ const lessonQuizSchema = Type.Object({
   displayOrder: Type.Number(),
   description: Type.Optional(Type.String()),
   solutionExplanation: Type.Optional(Type.String()),
+  feedback: Type.Optional(Type.String({ maxLength: 5000 })),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
+  quizSettings: Type.Optional(quizSettingsSchema),
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
@@ -101,6 +105,7 @@ export const adminLessonSchema = Type.Object({
   displayOrder: Type.Number(),
   title: Type.String(),
   description: Type.String(),
+  quizSettings: Type.Optional(quizSettingsSchema),
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
@@ -216,7 +221,10 @@ export const lessonShowSchema = Type.Object({
   fileType: Type.Union([Type.String(), Type.Null()]),
   fileUrl: Type.Union([Type.String(), Type.Null()]),
   quizDetails: Type.Optional(questionDetails),
+  quizRequiresStart: Type.Optional(Type.Boolean()),
+  quizAttempt: Type.Optional(Type.Union([quizAttemptSchema, Type.Null()])),
   lessonCompleted: Type.Optional(Type.Boolean()),
+  quizSettings: Type.Optional(quizSettingsSchema),
   thresholdScore: Type.Union([Type.Number(), Type.Null()]),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
@@ -335,6 +343,7 @@ export const studentQuestionAnswersSchema = Type.Object({
 
 export const answerQuestionsForLessonBody = Type.Object({
   lessonId: UUIDSchema,
+  attemptId: Type.Optional(Type.String()),
   questionsAnswers: Type.Array(studentQuestionAnswersSchema),
   language: Type.Enum(SUPPORTED_LANGUAGES),
 });

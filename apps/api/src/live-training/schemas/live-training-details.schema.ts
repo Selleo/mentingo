@@ -3,6 +3,7 @@ import { Type, type Static } from "@sinclair/typebox";
 import { baseResponse } from "src/common";
 
 import { liveTrainingSessionSummarySchema } from "../live-training-sessions/live-training-sessions.types";
+import { registrationSummarySchema } from "../registrations/live-training-registration.schema";
 
 import {
   liveTrainingBaseSchema,
@@ -16,6 +17,7 @@ export const liveTrainingDetailsSchema = Type.Intersect([
   liveTrainingBaseSchema,
   Type.Object({
     settings: liveTrainingSettingsSchema,
+    registration: Type.Optional(registrationSummarySchema),
     metadata: Type.Record(Type.String(), Type.Unknown()),
     author: liveTrainingUserSummarySchema,
     hosts: Type.Array(liveTrainingUserSummarySchema),

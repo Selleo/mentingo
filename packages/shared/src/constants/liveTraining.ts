@@ -46,6 +46,7 @@ export type LiveTrainingSessionStatus =
   (typeof LIVE_TRAINING_SESSION_STATUSES)[keyof typeof LIVE_TRAINING_SESSION_STATUSES];
 
 export const LIVE_TRAINING_MEMBER_ROLES = {
+  ATTENDEE: "attendee",
   HOST: "host",
   CO_TRAINER: "co_trainer",
   MODERATOR: "moderator",
@@ -78,7 +79,13 @@ export const LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES = {
 export type LiveTrainingResourceRelationshipType =
   (typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES)[keyof typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES];
 
+export const LIVE_TRAINING_REGISTRATION_STATUSES = {
+  REGISTERED: "registered",
+  WAITLISTED: "waitlisted",
+} as const;
+
 export type LiveTrainingSettings = {
+  registrationRequired?: boolean;
   viewerPermissions: {
     microphoneEnabled: boolean;
     cameraEnabled: boolean;

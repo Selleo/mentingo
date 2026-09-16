@@ -38,6 +38,7 @@ export class QuestionRepository {
         type: sql<QuestionType>`${questions.type}`,
         title: this.localizationService.getLocalizedSqlField(questions.title, language),
         description: this.localizationService.getLocalizedSqlField(questions.description, language),
+        feedback: sql<string>`CASE WHEN ${isCompleted} THEN coalesce(${this.localizationService.getLocalizedSqlField(questions.feedback, language)}, '') ELSE '' END`,
         solutionExplanation: sql<string | null>`CASE
               WHEN ${isCompleted} THEN ${this.localizationService.getLocalizedSqlField(
                 questions.solutionExplanation,

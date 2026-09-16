@@ -55,7 +55,7 @@
       "layoutResetError": "Výchozí rozložení dashboardu se nepodařilo obnovit."
     },
     "widgets": {
-      "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "loadError": "Tento widget se nepodařilo načíst.",
       "dataScope": {
         "personal": "Vaše data",
         "otherUsers": "Data organizace",
@@ -67,10 +67,15 @@
       "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
       "placeholderContent": "Tento widget je připravený na obsah konkrétní funkce.",
       "placeholderFooter": "Ukázkový widget",
-      "s_placeholder_1": { "title": "Widget studenta 1" },
-      "s_placeholder_2": { "title": "Widget studenta 2" },
-      "s_placeholder_3": { "title": "Widget studenta 3" },
-      "loadError": "Tento widget se nepodařilo načíst.",
+      "s_placeholder_1": {
+        "title": "Widget studenta 1"
+      },
+      "s_placeholder_2": {
+        "title": "Widget studenta 2"
+      },
+      "s_placeholder_3": {
+        "title": "Widget studenta 3"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "Všechny zahájené kurzy",
@@ -200,10 +205,18 @@
           "sun": "Ne"
         }
       },
-      "continue_learning": { "title": "Pokračovat ve vzdělávání" },
-      "required_course": { "title": "Povinné kurzy" },
-      "course_completion": { "title": "Průběh kurzů" },
-      "certificates": { "title": "Certifikáty" },
+      "continue_learning": {
+        "title": "Pokračovat ve vzdělávání"
+      },
+      "required_course": {
+        "title": "Povinné kurzy"
+      },
+      "course_completion": {
+        "title": "Průběh kurzů"
+      },
+      "certificates": {
+        "title": "Certifikáty"
+      },
       "ai_mentor_practice": {
         "title": "Cvičení s AI Mentorem",
         "aiNotConfigured": "AI Mentor není pro tohoto tenanta nakonfigurován."
@@ -314,7 +327,7 @@
       "next": "Další",
       "save": "Uložit",
       "saving": "Ukládání...",
-      "delete": "Vymazat",
+      "delete": "Smazat",
       "create": "Vytvořit",
       "cancel": "Zrušit",
       "back": "Zadní",
@@ -327,7 +340,6 @@
       "clearAll": "Vymazat vše",
       "validate": "Ověřit",
       "edit": "Upravit",
-      "delete": "Smazat",
       "uploading": "Nahrávání...",
       "sending": "Odesílání...",
       "loading": "Načítání..."
@@ -387,6 +399,7 @@
       }
     },
     "other": {
+      "selectDate": "Vyberte datum",
       "active": "Aktivní",
       "archived": "Archivováno",
       "selected": "Vybraný",
@@ -744,7 +757,9 @@
     "loading": "Načítání událostí",
     "empty": "Žádné události k zobrazení",
     "today": "Dnes",
-    "legend": { "label": "Zdroje" },
+    "legend": {
+      "label": "Zdroje"
+    },
     "microsoft": {
       "staleWarning": "Události Microsoft mohou být zastaralé. Připojte účet znovu nebo opakujte akci v nastavení účtu.",
       "horizonNotice": "Události Microsoft se importují od 30 dnů zpětně do 6 měsíců dopředu, takže tento rozsah může být neúplný."
@@ -1081,6 +1096,20 @@
       "toast": {
         "success": "Živé školení bylo úspěšně aktualizováno."
       }
+    },
+    "registration": {
+      "title": "Registrace",
+      "required": "Vyžadovat registraci",
+      "register": "Přihlásit se",
+      "cancel": "Zrušit přihlášení",
+      "registered": "Přihlášení",
+      "waitlisted": "Čekací listina",
+      "confirmed": "Vaše místo je potvrzeno.",
+      "position": "Vaše pořadí na čekací listině: {{position}}",
+      "capacity": "Přihlášení: {{count}} / {{limit}}",
+      "saved": "Přihlášení bylo aktualizováno.",
+      "closed": "Přihlašování je uzavřeno.",
+      "empty": "Zatím žádní účastníci."
     }
   },
   "newsView": {
@@ -2802,7 +2831,10 @@
             "label": "Scénář",
             "placeholder": "Popište situaci, kterou bude student procvičovat."
           },
-          "aiRole": { "label": "Role AI", "placeholder": "Například: váhající zákazník" },
+          "aiRole": {
+            "label": "Role AI",
+            "placeholder": "Například: váhající zákazník"
+          },
           "learnerRole": {
             "label": "Role studenta",
             "placeholder": "Například: obchodní zástupce"
@@ -2876,7 +2908,12 @@
           "failedTitle": "Návrh se nepodařilo vytvořit",
           "cancel": "Zrušit generování",
           "revise": "Upravit návrh",
-          "review": "Zkontrolovat konfiguraci",
+          "review": {
+            "currentDraftTitle": "Zkontrolovat aktuální návrh",
+            "currentDraftDescription": "Tento návrh stále obsahuje doporučení ke kvalitě. Před použitím jej zkontrolujte.",
+            "requiresReviewTitle": "Zkontrolovat vygenerovanou konfiguraci",
+            "requiresReviewDescription": "AI zachovala nejnovější návrh pro vaše konečné rozhodnutí."
+          },
           "progressLabel": "Průběh generování AI Mentora",
           "stages": {
             "draft": "Generování návrhu",
@@ -2915,12 +2952,6 @@
           "reviewConfiguration": "Zkontrolovat konfiguraci",
           "showMoreFindings": "Zobrazit dalších {{count}} zjištění",
           "showFewerFindings": "Zobrazit méně zjištění",
-          "review": {
-            "currentDraftTitle": "Zkontrolovat aktuální návrh",
-            "currentDraftDescription": "Tento návrh stále obsahuje doporučení ke kvalitě. Před použitím jej zkontrolujte.",
-            "requiresReviewTitle": "Zkontrolovat vygenerovanou konfiguraci",
-            "requiresReviewDescription": "AI zachovala nejnovější návrh pro vaše konečné rozhodnutí."
-          },
           "quality": {
             "title": "Zkontrolovat kvalitu pomocí AI",
             "resultTitle": "Kontrola kvality",
@@ -5443,7 +5474,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
-      "tabs": { "admins": "Administrátoři", "allUsers": "Všichni uživatelé" },
+      "tabs": {
+        "admins": "Administrátoři",
+        "allUsers": "Všichni uživatelé"
+      },
       "loading": "Načítání uživatelů...",
       "emptyAdmins": "Nebyli nalezeni žádní aktivní administrátoři.",
       "emptyAdminsSearch": "Pro \"{{search}}\" nebyli nalezeni žádní aktivní administrátoři.",
@@ -5593,7 +5627,13 @@
       "liveKitRoomNotAvailable": "Místnost LiveKit pro tuto relaci není dostupná.",
       "activeSessionUpdateForbidden": "Toto živé školení nelze během probíhající relace měnit.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
-      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení.",
+      "registrationClosed": "Přihlašování je uzavřeno.",
+      "registrationIneligible": "Nemáte oprávnění k tomuto školení.",
+      "hostRegistration": "Lektoři se nemusí přihlašovat.",
+      "registrationModeLocked": "Před změnou režimu zrušte všechna přihlášení.",
+      "capacityBelowRegistrations": "Kapacita nesmí být nižší než počet přihlášených.",
+      "registrationRequired": "Pro připojení je nutné potvrzené přihlášení."
     }
   },
   "modernCourseView": {
@@ -5739,6 +5779,42 @@
         "aiMentor": "AI mentor",
         "lesson": "Lekce"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Časový limit pokusu",
+    "durationMinutes": "{{minutes}} min",
+    "noDurationLimit": "Bez časového limitu",
+    "windowCloses": "Konec dostupnosti testu",
+    "noClosingTime": "Bez termínu uzavření",
+    "windowEndsAttempt": "Pokus končí uzavřením období dostupnosti, i když vám ještě zbývá čas.",
+    "opensIn": "Test bude dostupný za {{time}}",
+    "opensAutomatically": "Test se automaticky odemkne. Poté můžete zahájit pokus.",
+    "orderingGroup": "Pořadí otázek",
+    "timingGroup": "Dostupnost a délka",
+    "gradingGroup": "Hodnocení a pokusy",
+    "feedbackGroup": "Zpětná vazba",
+    "clearDate": "Vymazat datum",
+    "availabilityHelp": "Volitelné období dostupnosti společné pro všechny účastníky.",
+    "shuffleQuestions": "Náhodné pořadí otázek",
+    "shuffleAnswers": "Náhodné pořadí odpovědí",
+    "availableFrom": "Dostupný od",
+    "availableUntil": "Dostupný do",
+    "timeLimitMinutes": "Časový limit (minuty)",
+    "passedFeedback": "Zpětná vazba po úspěchu",
+    "failedFeedback": "Zpětná vazba po neúspěchu",
+    "questionFeedback": "Vysvětlení otázky",
+    "start": "Spustit test",
+    "expired": "Čas vypršel. Tento pokus nebyl úspěšný.",
+    "remaining": "Zbývající čas: {{time}}",
+    "unavailable": "Test je mimo období dostupnosti.",
+    "errors": {
+      "invalidDates": "Konec musí být po začátku.",
+      "unavailable": "Test je mimo období dostupnosti.",
+      "attemptLimit": "Byl dosažen limit pokusů.",
+      "noQuestions": "Přidejte alespoň jednu otázku.",
+      "startRequired": "Před odesláním odpovědí spusťte test.",
+      "staleAttempt": "Tento pokus již není aktuální. Obnovte stránku."
     }
   }
 }

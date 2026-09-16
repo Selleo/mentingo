@@ -50,7 +50,7 @@
       "layoutResetError": "We could not restore the default dashboard layout."
     },
     "widgets": {
-      "loadError": "This widget could not load its data.",
+      "loadError": "We could not load this widget.",
       "dataScope": {
         "personal": "Your data",
         "otherUsers": "Organization data",
@@ -62,10 +62,15 @@
       "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
       "placeholderContent": "This widget is ready for its feature-specific content.",
       "placeholderFooter": "Example widget",
-      "s_placeholder_1": { "title": "Learner widget 1" },
-      "s_placeholder_2": { "title": "Learner widget 2" },
-      "s_placeholder_3": { "title": "Learner widget 3" },
-      "loadError": "We could not load this widget.",
+      "s_placeholder_1": {
+        "title": "Learner widget 1"
+      },
+      "s_placeholder_2": {
+        "title": "Learner widget 2"
+      },
+      "s_placeholder_3": {
+        "title": "Learner widget 3"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "All courses you have started",
@@ -194,10 +199,18 @@
           "sun": "Sun"
         }
       },
-      "continue_learning": { "title": "Continue learning" },
-      "required_course": { "title": "Required courses" },
-      "course_completion": { "title": "Course progress" },
-      "certificates": { "title": "Certificates" },
+      "continue_learning": {
+        "title": "Continue learning"
+      },
+      "required_course": {
+        "title": "Required courses"
+      },
+      "course_completion": {
+        "title": "Course progress"
+      },
+      "certificates": {
+        "title": "Certificates"
+      },
       "ai_mentor_practice": {
         "title": "AI Mentor practice",
         "aiNotConfigured": "AI Mentor is not configured for this tenant."
@@ -319,7 +332,6 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
-      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending...",
       "loading": "Loading...",
@@ -381,6 +393,7 @@
       }
     },
     "other": {
+      "selectDate": "Select date",
       "active": "Active",
       "archived": "Archived",
       "selected": "Selected",
@@ -1078,6 +1091,20 @@
       "toast": {
         "success": "Live Training updated successfully."
       }
+    },
+    "registration": {
+      "title": "Registration",
+      "required": "Require registration",
+      "register": "Register",
+      "cancel": "Cancel registration",
+      "registered": "Registered",
+      "waitlisted": "Waiting list",
+      "confirmed": "Your place is confirmed.",
+      "position": "Your waiting list position: {{position}}",
+      "capacity": "Registered: {{count}} / {{limit}}",
+      "saved": "Registration updated.",
+      "closed": "Registration is closed.",
+      "empty": "No participants yet."
     }
   },
   "newsView": {
@@ -2876,7 +2903,12 @@
           "failedTitle": "Could not generate a draft",
           "cancel": "Cancel generation",
           "revise": "Revise draft",
-          "review": "Review configuration",
+          "review": {
+            "currentDraftTitle": "Review the current draft",
+            "currentDraftDescription": "This draft still has quality suggestions. Review it before applying it.",
+            "requiresReviewTitle": "Review the generated configuration",
+            "requiresReviewDescription": "AI kept the latest draft so you can make the final decision."
+          },
           "progressLabel": "AI Mentor generation progress",
           "stages": {
             "draft": "Generating draft",
@@ -2915,12 +2947,6 @@
           "reviewConfiguration": "Review configuration",
           "showMoreFindings": "Show {{count}} more findings",
           "showFewerFindings": "Show fewer findings",
-          "review": {
-            "currentDraftTitle": "Review the current draft",
-            "currentDraftDescription": "This draft still has quality suggestions. Review it before applying it.",
-            "requiresReviewTitle": "Review the generated configuration",
-            "requiresReviewDescription": "AI kept the latest draft so you can make the final decision."
-          },
           "quality": {
             "title": "Check quality with AI",
             "resultTitle": "Quality check",
@@ -5314,7 +5340,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
-      "tabs": { "admins": "Admins", "allUsers": "All users" },
+      "tabs": {
+        "admins": "Admins",
+        "allUsers": "All users"
+      },
       "loading": "Loading users...",
       "emptyAdmins": "No active admin users found.",
       "emptyAdminsSearch": "No active admins found for \"{{search}}\".",
@@ -5611,7 +5640,13 @@
       "liveKitRoomNotAvailable": "The LiveKit room for this session is not available.",
       "activeSessionUpdateForbidden": "This Live Training cannot be changed while a session is in progress.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
-      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
+      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached.",
+      "registrationClosed": "Registration is closed.",
+      "registrationIneligible": "You are not eligible for this training.",
+      "hostRegistration": "Hosts do not need to register.",
+      "registrationModeLocked": "Cancel all registrations before changing registration mode.",
+      "capacityBelowRegistrations": "Capacity cannot be below the number of registered participants.",
+      "registrationRequired": "A confirmed registration is required to join."
     }
   },
   "modernCourseView": {
@@ -5753,6 +5788,42 @@
         "aiMentor": "AI Mentor",
         "lesson": "Lesson"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Attempt time limit",
+    "durationMinutes": "{{minutes}} min",
+    "noDurationLimit": "No duration limit",
+    "windowCloses": "Availability window closes",
+    "noClosingTime": "No closing time",
+    "windowEndsAttempt": "The attempt ends when the window closes, even if you have time remaining.",
+    "opensIn": "Test opens in {{time}}",
+    "opensAutomatically": "The test will unlock automatically. You can then start your attempt.",
+    "orderingGroup": "Question order",
+    "timingGroup": "Availability and duration",
+    "gradingGroup": "Score and attempts",
+    "feedbackGroup": "Feedback",
+    "clearDate": "Clear date",
+    "availabilityHelp": "Optional availability window shared by all learners.",
+    "shuffleQuestions": "Random question order",
+    "shuffleAnswers": "Random answer order",
+    "availableFrom": "Available from",
+    "availableUntil": "Available until",
+    "timeLimitMinutes": "Time limit (minutes)",
+    "passedFeedback": "Feedback after passing",
+    "failedFeedback": "Feedback after failing",
+    "questionFeedback": "Question explanation",
+    "start": "Start test",
+    "expired": "Time is up. This attempt was not passed.",
+    "remaining": "Time remaining: {{time}}",
+    "unavailable": "This test is outside its availability window.",
+    "errors": {
+      "invalidDates": "The end must be after the start.",
+      "unavailable": "This test is outside its availability window.",
+      "attemptLimit": "Attempt limit reached.",
+      "noQuestions": "Add at least one question.",
+      "startRequired": "Start the test before submitting answers.",
+      "staleAttempt": "This attempt is no longer current. Refresh the page."
     }
   }
 }

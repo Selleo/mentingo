@@ -141,11 +141,15 @@ export type ChapterJsonbUpdate = Partial<Omit<ChapterInsert, "title">> & {
 
 export type LessonSelect = InferSelectModel<typeof lessons>;
 export type LessonInsert = InferInsertModel<typeof lessons>;
-export type LessonJsonbInsert = Omit<LessonInsert, "title" | "description"> & {
+export type LessonJsonbInsert = Omit<LessonInsert, "title" | "description" | "quizSettings"> & {
   title: SQL<unknown>;
   description?: SQL<unknown> | null;
+  quizSettings?: LessonSelect["quizSettings"] | SQL<unknown>;
 };
-export type LessonJsonbUpdate = Partial<Omit<LessonInsert, "title" | "description">> & {
+export type LessonJsonbUpdate = Partial<
+  Omit<LessonInsert, "title" | "description" | "quizSettings">
+> & {
+  quizSettings?: LessonSelect["quizSettings"] | SQL<unknown>;
   title?: SQL<unknown>;
   description?: SQL<unknown> | null;
 };
@@ -154,18 +158,20 @@ export type QuestionSelect = InferSelectModel<typeof questions>;
 export type QuestionInsert = InferInsertModel<typeof questions>;
 export type QuestionJsonbInsert = Omit<
   QuestionInsert,
-  "title" | "description" | "solutionExplanation"
+  "title" | "description" | "solutionExplanation" | "feedback"
 > & {
   title: SQL<unknown>;
   description?: SQL<unknown> | null;
   solutionExplanation?: SQL<unknown> | null;
+  feedback?: QuestionSelect["feedback"] | SQL<unknown>;
 };
 export type QuestionJsonbUpdate = Partial<
-  Omit<QuestionInsert, "title" | "description" | "solutionExplanation">
+  Omit<QuestionInsert, "title" | "description" | "solutionExplanation" | "feedback">
 > & {
   title?: SQL<unknown>;
   description?: SQL<unknown> | null;
   solutionExplanation?: SQL<unknown> | null;
+  feedback?: QuestionSelect["feedback"] | SQL<unknown>;
 };
 
 export type QuestionAnswerOptionSelect = InferSelectModel<typeof questionAnswerOptions>;

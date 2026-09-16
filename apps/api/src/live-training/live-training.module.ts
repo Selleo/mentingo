@@ -18,6 +18,7 @@ import { LiveTrainingRepository } from "./live-training.repository";
 import { LiveTrainingService } from "./live-training.service";
 import { LiveKitWebhookController } from "./livekit/livekit-webhook.controller";
 import { LiveKitService } from "./livekit/livekit.service";
+import { LiveTrainingRegistrationRepository } from "./registrations/live-training-registration.repository";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { LiveKitService } from "./livekit/livekit.service";
   ],
   controllers: [LiveTrainingController, LiveTrainingSessionsController, LiveKitWebhookController],
   providers: [
+    LiveTrainingRegistrationRepository,
     LiveTrainingService,
     LiveTrainingRepository,
     LiveTrainingAnnouncementsService,

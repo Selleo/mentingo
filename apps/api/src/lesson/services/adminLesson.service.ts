@@ -19,7 +19,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
-import { getTableColumns, sql } from "drizzle-orm";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
@@ -43,7 +43,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
-import { questionAnswerOptions, questions } from "src/storage/schema";
+import { lessons, questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
 import { AiJudgeConfigurationGraphService } from "../ai-judge-configuration/ai-judge-configuration-graph.service";
@@ -951,6 +951,7 @@ export class AdminLessonService {
         title: buildJsonbField(language, question.title),
         displayOrder: question.displayOrder,
         solutionExplanation: buildJsonbField(language, question.solutionExplanation),
+        feedback: buildJsonbField(language, question.feedback) ?? {},
         photoS3Key: question.photoS3Key,
       }));
 
@@ -1004,7 +1005,31 @@ export class AdminLessonService {
         throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
 
-      await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
+      if (language !== baseLanguage && data.quizSettings) {
+        const [previous] = await trx
+          .select({ settings: lessons.quizSettings })
+          .from(lessons)
+          .where(eq(lessons.id, id));
+        const keys = [
+          "shuffleQuestions",
+          "shuffleAnswers",
+          "availableFrom",
+          "availableUntil",
+          "timeLimitMinutes",
+        ] as const;
+        if (
+          keys.some(
+            (key) =>
+              data.quizSettings?.[key] !== undefined &&
+              (data.quizSettings[key] ?? null) !== (previous?.settings[key] ?? null),
+          )
+        ) {
+          throw new BadRequestException(
+            "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+          );
+        }
+      }
+      await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data, trx);
 
       const existingQuestions = await this.adminLessonRepository.getExistingQuestions(id, trx);
       const existingQuestionIds = existingQuestions.map((question) => question.id);
@@ -1063,6 +1088,7 @@ export class AdminLessonService {
             title: question.title,
             displayOrder: question.displayOrder,
             solutionExplanation: question.solutionExplanation,
+            feedback: question.feedback,
             photoS3Key: question.photoS3Key,
             language: data.language,
           };

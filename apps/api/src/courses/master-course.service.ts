@@ -69,6 +69,7 @@ import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
 import { normalizeJsonb, toJsonbBuildObject, toNullableJsonbBuildObject } from "src/utils/jsonb";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -939,6 +940,7 @@ export class MasterCourseService {
             type: sourceLesson.type,
             title: toJsonbBuildObject(sourceLesson.title),
             description: toNullableJsonbBuildObject(sourceLesson.description),
+            quizSettings: settingsToJSONBuildObject(sourceLesson.quizSettings),
             thresholdScore: sourceLesson.thresholdScore,
             attemptsLimit: sourceLesson.attemptsLimit,
             quizCooldownInHours: sourceLesson.quizCooldownInHours,
@@ -961,6 +963,7 @@ export class MasterCourseService {
         type: sourceLesson.type,
         title: toJsonbBuildObject(sourceLesson.title),
         description: toNullableJsonbBuildObject(sourceLesson.description),
+        quizSettings: settingsToJSONBuildObject(sourceLesson.quizSettings),
         thresholdScore: sourceLesson.thresholdScore,
         attemptsLimit: sourceLesson.attemptsLimit,
         quizCooldownInHours: sourceLesson.quizCooldownInHours,
@@ -1058,6 +1061,7 @@ export class MasterCourseService {
             title: toJsonbBuildObject(sourceQuestion.title),
             displayOrder: sourceQuestion.displayOrder,
             solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+            feedback: settingsToJSONBuildObject(sourceQuestion.feedback),
             photoS3Key: this.getCopiedInternalReference(
               params.resourceCollection,
               "questions",
@@ -1077,6 +1081,7 @@ export class MasterCourseService {
         title: toJsonbBuildObject(sourceQuestion.title),
         displayOrder: sourceQuestion.displayOrder,
         solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+        feedback: settingsToJSONBuildObject(sourceQuestion.feedback),
         photoS3Key: this.getCopiedInternalReference(
           params.resourceCollection,
           "questions",
@@ -1120,6 +1125,7 @@ export class MasterCourseService {
         description: toNullableJsonbBuildObject(sourceQuestion.description),
         title: toJsonbBuildObject(sourceQuestion.title),
         solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+        feedback: settingsToJSONBuildObject(sourceQuestion.feedback),
         photoS3Key: this.getCopiedInternalReference(
           params.resourceCollection,
           "questions",

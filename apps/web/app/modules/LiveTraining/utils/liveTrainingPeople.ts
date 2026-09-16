@@ -13,7 +13,7 @@ export const getUserCandidateDisplayName = (user: LiveTrainingHostCandidate) =>
   user.fullName || user.email;
 
 export const getLiveTrainingPeopleList = (
-  liveTraining: LiveTrainingDetails,
+  liveTraining: Pick<LiveTrainingDetails, "author" | "hosts">,
   fallbackName: string,
 ) => {
   const peopleById = new Map<string, LiveTrainingPersonListItem>();
@@ -48,5 +48,7 @@ export const getLiveTrainingPeopleList = (
   return [...peopleById.values()];
 };
 
-export const getLiveTrainingEditableHostIds = (liveTraining: LiveTrainingDetails) =>
+export const getLiveTrainingEditableHostIds = (
+  liveTraining: Pick<LiveTrainingDetails, "author" | "hosts">,
+) =>
   liveTraining.hosts.map((host) => host.id).filter((hostId) => hostId !== liveTraining.author.id);

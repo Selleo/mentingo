@@ -7674,6 +7674,60 @@
         }
       }
     },
+    "/api/lesson/quiz-attempt/start": {
+      "post": {
+        "operationId": "LessonController_startQuizAttempt",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartQuizAttemptBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartQuizAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/quiz-attempt/expire": {
+      "post": {
+        "operationId": "LessonController_expireQuizAttempt",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpireQuizAttemptBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpireQuizAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/evaluation-quiz": {
       "post": {
         "operationId": "LessonController_evaluationQuiz",
@@ -10416,6 +10470,85 @@
         "responses": {
           "204": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/registration": {
+      "post": {
+        "operationId": "LiveTrainingController_registerForTraining",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterForTrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "LiveTrainingController_cancelRegistration",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelRegistrationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/registrations": {
+      "get": {
+        "operationId": "LiveTrainingController_getRegistrations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRegistrationsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -31402,6 +31535,10 @@
                                 "solutionExplanation": {
                                   "type": "string"
                                 },
+                                "feedback": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
                                 "photoS3Key": {
                                   "anyOf": [
                                     {
@@ -31642,6 +31779,59 @@
                           },
                           "updatedAt": {
                             "type": "string"
+                          },
+                          "quizSettings": {
+                            "type": "object",
+                            "properties": {
+                              "shuffleQuestions": {
+                                "type": "boolean"
+                              },
+                              "shuffleAnswers": {
+                                "type": "boolean"
+                              },
+                              "availableFrom": {
+                                "anyOf": [
+                                  {
+                                    "format": "date-time",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "availableUntil": {
+                                "anyOf": [
+                                  {
+                                    "format": "date-time",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "timeLimitMinutes": {
+                                "anyOf": [
+                                  {
+                                    "minimum": 1,
+                                    "maximum": 1440,
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "passedFeedback": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "failedFeedback": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              }
+                            }
                           }
                         },
                         "required": [
@@ -34718,6 +34908,10 @@
                           "solutionExplanation": {
                             "type": "string"
                           },
+                          "feedback": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
                           "photoS3Key": {
                             "anyOf": [
                               {
@@ -34958,6 +35152,59 @@
                     },
                     "updatedAt": {
                       "type": "string"
+                    },
+                    "quizSettings": {
+                      "type": "object",
+                      "properties": {
+                        "shuffleQuestions": {
+                          "type": "boolean"
+                        },
+                        "shuffleAnswers": {
+                          "type": "boolean"
+                        },
+                        "availableFrom": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "availableUntil": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "timeLimitMinutes": {
+                          "anyOf": [
+                            {
+                              "minimum": 1,
+                              "maximum": 1440,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "passedFeedback": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "failedFeedback": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -35212,6 +35459,10 @@
                               "solutionExplanation": {
                                 "type": "string"
                               },
+                              "feedback": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
                               "photoS3Key": {
                                 "anyOf": [
                                   {
@@ -35452,6 +35703,59 @@
                         },
                         "updatedAt": {
                           "type": "string"
+                        },
+                        "quizSettings": {
+                          "type": "object",
+                          "properties": {
+                            "shuffleQuestions": {
+                              "type": "boolean"
+                            },
+                            "shuffleAnswers": {
+                              "type": "boolean"
+                            },
+                            "availableFrom": {
+                              "anyOf": [
+                                {
+                                  "format": "date-time",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "availableUntil": {
+                              "anyOf": [
+                                {
+                                  "format": "date-time",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "timeLimitMinutes": {
+                              "anyOf": [
+                                {
+                                  "minimum": 1,
+                                  "maximum": 1440,
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "passedFeedback": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "failedFeedback": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            }
+                          }
                         }
                       },
                       "required": [
@@ -35925,6 +36229,10 @@
                             }
                           ]
                         },
+                        "feedback": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
                         "photoS3Key": {
                           "anyOf": [
                             {
@@ -36105,8 +36413,132 @@
                   "score"
                 ]
               },
+              "quizRequiresStart": {
+                "type": "boolean"
+              },
+              "quizAttempt": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "startedAt": {
+                        "type": "string"
+                      },
+                      "expiresAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "status": {
+                        "anyOf": [
+                          {
+                            "const": "active",
+                            "type": "string"
+                          },
+                          {
+                            "const": "submitted",
+                            "type": "string"
+                          },
+                          {
+                            "const": "expired",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "questionOrder": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "optionOrder": {
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object",
+                        "properties": {}
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "startedAt",
+                      "expiresAt",
+                      "status",
+                      "questionOrder",
+                      "optionOrder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "lessonCompleted": {
                 "type": "boolean"
+              },
+              "quizSettings": {
+                "type": "object",
+                "properties": {
+                  "shuffleQuestions": {
+                    "type": "boolean"
+                  },
+                  "shuffleAnswers": {
+                    "type": "boolean"
+                  },
+                  "availableFrom": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "availableUntil": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timeLimitMinutes": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "maximum": 1440,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "passedFeedback": {
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "failedFeedback": {
+                    "maxLength": 5000,
+                    "type": "string"
+                  }
+                }
               },
               "thresholdScore": {
                 "anyOf": [
@@ -36630,6 +37062,9 @@
                           "settings": {
                             "type": "object",
                             "properties": {
+                              "registrationRequired": {
+                                "type": "boolean"
+                              },
                               "viewerPermissions": {
                                 "type": "object",
                                 "properties": {
@@ -36648,6 +37083,56 @@
                             },
                             "required": [
                               "viewerPermissions"
+                            ]
+                          },
+                          "registration": {
+                            "type": "object",
+                            "properties": {
+                              "registeredCount": {
+                                "type": "integer"
+                              },
+                              "waitlistedCount": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "const": "registered",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "waitlisted",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "position": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isOpen": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "registeredCount",
+                              "waitlistedCount",
+                              "status",
+                              "position",
+                              "isOpen"
                             ]
                           },
                           "metadata": {
@@ -37255,6 +37740,10 @@
                     "solutionExplanation": {
                       "type": "string"
                     },
+                    "feedback": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
                     "photoS3Key": {
                       "anyOf": [
                         {
@@ -37672,6 +38161,9 @@
               "settings": {
                 "type": "object",
                 "properties": {
+                  "registrationRequired": {
+                    "type": "boolean"
+                  },
                   "viewerPermissions": {
                     "type": "object",
                     "properties": {
@@ -37861,6 +38353,9 @@
               "settings": {
                 "type": "object",
                 "properties": {
+                  "registrationRequired": {
+                    "type": "boolean"
+                  },
                   "viewerPermissions": {
                     "type": "object",
                     "properties": {
@@ -38079,6 +38574,10 @@
                       "type": "number"
                     },
                     "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "feedback": {
+                      "maxLength": 5000,
                       "type": "string"
                     },
                     "photoS3Key": {
@@ -38726,6 +39225,10 @@
                         "solutionExplanation": {
                           "type": "string"
                         },
+                        "feedback": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
                         "photoS3Key": {
                           "anyOf": [
                             {
@@ -39020,11 +39523,68 @@
               "solutionExplanation": {
                 "type": "string"
               },
+              "feedback": {
+                "maxLength": 5000,
+                "type": "string"
+              },
               "fileS3Key": {
                 "type": "string"
               },
               "fileType": {
                 "type": "string"
+              },
+              "quizSettings": {
+                "type": "object",
+                "properties": {
+                  "shuffleQuestions": {
+                    "type": "boolean"
+                  },
+                  "shuffleAnswers": {
+                    "type": "boolean"
+                  },
+                  "availableFrom": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "availableUntil": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timeLimitMinutes": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "maximum": 1440,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "passedFeedback": {
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "failedFeedback": {
+                    "maxLength": 5000,
+                    "type": "string"
+                  }
+                }
               },
               "thresholdScore": {
                 "type": "number"
@@ -39123,6 +39683,10 @@
                       "type": "number"
                     },
                     "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "feedback": {
+                      "maxLength": 5000,
                       "type": "string"
                     },
                     "photoS3Key": {
@@ -39346,11 +39910,68 @@
                   "solutionExplanation": {
                     "type": "string"
                   },
+                  "feedback": {
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
                   "fileS3Key": {
                     "type": "string"
                   },
                   "fileType": {
                     "type": "string"
+                  },
+                  "quizSettings": {
+                    "type": "object",
+                    "properties": {
+                      "shuffleQuestions": {
+                        "type": "boolean"
+                      },
+                      "shuffleAnswers": {
+                        "type": "boolean"
+                      },
+                      "availableFrom": {
+                        "anyOf": [
+                          {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "availableUntil": {
+                        "anyOf": [
+                          {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "timeLimitMinutes": {
+                        "anyOf": [
+                          {
+                            "minimum": 1,
+                            "maximum": 1440,
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "passedFeedback": {
+                        "maxLength": 5000,
+                        "type": "string"
+                      },
+                      "failedFeedback": {
+                        "maxLength": 5000,
+                        "type": "string"
+                      }
+                    }
                   },
                   "thresholdScore": {
                     "type": "number"
@@ -39449,6 +40070,10 @@
                           "type": "number"
                         },
                         "solutionExplanation": {
+                          "type": "string"
+                        },
+                        "feedback": {
+                          "maxLength": 5000,
                           "type": "string"
                         },
                         "photoS3Key": {
@@ -39828,6 +40453,10 @@
                         "solutionExplanation": {
                           "type": "string"
                         },
+                        "feedback": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
                         "photoS3Key": {
                           "anyOf": [
                             {
@@ -40169,11 +40798,258 @@
           "data"
         ]
       },
+      "StartQuizAttemptBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "language"
+        ]
+      },
+      "StartQuizAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "startedAt": {
+                    "type": "string"
+                  },
+                  "expiresAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "submitted",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expired",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "questionOrder": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "optionOrder": {
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object",
+                    "properties": {}
+                  }
+                },
+                "required": [
+                  "id",
+                  "startedAt",
+                  "expiresAt",
+                  "status",
+                  "questionOrder",
+                  "optionOrder"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExpireQuizAttemptBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "language"
+        ]
+      },
+      "ExpireQuizAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "startedAt": {
+                    "type": "string"
+                  },
+                  "expiresAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "submitted",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expired",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "questionOrder": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "optionOrder": {
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object",
+                    "properties": {}
+                  }
+                },
+                "required": [
+                  "id",
+                  "startedAt",
+                  "expiresAt",
+                  "status",
+                  "questionOrder",
+                  "optionOrder"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "EvaluationQuizBody": {
         "type": "object",
         "properties": {
           "lessonId": {
             "format": "uuid",
+            "type": "string"
+          },
+          "attemptId": {
             "type": "string"
           },
           "questionsAnswers": {
@@ -57503,6 +58379,9 @@
                   "settings": {
                     "type": "object",
                     "properties": {
+                      "registrationRequired": {
+                        "type": "boolean"
+                      },
                       "viewerPermissions": {
                         "type": "object",
                         "properties": {
@@ -57521,6 +58400,56 @@
                     },
                     "required": [
                       "viewerPermissions"
+                    ]
+                  },
+                  "registration": {
+                    "type": "object",
+                    "properties": {
+                      "registeredCount": {
+                        "type": "integer"
+                      },
+                      "waitlistedCount": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "const": "registered",
+                                "type": "string"
+                              },
+                              {
+                                "const": "waitlisted",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "position": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "isOpen": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "registeredCount",
+                      "waitlistedCount",
+                      "status",
+                      "position",
+                      "isOpen"
                     ]
                   },
                   "metadata": {
@@ -57959,6 +58888,166 @@
           "data"
         ]
       },
+      "RegisterForTrainingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "registeredCount": {
+                "type": "integer"
+              },
+              "waitlistedCount": {
+                "type": "integer"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "registered",
+                        "type": "string"
+                      },
+                      {
+                        "const": "waitlisted",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "position": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isOpen": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "registeredCount",
+              "waitlistedCount",
+              "status",
+              "position",
+              "isOpen"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CancelRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "registeredCount": {
+                "type": "integer"
+              },
+              "waitlistedCount": {
+                "type": "integer"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "const": "registered",
+                        "type": "string"
+                      },
+                      {
+                        "const": "waitlisted",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "position": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isOpen": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "registeredCount",
+              "waitlistedCount",
+              "status",
+              "position",
+              "isOpen"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetRegistrationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "registered",
+                      "type": "string"
+                    },
+                    {
+                      "const": "waitlisted",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "joinedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "userId",
+                "fullName",
+                "status",
+                "joinedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CreateLiveTrainingBody": {
         "type": "object",
         "properties": {
@@ -58057,6 +59146,9 @@
           "settings": {
             "type": "object",
             "properties": {
+              "registrationRequired": {
+                "type": "boolean"
+              },
               "viewerPermissions": {
                 "type": "object",
                 "properties": {
@@ -58328,6 +59420,9 @@
               "settings": {
                 "type": "object",
                 "properties": {
+                  "registrationRequired": {
+                    "type": "boolean"
+                  },
                   "viewerPermissions": {
                     "type": "object",
                     "properties": {
@@ -58520,6 +59615,9 @@
                   "settings": {
                     "type": "object",
                     "properties": {
+                      "registrationRequired": {
+                        "type": "boolean"
+                      },
                       "viewerPermissions": {
                         "type": "object",
                         "properties": {
@@ -58538,6 +59636,56 @@
                     },
                     "required": [
                       "viewerPermissions"
+                    ]
+                  },
+                  "registration": {
+                    "type": "object",
+                    "properties": {
+                      "registeredCount": {
+                        "type": "integer"
+                      },
+                      "waitlistedCount": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "const": "registered",
+                                "type": "string"
+                              },
+                              {
+                                "const": "waitlisted",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "position": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "isOpen": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "registeredCount",
+                      "waitlistedCount",
+                      "status",
+                      "position",
+                      "isOpen"
                     ]
                   },
                   "metadata": {
@@ -59490,6 +60638,10 @@
               "role": {
                 "anyOf": [
                   {
+                    "const": "attendee",
+                    "type": "string"
+                  },
+                  {
                     "const": "host",
                     "type": "string"
                   },
@@ -59815,6 +60967,10 @@
                         },
                         "role": {
                           "anyOf": [
+                            {
+                              "const": "attendee",
+                              "type": "string"
+                            },
                             {
                               "const": "host",
                               "type": "string"

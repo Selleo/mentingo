@@ -1,5 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  LIVE_TRAINING_MEMBER_ROLES,
+  LIVE_TRAINING_REGISTRATION_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_STATUSES,
   CALENDAR_PROVIDERS,
@@ -228,7 +230,13 @@ export class MicrosoftCalendarRepository {
         .from(calendarEvents)
         .innerJoin(liveTrainings, eq(liveTrainings.calendarEventId, calendarEvents.id))
         .innerJoin(liveTrainingAuthor, eq(liveTrainingAuthor.id, liveTrainings.authorId))
-        .leftJoin(liveTrainingMembers, eq(liveTrainingMembers.liveTrainingId, liveTrainings.id))
+        .leftJoin(
+          liveTrainingMembers,
+          and(
+            eq(liveTrainingMembers.liveTrainingId, liveTrainings.id),
+            sql`(${liveTrainingMembers.role} <> ${LIVE_TRAINING_MEMBER_ROLES.ATTENDEE} or ${liveTrainingMembers.metadata}->>'status' = ${LIVE_TRAINING_REGISTRATION_STATUSES.REGISTERED})`,
+          ),
+        )
         .leftJoin(liveTrainingLinks, eq(liveTrainingLinks.liveTrainingId, liveTrainings.id))
         .leftJoin(
           groupCourses,

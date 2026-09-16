@@ -68,6 +68,7 @@ export const useQuizLessonForm = ({
     resolver: zodResolver(quizLessonFormSchema(t)),
     defaultValues: {
       title: "",
+      quizSettings: {},
       thresholdScore: null,
       attemptsLimit: null,
       quizCooldownInHours: null,
@@ -81,6 +82,7 @@ export const useQuizLessonForm = ({
     if (lessonToEdit) {
       const mappedData: QuizLessonFormValues = {
         title: lessonToEdit.title,
+        quizSettings: lessonToEdit.quizSettings ?? {},
         thresholdScore: null,
         attemptsLimit: null,
         quizCooldownInHours: null,
@@ -122,6 +124,7 @@ export const useQuizLessonForm = ({
               description: processedDescription || undefined,
               photoS3Key: question.photoS3Key || undefined,
               title: question.title,
+              feedback: question.feedback ?? "",
               displayOrder: question.displayOrder,
               options: question.options?.map((option: QuestionOption) => ({
                 id: option.id,

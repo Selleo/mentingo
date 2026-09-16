@@ -1,5 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  LIVE_TRAINING_MEMBER_ROLES,
+  LIVE_TRAINING_REGISTRATION_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
   ANNOUNCEMENT_FEEDS,
   ANNOUNCEMENT_SOURCE_TYPES,
@@ -32,6 +34,8 @@ import { LocalizationService } from "src/localization/localization.service";
 import { DEFAULT_STUDENT_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  liveTrainingMembers,
+  liveTrainings,
   announcements,
   groupAnnouncements,
   groupUsers,
@@ -441,6 +445,25 @@ export class AnnouncementsRepository {
   }
 
   private async getLiveTrainingAnnouncementRecipientIds(liveTrainingId: UUIDType) {
+    const [training] = await this.db
+      .select({ settings: liveTrainings.settings })
+      .from(liveTrainings)
+      .where(eq(liveTrainings.id, liveTrainingId));
+    if (training?.settings.registrationRequired) {
+      return this.db
+        .select({ id: users.id })
+        .from(users)
+        .innerJoin(liveTrainingMembers, eq(liveTrainingMembers.userId, users.id))
+        .where(
+          and(
+            eq(liveTrainingMembers.liveTrainingId, liveTrainingId),
+            eq(liveTrainingMembers.role, LIVE_TRAINING_MEMBER_ROLES.ATTENDEE),
+            sql`${liveTrainingMembers.metadata}->>'status' = ${LIVE_TRAINING_REGISTRATION_STATUSES.REGISTERED}`,
+            isNull(users.deletedAt),
+          ),
+        );
+    }
+
     return this.db
       .selectDistinct({ id: users.id })
       .from(users)
@@ -598,6 +621,30 @@ export class AnnouncementsRepository {
     announcementId: UUIDType,
     liveTrainingId: UUIDType,
   ) {
+    const [training] = await this.db
+      .select({ settings: liveTrainings.settings })
+      .from(liveTrainings)
+      .where(eq(liveTrainings.id, liveTrainingId));
+    if (training?.settings.registrationRequired) {
+      const recipients = await this.getLiveTrainingAnnouncementRecipientIds(liveTrainingId);
+      if (!recipients.length) return [];
+      return this.db
+        .select(this.getAnnouncementEmailRecipientFields())
+        .from(userAnnouncements)
+        .innerJoin(users, eq(users.id, userAnnouncements.userId))
+        .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
+        .where(
+          and(
+            eq(userAnnouncements.announcementId, announcementId),
+            inArray(
+              users.id,
+              recipients.map((user) => user.id),
+            ),
+            isNull(users.deletedAt),
+          ),
+        );
+    }
+
     return this.db
       .selectDistinct(this.getAnnouncementEmailRecipientFields())
       .from(userAnnouncements)

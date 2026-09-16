@@ -62,18 +62,31 @@
       "placeholderDescription": "Widget du tableau de bord préparé pour une vue dédiée",
       "placeholderContent": "Ce widget est prêt pour son contenu spécifique.",
       "placeholderFooter": "Widget d'exemple",
-      "s_placeholder_1": { "title": "Widget apprenant 1" },
-      "s_placeholder_2": { "title": "Widget apprenant 2" },
-      "s_placeholder_3": { "title": "Widget apprenant 3" },
+      "s_placeholder_1": {
+        "title": "Widget apprenant 1"
+      },
+      "s_placeholder_2": {
+        "title": "Widget apprenant 2"
+      },
+      "s_placeholder_3": {
+        "title": "Widget apprenant 3"
+      },
       "ai_mentor_practice": {
         "title": "Pratique avec l'AI Mentor",
-        "description": "Créez chaque jour un scénario de pratique ciblé",
         "aiNotConfigured": "L'AI Mentor n'est pas configuré pour cette organisation."
       },
-      "continue_learning": { "title": "Continuer l'apprentissage" },
-      "required_course": { "title": "Cours obligatoires" },
-      "course_completion": { "title": "Progression des cours" },
-      "certificates": { "title": "Certificats" },
+      "continue_learning": {
+        "title": "Continuer l'apprentissage"
+      },
+      "required_course": {
+        "title": "Cours obligatoires"
+      },
+      "course_completion": {
+        "title": "Progression des cours"
+      },
+      "certificates": {
+        "title": "Certificats"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "Tous les cours que vous avez commencés",
@@ -201,10 +214,6 @@
           "sat": "Sam",
           "sun": "Dim"
         }
-      },
-      "ai_mentor_practice": {
-        "title": "Pratique avec l'AI Mentor",
-        "aiNotConfigured": "L'AI Mentor n'est pas configuré pour cette organisation."
       },
       "todoTasks": {
         "title": "Liste de tâches",
@@ -384,6 +393,7 @@
       }
     },
     "other": {
+      "selectDate": "Choisir une date",
       "active": "Actif",
       "archived": "Archivé",
       "selected": "Sélectionné",
@@ -1081,6 +1091,20 @@
       "toast": {
         "success": "Formation en direct mise à jour avec succès."
       }
+    },
+    "registration": {
+      "title": "Inscription",
+      "required": "Exiger une inscription",
+      "register": "S’inscrire",
+      "cancel": "Annuler l’inscription",
+      "registered": "Inscrits",
+      "waitlisted": "Liste d’attente",
+      "confirmed": "Votre place est confirmée.",
+      "position": "Votre position sur la liste d’attente : {{position}}",
+      "capacity": "Inscrits : {{count}} / {{limit}}",
+      "saved": "Inscription mise à jour.",
+      "closed": "Les inscriptions sont closes.",
+      "empty": "Aucun participant pour le moment."
     }
   },
   "newsView": {
@@ -5036,7 +5060,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Rechercher par nom ou par email...",
-      "tabs": { "admins": "Administrateurs", "allUsers": "Tous les utilisateurs" },
+      "tabs": {
+        "admins": "Administrateurs",
+        "allUsers": "Tous les utilisateurs"
+      },
       "loading": "Chargement des utilisateurs...",
       "emptyAdmins": "Aucun administrateur actif trouvé.",
       "emptyAdminsSearch": "Aucun administrateur actif trouvé pour \"{{search}}\".",
@@ -5333,7 +5360,13 @@
       "liveKitRoomNotAvailable": "La salle LiveKit de cette session n'est pas disponible.",
       "activeSessionUpdateForbidden": "Cette formation en direct ne peut pas être modifiée pendant une session en cours.",
       "maxParticipantsReached": "Le nombre maximum de participants a été atteint.",
-      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint."
+      "maxParallelSessionsReached": "Le nombre maximum de sessions de formation en direct actives a été atteint.",
+      "registrationClosed": "Les inscriptions sont closes.",
+      "registrationIneligible": "Vous n’avez pas accès à cette formation.",
+      "hostRegistration": "Les formateurs n’ont pas besoin de s’inscrire.",
+      "registrationModeLocked": "Annulez toutes les inscriptions avant de changer de mode.",
+      "capacityBelowRegistrations": "La capacité ne peut pas être inférieure au nombre d’inscrits.",
+      "registrationRequired": "Une inscription confirmée est nécessaire pour rejoindre la session."
     }
   },
   "modernCourseView": {
@@ -5475,6 +5508,42 @@
         "aiMentor": "Mentor IA",
         "lesson": "Leçon"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Durée limite par tentative",
+    "durationMinutes": "{{minutes}} min",
+    "noDurationLimit": "Sans limite de durée",
+    "windowCloses": "Fin de la période de disponibilité",
+    "noClosingTime": "Sans heure de fermeture",
+    "windowEndsAttempt": "La tentative se termine à la fermeture de la période de disponibilité, même s’il vous reste du temps.",
+    "opensIn": "Test disponible dans {{time}}",
+    "opensAutomatically": "Le test se débloquera automatiquement. Vous pourrez alors commencer votre tentative.",
+    "orderingGroup": "Ordre des questions",
+    "timingGroup": "Disponibilité et durée",
+    "gradingGroup": "Score et tentatives",
+    "feedbackGroup": "Commentaires",
+    "clearDate": "Effacer la date",
+    "availabilityHelp": "Période de disponibilité facultative commune à tous les participants.",
+    "shuffleQuestions": "Ordre aléatoire des questions",
+    "shuffleAnswers": "Ordre aléatoire des réponses",
+    "availableFrom": "Disponible à partir du",
+    "availableUntil": "Disponible jusqu’au",
+    "timeLimitMinutes": "Durée limite (minutes)",
+    "passedFeedback": "Message en cas de réussite",
+    "failedFeedback": "Message en cas d’échec",
+    "questionFeedback": "Explication de la question",
+    "start": "Commencer le test",
+    "expired": "Le temps est écoulé. Cette tentative a échoué.",
+    "remaining": "Temps restant : {{time}}",
+    "unavailable": "Ce test est en dehors de sa période de disponibilité.",
+    "errors": {
+      "invalidDates": "La fin doit être postérieure au début.",
+      "unavailable": "Ce test est en dehors de sa période de disponibilité.",
+      "attemptLimit": "La limite de tentatives est atteinte.",
+      "noQuestions": "Ajoutez au moins une question.",
+      "startRequired": "Commencez le test avant d’envoyer les réponses.",
+      "staleAttempt": "Cette tentative n’est plus actuelle. Actualisez la page."
     }
   }
 }

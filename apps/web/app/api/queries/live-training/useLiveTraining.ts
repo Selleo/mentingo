@@ -30,6 +30,7 @@ export const liveTrainingQueryOptions = (
 
       return response.data.data;
     },
+    refetchInterval: (query) => (query.state.data?.settings.registrationRequired ? 5000 : false),
     ...options,
   });
 

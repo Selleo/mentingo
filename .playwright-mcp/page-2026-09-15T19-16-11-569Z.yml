@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Ups! Coś poszło nie tak." [level=1] [ref=e4]
+      - paragraph [ref=e5]: Not Found
+      - generic [ref=e6]: "Error: No route matches URL \"/__quiz-preview.html\""
+    - generic [ref=e7]:
+      - button "Wróć" [ref=e8] [cursor=pointer]
+      - button "Przejdź do Panelu" [ref=e12] [cursor=pointer]
+  - generic:
+    - region "Notifications (F8)":
+      - list

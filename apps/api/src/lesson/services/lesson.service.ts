@@ -60,6 +60,8 @@ import {
   extractLessonResourceIds,
 } from "../lesson-resource-references";
 import { LESSON_TYPES } from "../lesson.type";
+import { QuizAttemptRepository } from "../quiz/quiz-attempt.repository";
+import { hasQuizAttemptConfiguration } from "../quiz/quiz-settings";
 import { LessonRepository } from "../repositories/lesson.repository";
 
 import type { LessonResourceMetadata, ResourceWithUrlError } from "../lesson-resource.types";
@@ -82,6 +84,7 @@ export class LessonService {
 
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
+    private readonly quizAttempts: QuizAttemptRepository,
     private readonly lessonRepository: LessonRepository,
     private readonly questionService: QuestionService,
     private readonly questionRepository: QuestionRepository,
@@ -295,6 +298,12 @@ export class LessonService {
       return { ...lesson, liveTraining };
     }
 
+    const quizAttempt = await this.quizAttempts.state(lesson.id, effectiveUserId);
+    if (quizAttempt?.status === "expired") {
+      lesson.lessonCompleted = true;
+      lesson.quizScore = 0;
+      lesson.isQuizPassed = false;
+    }
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
       lesson.lessonCompleted,
@@ -302,7 +311,12 @@ export class LessonService {
       basicInfo?.languageAnswered ?? actualLanguage,
     );
 
+    const quizRequiresStart =
+      Boolean(quizAttempt) || hasQuizAttemptConfiguration(lesson.quizSettings ?? {});
     const isQuizFeedbackRedacted = !lesson.quizFeedbackEnabled;
+    if (lesson.quizSettings && (!lesson.lessonCompleted || isQuizFeedbackRedacted)) {
+      lesson.quizSettings = { ...lesson.quizSettings, passedFeedback: "", failedFeedback: "" };
+    }
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -325,6 +339,8 @@ export class LessonService {
     const redactedQuestionList = isQuizFeedbackRedacted
       ? questionListWithUrls.map((question) => ({
           ...question,
+          feedback: "",
+          solutionExplanation: null,
           passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
           options: question.options?.map((option) => ({
             ...option,
@@ -347,7 +363,7 @@ export class LessonService {
         wrongAnswerCount,
       };
 
-      return { ...lesson, quizDetails, isQuizFeedbackRedacted };
+      return { ...lesson, quizRequiresStart, quizAttempt, quizDetails, isQuizFeedbackRedacted };
     }
 
     const quizDetails = {
@@ -358,7 +374,7 @@ export class LessonService {
       wrongAnswerCount: null,
     };
 
-    return { ...lesson, quizDetails, isQuizFeedbackRedacted };
+    return { ...lesson, quizRequiresStart, quizAttempt, quizDetails, isQuizFeedbackRedacted };
   }
 
   private async getPublicLessonById(
@@ -378,9 +394,41 @@ export class LessonService {
     return this.getContentLessonWithResources(lesson, id, actualLanguage);
   }
 
-  async evaluationQuiz(
+  private async assertQuizAttemptAccess(lessonId: UUIDType, currentUser: CurrentUserType) {
+    await this.assertStudentProgressMutationAllowed(lessonId, currentUser);
+    const [access] = await this.lessonRepository.checkLessonAssignment(
+      lessonId,
+      currentUser.userId,
+    );
+    if (!access || (!access.isAssigned && !access.isFreemium))
+      throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
+  }
+
+  async startQuizAttempt(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    await this.assertQuizAttemptAccess(lessonId, currentUser);
+    return this.quizAttempts.start(lessonId, currentUser.userId, language);
+  }
+
+  async expireQuizAttempt(lessonId: UUIDType, currentUser: CurrentUserType) {
+    await this.assertQuizAttemptAccess(lessonId, currentUser);
+    return this.quizAttempts.finishExpired(lessonId, currentUser.userId);
+  }
+
+  async evaluationQuiz(answers: AnswerQuestionBody, currentUser: CurrentUserType) {
+    await this.assertQuizAttemptAccess(answers.lessonId, currentUser);
+    return this.quizAttempts.submit(answers.lessonId, currentUser.userId, answers.attemptId, (tx) =>
+      this.evaluateQuiz(answers, currentUser, tx),
+    );
+  }
+
+  private async evaluateQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     currentUser: CurrentUserType,
+    transaction: DatabasePg,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
@@ -448,7 +496,7 @@ export class LessonService {
       });
     }
 
-    return await this.db.transaction(async (trx) => {
+    const evaluate = async (trx: DatabasePg) => {
       try {
         const evaluationResult = await this.questionService.evaluationsQuestions(
           correctAnswersForQuizQuestions,
@@ -522,10 +570,13 @@ export class LessonService {
       } catch (error) {
         throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
       }
-    });
+    };
+    return evaluate(transaction);
   }
 
   async deleteStudentQuizAnswers(lessonId: UUIDType, currentUser: CurrentUserType): Promise<void> {
+    await this.assertQuizAttemptAccess(lessonId, currentUser);
+    if (await this.quizAttempts.reset(lessonId, currentUser.userId)) return;
     const { userId } = currentUser;
 
     await this.assertStudentProgressMutationAllowed(lessonId, currentUser);

@@ -144,6 +144,7 @@ export class CurriculumFactory {
       thresholdScore: input.thresholdScore ?? 50,
       attemptsLimit: input.attemptsLimit ?? null,
       quizCooldownInHours: input.quizCooldownInHours ?? null,
+      quizSettings: input.quizSettings,
       questions: input.questions ?? [],
       displayOrder: input.displayOrder,
     });

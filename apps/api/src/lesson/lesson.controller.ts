@@ -76,6 +76,11 @@ import {
   enrolledLessonSchema,
   initializeLessonContextSchema,
 } from "./lesson.schema";
+import {
+  quizAttemptRequestSchema,
+  quizAttemptResponseSchema,
+  type QuizAttemptRequest,
+} from "./quiz/quiz.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
@@ -85,6 +90,7 @@ import type {
   LessonsFilters,
   LessonShow,
 } from "./lesson.schema";
+import type { QuizAttemptState } from "./quiz/quiz.types";
 
 @Controller("lesson")
 export class LessonController {
@@ -377,6 +383,34 @@ export class LessonController {
     return new BaseResponse({
       message: "adminCourseView.curriculum.lesson.toast.lessonDeletedSuccessfully",
     });
+  }
+
+  @Post("quiz-attempt/start")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: quizAttemptRequestSchema }],
+    response: quizAttemptResponseSchema,
+  })
+  async startQuizAttempt(
+    @Body() body: QuizAttemptRequest,
+    @CurrentUser() user: CurrentUserType,
+  ): Promise<BaseResponse<QuizAttemptState | null>> {
+    return new BaseResponse(
+      await this.lessonService.startQuizAttempt(body.lessonId, body.language, user),
+    );
+  }
+
+  @Post("quiz-attempt/expire")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: quizAttemptRequestSchema }],
+    response: quizAttemptResponseSchema,
+  })
+  async expireQuizAttempt(
+    @Body() body: QuizAttemptRequest,
+    @CurrentUser() user: CurrentUserType,
+  ): Promise<BaseResponse<QuizAttemptState | null>> {
+    return new BaseResponse(await this.lessonService.expireQuizAttempt(body.lessonId, user));
   }
 
   @Post("evaluation-quiz")

@@ -63,7 +63,12 @@ export function LiveTrainingOverview({
         </dl>
       </section>
 
-      <LiveTrainingPeopleSection liveTraining={liveTraining} canEditPeople={canEditPeople} />
+      <LiveTrainingPeopleSection
+        liveTrainingId={liveTraining.id}
+        author={liveTraining.author}
+        hosts={liveTraining.hosts}
+        canEditPeople={canEditPeople}
+      />
     </div>
   );
 }

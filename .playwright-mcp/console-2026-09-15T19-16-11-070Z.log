@@ -1,0 +1,26 @@
+[      68ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/__quiz-preview.html:0
+[     114ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5173/api/settings/manifest.webmanifest:0
+[     115ms] [ERROR] Manifest fetch from http://localhost:5173/api/settings/manifest.webmanifest failed, code 401 @ http://localhost:5173/__quiz-preview.html:5
+[     344ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-PPELVYIX.js?v=0594b0a1:21550
+[     433ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5173/api/settings/manifest.webmanifest:0
+[     433ms] [ERROR] Manifest fetch from http://localhost:5173/api/settings/manifest.webmanifest failed, code 401 @ http://localhost:5173/__quiz-preview.html:0
+[     466ms] [WARNING] No routes matched location "/__quiz-preview.html"  @ http://localhost:5173/node_modules/.vite/deps/chunk-2STEW2RU.js?v=0594b0a1:193
+[     467ms] [WARNING] No routes matched location "/__quiz-preview.html"  @ http://localhost:5173/node_modules/.vite/deps/chunk-2STEW2RU.js?v=0594b0a1:193
+[     482ms] [WARNING] ⚠️ React Router Future Flag Warning: The revalidation behavior after 4xx/5xx `action` responses is changing in v7. You can use the `v7_skipActionErrorRevalidation` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_skipactionerrorrevalidation. @ http://localhost:5173/node_modules/.vite/deps/chunk-YIKYCELN.js?v=0594b0a1:696
+[     489ms] [WARNING] No routes matched location "/__quiz-preview.html"  @ http://localhost:5173/node_modules/.vite/deps/chunk-2STEW2RU.js?v=0594b0a1:193
+[     489ms] [WARNING] No routes matched location "/__quiz-preview.html"  @ http://localhost:5173/node_modules/.vite/deps/chunk-2STEW2RU.js?v=0594b0a1:193
+[   21126ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/@react-refresh:0
+[   21139ms] [ERROR] Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "application/json". Strict MIME type checking is enforced for module scripts per HTML spec. @ http://localhost:5173/app/locales/pl/translation.json:0
+[   35625ms] The requested module '/node_modules/.vite/deps/react-dom_client.js' does not provide an export named 'createRoot'
+[   50074ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-PPELVYIX.js?v=0594b0a1:21550
+[   50103ms] Error: Remix Vite plugin can't detect preamble. Something is wrong.
+    at http://localhost:5173/app/components/ui/label.tsx:1:461
+[   69771ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-PPELVYIX.js?v=0594b0a1:21550
+[   69807ms] [WARNING] react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next {code: NO_I18NEXT_INSTANCE} @ http://localhost:5173/node_modules/.vite/deps/react-i18next.js?v=0594b0a1:112
+[   81817ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-PPELVYIX.js?v=0594b0a1:21550
+[  297165ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-PPELVYIX.js?v=0594b0a1:21550
+[  537179ms] [ERROR] WebSocket connection to 'ws://localhost:5173/' failed: WebSocket opening handshake timed out @ http://localhost:5173/@vite/client:534
+[  537193ms] SyntaxError: Failed to construct 'WebSocket': The URL 'ws://localhost:undefined/' is invalid.
+    at setupWebSocket (http://localhost:5173/@vite/client:535:19)
+    at fallback (http://localhost:5173/@vite/client:508:16)
+    at WebSocket.<anonymous> (http://localhost:5173/@vite/client:551:7)

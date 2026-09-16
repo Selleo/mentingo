@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { LIVE_TRAINING_MEMBER_ROLES as MEMBER_ROLES } from "@repo/shared";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_SOURCE_ROLES,
@@ -492,6 +493,7 @@ export class CalendarService {
         FROM ${liveTrainingMembers}
         WHERE ${liveTrainingMembers.liveTrainingId} = ${liveTrainings.id}
           AND ${liveTrainingMembers.userId} = ${currentUser.userId}
+          AND ${liveTrainingMembers.role} <> ${MEMBER_ROLES.ATTENDEE}
       )
     `;
     const allUsersCondition = eq(

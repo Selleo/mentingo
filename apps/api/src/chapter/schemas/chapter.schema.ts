@@ -3,13 +3,18 @@ import { type Static, Type } from "@sinclair/typebox";
 import { UUIDSchema } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { lessonForChapterSchema, lessonSchema } from "src/lesson/lesson.schema";
+import { quizSettingsSchema } from "src/lesson/quiz/quiz.schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 export const chapterSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
   lessonCount: Type.Number(),
-  lessons: Type.Optional(Type.Array(lessonSchema)),
+  lessons: Type.Optional(
+    Type.Array(
+      Type.Object({ ...lessonSchema.properties, quizSettings: Type.Optional(quizSettingsSchema) }),
+    ),
+  ),
   completedLessonCount: Type.Optional(Type.Number()),
   chapterProgress: Type.Optional(Type.Union([Type.Enum(PROGRESS_STATUSES)])),
   isFreemium: Type.Optional(Type.Boolean()),

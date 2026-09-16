@@ -34,6 +34,8 @@ import {
   settings,
 } from "src/storage/schema";
 
+import { localizedQuizSettings } from "../quiz/quiz-settings";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -141,6 +143,7 @@ export class LessonRepository {
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         fileUrl: lessons.fileS3Key,
         fileType: lessons.fileType,
+        quizSettings: localizedQuizSettings(language),
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
@@ -296,6 +299,7 @@ export class LessonRepository {
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         fileUrl: lessons.fileS3Key,
         fileType: lessons.fileType,
+        quizSettings: localizedQuizSettings(language),
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
@@ -431,6 +435,7 @@ export class LessonRepository {
         id: lessons.id,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
+        quizSettings: localizedQuizSettings(language),
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,

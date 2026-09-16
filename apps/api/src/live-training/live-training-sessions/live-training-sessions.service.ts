@@ -322,6 +322,14 @@ export class LiveTrainingSessionsService {
       throw new BadRequestException("liveTraining.errors.liveKitRoomNotAvailable");
     }
 
+    if (
+      liveTraining.settings.registrationRequired &&
+      !this.canManageSession(liveTraining, currentUser) &&
+      liveTraining.registration?.status !== "registered"
+    ) {
+      throw new BadRequestException("liveTraining.errors.registrationRequired");
+    }
+
     await this.assertRoomHasCapacity(session.livekitRoomName, liveTraining.maxParticipants);
 
     const user = await this.liveTrainingSessionsRepository.getUserDisplayRow(currentUser.userId);

@@ -50,7 +50,7 @@
       "layoutResetError": "Das Standard-Dashboard-Layout konnte nicht wiederhergestellt werden."
     },
     "widgets": {
-      "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
+      "loadError": "Dieses Widget konnte nicht geladen werden.",
       "dataScope": {
         "personal": "Deine Daten",
         "otherUsers": "Organisationsdaten",
@@ -62,10 +62,15 @@
       "placeholderDescription": "Dashboard-Widget für eine eigene Datenansicht",
       "placeholderContent": "Dieses Widget ist für funktionsspezifische Inhalte vorbereitet.",
       "placeholderFooter": "Beispiel-Widget",
-      "s_placeholder_1": { "title": "Lernenden-Widget 1" },
-      "s_placeholder_2": { "title": "Lernenden-Widget 2" },
-      "s_placeholder_3": { "title": "Lernenden-Widget 3" },
-      "loadError": "Dieses Widget konnte nicht geladen werden.",
+      "s_placeholder_1": {
+        "title": "Lernenden-Widget 1"
+      },
+      "s_placeholder_2": {
+        "title": "Lernenden-Widget 2"
+      },
+      "s_placeholder_3": {
+        "title": "Lernenden-Widget 3"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "Alle von dir begonnenen Kurse",
@@ -194,10 +199,18 @@
           "sun": "So"
         }
       },
-      "continue_learning": { "title": "Weiterlernen" },
-      "required_course": { "title": "Pflichtkurse" },
-      "course_completion": { "title": "Kursfortschritt" },
-      "certificates": { "title": "Zertifikate" },
+      "continue_learning": {
+        "title": "Weiterlernen"
+      },
+      "required_course": {
+        "title": "Pflichtkurse"
+      },
+      "course_completion": {
+        "title": "Kursfortschritt"
+      },
+      "certificates": {
+        "title": "Zertifikate"
+      },
       "ai_mentor_practice": {
         "title": "KI-Mentor-Übung",
         "aiNotConfigured": "Der KI-Mentor ist für diesen Mandanten nicht konfiguriert."
@@ -321,7 +334,6 @@
       "clearAll": "Alles löschen",
       "validate": "Bestätigen",
       "edit": "Bearbeiten",
-      "delete": "Löschen",
       "uploading": "Hochladen...",
       "sending": "Senden...",
       "loading": "Laden..."
@@ -381,6 +393,7 @@
       }
     },
     "other": {
+      "selectDate": "Datum auswählen",
       "active": "Aktiv",
       "archived": "Archiviert",
       "selected": "Ausgewählt",
@@ -738,7 +751,9 @@
     "loading": "Ereignisse werden geladen",
     "empty": "Keine Ereignisse zum Anzeigen",
     "today": "Heute",
-    "legend": { "label": "Quellen" },
+    "legend": {
+      "label": "Quellen"
+    },
     "microsoft": {
       "staleWarning": "Microsoft-Termine sind möglicherweise veraltet. Verbinden Sie das Konto neu oder versuchen Sie es in den Kontoeinstellungen erneut.",
       "horizonNotice": "Microsoft-Termine werden von 30 Tagen in der Vergangenheit bis 6 Monate im Voraus importiert; dieser Zeitraum kann unvollständig sein."
@@ -877,7 +892,6 @@
       "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
-
   "liveTrainingView": {
     "title": "Live-Schulung",
     "description": "Diese Seite wird den vollständigen Arbeitsbereich für Live-Schulungen enthalten.",
@@ -1076,6 +1090,20 @@
       "toast": {
         "success": "Live-Schulung erfolgreich aktualisiert."
       }
+    },
+    "registration": {
+      "title": "Anmeldung",
+      "required": "Anmeldung erforderlich",
+      "register": "Anmelden",
+      "cancel": "Anmeldung stornieren",
+      "registered": "Angemeldet",
+      "waitlisted": "Warteliste",
+      "confirmed": "Ihr Platz ist bestätigt.",
+      "position": "Ihr Wartelistenplatz: {{position}}",
+      "capacity": "Angemeldet: {{count}} / {{limit}}",
+      "saved": "Anmeldung aktualisiert.",
+      "closed": "Die Anmeldung ist geschlossen.",
+      "empty": "Noch keine Teilnehmer."
     }
   },
   "newsView": {
@@ -2797,7 +2825,10 @@
             "label": "Szenario",
             "placeholder": "Beschreiben Sie die Übungssituation."
           },
-          "aiRole": { "label": "Rolle der KI", "placeholder": "Zum Beispiel: Zögernder Kunde" },
+          "aiRole": {
+            "label": "Rolle der KI",
+            "placeholder": "Zum Beispiel: Zögernder Kunde"
+          },
           "learnerRole": {
             "label": "Rolle des Lernenden",
             "placeholder": "Zum Beispiel: Vertriebsmitarbeiter"
@@ -2871,7 +2902,12 @@
           "failedTitle": "Entwurf konnte nicht erstellt werden",
           "cancel": "Generierung abbrechen",
           "revise": "Entwurf überarbeiten",
-          "review": "Konfiguration prüfen",
+          "review": {
+            "currentDraftTitle": "Aktuellen Entwurf prüfen",
+            "currentDraftDescription": "Dieser Entwurf enthält noch Qualitätsvorschläge. Prüfen Sie ihn vor der Anwendung.",
+            "requiresReviewTitle": "Generierte Konfiguration prüfen",
+            "requiresReviewDescription": "KI hat den letzten Entwurf für Ihre endgültige Entscheidung beibehalten."
+          },
           "progressLabel": "Fortschritt der KI-Mentor-Generierung",
           "stages": {
             "draft": "Entwurf erstellen",
@@ -2910,12 +2946,6 @@
           "reviewConfiguration": "Konfiguration prüfen",
           "showMoreFindings": "{{count}} weitere Hinweise anzeigen",
           "showFewerFindings": "Weniger Hinweise anzeigen",
-          "review": {
-            "currentDraftTitle": "Aktuellen Entwurf prüfen",
-            "currentDraftDescription": "Dieser Entwurf enthält noch Qualitätsvorschläge. Prüfen Sie ihn vor der Anwendung.",
-            "requiresReviewTitle": "Generierte Konfiguration prüfen",
-            "requiresReviewDescription": "KI hat den letzten Entwurf für Ihre endgültige Entscheidung beibehalten."
-          },
           "quality": {
             "title": "Qualität mit KI prüfen",
             "resultTitle": "Qualitätsprüfung",
@@ -5435,7 +5465,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Nach Name oder E-Mail suchen...",
-      "tabs": { "admins": "Administratoren", "allUsers": "Alle Benutzer" },
+      "tabs": {
+        "admins": "Administratoren",
+        "allUsers": "Alle Benutzer"
+      },
       "loading": "Benutzer werden geladen...",
       "emptyAdmins": "Keine aktiven Administratoren gefunden.",
       "emptyAdminsSearch": "Keine aktiven Administratoren für \"{{search}}\" gefunden.",
@@ -5585,7 +5618,13 @@
       "liveKitRoomNotAvailable": "Der LiveKit-Raum für diese Sitzung ist nicht verfügbar.",
       "activeSessionUpdateForbidden": "Dieses Live-Training kann während einer laufenden Sitzung nicht geändert werden.",
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
-      "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
+      "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht.",
+      "registrationClosed": "Die Anmeldung ist geschlossen.",
+      "registrationIneligible": "Sie sind für diese Schulung nicht berechtigt.",
+      "hostRegistration": "Gastgeber müssen sich nicht anmelden.",
+      "registrationModeLocked": "Stornieren Sie alle Anmeldungen vor der Modusänderung.",
+      "capacityBelowRegistrations": "Die Kapazität darf nicht unter der Zahl der Angemeldeten liegen.",
+      "registrationRequired": "Zum Beitritt ist eine bestätigte Anmeldung erforderlich."
     }
   },
   "modernCourseView": {
@@ -5727,6 +5766,42 @@
         "aiMentor": "KI-Mentor",
         "lesson": "Lektion"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Zeitlimit pro Versuch",
+    "durationMinutes": "{{minutes}} Min.",
+    "noDurationLimit": "Kein Zeitlimit",
+    "windowCloses": "Verfügbarkeit endet",
+    "noClosingTime": "Keine Schlusszeit",
+    "windowEndsAttempt": "Der Versuch endet mit dem Verfügbarkeitszeitraum, auch wenn noch Zeit übrig ist.",
+    "opensIn": "Test verfügbar in {{time}}",
+    "opensAutomatically": "Der Test wird automatisch freigeschaltet. Danach können Sie Ihren Versuch starten.",
+    "orderingGroup": "Fragenreihenfolge",
+    "timingGroup": "Verfügbarkeit und Dauer",
+    "gradingGroup": "Bewertung und Versuche",
+    "feedbackGroup": "Feedback",
+    "clearDate": "Datum löschen",
+    "availabilityHelp": "Optionaler Verfügbarkeitszeitraum für alle Lernenden.",
+    "shuffleQuestions": "Zufällige Fragenreihenfolge",
+    "shuffleAnswers": "Zufällige Antwortreihenfolge",
+    "availableFrom": "Verfügbar ab",
+    "availableUntil": "Verfügbar bis",
+    "timeLimitMinutes": "Zeitlimit (Minuten)",
+    "passedFeedback": "Rückmeldung bei Bestehen",
+    "failedFeedback": "Rückmeldung bei Nichtbestehen",
+    "questionFeedback": "Erklärung zur Frage",
+    "start": "Test starten",
+    "expired": "Die Zeit ist abgelaufen. Dieser Versuch wurde nicht bestanden.",
+    "remaining": "Verbleibende Zeit: {{time}}",
+    "unavailable": "Dieser Test ist derzeit nicht verfügbar.",
+    "errors": {
+      "invalidDates": "Das Ende muss nach dem Beginn liegen.",
+      "unavailable": "Dieser Test ist derzeit nicht verfügbar.",
+      "attemptLimit": "Versuchslimit erreicht.",
+      "noQuestions": "Fügen Sie mindestens eine Frage hinzu.",
+      "startRequired": "Starten Sie den Test vor dem Absenden.",
+      "staleAttempt": "Dieser Versuch ist nicht mehr aktuell. Laden Sie die Seite neu."
     }
   }
 }

@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 import { Accordion, AccordionContent, AccordionItem } from "~/components/ui/accordion";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "~/components/ui/form";
+import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
@@ -32,6 +36,7 @@ const QuestionWrapper = ({
   handleToggle: () => void;
   isStructureLocked?: boolean;
 }) => {
+  const { t } = useTranslation();
   const isOpenQuestion =
     questionType === QuestionType.BRIEF_RESPONSE || questionType === QuestionType.DETAILED_RESPONSE;
 
@@ -63,7 +68,29 @@ const QuestionWrapper = ({
             isOpenQuestion={isOpenQuestion}
             isStructureLocked={isStructureLocked}
           />
-          {isOpen && <AccordionContent>{children}</AccordionContent>}
+          {isOpen && (
+            <AccordionContent>
+              {children}
+              <FormField
+                control={form.control}
+                name={`questions.${questionIndex}.feedback`}
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>{t("quizPoc.questionFeedback")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value ?? ""}
+                        maxLength={5000}
+                        data-testid={QUIZ_LESSON_FORM_HANDLES.questionFeedbackInput(questionIndex)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
+          )}
         </div>
       </AccordionItem>
     </Accordion>

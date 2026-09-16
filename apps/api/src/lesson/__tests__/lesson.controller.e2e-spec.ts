@@ -1,3 +1,4 @@
+import nodeCrypto from "node:crypto";
 import { Readable } from "stream";
 
 import {
@@ -42,6 +43,7 @@ import {
   studentLessonProgress,
   studentQuestionAnswers,
 } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -1145,6 +1147,278 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         ),
       );
   };
+
+  describe("configured quiz attempts", () => {
+    const setupConfiguredQuiz = async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled: true },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      await enrollStudentToCourse(student.id, course.id);
+      const quiz = await createQuizLesson(course.id, chapter.id, author.id);
+      await db
+        .update(lessons)
+        .set({
+          attemptsLimit: 1,
+          thresholdScore: 0,
+          quizSettings: settingsToJSONBuildObject({
+            shuffleQuestions: true,
+            shuffleAnswers: true,
+            timeLimitMinutes: 1,
+            passedFeedback: { en: "Well done" },
+            failedFeedback: { en: "Try again" },
+          }),
+        })
+        .where(eq(lessons.id, quiz.lesson.id));
+      await db
+        .update(questions)
+        .set({ feedback: buildJsonbField("en", "Two plus two is four") })
+        .where(eq(questions.id, quiz.question.id));
+      return { ...quiz, student, cookies: await cookieFor(student, app) };
+    };
+
+    it("resumes the same attempt, grades shuffled answers and replays submission only once", async () => {
+      const { lesson, question, correctOption, cookies, student } = await setupConfiguredQuiz();
+      const body = { lessonId: lesson.id, language: "en" };
+      const starts = await Promise.all(
+        [1, 2].map(() =>
+          request(app.getHttpServer())
+            .post("/api/lesson/quiz-attempt/start")
+            .set("Cookie", cookies)
+            .send(body)
+            .expect(201),
+        ),
+      );
+      expect(starts[0].body.data).toEqual(starts[1].body.data);
+      const before = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(before.body.data.quizDetails.questions[0].feedback).toBe("");
+      expect(before.body.data.quizSettings.passedFeedback).toBe("");
+      const answers = {
+        ...body,
+        attemptId: starts[0].body.data.id,
+        questionsAnswers: [{ questionId: question.id, answers: [{ answerId: correctOption.id }] }],
+      };
+      const responses = await Promise.all(
+        [1, 2].map(() =>
+          request(app.getHttpServer())
+            .post("/api/lesson/evaluation-quiz")
+            .set("Cookie", cookies)
+            .send(answers)
+            .expect(201),
+        ),
+      );
+      expect(responses[0].body.data.data.score).toBe(100);
+      expect(responses[1].body.data.data.score).toBe(100);
+      const after = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(after.body.data.quizDetails.questions[0].feedback).toBe("Two plus two is four");
+      expect(after.body.data.quizSettings.passedFeedback).toBe("Well done");
+      const [progress] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lesson.id),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+      expect(progress.attempts).toBe(1);
+      await request(app.getHttpServer())
+        .delete("/api/lesson/delete-student-quiz-answers")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", cookies)
+        .expect(409);
+    });
+
+    it("keeps cooldowns for randomized quizzes and allows another batch after the wait", async () => {
+      const { lesson, cookies, student } = await setupConfiguredQuiz();
+      await db.update(lessons).set({ quizCooldownInHours: 1 }).where(eq(lessons.id, lesson.id));
+      const body = { lessonId: lesson.id, language: "en" };
+      const start = await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/start")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      const condition = and(
+        eq(studentLessonProgress.lessonId, lesson.id),
+        eq(studentLessonProgress.studentId, student.id),
+      );
+      await db
+        .update(studentLessonProgress)
+        .set({
+          quizAttemptState: settingsToJSONBuildObject({
+            ...start.body.data,
+            expiresAt: new Date(Date.now() - 1000).toISOString(),
+          }),
+        })
+        .where(condition);
+      await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/expire")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      await request(app.getHttpServer())
+        .delete("/api/lesson/delete-student-quiz-answers")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", cookies)
+        .expect(409);
+      await db
+        .update(studentLessonProgress)
+        .set({ updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() })
+        .where(condition);
+      await request(app.getHttpServer())
+        .delete("/api/lesson/delete-student-quiz-answers")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", cookies)
+        .expect(200);
+      await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/start")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      const [progress] = await db.select().from(studentLessonProgress).where(condition);
+      expect(progress.attempts).toBe(2);
+    });
+
+    it("reshuffles questions and answers on retake and preserves the new order on resume", async () => {
+      const { lesson, question, student, cookies } = await setupConfiguredQuiz();
+      await db
+        .update(lessons)
+        .set({ attemptsLimit: 2, quizCooldownInHours: null })
+        .where(eq(lessons.id, lesson.id));
+      await db.insert(questions).values({
+        lessonId: lesson.id,
+        authorId: question.authorId,
+        type: QUESTION_TYPE.SINGLE_CHOICE,
+        title: buildJsonbField("en", "Another question"),
+        displayOrder: 2,
+      });
+      const random = jest.spyOn(nodeCrypto, "randomInt").mockImplementation(() => 0);
+      const body = { lessonId: lesson.id, language: "en" };
+      const start = () =>
+        request(app.getHttpServer())
+          .post("/api/lesson/quiz-attempt/start")
+          .set("Cookie", cookies)
+          .send(body)
+          .expect(201);
+      try {
+        const first = (await start()).body.data;
+        await db
+          .update(studentLessonProgress)
+          .set({
+            quizAttemptState: settingsToJSONBuildObject({
+              ...first,
+              expiresAt: new Date(Date.now() - 1000).toISOString(),
+            }),
+          })
+          .where(
+            and(
+              eq(studentLessonProgress.lessonId, lesson.id),
+              eq(studentLessonProgress.studentId, student.id),
+            ),
+          );
+        await request(app.getHttpServer())
+          .post("/api/lesson/quiz-attempt/expire")
+          .set("Cookie", cookies)
+          .send(body)
+          .expect(201);
+        await request(app.getHttpServer())
+          .delete("/api/lesson/delete-student-quiz-answers")
+          .set("Cookie", cookies)
+          .query({ lessonId: lesson.id })
+          .expect(200);
+        random.mockImplementation(() => 1);
+        const second = (await start()).body.data;
+        expect(second.id).not.toBe(first.id);
+        expect(second.questionOrder).not.toEqual(first.questionOrder);
+        expect(second.optionOrder[question.id]).not.toEqual(first.optionOrder[question.id]);
+        expect((await start()).body.data).toEqual(second);
+      } finally {
+        random.mockRestore();
+      }
+    });
+
+    it("expires on the server, consumes the attempt and cannot pass with a zero threshold", async () => {
+      const { lesson, cookies, student } = await setupConfiguredQuiz();
+      const body = { lessonId: lesson.id, language: "en" };
+      const start = await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/start")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      await db
+        .update(studentLessonProgress)
+        .set({
+          quizAttemptState: settingsToJSONBuildObject({
+            ...start.body.data,
+            expiresAt: new Date(Date.now() - 1000).toISOString(),
+          }),
+        })
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lesson.id),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+      await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/expire")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/expire")
+        .set("Cookie", cookies)
+        .send(body)
+        .expect(201);
+      const result = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(result.body.data).toMatchObject({
+        isQuizPassed: false,
+        attempts: 1,
+        quizAttempt: { status: "expired" },
+        quizDetails: { score: 0 },
+      });
+      await request(app.getHttpServer())
+        .delete("/api/lesson/delete-student-quiz-answers")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", cookies)
+        .expect(409);
+    });
+
+    it("blocks starting before availability and rejects submission without starting", async () => {
+      const { lesson, cookies } = await setupConfiguredQuiz();
+      await db
+        .update(lessons)
+        .set({ quizSettings: { availableFrom: new Date(Date.now() + 60_000).toISOString() } })
+        .where(eq(lessons.id, lesson.id));
+      await request(app.getHttpServer())
+        .post("/api/lesson/quiz-attempt/start")
+        .set("Cookie", cookies)
+        .send({ lessonId: lesson.id, language: "en" })
+        .expect(400);
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId: lesson.id, language: "en", questionsAnswers: [] })
+        .expect(409);
+    });
+  });
 
   describe("DELETE /api/lesson - quiz lesson deletion", () => {
     it("should delete a quiz lesson with linked quiz attempts", async () => {

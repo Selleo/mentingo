@@ -50,7 +50,7 @@
       "layoutResetError": "No pudimos restaurar el diseño predeterminado del panel."
     },
     "widgets": {
-      "loadError": "No se pudieron cargar los datos de este widget.",
+      "loadError": "No se pudo cargar este widget.",
       "dataScope": {
         "personal": "Tus datos",
         "otherUsers": "Datos de la organización",
@@ -62,10 +62,15 @@
       "placeholderDescription": "Widget del panel preparado para una vista de datos propia",
       "placeholderContent": "Este widget está preparado para el contenido específico de su función.",
       "placeholderFooter": "Widget de ejemplo",
-      "s_placeholder_1": { "title": "Widget de estudiante 1" },
-      "s_placeholder_2": { "title": "Widget de estudiante 2" },
-      "s_placeholder_3": { "title": "Widget de estudiante 3" },
-      "loadError": "No se pudo cargar este widget.",
+      "s_placeholder_1": {
+        "title": "Widget de estudiante 1"
+      },
+      "s_placeholder_2": {
+        "title": "Widget de estudiante 2"
+      },
+      "s_placeholder_3": {
+        "title": "Widget de estudiante 3"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "Todos los cursos que has comenzado",
@@ -215,10 +220,18 @@
           "sun": "Dom"
         }
       },
-      "continue_learning": { "title": "Continuar aprendiendo" },
-      "required_course": { "title": "Cursos obligatorios" },
-      "course_completion": { "title": "Progreso de cursos" },
-      "certificates": { "title": "Certificados" },
+      "continue_learning": {
+        "title": "Continuar aprendiendo"
+      },
+      "required_course": {
+        "title": "Cursos obligatorios"
+      },
+      "course_completion": {
+        "title": "Progreso de cursos"
+      },
+      "certificates": {
+        "title": "Certificados"
+      },
       "ai_mentor_practice": {
         "title": "Práctica con Mentor IA",
         "aiNotConfigured": "Mentor IA no está configurado para esta organización."
@@ -325,7 +338,6 @@
       "clearAll": "Borrar todo",
       "validate": "Validar",
       "edit": "Editar",
-      "delete": "Eliminar",
       "uploading": "Subiendo...",
       "sending": "Enviando...",
       "loading": "Cargando..."
@@ -385,6 +397,7 @@
       }
     },
     "other": {
+      "selectDate": "Seleccionar fecha",
       "active": "Activo",
       "archived": "Archivado",
       "selected": "Seleccionado",
@@ -733,7 +746,9 @@
     "loading": "Cargando eventos",
     "empty": "No hay eventos para mostrar",
     "today": "Hoy",
-    "legend": { "label": "Fuentes" },
+    "legend": {
+      "label": "Fuentes"
+    },
     "microsoft": {
       "staleWarning": "Los eventos de Microsoft pueden estar desactualizados. Vuelve a conectar o reintenta desde los ajustes de la cuenta.",
       "horizonNotice": "Los eventos de Microsoft se importan desde 30 días atrás hasta 6 meses adelante, por lo que este intervalo puede estar incompleto."
@@ -1070,6 +1085,20 @@
       "toast": {
         "success": "Formación en vivo actualizada con éxito."
       }
+    },
+    "registration": {
+      "title": "Inscripción",
+      "required": "Requerir inscripción",
+      "register": "Inscribirse",
+      "cancel": "Cancelar inscripción",
+      "registered": "Inscritos",
+      "waitlisted": "Lista de espera",
+      "confirmed": "Tu plaza está confirmada.",
+      "position": "Tu posición en la lista de espera: {{position}}",
+      "capacity": "Inscritos: {{count}} / {{limit}}",
+      "saved": "Inscripción actualizada.",
+      "closed": "Las inscripciones están cerradas.",
+      "empty": "Todavía no hay participantes."
     }
   },
   "newsView": {
@@ -2790,7 +2819,10 @@
             "label": "Escenario",
             "placeholder": "Describe la situación que practicará el alumno."
           },
-          "aiRole": { "label": "Rol de la IA", "placeholder": "Por ejemplo: cliente indeciso" },
+          "aiRole": {
+            "label": "Rol de la IA",
+            "placeholder": "Por ejemplo: cliente indeciso"
+          },
           "learnerRole": {
             "label": "Rol del alumno",
             "placeholder": "Por ejemplo: representante de ventas"
@@ -5246,7 +5278,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
-      "tabs": { "admins": "Administradores", "allUsers": "Todos los usuarios" },
+      "tabs": {
+        "admins": "Administradores",
+        "allUsers": "Todos los usuarios"
+      },
       "loading": "Cargando usuarios...",
       "emptyAdmins": "No se encontraron administradores activos.",
       "emptyAdminsSearch": "No se encontraron administradores activos para \"{{search}}\".",
@@ -5543,7 +5578,13 @@
       "liveKitRoomNotAvailable": "La sala de LiveKit para esta sesión no está disponible.",
       "activeSessionUpdateForbidden": "Esta formación en directo no se puede modificar mientras haya una sesión en curso.",
       "maxParticipantsReached": "Se ha alcanzado el número máximo de participantes.",
-      "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
+      "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas.",
+      "registrationClosed": "Las inscripciones están cerradas.",
+      "registrationIneligible": "No tienes acceso a esta formación.",
+      "hostRegistration": "Los formadores no necesitan inscribirse.",
+      "registrationModeLocked": "Cancela todas las inscripciones antes de cambiar el modo.",
+      "capacityBelowRegistrations": "El aforo no puede ser menor que el número de inscritos.",
+      "registrationRequired": "Se necesita una inscripción confirmada para unirse."
     }
   },
   "modernCourseView": {
@@ -5684,6 +5725,42 @@
         "aiMentor": "Mentor de IA",
         "lesson": "Lección"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Límite de tiempo por intento",
+    "durationMinutes": "{{minutes}} min",
+    "noDurationLimit": "Sin límite de duración",
+    "windowCloses": "Fin del periodo de disponibilidad",
+    "noClosingTime": "Sin hora de cierre",
+    "windowEndsAttempt": "El intento termina al cerrarse el periodo de disponibilidad, aunque te quede tiempo.",
+    "opensIn": "El test estará disponible en {{time}}",
+    "opensAutomatically": "El test se desbloqueará automáticamente. Entonces podrás iniciar tu intento.",
+    "orderingGroup": "Orden de las preguntas",
+    "timingGroup": "Disponibilidad y duración",
+    "gradingGroup": "Puntuación e intentos",
+    "feedbackGroup": "Comentarios",
+    "clearDate": "Borrar fecha",
+    "availabilityHelp": "Periodo de disponibilidad opcional compartido por todos los participantes.",
+    "shuffleQuestions": "Orden aleatorio de preguntas",
+    "shuffleAnswers": "Orden aleatorio de respuestas",
+    "availableFrom": "Disponible desde",
+    "availableUntil": "Disponible hasta",
+    "timeLimitMinutes": "Límite de tiempo (minutos)",
+    "passedFeedback": "Mensaje al aprobar",
+    "failedFeedback": "Mensaje al suspender",
+    "questionFeedback": "Explicación de la pregunta",
+    "start": "Iniciar prueba",
+    "expired": "El tiempo ha terminado. Este intento no se ha aprobado.",
+    "remaining": "Tiempo restante: {{time}}",
+    "unavailable": "La prueba está fuera del período de disponibilidad.",
+    "errors": {
+      "invalidDates": "La fecha de cierre debe ser posterior a la de apertura.",
+      "unavailable": "La prueba está fuera del período de disponibilidad.",
+      "attemptLimit": "Se ha alcanzado el límite de intentos.",
+      "noQuestions": "Añade al menos una pregunta.",
+      "startRequired": "Inicia la prueba antes de enviar las respuestas.",
+      "staleAttempt": "Este intento ya no está vigente. Actualiza la página."
     }
   }
 }

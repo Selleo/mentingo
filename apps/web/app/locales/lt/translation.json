@@ -50,7 +50,7 @@
       "layoutResetError": "Nepavyko atkurti numatytojo skydelio išdėstymo."
     },
     "widgets": {
-      "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
+      "loadError": "Nepavyko įkelti šio valdiklio.",
       "dataScope": {
         "personal": "Jūsų duomenys",
         "otherUsers": "Organizacijos duomenys",
@@ -62,10 +62,15 @@
       "placeholderDescription": "Prietaisų skydelio valdiklis, paruoštas atskiram duomenų rodiniui",
       "placeholderContent": "Šis valdiklis paruoštas konkrečios funkcijos turiniui.",
       "placeholderFooter": "Pavyzdinis valdiklis",
-      "s_placeholder_1": { "title": "Besimokančiojo valdiklis 1" },
-      "s_placeholder_2": { "title": "Besimokančiojo valdiklis 2" },
-      "s_placeholder_3": { "title": "Besimokančiojo valdiklis 3" },
-      "loadError": "Nepavyko įkelti šio valdiklio.",
+      "s_placeholder_1": {
+        "title": "Besimokančiojo valdiklis 1"
+      },
+      "s_placeholder_2": {
+        "title": "Besimokančiojo valdiklis 2"
+      },
+      "s_placeholder_3": {
+        "title": "Besimokančiojo valdiklis 3"
+      },
       "studentTiles": {
         "continueLearning": {
           "description": "Visi pradėti kursai",
@@ -194,10 +199,18 @@
           "sun": "Sk"
         }
       },
-      "continue_learning": { "title": "Tęsti mokymąsi" },
-      "required_course": { "title": "Privalomi kursai" },
-      "course_completion": { "title": "Kursų pažanga" },
-      "certificates": { "title": "Sertifikatai" },
+      "continue_learning": {
+        "title": "Tęsti mokymąsi"
+      },
+      "required_course": {
+        "title": "Privalomi kursai"
+      },
+      "course_completion": {
+        "title": "Kursų pažanga"
+      },
+      "certificates": {
+        "title": "Sertifikatai"
+      },
       "ai_mentor_practice": {
         "title": "DI mentoriaus praktika",
         "aiNotConfigured": "DI mentorius nesukonfigūruotas šiai organizacijai."
@@ -321,7 +334,6 @@
       "clearAll": "Išvalyti viską",
       "validate": "Patvirtinti",
       "edit": "Redaguoti",
-      "delete": "Ištrinti",
       "uploading": "Įkeliama...",
       "sending": "Siunčiama...",
       "loading": "Įkeliama..."
@@ -381,6 +393,7 @@
       }
     },
     "other": {
+      "selectDate": "Pasirinkite datą",
       "active": "Aktyvus",
       "archived": "Suarchyvuota",
       "selected": "Pasirinkta",
@@ -738,7 +751,9 @@
     "loading": "Įvykiai įkeliami",
     "empty": "Nėra įvykių",
     "today": "Šiandien",
-    "legend": { "label": "Šaltiniai" },
+    "legend": {
+      "label": "Šaltiniai"
+    },
     "microsoft": {
       "staleWarning": "Microsoft įvykiai gali būti pasenę. Prijunkite iš naujo arba kartokite paskyros nustatymuose.",
       "horizonNotice": "Microsoft įvykiai importuojami nuo 30 dienų praeityje iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti nepilnas."
@@ -1075,6 +1090,20 @@
       "toast": {
         "success": "Tiesioginiai mokymai sėkmingai atnaujinti."
       }
+    },
+    "registration": {
+      "title": "Registracija",
+      "required": "Reikalauti registracijos",
+      "register": "Registruotis",
+      "cancel": "Atšaukti registraciją",
+      "registered": "Užsiregistravę",
+      "waitlisted": "Laukiančiųjų sąrašas",
+      "confirmed": "Jūsų vieta patvirtinta.",
+      "position": "Jūsų vieta laukiančiųjų sąraše: {{position}}",
+      "capacity": "Užsiregistravę: {{count}} / {{limit}}",
+      "saved": "Registracija atnaujinta.",
+      "closed": "Registracija uždaryta.",
+      "empty": "Dalyvių dar nėra."
     }
   },
   "newsView": {
@@ -2796,7 +2825,10 @@
             "label": "Scenarijus",
             "placeholder": "Aprašykite situaciją, kurią besimokantysis praktikuos."
           },
-          "aiRole": { "label": "AI vaidmuo", "placeholder": "Pavyzdžiui: abejojantis klientas" },
+          "aiRole": {
+            "label": "AI vaidmuo",
+            "placeholder": "Pavyzdžiui: abejojantis klientas"
+          },
           "learnerRole": {
             "label": "Besimokančiojo vaidmuo",
             "placeholder": "Pavyzdžiui: pardavimo atstovas"
@@ -2870,7 +2902,12 @@
           "failedTitle": "Nepavyko sugeneruoti juodraščio",
           "cancel": "Atšaukti generavimą",
           "revise": "Taisyti juodraštį",
-          "review": "Peržiūrėti konfigūraciją",
+          "review": {
+            "currentDraftTitle": "Peržiūrėti dabartinį juodraštį",
+            "currentDraftDescription": "Šiame juodraštyje dar yra kokybės pasiūlymų. Peržiūrėkite jį prieš pritaikydami.",
+            "requiresReviewTitle": "Peržiūrėti sugeneruotą konfigūraciją",
+            "requiresReviewDescription": "DI paliko naujausią juodraštį jūsų galutiniam sprendimui."
+          },
           "progressLabel": "DI mentoriaus generavimo eiga",
           "stages": {
             "draft": "Generuojamas juodraštis",
@@ -2909,12 +2946,6 @@
           "reviewConfiguration": "Peržiūrėti konfigūraciją",
           "showMoreFindings": "Rodyti dar {{count}} pastabų",
           "showFewerFindings": "Rodyti mažiau pastabų",
-          "review": {
-            "currentDraftTitle": "Peržiūrėti dabartinį juodraštį",
-            "currentDraftDescription": "Šiame juodraštyje dar yra kokybės pasiūlymų. Peržiūrėkite jį prieš pritaikydami.",
-            "requiresReviewTitle": "Peržiūrėti sugeneruotą konfigūraciją",
-            "requiresReviewDescription": "DI paliko naujausią juodraštį jūsų galutiniam sprendimui."
-          },
           "quality": {
             "title": "Patikrinti kokybę su DI",
             "resultTitle": "Kokybės patikra",
@@ -5439,7 +5470,10 @@
     },
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
-      "tabs": { "admins": "Administratoriai", "allUsers": "Visi naudotojai" },
+      "tabs": {
+        "admins": "Administratoriai",
+        "allUsers": "Visi naudotojai"
+      },
       "loading": "Įkeliami naudotojai...",
       "emptyAdmins": "Aktyvių administratorių nerasta.",
       "emptyAdminsSearch": "Aktyvių administratorių pagal \"{{search}}\" nerasta.",
@@ -5589,7 +5623,13 @@
       "liveKitRoomNotAvailable": "Šiai sesijai skirtas LiveKit kambarys nepasiekiamas.",
       "activeSessionUpdateForbidden": "Šio tiesioginio mokymo negalima keisti, kol vyksta sesija.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
-      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
+      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius.",
+      "registrationClosed": "Registracija uždaryta.",
+      "registrationIneligible": "Neturite teisės dalyvauti šiuose mokymuose.",
+      "hostRegistration": "Vedėjams registruotis nereikia.",
+      "registrationModeLocked": "Prieš keisdami režimą atšaukite visas registracijas.",
+      "capacityBelowRegistrations": "Vietų skaičius negali būti mažesnis už užsiregistravusiųjų skaičių.",
+      "registrationRequired": "Norint prisijungti būtina patvirtinta registracija."
     }
   },
   "modernCourseView": {
@@ -5735,6 +5775,42 @@
         "aiMentor": "DI mentorius",
         "lesson": "Pamoka"
       }
+    }
+  },
+  "quizPoc": {
+    "attemptDuration": "Bandymo laiko limitas",
+    "durationMinutes": "{{minutes}} min.",
+    "noDurationLimit": "Be laiko limito",
+    "windowCloses": "Prieinamumo laikotarpio pabaiga",
+    "noClosingTime": "Pabaigos laikas nenustatytas",
+    "windowEndsAttempt": "Bandymas baigiasi pasibaigus prieinamumo laikotarpiui, net jei dar liko laiko.",
+    "opensIn": "Testas bus pasiekiamas po {{time}}",
+    "opensAutomatically": "Testas atsirakins automatiškai. Tada galėsite pradėti bandymą.",
+    "orderingGroup": "Klausimų tvarka",
+    "timingGroup": "Prieinamumas ir trukmė",
+    "gradingGroup": "Vertinimas ir bandymai",
+    "feedbackGroup": "Grįžtamasis ryšys",
+    "clearDate": "Išvalyti datą",
+    "availabilityHelp": "Pasirenkamas prieinamumo laikotarpis visiems dalyviams.",
+    "shuffleQuestions": "Atsitiktinė klausimų tvarka",
+    "shuffleAnswers": "Atsitiktinė atsakymų tvarka",
+    "availableFrom": "Prieinama nuo",
+    "availableUntil": "Prieinama iki",
+    "timeLimitMinutes": "Laiko limitas (minutės)",
+    "passedFeedback": "Atsiliepimas išlaikius",
+    "failedFeedback": "Atsiliepimas neišlaikius",
+    "questionFeedback": "Klausimo paaiškinimas",
+    "start": "Pradėti testą",
+    "expired": "Laikas baigėsi. Bandymas neišlaikytas.",
+    "remaining": "Likęs laikas: {{time}}",
+    "unavailable": "Šiuo metu testas neprieinamas.",
+    "errors": {
+      "invalidDates": "Pabaiga turi būti po pradžios.",
+      "unavailable": "Šiuo metu testas neprieinamas.",
+      "attemptLimit": "Pasiektas bandymų limitas.",
+      "noQuestions": "Pridėkite bent vieną klausimą.",
+      "startRequired": "Pradėkite testą prieš pateikdami atsakymus.",
+      "staleAttempt": "Šis bandymas nebeaktualus. Atnaujinkite puslapį."
     }
   }
 }

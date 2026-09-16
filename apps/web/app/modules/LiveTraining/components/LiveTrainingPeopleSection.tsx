@@ -1,5 +1,5 @@
 import { Check, Loader2, UserPlus, Users, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateLiveTraining } from "~/api/mutations/live-training/useUpdateLiveTraining";
@@ -33,7 +33,9 @@ import {
 import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
 
 type LiveTrainingPeopleSectionProps = {
-  liveTraining: LiveTrainingDetails;
+  liveTrainingId: LiveTrainingDetails["id"];
+  author: LiveTrainingDetails["author"];
+  hosts: LiveTrainingDetails["hosts"];
   canEditPeople: boolean;
 };
 
@@ -48,6 +50,20 @@ type PersonRowProps = {
   onRemove: () => void;
 };
 
+// Polling renews signed URLs for the same image. Keep the loaded avatar mounted
+// until the person or image path changes; a new mount receives the latest URL.
+const HostAvatar = memo(
+  function HostAvatar({
+    name,
+    profilePictureUrl,
+  }: Pick<PersonRowProps, "name" | "profilePictureUrl">) {
+    return <UserAvatar userName={name} profilePictureUrl={profilePictureUrl} className="size-9" />;
+  },
+  (previous, next) =>
+    previous.name === next.name &&
+    previous.profilePictureUrl?.split("?")[0] === next.profilePictureUrl?.split("?")[0],
+);
+
 function PersonRow({
   name,
   profilePictureUrl,
@@ -61,7 +77,7 @@ function PersonRow({
   return (
     <div className="group/person-row flex min-w-0 items-center justify-between gap-3 rounded border border-neutral-200 px-3 py-2">
       <div className="flex min-w-0 items-center gap-3">
-        <UserAvatar userName={name} profilePictureUrl={profilePictureUrl} className="size-9" />
+        <HostAvatar name={name} profilePictureUrl={profilePictureUrl} />
         <p className="truncate text-sm font-medium text-neutral-950">{name}</p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
@@ -99,8 +115,10 @@ function PersonRow({
   );
 }
 
-export function LiveTrainingPeopleSection({
-  liveTraining,
+export const LiveTrainingPeopleSection = memo(function LiveTrainingPeopleSection({
+  liveTrainingId,
+  author,
+  hosts,
   canEditPeople,
 }: LiveTrainingPeopleSectionProps) {
   const { t } = useTranslation();
@@ -109,15 +127,16 @@ export function LiveTrainingPeopleSection({
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const { mutateAsync: updateLiveTraining, isPending: isUpdating } = useUpdateLiveTraining();
-  const people = getLiveTrainingPeopleList(liveTraining, t("liveTrainingView.sidebar.unknownUser"));
+  const fallbackName = t("liveTrainingView.sidebar.unknownUser");
+  const people = useMemo(
+    () => getLiveTrainingPeopleList({ author, hosts }, fallbackName),
+    [author, hosts, fallbackName],
+  );
   const editableHostIds = useMemo(
-    () => getLiveTrainingEditableHostIds(liveTraining),
-    [liveTraining],
+    () => getLiveTrainingEditableHostIds({ author, hosts }),
+    [author, hosts],
   );
-  const hostIds = useMemo(
-    () => new Set(liveTraining.hosts.map((host) => host.id)),
-    [liveTraining.hosts],
-  );
+  const hostIds = useMemo(() => new Set(hosts.map((host) => host.id)), [hosts]);
   const {
     data: userPages,
     fetchNextPage,
@@ -126,7 +145,7 @@ export function LiveTrainingPeopleSection({
     isLoading,
   } = useLiveTrainingHostCandidates(
     {
-      id: liveTraining.id,
+      id: liveTrainingId,
       keyword: debouncedSearch,
       perPage: 20,
     },
@@ -144,7 +163,7 @@ export function LiveTrainingPeopleSection({
 
   const updateHosts = async (nextHostIds: string[]) => {
     await updateLiveTraining({
-      id: liveTraining.id,
+      id: liveTrainingId,
       data: {
         language,
         hostUserIds: nextHostIds,
@@ -153,7 +172,7 @@ export function LiveTrainingPeopleSection({
   };
 
   const handleAddHost = async (userId: string) => {
-    if (hostIds.has(userId) || userId === liveTraining.author.id) return;
+    if (hostIds.has(userId) || userId === author.id) return;
 
     await updateHosts([...editableHostIds, userId]);
   };
@@ -241,7 +260,7 @@ export function LiveTrainingPeopleSection({
               <CommandGroup>
                 {users.map((user) => {
                   const name = getUserCandidateDisplayName(user);
-                  const isAuthor = user.id === liveTraining.author.id;
+                  const isAuthor = user.id === author.id;
                   const isHost = hostIds.has(user.id);
                   const isSelected = isAuthor || isHost;
 
@@ -287,4 +306,4 @@ export function LiveTrainingPeopleSection({
       )}
     </Popover>
   );
-}
+});

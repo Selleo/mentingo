@@ -8,6 +8,8 @@ import { LIVE_TRAINING_WORKSPACE_TABS } from "~/modules/LiveTraining/liveTrainin
 
 import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
 
+import { LiveTrainingRegistration } from "./LiveTrainingRegistration";
+
 import type {
   LiveTrainingDetails,
   LiveTrainingUiActions,
@@ -56,6 +58,7 @@ export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWor
           canEditPeople={actions.canManagePeople}
           className="lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]"
         />
+        <LiveTrainingRegistration liveTraining={liveTraining} actions={actions} />
       </TabsContent>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>

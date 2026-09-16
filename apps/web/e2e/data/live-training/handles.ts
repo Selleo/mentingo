@@ -30,6 +30,11 @@ export const LIVE_TRAINING_FORM_HANDLES = {
 } as const;
 
 export const LIVE_TRAINING_HANDLES = {
+  REGISTRATION_TOGGLE: "live-training-registration-toggle",
+  REGISTER_BUTTON: "live-training-register",
+  CANCEL_REGISTRATION_BUTTON: "live-training-cancel-registration",
+  REGISTRATION_STATUS: "live-training-registration-status",
+  REGISTRATION_LIST: "live-training-registration-list",
   PAGE: "live-training-page",
   STAGE: "live-training-stage",
   TITLE_INPUT: "live-training-title-input",

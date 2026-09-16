@@ -19,6 +19,8 @@ Administrators create sessions from the Live Training or Calendar workflow, trai
 
 - Create, edit, and delete standalone or course-linked live training events.
 - Configure delivery type, date, time, location, hosts, maximum participants, and viewer permissions.
+- Enable optional self-registration and view confirmed participants and a waiting list.
+- Automatically assign a cancelled place to the first eligible person on the waiting list.
 - Start, join, and end live training sessions through permission-controlled actions.
 - Keep online room participants arranged in a stable responsive grid, including balanced 2x2 layout for four participants.
 - Attach before-session and after-session materials.
@@ -39,7 +41,11 @@ Administrators create a live training item with title, schedule, delivery type, 
 
 Authorized editors can adjust key session details directly from the Live Training workspace. Valid inline changes, including maximum participant capacity, are saved when the editor leaves the field and are then reflected in the session data and connected calendar views. Once a session is waiting to start or in progress, Mentingo locks Live Training configuration and participant/material management until the session is finished, while hosts retain the controls needed to run it.
 
-When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
+For a training with registration enabled, learners register from the training details page. Available places are confirmed immediately; further registrations enter a waiting list. Learners see their own status and waiting-list position, while organizers see both lists. Cancelling before the scheduled start automatically promotes the earliest eligible waiting participant. Increasing capacity also fills places from the waiting list. Hosts do not consume registration places.
+
+Registration closes at the scheduled start or when a session is opened, whichever happens first. Capacity cannot be reduced below confirmed registrations, and registration mode cannot change while the lists are nonempty. Open details pages refresh registration status every five seconds. Promotion does not send an additional email.
+
+When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. When registration is enabled, learners need a confirmed place to join an online room; existing technical room-capacity limits still apply. For course-linked offline sessions with registration enabled, automatic lesson completion includes confirmed participants only. Training notifications also target confirmed participants.
 
 In online rooms, participant tiles adapt to the available stage size so small group sessions remain easy to scan, including a balanced two-by-two arrangement when four camera tiles are visible.
 
@@ -52,6 +58,7 @@ Materials are separated into before-session and after-session resources. Privile
 - API endpoints live under `apps/api/src/live-training`.
 - Access is guarded by the Live Training feature flag plus permissions such as `PERMISSIONS.LIVE_TRAINING_READ`, create/update/delete, join, start, end, and statistics.
 - Live Training integrates with Calendar, course lessons, resource uploads, announcements/email, realtime session updates, and LiveKit online rooms.
+- Registration reuses the existing member table with a distinct attendee role and JSON metadata; it requires no database migration. Seat allocation and waiting-list promotion lock the training row in one transaction. Host reads and host edits exclude attendee records.
 - An open session prevents changes to Live Training configuration, deletion, host assignments, and materials; the API enforces this rule even if a client bypasses the UI.
 - Online room participant layout is handled by the LiveKit-based meeting components in `apps/web/app/modules/LiveTraining/components/LiveTrainingMeeting`.
 
@@ -59,3 +66,5 @@ Materials are separated into before-session and after-session resources. Privile
 
 - API E2E coverage verifies creation with calendar events, course links, host access, calendar updates, soft deletion, material visibility, learner visibility, session ending, and notification/email behavior.
 - Web E2E coverage verifies disabled online delivery when LiveKit is unavailable, live-training lesson view behavior, material permissions, trainer/host visibility, offline session start/end, inline edits including maximum participant capacity, deletion, and calendar-driven creation/navigation. A focused frontend test also verifies that the current capacity value is committed when the editor leaves the field.
+
+Focused API coverage verifies competing registrations for one place, automatic promotion, repeated registration, participant-list access, registration-mode locking, and preservation of attendee records during host edits. A browser scenario demonstrates registration, waiting-list status, and promotion after cancellation.
