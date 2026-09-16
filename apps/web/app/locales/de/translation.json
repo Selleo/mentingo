@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Fügt die Frist des Pflichtkurses ein, sofern vorhanden. Ohne Frist wird der Text ausgeblendet.",
+      "inactivity_subject": "Verwendet den Betreff der Benachrichtigung. Bei kurzer Inaktivität ohne Kurs bezieht er sich auf die Plattform.",
+      "inactivity_message": "Beschreibt die Inaktivität im Kurs oder auf der Plattform, wenn kein Kurs vorhanden ist.",
+      "inactivity_action": "Verwendet die Schaltflächenbeschriftung der Benachrichtigung. Bei kurzer Inaktivität ohne Kurs erscheint „Plattform öffnen“.",
+      "deadline_message": "Beschreibt die tatsächliche Restzeit: heute, morgen oder die Anzahl der Tage bis zur Frist.",
+      "course_completion_message": "Bestätigt den Abschluss und erwähnt ein Zertifikat zum Herunterladen nur, wenn eines verfügbar ist.",
+      "course_completion_action": "Zeigt „Zertifikat herunterladen“, wenn verfügbar, andernfalls „Weiterlernen“.",
+      "certificate_archive_heading": "Zeigt je nach Ereignis „Zertifikat abgelaufen“ oder „Zertifikat zurückgesetzt“.",
+      "certificate_archive_message": "Erklärt, ob das Zertifikat abgelaufen ist oder von einem Administrator zurückgesetzt wurde."
+    },
     "ui": {
       "dividerHeight": "Trennlinienhöhe (px)",
       "tableOfContents": "Inhaltsverzeichnis",
@@ -130,6 +141,7 @@
       "emptyBlock": "Dieser Block ist leer.",
       "incompleteBaseLanguage": "Vervollständigen Sie Name, Betreff und Inhalt in der Basissprache.",
       "unsupportedEvent": "Nicht unterstütztes E-Mail-Ereignis.",
+      "restrictedAuthVariables": "Variablen für den Kontozugang dürfen nur als vollständige Ziele von Schaltflächen oder Textlinks verwendet werden.",
       "unsupportedVariables": "Die Vorlage enthält nicht unterstützte Variablen.",
       "missingMandatoryVariables": "Jede vollständige Übersetzung muss die erforderlichen Aktionslinks enthalten.",
       "malformedVariables": "Ungültige Variablensyntax.",
@@ -2014,6 +2026,7 @@
         "dashboard_read": "Das eigene Dashboard anzeigen.",
         "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
+        "email_template_manage": "E-Mail-Vorlagen verwalten und veröffentlichen, Bilder hochladen und Test-E-Mails senden.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
         "category_read": "Kurskategorien anzeigen.",

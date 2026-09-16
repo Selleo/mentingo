@@ -244,6 +244,7 @@ export class EmailTemplateService {
         body.event,
         document,
         this.emailTemplateValidationService.getSampleVariables(body.event),
+        body.subject[language]!,
       );
 
     const branding = await this.emailService.getDefaultEmailProperties(tenantId, userId, language);
@@ -254,6 +255,7 @@ export class EmailTemplateService {
     let logoUrl = previewLogo;
     if (!preview && previewLogo) logoUrl = "cid:logo";
     const rendered = renderEmailTemplate({
+      event: body.event,
       language,
       document: resolved.document,
       subject,

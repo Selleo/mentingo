@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Dodaje termin obowiązkowego kursu, jeśli został ustalony. Ukryte, gdy kurs nie ma terminu.",
+      "inactivity_subject": "Używa tematu powiadomienia. Przy krótkiej nieaktywności bez kursu temat dotyczy platformy.",
+      "inactivity_message": "Opisuje nieaktywność w kursie lub na platformie, jeśli nie ma kursu.",
+      "inactivity_action": "Używa etykiety przycisku powiadomienia. Przy krótkiej nieaktywności bez kursu wyświetla „Otwórz platformę”.",
+      "deadline_message": "Podaje rzeczywisty czas do terminu: dziś, jutro lub liczbę pozostałych dni.",
+      "course_completion_message": "Potwierdza ukończenie i wspomina o certyfikacie do pobrania tylko wtedy, gdy jest dostępny.",
+      "course_completion_action": "Wyświetla „Pobierz certyfikat”, gdy jest dostępny, lub „Kontynuuj swoją naukę”.",
+      "certificate_archive_heading": "Wyświetla „Certyfikat wygasł” lub „Certyfikat zresetowany”, zależnie od zdarzenia.",
+      "certificate_archive_message": "Wyjaśnia, czy certyfikat wygasł, czy został zresetowany przez administratora."
+    },
     "ui": {
       "dividerHeight": "Wysokość separatora (px)",
       "tableOfContents": "Spis treści",
@@ -130,6 +141,7 @@
       "emptyBlock": "Ten blok jest pusty.",
       "incompleteBaseLanguage": "Uzupełnij nazwę, temat i treść w języku bazowym.",
       "unsupportedEvent": "Nieobsługiwane zdarzenie e-mail.",
+      "restrictedAuthVariables": "Zmienne dostępu do konta mogą być używane tylko jako samodzielne adresy przycisków lub linków tekstowych.",
       "unsupportedVariables": "Szablon zawiera nieobsługiwane zmienne.",
       "missingMandatoryVariables": "Każde kompletne tłumaczenie musi zawierać wymagane linki akcji.",
       "malformedVariables": "Nieprawidłowa składnia zmiennych.",
@@ -2232,6 +2244,7 @@
         "dashboard_read": "Może wyświetlać swój dashboard.",
         "todo_task_manage_self": "Może tworzyć i zarządzać własnymi zadaniami.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
+        "email_template_manage": "Może zarządzać szablonami wiadomości e-mail, publikować je, przesyłać obrazy i wysyłać wiadomości testowe.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",
         "category_read": "Może przeglądać kategorie kursów.",

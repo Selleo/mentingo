@@ -159,18 +159,26 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
       defineEmailTemplateVariable(
+        "assignment_deadline_message",
+        "Assignment deadline message",
+        "text",
+        "This course is mandatory and must be completed by 30 September 2026.",
+      ),
+      defineEmailTemplateVariable(
         "formatted_course_due_date",
         "Formatted course due date",
         "date",
         "30 September 2026",
       ),
     ],
-    getContent: (language) =>
-      getUserAssignedToCourseEmailTranslations(
-        language,
-        "{{ course_name }}",
-        "{{ formatted_course_due_date }}",
-      ),
+    getContent: (language) => {
+      const content = getUserAssignedToCourseEmailTranslations(language, "{{ course_name }}", null);
+
+      return {
+        ...content,
+        paragraphs: [...content.paragraphs, "{{ assignment_deadline_message }}"],
+      };
+    },
     buttonUrl: "{{ course_link }}",
   }),
   createEmailTemplateDefinition({
@@ -178,8 +186,26 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     name: EMAIL_TEMPLATE_NAMES.USER_SHORT_INACTIVITY,
     description: "Sent when a learner has recently stopped progressing.",
     sourceTemplate: "UserShortInactivityEmail",
-    subject: buildNormalizedLocalizedSubjectTemplates("userShortInactivityEmail"),
+    subject: buildSameLocalizedSubjectTemplates("{{ inactivity_subject }}"),
     variables: [
+      defineEmailTemplateVariable(
+        "inactivity_subject",
+        "Inactivity subject",
+        "text",
+        "Continue learning",
+      ),
+      defineEmailTemplateVariable(
+        "inactivity_message",
+        "Inactivity message",
+        "text",
+        "Resume your learning on the platform.",
+      ),
+      defineEmailTemplateVariable(
+        "inactivity_action",
+        "Inactivity action",
+        "text",
+        "OPEN PLATFORM",
+      ),
       defineEmailTemplateVariable("course_name", "Course name", "text", "Leadership essentials"),
       defineEmailTemplateVariable(
         "course_link",
@@ -191,8 +217,15 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
     ],
-    getContent: (language) =>
-      getUserShortInactivityEmailTranslations(language, "{{ course_name }}"),
+    getContent: (language) => {
+      const content = getUserShortInactivityEmailTranslations(language);
+
+      return {
+        ...content,
+        paragraphs: [content.paragraphs[0]!, "{{ inactivity_message }}"],
+        buttonText: "{{ inactivity_action }}",
+      };
+    },
     buttonUrl: "{{ course_link }}",
   }),
   createEmailTemplateDefinition({
@@ -200,8 +233,26 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     name: EMAIL_TEMPLATE_NAMES.USER_LONG_INACTIVITY,
     description: "Sent when a learner has been inactive for a longer period.",
     sourceTemplate: "UserLongInactivityEmail",
-    subject: buildNormalizedLocalizedSubjectTemplates("userLongInactivityEmail"),
+    subject: buildSameLocalizedSubjectTemplates("{{ inactivity_subject }}"),
     variables: [
+      defineEmailTemplateVariable(
+        "inactivity_subject",
+        "Inactivity subject",
+        "text",
+        "Continue learning",
+      ),
+      defineEmailTemplateVariable(
+        "inactivity_message",
+        "Inactivity message",
+        "text",
+        "Resume your learning on the platform.",
+      ),
+      defineEmailTemplateVariable(
+        "inactivity_action",
+        "Inactivity action",
+        "text",
+        "OPEN PLATFORM",
+      ),
       defineEmailTemplateVariable("course_name", "Course name", "text", "Leadership essentials"),
       defineEmailTemplateVariable(
         "course_link",
@@ -213,7 +264,15 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
     ],
-    getContent: (language) => getUserLongInactivityEmailTranslations(language, "{{ course_name }}"),
+    getContent: (language) => {
+      const content = getUserLongInactivityEmailTranslations(language);
+
+      return {
+        ...content,
+        paragraphs: [content.paragraphs[0]!, "{{ inactivity_message }}"],
+        buttonText: "{{ inactivity_action }}",
+      };
+    },
     buttonUrl: "{{ course_link }}",
   }),
   createEmailTemplateDefinition({
@@ -268,12 +327,30 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
           required: true,
         },
       ),
+      defineEmailTemplateVariable(
+        "course_completion_message",
+        "Course completion message",
+        "text",
+        "Your course is complete.",
+      ),
+      defineEmailTemplateVariable(
+        "course_completion_action",
+        "Course completion action",
+        "text",
+        "CONTINUE LEARNING",
+      ),
       defineEmailTemplateVariable("has_certificate", "Has certificate", "boolean", true, {
         required: true,
       }),
     ],
-    getContent: (language) =>
-      getUserFinishedCourseEmailTranslations(language, "{{ course_name }}", true),
+    getContent: (language) => ({
+      ...getUserFinishedCourseEmailTranslations(language, "{{ course_name }}", true),
+      paragraphs: [
+        getUserFinishedCourseEmailTranslations(language, "", false).paragraphs[0]!,
+        "{{ course_completion_message }}",
+      ],
+      buttonText: "{{ course_completion_action }}",
+    }),
     buttonUrl: "{{ button_link }}",
   }),
   createEmailTemplateDefinition({
@@ -327,6 +404,18 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
       defineEmailTemplateVariable(
+        "certificate_archive_heading",
+        "Certificate archive heading",
+        "text",
+        "Certificate reset",
+      ),
+      defineEmailTemplateVariable(
+        "certificate_archive_message",
+        "Certificate archive message",
+        "text",
+        "Your certificate was reset by an administrator.",
+      ),
+      defineEmailTemplateVariable(
         "reason",
         "Archive reason",
         "text",
@@ -336,12 +425,22 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         },
       ),
     ],
-    getContent: (language) =>
-      getCertificateExpiredEmailTranslations(
+    getContent: (language) => ({
+      ...getCertificateExpiredEmailTranslations(
         language,
         "{{ course_name }}",
         CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
       ),
+      heading: "{{ certificate_archive_heading }}",
+      paragraphs: [
+        "{{ certificate_archive_message }}",
+        getCertificateExpiredEmailTranslations(
+          language,
+          "",
+          CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+        ).paragraphs[1]!,
+      ],
+    }),
     buttonUrl: "{{ course_link }}",
   }),
   createEmailTemplateDefinition({
@@ -453,12 +552,25 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       defineEmailTemplateVariable("due_date", "Due date", "date", "30 September 2026", {
         required: true,
       }),
+      defineEmailTemplateVariable(
+        "deadline_message",
+        "Course deadline message",
+        "text",
+        "The course deadline is in 3 days.",
+      ),
       defineEmailTemplateVariable("days_before_due_date", "Days before due date", "number", 3, {
         required: true,
       }),
     ],
-    getContent: (language) =>
-      getCourseDueDateReminderEmailTranslations(language, "{{ course_name }}", "{{ due_date }}", 3),
+    getContent: (language) => ({
+      ...getCourseDueDateReminderEmailTranslations(
+        language,
+        "{{ course_name }}",
+        "{{ due_date }}",
+        3,
+      ),
+      paragraphs: ["{{ deadline_message }}"],
+    }),
     buttonUrl: "{{ course_link }}",
   }),
   createEmailTemplateDefinition({

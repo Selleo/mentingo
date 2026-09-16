@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Añade la fecha límite del curso obligatorio, si existe. Se oculta cuando no hay fecha límite.",
+      "inactivity_subject": "Usa el asunto de la notificación. En recordatorios de inactividad breve sin curso, el asunto se refiere a la plataforma.",
+      "inactivity_message": "Describe la inactividad en el curso o en la plataforma cuando no hay curso.",
+      "inactivity_action": "Usa la etiqueta del botón de la notificación. En recordatorios de inactividad breve sin curso, muestra «Abrir plataforma».",
+      "deadline_message": "Describe el tiempo restante real: hoy, mañana o el número de días hasta la fecha límite.",
+      "course_completion_message": "Confirma la finalización y menciona un certificado descargable solo cuando está disponible.",
+      "course_completion_action": "Muestra «Descargar certificado» si está disponible; de lo contrario, «Continuar aprendiendo».",
+      "certificate_archive_heading": "Muestra «Certificado caducado» o «Certificado restablecido», según lo ocurrido.",
+      "certificate_archive_message": "Explica si el certificado caducó o fue restablecido por un administrador."
+    },
     "ui": {
       "dividerHeight": "Altura del separador (px)",
       "tableOfContents": "Índice",
@@ -130,6 +141,7 @@
       "emptyBlock": "Este bloque está vacío.",
       "incompleteBaseLanguage": "Completa el nombre, el asunto y el contenido en el idioma base.",
       "unsupportedEvent": "Evento de correo no admitido.",
+      "restrictedAuthVariables": "Las variables de acceso a la cuenta solo pueden usarse como destinos completos de botones o enlaces de texto.",
       "unsupportedVariables": "La plantilla contiene variables no admitidas.",
       "missingMandatoryVariables": "Cada traducción completa debe incluir los enlaces de acción obligatorios.",
       "malformedVariables": "Sintaxis de variables no válida.",
@@ -2007,6 +2019,7 @@
         "dashboard_read": "Ver su panel de control.",
         "todo_task_manage_self": "Crear y gestionar sus propias tareas.",
         "settings_manage": "Administrar la configuración global de la plataforma.",
+        "email_template_manage": "Administrar y publicar plantillas de correo electrónico, subir imágenes y enviar correos de prueba.",
         "env_read_public": "Ver los valores de configuración del entorno público.",
         "env_manage": "Administrar los valores de configuración del entorno.",
         "category_read": "Ver categorías de cursos.",

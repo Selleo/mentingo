@@ -38,19 +38,23 @@ export class EmailTemplateValidationService {
     content: LocalizedEmailTemplateContent,
   ) {
     const definition = this.getDefinition(event);
-    for (const document of Object.values(content)) {
+    const subjects = Object.values(subject).filter((value): value is string => value !== undefined);
+    const documents = Object.values(content);
+    for (const document of documents) {
       this.validateEmailTemplateDocumentStructure(document);
       this.assertNoEmptyEmailTemplateBlocks(document);
     }
 
-    for (const text of this.collectTemplateText(subject, content)) {
+    for (const text of this.collectTemplateText(subjects, documents)) {
       this.validateVariableSyntax(text);
       this.validateTemplateVariables(text, definition);
     }
 
+    this.assertAuthenticationVariableUsage(event, subjects, documents);
+
     const sampleVariables = this.getSampleVariables(event);
 
-    for (const document of Object.values(content)) {
+    for (const document of documents) {
       this.validateEmailTemplateUrls(document, sampleVariables);
     }
   }
@@ -185,6 +189,7 @@ export class EmailTemplateValidationService {
     event: EmailTemplateEvent,
     document: EmailTemplateDocument,
     variables: Record<string, EmailTemplateVariableValue>,
+    subject = "",
   ) {
     this.validateEmailTemplateDocumentStructure(document);
 
@@ -216,8 +221,63 @@ export class EmailTemplateValidationService {
         throw new BadRequestException("emailTemplates.errors.invalidContent");
     }
 
+    this.assertAuthenticationVariableUsage(event, [subject], [document]);
     this.assertRequiredActionLinks(event, document);
     this.validateEmailTemplateUrls(document, variables);
+  }
+
+  /**
+   * Confines credential-bearing variables (marked `requiredInTemplate` in the registry)
+   * to complete button URLs or inline-link destinations, e.g. `{{ reset_link }}`.
+   *
+   * Rejects these tokens in subjects, visible text, image fields, and composed URLs
+   * such as `https://example.com/pixel?token={{ reset_link }}`, which would leak the
+   * recipient's credential when loaded. Rich-text fragments are joined per paragraph
+   * so splitting a token across formatting marks cannot bypass validation.
+   *
+   * Inspects every supplied translation without mutating it. Required-link presence,
+   * token syntax, and resolved URL protocols are validated separately.
+   *
+   * @throws {BadRequestException} If a protected token appears outside an allowed destination.
+   */
+  private assertAuthenticationVariableUsage(
+    event: EmailTemplateEvent,
+    subjects: readonly string[],
+    documents: readonly EmailTemplateDocument[],
+  ) {
+    const protectedKeys = new Set(
+      this.getDefinition(event)
+        .variables.filter((variable) => variable.requiredInTemplate)
+        .map((variable) => variable.key),
+    );
+    if (!protectedKeys.size) return;
+
+    const containsProtectedVariable = (text: string) =>
+      this.extractVariables(text).some((key) => protectedKeys.has(key));
+
+    const nonActionText = this.collectTemplateText(subjects, documents, {
+      includeActionUrls: false,
+    });
+
+    const actionUrls = documents.flatMap((document) =>
+      document.content.flatMap((block) => [
+        ...(block.type === EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON ? [block.attrs.url] : []),
+        ...this.getEmailTemplateInlineLinkUrls(block),
+      ]),
+    );
+
+    const hasUnsafeAction = actionUrls.some((url) => {
+      if (!containsProtectedVariable(url)) return false;
+
+      return (
+        this.extractVariables(url).length !== 1 ||
+        url.replace(EMAIL_TEMPLATE_VARIABLE_PATTERN, "").trim() !== ""
+      );
+    });
+
+    if (nonActionText.some(containsProtectedVariable) || hasUnsafeAction) {
+      throw new BadRequestException("emailTemplates.errors.restrictedAuthVariables");
+    }
   }
 
   private validateTemplateVariables(
@@ -249,13 +309,19 @@ export class EmailTemplateValidationService {
     return [...value.matchAll(EMAIL_TEMPLATE_VARIABLE_PATTERN)].map((match) => match[1]);
   }
 
-  private collectTemplateText(subject: LocalizedText, content: LocalizedEmailTemplateContent) {
-    const values = Object.values(subject).filter((value): value is string => value !== undefined);
+  private collectTemplateText(
+    subjects: readonly string[],
+    documents: readonly EmailTemplateDocument[],
+    { includeActionUrls = true }: { includeActionUrls?: boolean } = {},
+  ) {
+    const values = [...subjects];
 
-    for (const document of Object.values(content)) {
+    for (const document of documents) {
       for (const block of document.content) {
-        if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON)
-          values.push(block.attrs.label, block.attrs.url);
+        if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON) {
+          values.push(block.attrs.label);
+          if (includeActionUrls) values.push(block.attrs.url);
+        }
         if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE)
           values.push(block.attrs.src, block.attrs.alt);
         if (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER) values.push(block.attrs.text);
@@ -265,7 +331,7 @@ export class EmailTemplateValidationService {
             values.push((paragraph.content ?? []).map((node) => node.text).join(""));
             for (const node of paragraph.content ?? []) {
               for (const mark of node.marks ?? []) {
-                if (mark.type === EMAIL_TEMPLATE_INLINE_MARK_TYPES.LINK) {
+                if (includeActionUrls && mark.type === EMAIL_TEMPLATE_INLINE_MARK_TYPES.LINK) {
                   values.push(mark.attrs.href);
                 }
               }

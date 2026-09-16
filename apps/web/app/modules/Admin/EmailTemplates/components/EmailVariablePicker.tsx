@@ -9,6 +9,8 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { EmailTemplateVariableDescription } from "./EmailTemplateVariableDescription";
+
 import type { EmailTemplateVariables } from "../emailTemplates.types";
 
 export type EmailVariablePickerProps = {
@@ -36,8 +38,11 @@ export function EmailVariablePicker({
       <SelectContent>
         {variables.map((variable) => (
           <SelectItem key={variable.key} value={variable.key}>
-            {variable.key}
-            {variable.requiredInTemplate ? " *" : ""}
+            <span className="block">
+              {variable.key}
+              {variable.requiredInTemplate ? " *" : ""}
+            </span>
+            <EmailTemplateVariableDescription variableKey={variable.key} />
           </SelectItem>
         ))}
       </SelectContent>

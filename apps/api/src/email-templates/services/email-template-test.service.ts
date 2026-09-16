@@ -31,6 +31,7 @@ export class EmailTemplateTestService {
       body.event,
       body.content[language]!,
       this.emailTemplateValidationService.getSampleVariables(body.event),
+      body.subject[language]!,
     );
     const job = await this.queueService.enqueue<EmailTemplateTestJobData>(
       QUEUE_NAMES.EMAIL_TEMPLATE_TEST,

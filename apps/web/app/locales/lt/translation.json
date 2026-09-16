@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Prideda privalomo kurso terminą, jei jis nustatytas. Jei termino nėra, tekstas nerodomas.",
+      "inactivity_subject": "Naudoja pranešimo temą. Trumpo neaktyvumo priminimuose be kurso tema nurodo platformą.",
+      "inactivity_message": "Aprašo neaktyvumą kurse arba platformoje, jei kurso nėra.",
+      "inactivity_action": "Naudoja pranešimo mygtuko tekstą. Trumpo neaktyvumo priminimuose be kurso rodoma „Atidaryti platformą“.",
+      "deadline_message": "Aprašo tikrąjį likusį laiką: šiandien, rytoj arba dienų skaičių iki termino.",
+      "course_completion_message": "Patvirtina kurso baigimą ir pamini atsisiunčiamą pažymėjimą tik tada, kai jis prieinamas.",
+      "course_completion_action": "Rodo „Atsiųsti pažymėjimą“, jei jis prieinamas, kitu atveju – „Tęsti mokymąsi“.",
+      "certificate_archive_heading": "Pagal įvykį rodo „Pažymėjimas nebegalioja“ arba „Pažymėjimas nustatytas iš naujo“.",
+      "certificate_archive_message": "Paaiškina, ar pažymėjimo galiojimas baigėsi, ar administratorius jį nustatė iš naujo."
+    },
     "ui": {
       "dividerHeight": "Skirtuko aukštis (px)",
       "tableOfContents": "Turinys",
@@ -130,6 +141,7 @@
       "emptyBlock": "Šis blokas tuščias.",
       "incompleteBaseLanguage": "Užpildykite pavadinimą, temą ir turinį pagrindine kalba.",
       "unsupportedEvent": "Nepalaikomas el. pašto įvykis.",
+      "restrictedAuthVariables": "Paskyros prieigos kintamuosius galima naudoti tik kaip pilnus mygtukų arba tekstinių nuorodų adresus.",
       "unsupportedVariables": "Šablone yra nepalaikomų kintamųjų.",
       "missingMandatoryVariables": "Kiekviename užbaigtame vertime turi būti reikiamos veiksmų nuorodos.",
       "malformedVariables": "Neteisinga kintamųjų sintaksė.",
@@ -2013,6 +2025,7 @@
         "dashboard_read": "Gali peržiūrėti savo prietaisų skydelį.",
         "todo_task_manage_self": "Gali kurti ir tvarkyti savo užduotis.",
         "settings_manage": "Gali valdyti bendruosius platformos nustatymus.",
+        "email_template_manage": "Gali valdyti ir skelbti el. laiškų šablonus, įkelti vaizdus ir siųsti bandomuosius el. laiškus.",
         "env_read_public": "Gali peržiūrėti viešas aplinkos konfigūracijos reikšmes.",
         "env_manage": "Gali valdyti aplinkos konfigūracijos reikšmes.",
         "category_read": "Gali peržiūrėti kursų kategorijas.",

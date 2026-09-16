@@ -42,6 +42,7 @@ export class EmailTemplateRenderingService {
         context.event,
         document,
         variables,
+        template.subject[language]!,
       );
       const resolved = await this.emailTemplateAssetService.resolveEmailTemplateAssets(
         document,
@@ -49,6 +50,7 @@ export class EmailTemplateRenderingService {
       );
       return {
         ...renderEmailTemplate({
+          event: context.event,
           document: resolved.document,
           subject: template.subject[language]!,
           language,

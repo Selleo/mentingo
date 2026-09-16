@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Adds the mandatory-course deadline when a due date exists. Hidden when there is no due date.",
+      "inactivity_subject": "Uses the notification’s subject. Short-inactivity reminders use a platform subject when no course is available.",
+      "inactivity_message": "Describes inactivity in the course, or on the platform when no course is available.",
+      "inactivity_action": "Uses the notification’s action label. Short-inactivity reminders show “Open platform” when no course is available.",
+      "deadline_message": "Describes the actual time remaining: today, tomorrow, or the number of days until the deadline.",
+      "course_completion_message": "Confirms completion and mentions a downloadable certificate only when one is available.",
+      "course_completion_action": "Shows “Download certificate” when a certificate is available; otherwise “Continue learning”.",
+      "certificate_archive_heading": "Uses “Certificate expired” or “Certificate reset”, according to what happened.",
+      "certificate_archive_message": "Explains whether the certificate expired or was reset by an administrator."
+    },
     "ui": {
       "dividerHeight": "Divider height (px)",
       "tableOfContents": "Table of contents",
@@ -130,6 +141,7 @@
       "emptyBlock": "This block is empty.",
       "incompleteBaseLanguage": "Complete the base-language name, subject, and content.",
       "unsupportedEvent": "Unsupported email event.",
+      "restrictedAuthVariables": "Account-access variables can only be used as standalone button or text-link destinations.",
       "unsupportedVariables": "The template contains unsupported variables.",
       "missingMandatoryVariables": "Each complete translation must contain the required action links.",
       "malformedVariables": "Invalid variable syntax.",
@@ -2016,6 +2028,7 @@
         "dashboard_read": "View their dashboard.",
         "todo_task_manage_self": "Create and manage their own to-do tasks.",
         "settings_manage": "Manage global platform settings.",
+        "email_template_manage": "Manage and publish email templates, upload images, and send test emails.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",
         "category_read": "View course categories.",

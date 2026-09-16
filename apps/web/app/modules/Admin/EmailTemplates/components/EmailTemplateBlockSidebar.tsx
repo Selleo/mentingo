@@ -13,6 +13,7 @@ import {
 } from "../emailTemplates.constants";
 
 import { EmailTemplateBlockPalette } from "./EmailTemplateBlockPalette";
+import { EmailTemplateVariableDescription } from "./EmailTemplateVariableDescription";
 
 import type { EmailTemplateBlock, EmailTemplateVariables } from "../emailTemplates.types";
 
@@ -70,32 +71,34 @@ export function EmailTemplateBlockSidebar({
         </div>
         <div className="space-y-1.5 overflow-x-auto pb-1">
           {filteredVariables.map((variable) => (
-            <Button
-              key={variable.key}
-              draggable={!disabled}
-              onDragStart={(event) => {
-                event.dataTransfer.setData(EMAIL_TEMPLATE_VARIABLE_DRAG_TYPE, variable.key);
-                event.dataTransfer.setData("text/plain", `{{ ${variable.key} }}`);
-                event.dataTransfer.effectAllowed = "copy";
-              }}
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              className="h-auto w-max min-w-full justify-start whitespace-nowrap px-2 py-1.5 text-left font-mono text-[11px]"
-              title={
-                typeof variable.sampleValue === "object"
-                  ? t("emailTemplates.ui.collectionSample")
-                  : String(variable.sampleValue)
-              }
-              onClick={() => onInsertVariable(`{{ ${variable.key} }}`)}
-            >
-              <Variable className="mr-2 size-3.5 shrink-0 text-neutral-500" aria-hidden="true" />
-              {`{{ ${variable.key} }}`}
-              {variable.requiredInTemplate && (
-                <span aria-label={t("emailTemplates.ui.requiredLink")}> *</span>
-              )}
-            </Button>
+            <div key={variable.key} className="space-y-1">
+              <Button
+                draggable={!disabled}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData(EMAIL_TEMPLATE_VARIABLE_DRAG_TYPE, variable.key);
+                  event.dataTransfer.setData("text/plain", `{{ ${variable.key} }}`);
+                  event.dataTransfer.effectAllowed = "copy";
+                }}
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={disabled}
+                className="h-auto w-max min-w-full justify-start whitespace-nowrap px-2 py-1.5 text-left font-mono text-[11px]"
+                title={
+                  typeof variable.sampleValue === "object"
+                    ? t("emailTemplates.ui.collectionSample")
+                    : String(variable.sampleValue)
+                }
+                onClick={() => onInsertVariable(`{{ ${variable.key} }}`)}
+              >
+                <Variable className="mr-2 size-3.5 shrink-0 text-neutral-500" aria-hidden="true" />
+                {`{{ ${variable.key} }}`}
+                {variable.requiredInTemplate && (
+                  <span aria-label={t("emailTemplates.ui.requiredLink")}> *</span>
+                )}
+              </Button>
+              <EmailTemplateVariableDescription variableKey={variable.key} />
+            </div>
           ))}
           {!filteredVariables.length && (
             <p className="text-xs text-neutral-500">{t("emailTemplates.ui.noVariables")}</p>

@@ -33,6 +33,7 @@ describe("Email template variables across formatting boundaries", () => {
       validation.validateDraft("user_first_login", { en: "Hello" }, { en: document }),
     ).not.toThrow();
     const result = renderEmailTemplate({
+      event: "user_first_login",
       document,
       subject: "Hello",
       variables: { name: "Ada" },

@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Přidá termín povinného kurzu, pokud je stanoven. Bez termínu se nezobrazí.",
+      "inactivity_subject": "Použije předmět oznámení. U krátké neaktivity bez kurzu se předmět týká platformy.",
+      "inactivity_message": "Popisuje neaktivitu v kurzu, nebo na platformě, pokud není k dispozici kurz.",
+      "inactivity_action": "Použije popisek tlačítka oznámení. U krátké neaktivity bez kurzu zobrazí „Otevřít platformu”.",
+      "deadline_message": "Popisuje skutečný čas do termínu: dnes, zítra nebo počet zbývajících dní.",
+      "course_completion_message": "Potvrdí dokončení a zmíní certifikát ke stažení pouze tehdy, je-li dostupný.",
+      "course_completion_action": "Zobrazí „Stáhnout certifikát”, pokud je dostupný, jinak „Pokračovat ve studiu”.",
+      "certificate_archive_heading": "Podle události zobrazí „Certifikát vypršel” nebo „Certifikát resetován”.",
+      "certificate_archive_message": "Vysvětlí, zda certifikát vypršel, nebo jej resetoval administrátor."
+    },
     "ui": {
       "dividerHeight": "Výška oddělovače (px)",
       "tableOfContents": "Obsah",
@@ -130,6 +141,7 @@
       "emptyBlock": "Tento blok je prázdný.",
       "incompleteBaseLanguage": "Vyplňte název, předmět a obsah v základním jazyce.",
       "unsupportedEvent": "Nepodporovaná e-mailová událost.",
+      "restrictedAuthVariables": "Proměnné pro přístup k účtu lze použít pouze jako úplné cíle tlačítek nebo textových odkazů.",
       "unsupportedVariables": "Šablona obsahuje nepodporované proměnné.",
       "missingMandatoryVariables": "Každý úplný překlad musí obsahovat požadované odkazy na akce.",
       "malformedVariables": "Neplatná syntaxe proměnných.",
@@ -2019,6 +2031,7 @@
         "dashboard_read": "Může zobrazit svůj dashboard.",
         "todo_task_manage_self": "Může vytvářet a spravovat vlastní úkoly.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
+        "email_template_manage": "Může spravovat a publikovat e-mailové šablony, nahrávat obrázky a odesílat testovací e-maily.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
         "category_read": "Může zobrazit kategorie kurzů.",

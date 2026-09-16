@@ -2,6 +2,8 @@ import { Button, Column, Hr, Img, Row, Section, Text, render } from "@react-emai
 import React from "react";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { formatEmailTemplateVariables } from "./utils/formatEmailTemplateVariables";
+import { getDynamicEmailTemplateContent } from "./utils/dynamicEmailTemplateContent";
+import { resolveLegacyEmailTemplateContent } from "./utils/resolveLegacyEmailTemplateContent";
 import { resolveInlineVariables } from "./utils/resolveInlineVariables";
 
 import {
@@ -60,7 +62,7 @@ const EmailTemplateDocumentComponent = ({
   document,
   variables,
   branding,
-}: Omit<RenderEmailTemplateInput, "subject">) => {
+}: Omit<RenderEmailTemplateInput, "subject" | "event">) => {
   const styles = getBaseEmailStyles(branding.primaryColor);
 
   const renderedBlocks = document.content.map((block, blockIndex) => {
@@ -87,14 +89,19 @@ const EmailTemplateDocumentComponent = ({
           </Text>
         ));
       case EMAIL_TEMPLATE_BLOCK_TYPES.TEXT:
-        return block.content.map((paragraph, paragraphIndex) => (
-          <Text
-            key={`${blockIndex}-${paragraphIndex}`}
-            style={{ ...styles.paragraph, whiteSpace: "pre-wrap" }}
-          >
-            {renderInlineNodes(paragraph.content ?? [], variables)}
-          </Text>
-        ));
+        return block.content.map((paragraph, paragraphIndex) => {
+          const text = (paragraph.content ?? []).map((node) => node.text).join("");
+          if (text.trim() && !replaceVariables(text, variables).trim()) return null;
+
+          return (
+            <Text
+              key={`${blockIndex}-${paragraphIndex}`}
+              style={{ ...styles.paragraph, whiteSpace: "pre-wrap" }}
+            >
+              {renderInlineNodes(paragraph.content ?? [], variables)}
+            </Text>
+          );
+        });
       case EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON:
         return (
           <Section key={blockIndex} style={styles.buttonWrapper}>
@@ -186,27 +193,34 @@ const EmailTemplateDocumentComponent = ({
 };
 
 export const renderEmailTemplate = ({
+  event,
   document,
   subject,
   variables,
   branding,
   language = SUPPORTED_LANGUAGES.EN,
 }: RenderEmailTemplateInput): RenderedEmailTemplate => {
+  const { derivedVariables, legacyReplacements } = getDynamicEmailTemplateContent(
+    event,
+    variables,
+    language,
+  );
   const resolvedVariables = {
     ...formatEmailTemplateVariables(variables, language),
+    ...derivedVariables,
     company_name: branding.companyName,
   };
 
   const email = (
     <EmailTemplateDocumentComponent
-      document={document}
+      document={resolveLegacyEmailTemplateContent(document, legacyReplacements)}
       variables={resolvedVariables}
       branding={branding}
     />
   );
 
   return {
-    subject: replaceVariables(subject, resolvedVariables),
+    subject: replaceVariables(legacyReplacements.get(subject) ?? subject, resolvedVariables),
     html: render(email),
     text: render(email, { plainText: true }),
   };

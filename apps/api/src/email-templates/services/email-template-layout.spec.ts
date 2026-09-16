@@ -3,6 +3,7 @@ import { EMAIL_TEMPLATE_DEFINITIONS, renderEmailTemplate } from "@repo/email-tem
 describe("Email template branded layout", () => {
   it.each([undefined, 8])("renders divider height %s", (height) => {
     const rendered = renderEmailTemplate({
+      event: "welcome",
       document: {
         type: "doc",
         version: 1,
@@ -19,6 +20,7 @@ describe("Email template branded layout", () => {
     "centers sent image blocks from %s",
     (src) => {
       const rendered = renderEmailTemplate({
+        event: "welcome",
         document: {
           type: "doc",
           version: 1,
@@ -37,6 +39,7 @@ describe("Email template branded layout", () => {
 
   it.each(EMAIL_TEMPLATE_DEFINITIONS)("preserves the branded shell for $event", (definition) => {
     const rendered = renderEmailTemplate({
+      event: "welcome",
       document: definition.defaultDocuments.en,
       subject: definition.subjects.en,
       variables: Object.fromEntries(

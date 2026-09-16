@@ -1,6 +1,10 @@
 import type { SupportedLanguages } from "@repo/shared";
 
-import type { EmailTemplateDocument, EmailTemplateVariableValue } from "./template-registry.types";
+import type {
+  EmailTemplateDocument,
+  EmailTemplateEvent,
+  EmailTemplateVariableValue,
+} from "./template-registry.types";
 
 export type EmailTemplateBranding = {
   companyName: string;
@@ -10,6 +14,7 @@ export type EmailTemplateBranding = {
 };
 
 export type RenderEmailTemplateInput = {
+  event: EmailTemplateEvent;
   document: EmailTemplateDocument;
   subject: string;
   variables: Readonly<Record<string, EmailTemplateVariableValue>>;

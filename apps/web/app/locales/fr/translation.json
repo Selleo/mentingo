@@ -1,5 +1,16 @@
 {
   "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Ajoute l’échéance du cours obligatoire si elle existe. Masqué en l’absence d’échéance.",
+      "inactivity_subject": "Utilise l’objet de la notification. Pour une courte inactivité sans cours, l’objet concerne la plateforme.",
+      "inactivity_message": "Décrit l’inactivité dans le cours ou sur la plateforme lorsqu’aucun cours n’est disponible.",
+      "inactivity_action": "Utilise le libellé du bouton de la notification. Pour une courte inactivité sans cours, affiche « Ouvrir la plateforme ».",
+      "deadline_message": "Décrit le délai réel restant : aujourd’hui, demain ou le nombre de jours avant l’échéance.",
+      "course_completion_message": "Confirme la fin du cours et mentionne un certificat à télécharger uniquement s’il est disponible.",
+      "course_completion_action": "Affiche « Télécharger le certificat » s’il est disponible, sinon « Continuer à apprendre ».",
+      "certificate_archive_heading": "Affiche « Certificat expiré » ou « Certificat réinitialisé », selon l’événement.",
+      "certificate_archive_message": "Explique si le certificat a expiré ou a été réinitialisé par un administrateur."
+    },
     "ui": {
       "dividerHeight": "Hauteur du séparateur (px)",
       "tableOfContents": "Table des matières",
@@ -130,6 +141,7 @@
       "emptyBlock": "Ce bloc est vide.",
       "incompleteBaseLanguage": "Complétez le nom, l’objet et le contenu dans la langue de base.",
       "unsupportedEvent": "Événement de courriel non pris en charge.",
+      "restrictedAuthVariables": "Les variables d’accès au compte ne peuvent être utilisées que comme destinations complètes de boutons ou de liens textuels.",
       "unsupportedVariables": "Le modèle contient des variables non prises en charge.",
       "missingMandatoryVariables": "Chaque traduction complète doit contenir les liens d’action requis.",
       "malformedVariables": "Syntaxe de variable incorrecte.",
@@ -2014,6 +2026,7 @@
         "dashboard_read": "Afficher leur tableau de bord.",
         "todo_task_manage_self": "Créer et gérer leurs propres tâches.",
         "settings_manage": "Gérez les paramètres globaux de la plateforme.",
+        "email_template_manage": "Gérez et publiez les modèles d’e-mail, importez des images et envoyez des e-mails de test.",
         "env_read_public": "Afficher les valeurs de configuration de l'environnement public.",
         "env_manage": "Gérer les valeurs de configuration de l'environnement.",
         "category_read": "Afficher les catégories de cours.",
