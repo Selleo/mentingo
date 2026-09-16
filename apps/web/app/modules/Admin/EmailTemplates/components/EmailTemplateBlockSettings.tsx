@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
 import { EMAIL_TEMPLATE_BLOCK_TYPES } from "../emailTemplates.constants";
 
 import { EmailTemplateImageUpload } from "./EmailTemplateImageUpload";
@@ -36,6 +37,7 @@ export function EmailTemplateBlockSettings({
           <EmailTemplateTextField
             dense
             stacked
+            testId={EMAIL_TEMPLATES_HANDLES.BUTTON_LABEL}
             label={t("emailTemplates.ui.buttonLabel")}
             highlightVariables
             value={block.attrs.label}
@@ -46,6 +48,7 @@ export function EmailTemplateBlockSettings({
           <EmailTemplateTextField
             dense
             stacked
+            testId={EMAIL_TEMPLATES_HANDLES.BUTTON_URL}
             label={t("emailTemplates.ui.url")}
             highlightVariables
             value={block.attrs.url}
@@ -77,6 +80,7 @@ export function EmailTemplateBlockSettings({
           <EmailTemplateTextField
             dense
             stacked
+            testId={EMAIL_TEMPLATES_HANDLES.IMAGE_ALT}
             label={t("emailTemplates.ui.altText")}
             highlightVariables
             variables={variables}

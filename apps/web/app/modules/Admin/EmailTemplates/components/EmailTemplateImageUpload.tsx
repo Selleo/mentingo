@@ -7,6 +7,8 @@ import { IMAGE_UPLOAD_SIZES } from "~/components/FileUploadInput/imageUpload.con
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Label } from "~/components/ui/label";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
+
 type EmailTemplateImageUploadProps = {
   source: string;
   disabled: boolean;
@@ -30,7 +32,7 @@ export function EmailTemplateImageUpload({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid={EMAIL_TEMPLATES_HANDLES.IMAGE_UPLOAD}>
       <Label htmlFor={inputId} className="text-xs">
         {t("emailTemplates.ui.uploadImage")}
       </Label>

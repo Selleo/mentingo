@@ -111,6 +111,7 @@ export default function EmailTemplatesPage() {
               {data?.data.map((template) => (
                 <TableRow
                   key={template.id ?? template.event}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.ROW(template.id ?? template.event)}
                   className="cursor-pointer hover:bg-neutral-100"
                   onClick={(event) => {
                     if ((event.target as HTMLElement).closest("a, button")) return;
@@ -214,6 +215,7 @@ export default function EmailTemplatesPage() {
                             variant="ghost"
                             size="icon"
                             disabled={isActionPending}
+                            data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
                             aria-label={t("emailTemplates.ui.delete")}
                             onClick={() =>
                               setPendingConfirmation({

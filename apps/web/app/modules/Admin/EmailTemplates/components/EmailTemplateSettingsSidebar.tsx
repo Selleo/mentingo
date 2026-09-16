@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
+
 import { EmailTemplateBlockSettings } from "./EmailTemplateBlockSettings";
 import { EmailTemplateOutline } from "./EmailTemplateOutline";
 
@@ -35,6 +37,7 @@ export function EmailTemplateSettingsSidebar({
   const { t } = useTranslation();
   return (
     <aside
+      data-testid={EMAIL_TEMPLATES_HANDLES.SETTINGS}
       className={cn(
         "min-w-0 space-y-6 border-t bg-white p-4 lg:col-span-2 xl:col-span-1 xl:border-l xl:border-t-0",
         { hidden: hidden },

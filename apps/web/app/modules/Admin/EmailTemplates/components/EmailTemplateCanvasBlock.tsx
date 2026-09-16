@@ -249,6 +249,7 @@ export function EmailTemplateCanvasBlock({
                 size="icon"
                 {...attributes}
                 {...listeners}
+                data-testid={EMAIL_TEMPLATES_HANDLES.DRAG_BLOCK}
                 aria-label={t("emailTemplates.ui.dragBlock")}
                 className="touch-none cursor-grab"
               >
@@ -278,6 +279,7 @@ export function EmailTemplateCanvasBlock({
                 type="button"
                 variant="ghost"
                 size="icon"
+                data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE_BLOCK}
                 aria-label={t("emailTemplates.ui.duplicateBlock")}
                 onClick={onDuplicate}
               >
@@ -287,6 +289,7 @@ export function EmailTemplateCanvasBlock({
                 type="button"
                 variant="ghost"
                 size="icon"
+                data-testid={EMAIL_TEMPLATES_HANDLES.REMOVE_BLOCK}
                 aria-label={t("emailTemplates.ui.removeBlock")}
                 onClick={onRemove}
               >
@@ -305,6 +308,7 @@ export function EmailTemplateCanvasBlock({
               type="button"
               disabled={disabled}
               aria-label={`${t("emailTemplates.ui.editBlock")} ${t(`emailTemplates.ui.blocks.${block.type}`)}`}
+              data-testid={EMAIL_TEMPLATES_HANDLES.EDIT_BLOCK}
               onClick={onSelect}
               className="block w-full px-[10%] text-left disabled:cursor-default"
             >

@@ -169,6 +169,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
       ]}
     >
       <UnsavedChangesExitGuard
+        testIds={{ cancel: EMAIL_TEMPLATES_HANDLES.STAY, leave: EMAIL_TEMPLATES_HANDLES.LEAVE }}
         enabled={hasUnsavedChanges}
         dialogTitle={t("emailTemplates.ui.unsavedTitle")}
         message={t("emailTemplates.ui.unsavedHint")}
@@ -227,6 +228,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
         {formError && formError !== t("emailTemplates.errors.invalidContent") && (
           <p
             role="alert"
+            data-testid={EMAIL_TEMPLATES_HANDLES.ERROR}
             className="rounded-lg border border-destructive p-3 text-sm text-destructive"
           >
             {formError}
@@ -264,6 +266,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
               </div>
               <div className="min-w-0 lg:col-start-1 lg:row-start-1">
                 <EmailTemplateTextField
+                  testId={EMAIL_TEMPLATES_HANDLES.NAME}
                   label={t("emailTemplates.ui.name")}
                   value={formValues.name[selectedLanguage] ?? ""}
                   disabled={isReadonly || isActionPending}
@@ -277,6 +280,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
               </div>
               <div className="min-w-0 lg:col-span-2">
                 <EmailTemplateTextField
+                  testId={EMAIL_TEMPLATES_HANDLES.SUBJECT}
                   label={t("emailTemplates.ui.subject")}
                   value={formValues.subject[selectedLanguage] ?? ""}
                   variables={savedTemplate.variables}

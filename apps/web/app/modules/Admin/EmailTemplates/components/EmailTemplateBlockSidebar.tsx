@@ -62,6 +62,7 @@ export function EmailTemplateBlockSidebar({
         <div className="relative">
           <Search className="pointer-events-none absolute left-2 top-3 size-4 text-neutral-400" />
           <Input
+            data-testid={EMAIL_TEMPLATES_HANDLES.VARIABLE_SEARCH}
             value={variableSearch}
             onChange={(e) => setVariableSearch(e.target.value)}
             className="pl-8"
@@ -73,6 +74,7 @@ export function EmailTemplateBlockSidebar({
           {filteredVariables.map((variable) => (
             <div key={variable.key} className="space-y-1">
               <Button
+                data-testid={EMAIL_TEMPLATES_HANDLES.VARIABLE(variable.key)}
                 draggable={!disabled}
                 onDragStart={(event) => {
                   event.dataTransfer.setData(EMAIL_TEMPLATE_VARIABLE_DRAG_TYPE, variable.key);

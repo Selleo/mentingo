@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
 import { EMAIL_TEMPLATE_BLOCK_ICONS, EMAIL_TEMPLATE_DRAG_TYPES } from "../emailTemplates.constants";
 
 import type { EmailTemplateBlock } from "../emailTemplates.types";
@@ -32,6 +33,7 @@ export function EmailTemplateBlockPalette({
 
   return (
     <Button
+      data-testid={EMAIL_TEMPLATES_HANDLES.PALETTE_BLOCK(type)}
       ref={setNodeRef}
       type="button"
       variant="outline"

@@ -70,6 +70,7 @@ export function EmailTemplateInsertionPoint({
                 variant="ghost"
                 size="sm"
                 key={type}
+                data-testid={EMAIL_TEMPLATES_HANDLES.INSERT_BLOCK(type)}
                 className="justify-start gap-2"
                 onClick={() => {
                   onInsert(type);

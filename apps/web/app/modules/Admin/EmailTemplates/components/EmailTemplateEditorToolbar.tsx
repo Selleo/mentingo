@@ -60,6 +60,7 @@ export function EmailTemplateEditorToolbar({
           {template.name[template.baseLanguage] || t("emailTemplates.ui.editor")}
         </h4>
         <Badge
+          data-testid={EMAIL_TEMPLATES_HANDLES.STATUS}
           variant={
             EMAIL_TEMPLATE_STATUS_BADGE_VARIANTS[template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM]
           }
@@ -82,6 +83,10 @@ export function EmailTemplateEditorToolbar({
               className="[&_button]:h-10"
             >
               <LanguageSelector
+                testIds={{
+                  select: EMAIL_TEMPLATES_HANDLES.LANGUAGE,
+                  option: EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION,
+                }}
                 formKey={template.id ?? template.event}
                 value={language}
                 baseLanguage={template.baseLanguage}
@@ -104,6 +109,7 @@ export function EmailTemplateEditorToolbar({
                 language === template.baseLanguage ||
                 !isTranslationComplete
               }
+              data-testid={EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE}
               onClick={onSetBaseLanguage}
             >
               {t("emailTemplates.ui.setBaseLanguage")}
@@ -121,13 +127,18 @@ export function EmailTemplateEditorToolbar({
             title={t("emailTemplates.ui.sendTest")}
             aria-label={t("emailTemplates.ui.sendTest")}
             disabled={isActionPending}
+            data-testid={EMAIL_TEMPLATES_HANDLES.SEND_TEST}
             onClick={onSendTest}
           >
             <Send className="size-4" />
           </Button>
         </div>
         {!template.editable ? (
-          <Button disabled={isActionPending} onClick={onCopyDefault}>
+          <Button
+            disabled={isActionPending}
+            data-testid={EMAIL_TEMPLATES_HANDLES.COPY}
+            onClick={onCopyDefault}
+          >
             <Copy className="mr-2 size-4" />
             {t("emailTemplates.ui.copyDefault")}
           </Button>
@@ -144,6 +155,7 @@ export function EmailTemplateEditorToolbar({
                 title={t("emailTemplates.ui.duplicate")}
                 aria-label={t("emailTemplates.ui.duplicate")}
                 disabled={isActionPending || hasUnsavedChanges}
+                data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE}
                 onClick={onDuplicate}
               >
                 <Copy className="size-4" />
@@ -154,6 +166,7 @@ export function EmailTemplateEditorToolbar({
                 title={t("emailTemplates.ui.delete")}
                 aria-label={t("emailTemplates.ui.delete")}
                 disabled={isActionPending || hasUnsavedChanges}
+                data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
                 onClick={onDelete}
               >
                 <Trash2 className="size-4" />
@@ -165,6 +178,7 @@ export function EmailTemplateEditorToolbar({
                   title={t("emailTemplates.ui.archive")}
                   aria-label={t("emailTemplates.ui.archive")}
                   disabled={isActionPending || hasUnsavedChanges}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.ARCHIVE}
                   onClick={onArchive}
                 >
                   <Archive className="size-4" />
@@ -172,7 +186,11 @@ export function EmailTemplateEditorToolbar({
               )}
             </div>
             {template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED ? (
-              <Button disabled={isActionPending} onClick={onRestore}>
+              <Button
+                disabled={isActionPending}
+                data-testid={EMAIL_TEMPLATES_HANDLES.RESTORE}
+                onClick={onRestore}
+              >
                 <RotateCcw className="mr-2 size-4" />
                 {t("emailTemplates.ui.restore")}
               </Button>

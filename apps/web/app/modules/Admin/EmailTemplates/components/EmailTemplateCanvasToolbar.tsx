@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
+
 export type EmailTemplateCanvasToolbarProps = {
   isMobilePreview: boolean;
   isPreviewMode: boolean;
@@ -26,6 +28,7 @@ export function EmailTemplateCanvasToolbar({
         variant="ghost"
         aria-pressed={!isMobilePreview}
         className={cn("gap-2", { "bg-neutral-100": !isMobilePreview })}
+        data-testid={EMAIL_TEMPLATES_HANDLES.DESKTOP}
         onClick={() => onMobileChange(false)}
       >
         <Monitor className="size-4" />
@@ -37,6 +40,7 @@ export function EmailTemplateCanvasToolbar({
         variant="ghost"
         aria-pressed={isMobilePreview}
         className={cn("gap-2", { "bg-neutral-100": isMobilePreview })}
+        data-testid={EMAIL_TEMPLATES_HANDLES.MOBILE}
         onClick={() => onMobileChange(true)}
       >
         <Smartphone className="size-4" />
@@ -48,6 +52,7 @@ export function EmailTemplateCanvasToolbar({
         variant="ghost"
         aria-pressed={isPreviewMode}
         className={cn("gap-2", { "bg-neutral-100": isPreviewMode })}
+        data-testid={EMAIL_TEMPLATES_HANDLES.PREVIEW}
         onClick={onTogglePreview}
       >
         <Eye className="size-4" />

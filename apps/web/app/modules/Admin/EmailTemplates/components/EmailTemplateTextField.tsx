@@ -11,6 +11,7 @@ import type { EmailTemplateVariables } from "../emailTemplates.types";
 
 export type EmailTemplateTextFieldProps = {
   label: string;
+  testId?: string;
   value: string;
   onChange: (value: string) => void;
   variables?: EmailTemplateVariables;
@@ -23,6 +24,7 @@ export type EmailTemplateTextFieldProps = {
 
 export function EmailTemplateTextField({
   label,
+  testId,
   value,
   onChange,
   variables,
@@ -85,6 +87,7 @@ export function EmailTemplateTextField({
         )}
         <Input
           id={id}
+          data-testid={testId}
           ref={inputRef}
           className={cn({
             "h-8": compact || dense,
