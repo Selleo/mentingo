@@ -6,7 +6,7 @@ This guide covers local prerequisites, installation, seeded development accounts
 
 Before you begin, make sure you have:
 
-- Node.js version 20.15.0, as stated in `.tool-versions`.
+- Node.js version 22.15.0, as stated in `.tool-versions`.
   - We recommend using [asdf](https://asdf-vm.com/) for version management.
 - [pnpm](https://pnpm.io/) package manager.
 - [Caddy](https://caddyserver.com/docs/install#homebrew-mac) v2.8.4.
@@ -208,7 +208,7 @@ Email templates are automatically built when starting the development server. To
 ## Project Structure
 
 ```text
-lms-core
+mentingo
 ├── apps
 │   ├── api
 │   │   ├── src
