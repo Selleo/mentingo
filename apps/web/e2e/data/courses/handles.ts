@@ -196,11 +196,17 @@ export const COURSE_DISCUSSION_HANDLES = {
     `course-discussion-message-reaction-action-${messageId}-${reactionHandleValue(reaction)}`,
   messageReactionSummary: (messageId: string, reaction: string) =>
     `course-discussion-message-reaction-summary-${messageId}-${reactionHandleValue(reaction)}`,
+  messageAuthorPresence: (messageId: string) =>
+    `course-discussion-message-author-presence-${messageId}`,
   repliesToggle: (messageId: string) => `course-discussion-replies-toggle-${messageId}`,
   replies: (messageId: string) => `course-discussion-replies-${messageId}`,
   replyForm: (messageId: string) => `course-discussion-reply-form-${messageId}`,
   replyInput: (messageId: string) => `course-discussion-reply-input-${messageId}`,
   replySendButton: (messageId: string) => `course-discussion-reply-send-button-${messageId}`,
+  LOAD_MORE_REPLIES_BUTTON: "course-discussion-load-more-replies-button",
+  PAGINATION_PREVIOUS_BUTTON: "course-discussion-pagination-previous-button",
+  PAGINATION_NEXT_BUTTON: "course-discussion-pagination-next-button",
+  paginationPageButton: (page: number) => `course-discussion-pagination-page-${page}`,
   DELETE_DIALOG: "course-discussion-delete-dialog",
   DELETE_DIALOG_CANCEL_BUTTON: "course-discussion-delete-dialog-cancel-button",
   DELETE_DIALOG_CONFIRM_BUTTON: "course-discussion-delete-dialog-confirm-button",
