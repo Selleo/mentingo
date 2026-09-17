@@ -73,6 +73,7 @@ export function ChatMessage({
     >
       {showAvatar && !isDeleted ? (
         <MessageAvatar
+          messageId={message.id}
           userName={authorName}
           avatarReference={avatarReference}
           isOnline={Boolean(authorPresence?.isOnline)}
@@ -162,11 +163,13 @@ function MessageAvatar({
   avatarReference,
   hasMeta,
   isOnline,
+  messageId,
   userName,
 }: {
   avatarReference: string | null;
   hasMeta: boolean;
   isOnline: boolean;
+  messageId: string;
   userName: string;
 }) {
   return (
@@ -177,6 +180,8 @@ function MessageAvatar({
         profilePictureUrl={avatarReference}
       />
       <span
+        data-testid={COURSE_DISCUSSION_HANDLES.messageAuthorPresence(messageId)}
+        data-online={isOnline}
         className={cn(
           "absolute bottom-0 right-0 z-10 size-2.5 rounded-full border-[1.5px] border-background",
           {
