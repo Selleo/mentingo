@@ -43,7 +43,7 @@ export function NavigationHeader({
         )}
       </Link>
       <div className="flex gap-x-2">
-        {!is2xlBreakpoint && <NavigationGlobalSearchWrapper />}
+        {!is2xlBreakpoint && <NavigationGlobalSearchWrapper containerClassName="2xl:hidden" />}
 
         <MobileMenuToggle
           isMobileNavOpen={isMobileNavOpen}
