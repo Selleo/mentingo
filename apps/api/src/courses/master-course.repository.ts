@@ -607,7 +607,7 @@ export class MasterCourseRepository {
 
   async findCategoryByLocalizedTitle(title: string) {
     const [existingCategory] = await this.db
-      .select(getTableColumns(categories))
+      .select()
       .from(categories)
       .where(this.localizationService.getLocalizedFieldSearchCondition(categories.title, title))
       .limit(1);
