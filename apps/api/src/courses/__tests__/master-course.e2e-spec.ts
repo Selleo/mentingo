@@ -10,7 +10,7 @@ import {
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
 } from "@repo/shared";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -662,16 +662,18 @@ describe("Master course export and sync (e2e)", () => {
           availableLocales: courses.availableLocales,
           categoryId: courses.categoryId,
           authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
 
       expect(targetCourse).toBeDefined();
+      expect(targetCourse.authorMetadataType).toBe("object");
       expect(targetCourse.authorMetadata).toMatchObject({
-        authorId: expect.any(String),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
+        authorId: sourceAdmin.id,
+        firstName: sourceAdmin.firstName,
+        lastName: sourceAdmin.lastName,
       });
       expect(targetCourse.title).toEqual({
         en: "Master Source Course",
@@ -782,7 +784,7 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("syncs course overview fields while preserving the target course status", async () => {
-    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const { sourceAdmin, sourceCourseId, targetCourseId } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
     await runAsTenant(targetTenantId, () =>
@@ -802,6 +804,14 @@ describe("Master course export and sync (e2e)", () => {
           },
           showAuthorSection: true,
           thumbnailPositionY: 28,
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: "Updated",
+            lastName: "Source Author",
+            jobTitle: null,
+            description: null,
+            profilePictureReference: null,
+          },
         })
         .where(eq(courses.id, sourceCourseId)),
     );
@@ -829,6 +839,8 @@ describe("Master course export and sync (e2e)", () => {
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
+          authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
@@ -845,6 +857,12 @@ describe("Master course export and sync (e2e)", () => {
     expect(syncedTargetCourse?.showAuthorSection).toBe(true);
     expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
     expect(syncedTargetCourse?.status).toBe("published");
+    expect(syncedTargetCourse?.authorMetadataType).toBe("object");
+    expect(syncedTargetCourse?.authorMetadata).toMatchObject({
+      authorId: sourceAdmin.id,
+      firstName: "Updated",
+      lastName: "Source Author",
+    });
   });
 
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {

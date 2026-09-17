@@ -282,6 +282,7 @@ export class MasterCourseService {
 
     await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
       ...duplicatedCourseValues,
+      authorMetadata: toNullableJsonbBuildObject(duplicatedCourseValues.authorMetadata),
       title: toJsonbBuildObject(targetCourse.title),
       description: toJsonbBuildObject(sourceSnapshot.course.description),
       thumbnailS3Key: this.getCopiedInternalReference(
@@ -728,7 +729,7 @@ export class MasterCourseService {
       chapterCount: params.sourceSnapshot.course.chapterCount,
       courseType: params.sourceSnapshot.course.courseType,
       authorId: params.targetAuthorId,
-      authorMetadata: params.sourceSnapshot.course.authorMetadata,
+      authorMetadata: toNullableJsonbBuildObject(params.sourceSnapshot.course.authorMetadata),
       categoryId: params.categoryId,
       stripeProductId: null,
       stripePriceId: null,
@@ -832,7 +833,7 @@ export class MasterCourseService {
       chapterCount: course.chapterCount,
       courseType: course.courseType,
       authorId: params.targetAuthorId,
-      authorMetadata: course.authorMetadata,
+      authorMetadata: toNullableJsonbBuildObject(course.authorMetadata),
       categoryId,
       stripeProductId: null,
       stripePriceId: null,

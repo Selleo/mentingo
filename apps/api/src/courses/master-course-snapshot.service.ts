@@ -6,10 +6,8 @@ import {
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
 } from "src/resource-library/resource-library.utils";
-import { normalizeJsonb } from "src/utils/jsonb";
 
 import type { UUIDType } from "src/common";
-import type { CourseAuthorMetadata } from "src/courses/types/course.types";
 import type { CourseSelect, SourceSnapshot } from "src/courses/types/master-course.types";
 
 @Injectable()
@@ -17,15 +15,10 @@ export class MasterCourseSnapshotService {
   constructor(private readonly masterCourseRepository: MasterCourseRepository) {}
 
   async buildSourceSnapshot(sourceCourse: CourseSelect): Promise<SourceSnapshot | null> {
-    const storedAuthorMetadata = normalizeJsonb<CourseAuthorMetadata | null>(
-      sourceCourse.authorMetadata,
-      null,
-    );
-
     const course = {
       ...sourceCourse,
       authorMetadata:
-        storedAuthorMetadata ??
+        sourceCourse.authorMetadata ??
         (await this.masterCourseRepository.getCourseAuthorMetadata(sourceCourse.authorId)),
     };
 
