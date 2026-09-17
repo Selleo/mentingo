@@ -155,8 +155,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
         <NavigationGlobalSearchWrapper
           useCompactVariant={isSidebarCollapsed}
-          containerClassName={cn("w-full", {
-            "flex justify-center": isSidebarCollapsed,
+          containerClassName={cn("hidden w-full 2xl:block", {
+            "2xl:flex 2xl:justify-center": isSidebarCollapsed,
           })}
         />
 

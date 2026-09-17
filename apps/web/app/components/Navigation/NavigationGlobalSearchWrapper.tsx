@@ -112,20 +112,21 @@ export const NavigationGlobalSearchWrapper = ({
         />
       ) : (
         <button
+          aria-label={t("navigationSideBar.findInApplication")}
           onClick={() => setIsGlobalSearchDialogOpen(true)}
           className={cn(
-            "hidden h-[42px] w-full items-center justify-start rounded-lg border border-neutral-300 bg-white py-2 px-0 pl-8 pr-8 text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
-            "2xl:flex",
+            "flex size-10 items-center justify-center rounded-lg bg-neutral-50 p-2 text-neutral-800 transition-colors hover:text-primary-500",
+            "2xl:h-[42px] 2xl:w-full 2xl:justify-start 2xl:border 2xl:border-neutral-300 2xl:bg-white 2xl:py-2 2xl:pl-8 2xl:pr-8 2xl:hover:border-primary-500",
           )}
         >
-          <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
-          <span className="body-base inline-block w-full text-start text-current transition-colors">
+          <Search className="size-6 transition-colors 2xl:absolute 2xl:left-2 2xl:top-1/2 2xl:size-5 2xl:-translate-y-1/2 2xl:transform" />
+          <span className="body-base hidden w-full text-start text-current transition-colors 2xl:inline-block">
             {t("globalSearch.search")}
           </span>
           {isMac ? (
-            <GlobalSearchMac className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
+            <GlobalSearchMac className="absolute right-2 top-1/2 hidden -translate-y-1/2 transform 2xl:block" />
           ) : (
-            <GlobalSearchWin className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
+            <GlobalSearchWin className="absolute right-2 top-1/2 hidden -translate-y-1/2 transform 2xl:block" />
           )}
         </button>
       )}
