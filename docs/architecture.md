@@ -56,23 +56,23 @@ flowchart TB
 
 ## Applications
 
-| Path | What it is |
-|---|---|
-| `apps/api` | NestJS API. Domain logic, authentication, AI orchestration, background jobs (BullMQ), WebSockets (Socket.IO with a Redis adapter), OpenAPI schema at `/api`. |
-| `apps/web` | Remix single-page application built with Vite. Learner, content-creator and admin interfaces. Talks to the API through a generated typed client. |
-| `apps/reverse-proxy` | Caddy configuration providing per-tenant local domains and HTTPS in development. |
+| Path                 | What it is                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/api`           | NestJS API. Domain logic, authentication, AI orchestration, background jobs (BullMQ), WebSockets (Socket.IO with a Redis adapter), OpenAPI schema at `/api`. |
+| `apps/web`           | Remix single-page application built with Vite. Learner, content-creator and admin interfaces. Talks to the API through a generated typed client.             |
+| `apps/reverse-proxy` | Caddy configuration providing per-tenant local domains and HTTPS in development.                                                                             |
 
 ## Packages
 
-| Package | What it is |
-|---|---|
-| `@repo/shared` | Types and helpers shared between API and web. |
-| `@repo/prompts` | AI prompt sources, generated at build time. |
-| `@repo/scorm-export-generator` | Node-side SCORM 1.2 export package generator. |
-| `@repo/scorm-export-runtime` | Standalone browser runtime for exported SCORM packages. |
-| `@repo/email-templates` | Transactional email templates (React Email). |
-| `@mentingo/performance-tests` | k6 suite: load, stress, spike, soak and mixed scenarios. |
-| `@repo/eslint-config`, `@repo/typescript-config` | Shared tooling configuration. |
+| Package                                          | What it is                                               |
+| ------------------------------------------------ | -------------------------------------------------------- |
+| `@repo/shared`                                   | Types and helpers shared between API and web.            |
+| `@repo/prompts`                                  | AI prompt sources, generated at build time.              |
+| `@repo/scorm-export-generator`                   | Node-side SCORM 1.2 export package generator.            |
+| `@repo/scorm-export-runtime`                     | Standalone browser runtime for exported SCORM packages.  |
+| `@repo/email-templates`                          | Transactional email templates (React Email).             |
+| `@mentingo/performance-tests`                    | k6 suite: load, stress, spike, soak and mixed scenarios. |
+| `@repo/eslint-config`, `@repo/typescript-config` | Shared tooling configuration.                            |
 
 ## Multi-tenancy
 

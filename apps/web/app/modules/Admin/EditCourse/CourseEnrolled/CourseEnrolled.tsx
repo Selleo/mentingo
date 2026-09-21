@@ -197,8 +197,8 @@ export const CourseEnrolled = ({
         return (
           <div className="flex gap-1">
             {visibleGroups.map((group) => (
-              <Badge key={group.id} variant="secondary">
-                {group.name}
+              <Badge key={group.id} variant="secondary" className="max-w-48" title={group.name}>
+                <span className="truncate">{group.name}</span>
               </Badge>
             ))}
             {remainingCount > 0 && (
@@ -568,7 +568,10 @@ export const CourseEnrolled = ({
           </DialogPortal>
         </Dialog>
       </div>
-      <Table data-testid={COURSE_ENROLLED_HANDLES.TABLE} className="border bg-neutral-50">
+      <Table
+        data-testid={COURSE_ENROLLED_HANDLES.TABLE}
+        className="w-max min-w-full border bg-neutral-50"
+      >
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

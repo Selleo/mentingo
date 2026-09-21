@@ -37,11 +37,11 @@
 
 ## Screenshots
 
-|  |  |
-|---|---|
-| ![Course catalog](docs/assets/screenshot-course-catalog.png) <br/> **Course catalog** - continue learning, top courses, one click in | ![Lesson content](docs/assets/screenshot-lesson.png) <br/> **Lesson view** - distraction-free content with video |
-| ![AI Mentor](docs/assets/screenshot-ai-mentor.jpg) <br/> **AI Mentor** - real-time role-play, scored automatically | ![Assessment](docs/assets/screenshot-quiz.jpg) <br/> **Assessment engine** - scenario-based questions, not just recall |
-| ![Admin dashboard](docs/assets/screenshot-admin.jpg) <br/> **Admin dashboard** - deadlines, to-do list, AI mentor practice | ![Certificate settings](docs/assets/screenshot-certificate.jpg) <br/> **Recertification** - expiring certificates, signature and validity period |
+|                                                                                                                                      |                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![Course catalog](docs/assets/screenshot-course-catalog.png) <br/> **Course catalog** - continue learning, top courses, one click in | ![Lesson content](docs/assets/screenshot-lesson.png) <br/> **Lesson view** - distraction-free content with video                                 |
+| ![AI Mentor](docs/assets/screenshot-ai-mentor.jpg) <br/> **AI Mentor** - real-time role-play, scored automatically                   | ![Assessment](docs/assets/screenshot-quiz.jpg) <br/> **Assessment engine** - scenario-based questions, not just recall                           |
+| ![Admin dashboard](docs/assets/screenshot-admin.jpg) <br/> **Admin dashboard** - deadlines, to-do list, AI mentor practice           | ![Certificate settings](docs/assets/screenshot-certificate.jpg) <br/> **Recertification** - expiring certificates, signature and validity period |
 
 <!-- ETAP 4: dodać 30-sekundowy GIF z tour po nagraniu, np. > 30-second product tour: [docs/assets/mentingo-tour.gif](docs/assets/mentingo-tour.gif) -->
 
@@ -74,11 +74,11 @@ pnpm dev
 
 Then open **https://tenant1.lms.localhost** and sign in:
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin+tenant1@example.com` | `password` |
+| Role            | Email                                | Password   |
+| --------------- | ------------------------------------ | ---------- |
+| Admin           | `admin+tenant1@example.com`          | `password` |
 | Content creator | `contentcreator+tenant1@example.com` | `password` |
-| Learner | `student+tenant1@example.com` | `password` |
+| Learner         | `student+tenant1@example.com`        | `password` |
 
 API and Swagger docs: `https://tenant1.lms.localhost/api` · Mail catcher: `https://mailbox.lms.localhost`
 
@@ -98,22 +98,22 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 ## At a glance
 
-| | |
-|---|---|
-| **Licence** | MIT - modify, white-label and resell, no copyleft obligation |
-| **Hosting** | Self-hosted on your own infrastructure, one-click CloudFormation deployment from [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw), or managed by [Selleo](https://selleo.com/lms-software-development) |
-| **Cost model** | Self-hosted: no licence fee, you pay only for infrastructure. Managed: flat tiered subscription, not per-seat metering |
-| **Backend** | NestJS 10 · TypeScript · Drizzle ORM · PostgreSQL 16 + pgvector · Redis · BullMQ · Socket.IO |
-| **Frontend** | Remix (Vite SPA) · React · Radix UI · TanStack Query/Table · Recharts |
-| **AI** | Vercel AI SDK + OpenAI · LangChain · pgvector retrieval · LiveKit real-time voice · Langfuse tracing |
-| **Authentication** | Microsoft 365, Google Workspace and Slack OAuth 2.0 SSO · email/password · TOTP two-factor |
-| **Multi-tenancy** | PostgreSQL Row-Level Security with a least-privilege runtime role, per-tenant domains |
-| **Interoperability** | SCORM 1.2 export · OpenAPI/Swagger with a generated typed client · CSV and XLSX bulk import/export |
-| **Storage & media** | Any S3-compatible object storage (MinIO, AWS S3, Hetzner) · Bunny Stream video with signed URLs |
-| **Payments** | Stripe (optional - for selling courses) |
-| **UI languages** | English, Polish, German, Spanish, French, Czech |
-| **Runtime** | Node.js >= 22.15, pnpm 10 |
-| **Latest release** | see [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/Selleo/mentingo/releases) |
+|                      |                                                                                                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Licence**          | MIT - modify, white-label and resell, no copyleft obligation                                                                                                                                                                          |
+| **Hosting**          | Self-hosted on your own infrastructure, one-click CloudFormation deployment from [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw), or managed by [Selleo](https://selleo.com/lms-software-development) |
+| **Cost model**       | Self-hosted: no licence fee, you pay only for infrastructure. Managed: flat tiered subscription, not per-seat metering                                                                                                                |
+| **Backend**          | NestJS 10 · TypeScript · Drizzle ORM · PostgreSQL 16 + pgvector · Redis · BullMQ · Socket.IO                                                                                                                                          |
+| **Frontend**         | Remix (Vite SPA) · React · Radix UI · TanStack Query/Table · Recharts                                                                                                                                                                 |
+| **AI**               | Vercel AI SDK + OpenAI · LangChain · pgvector retrieval · LiveKit real-time voice · Langfuse tracing                                                                                                                                  |
+| **Authentication**   | Microsoft 365, Google Workspace and Slack OAuth 2.0 SSO · email/password · TOTP two-factor                                                                                                                                            |
+| **Multi-tenancy**    | PostgreSQL Row-Level Security with a least-privilege runtime role, per-tenant domains                                                                                                                                                 |
+| **Interoperability** | SCORM 1.2 export · OpenAPI/Swagger with a generated typed client · CSV and XLSX bulk import/export                                                                                                                                    |
+| **Storage & media**  | Any S3-compatible object storage (MinIO, AWS S3, Hetzner) · Bunny Stream video with signed URLs                                                                                                                                       |
+| **Payments**         | Stripe (optional - for selling courses)                                                                                                                                                                                               |
+| **UI languages**     | English, Polish, German, Spanish, French, Czech                                                                                                                                                                                       |
+| **Runtime**          | Node.js >= 22.15, pnpm 10                                                                                                                                                                                                             |
+| **Latest release**   | see [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/Selleo/mentingo/releases)                                                                                                                                          |
 
 ---
 
@@ -149,19 +149,19 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 ## How Mentingo compares
 
-|  | **Mentingo** | Moodle | Open edX | Docebo | TalentLMS |
-|---|---|---|---|---|---|
-| Licence | **MIT** - permissive | GPL v3 - copyleft | AGPL v3 - network copyleft | Proprietary | Proprietary |
-| Self-hosting | Yes | Yes | Yes | No | No |
-| One-click cloud deployment | Yes - AWS Marketplace (CloudFormation: ECS, RDS, ElastiCache), no software charge | Partner hosting | Third-party providers | Vendor SaaS only | Vendor SaaS only |
-| White-label and resell | Yes, no obligation to publish your changes | Yes, derivatives stay GPL | Yes, but a hosted fork must disclose source | Branding only, per plan | Branding only, per plan |
-| Cost model | Self-host: infrastructure only. Managed: flat tiers | Free licence, paid hosting/partners | Free licence, significant DevOps cost | Per-user subscription | Per-user subscription |
-| Built-in AI mentor (voice + chat role-play) | Yes | Via third-party plugins | Via extensions | Yes, vendor-controlled | Limited |
-| AI provider | Bring your own key | n/a | n/a | Vendor-controlled | Vendor-controlled |
-| Multi-tenancy | Yes - PostgreSQL Row-Level Security | Separate instances or plugins | Yes, operationally complex | Vendor-managed | Vendor-managed |
-| Corporate SSO | Microsoft 365, Google Workspace, Slack | Plugins | Yes | Yes | Yes |
-| Stack | TypeScript (NestJS + React/Remix) | PHP | Python/Django | n/a | n/a |
-| Time to a running instance | One setup script locally, or a CloudFormation stack from AWS Marketplace | Moderate | High (Tutor + DevOps) | n/a | n/a |
+|                                             | **Mentingo**                                                                      | Moodle                              | Open edX                                    | Docebo                  | TalentLMS               |
+| ------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- | ----------------------- | ----------------------- |
+| Licence                                     | **MIT** - permissive                                                              | GPL v3 - copyleft                   | AGPL v3 - network copyleft                  | Proprietary             | Proprietary             |
+| Self-hosting                                | Yes                                                                               | Yes                                 | Yes                                         | No                      | No                      |
+| One-click cloud deployment                  | Yes - AWS Marketplace (CloudFormation: ECS, RDS, ElastiCache), no software charge | Partner hosting                     | Third-party providers                       | Vendor SaaS only        | Vendor SaaS only        |
+| White-label and resell                      | Yes, no obligation to publish your changes                                        | Yes, derivatives stay GPL           | Yes, but a hosted fork must disclose source | Branding only, per plan | Branding only, per plan |
+| Cost model                                  | Self-host: infrastructure only. Managed: flat tiers                               | Free licence, paid hosting/partners | Free licence, significant DevOps cost       | Per-user subscription   | Per-user subscription   |
+| Built-in AI mentor (voice + chat role-play) | Yes                                                                               | Via third-party plugins             | Via extensions                              | Yes, vendor-controlled  | Limited                 |
+| AI provider                                 | Bring your own key                                                                | n/a                                 | n/a                                         | Vendor-controlled       | Vendor-controlled       |
+| Multi-tenancy                               | Yes - PostgreSQL Row-Level Security                                               | Separate instances or plugins       | Yes, operationally complex                  | Vendor-managed          | Vendor-managed          |
+| Corporate SSO                               | Microsoft 365, Google Workspace, Slack                                            | Plugins                             | Yes                                         | Yes                     | Yes                     |
+| Stack                                       | TypeScript (NestJS + React/Remix)                                                 | PHP                                 | Python/Django                               | n/a                     | n/a                     |
+| Time to a running instance                  | One setup script locally, or a CloudFormation stack from AWS Marketplace          | Moderate                            | High (Tutor + DevOps)                       | n/a                     | n/a                     |
 
 Licences verified from each project's `LICENSE` file in September 2026. Commercial pricing and feature tiers change - check the vendors' current pricing pages before making a decision.
 
@@ -179,23 +179,23 @@ Component diagram, multi-tenancy model and how the AI mentor pipeline fits toget
 
 **Apps**
 
-| App | What it is |
-|---|---|
-| `apps/api` | NestJS API - domain logic, auth, AI orchestration, background jobs (BullMQ), WebSockets |
-| `apps/web` | Remix single-page app (Vite) - learner, content-creator and admin interfaces |
-| `apps/reverse-proxy` | Caddy config providing local domains and HTTPS in development |
+| App                  | What it is                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `apps/api`           | NestJS API - domain logic, auth, AI orchestration, background jobs (BullMQ), WebSockets |
+| `apps/web`           | Remix single-page app (Vite) - learner, content-creator and admin interfaces            |
+| `apps/reverse-proxy` | Caddy config providing local domains and HTTPS in development                           |
 
 **Packages**
 
-| Package | What it is |
-|---|---|
-| `@repo/shared` | Types and helpers shared by API and web |
-| `@repo/prompts` | Versioned AI prompt sources and generation |
-| `@repo/scorm-export-generator` | Node-side SCORM 1.2 export package generator |
-| `@repo/scorm-export-runtime` | Standalone browser runtime for exported SCORM packages |
-| `@repo/email-templates` | Transactional email templates |
-| `@mentingo/performance-tests` | k6 suite - load, stress, spike, soak and mixed scenarios |
-| `@repo/eslint-config`, `@repo/typescript-config` | Shared tooling configuration |
+| Package                                          | What it is                                               |
+| ------------------------------------------------ | -------------------------------------------------------- |
+| `@repo/shared`                                   | Types and helpers shared by API and web                  |
+| `@repo/prompts`                                  | Versioned AI prompt sources and generation               |
+| `@repo/scorm-export-generator`                   | Node-side SCORM 1.2 export package generator             |
+| `@repo/scorm-export-runtime`                     | Standalone browser runtime for exported SCORM packages   |
+| `@repo/email-templates`                          | Transactional email templates                            |
+| `@mentingo/performance-tests`                    | k6 suite - load, stress, spike, soak and mixed scenarios |
+| `@repo/eslint-config`, `@repo/typescript-config` | Shared tooling configuration                             |
 
 **What it costs to run**
 
@@ -341,12 +341,12 @@ English, Polish, German, Spanish, French and Czech. Translations live in `apps/w
 
 Mentingo is free to self-host under the MIT licence, and it is maintained by [Selleo](https://selleo.com) - a product engineering team that has been building learning platforms since 2005.
 
-| | |
-|---|---|
-| **Managed hosting** | We run Mentingo for you - infrastructure, updates, backups, monitoring. Flat tiered pricing, no per-seat metering. [Pricing](https://mentingo.com/pricing) |
-| **Go live in 7 days** | Branded, configured and populated production instance in a week, using pre-built modules instead of a months-long implementation project. |
-| **Custom build on top** | Integrations with your HRIS, SSO or internal systems; new modules; a full product built on the Mentingo core. |
-| **Two-week trial sprint** | Work with our team for two weeks before committing to anything longer. |
+|                              |                                                                                                                                                                                                                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Managed hosting**          | We run Mentingo for you - infrastructure, updates, backups, monitoring. Flat tiered pricing, no per-seat metering. [Pricing](https://mentingo.com/pricing)                                                                                                            |
+| **Go live in 7 days**        | Branded, configured and populated production instance in a week, using pre-built modules instead of a months-long implementation project.                                                                                                                             |
+| **Custom build on top**      | Integrations with your HRIS, SSO or internal systems; new modules; a full product built on the Mentingo core.                                                                                                                                                         |
+| **Two-week trial sprint**    | Work with our team for two weeks before committing to anything longer.                                                                                                                                                                                                |
 | **One-click AWS deployment** | Subscribe on [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw) and launch a CloudFormation stack - ECS, RDS and ElastiCache - inside your own AWS account. No software charge, no procurement cycle: it goes on your existing AWS bill. |
 
 **[Talk to us →](https://selleo.com/lms-software-development)**
