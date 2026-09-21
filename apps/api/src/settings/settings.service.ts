@@ -1469,7 +1469,10 @@ export class SettingsService {
       globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
 
     try {
-      return await this.fileService.getFileBuffer(logoUrl);
+      const buffer = await this.fileService.getFileBuffer(logoUrl);
+      if (!buffer) return null;
+
+      return await sharp(buffer).png().toBuffer();
     } catch {
       return null;
     }
