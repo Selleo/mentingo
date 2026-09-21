@@ -4114,6 +4114,22 @@ describe("CourseController (e2e)", () => {
         })
         .expect(200);
 
+      const refreshDeadline = Date.now() + 15000;
+
+      while (true) {
+        const [refreshedCourse] = await db
+          .select({ durationEstimates: courses.durationEstimates })
+          .from(courses)
+          .where(eq(courses.id, course.id));
+
+        if (refreshedCourse.durationEstimates.en?.totalSeconds === 150) break;
+        if (Date.now() >= refreshDeadline) {
+          throw new Error("Timed out waiting for the lesson update to refresh course duration");
+        }
+
+        await sleep(50);
+      }
+
       const refreshedResponse = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
         .set("Cookie", cookies)
