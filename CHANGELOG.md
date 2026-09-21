@@ -1,6 +1,16 @@
+<a name="v4.20.1"></a>
+
+## [v4.20.1] - 21.09.2026
+
+### Bug Fixes:
+
+- preserve transparency in PNG platform logos ([#1983](https://github.com/Selleo/mentingo/issues/1983))
+
+- ensure courses can be shared correctly and display the right author ([#1968](https://github.com/Selleo/mentingo/issues/1968))
+
 <a name="v4.20.0"></a>
 
-## [v4.20.0] - 17.09.2026
+## [v4.20.0] - 18.09.2026
 
 ### Features:
 
@@ -15,6 +25,8 @@
 - display global search on mobile ([#1978](https://github.com/Selleo/mentingo/issues/1978))
 
 ### Documentation:
+
+- update changelog for version v4.20.0
 
 - rewrite README, add trust-layer and GEO docs, add real screenshots ([#1976](https://github.com/Selleo/mentingo/issues/1976))
 
@@ -3334,7 +3346,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.20.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.20.1...HEAD
+[v4.20.1]: https://github.com/Selleo/mentingo/compare/v4.20.0...v4.20.1
 [v4.20.0]: https://github.com/Selleo/mentingo/compare/v4.19.1...v4.20.0
 [v4.19.1]: https://github.com/Selleo/mentingo/compare/v4.19.0...v4.19.1
 [v4.19.0]: https://github.com/Selleo/mentingo/compare/v4.18.0...v4.19.0
