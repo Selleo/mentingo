@@ -17,6 +17,9 @@ export const courseAuthorNameSql = () =>
 
 export const courseAuthorAvatarReferenceSql = () =>
   sql<string>`COALESCE(
-    jsonb_extract_path_text(${courses.authorMetadata}::jsonb, 'profilePictureReference'),
+    jsonb_extract_path_text(
+      ${courses.authorMetadata}::jsonb,
+      'profilePictureReference'
+    ),
     ${users.avatarReference}
   )`;
