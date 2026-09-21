@@ -22,7 +22,7 @@ export function useNavigationTracker() {
     if (currentUser || isAuthRoute || isRootRoute) return;
 
     addLastUnauthorizedEntry({
-      pathname: location.pathname,
+      pathname: `${location.pathname}${location.search}`,
       timestamp: Date.now(),
     });
   }, [
@@ -36,8 +36,16 @@ export function useNavigationTracker() {
 
   useEffect(() => {
     if (!currentUser || isAuthRoute || isRootRoute || !lastEntry) return;
-    if (lastEntry.pathname !== location.pathname) return;
+    if (lastEntry.pathname !== `${location.pathname}${location.search}`) return;
 
     clearHistory();
-  }, [clearHistory, currentUser, isAuthRoute, isRootRoute, lastEntry, location.pathname]);
+  }, [
+    clearHistory,
+    currentUser,
+    isAuthRoute,
+    isRootRoute,
+    lastEntry,
+    location.pathname,
+    location.search,
+  ]);
 }

@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
-import { ENTITY_TYPES, MAX_COURSE_TRAILER_VIDEO_SIZE, PERMISSIONS } from "@repo/shared";
+import {
+  COURSE_ORIGIN_TYPES,
+  ENTITY_TYPES,
+  MAX_COURSE_TRAILER_VIDEO_SIZE,
+  PERMISSIONS,
+} from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -70,6 +75,9 @@ export default function CourseOverview({
   const navigate = useNavigate();
   const { course, isAdminExperience, isCourseStudentModeActive, isPreviewMode } =
     useCourseAccessProvider();
+
+  const isSharedCourse = course.originType === COURSE_ORIGIN_TYPES.EXPORTED;
+  const canEditCourseMetadata = isAdminExperience && !isSharedCourse;
 
   const { data: currentUser } = useCurrentUser();
   const { data: categories = [] } = useCategories({
@@ -356,18 +364,20 @@ export default function CourseOverview({
                 </span>
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={openMediaModal}
-                data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
-                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-sm backdrop-blur-sm transition sm:w-auto sm:px-4"
-              >
-                <Upload className="size-4 text-primary-700" />
+              {canEditCourseMetadata && (
+                <Button
+                  variant="outline"
+                  onClick={openMediaModal}
+                  data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
+                  className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-sm backdrop-blur-sm transition sm:w-auto sm:px-4"
+                >
+                  <Upload className="size-4 text-primary-700" />
 
-                <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
-                  {t("modernCourseView.overview.editMedia")}
-                </span>
-              </Button>
+                  <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
+                    {t("modernCourseView.overview.editMedia")}
+                  </span>
+                </Button>
+              )}
             </div>
 
             <CourseLanguageSelector
@@ -378,6 +388,7 @@ export default function CourseOverview({
                 availableLocales: course.availableLocales,
               }}
               isAIConfigured={isAIConfigured?.enabled ?? false}
+              canAddLanguage={!isSharedCourse}
               hasMissingTranslations={hasMissingTranslations}
               onChange={onLanguageChange}
               setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
@@ -403,7 +414,7 @@ export default function CourseOverview({
               categoryId={categoryId}
               categoryTitle={selectedCategoryTitle}
               categories={categories}
-              canEdit={isAdminExperience}
+              canEdit={canEditCourseMetadata}
               canManageCategories={canManageCategories}
               disabled={isUpdatingCourse}
               durationSeconds={course.estimatedDurationSeconds}
@@ -418,7 +429,7 @@ export default function CourseOverview({
 
             <CourseTitleEditor
               title={title}
-              canEdit={isAdminExperience}
+              canEdit={canEditCourseMetadata}
               disabled={isUpdatingCourse}
               isEditing={isEditingTitle}
               onCancel={handleCancelTitleEdit}
@@ -503,6 +514,7 @@ export default function CourseOverview({
 
       {showDescriptionModal && (
         <CourseDescriptionModal
+          canEdit={canEditCourseMetadata}
           courseDescription={description}
           onChangeDescription={(nextDescription) =>
             setValue("description", nextDescription, {
@@ -519,6 +531,7 @@ export default function CourseOverview({
         currency={course.currency}
         courseId={course.id}
         language={language}
+        isSharedCourse={isSharedCourse}
         onOpenChange={setShowSettingsDrawer}
         open={showSettingsDrawer}
         priceInCents={course.priceInCents}

@@ -23,6 +23,7 @@ const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
+  [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "Group Manager",
   [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
 };
 
@@ -122,6 +123,30 @@ export async function assignSystemRoleToUserInTests(
     roleId: role.id,
     tenantId,
   });
+}
+
+export async function addSystemRoleToUserInTests(
+  db: DatabasePg,
+  userId: UUIDType,
+  tenantId: UUIDType,
+  roleSlug: SystemRoleSlug,
+) {
+  await ensureSystemRolesForTenantInTests(db, tenantId);
+
+  const [role] = await db
+    .select({ id: permissionRoles.id })
+    .from(permissionRoles)
+    .where(and(eq(permissionRoles.tenantId, tenantId), eq(permissionRoles.slug, roleSlug)))
+    .limit(1);
+
+  if (!role) throw new Error(`System role '${roleSlug}' not found for tenant ${tenantId}`);
+
+  await db
+    .insert(permissionUserRoles)
+    .values({ userId, roleId: role.id, tenantId })
+    .onConflictDoNothing({
+      target: [permissionUserRoles.userId, permissionUserRoles.roleId],
+    });
 }
 
 async function findPermissionRoleIdInTests(

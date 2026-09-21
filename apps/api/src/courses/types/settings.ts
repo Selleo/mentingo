@@ -1,4 +1,8 @@
-import { CERTIFICATE_VALIDITY_TYPES, CERTIFICATE_VALIDITY_UNITS } from "@repo/shared";
+import {
+  CERTIFICATE_VALIDITY_TYPES,
+  CERTIFICATE_VALIDITY_UNITS,
+  DEFAULT_CERTIFICATE_FONT_COLOR,
+} from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import {
@@ -42,7 +46,7 @@ export const coursesSettingsSchema = Type.Object(
       default: null,
     }),
     certificateFontColor: Type.Union([Type.String(), Type.Null()], {
-      default: null,
+      default: DEFAULT_CERTIFICATE_FONT_COLOR,
     }),
     certificateValidity: Type.Union([certificateValiditySchema, Type.Null()], {
       default: null,

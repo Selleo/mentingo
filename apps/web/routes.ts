@@ -85,6 +85,12 @@ export const routes: (
             "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx",
           );
           route("activity-logs", "modules/ActivityLogs/ActivityLogs.page.tsx");
+          route("ai-conversations", "modules/Admin/AiConversations/AiConversations.page.tsx");
+          route(
+            "ai-conversations/:threadId",
+            "modules/Admin/AiConversations/AiConversations.page.tsx",
+            { id: "admin-ai-conversation" },
+          );
         });
         route("super-admin", "modules/SuperAdmin/SuperAdmin.layout.tsx", () => {
           route("tenants", "modules/SuperAdmin/Tenants.page.tsx", { index: true });

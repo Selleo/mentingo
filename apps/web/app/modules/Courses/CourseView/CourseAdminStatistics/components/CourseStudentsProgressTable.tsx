@@ -1,4 +1,3 @@
-import { PERMISSIONS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -25,6 +24,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+import { COURSE_STATISTICS_VIEW_PERMISSIONS } from "../utils/courseStatisticsAccess";
 
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { GetCourseStudentsProgressResponse } from "~/api/generated-api";
@@ -49,8 +49,8 @@ export function CourseStudentsProgressTable({
 }: CourseStudentsProgressTableProps) {
   const { t } = useTranslation();
 
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  const { hasAccess: canViewStatistics } = usePermissions({
+    required: COURSE_STATISTICS_VIEW_PERMISSIONS,
   });
   const { language } = useLanguageStore();
 
@@ -63,7 +63,7 @@ export function CourseStudentsProgressTable({
 
   const { data: courseStudentsProgress, isFetching } = useCourseStudentsProgress({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canViewStatistics,
     query,
   });
 

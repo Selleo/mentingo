@@ -3,6 +3,7 @@ import { PERMISSIONS } from "@repo/shared";
 import { BookOpen, Clock, Info, Play } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { match, P } from "ts-pattern";
 
 import { useEnrollCourse } from "~/api/mutations";
 import {
@@ -15,6 +16,7 @@ import {
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
 import { resolveCourseExperienceState } from "~/modules/Courses/context/CourseAccessProvider";
@@ -57,6 +59,10 @@ const HeroBanner = ({
     required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   });
   const { mutateAsync: enrollCourse } = useEnrollCourse();
+  const isGroupManager = hasPermission(
+    currentUser?.permissions ?? [],
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+  );
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
   const lessonsLabel = lessonCount
@@ -92,9 +98,26 @@ const HeroBanner = ({
     canUpdateLearningProgress,
   ]);
   const isPreviewMode = courseExperienceState?.isPreviewMode ?? canUseLearningMode;
+  const primaryActionLabel = match({
+    isGroupManager,
+    isPreviewMode,
+    hasCourseProgress,
+    hasNextLesson: Boolean(notStartedLessonId || firstInProgressLessonId),
+  })
+    .with({ isGroupManager: true }, () => "calendarView.details.action.goToCourse")
+    .with({ isPreviewMode: true }, () => "adminCourseView.common.preview")
+    .with({ hasCourseProgress: false }, () => "studentCourseView.sideSection.button.startLearning")
+    .with({ hasNextLesson: true }, () => "studentCourseView.sideSection.button.continueLearning")
+    .with(P._, () => "studentCourseView.sideSection.button.repeatLessons")
+    .exhaustive();
 
   const handleNavigateToLesson = useCallback(async () => {
     if (!heroCourseData) return;
+
+    if (isGroupManager) {
+      navigate(`/course/${heroCourseData.id}`);
+      return;
+    }
 
     const shouldEnrollBeforeNavigation =
       !isPreviewMode && !heroCourseData.enrolled && canUpdateLearningProgress;
@@ -117,7 +140,15 @@ const HeroBanner = ({
     navigateToNextLesson(heroCourseData, navigate, {
       openFirstLesson: isPreviewMode || shouldEnrollBeforeNavigation,
     });
-  }, [heroCourseData, isPreviewMode, navigate, enrollCourse, canUpdateLearningProgress, language]);
+  }, [
+    heroCourseData,
+    isGroupManager,
+    isPreviewMode,
+    navigate,
+    enrollCourse,
+    canUpdateLearningProgress,
+    language,
+  ]);
 
   return (
     <section className="relative w-full bg-primary-50 md:h-[70vh] md:min-h-[500px] md:overflow-hidden">
@@ -177,15 +208,7 @@ const HeroBanner = ({
           <div className="flex flex-wrap gap-2 pt-1 md:gap-3 md:pt-2">
             <Button onClick={handleNavigateToLesson}>
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
-              {t(
-                isPreviewMode
-                  ? "adminCourseView.common.preview"
-                  : !hasCourseProgress
-                    ? "studentCourseView.sideSection.button.startLearning"
-                    : notStartedLessonId || firstInProgressLessonId
-                      ? "studentCourseView.sideSection.button.continueLearning"
-                      : "studentCourseView.sideSection.button.repeatLessons",
-              )}
+              {t(primaryActionLabel)}
             </Button>
             <Button asChild variant="outline">
               <Link to={`/course/${id}`}>

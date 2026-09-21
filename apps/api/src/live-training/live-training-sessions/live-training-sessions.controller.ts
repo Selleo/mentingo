@@ -33,7 +33,7 @@ export class LiveTrainingSessionsController {
   constructor(private readonly liveTrainingSessionsService: LiveTrainingSessionsService) {}
 
   @Get()
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "liveTrainingId", schema: UUIDSchema },
@@ -102,7 +102,7 @@ export class LiveTrainingSessionsController {
   }
 
   @Get("participants/profile-pictures")
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "liveTrainingId", schema: UUIDSchema },
@@ -125,7 +125,7 @@ export class LiveTrainingSessionsController {
   }
 
   @Get(":sessionId")
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "liveTrainingId", schema: UUIDSchema },

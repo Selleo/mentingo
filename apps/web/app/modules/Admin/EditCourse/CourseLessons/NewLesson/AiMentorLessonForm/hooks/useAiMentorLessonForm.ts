@@ -10,6 +10,7 @@ import { useUpdateAiMentorLesson } from "~/api/mutations/admin/useUpdateAiMentor
 import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import {
   type Chapter,
   ContentTypes,
@@ -57,6 +58,7 @@ export const useAiMentorLessonForm = ({
   const { mutateAsync: updateAiMentorLesson } = useUpdateAiMentorLesson();
   const { mutateAsync: deleteAiMentorLesson } = useDeleteLesson();
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
+  const { isLeavingContent, setIsCurrectFormDirty } = useLeaveModal();
   const lessonFormScopeRef = useRef<LessonFormScope | null>(null);
 
   const form = useForm<AiMentorLessonFormValues>({
@@ -137,7 +139,10 @@ export const useAiMentorLessonForm = ({
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }
 
-      setContentTypeToDisplay(ContentTypes.EMPTY);
+      if (!isLeavingContent) {
+        setContentTypeToDisplay(ContentTypes.EMPTY);
+      }
+      setIsCurrectFormDirty(false);
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
       await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit?.id] });
       await queryClient.invalidateQueries({

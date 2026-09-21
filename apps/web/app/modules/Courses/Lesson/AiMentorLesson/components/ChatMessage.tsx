@@ -55,8 +55,6 @@ const ChatMessage = ({
   const isAssistant = role === "assistant";
   const textContent = content ?? getUiMessageText({ parts });
 
-  const previewDisplayName =
-    `${previewUser?.firstName ?? ""} ${previewUser?.lastName ?? ""}`.trim();
   const currentUserDisplayName =
     `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim();
 
@@ -69,7 +67,7 @@ const ChatMessage = ({
       return aiName ?? t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
     }
 
-    const fallbackName = previewUser ? previewDisplayName : currentUserDisplayName;
+    const fallbackName = previewUser?.displayName ?? currentUserDisplayName;
 
     return (
       userName ||
@@ -78,17 +76,7 @@ const ChatMessage = ({
       fallbackName ||
       t("studentCourseView.lesson.aiMentorLesson.userName")
     );
-  }, [
-    aiName,
-    currentUserDisplayName,
-    isAssistant,
-    name,
-    previewDisplayName,
-    previewUser,
-    t,
-    user?.name,
-    userName,
-  ]);
+  }, [aiName, currentUserDisplayName, isAssistant, name, previewUser, t, user?.name, userName]);
 
   return (
     <div

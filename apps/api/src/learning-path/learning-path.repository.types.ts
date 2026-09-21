@@ -1,4 +1,5 @@
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuery";
 import type { GroupsFilterSchema } from "src/group/group.types";
@@ -10,6 +11,8 @@ export type LearningPathEnrolledStudentsQuery = {
   groups?: GroupsFilterSchema;
   page?: number;
   perPage?: number;
+  learnerScope?: SQL;
+  managedByUserId?: UUIDType;
 };
 
 export type LearningPathListQuery = {
@@ -18,4 +21,5 @@ export type LearningPathListQuery = {
   language?: SupportedLanguages;
   searchQuery?: string;
   visibility?: { canReadAll: boolean; canReadOwn: boolean; studentId: UUIDType };
+  scopeCondition?: SQL;
 };

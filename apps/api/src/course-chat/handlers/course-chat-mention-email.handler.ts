@@ -87,7 +87,7 @@ export class CourseChatMentionEmailHandler
         sendEmail: false,
         emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
         sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
-        sourceId: null,
+        sourceId: courseId,
         usersToNotify: uniqueMentionedUserIds,
       });
 

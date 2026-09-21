@@ -41,6 +41,7 @@ type LanguageSelectorProps = {
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
   isAIConfigured: boolean;
+  canAddLanguage?: boolean;
   hasMissingTranslations?: boolean;
   className?: string;
   compactOnMobile?: boolean;
@@ -54,6 +55,7 @@ export const CourseLanguageSelector = ({
   onChange,
   setOpenGenerateTranslationModal,
   isAIConfigured,
+  canAddLanguage = true,
   hasMissingTranslations = false,
   className,
   compactOnMobile,
@@ -72,9 +74,9 @@ export const CourseLanguageSelector = ({
   const addedItems = courseLanguages.filter(
     (item) => !!course?.availableLocales?.includes(item.key),
   );
-  const notAddedItems = courseLanguages.filter(
-    (item) => !(course?.availableLocales?.includes(item.key) ?? false),
-  );
+  const notAddedItems = canAddLanguage
+    ? courseLanguages.filter((item) => !(course?.availableLocales?.includes(item.key) ?? false))
+    : [];
 
   const baseLanguageTranslationKey = courseLanguages.find(
     (item) => item.key === course?.baseLanguage,

@@ -8,6 +8,7 @@ const SYSTEM_ROLE_TRANSLATION_KEYS = {
   [SYSTEM_ROLE_SLUGS.STUDENT]: "common.roles.student",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "common.roles.contentCreator",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "common.roles.trainer",
+  [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "common.roles.groupManager",
 } as const;
 
 export const getRoleLabel = (roleSlug: string, t: TFunction, roles?: RoleOption[]): string => {

@@ -16,8 +16,13 @@ export class ReportService {
   async generateSummaryReport(
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    courseId?: string,
   ): Promise<Buffer> {
-    const reportData = await this.reportRepository.getAllStudentCourseData(language, currentUser);
+    const reportData = await this.reportRepository.getAllStudentCourseData(
+      language,
+      currentUser,
+      courseId,
+    );
 
     const headers = REPORT_HEADERS[language] || REPORT_HEADERS.en;
 

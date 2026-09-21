@@ -57,8 +57,8 @@ importers:
         specifier: 0.8.2
         version: 0.8.2(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(rxjs@7.8.1)(stripe@18.5.0(@types/node@22.15.0))
       '@japro/luma-sdk':
-        specifier: 0.2.15
-        version: 0.2.15
+        specifier: 0.2.22
+        version: 0.2.22
       '@keyv/redis':
         specifier: 4.0.2
         version: 4.0.2
@@ -1040,7 +1040,7 @@ importers:
         version: 18.3.1
       react-email:
         specifier: 2.1.6
-        version: 2.1.6(@opentelemetry/api@1.9.0)(@swc/helpers@0.5.2)(eslint@8.57.1)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5))
+        version: 2.1.6(@opentelemetry/api@1.9.1)(@swc/helpers@0.5.2)(eslint@8.57.1)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5))
     devDependencies:
       '@babel/generator':
         specifier: 7.26.2
@@ -1179,8 +1179,8 @@ importers:
   packages/shared:
     dependencies:
       '@japro/luma-sdk':
-        specifier: 0.2.15
-        version: 0.2.15
+        specifier: 0.2.22
+        version: 0.2.22
     devDependencies:
       glob:
         specifier: 11.0.3
@@ -2412,11 +2412,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild/aix-ppc64@0.19.11':
     resolution: {integrity: sha512-FnzU0LyE3ySQk7UntJO4+qIiQgI7KoODnZg5xzXIrFJlKd2P2gwHsHY4927xj9y5PJmJSzULiUCWmv7iWnNa7g==}
@@ -3768,8 +3768,8 @@ packages:
     resolution: {integrity: sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==}
     engines: {node: '>=8'}
 
-  '@japro/luma-sdk@0.2.15':
-    resolution: {integrity: sha512-gJ0Jv8cLQfFPIB9fZe+OLEaQLP0B+kEv5s5qSb1eFCWwYnVtFasJEu8F0uL1Ej53bxEFHd8w5Q39N0imTFhKmw==}
+  '@japro/luma-sdk@0.2.22':
+    resolution: {integrity: sha512-8tQhKyOkokCeJmzTYjC8jetz7C1xls4VTJ9LGW1oLinXNA1Ahn1VWeGb0C0f8/zcJ0AaIcKooVVOAuxK+UMVMw==}
 
   '@jest/console@29.7.0':
     resolution: {integrity: sha512-5Ni4CU7XHQi32IJ398EEP4RrB8eV09sXP2ROqD4bksHrnTree52PsxvX8tpL8LvTZ3pFzXyPbNQReSN41CAhOg==}
@@ -10049,6 +10049,9 @@ packages:
   axios@1.13.5:
     resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
+
   axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
 
@@ -10292,10 +10295,6 @@ packages:
   cacheable-request@10.2.14:
     resolution: {integrity: sha512-zkDT5WAF4hSSoUgyfg5tFIxz8XQK+25W/TLVojJTMKBaxevLBBtLxgqguAuVQB8PVW79FVjHcU+GJ9tVbDZ9mQ==}
     engines: {node: '>=14.16'}
-
-  call-bind-apply-helpers@1.0.1:
-    resolution: {integrity: sha512-BhYE+WDaywFg2TBWYNXAE+8B1ATnThNBqXHP5nQu0jWJdVvY2hvkpyB3qOmtmDePiS5/BDQ8wASEWGMWRG148g==}
-    engines: {node: '>= 0.4'}
 
   call-bind-apply-helpers@1.0.2:
     resolution: {integrity: sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==}
@@ -10782,6 +10781,7 @@ packages:
   cron-parser@4.9.0:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
+    deprecated: v4 is no longer maintained, upgrade to v5
 
   cron@3.1.7:
     resolution: {integrity: sha512-tlBg7ARsAMQLzgwqVxy8AZl/qlTc5nibqYwtNGoCrd+cV+ugI+tvZC1oT/8dFH8W455YrywGykx/KMmAqOr7Jw==}
@@ -11460,10 +11460,6 @@ packages:
     resolution: {integrity: sha512-MZ4iQ6JwHOBQjahnjwaC1ZtIBH+2ohjamzAO3oaHcXYup7qxjF2fixyH+Q71voWHeOkI2q/TnJao/KfXYIZWbw==}
     engines: {node: '>= 0.4'}
 
-  es-object-atoms@1.1.1:
-    resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
-    engines: {node: '>= 0.4'}
-
   es-object-atoms@1.1.2:
     resolution: {integrity: sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==}
     engines: {node: '>= 0.4'}
@@ -12033,6 +12029,15 @@ packages:
       debug:
         optional: true
 
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
 
@@ -12064,6 +12069,10 @@ packages:
 
   form-data@4.0.5:
     resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
+    engines: {node: '>= 6'}
+
+  form-data@4.0.6:
+    resolution: {integrity: sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==}
     engines: {node: '>= 6'}
 
   format@0.2.2:
@@ -12221,10 +12230,6 @@ packages:
 
   get-intrinsic@1.2.4:
     resolution: {integrity: sha512-5uYhsJH8VJBTv7oslg4BznJYhDoRI6waYCxMmCdnTrcCrHA/fCFKoTFz2JKKE0HdDFUF7/oQuhzumXJK7paBRQ==}
-    engines: {node: '>= 0.4'}
-
-  get-intrinsic@1.2.7:
-    resolution: {integrity: sha512-VW6Pxhsrk0KAOqs3WEd0klDiF/+V7gQOpAvY1jVU/LHmaD/kQO4523aiJuikX/QAKYiW6x8Jh+RJej1almdtCA==}
     engines: {node: '>= 0.4'}
 
   get-intrinsic@1.3.0:
@@ -15489,6 +15494,10 @@ packages:
 
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
 
   psl@1.13.0:
     resolution: {integrity: sha512-BFwmFXiJoFqlUpZ5Qssolv15DMyc84gTBds1BjsV1BfXEo1UyyD7GsmN67n7J77uRhoSNW1AXtXKPLcBFQn9Aw==}
@@ -21220,9 +21229,9 @@ snapshots:
 
   '@istanbuljs/schema@0.1.3': {}
 
-  '@japro/luma-sdk@0.2.15':
+  '@japro/luma-sdk@0.2.22':
     dependencies:
-      axios: 1.13.5(debug@4.4.3)
+      axios: 1.20.0
       socket.io-client: 4.8.3
     transitivePeerDependencies:
       - bufferutil
@@ -28966,6 +28975,16 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  axios@1.20.0:
+    dependencies:
+      follow-redirects: 1.16.0
+      form-data: 4.0.6
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
   axios@1.7.2:
     dependencies:
       follow-redirects: 1.15.9
@@ -29299,11 +29318,6 @@ snapshots:
       responselike: 3.0.0
     optional: true
 
-  call-bind-apply-helpers@1.0.1:
-    dependencies:
-      es-errors: 1.3.0
-      function-bind: 1.1.2
-
   call-bind-apply-helpers@1.0.2:
     dependencies:
       es-errors: 1.3.0
@@ -29314,7 +29328,7 @@ snapshots:
       es-define-property: 1.0.1
       es-errors: 1.3.0
       function-bind: 1.1.2
-      get-intrinsic: 1.2.7
+      get-intrinsic: 1.3.0
       set-function-length: 1.2.2
 
   call-bind@1.0.9:
@@ -30410,11 +30424,11 @@ snapshots:
       data-view-byte-offset: 1.0.0
       es-define-property: 1.0.1
       es-errors: 1.3.0
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       es-set-tostringtag: 2.1.0
       es-to-primitive: 1.3.0
       function.prototype.name: 1.1.6
-      get-intrinsic: 1.2.7
+      get-intrinsic: 1.3.0
       get-symbol-description: 1.0.2
       globalthis: 1.0.4
       gopd: 1.2.0
@@ -30530,10 +30544,6 @@ snapshots:
   es-module-lexer@1.5.4: {}
 
   es-object-atoms@1.0.0:
-    dependencies:
-      es-errors: 1.3.0
-
-  es-object-atoms@1.1.1:
     dependencies:
       es-errors: 1.3.0
 
@@ -31562,6 +31572,8 @@ snapshots:
 
   follow-redirects@1.15.9: {}
 
+  follow-redirects@1.16.0: {}
+
   for-each@0.3.3:
     dependencies:
       is-callable: 1.2.7
@@ -31604,6 +31616,14 @@ snapshots:
       mime-types: 2.1.35
 
   form-data@4.0.5:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.4
+      mime-types: 2.1.35
+
+  form-data@4.0.6:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
@@ -31790,19 +31810,6 @@ snapshots:
       has-proto: 1.0.3
       has-symbols: 1.1.0
       hasown: 2.0.4
-
-  get-intrinsic@1.2.7:
-    dependencies:
-      call-bind-apply-helpers: 1.0.1
-      es-define-property: 1.0.1
-      es-errors: 1.3.0
-      es-object-atoms: 1.1.2
-      function-bind: 1.1.2
-      get-proto: 1.0.1
-      gopd: 1.2.0
-      has-symbols: 1.1.0
-      hasown: 2.0.4
-      math-intrinsics: 1.1.0
 
   get-intrinsic@1.3.0:
     dependencies:
@@ -34875,7 +34882,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next@14.1.4(@babel/core@7.24.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.1.4(@babel/core@7.24.5)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.1.4
       '@swc/helpers': 0.5.2
@@ -34896,7 +34903,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.1.4
       '@next/swc-win32-ia32-msvc': 14.1.4
       '@next/swc-win32-x64-msvc': 14.1.4
-      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api': 1.9.1
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -35982,6 +35989,8 @@ snapshots:
 
   proxy-from-env@1.1.0: {}
 
+  proxy-from-env@2.1.0: {}
+
   psl@1.13.0:
     dependencies:
       punycode: 2.3.1
@@ -36292,7 +36301,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       tslib: 2.8.1
 
-  react-email@2.1.6(@opentelemetry/api@1.9.0)(@swc/helpers@0.5.2)(eslint@8.57.1)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5)):
+  react-email@2.1.6(@opentelemetry/api@1.9.1)(@swc/helpers@0.5.2)(eslint@8.57.1)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5)):
     dependencies:
       '@babel/core': 7.24.5
       '@babel/parser': 7.24.5
@@ -36319,7 +36328,7 @@ snapshots:
       glob: 10.3.4
       log-symbols: 4.1.0
       mime-types: 2.1.35
-      next: 14.1.4(@babel/core@7.24.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.1.4(@babel/core@7.24.5)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       normalize-path: 3.0.0
       ora: 5.4.1
       postcss: 8.4.38

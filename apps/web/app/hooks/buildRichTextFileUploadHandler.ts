@@ -81,6 +81,7 @@ const handleVideoUpload = async ({
   uploadQueue,
   insertOnUpload,
   visibility,
+  insertionPosition,
 }: {
   editor?: TiptapEditor | null;
   file: File;
@@ -95,6 +96,7 @@ const handleVideoUpload = async ({
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
   insertOnUpload: boolean;
   visibility?: EditableResourceVisibility;
+  insertionPosition?: number;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "video" });
   const uploadId = queueId ?? crypto.randomUUID();
@@ -104,6 +106,9 @@ const handleVideoUpload = async ({
   }
 
   if (insertOnUpload) {
+    if (insertionPosition !== undefined) {
+      editor?.commands.setTextSelection(insertionPosition);
+    }
     await insertPendingVideoNode({
       editor,
       file,
@@ -187,6 +192,7 @@ const handleResourceUpload = async ({
   uploadQueue,
   insertOnUpload,
   visibility,
+  insertionPosition,
 }: {
   editor?: TiptapEditor | null;
   file: File;
@@ -199,6 +205,7 @@ const handleResourceUpload = async ({
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
   insertOnUpload: boolean;
   visibility?: EditableResourceVisibility;
+  insertionPosition?: number;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
 
@@ -235,6 +242,9 @@ const handleResourceUpload = async ({
   }
 
   if (insertOnUpload) {
+    if (insertionPosition !== undefined) {
+      editor?.commands.setTextSelection(insertionPosition);
+    }
     await insertResourceNode({
       editor,
       resourceId,
@@ -345,6 +355,7 @@ export const buildRichTextFileUploadHandler = ({
     file?: File,
     editor?: TiptapEditor | null,
     visibility?: EditableResourceVisibility,
+    insertionPosition?: number,
   ) => {
     if (!file) return;
 
@@ -362,6 +373,7 @@ export const buildRichTextFileUploadHandler = ({
         uploadQueue,
         insertOnUpload,
         visibility,
+        insertionPosition,
       });
       return;
     }
@@ -378,6 +390,7 @@ export const buildRichTextFileUploadHandler = ({
       uploadQueue,
       insertOnUpload,
       visibility,
+      insertionPosition,
     });
   };
 };

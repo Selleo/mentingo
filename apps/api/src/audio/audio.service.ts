@@ -20,7 +20,12 @@ import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realti
 import { ExternalAudioService } from "./external-audio.service";
 
 import type { OnModuleInit } from "@nestjs/common";
-import type { PcmChunkMeta, VoiceAction } from "@repo/shared";
+import type {
+  AudioReconnectPayload,
+  ClientSpeechBoundaryPayload,
+  PcmChunkMeta,
+  VoiceAction,
+} from "@repo/shared";
 import type {
   SendTTSTriggerBody,
   StartAudioBody,
@@ -31,6 +36,7 @@ import type { WsUser } from "src/websocket/websocket.types";
 @Injectable()
 export class AudioService implements OnModuleInit {
   private readonly logger = new Logger(AudioService.name);
+  private readonly audioChunkQueues = new Map<string, Promise<void>>();
 
   constructor(
     private readonly queueService: QueueService,
@@ -87,10 +93,75 @@ export class AudioService implements OnModuleInit {
           voiceAction: payload.voiceAction,
         });
       }
+      return;
     }
+
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, {});
   }
 
   async audioChunk(sessionId: string, meta: PcmChunkMeta, bytes: Buffer) {
+    return this.enqueueSessionOperation(sessionId, () =>
+      this.processAudioChunk(sessionId, meta, bytes),
+    );
+  }
+
+  async clientSpeechStart(sessionId: string, payload: ClientSpeechBoundaryPayload) {
+    await this.enqueueSessionOperation(sessionId, () =>
+      this.externalAudioService.clientSpeechStart(sessionId, payload),
+    );
+  }
+
+  async clientSpeechEnd(sessionId: string, payload: ClientSpeechBoundaryPayload) {
+    await this.enqueueSessionOperation(sessionId, () =>
+      this.externalAudioService.clientSpeechEnd(sessionId, payload),
+    );
+  }
+
+  async reconnectAudio(
+    sessionId: string,
+    currentUser: WsUser,
+    payload: AudioReconnectPayload,
+  ): Promise<boolean> {
+    const recovered = this.externalAudioService.reconnectAudio(sessionId, currentUser, payload);
+    if (!recovered) {
+      this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_RECONNECT_ERROR, sessionId, {
+        type: VOICE_SOCKET_EVENT.AUDIO_RECONNECT_ERROR,
+        sessionId,
+        sessionRunId: payload.sessionRunId,
+        attempt: payload.attempt,
+        code: "AUDIO_SESSION_NOT_FOUND",
+      });
+    }
+
+    return recovered;
+  }
+
+  private async enqueueSessionOperation<T>(
+    sessionId: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const previous = this.audioChunkQueues.get(sessionId) ?? Promise.resolve();
+    const operationPromise = previous.catch(() => undefined).then(operation);
+    const queueTail = operationPromise.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    this.audioChunkQueues.set(sessionId, queueTail);
+    try {
+      return await operationPromise;
+    } finally {
+      if (this.audioChunkQueues.get(sessionId) === queueTail) {
+        this.audioChunkQueues.delete(sessionId);
+      }
+    }
+  }
+
+  private async processAudioChunk(sessionId: string, meta: PcmChunkMeta, bytes: Buffer) {
+    if (this.externalAudioService.hasSession(sessionId)) {
+      return this.externalAudioService.audioChunk(sessionId, meta, bytes);
+    }
+
     const voiceAction = await this.getVoiceAction(sessionId);
     if (this.isExternalVoiceAction(voiceAction)) {
       return this.externalAudioService.audioChunk(sessionId, meta, bytes);
@@ -110,6 +181,12 @@ export class AudioService implements OnModuleInit {
   }
 
   async stopAudio(sessionId: string, tenantId?: string) {
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
+    if (this.externalAudioService.hasSession(sessionId)) {
+      await this.externalAudioService.stopAudio(sessionId);
+      return;
+    }
+
     const voiceAction = await this.getVoiceAction(sessionId);
     if (!voiceAction) {
       this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.STOP_AUDIO, sessionId, {
@@ -131,19 +208,33 @@ export class AudioService implements OnModuleInit {
   }
 
   async cancelAudio(sessionId: string) {
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
+    if (this.externalAudioService.hasSession(sessionId)) {
+      await this.externalAudioService.cancelAudio(sessionId);
+      await this.clearAudioState(sessionId);
+      this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.SESSION_METADATA_CLEARED, sessionId, {
+        clientId: sessionId,
+      });
+      return;
+    }
+
     const voiceAction = await this.getVoiceAction(sessionId);
     if (this.isExternalVoiceAction(voiceAction)) {
       await this.externalAudioService.cancelAudio(sessionId);
     }
 
     await this.clearAudioState(sessionId);
-    this.realtimePublisher.emitToRoom("voice:sessionMetadataCleared", sessionId, {
+    this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.SESSION_METADATA_CLEARED, sessionId, {
       clientId: sessionId,
     });
   }
 
   async handleDisconnect(sessionId: string) {
-    this.externalAudioService.clearSession(sessionId);
+    await this.audioChunkQueues.get(sessionId)?.catch(() => undefined);
+    if (this.externalAudioService.handleClientDisconnect(sessionId)) {
+      return;
+    }
+
     await this.clearAudioState(sessionId);
   }
 

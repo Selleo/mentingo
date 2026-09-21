@@ -97,6 +97,7 @@ export function AverageScorePerQuizChart({ averageQuizScores }: AverageScorePerQ
             name={t("adminCourseView.statistics.overview.averageQuizScore")}
             fill="var(--primary)"
             radius={8}
+            maxBarSize={56}
           />
         </BarChart>
       </ChartContainer>

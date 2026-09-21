@@ -1,5 +1,5 @@
 import { Link, useParams } from "@remix-run/react";
-import { COURSE_STATUSES } from "@repo/shared";
+import { PERMISSIONS, COURSE_STATUSES } from "@repo/shared";
 import { GraduationCap, Info, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +13,7 @@ import {
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -43,6 +44,11 @@ export default function CourseOverviewActions({
   const { mutateAsync: enrollCourse, isPending: isEnrolling } = useEnrollCourse();
   const { course, isAdminExperience, canEditCourse, isCourseStudentModeActive } =
     useCourseAccessProvider();
+
+  const isGroupManager = hasPermission(
+    currentUser?.permissions ?? [],
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+  );
 
   const isDraftCourse = course.status === COURSE_STATUSES.DRAFT;
 
@@ -98,6 +104,8 @@ export default function CourseOverviewActions({
     }
 
     if (!course.enrolled) {
+      if (isGroupManager) return null;
+
       if (!currentUser) {
         const registerPath = globalSettings?.inviteOnlyRegistration
           ? "/auth/login"

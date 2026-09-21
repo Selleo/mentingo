@@ -12,6 +12,7 @@ import {
 import {
   AI_MENTOR_TYPE,
   COURSE_ORIGIN_TYPES,
+  DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   LESSON_TYPES,
   type LocalizedText,
@@ -276,7 +277,7 @@ export class MasterCourseService {
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignature: null,
-      certificateFontColor: null,
+      certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
       certificateValidity: null,
     });
 
@@ -295,6 +296,7 @@ export class MasterCourseService {
 
     await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
       ...duplicatedCourseValues,
+      authorMetadata: toNullableJsonbBuildObject(duplicatedCourseValues.authorMetadata),
       title: toJsonbBuildObject(targetCourse.title),
       description: toJsonbBuildObject(sourceSnapshot.course.description),
       thumbnailS3Key: this.getCopiedInternalReference(
@@ -589,7 +591,7 @@ export class MasterCourseService {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
         certificateSignature: null,
-        certificateFontColor: null,
+        certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
         certificateValidity: null,
       });
 
@@ -755,7 +757,7 @@ export class MasterCourseService {
       chapterCount: params.sourceSnapshot.course.chapterCount,
       courseType: params.sourceSnapshot.course.courseType,
       authorId: params.targetAuthorId,
-      authorMetadata: params.sourceSnapshot.course.authorMetadata,
+      authorMetadata: toNullableJsonbBuildObject(params.sourceSnapshot.course.authorMetadata),
       categoryId: params.categoryId,
       stripeProductId: null,
       stripePriceId: null,
@@ -808,9 +810,8 @@ export class MasterCourseService {
 
     if (createdCategory) return createdCategory.id;
 
-    const conflictingCategory = await this.masterCourseRepository.findCategoryByBaseTitle(
+    const conflictingCategory = await this.masterCourseRepository.findCategoryByLocalizedTitle(
       sourceSnapshot.categoryBaseTitle,
-      sourceSnapshot.category.baseLanguage,
     );
 
     if (!conflictingCategory) {
@@ -860,7 +861,7 @@ export class MasterCourseService {
       chapterCount: course.chapterCount,
       courseType: course.courseType,
       authorId: params.targetAuthorId,
-      authorMetadata: course.authorMetadata,
+      authorMetadata: toNullableJsonbBuildObject(course.authorMetadata),
       categoryId,
       stripeProductId: null,
       stripePriceId: null,
@@ -2085,7 +2086,7 @@ export class MasterCourseService {
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignature: null,
-      certificateFontColor: null,
+      certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
       certificateValidity: null,
     });
 

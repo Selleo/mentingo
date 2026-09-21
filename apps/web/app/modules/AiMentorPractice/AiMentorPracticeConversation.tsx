@@ -52,7 +52,7 @@ export function AiMentorPracticeConversation({
   const [latestEvaluation, setLatestEvaluation] = useState<AiMentorEvaluation | null>(null);
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const hydratedThreadRef = useRef<string | null>(null);
+  const committedLearnerTurnsRef = useRef(new Map<string, string>());
   const resolvedThreadId = threadId ?? "";
   const transport = useMemo(
     () => createAiMentorChatTransport(resolvedThreadId),
@@ -76,7 +76,12 @@ export function AiMentorPracticeConversation({
   });
 
   useEffect(() => {
-    if (isReplayPending || !currentThreadMessages || hydratedThreadRef.current === resolvedThreadId)
+    if (
+      isReplayPending ||
+      !currentThreadMessages ||
+      status === AI_CHAT_STATUSES.SUBMITTED ||
+      status === AI_CHAT_STATUSES.STREAMING
+    )
       return;
 
     setMessages(
@@ -88,22 +93,32 @@ export function AiMentorPracticeConversation({
         }),
       ),
     );
-    hydratedThreadRef.current = resolvedThreadId;
-  }, [currentThreadMessages, isReplayPending, resolvedThreadId, setMessages]);
+  }, [currentThreadMessages, isReplayPending, setMessages, status]);
+
+  useEffect(() => {
+    committedLearnerTurnsRef.current.clear();
+  }, [resolvedThreadId]);
 
   const appendVoiceMessage = useCallback(
-    (role: UIMessage["role"], content: string) => {
+    (role: UIMessage["role"], content: string, messageId?: string) => {
       const nextContent = content.trim();
       if (!nextContent) return;
+      if (role === "user" && messageId) {
+        if (committedLearnerTurnsRef.current.get(messageId) === nextContent) return;
+        committedLearnerTurnsRef.current.set(messageId, nextContent);
+      }
 
-      setMessages((current) => [
-        ...current,
-        createTextUiMessage<UIMessage>({
-          id: `practice-voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-          role,
-          content: nextContent,
-        }),
-      ]);
+      const nextMessage = createTextUiMessage<UIMessage>({
+        id: messageId ?? `practice-voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        role,
+        content: nextContent,
+      });
+      setMessages((current) => {
+        if (current.some((message) => message.id === nextMessage.id)) {
+          return current.map((message) => (message.id === nextMessage.id ? nextMessage : message));
+        }
+        return [...current, nextMessage];
+      });
     },
     [setMessages],
   );
@@ -169,7 +184,6 @@ export function AiMentorPracticeConversation({
     setShowEvaluationDialog(false);
     setLatestEvaluation(null);
     setMessages([]);
-    hydratedThreadRef.current = null;
     await replayPractice();
   }, [replayPractice, setMessages]);
 
@@ -225,10 +239,12 @@ export function AiMentorPracticeConversation({
           >
             {isThreadActive && !isJudgePending && !isReplayPending ? (
               <AiMentorPracticeComposer
-                lessonId={id}
+                key={resolvedThreadId}
+                practiceSessionId={id}
+                threadId={resolvedThreadId}
                 mentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
                 handleSubmit={handleSubmit}
-                onMentorTranscription={(text) => appendVoiceMessage("user", text)}
+                onLearnerTranscription={(text, turnId) => appendVoiceMessage("user", text, turnId)}
                 onMentorResponseCompleted={(text) => appendVoiceMessage("assistant", text)}
                 onAudioInterrupted={invalidateMessages}
                 onAudioOutputCompleted={invalidateMessages}

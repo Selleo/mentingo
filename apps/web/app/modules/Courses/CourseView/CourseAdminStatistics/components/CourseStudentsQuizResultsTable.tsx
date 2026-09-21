@@ -1,4 +1,3 @@
-import { PERMISSIONS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -26,6 +25,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+import { COURSE_STATISTICS_VIEW_PERMISSIONS } from "../utils/courseStatisticsAccess";
 
 import LessonPreviewDialog from "./LessonPreviewDialog";
 
@@ -56,8 +56,8 @@ export function CourseStudentsQuizResultsTable({
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
 
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  const { hasAccess: canViewStatistics } = usePermissions({
+    required: COURSE_STATISTICS_VIEW_PERMISSIONS,
   });
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -66,6 +66,8 @@ export function CourseStudentsQuizResultsTable({
   const [previewDialogData, setPreviewDialogData] = useState<{
     lessonId: string;
     userId: string;
+    studentName: string;
+    studentAvatarUrl?: string | null;
   } | null>(null);
 
   const query = useMemo(() => {
@@ -79,7 +81,7 @@ export function CourseStudentsQuizResultsTable({
     isFetching,
   } = useCourseStudentsQuizResults({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canViewStatistics,
     query,
   });
 
@@ -167,6 +169,8 @@ export function CourseStudentsQuizResultsTable({
                 setPreviewDialogData({
                   lessonId: row.original.lessonId,
                   userId: row.original.studentId,
+                  studentName: row.original.studentName,
+                  studentAvatarUrl: row.original.studentAvatarUrl,
                 });
                 setIsPreviewDialogOpen(true);
               }}
@@ -269,6 +273,8 @@ export function CourseStudentsQuizResultsTable({
           course={course}
           lessonId={previewDialogData.lessonId}
           userId={previewDialogData.userId}
+          studentName={previewDialogData.studentName}
+          studentAvatarUrl={previewDialogData.studentAvatarUrl}
           isOpen={isPreviewDialogOpen}
           onClose={() => {
             setIsPreviewDialogOpen(false);

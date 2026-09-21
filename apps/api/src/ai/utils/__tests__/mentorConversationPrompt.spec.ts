@@ -28,8 +28,8 @@ describe("AI Mentor conversation prompts", () => {
     const prompt = renderPrompt(promptTemplates.roleplayPrompt.template);
 
     expect(prompt).toContain("character direction privately");
-    expect(prompt).toContain("Speak entirely in the configured conversation language");
-    expect(prompt).toContain("natural Polish case endings");
+    expect(prompt).toContain("Respond entirely in");
+    expect(prompt).toContain("natural, idiomatic grammar");
     expect(prompt).toContain("Do not quote them, summarize them, convert them into a checklist");
     expect(prompt).toContain("Make one meaningful conversational move per turn");
     expect(prompt).toContain("Ask at most one focused question per turn");

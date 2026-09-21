@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { cn } from "~/lib/utils";
+import { UnsavedChangesExitGuard } from "~/modules/Admin/components/UnsavedChangesExitGuard";
 import { CourseGenerationButton } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationButton";
 import { CourseGenerationChatRuntime } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationChatRuntime";
 import { CourseGenerationCompletedNotice } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationCompletedNotice";
@@ -307,6 +308,7 @@ const CourseLessons = ({
   }, []);
   const isExitGuardEnabled =
     (isGenerationProcessing || isBackgroundGenerating) && !isCourseGenerated;
+  const isLessonExitGuardEnabled = isCurrentFormDirty;
 
   return (
     <div
@@ -314,6 +316,13 @@ const CourseLessons = ({
       className="flex basis-full flex-col gap-8 rounded-lg md:flex-row md:items-start"
     >
       <CourseGenerationExitGuard enabled={isExitGuardEnabled} />
+      <UnsavedChangesExitGuard
+        enabled={isLessonExitGuardEnabled && !isExitGuardEnabled}
+        dialogTitle={t("adminCourseView.curriculum.lesson.other.leaveContentHeader")}
+        message={t("adminCourseView.curriculum.lesson.other.leaveContentBody")}
+        cancelLabel={t("adminCourseView.curriculum.lesson.other.leaveContentCancel")}
+        leaveLabel={t("adminCourseView.curriculum.lesson.other.leaveContentDiscard")}
+      />
       <div className="flex w-full flex-col justify-between overflow-y-auto md:w-[480px] md:shrink-0 md:basis-[480px]">
         <CourseGenerationProgressStrip
           visible={shouldShowProgressStrip}

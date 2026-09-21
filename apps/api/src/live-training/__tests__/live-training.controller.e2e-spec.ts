@@ -333,6 +333,26 @@ describe("LiveTrainingController (e2e)", () => {
     expect(calendarEvent.title).toMatchObject({ [language]: "Updated offline training" });
   });
 
+  it("blocks Live Training changes while a session is in progress", async () => {
+    const admin = await createAdmin();
+    const liveTraining = await createOfflineLiveTraining(admin);
+
+    await request(app.getHttpServer())
+      .post(`/api/live-training/${liveTraining.id}/sessions/start`)
+      .query({ language })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .patch(`/api/live-training/${liveTraining.id}`)
+      .set("Cookie", await cookieFor(admin, app))
+      .send({ language, deliveryType: LIVE_TRAINING_DELIVERY_TYPES.ONLINE })
+      .expect(400)
+      .expect(({ body }) => {
+        expect(body.message).toBe("liveTraining.errors.activeSessionUpdateForbidden");
+      });
+  });
+
   it("rejects course links from trainers without course management access", async () => {
     const admin = await createAdmin();
     const trainer = await createTrainer();

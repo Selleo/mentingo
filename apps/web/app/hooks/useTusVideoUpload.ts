@@ -91,6 +91,5 @@ export const useTusVideoUpload = () => {
     getSessionForFile,
     uploadVideo,
     isUploading: tusUpload.isUploading,
-    uploadProgress: tusUpload.uploadProgress,
   };
 };

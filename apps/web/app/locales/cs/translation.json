@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Relace",
+    "context": "Kontext",
+    "activity": "Aktivita",
+    "filters": "Filtry",
+    "details": "Podrobnosti",
+    "selectConversation": "Vyberte konverzaci",
+    "pageSize": "Konverzace na stránku",
+    "conversation": "Konverzace",
+    "source": "Kurz",
+    "view": "Zobrazit konverzaci",
+    "title": "Konverzace s AI",
+    "description": "Prohlížejte cvičné relace a lekce s AI mentorem.",
+    "owner": "Uživatel",
+    "loading": "Načítání…",
+    "retry": "Zkusit znovu",
+    "noMatches": "Těmto filtrům neodpovídají žádné konverzace.",
+    "loadMore": "Načíst další",
+    "back": "Zpět na konverzace",
+    "readOnly": "Konverzace pouze pro čtení",
+    "unavailable": "Tato konverzace není dostupná.",
+    "untitled": "Konverzace bez názvu",
+    "started": "Zahájeno",
+    "lastActivity": "Poslední aktivita",
+    "language": "Jazyk",
+    "result": "Zobrazit hodnocení",
+    "emptyTranscript": "Tato konverzace zatím neobsahuje zprávy.",
+    "messagesError": "Zprávy se nepodařilo načíst.",
+    "search": "Hledat názvy konverzací",
+    "type": "Typ",
+    "allTypes": "Všechny typy",
+    "status": "Stav",
+    "allStatuses": "Všechny stavy",
+    "from": "Zahájeno od",
+    "to": "Zahájeno do",
+    "listError": "Konverzace se nepodařilo načíst.",
+    "errors": { "invalidDateRange": "Datum ukončení musí být pozdější než datum zahájení." },
+    "empty": "Zatím žádné konverzace.",
+    "types": {
+      "practice": "Cvičná relace",
+      "ai-mentor": "Lekce s AI mentorem"
+    },
+    "statuses": {
+      "active": "Probíhá",
+      "completed": "Dokončená",
+      "archived": "Archivovaná"
+    }
+  },
   "dashboardHome": {
     "title": "Váš dashboard",
     "subtitle": "Nejdůležitější informace a vzdělávací aktivity vždy po ruce.",
@@ -348,7 +396,8 @@
       "admin": "Admin",
       "contentCreator": "Tvůrce obsahu",
       "trainer": "Trainer",
-      "student": "Student"
+      "student": "Student",
+      "groupManager": "Správce skupin"
     },
     "languages": {
       "en": "Angličtina",
@@ -920,6 +969,7 @@
       "participants": "Účastníci",
       "viewerMic": "Mikrofon diváka",
       "viewerCamera": "Kamera diváka",
+      "editBlockedDuringSession": "Chcete-li toto nastavení změnit, nejprve ukončete aktuální relaci.",
       "scheduleTooltip": "Plánovaný čas školení",
       "timezoneTooltip": "Časové pásmo školení",
       "maxParticipantsTooltip": "Maximum účastníků",
@@ -1892,6 +1942,7 @@
         "course_delete": "Může mazat kurzy.",
         "course_enrollment": "Může spravovat zápisy do kurzů.",
         "course_statistics": "Může zobrazit analýzy a statistiky kurzů.",
+        "managed_group_results_read": "Může zobrazit výsledky účastníků v přiřazených spravovaných skupinách.",
         "course_export": "Může exportovat data kurzů.",
         "learning_mode_use": "Může používat funkce režimu učení.",
         "learning_progress_update": "Může aktualizovat studijní postup.",
@@ -1939,6 +1990,7 @@
         "live_training_start": "Může spouštět relace živého školení.",
         "live_training_end": "Může ukončovat relace živého školení.",
         "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
+        "ai_thread_read": "Může zobrazit všechny konverzace s AI a jejich uložená hodnocení.",
         "activity_log_read": "Může zobrazit protokoly aktivit."
       }
     },
@@ -2025,7 +2077,7 @@
   },
   "adminUserView": {
     "header": "Vytvořit nového uživatele",
-    "subHeader": "Chcete-li vytvořit nového uživatele, vyplňte údaje. Až budete hotovi, klikněte na Uložit.",
+    "managedGroupsTooltip": "Vybrané skupiny určují, které kurzy, pokrok, výsledky, dobu učení a certifikáty účastníků může tento uživatel jako správce skupiny zobrazit.",
     "editUserHeader": "Informace o uživateli",
     "tabs": {
       "information": "Informace o uživateli",
@@ -2038,7 +2090,8 @@
     "placeholder": {
       "role": "Vyberte roli",
       "groupId": "Vyberte skupinu",
-      "language": "Vyberte jazyk"
+      "language": "Vyberte jazyk",
+      "managedGroups": "Vyberte spravované skupiny"
     },
     "field": {
       "firstName": "Křestní jméno",
@@ -2047,7 +2100,8 @@
       "role": "Role",
       "language": "Jazyk",
       "status": "Postavení",
-      "groups": "Skupina"
+      "groups": "Skupina",
+      "managedGroups": "Spravované skupiny"
     },
     "toast": {
       "userCreatedSuccessfully": "Uživatel byl úspěšně vytvořen",
@@ -3212,11 +3266,12 @@
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
           "fillInTheBlanksSentenceTip": "Napište větu a vložte do ní slova.",
           "fillInTheBlanksWordTip": "Vytvořte a vložte slovo do věty.",
-          "leaveContentHeader": "Opravdu chcete opustit tento editor otázek?",
-          "leaveContentBody": "Smaže veškerý neuložený postup",
+          "leaveContentHeader": "Opustit editor lekce?",
+          "leaveContentBody": "Máte neuložené změny. Pokud nyní odejdete, budou ztraceny.",
+          "leaveContentCancel": "Pokračovat v úpravách",
+          "leaveContentDiscard": "Opustit bez uložení",
           "dropOrClick": "Přetáhněte obrázek sem nebo jej nahrajte kliknutím",
           "allowedFormats": "PNG, JPG nebo SVG",
-          "leaveContentBodyValidate": "Pokud chcete uložit změny, musíte nejprve ověřit formulář",
           "aiMentorInstructionsTooltip": "Popište, jak by se měl AI Mentor chovat během lekce. Zahrňte kontext, roli nebo scénář, který by AI měla následovat. To určuje, jak bude AI vést konverzaci.",
           "updateAiMentorAvatarDescription": "Nahrajte nový obrázek pro AI mentora nebo odeberte aktuální.",
           "updateAiMentorAvatar": "Aktualizujte avatar AI mentora",
@@ -3395,7 +3450,23 @@
         "progress": "Pokrok",
         "quizResults": "Výsledky kvízu",
         "aiMentorResults": "Výsledky AI Mentor",
-        "learningTime": "Čas na učení"
+        "learningTime": "Čas na učení",
+        "certificates": "Certifikáty"
+      },
+      "certificates": {
+        "learner": "Účastník",
+        "email": "E-mail",
+        "groups": "Skupiny",
+        "status": "Stav",
+        "expiry": "Platnost do",
+        "preview": "Náhled certifikátu",
+        "empty": "Nebyli nalezeni žádní zapsaní účastníci.",
+        "statuses": {
+          "not_earned": "Nezískán",
+          "active": "Aktivní",
+          "expired": "Vypršel",
+          "revoked": "Odvolán"
+        }
       },
       "field": {
         "studentName": "Student",
@@ -3613,6 +3684,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurz není dostupný",
+      "accessDescription": "Přihlaste se nebo si vytvořte účet a pokračujte ke kurzu.",
+      "goToLogin": "Přejít k přihlášení",
+      "goToCourseList": "Přejít na seznam kurzů",
+      "goToHome": "Přejít na domovskou stránku",
+      "notFoundTitle": "Kurz nebyl nalezen",
+      "notFoundDescription": "Tento kurz se nepodařilo najít."
+    },
     "other": {
       "cannotFindCourses": "Nenašli jsme žádné kurzy",
       "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později",
@@ -3705,6 +3785,7 @@
       "single": "Singl",
       "multiple": "Násobek",
       "fillInTheBlanks": "Vyplňte prázdná místa.",
+      "notAnswered": "Bez odpovědi",
       "selectQuestion": "vybrat otázku.",
       "trueOrFalseQuestion": "Správná nebo nepravdivá otázka.",
       "multipleChoice": "Otázka s výběrem z více možností.",
@@ -3896,6 +3977,11 @@
           "muted": "Ztlumeno",
           "mutedHint": "Váš mikrofon je ztlumený. Mentor vás neslyší.",
           "youSaid": "Řekl jsi",
+          "recovery": {
+            "failedTitle": "Hlasová relace byla odpojena",
+            "failedDescription": "Připojení se nepodařilo obnovit. Restartujte hlasovou relaci a pokračujte.",
+            "restart": "Restartovat relaci"
+          },
           "states": {
             "idle": {
               "title": "Připraveno",
@@ -4192,7 +4278,8 @@
       "admin": "Správce",
       "student": "Student",
       "content_creator": "Tvůrce obsahu",
-      "trainer": "Trenér"
+      "trainer": "Trenér",
+      "group_manager": "Správce skupin"
     },
     "switch": {
       "enabled": "Povoleno",
@@ -5522,6 +5609,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu.",
+      "invalidAiMentorConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci mentora. Zkuste kurz vygenerovat znovu.",
       "invalidAiJudgeConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci hodnocení. Zkuste kurz vygenerovat znovu."
     }
   },
@@ -5551,6 +5639,8 @@
       "invalidLessonType": "Přiřazení Živé školení lze přidat pouze k lekcím Živé školení.",
       "deleteAssignedToLesson": "Tento Živé školení je propojen s lekcí. Nejdříve smažte lekci a až potom Živé školení.",
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
+      "liveKitRoomNotAvailable": "Místnost LiveKit pro tuto relaci není dostupná.",
+      "activeSessionUpdateForbidden": "Toto živé školení nelze během probíhající relace měnit.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
     }

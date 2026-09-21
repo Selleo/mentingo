@@ -193,7 +193,7 @@ export class CourseController {
   ) {}
 
   @Get("all")
-  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
@@ -228,6 +228,7 @@ export class CourseController {
       sort,
       currentUserId: currentUser.userId,
       currentUserPermissions: currentUser.permissions,
+      currentUser,
       language,
     };
 
@@ -490,15 +491,9 @@ export class CourseController {
   async getCourse(
     @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] = [],
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<CommonShowCourse>> {
-    const course = await this.courseService.getCourse(
-      idOrSlug,
-      currentUserId,
-      currentUserPermissions,
-      language,
-    );
+    const course = await this.courseService.getCourse(idOrSlug, currentUser, language);
     return new BaseResponse(course);
   }
 
@@ -963,7 +958,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     response: baseResponse(getCourseStatisticsSchema),
     request: [
@@ -979,13 +974,13 @@ export class CourseController {
     await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = { groupId };
 
-    const data = await this.courseService.getCourseStatistics(courseId, query);
+    const data = await this.courseService.getCourseStatistics(courseId, query, currentUser);
 
     return new BaseResponse(data);
   }
 
   @Get(":courseId/statistics/learning-time")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     response: paginatedResponse(learningTimeStatisticsSchema),
     request: [
@@ -1010,13 +1005,17 @@ export class CourseController {
   ) {
     await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = { userId, groupId, page, perPage, sort, searchQuery };
-    const data = await this.learningTimeService.getLearningTimeStatistics(courseId, query);
+    const data = await this.learningTimeService.getLearningTimeStatistics(
+      courseId,
+      query,
+      currentUser,
+    );
 
     return new PaginatedResponse(data);
   }
 
   @Get(":courseId/statistics/learning-time-filter-options")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     response: baseResponse(learningTimeStatisticsFilterOptionsSchema),
     request: [
@@ -1030,13 +1029,14 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
-    const data = await this.learningTimeService.getFilterOptions(courseId, language);
+
+    const data = await this.learningTimeService.getFilterOptions(courseId, language, currentUser);
 
     return new BaseResponse(data);
   }
 
   @Get(":courseId/statistics/average-quiz-score")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -1058,13 +1058,14 @@ export class CourseController {
       courseId,
       query,
       language,
+      currentUser,
     );
 
     return new BaseResponse(averageQuizScores);
   }
 
   @Get(":courseId/statistics/students-progress")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -1102,13 +1103,13 @@ export class CourseController {
       groupId,
     };
 
-    const studentsProgression = await this.courseService.getStudentsProgress(query);
+    const studentsProgression = await this.courseService.getStudentsProgress(query, currentUser);
 
     return new PaginatedResponse(studentsProgression);
   }
 
   @Get(":courseId/statistics/students-quiz-results")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -1149,13 +1150,13 @@ export class CourseController {
       searchQuery,
     };
 
-    const studentQuizResults = await this.courseService.getStudentsQuizResults(query);
+    const studentQuizResults = await this.courseService.getStudentsQuizResults(query, currentUser);
 
     return new PaginatedResponse(studentQuizResults);
   }
 
   @Get(":courseId/statistics/students-ai-mentor-results")
-  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -1196,7 +1197,10 @@ export class CourseController {
       searchQuery,
     };
 
-    const studentQuizResults = await this.courseService.getStudentsAiMentorResults(query);
+    const studentQuizResults = await this.courseService.getStudentsAiMentorResults(
+      query,
+      currentUser,
+    );
 
     return new PaginatedResponse(studentQuizResults);
   }

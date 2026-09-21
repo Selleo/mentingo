@@ -11,9 +11,14 @@ import {
 
 import ModernCourseCard from "./ModernCourseCard";
 
-import type { GetAvailableCoursesResponse, GetStudentCoursesResponse } from "~/api/generated-api";
+import type {
+  GetAllCoursesResponse,
+  GetAvailableCoursesResponse,
+  GetStudentCoursesResponse,
+} from "~/api/generated-api";
 
 type CourseCarouselCourse =
+  | GetAllCoursesResponse["data"][number]
   | GetAvailableCoursesResponse["data"][number]
   | GetStudentCoursesResponse["data"][number];
 
@@ -202,9 +207,9 @@ const ModernCourseCarousel = ({
                   progressPercent={progressByCourseId[course.id]}
                   category={course.category}
                   className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
-                  enrolled={course.enrolled}
+                  enrolled={"enrolled" in course ? course.enrolled : false}
                   hasFreeChapters={course.hasFreeChapters}
-                  dueDate={course.dueDate ? new Date(course.dueDate) : null}
+                  dueDate={"dueDate" in course && course.dueDate ? new Date(course.dueDate) : null}
                 />
               </CarouselItem>
             ))}

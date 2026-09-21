@@ -1,4 +1,3 @@
-import { PERMISSIONS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -24,6 +23,7 @@ import { cn } from "~/lib/utils";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+import { COURSE_STATISTICS_VIEW_PERMISSIONS } from "../utils/courseStatisticsAccess";
 
 import LessonPreviewDialog from "./LessonPreviewDialog";
 
@@ -56,14 +56,16 @@ export function CourseStudentsAiMentorResultsTable({
 }: CourseStudentsAiMentorResultsTableProps) {
   const { t } = useTranslation();
 
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  const { hasAccess: canViewStatistics } = usePermissions({
+    required: COURSE_STATISTICS_VIEW_PERMISSIONS,
   });
 
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [previewDialogData, setPreviewDialogData] = useState<{
     lessonId: string;
     userId: string;
+    studentName: string;
+    studentAvatarUrl?: string | null;
   } | null>(null);
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -77,7 +79,7 @@ export function CourseStudentsAiMentorResultsTable({
 
   const { data: courseStudentsAiMentorResults, isFetching } = useCourseStudentsAiMentorResults({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canViewStatistics,
     query,
   });
 
@@ -157,6 +159,8 @@ export function CourseStudentsAiMentorResultsTable({
                 setPreviewDialogData({
                   lessonId: row.original.lessonId,
                   userId: row.original.studentId,
+                  studentName: row.original.studentName,
+                  studentAvatarUrl: row.original.studentAvatarUrl,
                 });
                 setIsPreviewDialogOpen(true);
               }}
@@ -251,6 +255,8 @@ export function CourseStudentsAiMentorResultsTable({
           course={course}
           lessonId={previewDialogData.lessonId}
           userId={previewDialogData.userId}
+          studentName={previewDialogData.studentName}
+          studentAvatarUrl={previewDialogData.studentAvatarUrl}
           isOpen={isPreviewDialogOpen}
           onClose={() => {
             setIsPreviewDialogOpen(false);

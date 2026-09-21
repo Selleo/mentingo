@@ -37,7 +37,7 @@ L&D teams can coordinate blended programs more reliably because scheduling, cour
 
 Administrators create a live training item with title, schedule, delivery type, hosts, location or online room behavior, participant visibility, and optional course links. Sessions can also be created from the calendar, which pre-fills scheduling context.
 
-Authorized editors can adjust key session details directly from the Live Training workspace. Valid inline changes, including maximum participant capacity, are saved when the editor leaves the field and are then reflected in the session data and connected calendar views.
+Authorized editors can adjust key session details directly from the Live Training workspace. Valid inline changes, including maximum participant capacity, are saved when the editor leaves the field and are then reflected in the session data and connected calendar views. Once a session is waiting to start or in progress, Mentingo locks Live Training configuration and participant/material management until the session is finished, while hosts retain the controls needed to run it.
 
 When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
 
@@ -52,6 +52,7 @@ Materials are separated into before-session and after-session resources. Privile
 - API endpoints live under `apps/api/src/live-training`.
 - Access is guarded by the Live Training feature flag plus permissions such as `PERMISSIONS.LIVE_TRAINING_READ`, create/update/delete, join, start, end, and statistics.
 - Live Training integrates with Calendar, course lessons, resource uploads, announcements/email, realtime session updates, and LiveKit online rooms.
+- An open session prevents changes to Live Training configuration, deletion, host assignments, and materials; the API enforces this rule even if a client bypasses the UI.
 - Online room participant layout is handled by the LiveKit-based meeting components in `apps/web/app/modules/LiveTraining/components/LiveTrainingMeeting`.
 
 ## Test Evidence

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
@@ -20,6 +21,7 @@ export const TextBlank = ({
   isQuizSubmitted,
   questionId,
 }: TextBlankProps) => {
+  const { t } = useTranslation();
   const { register } = useFormContext<QuizForm>();
   const { isQuizFeedbackRedacted } = useQuizContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -41,6 +43,7 @@ export const TextBlank = ({
   }, [isQuizSubmitted]);
 
   const isCorrectAnswer = studentAnswer?.isCorrect && studentAnswer.isStudentAnswer;
+  const isUnanswered = Boolean(isQuizSubmitted && !studentAnswer?.studentAnswer);
 
   const textBlankClasses = cn(
     "mx-1.5 w-20 align-middle bg-transparent border-b border-dashed border-b-accent-foreground text-accent-foreground focus:outline-none focus:ring-0",
@@ -50,8 +53,9 @@ export const TextBlank = ({
         !isQuizFeedbackRedacted && isCorrectAnswer && studentAnswer?.isStudentAnswer,
       "border-b-error-500 text-error-500":
         !isQuizFeedbackRedacted &&
-        typeof studentAnswer?.isStudentAnswer === "boolean" &&
-        !studentAnswer?.isStudentAnswer,
+        ((typeof studentAnswer?.isStudentAnswer === "boolean" && !studentAnswer.isStudentAnswer) ||
+          isUnanswered),
+      "w-28 italic placeholder:text-error-500": !isQuizFeedbackRedacted && isUnanswered,
     },
   );
 
@@ -62,6 +66,7 @@ export const TextBlank = ({
       key={index}
       type="text"
       data-testid={`text-blank-${formFieldId}`}
+      placeholder={isUnanswered ? t("studentLessonView.other.notAnswered") : undefined}
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}
       disabled={isDisabled}

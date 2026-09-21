@@ -1,4 +1,8 @@
-import { LIVE_TRAINING_DESCRIPTION_MAX_LENGTH, LIVE_TRAINING_TITLE_MAX_LENGTH } from "@repo/shared";
+import {
+  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
+  LIVE_TRAINING_SESSION_STATUSES,
+  LIVE_TRAINING_TITLE_MAX_LENGTH,
+} from "@repo/shared";
 import {
   CalendarClock,
   Mic,
@@ -112,6 +116,12 @@ export function LiveTrainingSessionStage({
     onEditFormStateCommit,
   });
   const canToggleDeliveryType = canEdit && canUseOnlineDelivery;
+  const hasOpenSession =
+    liveTraining.currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.WAITING ||
+    liveTraining.currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.ACTIVE;
+  const editTooltip = hasOpenSession
+    ? t("liveTrainingView.stage.editBlockedDuringSession")
+    : undefined;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -250,9 +260,10 @@ export function LiveTrainingSessionStage({
                     canEdit={canToggleDeliveryType}
                     value={t(`liveTrainingView.deliveryType.${displayedDeliveryType}`)}
                     tooltip={
-                      canUseOnlineDelivery
+                      editTooltip ??
+                      (canUseOnlineDelivery
                         ? t("calendarView.create.tooltip.deliveryType")
-                        : t("calendarView.create.liveKitRequired")
+                        : t("calendarView.create.liveKitRequired"))
                     }
                   />
                 </button>
@@ -278,7 +289,7 @@ export function LiveTrainingSessionStage({
                             displayedAllDay,
                             language,
                           )}
-                          tooltip={t("liveTrainingView.stage.scheduleTooltip")}
+                          tooltip={editTooltip ?? t("liveTrainingView.stage.scheduleTooltip")}
                         />
                       </button>
                     </PopoverTrigger>
@@ -346,7 +357,7 @@ export function LiveTrainingSessionStage({
                       align="center"
                       className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {t("calendarView.create.tooltip.maxParticipants")}
+                      {editTooltip ?? t("calendarView.create.tooltip.maxParticipants")}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   </Tooltip>
@@ -382,7 +393,7 @@ export function LiveTrainingSessionStage({
                       align="center"
                       className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {t("calendarView.create.tooltip.location")}
+                      {editTooltip ?? t("calendarView.create.tooltip.location")}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   </Tooltip>
@@ -413,7 +424,7 @@ export function LiveTrainingSessionStage({
                             : t("liveTrainingView.boolean.no")
                         }
                         variant={editFormState.microphoneEnabled ? "default" : "danger"}
-                        tooltip={t("liveTrainingView.stage.viewerMic")}
+                        tooltip={editTooltip ?? t("liveTrainingView.stage.viewerMic")}
                       />
                     </button>
                     <button
@@ -437,7 +448,7 @@ export function LiveTrainingSessionStage({
                             : t("liveTrainingView.boolean.no")
                         }
                         variant={editFormState.cameraEnabled ? "default" : "danger"}
-                        tooltip={t("liveTrainingView.stage.viewerCamera")}
+                        tooltip={editTooltip ?? t("liveTrainingView.stage.viewerCamera")}
                       />
                     </button>
                   </>

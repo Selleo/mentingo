@@ -64,6 +64,12 @@ describe("CourseCategoryEditor", () => {
     expect(screen.queryByRole("link", { name: "Manage categories" })).not.toBeInTheDocument();
   });
 
+  it("exposes the category control as disabled when editing is not allowed", () => {
+    renderEditor({ ...defaultProps, canEdit: false, isEditing: false });
+
+    expect(screen.getByTestId(COURSE_SETTINGS_HANDLES.CATEGORY_SELECT)).toBeDisabled();
+  });
+
   it("styles the missing-category placeholder like the missing course title", () => {
     renderEditor({
       ...defaultProps,

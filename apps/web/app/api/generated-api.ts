@@ -215,6 +215,7 @@ export interface CurrentUserResponse {
       | "category.manage"
       | "group.read"
       | "group.manage"
+      | "managed_group_results.read"
       | "learning_path.read"
       | "learning_path.create"
       | "learning_path.update"
@@ -261,6 +262,7 @@ export interface CurrentUserResponse {
       | "file.delete"
       | "resource_library.manage"
       | "ai.use"
+      | "ai_thread.read"
       | "announcement.read"
       | "announcement.create"
       | "announcement.delete"
@@ -1659,6 +1661,11 @@ export interface GetUserByIdResponse {
       id: string;
       name: string;
     }[];
+    managedGroups?: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
   };
 }
 
@@ -1680,6 +1687,7 @@ export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1720,6 +1728,7 @@ export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
   groups?: string[] | null;
+  managedGroupIds?: string[];
   /** @format email */
   email?: string;
   roleSlugs?: string[];
@@ -1836,6 +1845,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   roleSlugs: string[];
+  managedGroupIds?: string[];
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
 
@@ -2472,6 +2482,7 @@ export interface GetCourseResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     dueDate: string | null;
+    isManagerPreview?: boolean;
   };
 }
 
@@ -2780,7 +2791,7 @@ export interface GetCourseSettingsResponse {
     videoCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
-    /** @default null */
+    /** @default "#000000" */
     certificateFontColor: string | null;
     /** @default null */
     certificateValidity:
@@ -2937,6 +2948,7 @@ export interface GetCourseStudentsProgressResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     groups:
       | {
@@ -2961,6 +2973,7 @@ export interface GetCourseStudentsQuizResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -2982,6 +2995,7 @@ export interface GetCourseStudentsAiMentorResultsResponse {
     /** @format uuid */
     studentId: string;
     studentName: string;
+    studentEmail: string | null;
     studentAvatarUrl: string | null;
     /** @format uuid */
     lessonId: string;
@@ -7417,6 +7431,30 @@ export interface MarkLessonAsCompletedResponse {
   };
 }
 
+export interface GetCourseCertificateRowsResponse {
+  data: {
+    data: {
+      certificateId: string | null;
+      learnerName: string;
+      learnerEmail: string;
+      groups: string[];
+      status: "not_earned" | "active" | "expired" | "revoked";
+      issuedAt: string | null;
+      expiresAt: string | null;
+      courseTitle: string;
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+      previewAllowed: boolean;
+    }[];
+    pagination: {
+      totalItems: number;
+      page: number;
+      perPage: number;
+    };
+    appliedFilters?: object;
+  };
+}
+
 export interface GetAllCertificatesResponse {
   data: {
     /** @format uuid */
@@ -7837,6 +7875,100 @@ export interface JudgeThreadResponse {
       learnerSafeFeedback: string;
     }[];
   };
+}
+
+export interface GetAdminAiThreadSummariesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "practice" | "ai-mentor";
+    practiceSessionId: string | null;
+    aiMentorLessonId: string | null;
+    lessonId: string | null;
+    courseId: string | null;
+    courseTitle: string | null;
+    title: string;
+    openingPreview: string | null;
+    owner: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+    };
+    status: "active" | "completed" | "archived";
+    language: string;
+    createdAt: string;
+    lastActivityAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAdminAiThreadDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    type: "practice" | "ai-mentor";
+    practiceSessionId: string | null;
+    aiMentorLessonId: string | null;
+    lessonId: string | null;
+    courseId: string | null;
+    courseTitle: string | null;
+    title: string;
+    openingPreview: string | null;
+    owner: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+    };
+    status: "active" | "completed" | "archived";
+    language: string;
+    createdAt: string;
+    lastActivityAt: string;
+  } & {
+    evaluation: {
+      passed: boolean;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      criteria: {
+        criterionId: string | null;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        blockingErrorId: string | null;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
+    } | null;
+  };
+}
+
+export interface GetAdminAiThreadMessagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    createdAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetAllAssignedDocumentsForLessonResponse {
@@ -9856,6 +9988,78 @@ export interface UpdateTenantResponse {
     isManaging: boolean;
     createdAt: string;
     updatedAt: string;
+  };
+}
+
+export interface UpdateTenantApiKeysBody {
+  name:
+    | "MICROSOFT_CLIENT_ID"
+    | "MICROSOFT_CLIENT_SECRET"
+    | "MICROSOFT_CALENDAR_CLIENT_ID"
+    | "MICROSOFT_CALENDAR_CLIENT_SECRET"
+    | "MICROSOFT_OAUTH_ENABLED"
+    | "OPENAI_API_KEY"
+    | "BUNNY_STREAM_API_KEY"
+    | "BUNNY_STREAM_READ_ONLY_API_KEY"
+    | "BUNNY_STREAM_LIBRARY_ID"
+    | "BUNNY_STREAM_CDN_URL"
+    | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
+    | "GOOGLE_CLIENT_ID"
+    | "GOOGLE_CLIENT_SECRET"
+    | "GOOGLE_OAUTH_ENABLED"
+    | "VITE_GOOGLE_OAUTH_ENABLED"
+    | "VITE_MICROSOFT_OAUTH_ENABLED"
+    | "STRIPE_WEBHOOK_SECRET"
+    | "STRIPE_SECRET_KEY"
+    | "VITE_STRIPE_PUBLISHABLE_KEY"
+    | "SLACK_CLIENT_ID"
+    | "SLACK_CLIENT_SECRET"
+    | "SLACK_OAUTH_ENABLED"
+    | "VITE_SLACK_OAUTH_ENABLED"
+    | "LUMA_API_KEY"
+    | "LIVEKIT_URL"
+    | "LIVEKIT_API_KEY"
+    | "LIVEKIT_API_SECRET";
+  /**
+   * Tenant environment value. Stored encrypted; never returned in responses.
+   * @maxLength 4096
+   */
+  value: string;
+}
+
+export interface UpdateTenantApiKeysResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    updatedKeys: (
+      | "MICROSOFT_CLIENT_ID"
+      | "MICROSOFT_CLIENT_SECRET"
+      | "MICROSOFT_CALENDAR_CLIENT_ID"
+      | "MICROSOFT_CALENDAR_CLIENT_SECRET"
+      | "MICROSOFT_OAUTH_ENABLED"
+      | "OPENAI_API_KEY"
+      | "BUNNY_STREAM_API_KEY"
+      | "BUNNY_STREAM_READ_ONLY_API_KEY"
+      | "BUNNY_STREAM_LIBRARY_ID"
+      | "BUNNY_STREAM_CDN_URL"
+      | "BUNNY_STREAM_TOKEN_SIGNING_KEY"
+      | "GOOGLE_CLIENT_ID"
+      | "GOOGLE_CLIENT_SECRET"
+      | "GOOGLE_OAUTH_ENABLED"
+      | "VITE_GOOGLE_OAUTH_ENABLED"
+      | "VITE_MICROSOFT_OAUTH_ENABLED"
+      | "STRIPE_WEBHOOK_SECRET"
+      | "STRIPE_SECRET_KEY"
+      | "VITE_STRIPE_PUBLISHABLE_KEY"
+      | "SLACK_CLIENT_ID"
+      | "SLACK_CLIENT_SECRET"
+      | "SLACK_OAUTH_ENABLED"
+      | "VITE_SLACK_OAUTH_ENABLED"
+      | "LUMA_API_KEY"
+      | "LIVEKIT_URL"
+      | "LIVEKIT_API_KEY"
+      | "LIVEKIT_API_SECRET"
+    )[];
   };
 }
 
@@ -15574,6 +15778,35 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CertificatesControllerGetCourseCertificateRows
+     * @request GET:/api/certificates/course/{courseId}
+     */
+    certificatesControllerGetCourseCertificateRows: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        groupId?: string;
+        search?: string;
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseCertificateRowsResponse, any>({
+        path: `/api/certificates/course/${courseId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CertificatesControllerGetAllCertificates
      * @request GET:/api/certificates/all
      */
@@ -15988,6 +16221,97 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/ai/retake/${lessonId}`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadSummaries
+     * @request GET:/api/admin/ai-threads
+     */
+    adminAiThreadsControllerGetAdminAiThreadSummaries: (
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @format uuid */
+        userId?: string;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format date-time */
+        from?: string;
+        /** @format date-time */
+        to?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        type?: "practice" | "ai-mentor";
+        status?: "active" | "completed" | "archived";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadSummariesResponse, any>({
+        path: `/api/admin/ai-threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadDetails
+     * @request GET:/api/admin/ai-threads/{threadId}
+     */
+    adminAiThreadsControllerGetAdminAiThreadDetails: (
+      threadId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadDetailsResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AdminAiThreadsControllerGetAdminAiThreadMessages
+     * @request GET:/api/admin/ai-threads/{threadId}/messages
+     */
+    adminAiThreadsControllerGetAdminAiThreadMessages: (
+      threadId: string,
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAdminAiThreadMessagesResponse, any>({
+        path: `/api/admin/ai-threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
 
@@ -17870,6 +18194,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        courseId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -18198,6 +18524,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, void>({
         path: `/api/integration/tenants/${tenantId}`,
         method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * @description Sets or replaces a supported tenant environment value by name. Uses the same supported names as the environment settings API. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. Values are encrypted and never returned. The tenant in the path is authoritative, regardless of X-Tenant-Id.
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateTenantApiKeys
+     * @summary Update a tenant environment value
+     * @request PATCH:/api/integration/tenants/{tenantId}/api-keys
+     */
+    integrationControllerUpdateTenantApiKeys: (
+      tenantId: string,
+      data: UpdateTenantApiKeysBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantApiKeysResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/api-keys`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

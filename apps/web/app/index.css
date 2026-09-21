@@ -416,6 +416,24 @@ html {
   }
 }
 
+@keyframes transcript-finalized-text {
+  0% {
+    color: transparent;
+    background-position: 200% 0;
+    -webkit-text-fill-color: transparent;
+  }
+  85% {
+    color: transparent;
+    background-position: -200% 0;
+    -webkit-text-fill-color: transparent;
+  }
+  100% {
+    color: var(--neutral-900);
+    background-position: -200% 0;
+    -webkit-text-fill-color: var(--neutral-900);
+  }
+}
+
 .loading-text-shimmer {
   color: var(--primary-700);
   background-image: linear-gradient(
@@ -434,10 +452,35 @@ html {
   animation: loading-text-shimmer 3.2s ease-in-out infinite;
 }
 
+.transcript-finalized-text {
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    var(--primary-700) 0%,
+    var(--primary-700) 42%,
+    var(--primary-300) 50%,
+    var(--primary-700) 58%,
+    var(--primary-700) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 200% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: transcript-finalized-text 3.2s ease-out 1 forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loading-text-shimmer {
     background-image: none;
     color: var(--primary-700);
+    animation: none;
+  }
+
+  .transcript-finalized-text {
+    background-image: none;
+    color: var(--neutral-900);
+    -webkit-text-fill-color: var(--neutral-900);
     animation: none;
   }
 }

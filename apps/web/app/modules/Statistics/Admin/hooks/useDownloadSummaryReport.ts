@@ -17,12 +17,12 @@ export function useDownloadSummaryReport() {
   const { language } = useLanguageStore();
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const downloadReport = async () => {
+  const downloadReport = async (courseId?: string) => {
     setIsDownloading(true);
 
     try {
       const response = (await ApiClient.api.reportControllerDownloadSummaryReport(
-        { language },
+        { language, courseId },
         { format: "blob" },
       )) as unknown as AxiosResponse<Blob>;
 

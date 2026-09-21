@@ -47,6 +47,7 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import {
   userHasPermissionCondition as buildUserHasPermissionCondition,
   userLacksAnyPermissionsCondition as buildUserLacksAnyPermissionsCondition,
@@ -78,6 +79,7 @@ import {
   createTokens,
   credentials,
   groups,
+  groupManagerGroups,
   groupUsers,
   permissionRoles,
   permissionRoleRuleSets,
@@ -90,6 +92,7 @@ import {
   tenants,
   userOnboarding,
   studentCourses,
+  courses,
   coursesSummaryStats,
 } from "../storage/schema";
 
@@ -113,6 +116,7 @@ import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type { LocalizedGroup } from "src/group/group.types";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 import type { AdminOverdueCourseNotificationRecipient } from "src/user/types/admin-overdue-course-notification-recipient.type";
@@ -124,13 +128,15 @@ export class UserService {
     [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
     [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
+    [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "Group Manager",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
   private readonly SYSTEM_ROLE_PRIORITY: Record<string, number> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: 0,
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: 1,
     [SYSTEM_ROLE_SLUGS.TRAINER]: 2,
-    [SYSTEM_ROLE_SLUGS.STUDENT]: 3,
+    [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: 3,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: 4,
   };
 
   constructor(
@@ -169,9 +175,7 @@ export class UserService {
         >`COALESCE(json_agg(DISTINCT ${permissionRoles.slug}) FILTER (WHERE ${permissionRoles.slug} IS NOT NULL), '[]')`.as(
           "roleSlugs",
         ),
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
@@ -252,7 +256,8 @@ export class UserService {
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.ADMIN} THEN 0
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.TRAINER} THEN 2
-            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 3
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.GROUP_MANAGER} THEN 3
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 4
             ELSE 999
           END
         `,
@@ -262,19 +267,26 @@ export class UserService {
 
   public async getUserById(id: UUIDType, db?: DatabasePg, language?: SupportedLanguages) {
     const dbInstance = db ?? this.db;
+    const managedGroup = alias(groups, "managed_group");
 
     const [user] = await dbInstance
       .select({
         ...getTableColumns(users),
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+        groups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
           language,
           groups,
         )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
+        managedGroups: sql<LocalizedGroup[]>`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+          managedGroup.id
+        }, 'name', ${this.localizationService.getLocalizedSqlField(
+          managedGroup.name,
+          language,
+          groups,
+          "managed_group",
+        )})) FILTER (WHERE ${managedGroup.id} IS NOT NULL), '[]')`.as("managedGroups"),
         requiresPasswordChange:
           sql<boolean>`COALESCE(bool_or(${credentials.requiresPasswordChange}), false)`.as(
             "requiresPasswordChange",
@@ -284,6 +296,8 @@ export class UserService {
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .leftJoin(groupManagerGroups, eq(users.id, groupManagerGroups.managerUserId))
+      .leftJoin(managedGroup, eq(groupManagerGroups.groupId, managedGroup.id))
       .where(and(eq(users.id, id), isNull(users.deletedAt)))
       .groupBy(users.id);
 
@@ -315,6 +329,7 @@ export class UserService {
     userId: UUIDType,
     currentUser: CurrentUserType | null,
   ): Promise<UserDetailsResponse> {
+    let canViewContactDetails = false;
     const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
         id: users.id,
@@ -335,12 +350,35 @@ export class UserService {
     if (currentUser) {
       const canViewSelf = userId === currentUser.userId;
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+      const isGroupManager = hasPermission(
+        currentUser.permissions,
+        PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+      );
       const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
+      const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
       const targetHasPublicProfile =
         targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN) ||
         targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
 
-      const canView = canViewSelf || canManageUsers || targetHasPublicProfile;
+      canViewContactDetails = canViewSelf || canManageUsers || targetIsAdmin;
+
+      const managerCourseScope = isGroupManager
+        ? getGroupManagerCourseScopeCondition(currentUser, courses.id, [])
+        : undefined;
+
+      const [managedCourseByAuthor] = managerCourseScope
+        ? await this.db
+            .select({ id: courses.id })
+            .from(courses)
+            .where(and(eq(courses.authorId, userId), managerCourseScope))
+            .limit(1)
+        : [];
+
+      const canView =
+        canViewSelf ||
+        canManageUsers ||
+        (!isGroupManager && targetHasPublicProfile) ||
+        Boolean(managedCourseByAuthor);
 
       if (!canView) throw new ForbiddenException("common.toast.noAccess");
     }
@@ -351,6 +389,8 @@ export class UserService {
 
     return {
       ...user,
+      contactEmail: canViewContactDetails ? user.contactEmail : null,
+      contactPhone: canViewContactDetails ? user.contactPhone : null,
       profilePictureUrl,
     };
   }
@@ -367,15 +407,29 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    const shouldRevokeSession =
-      data.roleSlugs && (await this.haveRoleAssignmentsChanged(id, data.roleSlugs));
+    const currentAccess = await this.getUserAccess(id);
+
+    const nextRoleSlugs = data.roleSlugs ?? currentAccess.roleSlugs;
+
+    const currentManagedGroupIds = await this.getManagedGroupIds(id);
+
+    const nextManagedGroupIds = nextRoleSlugs.includes(SYSTEM_ROLE_SLUGS.GROUP_MANAGER)
+      ? (data.managedGroupIds ?? currentManagedGroupIds)
+      : [];
+
+    const rolesChanged = Boolean(
+      data.roleSlugs && (await this.haveRoleAssignmentsChanged(id, data.roleSlugs)),
+    );
+
+    const managedGroupsChanged = !this.haveSameIds(currentManagedGroupIds, nextManagedGroupIds);
+    const shouldRevokeSession = rolesChanged || managedGroupsChanged;
     const shouldRefreshCourseAuthorMetadata =
       data.firstName !== undefined || data.lastName !== undefined;
 
     const updatedUser = await this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
-      const { groups, roleSlugs, ...userData } = data;
+      const { groups, managedGroupIds: _managedGroupIds, roleSlugs, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
@@ -394,6 +448,15 @@ export class UserService {
 
       if (roleSlugs !== undefined) {
         await this.replaceUserRoleAssignments(id, existingUser.users.tenantId, roleSlugs, trx);
+      }
+
+      if (data.managedGroupIds !== undefined || managedGroupsChanged) {
+        await this.replaceManagedGroupAssignments(
+          id,
+          existingUser.users.tenantId,
+          nextManagedGroupIds,
+          trx,
+        );
       }
 
       const updatedSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
@@ -804,7 +867,7 @@ export class UserService {
     data: CreateUserBody,
     context: CreateUserContext,
   ): Promise<CreateUserCoreResult> {
-    const { roleSlugs, ...userData } = data;
+    const { roleSlugs, managedGroupIds = [], ...userData } = data;
     const [createdUser] = await trx.insert(users).values(userData).returning();
 
     if (!createdUser) throw new InternalServerErrorException("common.toast.somethingWentWrong");
@@ -813,6 +876,17 @@ export class UserService {
       [{ userId: createdUser.id, tenantId: createdUser.tenantId, roleSlugs }],
       trx,
     );
+
+    const permissions = await this.getPermissionsForRoleSlugs(roleSlugs, createdUser.tenantId, trx);
+
+    if (hasPermission(permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)) {
+      await this.replaceManagedGroupAssignments(
+        createdUser.id,
+        createdUser.tenantId,
+        managedGroupIds,
+        trx,
+      );
+    }
 
     await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
@@ -1038,17 +1112,19 @@ export class UserService {
     if (!user) return null;
 
     const userGroups = await this.getUserGroupsForSnapshot(userId, dbInstance);
+    const managedGroups = await this.getManagedGroupsForSnapshot(userId, dbInstance);
 
     return {
       ...user,
       groups: userGroups,
+      managedGroups,
     };
   }
 
   private async getUserGroupsForSnapshot(
     userId: UUIDType,
     dbInstance: DatabasePg = this.db,
-  ): Promise<Array<{ id: UUIDType; name: string | null }>> {
+  ): Promise<LocalizedGroup[]> {
     const userGroups = await dbInstance
       .select({
         id: groups.id,
@@ -1059,7 +1135,73 @@ export class UserService {
       .where(eq(groupUsers.userId, userId))
       .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)));
 
-    return userGroups.map(({ id, name }) => ({ id, name }));
+    return userGroups.map(({ id, name }) => ({ id, name: name ?? "" }));
+  }
+
+  private async getManagedGroupsForSnapshot(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LocalizedGroup[]> {
+    return dbInstance
+      .select({
+        id: groups.id,
+        name: this.localizationService.getLocalizedSqlField(groups.name, undefined, groups),
+      })
+      .from(groupManagerGroups)
+      .innerJoin(groups, eq(groupManagerGroups.groupId, groups.id))
+      .where(eq(groupManagerGroups.managerUserId, userId))
+      .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)))
+      .then((managedGroups) => managedGroups.map(({ id, name }) => ({ id, name: name ?? "" })));
+  }
+
+  private async getManagedGroupIds(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<UUIDType[]> {
+    const assignments = await dbInstance
+      .select({ groupId: groupManagerGroups.groupId })
+      .from(groupManagerGroups)
+      .where(eq(groupManagerGroups.managerUserId, userId));
+
+    return assignments.map(({ groupId }) => groupId);
+  }
+
+  private haveSameIds(currentIds: UUIDType[], nextIds: UUIDType[]): boolean {
+    const current = new Set(currentIds);
+    const next = new Set(nextIds);
+    return current.size === next.size && [...current].every((id) => next.has(id));
+  }
+
+  private async replaceManagedGroupAssignments(
+    userId: UUIDType,
+    tenantId: UUIDType,
+    groupIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    const uniqueGroupIds = [...new Set(groupIds)];
+
+    if (uniqueGroupIds.length) {
+      const validGroups = await dbInstance
+        .select({ id: groups.id })
+        .from(groups)
+        .where(and(eq(groups.tenantId, tenantId), inArray(groups.id, uniqueGroupIds)));
+
+      if (validGroups.length !== uniqueGroupIds.length) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+    }
+
+    await dbInstance.delete(groupManagerGroups).where(eq(groupManagerGroups.managerUserId, userId));
+
+    if (!uniqueGroupIds.length) return;
+
+    await dbInstance.insert(groupManagerGroups).values(
+      uniqueGroupIds.map((groupId) => ({
+        managerUserId: userId,
+        groupId,
+        tenantId,
+      })),
+    );
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
@@ -1274,10 +1416,25 @@ export class UserService {
     );
 
     await this.db.transaction(async (trx) => {
+      const permissions = await this.getPermissionsForRoleSlugs(
+        data.roleSlugs,
+        usersToUpdate[0].tenantId,
+        trx,
+      );
+
+      const canReadManagedGroupResults = hasPermission(
+        permissions,
+        PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+      );
+
       await Promise.all(
-        usersToUpdate.map((user) =>
-          this.replaceUserRoleAssignments(user.id, user.tenantId, data.roleSlugs, trx),
-        ),
+        usersToUpdate.map(async (user) => {
+          await this.replaceUserRoleAssignments(user.id, user.tenantId, data.roleSlugs, trx);
+
+          if (!canReadManagedGroupResults) {
+            await this.replaceManagedGroupAssignments(user.id, user.tenantId, [], trx);
+          }
+        }),
       );
     });
 

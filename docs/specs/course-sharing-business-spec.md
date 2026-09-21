@@ -4,7 +4,7 @@
 
 Course sharing lets a managing organization distribute one centrally maintained course to other organizations without rebuilding or manually updating the training in every tenant. HR and L&D teams can keep one authoritative curriculum while each recipient organization controls when its local copy is published and who is enrolled.
 
-The managing-tenant administrator selects recipient organizations from the course editor and shares the course. Mentingo creates a read-only draft copy in each selected organization, then automatically synchronizes later content changes from the source. Recipient administrators can publish the shared course and manage enrollment without gaining access to alter centrally owned content.
+The managing-tenant administrator selects recipient organizations from the course editor and shares the course. Mentingo creates a read-only draft copy in each selected organization, then automatically synchronizes later content changes from the source, including learner-facing course metadata and the “what you’ll learn” section. Recipient administrators can publish the shared course, manage enrollment, and configure certificate settings without gaining access to alter centrally owned content.
 
 ## Who Uses It
 
@@ -32,7 +32,7 @@ Central course ownership reduces duplicated authoring and makes training updates
 
 A managing-tenant administrator opens a course's sharing area, selects one or more active organizations, and starts sharing. Inactive organizations are omitted from the selector and cannot be supplied directly through the API. Mentingo creates a separate draft course for each recipient and copies the supported curriculum and resources in the background. The source becomes the centrally managed master, while recipient copies display a shared-course notice and restrict editing to the local controls that remain available, including status and enrollment.
 
-When the source course or its curriculum changes, Mentingo queues synchronization for every active sharing link. The recipient copy receives the latest centrally managed content but keeps its existing draft or published status. A later sync therefore updates what learners see without making a locally published course unavailable.
+When the source course or its curriculum changes, Mentingo queues synchronization for every active sharing link. The recipient copy receives the latest centrally managed content and learner-facing metadata but keeps its existing draft or published status. A later sync therefore updates what learners see without making a locally published course unavailable. In the recipient’s course overview, centrally owned metadata such as the title, category, description, cover, trailer, and learning outcomes is presented as read-only; local administrators retain controls for rollout, enrollment, and certificate settings.
 
 ## Key Technical Context
 
@@ -46,4 +46,4 @@ When the source course or its curriculum changes, Mentingo queues synchronizatio
 
 API E2E coverage verifies managing-tenant authorization, active-recipient selection, rejection of inactive recipients, initial draft creation, read-only exported content, localized course/category copying, repeated sharing behavior, resource and video handling, category synchronization, and source deletion propagation. Regression coverage also verifies that after a recipient publishes its shared copy, a later source update synchronizes content without changing that published status.
 
-There is no dedicated Playwright E2E flow for tenant-to-tenant course sharing; the UI workflow and local controls are evidenced by the course editor implementation and translations rather than browser-level coverage.
+Frontend Playwright coverage verifies that recipient administrators see shared-course metadata and learning outcomes as read-only, cannot open the content editor or add new languages, and retain only the allowed settings tabs.

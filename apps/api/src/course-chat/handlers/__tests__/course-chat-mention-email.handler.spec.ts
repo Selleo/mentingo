@@ -76,6 +76,7 @@ describe("CourseChatMentionEmailHandler", () => {
           es: 'En el curso "Seguridad"',
           fr: "Dans le cours « Sécurité »",
         },
+        sourceId: courseId,
         usersToNotify: [mentionedUserId],
       }),
     );

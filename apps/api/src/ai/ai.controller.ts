@@ -104,7 +104,7 @@ export class AiController {
   }
 
   @Get("thread/messages")
-  @RequirePermission(PERMISSIONS.AI_USE)
+  @RequirePermission(PERMISSIONS.AI_USE, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [{ type: "query" as const, name: "thread", schema: UUIDSchema }],
     response: baseResponse(Type.Array(responseThreadMessageSchema)),

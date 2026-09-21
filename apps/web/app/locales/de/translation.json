@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sitzung",
+    "context": "Kontext",
+    "activity": "Aktivität",
+    "filters": "Filter",
+    "details": "Details",
+    "selectConversation": "Gespräch auswählen",
+    "pageSize": "Gespräche pro Seite",
+    "conversation": "Gespräch",
+    "source": "Kurs",
+    "view": "Gespräch ansehen",
+    "title": "KI-Gespräche",
+    "description": "Übungssitzungen und KI-Mentor-Lektionen ansehen.",
+    "owner": "Benutzer",
+    "loading": "Wird geladen…",
+    "retry": "Erneut versuchen",
+    "noMatches": "Keine Gespräche entsprechen diesen Filtern.",
+    "loadMore": "Mehr laden",
+    "back": "Zurück zu Gesprächen",
+    "readOnly": "Schreibgeschütztes Gespräch",
+    "unavailable": "Dieses Gespräch ist nicht verfügbar.",
+    "untitled": "Gespräch ohne Titel",
+    "started": "Beginn",
+    "lastActivity": "Letzte Aktivität",
+    "language": "Sprache",
+    "result": "Bewertung ansehen",
+    "emptyTranscript": "Dieses Gespräch enthält noch keine Nachrichten.",
+    "messagesError": "Nachrichten konnten nicht geladen werden.",
+    "search": "Gesprächstitel suchen",
+    "type": "Typ",
+    "allTypes": "Alle Typen",
+    "status": "Status",
+    "allStatuses": "Alle Status",
+    "from": "Begonnen ab",
+    "to": "Begonnen bis",
+    "listError": "Gespräche konnten nicht geladen werden.",
+    "errors": { "invalidDateRange": "Das Enddatum muss nach dem Startdatum liegen." },
+    "empty": "Noch keine Gespräche.",
+    "types": {
+      "practice": "Übungssitzung",
+      "ai-mentor": "KI-Mentor-Lektion"
+    },
+    "statuses": {
+      "active": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "archived": "Archiviert"
+    }
+  },
   "dashboardHome": {
     "title": "Ihr Dashboard",
     "subtitle": "Die wichtigsten Lerninformationen und Aktionen immer griffbereit.",
@@ -342,7 +390,8 @@
       "admin": "Admin",
       "contentCreator": "Inhaltsersteller",
       "trainer": "Trainer",
-      "student": "Student"
+      "student": "Student",
+      "groupManager": "Gruppenmanager"
     },
     "languages": {
       "en": "Englisch",
@@ -915,6 +964,7 @@
       "participants": "Teilnehmer",
       "viewerMic": "Zuschauermikrofon",
       "viewerCamera": "Zuschauerkamera",
+      "editBlockedDuringSession": "Um diese Einstellung zu ändern, beende zuerst die aktuelle Sitzung.",
       "scheduleTooltip": "Geplante Schulungszeit",
       "timezoneTooltip": "Schulungszeitzone",
       "maxParticipantsTooltip": "Maximale Teilnehmerzahl",
@@ -1887,6 +1937,7 @@
         "course_delete": "Kurse löschen.",
         "course_enrollment": "Kursanmeldungen verwalten.",
         "course_statistics": "Kursanalysen und -statistiken anzeigen.",
+        "managed_group_results_read": "Lernergebnisse für zugewiesene verwaltete Gruppen anzeigen.",
         "course_export": "Kursdaten exportieren.",
         "learning_mode_use": "Funktionen des Lernmodus verwenden.",
         "learning_progress_update": "Lernfortschritt aktualisieren.",
@@ -1934,6 +1985,7 @@
         "live_training_start": "Live-Schulungssitzungen starten.",
         "live_training_end": "Live-Schulungssitzungen beenden.",
         "live_training_statistics": "Anwesenheit und Statistiken für Live-Schulungen anzeigen.",
+        "ai_thread_read": "Alle KI-Unterhaltungen und ihre gespeicherten Bewertungen anzeigen.",
         "activity_log_read": "Aktivitätsprotokolle anzeigen."
       }
     },
@@ -2020,7 +2072,7 @@
   },
   "adminUserView": {
     "header": "Neuen Benutzer erstellen",
-    "subHeader": "Geben Sie die Details ein, um einen neuen Benutzer zu erstellen. Klicken Sie auf Speichern, wenn Sie fertig sind.",
+    "managedGroupsTooltip": "Die ausgewählten Gruppen bestimmen, welche Kurse, Fortschritte, Ergebnisse, Lernzeiten und Zertifikate der Lernenden dieser Benutzer als Gruppenmanager einsehen kann.",
     "editUserHeader": "Benutzerinformationen",
     "tabs": {
       "information": "Benutzerinformationen",
@@ -2033,7 +2085,8 @@
     "placeholder": {
       "role": "Wählen Sie eine Rolle aus",
       "groupId": "Wählen Sie eine Gruppe aus",
-      "language": "Wählen Sie eine Sprache aus"
+      "language": "Wählen Sie eine Sprache aus",
+      "managedGroups": "Verwaltete Gruppen auswählen"
     },
     "field": {
       "firstName": "Vorname",
@@ -2042,7 +2095,8 @@
       "role": "Rolle",
       "language": "Sprache",
       "status": "Status",
-      "groups": "Gruppe"
+      "groups": "Gruppe",
+      "managedGroups": "Verwaltete Gruppen"
     },
     "toast": {
       "userCreatedSuccessfully": "Benutzer erfolgreich erstellt",
@@ -3206,11 +3260,12 @@
           "embedLessonDescription": "Externe Ressource (z. B. Google Form, Canva-Präsentation oder YouTube-Livestream).",
           "fillInTheBlanksSentenceTip": "Schreiben Sie einen Satz und fügen Sie Wörter ein.",
           "fillInTheBlanksWordTip": "Bilden Sie das Wort und fügen Sie es in einen Satz ein.",
-          "leaveContentHeader": "Sind Sie sicher, dass Sie diesen Frageneditor verlassen möchten?",
-          "leaveContentBody": "Dadurch werden alle nicht gespeicherten Fortschritte gelöscht",
+          "leaveContentHeader": "Diesen Lektionseditor verlassen?",
+          "leaveContentBody": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt gehen, gehen sie verloren.",
+          "leaveContentCancel": "Weiter bearbeiten",
+          "leaveContentDiscard": "Ohne Speichern verlassen",
           "dropOrClick": "Legen Sie das Bild hier ab oder klicken Sie zum Hochladen",
           "allowedFormats": "PNG, JPG oder SVG",
-          "leaveContentBodyValidate": "Wenn Sie die Änderungen speichern möchten, müssen Sie zunächst das Formular validieren",
           "aiMentorInstructionsTooltip": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll. Geben Sie den Kontext, die Rolle oder das Szenario an, dem die KI folgen soll. Dies definiert, wie die KI das Gespräch leiten wird.",
           "updateAiMentorAvatarDescription": "Laden Sie ein neues Bild für den KI-Mentor hoch oder entfernen Sie das aktuelle.",
           "updateAiMentorAvatar": "Aktualisieren Sie den Avatar des KI-Mentors",
@@ -3389,7 +3444,23 @@
         "progress": "Fortschritt",
         "quizResults": "Quizergebnisse",
         "aiMentorResults": "Ergebnisse des KI-Mentors",
-        "learningTime": "Lernzeit"
+        "learningTime": "Lernzeit",
+        "certificates": "Zertifikate"
+      },
+      "certificates": {
+        "learner": "Lernender",
+        "email": "E-Mail",
+        "groups": "Gruppen",
+        "status": "Status",
+        "expiry": "Ablauf",
+        "preview": "Zertifikat ansehen",
+        "empty": "Keine eingeschriebenen Lernenden gefunden.",
+        "statuses": {
+          "not_earned": "Nicht erworben",
+          "active": "Aktiv",
+          "expired": "Abgelaufen",
+          "revoked": "Widerrufen"
+        }
       },
       "field": {
         "studentName": "Student",
@@ -3607,6 +3678,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kurs ist nicht verfügbar",
+      "accessDescription": "Melden Sie sich an oder erstellen Sie ein Konto, um zum Kurs zu gelangen.",
+      "goToLogin": "Zum Login",
+      "goToCourseList": "Zur Kursliste",
+      "goToHome": "Zur Startseite",
+      "notFoundTitle": "Kurs nicht gefunden",
+      "notFoundDescription": "Dieser Kurs konnte nicht gefunden werden."
+    },
     "other": {
       "cannotFindCourses": "Wir konnten keine Kurse finden",
       "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut",
@@ -3699,6 +3779,7 @@
       "single": "Einzel",
       "multiple": "Mehrere",
       "fillInTheBlanks": "Füllen Sie die Lücken aus.",
+      "notAnswered": "Nicht beantwortet",
       "selectQuestion": "Frage auswählen.",
       "trueOrFalseQuestion": "Wahre oder falsche Frage.",
       "multipleChoice": "Multiple-Choice-Frage.",
@@ -3890,6 +3971,11 @@
           "muted": "Stumm",
           "mutedHint": "Ihr Mikrofon ist stummgeschaltet. Der Mentor kann Sie nicht hören.",
           "youSaid": "Du sagtest",
+          "recovery": {
+            "failedTitle": "Sprachsitzung wurde getrennt",
+            "failedDescription": "Die Verbindung konnte nicht wiederhergestellt werden. Starten Sie die Sprachsitzung neu, um fortzufahren.",
+            "restart": "Sitzung neu starten"
+          },
           "states": {
             "idle": {
               "title": "Bereit",
@@ -4184,7 +4270,8 @@
       "admin": "Administrator",
       "student": "Student",
       "content_creator": "Inhaltsersteller",
-      "trainer": "Trainer"
+      "trainer": "Trainer",
+      "group_manager": "Gruppenmanager"
     },
     "switch": {
       "enabled": "Ermöglicht",
@@ -5514,6 +5601,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren.",
+      "invalidAiMentorConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Mentor-Konfiguration. Bitte generiere den Kurs erneut.",
       "invalidAiJudgeConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Bewertungskonfiguration. Bitte generiere den Kurs erneut."
     }
   },
@@ -5543,6 +5631,8 @@
       "invalidLessonType": "Live-Schulungszuweisungen können nur zu Live-Schulungslektionen hinzugefügt werden.",
       "deleteAssignedToLesson": "Dieses Live-Schulung ist mit einer Lektion verknüpft. Lösche zuerst die Lektion, bevor du das Live-Schulung löschst.",
       "liveKitNotConfigured": "LiveKit ist nicht konfiguriert.",
+      "liveKitRoomNotAvailable": "Der LiveKit-Raum für diese Sitzung ist nicht verfügbar.",
+      "activeSessionUpdateForbidden": "Dieses Live-Training kann während einer laufenden Sitzung nicht geändert werden.",
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
       "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
     }

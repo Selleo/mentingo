@@ -827,6 +827,7 @@ export class SettingsService {
       SYSTEM_ROLE_SLUGS.ADMIN,
       SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
       SYSTEM_ROLE_SLUGS.TRAINER,
+      SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
       SYSTEM_ROLE_SLUGS.STUDENT,
     ];
     const primaryRole = rolePriority.find((roleSlug) => roleSet.has(roleSlug));
@@ -1468,7 +1469,10 @@ export class SettingsService {
       globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
 
     try {
-      return await this.fileService.getFileBuffer(logoUrl);
+      const buffer = await this.fileService.getFileBuffer(logoUrl);
+      if (!buffer) return null;
+
+      return await sharp(buffer).png().toBuffer();
     } catch {
       return null;
     }

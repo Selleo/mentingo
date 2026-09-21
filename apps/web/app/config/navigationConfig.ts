@@ -70,7 +70,7 @@ export const getNavigationConfig = (
           path: "courses",
           iconName: "Course",
           accessRequirement: {
-            anyOf: [PERMISSIONS.COURSE_READ],
+            anyOf: [PERMISSIONS.COURSE_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
           },
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
@@ -218,6 +218,22 @@ export const getNavigationConfig = (
           path: "admin/activity-logs",
           iconName: "Timeline",
           testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+        },
+      ],
+    },
+    {
+      title: t("aiConversations.title"),
+      icon: "AiMentor",
+      isExpandable: false,
+      testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
+      restrictedAccessRequirement: { allOf: [PERMISSIONS.AI_THREAD_READ] },
+      restrictedManagingTenantAdmin: false,
+      items: [
+        {
+          label: t("aiConversations.title"),
+          path: "admin/ai-conversations",
+          iconName: "AiMentor",
+          testId: NAVIGATION_HANDLES.AI_CONVERSATIONS_LINK,
         },
       ],
     },

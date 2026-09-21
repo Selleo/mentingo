@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLesson } from "~/api/queries";
-import { useUserById } from "~/api/queries/admin/useUserById";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
@@ -39,6 +38,8 @@ interface LessonPreviewDialogProps {
   course: GetCourseResponse["data"];
   lessonId: string;
   userId: string;
+  studentName: string;
+  studentAvatarUrl?: string | null;
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -50,6 +51,8 @@ export default function LessonPreviewDialog({
   course,
   lessonId,
   userId,
+  studentName,
+  studentAvatarUrl,
   isOpen,
   onClose,
 }: LessonPreviewDialogProps) {
@@ -59,14 +62,13 @@ export default function LessonPreviewDialog({
 
   const { language } = useLanguageStore();
 
-  const { data: user, isLoading: isLoadingUser } = useUserById(userId);
   const { data: lesson, isLoading: isLoadingLesson } = useLesson(lessonId, language, userId);
 
   useEffect(() => {
-    if (!isLoadingUser && !isLoadingLesson && (!user || !lesson || !course)) {
+    if (!isLoadingLesson && (!lesson || !course)) {
       onClose?.();
     }
-  }, [user, lesson, isLoadingUser, isLoadingLesson, onClose, course]);
+  }, [lesson, isLoadingLesson, onClose, course]);
 
   const isAiMentorLesson = lesson?.type === LessonType.AI_MENTOR;
   const hasTaskDescription = Boolean(lesson?.description && lesson.description.trim().length > 0);
@@ -87,7 +89,7 @@ export default function LessonPreviewDialog({
   }, [aiMentorDetails, isAiMentorLesson]);
   const shouldShowEvaluation = hasEvaluationData(aiMentorEvaluation);
 
-  if (!user || !lesson || !course) {
+  if (!lesson || !course) {
     return null;
   }
 
@@ -114,8 +116,6 @@ export default function LessonPreviewDialog({
   const requiredCorrectAnswers = isAiMentorLesson
     ? Math.ceil((thresholdPercentage * maxScore) / 100)
     : Math.ceil((thresholdPercentage * maxScore) / 100);
-
-  const { firstName, lastName, profilePictureUrl } = user;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -175,12 +175,10 @@ export default function LessonPreviewDialog({
               <div className="flex items-center gap-4">
                 <UserAvatar
                   className="size-8"
-                  userName={user.firstName}
-                  profilePictureUrl={user.profilePictureUrl}
+                  userName={studentName}
+                  profilePictureUrl={studentAvatarUrl}
                 />
-                <p className="h6">
-                  {user.firstName} {user.lastName}
-                </p>
+                <p className="h6">{studentName}</p>
               </div>
               {!isAiMentorLesson && (
                 <div className="flex items-center gap-3">
@@ -270,9 +268,8 @@ export default function LessonPreviewDialog({
                 course={course}
                 hideControls={isAiMentorLesson}
                 previewUser={{
-                  firstName,
-                  lastName,
-                  profilePictureUrl,
+                  displayName: studentName,
+                  profilePictureUrl: studentAvatarUrl,
                 }}
                 lessonsAmount={currentChapter?.lessons.length ?? 0}
                 handleNext={() => {}}

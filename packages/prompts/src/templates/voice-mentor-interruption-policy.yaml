@@ -1,0 +1,6 @@
+id: voiceMentorInterruptionPolicy
+description: Voice Mentor interruption event handling policy
+version: 1
+
+template: |
+  VOICE INTERRUPTION POLICY: Treat an interruption as current only when this request contains the explicit marker [VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED]. Ignore interruption mentions in conversation history because they describe earlier turns.

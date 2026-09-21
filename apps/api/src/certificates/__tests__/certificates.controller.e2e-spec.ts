@@ -18,6 +18,7 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { assignSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { ACTIVITY_LOG_ACTION_TYPES } from "../../activity-logs/types";
 import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
@@ -27,6 +28,7 @@ import {
   activityLogs,
   certificates,
   chapters,
+  groupManagerGroups,
   lessons,
   assessments,
   assessmentAttempts,
@@ -1496,6 +1498,159 @@ describe("CertificatesController (e2e)", () => {
     });
   });
 
+  describe("GET /api/certificates/course/:courseId", () => {
+    it("returns all course certificate rows for an administrator", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const firstStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
+      const secondStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        title: "Course certificate statistics",
+        authorId: admin.id,
+        categoryId: category.id,
+        thumbnailS3Key: null,
+        hasCertificate: true,
+      });
+
+      await db.insert(studentCourses).values([
+        { studentId: firstStudent.id, courseId: course.id, status: "enrolled" },
+        { studentId: secondStudent.id, courseId: course.id, status: "enrolled" },
+      ]);
+      await db.insert(certificates).values([
+        { userId: firstStudent.id, courseId: course.id },
+        { userId: secondStudent.id, courseId: course.id },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/certificates/course/${course.id}`)
+        .set("Cookie", cookies)
+        .query({ language: "en" })
+        .expect(200);
+
+      expect(response.body.data.data).toHaveLength(2);
+      expect(response.body.data.pagination.totalItems).toBe(2);
+    });
+
+    it("returns an empty result for an empty group and filters rows for a populated group", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        title: "Filtered certificate statistics",
+        authorId: admin.id,
+        categoryId: category.id,
+        thumbnailS3Key: null,
+        hasCertificate: true,
+      });
+      const populatedGroup = await groupFactory.withMembers([student.id]).create();
+      const emptyGroup = await groupFactory.create();
+
+      await db.insert(studentCourses).values({
+        studentId: student.id,
+        courseId: course.id,
+        status: "enrolled",
+      });
+      await db.insert(certificates).values({ userId: student.id, courseId: course.id });
+
+      const emptyResponse = await request(app.getHttpServer())
+        .get(`/api/certificates/course/${course.id}`)
+        .set("Cookie", cookies)
+        .query({ language: "en", groupId: emptyGroup.id })
+        .expect(200);
+
+      expect(emptyResponse.body.data.data).toEqual([]);
+      expect(emptyResponse.body.data.pagination.totalItems).toBe(0);
+
+      const populatedResponse = await request(app.getHttpServer())
+        .get(`/api/certificates/course/${course.id}`)
+        .set("Cookie", cookies)
+        .query({ language: "en", groupId: populatedGroup.id })
+        .expect(200);
+
+      expect(populatedResponse.body.data.data).toHaveLength(1);
+      expect(populatedResponse.body.data.data[0].learnerEmail).toBe(student.email);
+      expect(populatedResponse.body.data.pagination.totalItems).toBe(1);
+    });
+
+    it("returns only learners in groups managed by a group manager", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const manager = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ roleSlug: SYSTEM_ROLE_SLUGS.GROUP_MANAGER, tenantId: admin.tenantId });
+      await assignSystemRoleToUserInTests(
+        db,
+        manager.id,
+        manager.tenantId,
+        SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+      );
+      const managedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
+      const unmanagedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
+      const cookies = await cookieFor(manager, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        title: "Managed certificate statistics",
+        authorId: admin.id,
+        categoryId: category.id,
+        thumbnailS3Key: null,
+        hasCertificate: true,
+      });
+      const managedGroup = await groupFactory.withMembers([managedStudent.id]).create();
+      const unmanagedGroup = await groupFactory.withMembers([unmanagedStudent.id]).create();
+
+      await db.insert(groupManagerGroups).values({
+        managerUserId: manager.id,
+        groupId: managedGroup.id,
+        tenantId: manager.tenantId,
+      });
+      await db.insert(studentCourses).values([
+        { studentId: managedStudent.id, courseId: course.id, status: "enrolled" },
+        { studentId: unmanagedStudent.id, courseId: course.id, status: "enrolled" },
+      ]);
+      await db.insert(certificates).values([
+        { userId: managedStudent.id, courseId: course.id },
+        { userId: unmanagedStudent.id, courseId: course.id },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/certificates/course/${course.id}`)
+        .set("Cookie", cookies)
+        .query({ language: "en" })
+        .expect(200);
+
+      expect(response.body.data.data).toHaveLength(1);
+      expect(response.body.data.data[0].learnerEmail).toBe(managedStudent.email);
+      expect(response.body.data.data[0].learnerEmail).not.toBe(unmanagedStudent.email);
+      expect(unmanagedGroup.id).toBeDefined();
+    });
+  });
+
   describe("POST /api/certificates/download", () => {
     describe("when user is not logged in", () => {
       it("returns 401 if user is not logged in", async () => {
@@ -1583,6 +1738,97 @@ describe("CertificatesController (e2e)", () => {
           "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
+      });
+
+      it("allows a group manager to download a managed learner certificate", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .withAdminRole()
+          .create();
+        const manager = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ roleSlug: SYSTEM_ROLE_SLUGS.GROUP_MANAGER, tenantId: admin.tenantId });
+        await assignSystemRoleToUserInTests(
+          db,
+          manager.id,
+          manager.tenantId,
+          SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+        );
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create();
+        const cookies = await cookieFor(manager, app);
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          title: "Managed certificate download",
+          authorId: admin.id,
+          categoryId: category.id,
+          thumbnailS3Key: null,
+          hasCertificate: true,
+        });
+        const group = await groupFactory.withMembers([student.id]).create();
+        await db.insert(groupManagerGroups).values({
+          managerUserId: manager.id,
+          groupId: group.id,
+          tenantId: manager.tenantId,
+        });
+        const [certificate] = await db
+          .insert(certificates)
+          .values({ userId: student.id, courseId: course.id })
+          .returning();
+
+        const response = await request(app.getHttpServer())
+          .post("/api/certificates/download")
+          .set("Cookie", cookies)
+          .send({ certificateId: certificate.id, language: "en" })
+          .expect(201);
+
+        expect(response.headers["content-type"]).toBe("application/pdf");
+        expect(response.body instanceof Buffer).toBe(true);
+      });
+
+      it("does not allow a group manager to download an unmanaged learner certificate", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .withAdminRole()
+          .create();
+        const manager = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ roleSlug: SYSTEM_ROLE_SLUGS.GROUP_MANAGER, tenantId: admin.tenantId });
+        await assignSystemRoleToUserInTests(
+          db,
+          manager.id,
+          manager.tenantId,
+          SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+        );
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create();
+        const cookies = await cookieFor(manager, app);
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          title: "Restricted certificate download",
+          authorId: admin.id,
+          categoryId: category.id,
+          thumbnailS3Key: null,
+          hasCertificate: true,
+        });
+        const [certificate] = await db
+          .insert(certificates)
+          .values({ userId: student.id, courseId: course.id })
+          .returning();
+
+        await request(app.getHttpServer())
+          .post("/api/certificates/download")
+          .set("Cookie", cookies)
+          .send({ certificateId: certificate.id, language: "en" })
+          .expect(404);
       });
 
       it("returns 400 when html content is empty", async () => {

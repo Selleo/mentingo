@@ -1,4 +1,5 @@
 import { ClipboardCheck } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -10,10 +11,11 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 type AiMentorPracticeComposerProps = {
-  lessonId: string;
+  practiceSessionId: string;
+  threadId: string;
   mentorName: string;
   handleSubmit: () => void;
-  onMentorTranscription: (text: string) => void;
+  onLearnerTranscription: (text: string, turnId?: string) => void;
   onMentorResponseCompleted: (text: string) => void;
   onAudioInterrupted: () => void;
   onAudioOutputCompleted: () => void;
@@ -32,10 +34,11 @@ type AiMentorPracticeComposerProps = {
 };
 
 export function AiMentorPracticeComposer({
-  lessonId,
+  practiceSessionId,
+  threadId,
   mentorName,
   handleSubmit,
-  onMentorTranscription,
+  onLearnerTranscription,
   onMentorResponseCompleted,
   onAudioInterrupted,
   onAudioOutputCompleted,
@@ -51,14 +54,15 @@ export function AiMentorPracticeComposer({
   isProcessing,
 }: AiMentorPracticeComposerProps) {
   const { t } = useTranslation();
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
 
   return (
     <>
       <LessonForm
-        lessonId={lessonId}
+        voiceTarget={{ practiceSessionId, threadId }}
         mentorName={mentorName}
         handleSubmit={handleSubmit}
-        onMentorTranscription={onMentorTranscription}
+        onLearnerTranscription={onLearnerTranscription}
         onMentorResponseCompleted={onMentorResponseCompleted}
         onAudioInterrupted={onAudioInterrupted}
         onAudioOutputCompleted={onAudioOutputCompleted}
@@ -70,7 +74,8 @@ export function AiMentorPracticeComposer({
         setInput={setInput}
         hasTaskDescription={hasTaskDescription}
         taskDescription={taskDescription}
-        allowVoiceMentor={false}
+        allowVoiceMentor={!isProcessing}
+        onVoiceActiveChange={setIsVoiceActive}
         compact
       />
       <div className="mt-2 flex items-center justify-between gap-4">
@@ -82,7 +87,7 @@ export function AiMentorPracticeComposer({
           data-testid={AI_MENTOR_PRACTICE_HANDLES.CHECK_BUTTON}
           size="sm"
           className="shrink-0 gap-2 motion-safe:active:scale-[0.98] motion-reduce:transform-none"
-          disabled={!hasLearnerMessage || isProcessing}
+          disabled={!hasLearnerMessage || isProcessing || isJudgePending || isVoiceActive}
           onClick={() => void onJudge()}
         >
           {t("aiMentorPractice.checkPractice")}

@@ -32,7 +32,9 @@ import {
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
@@ -162,6 +164,8 @@ const AiMentorLessonForm = ({
   });
 
   const { t } = useTranslation();
+  const { isLeaveModalOpen, closeLeaveModal, setIsCurrectFormDirty, setIsLeavingContent } =
+    useLeaveModal();
 
   const { id = "" } = useParams();
 
@@ -284,6 +288,11 @@ const AiMentorLessonForm = ({
   const aiJudgeConfiguration = stagedAiJudgeConfiguration ?? persistedAiJudgeConfiguration;
   const isAiMentorConfigurationDirty = Boolean(form.formState.dirtyFields.aiMentorConfiguration);
   const isAiJudgeConfigurationDirty = Boolean(form.formState.dirtyFields.aiJudgeConfiguration);
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsCurrectFormDirty(isDirty);
+  }, [isDirty, setIsCurrectFormDirty]);
 
   const applyScenarioTemplate = (template: AiMentorScenarioTemplate) => {
     const draft = buildAiMentorScenarioTemplateDraft(template, t);
@@ -743,6 +752,17 @@ const AiMentorLessonForm = ({
     setIsModalOpen(true);
   };
 
+  const onCancelLeave = () => {
+    closeLeaveModal();
+    setIsLeavingContent(false);
+  };
+
+  const onDiscardLeave = () => {
+    closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
+  };
+
   const onOpenPreview = () => setPreviewOpen(true);
   const onClosePreview = () => setPreviewOpen(false);
   const onOpenAvatarDialog = () => {
@@ -978,6 +998,12 @@ const AiMentorLessonForm = ({
             onClose={onCloseModal}
             onDelete={onDelete}
             contentType={DeleteContentType.AI_MENTOR}
+          />
+
+          <LeaveConfirmationModal
+            open={isLeaveModalOpen}
+            onCancel={onCancelLeave}
+            onDiscard={onDiscardLeave}
           />
 
           <Dialog

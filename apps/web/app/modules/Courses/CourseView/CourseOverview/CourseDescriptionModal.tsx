@@ -11,6 +11,7 @@ import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseDescriptionModalProps = {
+  canEdit: boolean;
   courseDescription: string;
   onChangeDescription: (description: string) => void;
   onClose: () => void;
@@ -18,17 +19,17 @@ type CourseDescriptionModalProps = {
 };
 
 export default function CourseDescriptionModal({
+  canEdit,
   courseDescription,
   onChangeDescription,
   onClose,
   onSaveDescription,
 }: CourseDescriptionModalProps) {
-  const { course, isAdminExperience } = useCourseAccessProvider();
+  const { course } = useCourseAccessProvider();
   const { t } = useTranslation();
+
   const saveAndClose = async () => {
-    if (isAdminExperience) {
-      await onSaveDescription();
-    }
+    if (canEdit) await onSaveDescription();
     onClose();
   };
 
@@ -79,7 +80,7 @@ export default function CourseDescriptionModal({
             <h5 className="mb-3 font-bold text-neutral-950">
               {t("modernCourseView.overview.description")}
             </h5>
-            {isAdminExperience ? (
+            {canEdit ? (
               <div data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}>
                 <BaseEditor
                   content={courseDescription}
@@ -123,11 +124,7 @@ export default function CourseDescriptionModal({
               onClick={() => void saveAndClose()}
               className="px-6 font-semibold"
             >
-              {t(
-                isAdminExperience
-                  ? "modernCourseView.common.saveChanges"
-                  : "modernCourseView.common.close",
-              )}
+              {t(canEdit ? "modernCourseView.common.saveChanges" : "modernCourseView.common.close")}
             </Button>
           </div>
         </div>

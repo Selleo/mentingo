@@ -21,6 +21,12 @@ const globalSettings = (
   }) as GetPublicGlobalSettingsResponse["data"];
 
 describe("getDefaultAuthenticatedRedirect", () => {
+  it("redirects Group Managers to the regular courses route", () => {
+    const user = currentUserWithPermissions([PERMISSIONS.MANAGED_GROUP_RESULTS_READ]);
+
+    expect(getDefaultAuthenticatedRedirect(user, globalSettings())).toBe("/courses");
+  });
+
   it("skips learning paths when the feature is disabled", () => {
     const user = currentUserWithPermissions([PERMISSIONS.LEARNING_PATH_READ]);
 

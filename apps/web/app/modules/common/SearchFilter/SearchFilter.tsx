@@ -2,7 +2,7 @@ import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { enUS, pl } from "date-fns/locale";
 import { debounce } from "lodash-es";
 import { CalendarDays, Search } from "lucide-react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -87,6 +87,8 @@ interface SearchFilterProps {
   isLoading?: boolean;
   className?: string;
   clearAllTestId?: string;
+  onClearAll?: () => void;
+  showClearAll?: boolean;
 }
 
 export const SearchFilter: React.FC<SearchFilterProps> = ({
@@ -97,12 +99,26 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   isLoading,
   className,
   clearAllTestId,
+  onClearAll,
+  showClearAll = true,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t, i18n } = useTranslation();
   const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
 
-  const debouncedSearchTitle = debounce(onChange, 300);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const debouncedSearchTitle = useMemo(
+    () => debounce((name: string, value: FilterValue) => onChangeRef.current(name, value), 300),
+    [],
+  );
+  useEffect(() => () => debouncedSearchTitle.cancel(), [debouncedSearchTitle]);
+  const textFilter = filters.find((filter) => filter.type === "text");
+  const textValue = textFilter ? values[textFilter.name] : undefined;
+  useEffect(() => {
+    debouncedSearchTitle.cancel();
+    if (inputRef.current) inputRef.current.value = typeof textValue === "string" ? textValue : "";
+  }, [textValue, debouncedSearchTitle]);
 
   const handleChange = (name: string, value: FilterValue) => {
     if (filters.find((filter) => filter?.type === "status")?.name === name) {
@@ -117,9 +133,11 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   };
 
   const handleClearAll = () => {
+    debouncedSearchTitle.cancel();
     if (inputRef.current) {
       inputRef.current.value = "";
     }
+    if (onClearAll) return onClearAll();
     filters.forEach((filter) => {
       onChange(filter.name, filter.default);
     });
@@ -348,7 +366,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
         }
       })}
 
-      {isAnyFilterApplied && (
+      {showClearAll && isAnyFilterApplied && (
         <Button
           data-testid={clearAllTestId}
           className="border border-primary-500 bg-transparent text-accent-foreground"

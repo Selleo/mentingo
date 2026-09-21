@@ -48,6 +48,12 @@ import { IntegrationApiKeyGuard } from "src/integration/guards/integration-api-k
 import { IntegrationService } from "src/integration/integration.service";
 import { IntegrationKeyTenantContext } from "src/integration/integration.types";
 import {
+  integrationUpdateTenantApiKeysSchema,
+  integrationUpdateTenantApiKeysResponseSchema,
+  type IntegrationUpdateTenantApiKeysBody,
+  type IntegrationUpdateTenantApiKeysResponse,
+} from "src/integration/schemas/integration-tenant-api-keys.schema";
+import {
   integrationCreateTenantSchema,
   integrationDeleteUserResponseSchema,
   integrationMessageResponseSchema,
@@ -193,6 +199,44 @@ export class IntegrationController {
   ): Promise<BaseResponse<IntegrationTenantLifecycleResponse>> {
     return new BaseResponse(
       await this.integrationService.updateTenantForIntegration(
+        tenantId,
+        body,
+        currentUser,
+        keyTenant,
+      ),
+    );
+  }
+
+  @Patch("tenants/:tenantId/api-keys")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Update a tenant environment value",
+    description:
+      "Sets or replaces a supported tenant environment value by name. Uses the same supported names as the environment settings API. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. Values are encrypted and never returned. The tenant in the path is authoritative, regardless of X-Tenant-Id.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Not required; the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "body", schema: integrationUpdateTenantApiKeysSchema },
+    ],
+    response: baseResponse(integrationUpdateTenantApiKeysResponseSchema),
+  })
+  async updateTenantApiKeys(
+    @Param("tenantId") tenantId: UUIDType,
+    @Body() body: IntegrationUpdateTenantApiKeysBody,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationUpdateTenantApiKeysResponse>> {
+    return new BaseResponse(
+      await this.integrationService.updateTenantApiKeysForIntegration(
         tenantId,
         body,
         currentUser,

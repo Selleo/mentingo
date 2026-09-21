@@ -1,25 +1,55 @@
-import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { redirect, useLoaderData, useNavigate, useParams, useSearchParams } from "@remix-run/react";
+import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { courseLookupQueryOptions, courseQueryOptions, useCourse } from "~/api/queries";
+import {
+  courseLookupQueryOptions,
+  courseQueryOptions,
+  currentUserQueryOptions,
+  useCourse,
+} from "~/api/queries";
+import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { userSettingsQueryOptions } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOverview";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import { buildCourseRedirectPath } from "./courseRedirect.utils";
 import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
+import CourseUnavailable from "./CourseUnavailable";
+import {
+  COURSE_UNAVAILABLE_REASONS,
+  COURSE_VIEW_LOADER_STATUS,
+  type CourseUnavailableReason,
+} from "./CourseView.constants";
 import { LearningModeBanner } from "./LearningModeBanner";
 import { TableOfContent } from "./TableOfContent/TableOfContent";
 
 import type { SupportedLanguages } from "@repo/shared";
+
+type CourseViewLoaderData =
+  | { status: (typeof COURSE_VIEW_LOADER_STATUS)["AVAILABLE"] }
+  | {
+      status: (typeof COURSE_VIEW_LOADER_STATUS)["UNAVAILABLE"];
+      reason: CourseUnavailableReason;
+      canAccessCourseList: boolean;
+    }
+  | null;
+
+const getNotFoundLoaderData = (canAccessCourseList: boolean) =>
+  ({
+    status: COURSE_VIEW_LOADER_STATUS.UNAVAILABLE,
+    reason: COURSE_UNAVAILABLE_REASONS.NOT_FOUND,
+    canAccessCourseList,
+  }) as const;
 
 const resolvePreferredLanguage = (
   url: URL,
@@ -55,7 +85,25 @@ export const clientLoader = async ({
   if (!idOrSlug) return null;
 
   const url = new URL(request.url);
-  const userSettingsResponse = await queryClient.ensureQueryData(userSettingsQueryOptions);
+
+  const [currentUserResponse, globalSettingsResponse, userSettingsResponse] = await Promise.all([
+    queryClient.ensureQueryData(currentUserQueryOptions),
+    queryClient.ensureQueryData(globalSettingsQueryOptions),
+    queryClient.ensureQueryData(userSettingsQueryOptions),
+  ]);
+
+  const currentUser = currentUserResponse?.data;
+
+  if (!currentUser && !globalSettingsResponse?.data?.unregisteredUserCoursesAccessibility) {
+    saveEntryToNavigationHistory(request);
+
+    return {
+      status: COURSE_VIEW_LOADER_STATUS.UNAVAILABLE,
+      reason: COURSE_UNAVAILABLE_REASONS.REQUIRES_AUTHENTICATION,
+      canAccessCourseList: false,
+    } as const;
+  }
+
   const language = resolvePreferredLanguage(url, userSettingsResponse?.data?.language);
   useLanguageStore.getState().setLanguage(language);
 
@@ -63,11 +111,15 @@ export const clientLoader = async ({
     .fetchQuery(courseLookupQueryOptions(idOrSlug, language))
     .catch((error: unknown) => {
       if (isAxiosError(error) && error.response?.status === 404) {
-        throw redirect("/courses", 302);
+        return getNotFoundLoaderData(
+          !currentUser || hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ),
+        );
       }
 
       throw error;
     });
+
+  if (lookupCourse.status === COURSE_VIEW_LOADER_STATUS.UNAVAILABLE) return lookupCourse;
 
   const { status, slug } = lookupCourse;
 
@@ -75,20 +127,26 @@ export const clientLoader = async ({
     throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
 
-  await queryClient
+  const courseResponse = await queryClient
     .ensureQueryData(courseQueryOptions(idOrSlug, language))
     .catch((error: unknown) => {
       if (isAxiosError(error) && error.response?.status === 404) {
-        throw redirect("/courses", 302);
+        return null;
       }
-
       throw error;
     });
 
-  return null;
+  if (!courseResponse)
+    return getNotFoundLoaderData(
+      !currentUser || hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ),
+    );
+
+  return { status: COURSE_VIEW_LOADER_STATUS.AVAILABLE } as const;
 };
 
 export default function CourseViewPage() {
+  const loaderData = useLoaderData() as CourseViewLoaderData;
+
   const { t } = useTranslation();
   const { id = "" } = useParams();
   const navigate = useNavigate();
@@ -100,7 +158,11 @@ export default function CourseViewPage() {
   const language =
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
-  const { data: course, error } = useCourse(id, language);
+  const { data: course, error } = useCourse(
+    id,
+    language,
+    loaderData?.status === COURSE_VIEW_LOADER_STATUS.AVAILABLE,
+  );
 
   const handleCourseLanguageChange = useCallback(
     (nextLanguage: SupportedLanguages) => {
@@ -137,6 +199,15 @@ export default function CourseViewPage() {
       handleCourseLanguageChange(course.baseLanguage);
     }
   }, [course, handleCourseLanguageChange, language]);
+
+  if (loaderData?.status === COURSE_VIEW_LOADER_STATUS.UNAVAILABLE) {
+    return (
+      <CourseUnavailable
+        reason={loaderData.reason}
+        canAccessCourseList={loaderData.canAccessCourseList}
+      />
+    );
+  }
 
   if (!course) return null;
   const breadcrumbs = [

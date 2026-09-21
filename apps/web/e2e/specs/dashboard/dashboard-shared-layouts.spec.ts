@@ -16,19 +16,24 @@ import type { UserRole } from "~/config/userRoles";
 const W = DASHBOARD_WIDGET_TYPES;
 
 const roleDefaults: Record<string, DashboardLayoutWidget[]> = {
-  [SYSTEM_ROLE_SLUGS.ADMIN]: [
-    { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
+  [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: [
     { type: W.EVENT_CALENDAR, size: "4x2", visible: true },
-    { type: W.TODO_LIST, size: "3x2", visible: true },
-    { type: W.DEADLINE_RISKS, size: "3x2", visible: true },
+    { type: W.DEADLINE_RISKS, size: "2x2", visible: true },
     { type: W.TRAINING_COMPLETION, size: "2x2", visible: true },
   ],
-  [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: [
-    { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
+  [SYSTEM_ROLE_SLUGS.ADMIN]: [
+    { type: W.DEADLINE_RISKS, size: "2x2", visible: true },
     { type: W.EVENT_CALENDAR, size: "4x2", visible: true },
-    { type: W.TODO_LIST, size: "3x2", visible: true },
-    { type: W.DEADLINE_RISKS, size: "3x2", visible: true },
     { type: W.TRAINING_COMPLETION, size: "2x2", visible: true },
+    { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
+    { type: W.TODO_LIST, size: "3x2", visible: true },
+  ],
+  [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: [
+    { type: W.DEADLINE_RISKS, size: "2x2", visible: true },
+    { type: W.EVENT_CALENDAR, size: "4x2", visible: true },
+    { type: W.TRAINING_COMPLETION, size: "2x2", visible: true },
+    { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
+    { type: W.TODO_LIST, size: "3x2", visible: true },
   ],
   [SYSTEM_ROLE_SLUGS.TRAINER]: [
     { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
@@ -36,10 +41,10 @@ const roleDefaults: Record<string, DashboardLayoutWidget[]> = {
     { type: W.TODO_LIST, size: "3x2", visible: true },
   ],
   [SYSTEM_ROLE_SLUGS.STUDENT]: [
-    { type: W.AI_MENTOR_PRACTICE, size: "3x2", visible: true },
+    { type: W.CONTINUE_LEARNING, size: "2x2", visible: true },
+    { type: W.AI_MENTOR_PRACTICE, size: "2x2", visible: true },
     { type: W.EVENT_CALENDAR, size: "4x2", visible: true },
-    { type: W.TODO_LIST, size: "3x2", visible: true },
-    { type: W.CONTINUE_LEARNING, size: "3x2", visible: true },
+    { type: W.TODO_LIST, size: "2x2", visible: true },
     { type: W.REQUIRED_COURSES, size: "2x2", visible: true },
     { type: W.COURSE_COMPLETION, size: "2x2", visible: true },
     { type: W.CERTIFICATES, size: "2x2", visible: true },
@@ -85,7 +90,9 @@ const visibleWidgetTitles = async (page: Parameters<typeof mockDashboardLayout>[
 
 test.describe("role-specific dashboard default layouts", () => {
   for (const [roleSlug, expectedWidgets] of Object.entries(roleDefaults)) {
-    if (roleSlug === SYSTEM_ROLE_SLUGS.TRAINER) continue;
+    if (roleSlug === SYSTEM_ROLE_SLUGS.TRAINER || roleSlug === SYSTEM_ROLE_SLUGS.GROUP_MANAGER) {
+      continue;
+    }
     const role = roleSlug as UserRole;
     test(`${roleSlug} restores its default profile and persists it`, async ({ withWorkerPage }) => {
       await withWorkerPage(role, async ({ page }) => {

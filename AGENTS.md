@@ -83,7 +83,7 @@ Start with this file, then read the more specific `AGENTS.md` files for the area
 
 - Run the narrowest relevant validation command for touched code.
 - Update or add tests for changed behavior.
-- When product or feature behavior changes, run `.agents/skills/mentingo-feature-overview/SKILL.md` and update the matching business spec in `docs/specs/<feature-slug>-business-spec.md` as part of the same change. If no spec exists yet, create it.
+- When a change meaningfully alters a product capability, user workflow, access rule, or business outcome, run `.agents/skills/mentingo-feature-overview/SKILL.md` and update the matching business spec in `docs/specs/<feature-slug>-business-spec.md` as part of the same change. If no spec exists yet, create it. Do not update business specs for cosmetic changes, copy or styling adjustments, implementation-only refactors, or small bug fixes that merely restore already-documented intended behavior.
 - Regenerate generated artifacts only through existing scripts.
 - Keep changes limited to the task.
 - Report commands run, commands skipped, assumptions, and remaining risks.

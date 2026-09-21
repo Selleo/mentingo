@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Session",
+    "context": "Context",
+    "activity": "Activity",
+    "filters": "Filters",
+    "details": "Details",
+    "selectConversation": "Select a conversation",
+    "pageSize": "Conversations per page",
+    "conversation": "Conversation",
+    "source": "Course",
+    "view": "View conversation",
+    "title": "AI conversations",
+    "description": "Review practice sessions and AI Mentor lessons.",
+    "owner": "User",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "noMatches": "No conversations match these filters.",
+    "loadMore": "Load more",
+    "back": "Back to conversations",
+    "readOnly": "Read-only conversation",
+    "unavailable": "This conversation is unavailable.",
+    "untitled": "Untitled conversation",
+    "started": "Started",
+    "lastActivity": "Last activity",
+    "language": "Language",
+    "result": "View evaluation",
+    "emptyTranscript": "No messages in this conversation yet.",
+    "messagesError": "Could not load messages.",
+    "search": "Search conversation titles",
+    "type": "Type",
+    "allTypes": "All types",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "from": "Started from",
+    "to": "Started until",
+    "listError": "Could not load conversations.",
+    "errors": { "invalidDateRange": "The end date must be after the start date." },
+    "empty": "No conversations yet.",
+    "types": {
+      "practice": "Practice session",
+      "ai-mentor": "AI Mentor lesson"
+    },
+    "statuses": {
+      "active": "In progress",
+      "completed": "Completed",
+      "archived": "Archived"
+    }
+  },
   "dashboardHome": {
     "title": "Your dashboard",
     "subtitle": "Keep the most important learning information and actions within easy reach.",
@@ -342,7 +390,8 @@
       "admin": "Admin",
       "contentCreator": "Content creator",
       "trainer": "Trainer",
-      "student": "Student"
+      "student": "Student",
+      "groupManager": "Group Manager"
     },
     "languages": {
       "en": "English",
@@ -917,6 +966,7 @@
       "participants": "Participants",
       "viewerMic": "Viewer microphone",
       "viewerCamera": "Viewer camera",
+      "editBlockedDuringSession": "To change this setting, end the current session first.",
       "scheduleTooltip": "Planned training time",
       "timezoneTooltip": "Training timezone",
       "maxParticipantsTooltip": "Maximum participants",
@@ -1889,6 +1939,7 @@
         "course_delete": "Delete courses.",
         "course_enrollment": "Manage course enrollments.",
         "course_statistics": "View course analytics and statistics.",
+        "managed_group_results_read": "View learner results for assigned managed groups.",
         "course_export": "Export course data.",
         "course_discussion_read": "View course discussions.",
         "course_discussion_message_create": "Create messages in course discussions.",
@@ -1935,6 +1986,7 @@
         "live_training_start": "Start live training sessions.",
         "live_training_end": "End live training sessions.",
         "live_training_statistics": "View live training attendance and statistics.",
+        "ai_thread_read": "View all AI conversations and their saved evaluations.",
         "activity_log_read": "View activity logs.",
         "course_ai_generation": "Generate course structure and content with AI tools."
       }
@@ -2022,7 +2074,7 @@
   },
   "adminUserView": {
     "header": "Create New User",
-    "subHeader": "Fill in the details to create a new user. Click save when you're done.",
+    "managedGroupsTooltip": "Selected groups determine which learners' courses, progress, results, learning time, and certificates this user can view as a Group Manager.",
     "editUserHeader": "User Information",
     "tabs": {
       "information": "User information",
@@ -2035,7 +2087,8 @@
     "placeholder": {
       "role": "Select a role",
       "groupId": "Select a group",
-      "language": "Select a language"
+      "language": "Select a language",
+      "managedGroups": "Select managed groups"
     },
     "field": {
       "firstName": "First name",
@@ -2044,7 +2097,8 @@
       "role": "Role",
       "language": "Language",
       "status": "Status",
-      "groups": "Group"
+      "groups": "Group",
+      "managedGroups": "Managed groups"
     },
     "toast": {
       "userCreatedSuccessfully": "User created successfully",
@@ -3211,11 +3265,12 @@
           "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",
           "fillInTheBlanksSentenceTip": "Write a sentence and drop words in to it.",
           "fillInTheBlanksWordTip": "Create and drop the word into sentence.",
-          "leaveContentHeader": "Are you sure you want to leave this question editor?",
-          "leaveContentBody": "It will delete all unsaved progress",
+          "leaveContentHeader": "Leave this lesson editor?",
+          "leaveContentBody": "You have unsaved changes. If you leave now, they will be lost.",
+          "leaveContentCancel": "Keep editing",
+          "leaveContentDiscard": "Leave without saving",
           "dropOrClick": "Drop image here or click to upload",
           "allowedFormats": "PNG, JPG or SVG",
-          "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
           "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
           "updateAiMentorAvatar": "Update AI mentor avatar",
@@ -3394,7 +3449,23 @@
         "progress": "Progress",
         "quizResults": "Quiz Results",
         "aiMentorResults": "AI Mentor Results",
-        "learningTime": "Learning Time"
+        "learningTime": "Learning Time",
+        "certificates": "Certificates"
+      },
+      "certificates": {
+        "learner": "Learner",
+        "email": "Email",
+        "groups": "Groups",
+        "status": "Status",
+        "expiry": "Expiry",
+        "preview": "Preview certificate",
+        "empty": "No enrolled learners found.",
+        "statuses": {
+          "not_earned": "Not earned",
+          "active": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked"
+        }
       },
       "field": {
         "studentName": "Student",
@@ -3612,6 +3683,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "The course is unavailable",
+      "accessDescription": "Please sign in or create an account to continue to the course.",
+      "goToLogin": "Go to login",
+      "goToCourseList": "Go to course list",
+      "goToHome": "Go to home",
+      "notFoundTitle": "Course not found",
+      "notFoundDescription": "We could not find this course."
+    },
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",
@@ -3704,6 +3784,7 @@
       "single": "Single",
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
+      "notAnswered": "Not answered",
       "selectQuestion": "select question.",
       "trueOrFalseQuestion": "True or false question.",
       "multipleChoice": "Multiple choice question.",
@@ -3895,6 +3976,11 @@
           "muted": "Muted",
           "mutedHint": "Your microphone is muted. The mentor cannot hear you.",
           "youSaid": "You said",
+          "recovery": {
+            "failedTitle": "Voice session disconnected",
+            "failedDescription": "The connection could not be restored. Restart the voice session to continue.",
+            "restart": "Restart session"
+          },
           "states": {
             "idle": {
               "title": "Ready",
@@ -4189,7 +4275,8 @@
       "admin": "Administrator",
       "student": "Student",
       "content_creator": "Content Creator",
-      "trainer": "Trainer"
+      "trainer": "Trainer",
+      "group_manager": "Group Manager"
     },
     "switch": {
       "enabled": "Enabled",
@@ -5540,6 +5627,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "The generated quiz contains an invalid blank answer id. Please retry course generation.",
+      "invalidAiMentorConfiguration": "The generated AI Mentor lesson contains an invalid mentor configuration. Please retry course generation.",
       "invalidAiJudgeConfiguration": "The generated AI Mentor lesson contains an invalid assessment configuration. Please retry course generation."
     }
   },
@@ -5569,6 +5657,8 @@
       "invalidLessonType": "Only Live Training lessons can have Live Training assignments.",
       "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training.",
       "liveKitNotConfigured": "LiveKit is not configured.",
+      "liveKitRoomNotAvailable": "The LiveKit room for this session is not available.",
+      "activeSessionUpdateForbidden": "This Live Training cannot be changed while a session is in progress.",
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }

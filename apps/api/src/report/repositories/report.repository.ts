@@ -3,6 +3,10 @@ import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import {
+  getGroupManagerLearnerScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import {
@@ -39,10 +43,12 @@ export class ReportRepository {
   async getAllStudentCourseData(
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    courseId?: string,
   ): Promise<StudentCourseReportRow[]> {
     const conditions = [
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       isNull(users.deletedAt),
+      courseId ? eq(studentCourses.courseId, courseId) : undefined,
     ];
 
     const canViewOnlyCreatedCourses = hasPermission(
@@ -53,6 +59,16 @@ export class ReportRepository {
     if (canViewOnlyCreatedCourses) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
+
+    const managerScopeCondition = getGroupManagerLearnerScopeCondition(
+      currentUser,
+      studentCourses.studentId,
+      [PERMISSIONS.REPORT_READ],
+    );
+
+    if (managerScopeCondition) conditions.push(managerScopeCondition);
+
+    const isManagerScoped = shouldApplyGroupManagerScope(currentUser, [PERMISSIONS.REPORT_READ]);
 
     const lessonCountQuery = sql<number>`(
       SELECT COALESCE(SUM(ch.lesson_count), 0)::int
@@ -84,6 +100,15 @@ export class ReportRepository {
           FROM ${groups}
           JOIN ${groupUsers} ON ${groupUsers.groupId} = ${groups.id}
           WHERE ${groupUsers.userId} = ${users.id}
+            ${
+              isManagerScoped
+                ? sql`AND EXISTS (
+                    SELECT 1 FROM group_manager_groups gmg_report
+                    WHERE gmg_report.manager_user_id = ${currentUser.userId}
+                      AND gmg_report.group_id = ${groups.id}
+                  )`
+                : sql``
+            }
         )`,
         courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
         lessonCount: lessonCountQuery.as("lesson_count"),

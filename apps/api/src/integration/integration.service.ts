@@ -12,8 +12,10 @@ import { PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { EnvService } from "src/env/services/env.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantsService } from "src/super-admin/tenants.service";
 
 import { IntegrationRepository } from "./integration.repository";
@@ -25,6 +27,10 @@ import type {
   IntegrationTrainingResultsQuery,
   RotateAdminKeyData,
 } from "./integration.types";
+import type {
+  IntegrationUpdateTenantApiKeysBody,
+  IntegrationUpdateTenantApiKeysResponse,
+} from "./schemas/integration-tenant-api-keys.schema";
 import type {
   IntegrationCreateTenantBody,
   IntegrationTenantLifecycleResponse,
@@ -41,6 +47,8 @@ export class IntegrationService {
     private readonly permissionsService: PermissionsService,
     private readonly tenantsService: TenantsService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly envService: EnvService,
+    private readonly tenantDbRunner: TenantDbRunnerService,
   ) {
     if (!process.env.MASTER_KEY) throw new Error("MASTER_KEY is required for integration API keys");
 
@@ -191,6 +199,27 @@ export class IntegrationService {
     this.assertCanManageTenants(actor, keyTenant);
 
     return this.tenantsService.updateTenantById(tenantId, input);
+  }
+
+  async updateTenantApiKeysForIntegration(
+    tenantId: string,
+    input: IntegrationUpdateTenantApiKeysBody,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationUpdateTenantApiKeysResponse> {
+    this.assertCanManageTenants(actor, keyTenant);
+
+    const tenant = await this.integrationRepository.getTenantById(tenantId);
+    if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
+
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.bulkUpsertEnv([{ name: input.name, value: input.value }], {
+        ...actor,
+        tenantId,
+      }),
+    );
+
+    return { tenantId, updatedKeys: [input.name] };
   }
 
   async getTrainingResults(

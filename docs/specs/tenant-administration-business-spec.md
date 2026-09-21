@@ -11,7 +11,7 @@ The main workflow starts in the super-admin tenant list. A managing admin browse
 ## Who Uses It
 
 - Managing platform admins browse customer tenants, use recent activity signals to identify organizations that may need attention, and permanently remove obsolete organizations when retention is no longer required.
-- Integration operators automate tenant creation, updates, deactivation, and permanent deletion from an authorized external system.
+- Integration operators automate tenant creation, updates, deactivation, and permanent deletion from an authorized external system, and update an organization's supported integration settings by name.
 - Platform operators activate or deactivate tenant workspaces.
 - Tenant admins benefit because a newly created tenant receives default global settings and an invited admin account.
 - Support staff use the tenant list as the starting point for temporary support-mode access.
@@ -25,7 +25,7 @@ The main workflow starts in the super-admin tenant list. A managing admin browse
 - Create an organization with its host, status, default settings, and invited initial admin.
 - Update organization identity, host, and active/inactive status.
 - Permanently delete another organization after confirming an irreversible warning.
-- Automate organization creation, partial updates, deactivation, and permanent deletion through the Integration API.
+- Automate organization creation, partial updates, deactivation, permanent deletion, and supported integration-setting updates through the Integration API.
 - Normalize organization hosts and prevent duplicate or invalid hosts.
 - Restrict administration to authorized users in the managing organization and prevent them from deleting their current organization.
 
@@ -45,11 +45,15 @@ When editing a tenant, the admin updates the tenant's name, host, or active/inac
 
 Access is restricted to users who have tenant-management permission and are operating from a designated managing tenant. Normal tenant users and learners are redirected away from this area.
 
+An authorized integration operator can update supported settings for an existing organization, such as its Luma, OpenAI, or LiveKit connection credentials. Luma is Mentingo's connected AI service. The operator submits the setting's name and value for the selected organization. Mentingo saves it encrypted and confirms which setting changed without returning the value. This API operation does not create provider keys or automatically provision them during tenant creation, and it adds no new UI.
+
 ## Key Technical Context
 
 - Frontend tenant pages live in `apps/web/app/modules/SuperAdmin` and are routed under `/super-admin/tenants`.
 - The tenant API lives in `apps/api/src/super-admin/tenants.controller.ts` and `apps/api/src/super-admin/tenants.service.ts`.
 - Integration lifecycle endpoints live in `apps/api/src/integration/integration.controller.ts` and reuse the tenant service's validation, update, and deletion safeguards.
+- `PATCH /api/integration/tenants/:tenantId/api-keys` accepts `{ "name": "OPENAI_API_KEY", "value": "<value>" }`. Names come from the existing `ALLOWED_SECRETS` list, not a Luma-only list. Unsupported names, extra fields, non-string values, and values over 4096 characters are rejected; empty and multiline strings are supported like the existing environment API. It requires `X-API-Key`, Integration API access, tenant-management permission, and a key owned by a managing tenant. The path determines the target; `X-Tenant-Id` is optional and cannot grant managing access. The response contains only `data.tenantId` and `data.updatedKeys`.
+- Key updates reuse the existing encrypted secret service and target-tenant transaction. The existing environment-change event records the actor and changed key names, never secret values. Other tenant secrets and global process configuration are unchanged.
 - Tenant administration requires `PERMISSIONS.TENANT_MANAGE` and `ManagingTenantAdminGuard`.
 - Hard deletion uses the tenant foreign-key cascade to remove tenant-scoped relational records atomically; the API independently rejects attempts to delete the current managing tenant.
 - Activity summaries use tenant-scoped audit records and display historical actor emails without exposing role snapshots. The five-action preview is loaded in one additional batched query for the visible organization page rather than one query per row.
@@ -61,3 +65,7 @@ Access is restricted to users who have tenant-management permission and are oper
 ## Test Evidence
 
 Frontend coverage verifies protocol-free host display with truncation and a full-value tooltip; activity-summary, five-action hover preview, trend, and active-user reach rendering; activity sort requests; status filtering; the hard-delete confirmation flow; protection of the current organization; tenant browsing; opening details; creation; updates; and denial for non-managing users. Backend E2E coverage verifies role-free latest actor snapshots, the newest-five activity limit, rolling current and previous 14-day activity summaries, distinct active-user reach, activity sorting, active/inactive filtering with matching totals, cascading tenant deletion, and rejection of current-tenant deletion. Integration API E2E coverage verifies tenant creation, partial updates, deactivation, permanent deletion, persisted update values, host normalization, current-managing-tenant protection, and rejection of lifecycle operations from non-managing tenants.
+
+Focused unit tests for the update endpoint cover the actual controller/guard metadata, missing and invalid credentials, permission checks, managing-owner/header separation, every supported environment name, empty/multiline values, unknown-name rejection at both schema and service boundaries, nonexistent tenants, key replacement, encryption/decryption, tenant-context isolation, preserving other settings, secret-free responses/events, and storage errors. Storage and transaction execution are mocked; these tests do not prove PostgreSQL RLS or transaction rollback. No live database tests or app servers are required for this focused suite.
+
+API startup generates the Integration API schema; in development it also generates the full API schema. Run `pnpm generate:client` afterward to regenerate the frontend client.

@@ -12,7 +12,7 @@ import {
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
 } from "@repo/shared";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -374,6 +374,14 @@ describe("Master course export and sync (e2e)", () => {
             en: ["Understand the source course"],
             pl: ["Zrozumiec kurs zrodlowy"],
           },
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: sourceAdmin.firstName,
+            lastName: sourceAdmin.lastName,
+            jobTitle: null,
+            description: null,
+            profilePictureReference: sourceAdmin.avatarReference,
+          },
           showAuthorSection: false,
           thumbnailPositionY: 72,
           availableLocales: ["en", "pl"],
@@ -600,8 +608,14 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
-    const { sourceCourseId, sourceChapterId, sourceLessonId, targetCourseId, targetCookie } =
-      await setupAndExport();
+    const {
+      sourceAdmin,
+      sourceCourseId,
+      sourceChapterId,
+      sourceLessonId,
+      targetCourseId,
+      targetCookie,
+    } = await setupAndExport();
 
     const targetCourseResponse = await withTenantHost(
       request(app.getHttpServer())
@@ -621,6 +635,19 @@ describe("Master course export and sync (e2e)", () => {
       "Master Source Lesson",
     );
 
+    const targetCoursesResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ page: 1, perPage: 100, language: "en" })
+        .set("Cookie", targetCookie),
+      TARGET_HOST,
+    ).expect(200);
+
+    expect(
+      targetCoursesResponse.body.data.find((course: { id: string }) => course.id === targetCourseId)
+        .author,
+    ).toBe(`${sourceAdmin.firstName} ${sourceAdmin.lastName}`);
+
     await runAsTenant(targetTenantId, async () => {
       const [targetCourse] = await db
         .select({
@@ -637,12 +664,20 @@ describe("Master course export and sync (e2e)", () => {
           baseLanguage: courses.baseLanguage,
           availableLocales: courses.availableLocales,
           categoryId: courses.categoryId,
+          authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
 
       expect(targetCourse).toBeDefined();
+      expect(targetCourse.authorMetadataType).toBe("object");
+      expect(targetCourse.authorMetadata).toMatchObject({
+        authorId: sourceAdmin.id,
+        firstName: sourceAdmin.firstName,
+        lastName: sourceAdmin.lastName,
+      });
       expect(targetCourse.title).toEqual({
         en: "Master Source Course",
         pl: "Kurs zrodlowy master",
@@ -752,7 +787,7 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("syncs course overview fields while preserving the target course status", async () => {
-    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const { sourceAdmin, sourceCourseId, targetCourseId } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
     await runAsTenant(targetTenantId, () =>
@@ -772,6 +807,14 @@ describe("Master course export and sync (e2e)", () => {
           },
           showAuthorSection: true,
           thumbnailPositionY: 28,
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: "Updated",
+            lastName: "Source Author",
+            jobTitle: null,
+            description: null,
+            profilePictureReference: null,
+          },
         })
         .where(eq(courses.id, sourceCourseId)),
     );
@@ -799,6 +842,8 @@ describe("Master course export and sync (e2e)", () => {
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
+          authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
@@ -815,6 +860,12 @@ describe("Master course export and sync (e2e)", () => {
     expect(syncedTargetCourse?.showAuthorSection).toBe(true);
     expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
     expect(syncedTargetCourse?.status).toBe("published");
+    expect(syncedTargetCourse?.authorMetadataType).toBe("object");
+    expect(syncedTargetCourse?.authorMetadata).toMatchObject({
+      authorId: sourceAdmin.id,
+      firstName: "Updated",
+      lastName: "Source Author",
+    });
   });
 
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {

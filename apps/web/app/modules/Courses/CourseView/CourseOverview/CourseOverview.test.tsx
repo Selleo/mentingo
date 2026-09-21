@@ -1,3 +1,4 @@
+import { COURSE_ORIGIN_TYPES, type CourseOriginType } from "@repo/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -30,6 +31,7 @@ const course = {
   description: "Course description",
   estimatedDurationSeconds: 3_600,
   learningOutcomes: [],
+  originType: COURSE_ORIGIN_TYPES.REGULAR as CourseOriginType,
   thumbnailPositionY: 50,
   thumbnailUrl: "/course-image.jpg",
   title: "Course title",
@@ -120,11 +122,18 @@ vi.mock("~/modules/Admin/EditCourse/components/CourseLanguageSelector", () => ({
 }));
 
 vi.mock("./CourseCategoryEditor", () => ({
-  default: ({ onChange }: { onChange: (categoryId: string) => Promise<void> }) => (
-    <button type="button" onClick={() => void onChange("category-2")}>
-      Change category
-    </button>
-  ),
+  default: ({
+    canEdit,
+    onChange,
+  }: {
+    canEdit: boolean;
+    onChange: (categoryId: string) => Promise<void>;
+  }) =>
+    canEdit && (
+      <button type="button" onClick={() => void onChange("category-2")}>
+        Change category
+      </button>
+    ),
 }));
 
 vi.mock("./CourseDescriptionModal", () => ({
@@ -213,21 +222,24 @@ vi.mock("./CourseSettingsDrawer", () => ({
 
 vi.mock("./CourseTitleEditor", () => ({
   default: ({
+    canEdit,
     onChange,
     onSave,
   }: {
+    canEdit: boolean;
     onChange: (title: string) => void;
     onSave: () => Promise<void>;
-  }) => (
-    <div>
-      <button type="button" onClick={() => onChange("Updated course title")}>
-        Change title
-      </button>
-      <button type="button" onClick={() => void onSave()}>
-        Save title
-      </button>
-    </div>
-  ),
+  }) =>
+    canEdit && (
+      <div>
+        <button type="button" onClick={() => onChange("Updated course title")}>
+          Change title
+        </button>
+        <button type="button" onClick={() => void onSave()}>
+          Save title
+        </button>
+      </div>
+    ),
 }));
 
 vi.mock("./CourseWhatYouWillLearn", () => ({
@@ -388,5 +400,25 @@ describe("CourseOverview", () => {
         courseOverviewCache: { idOrSlug: "course-slug", language: "en" },
       });
     });
+  });
+
+  it("hides metadata and media editing for shared courses", () => {
+    course.originType = COURSE_ORIGIN_TYPES.EXPORTED;
+
+    renderWith().render(
+      <MemoryRouter>
+        <CourseOverview
+          idOrSlug="course-slug"
+          language="en"
+          onLanguageChange={vi.fn()}
+          openGenerateTranslationModal={false}
+          setOpenGenerateTranslationModal={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByTestId(COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change title" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Change category" })).not.toBeInTheDocument();
   });
 });

@@ -35,6 +35,7 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   groupCourses,
+  groupManagerGroups,
   lessonLearningTime,
   lessons,
   resourceEntity,
@@ -52,6 +53,7 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { assignSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
@@ -452,6 +454,182 @@ describe("CourseController (e2e)", () => {
         .query({ language: SUPPORTED_LANGUAGES.EN })
         .set("Cookie", await cookieFor(admin, app))
         .expect(200);
+    });
+  });
+
+  describe("course statistics group manager scope", () => {
+    it("limits every statistics endpoint to the manager's assigned groups", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const manager = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.GROUP_MANAGER, tenantId: admin.tenantId });
+      await assignSystemRoleToUserInTests(
+        db,
+        manager.id,
+        manager.tenantId,
+        SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+      );
+      const managedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ tenantId: admin.tenantId });
+      const unmanagedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ tenantId: admin.tenantId });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        title: "Group manager statistics scope",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Statistics scope chapter",
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+      const [quiz] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.QUIZ,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Statistics scope quiz"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+          thresholdScore: 0,
+          displayOrder: 1,
+        })
+        .returning();
+      const managedGroup = await groupFactory
+        .withMembers([managedStudent.id])
+        .create({ tenantId: admin.tenantId });
+      const unmanagedGroup = await groupFactory
+        .withMembers([unmanagedStudent.id])
+        .create({ tenantId: admin.tenantId });
+
+      await db.insert(groupManagerGroups).values({
+        managerUserId: manager.id,
+        groupId: managedGroup.id,
+        tenantId: manager.tenantId,
+      });
+      await db.insert(coursesSummaryStats).values({
+        courseId: course.id,
+        authorId: admin.id,
+        freePurchasedCount: 1,
+        completedCourseStudentCount: 1,
+      });
+      await db.insert(studentCourses).values([
+        {
+          studentId: managedStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          progress: "completed",
+          completedAt: new Date().toISOString(),
+        },
+        {
+          studentId: unmanagedStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          progress: "completed",
+          completedAt: new Date().toISOString(),
+        },
+      ]);
+      await db.insert(studentLessonProgress).values([
+        {
+          studentId: managedStudent.id,
+          chapterId: chapter.id,
+          lessonId: quiz.id,
+          quizScore: 80,
+          attempts: 1,
+          isStarted: true,
+          isQuizPassed: true,
+          completedAt: new Date().toISOString(),
+        },
+        {
+          studentId: unmanagedStudent.id,
+          chapterId: chapter.id,
+          lessonId: quiz.id,
+          quizScore: 20,
+          attempts: 1,
+          isStarted: true,
+          isQuizPassed: true,
+          completedAt: new Date().toISOString(),
+        },
+      ]);
+      await db.insert(lessonLearningTime).values([
+        {
+          userId: managedStudent.id,
+          lessonId: quiz.id,
+          courseId: course.id,
+          totalSeconds: 120,
+        },
+        {
+          userId: unmanagedStudent.id,
+          lessonId: quiz.id,
+          courseId: course.id,
+          totalSeconds: 240,
+        },
+      ]);
+
+      const cookies = await cookieFor(manager, app);
+      const progressResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-progress`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(
+        progressResponse.body.data.map(({ studentId }: { studentId: string }) => studentId),
+      ).toEqual([managedStudent.id]);
+
+      const quizResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-quiz-results`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(
+        quizResponse.body.data.map(({ studentId }: { studentId: string }) => studentId),
+      ).toEqual([managedStudent.id]);
+
+      const aiMentorResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-ai-mentor-results`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(aiMentorResponse.body.data).toEqual([]);
+
+      const averageResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(averageResponse.body.data.averageScoresPerQuiz[0].averageScore).toBe(80);
+
+      const learningTimeResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/learning-time`)
+        .query({ perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(learningTimeResponse.body.data.users.map(({ id }: { id: string }) => id)).toEqual([
+        managedStudent.id,
+      ]);
+
+      const summaryResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics`)
+        .set("Cookie", cookies)
+        .expect(200);
+      expect(summaryResponse.body.data.enrolledCount).toBe(1);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-progress`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, groupId: unmanagedGroup.id })
+        .set("Cookie", cookies)
+        .expect(404);
     });
   });
 
@@ -3935,6 +4113,22 @@ describe("CourseController (e2e)", () => {
           description: Array.from({ length: 500 }, () => "word").join(" "),
         })
         .expect(200);
+
+      const refreshDeadline = Date.now() + 15000;
+
+      while (true) {
+        const [refreshedCourse] = await db
+          .select({ durationEstimates: courses.durationEstimates })
+          .from(courses)
+          .where(eq(courses.id, course.id));
+
+        if (refreshedCourse.durationEstimates.en?.totalSeconds === 150) break;
+        if (Date.now() >= refreshDeadline) {
+          throw new Error("Timed out waiting for the lesson update to refresh course duration");
+        }
+
+        await sleep(50);
+      }
 
       const refreshedResponse = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)

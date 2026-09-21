@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
 import { AI_MENTOR_TYPE, PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import _ from "lodash";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
@@ -62,6 +62,7 @@ import type {
   AiTranscriptionResult,
   AiUiMessageStream,
 } from "src/ai/ai-chat.types";
+import type { AiPracticeReplayMessage } from "src/ai/ai-practice.types";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -154,6 +155,10 @@ export class AiService {
     )();
   }
 
+  async getExistingThreadForLesson(lessonId: UUIDType, userId: UUIDType) {
+    return this.threadService.findExistingThreadForLesson(lessonId, userId);
+  }
+
   async getPracticeThreadWithSetup(data: {
     practiceSessionId: UUIDType;
     userId: UUIDType;
@@ -172,6 +177,7 @@ export class AiService {
       async () => {
         const existingThread = await this.aiRepository.findThread([
           eq(aiMentorThreads.practiceSessionId, data.practiceSessionId),
+          inArray(aiMentorThreads.status, [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED]),
           eq(aiMentorThreads.userId, data.userId),
         ]);
 
@@ -246,6 +252,8 @@ export class AiService {
               data.content,
               isVoiceMentor,
               data.id,
+              data.voiceTurnWasInterrupted,
+              data.voiceDeliveryContext,
             );
 
             const generationConfig = isVoiceMentor
@@ -279,6 +287,7 @@ export class AiService {
                 voiceSessionId: data.voiceSessionId,
               },
               createCoreStream,
+              data.abortSignal,
             );
 
             if (stream.source === AI_RUNTIME_SOURCES.CORE) return stream;
@@ -356,6 +365,39 @@ export class AiService {
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
+    const content = await this.generateWelcomeMessage(systemPrompt);
+    await this.aiRepository.insertMessage({
+      tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, content),
+      threadId,
+      role: MESSAGE_ROLE.MENTOR,
+      content,
+    });
+  }
+
+  async preparePracticeReplay(
+    threadId: UUIDType,
+    userId: UUIDType,
+  ): Promise<AiPracticeReplayMessage[]> {
+    const systemPrompt = await this.promptService.buildSystemPrompt(
+      { threadId, userId },
+      AI_MENTOR_TYPE.ROLEPLAY,
+    );
+    const welcome = await this.generateWelcomeMessage(systemPrompt);
+    return [
+      {
+        role: MESSAGE_ROLE.SYSTEM,
+        content: systemPrompt,
+        tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt),
+      },
+      {
+        role: MESSAGE_ROLE.MENTOR,
+        content: welcome,
+        tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, welcome),
+      },
+    ];
+  }
+
+  private async generateWelcomeMessage(systemPrompt: string) {
     const welcomeMessagePrompt = await this.promptService.loadPrompt("welcomePrompt", {
       systemPrompt,
     });
@@ -389,14 +431,7 @@ export class AiService {
       { name: "Start Conversation", asType: "generation" },
     )();
 
-    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
-
-    await this.aiRepository.insertMessage({
-      threadId,
-      content,
-      tokenCount,
-      role: MESSAGE_ROLE.MENTOR,
-    });
+    return content;
   }
 
   async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {
@@ -732,12 +767,13 @@ export class AiService {
       instructions,
       messages,
       maxOutputTokens: MAX_TOKENS,
+      abortSignal: data.abortSignal,
       ...generationConfig,
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CHAT),
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 
-        if (persistOnFinish) {
+        if (persistOnFinish && !data.abortSignal?.aborted) {
           await this.persistMentorChatMessages({
             data,
             model,
@@ -776,10 +812,18 @@ export class AiService {
 
     try {
       for await (const delta of stream) {
+        if (data.abortSignal?.aborted) {
+          trace.getActiveSpan()?.end();
+          return;
+        }
         mentorContent += delta;
         yield delta;
       }
 
+      if (data.abortSignal?.aborted) {
+        trace.getActiveSpan()?.end();
+        return;
+      }
       const persistedContent = isVoiceMentor ? stripVoiceControlTags(mentorContent) : mentorContent;
       await this.persistMentorChatMessages({
         data,

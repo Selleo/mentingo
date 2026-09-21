@@ -42,6 +42,7 @@ type CourseSettingsDrawerProps = {
   open: boolean;
   priceInCents?: number;
   status: CourseStatusValue;
+  isSharedCourse: boolean;
   title: string;
   unsupportedLessonCount: number;
 };
@@ -54,18 +55,21 @@ export default function CourseSettingsDrawer({
   open,
   priceInCents,
   status,
+  isSharedCourse,
   title,
   unsupportedLessonCount,
 }: CourseSettingsDrawerProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<SettingsTab>(SETTINGS_TABS.SETTINGS);
+  const [activeTab, setActiveTab] = useState<SettingsTab>(
+    isSharedCourse ? SETTINGS_TABS.STATUS : SETTINGS_TABS.SETTINGS,
+  );
   const courseTabs = useEditCourseTabs();
   const visibleCourseTabValues = new Set(courseTabs.map((tab) => tab.value));
 
   const tabs: Array<{ label: string; value: SettingsTab }> = [
-    { label: title, value: SETTINGS_TABS.SETTINGS },
+    ...(!isSharedCourse ? [{ label: title, value: SETTINGS_TABS.SETTINGS }] : []),
     { label: t("adminCourseView.common.status"), value: SETTINGS_TABS.STATUS },
-    ...(visibleCourseTabValues.has(EDIT_COURSE_TABS.PRICING)
+    ...(!isSharedCourse && visibleCourseTabValues.has(EDIT_COURSE_TABS.PRICING)
       ? [{ label: t("adminCourseView.common.pricing"), value: SETTINGS_TABS.PRICING }]
       : []),
     ...(visibleCourseTabValues.has(EDIT_COURSE_TABS.ENROLLED)
@@ -76,7 +80,7 @@ export default function CourseSettingsDrawer({
           },
         ]
       : []),
-    ...(visibleCourseTabValues.has(EDIT_COURSE_TABS.EXPORTS)
+    ...(!isSharedCourse && visibleCourseTabValues.has(EDIT_COURSE_TABS.EXPORTS)
       ? [
           {
             label: t("adminCourseView.sharedCourse.exportsTitle"),
@@ -123,7 +127,7 @@ export default function CourseSettingsDrawer({
             </div>
 
             <div className="min-w-0 flex-1 overflow-auto p-4 md:p-6">
-              {activeTab === SETTINGS_TABS.SETTINGS && (
+              {activeTab === SETTINGS_TABS.SETTINGS && !isSharedCourse && (
                 <CourseSettingsSwitches courseId={courseId} />
               )}
               {activeTab === SETTINGS_TABS.STATUS && (

@@ -33,6 +33,7 @@ const CATEGORY_PAGE_SIZE = 4;
 type CategoryCoursesRowProps = {
   category: GetAllCategoriesResponse["data"][number];
   progressByCourseId: Record<string, number | undefined>;
+  userId?: string;
   rowRef?: Ref<HTMLElement>;
 };
 
@@ -46,7 +47,12 @@ type HeroCourse = {
   slug: string;
 };
 
-const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCoursesRowProps) => {
+const CategoryCoursesRow = ({
+  category,
+  progressByCourseId,
+  userId,
+  rowRef,
+}: CategoryCoursesRowProps) => {
   const { language } = useLanguageStore();
   const prefetchedAfterPageRef = useRef(0);
   const hasNextPageRef = useRef(false);
@@ -57,6 +63,7 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
       {
         category: category.title,
         language,
+        userId,
       },
       COURSE_PAGE_SIZE,
       { notifyOnChangeProps: ["data", "isLoading", "hasNextPage", "isFetchingNextPage"] },
@@ -184,7 +191,10 @@ const ModernCoursesView = () => {
     hasNextPage: hasNextCategoriesPage,
     isFetchingNextPage: isFetchingNextCategoriesPage,
     fetchNextPage: fetchNextCategoriesPage,
-  } = useInfiniteAvailableCourseCategories({ language }, CATEGORY_PAGE_SIZE);
+  } = useInfiniteAvailableCourseCategories(
+    { language, userId: currentUser?.id },
+    CATEGORY_PAGE_SIZE,
+  );
 
   const categories = useMemo(
     () =>
@@ -381,6 +391,7 @@ const ModernCoursesView = () => {
                   key={category.id}
                   category={category}
                   progressByCourseId={progressByCourseId}
+                  userId={currentUser?.id}
                   rowRef={index === categories.length - 1 ? lastCategoryRowRef : undefined}
                 />
               )),

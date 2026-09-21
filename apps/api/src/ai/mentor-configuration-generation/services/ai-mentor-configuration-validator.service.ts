@@ -6,6 +6,7 @@ import {
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
@@ -23,7 +24,10 @@ import type {
 
 @Injectable()
 export class AiMentorConfigurationValidatorService {
-  constructor(private readonly promptService: PromptService) {}
+  constructor(
+    private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
+  ) {}
 
   async validate(
     input: ValidateAiMentorConfigurationDraftInput,
@@ -67,28 +71,41 @@ export class AiMentorConfigurationValidatorService {
     await this.promptService.isNotEmpty(prompt);
 
     try {
-      const provider = await this.promptService.getOpenAI();
-      const { generateText, jsonSchema, Output } = await loadAiSdk();
-      const schema = jsonSchema<AiMentorConfigurationValidatorModelResult>(
-        () => aiMentorConfigurationValidatorModelResultSchema,
-      );
-      const result = await generateText({
-        model: provider(OPENAI_MODELS.BASIC),
-        output: Output.object({ schema }),
-        providerOptions: {
-          openai: { reasoningEffort: AI_MENTOR_CONFIGURATION_VALIDATOR_REASONING_EFFORT },
+      return await this.aiRuntimeService.validateMentorConfiguration(
+        {
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0,
         },
-        temperature: 0,
-        system,
-        prompt,
-        telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CONFIGURATION_VALIDATION),
-      });
-      const output = result.output;
+        async () => {
+          const provider = await this.promptService.getOpenAI();
+          const { generateText, jsonSchema, Output } = await loadAiSdk();
+          const schema = jsonSchema<AiMentorConfigurationValidatorModelResult>(
+            () => aiMentorConfigurationValidatorModelResultSchema,
+          );
+          const result = await generateText({
+            model: provider(OPENAI_MODELS.BASIC),
+            output: Output.object({ schema }),
+            providerOptions: {
+              openai: { reasoningEffort: AI_MENTOR_CONFIGURATION_VALIDATOR_REASONING_EFFORT },
+            },
+            temperature: 0,
+            system,
+            prompt,
+            telemetry: buildAiTelemetry(
+              AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CONFIGURATION_VALIDATION,
+            ),
+          });
+          const output = result.output;
 
-      if (!Value.Check(aiMentorConfigurationValidatorModelResultSchema, output))
-        throw new Error("Validator returned an invalid result structure");
+          if (!Value.Check(aiMentorConfigurationValidatorModelResultSchema, output))
+            throw new Error("Validator returned an invalid result structure");
 
-      return output;
+          return output;
+        },
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       updateActiveObservation({ level: "ERROR", statusMessage: message });

@@ -1,4 +1,4 @@
-import { MAX_COURSE_LEARNING_OUTCOMES } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, MAX_COURSE_LEARNING_OUTCOMES } from "@repo/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -64,6 +64,28 @@ describe("CourseWhatYouWillLearn", () => {
     expect(screen.getByText("Clean data")).toBeInTheDocument();
     expect(screen.getByText("Build dashboards")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add learning outcome" })).not.toBeInTheDocument();
+  });
+
+  it("renders shared-course learning outcomes without editing controls", () => {
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse({
+      learningOutcomes: ["Centrally managed outcome"],
+      originType: COURSE_ORIGIN_TYPES.EXPORTED,
+    });
+
+    renderWith().render(
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Centrally managed outcome"]}
+        language="en"
+        idOrSlug="course-1"
+      />,
+    );
+
+    expect(screen.getByText("Centrally managed outcome")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add learning outcome" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove learning outcome" }),
+    ).not.toBeInTheDocument();
   });
 
   it("lets admins add a learning outcome and saves it for the current language", async () => {

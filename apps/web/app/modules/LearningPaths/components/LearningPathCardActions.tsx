@@ -175,14 +175,14 @@ export function LearningPathCardActions({
               {t("learningPathsView.enrollment.enrolled")}
             </Badge>
           )}
-          {!isEnrolled && (
+          {!isEnrolled && onEnrollCurrentUser && (
             <Button
               type="button"
               variant="primary"
               className="gap-2"
-              disabled={isPending || !onEnrollCurrentUser}
+              disabled={isPending}
               onClick={() => {
-                void onEnrollCurrentUser?.();
+                void onEnrollCurrentUser();
               }}
             >
               <UserPlus className="size-4" />

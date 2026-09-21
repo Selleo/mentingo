@@ -67,7 +67,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
       onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
       className={cn(
-        "group flex items-center gap-2 rounded-lg border border-neutral-100",
+        "group flex items-start gap-2 rounded-lg border border-neutral-100",
         compact ? "px-2 py-1" : "px-2.5 py-2",
       )}
     >
@@ -87,7 +87,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
 
       <button
         type="button"
-        className="cursor-grab touch-none text-neutral-400 hover:text-neutral-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+        className="mt-0.5 cursor-grab touch-none text-neutral-400 hover:text-neutral-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
         {...attributes}
         {...listeners}
         aria-label={t("dashboardHome.widgets.todoTasks.reorder")}
@@ -114,7 +114,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
       ) : (
         <span
           className={cn(
-            "min-w-0 flex-1 truncate text-sm",
+            "min-w-0 flex-1 break-words text-sm leading-5",
             task.completed && "text-neutral-400 line-through",
           )}
         >

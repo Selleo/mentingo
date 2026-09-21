@@ -4,6 +4,7 @@ import { groupsFilterSchema } from "src/group/group.schema";
 
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const courseSortFields = [
   "title",
@@ -81,6 +82,7 @@ export type CoursesQuery = {
   sort?: SortCourseFieldsOptions;
   currentUserId?: UUIDType;
   currentUserPermissions?: PermissionKey[];
+  currentUser?: CurrentUserType;
   excludeCourseId?: UUIDType;
   language: SupportedLanguages;
 };

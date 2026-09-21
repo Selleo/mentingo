@@ -112,6 +112,7 @@ export default function CourseCategoryEditor({
       ) : (
         <button
           type="button"
+          data-testid={COURSE_SETTINGS_HANDLES.CATEGORY_SELECT}
           disabled={!canEdit}
           onClick={() => {
             if (canEdit) {

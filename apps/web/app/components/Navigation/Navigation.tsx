@@ -50,7 +50,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     ],
   });
   const { hasAccess: canReadLearningPaths } = usePermissions({
-    required: [PERMISSIONS.LEARNING_PATH_READ],
+    required: [PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
   });
 
   const { t } = useTranslation();
@@ -155,8 +155,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
         <NavigationGlobalSearchWrapper
           useCompactVariant={isSidebarCollapsed}
-          containerClassName={cn("w-full", {
-            "flex justify-center": isSidebarCollapsed,
+          containerClassName={cn("hidden w-full 2xl:block", {
+            "2xl:flex 2xl:justify-center": isSidebarCollapsed,
           })}
         />
 

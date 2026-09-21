@@ -40,6 +40,16 @@ export class ThreadService {
     return { thread: newThread, newThread: true };
   }
 
+  async findExistingThreadForLesson(lessonId: UUIDType, userId: UUIDType) {
+    const aiMentorLessonId = await this.findAiMentorLessonIdFromLesson(lessonId);
+
+    return this.aiRepository.findThread([
+      eq(aiMentorThreads.aiMentorLessonId, aiMentorLessonId),
+      inArray(aiMentorThreads.status, [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED]),
+      eq(aiMentorThreads.userId, userId),
+    ]);
+  }
+
   async findThread(
     threadId: UUIDType,
     currentUser: ThreadViewer,
@@ -62,7 +72,10 @@ export class ThreadService {
     const author = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 
     const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
-    const hasAccess = canManageUsers || author === userId;
+    const isManagedLearner =
+      hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ) &&
+      (await this.aiRepository.isLearnerManagedByUser(thread.userId, userId));
+    const hasAccess = canManageUsers || author === userId || isManagedLearner;
 
     if (!(thread.userId === userId || hasAccess))
       throw new ForbiddenException("common.toast.noAccess");

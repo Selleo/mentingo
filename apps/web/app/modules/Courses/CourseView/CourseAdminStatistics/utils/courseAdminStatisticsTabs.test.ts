@@ -6,6 +6,15 @@ import {
 } from "./courseAdminStatisticsTabs";
 
 describe("getVisibleCourseStatisticsTabs", () => {
+  it("always includes certificate status", () => {
+    expect(
+      getVisibleCourseStatisticsTabs({
+        hasAiMentorResults: false,
+        isAIConfigured: false,
+      }),
+    ).toContain(CourseAdminStatisticsTabs.certificates);
+  });
+
   it("hides AI mentor results when AI is not configured and no AI mentor results exist", () => {
     expect(
       getVisibleCourseStatisticsTabs({

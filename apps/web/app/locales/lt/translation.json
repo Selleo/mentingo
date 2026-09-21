@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Sesija",
+    "context": "Kontekstas",
+    "activity": "Veikla",
+    "filters": "Filtrai",
+    "details": "Išsami informacija",
+    "selectConversation": "Pasirinkite pokalbį",
+    "pageSize": "Pokalbiai puslapyje",
+    "conversation": "Pokalbis",
+    "source": "Kursas",
+    "view": "Peržiūrėti pokalbį",
+    "title": "DI pokalbiai",
+    "description": "Peržiūrėkite praktikos sesijas ir DI mentoriaus pamokas.",
+    "owner": "Naudotojas",
+    "loading": "Įkeliama…",
+    "retry": "Bandyti dar kartą",
+    "noMatches": "Nė vienas pokalbis neatitinka šių filtrų.",
+    "loadMore": "Įkelti daugiau",
+    "back": "Grįžti į pokalbius",
+    "readOnly": "Tik skaitomas pokalbis",
+    "unavailable": "Šis pokalbis nepasiekiamas.",
+    "untitled": "Pokalbis be pavadinimo",
+    "started": "Pradžia",
+    "lastActivity": "Paskutinė veikla",
+    "language": "Kalba",
+    "result": "Peržiūrėti vertinimą",
+    "emptyTranscript": "Šiame pokalbyje dar nėra žinučių.",
+    "messagesError": "Nepavyko įkelti žinučių.",
+    "search": "Ieškoti pokalbių pavadinimų",
+    "type": "Tipas",
+    "allTypes": "Visi tipai",
+    "status": "Būsena",
+    "allStatuses": "Visos būsenos",
+    "from": "Pradėti nuo",
+    "to": "Pradėti iki",
+    "listError": "Nepavyko įkelti pokalbių.",
+    "errors": { "invalidDateRange": "Pabaigos data turi būti vėlesnė už pradžios datą." },
+    "empty": "Pokalbių dar nėra.",
+    "types": {
+      "practice": "Praktikos sesija",
+      "ai-mentor": "DI mentoriaus pamoka"
+    },
+    "statuses": {
+      "active": "Vyksta",
+      "completed": "Baigtas",
+      "archived": "Archyvuotas"
+    }
+  },
   "dashboardHome": {
     "title": "Jūsų skydelis",
     "subtitle": "Svarbiausia mokymosi informacija ir veiksmai visada po ranka.",
@@ -342,7 +390,8 @@
       "admin": "Admin",
       "contentCreator": "Turinio kūrėjas",
       "trainer": "Trainer",
-      "student": "Studentas"
+      "student": "Studentas",
+      "groupManager": "Grupių vadovas"
     },
     "languages": {
       "en": "Anglų",
@@ -914,6 +963,7 @@
       "participants": "Dalyviai",
       "viewerMic": "Žiūrovo mikrofonas",
       "viewerCamera": "Žiūrovo kamera",
+      "editBlockedDuringSession": "Norėdami pakeisti šį nustatymą, pirmiausia užbaikite dabartinę sesiją.",
       "scheduleTooltip": "Planuojamas mokymų laikas",
       "timezoneTooltip": "Mokymų laiko juosta",
       "maxParticipantsTooltip": "Maksimalus dalyvių skaičius",
@@ -1886,6 +1936,7 @@
         "course_delete": "Gali trinti kursus.",
         "course_enrollment": "Gali valdyti registraciją į kursus.",
         "course_statistics": "Gali peržiūrėti kursų analizę ir statistiką.",
+        "managed_group_results_read": "Gali peržiūrėti priskirtų valdomų grupių besimokančiųjų rezultatus.",
         "course_export": "Gali eksportuoti kursų duomenis.",
         "learning_mode_use": "Gali naudoti mokymosi režimo funkcijas.",
         "learning_progress_update": "Gali atnaujinti besimokančiojo pažangą.",
@@ -1933,6 +1984,7 @@
         "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
         "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
+        "ai_thread_read": "Gali peržiūrėti visus pokalbius su DI ir jų išsaugotus vertinimus.",
         "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
       }
     },
@@ -2019,7 +2071,7 @@
   },
   "adminUserView": {
     "header": "Sukurti naują vartotoją",
-    "subHeader": "Norėdami sukurti naują vartotoją, užpildykite informaciją. Baigę spustelėkite išsaugoti.",
+    "managedGroupsTooltip": "Pasirinktos grupės nustato, kurių besimokančiųjų kursus, pažangą, rezultatus, mokymosi laiką ir sertifikatus šis naudotojas gali peržiūrėti kaip grupės vadovas.",
     "editUserHeader": "Vartotojo informacija",
     "tabs": {
       "information": "Vartotojo informacija",
@@ -2032,7 +2084,8 @@
     "placeholder": {
       "role": "Pasirinkite vaidmenį",
       "groupId": "Pasirinkite grupę",
-      "language": "Pasirinkite kalbą"
+      "language": "Pasirinkite kalbą",
+      "managedGroups": "Pasirinkite valdomas grupes"
     },
     "field": {
       "firstName": "Vardas",
@@ -2041,7 +2094,8 @@
       "role": "Vaidmuo",
       "language": "Kalba",
       "status": "Būsena",
-      "groups": "Grupė"
+      "groups": "Grupė",
+      "managedGroups": "Valdomos grupės"
     },
     "toast": {
       "userCreatedSuccessfully": "Vartotojas sėkmingai sukurtas",
@@ -3207,11 +3261,12 @@
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
           "fillInTheBlanksSentenceTip": "Parašykite sakinį ir įrašykite į jį žodžius.",
           "fillInTheBlanksWordTip": "Sukurkite ir įmeskite žodį į sakinį.",
-          "leaveContentHeader": "Ar tikrai norite išeiti iš šios klausimų redagavimo priemonės?",
-          "leaveContentBody": "Bus ištrinta visa neišsaugota eiga",
+          "leaveContentHeader": "Išeiti iš pamokos redaktoriaus?",
+          "leaveContentBody": "Turite neišsaugotų pakeitimų. Jei išeisite dabar, jie bus prarasti.",
+          "leaveContentCancel": "Tęsti redagavimą",
+          "leaveContentDiscard": "Išeiti neišsaugojus",
           "dropOrClick": "Nuvilkite vaizdą čia arba spustelėkite, kad įkeltumėte",
           "allowedFormats": "PNG, JPG arba SVG",
-          "leaveContentBodyValidate": "Jei norite išsaugoti pakeitimus, pirmiausia turite patvirtinti formą",
           "aiMentorInstructionsTooltip": "Apibūdinkite, kaip AI mentorius turėtų elgtis pamokos metu. Įtraukite kontekstą, vaidmenį ar scenarijų, kurio AI turėtų laikytis. Tai apibrėžia, kaip AI vadovaus pokalbiui.",
           "updateAiMentorAvatarDescription": "Įkelkite naują AI mentoriaus vaizdą arba pašalinkite esamą.",
           "updateAiMentorAvatar": "Atnaujinkite AI mentoriaus avatarą",
@@ -3390,7 +3445,23 @@
         "progress": "Pažanga",
         "quizResults": "Viktorinos rezultatai",
         "aiMentorResults": "AI mentoriaus rezultatai",
-        "learningTime": "Mokymosi laikas"
+        "learningTime": "Mokymosi laikas",
+        "certificates": "Sertifikatai"
+      },
+      "certificates": {
+        "learner": "Besimokantysis",
+        "email": "El. paštas",
+        "groups": "Grupės",
+        "status": "Būsena",
+        "expiry": "Galiojimo pabaiga",
+        "preview": "Peržiūrėti sertifikatą",
+        "empty": "Užregistruotų besimokančiųjų nerasta.",
+        "statuses": {
+          "not_earned": "Negautas",
+          "active": "Aktyvus",
+          "expired": "Baigė galioti",
+          "revoked": "Atšauktas"
+        }
       },
       "field": {
         "studentName": "Studentas",
@@ -3608,6 +3679,15 @@
     }
   },
   "studentCoursesView": {
+    "courseUnavailable": {
+      "accessTitle": "Kursas nepasiekiamas",
+      "accessDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti kursą.",
+      "goToLogin": "Eiti į prisijungimą",
+      "goToCourseList": "Eiti į kursų sąrašą",
+      "goToHome": "Eiti į pagrindinį puslapį",
+      "notFoundTitle": "Kursas nerastas",
+      "notFoundDescription": "Šio kurso rasti nepavyko."
+    },
     "other": {
       "cannotFindCourses": "Neradome jokių kursų",
       "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau",
@@ -3700,6 +3780,7 @@
       "single": "Vienišas",
       "multiple": "Keli",
       "fillInTheBlanks": "Užpildykite tuščias vietas.",
+      "notAnswered": "Neatsakyta",
       "selectQuestion": "pasirinkti klausimą.",
       "trueOrFalseQuestion": "Tikras ar klaidingas klausimas.",
       "multipleChoice": "Klausimas su keliais pasirinkimais.",
@@ -3891,6 +3972,11 @@
           "muted": "Nutildyta",
           "mutedHint": "Jūsų mikrofonas nutildytas. Mentorius jūsų negirdi.",
           "youSaid": "Tu sakei",
+          "recovery": {
+            "failedTitle": "Balso sesija atsijungė",
+            "failedDescription": "Ryšio atkurti nepavyko. Paleiskite balso sesiją iš naujo, kad tęstumėte.",
+            "restart": "Paleisti sesiją iš naujo"
+          },
           "states": {
             "idle": {
               "title": "Paruošta",
@@ -4187,7 +4273,8 @@
       "admin": "Administratorius",
       "student": "Studentas",
       "content_creator": "Turinio kūrėjas",
-      "trainer": "Treneris"
+      "trainer": "Treneris",
+      "group_manager": "Grupių vadovas"
     },
     "switch": {
       "enabled": "Įjungta",
@@ -5518,6 +5605,7 @@
   "luma": {
     "errors": {
       "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą.",
+      "invalidAiMentorConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama mentoriaus konfigūracija. Bandykite generuoti kursą dar kartą.",
       "invalidAiJudgeConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama vertinimo konfigūracija. Bandykite generuoti kursą dar kartą."
     }
   },
@@ -5547,6 +5635,8 @@
       "invalidLessonType": "Tiesioginiai mokymai priskyrimus galima pridėti tik prie Tiesioginiai mokymai pamokų.",
       "deleteAssignedToLesson": "Šis Tiesioginiai mokymai susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Tiesioginiai mokymai.",
       "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
+      "liveKitRoomNotAvailable": "Šiai sesijai skirtas LiveKit kambarys nepasiekiamas.",
+      "activeSessionUpdateForbidden": "Šio tiesioginio mokymo negalima keisti, kol vyksta sesija.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }

@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react";
 import { ANNOUNCEMENT_SOURCE_TYPES, ANNOUNCEMENT_STATUSES } from "@repo/shared";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCheck, Megaphone, Trash2 } from "lucide-react";
@@ -22,6 +23,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { getDateLocale } from "~/utils/getDateLocale";
 
 import { NOTIFICATIONS_HANDLES } from "../handles";
+import { getNotificationHref } from "../utils";
 
 import { SafeAnnouncementContent } from "./SafeAnnouncementContent";
 
@@ -48,6 +50,8 @@ export function NotificationAnnouncementItem({
   const canDeleteAnnouncement =
     canDelete && announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.MANUAL;
 
+  const notificationHref = getNotificationHref(announcement);
+
   const distance = formatDistanceToNow(new Date(announcement.createdAt), {
     addSuffix: true,
     locale: getDateLocale(language),
@@ -55,14 +59,8 @@ export function NotificationAnnouncementItem({
 
   const handleMarkAsRead = () => markAsRead({ id: announcement.id });
 
-  return (
-    <article
-      className={cn(
-        "group grid grid-cols-[40px_1fr_auto] gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-colors hover:border-primary-200 hover:bg-primary-50/40",
-        isUnread && highlightUnread && "border-primary-300 bg-primary-50/60",
-      )}
-      data-testid={NOTIFICATIONS_HANDLES.card(announcement.id)}
-    >
+  const notificationContent = (
+    <>
       <div className="grid size-10 place-items-center rounded-lg bg-primary-100 text-primary-800">
         <Megaphone className="size-5" aria-hidden />
       </div>
@@ -84,6 +82,28 @@ export function NotificationAnnouncementItem({
           <span>{distance}</span>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <article
+      className={cn(
+        "group grid grid-cols-[1fr_auto] gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-colors hover:border-primary-200 hover:bg-primary-50/40",
+        isUnread && highlightUnread && "border-primary-300 bg-primary-50/60",
+      )}
+      data-testid={NOTIFICATIONS_HANDLES.card(announcement.id)}
+    >
+      {notificationHref ? (
+        <Link
+          to={notificationHref}
+          className="grid min-w-0 grid-cols-[40px_1fr] gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {notificationContent}
+        </Link>
+      ) : (
+        <div className="grid min-w-0 grid-cols-[40px_1fr] gap-3">{notificationContent}</div>
+      )}
 
       <div className="flex items-start gap-1">
         {isUnread && (

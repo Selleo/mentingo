@@ -7,6 +7,7 @@ describe("checkRouteAccess", () => {
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE])).toBe(true);
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_UPDATE_OWN])).toBe(true);
     expect(checkRouteAccess("admin/courses", [PERMISSIONS.COURSE_READ])).toBe(false);
+    expect(checkRouteAccess("admin/courses", [PERMISSIONS.MANAGED_GROUP_RESULTS_READ])).toBe(false);
   });
 
   it("should handle wildcard routes", () => {

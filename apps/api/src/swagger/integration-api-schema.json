@@ -217,6 +217,72 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}/api-keys": {
+      "patch": {
+        "operationId": "IntegrationController_updateTenantApiKeys",
+        "summary": "Update a tenant environment value",
+        "description": "Sets or replaces a supported tenant environment value by name. Uses the same supported names as the environment settings API. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint. Values are encrypted and never returned. The tenant in the path is authoritative, regardless of X-Tenant-Id.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantApiKeysBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTenantApiKeysResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/deactivate": {
       "post": {
         "operationId": "IntegrationController_deactivateTenant",
@@ -1508,6 +1574,270 @@
           "data"
         ]
       },
+      "UpdateTenantApiKeysBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "const": "MICROSOFT_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "MICROSOFT_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "MICROSOFT_CALENDAR_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "MICROSOFT_CALENDAR_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "MICROSOFT_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "OPENAI_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "BUNNY_STREAM_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "BUNNY_STREAM_READ_ONLY_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "BUNNY_STREAM_LIBRARY_ID",
+                "type": "string"
+              },
+              {
+                "const": "BUNNY_STREAM_CDN_URL",
+                "type": "string"
+              },
+              {
+                "const": "BUNNY_STREAM_TOKEN_SIGNING_KEY",
+                "type": "string"
+              },
+              {
+                "const": "GOOGLE_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "GOOGLE_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "GOOGLE_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "VITE_GOOGLE_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "VITE_MICROSOFT_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "STRIPE_WEBHOOK_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "STRIPE_SECRET_KEY",
+                "type": "string"
+              },
+              {
+                "const": "VITE_STRIPE_PUBLISHABLE_KEY",
+                "type": "string"
+              },
+              {
+                "const": "SLACK_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "SLACK_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
+                "const": "SLACK_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "VITE_SLACK_OAUTH_ENABLED",
+                "type": "string"
+              },
+              {
+                "const": "LUMA_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "LIVEKIT_URL",
+                "type": "string"
+              },
+              {
+                "const": "LIVEKIT_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "LIVEKIT_API_SECRET",
+                "type": "string"
+              }
+            ]
+          },
+          "value": {
+            "maxLength": 4096,
+            "writeOnly": true,
+            "description": "Tenant environment value. Stored encrypted; never returned in responses.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ]
+      },
+      "UpdateTenantApiKeysResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "updatedKeys": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "MICROSOFT_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "MICROSOFT_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "MICROSOFT_CALENDAR_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "MICROSOFT_CALENDAR_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "MICROSOFT_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "OPENAI_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "BUNNY_STREAM_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "BUNNY_STREAM_READ_ONLY_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "BUNNY_STREAM_LIBRARY_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "BUNNY_STREAM_CDN_URL",
+                      "type": "string"
+                    },
+                    {
+                      "const": "BUNNY_STREAM_TOKEN_SIGNING_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "VITE_GOOGLE_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "VITE_MICROSOFT_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "STRIPE_WEBHOOK_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "STRIPE_SECRET_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "VITE_STRIPE_PUBLISHABLE_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "SLACK_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "SLACK_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "SLACK_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "VITE_SLACK_OAUTH_ENABLED",
+                      "type": "string"
+                    },
+                    {
+                      "const": "LUMA_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "LIVEKIT_URL",
+                      "type": "string"
+                    },
+                    {
+                      "const": "LIVEKIT_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "LIVEKIT_API_SECRET",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "tenantId",
+              "updatedKeys"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeactivateTenantResponse": {
         "type": "object",
         "properties": {
@@ -2033,6 +2363,25 @@
                     "name"
                   ]
                 }
+              },
+              "managedGroups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -2074,6 +2423,13 @@
           "roleSlugs": {
             "type": "array",
             "items": {
+              "type": "string"
+            }
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -2162,6 +2518,13 @@
                 "type": "null"
               }
             ]
+          },
+          "managedGroupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           },
           "email": {
             "format": "email",

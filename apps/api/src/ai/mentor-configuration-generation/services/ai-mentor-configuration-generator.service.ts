@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { AI_MENTOR_CONFIGURATION_GENERATION_MODE, AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
@@ -31,7 +32,10 @@ import type { AiMentorConfigurationContent } from "src/lesson/ai-mentor-configur
 
 @Injectable()
 export class AiMentorConfigurationGeneratorService {
-  constructor(private readonly promptService: PromptService) {}
+  constructor(
+    private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
+  ) {}
 
   async generate(
     input: GenerateAiMentorConfigurationDraftInput,
@@ -83,10 +87,20 @@ export class AiMentorConfigurationGeneratorService {
     await this.promptService.isNotEmpty(prompt);
 
     try {
-      const result = await this.generateCoreTeacherFields(system, prompt);
+      const result = await this.aiRuntimeService.generateMentorConfiguration(
+        {
+          configurationType: AI_MENTOR_TYPE.TEACHER,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0,
+        },
+        () => this.generateCoreTeacherFields(system, prompt),
+      );
       if (!Value.Check(generatedAiMentorTeacherConfigurationFieldsSchema, result))
         throw new Error("Generator returned an invalid configuration structure");
-      return result;
+      return result as GeneratedAiMentorTeacherConfigurationFields;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       updateActiveObservation({ level: "ERROR", statusMessage: message });
@@ -101,10 +115,20 @@ export class AiMentorConfigurationGeneratorService {
     await this.promptService.isNotEmpty(prompt);
 
     try {
-      const result = await this.generateCoreRoleplayFields(system, prompt);
+      const result = await this.aiRuntimeService.generateMentorConfiguration(
+        {
+          configurationType: AI_MENTOR_TYPE.ROLEPLAY,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0,
+        },
+        () => this.generateCoreRoleplayFields(system, prompt),
+      );
       if (!Value.Check(generatedAiMentorRoleplayConfigurationFieldsSchema, result))
         throw new Error("Generator returned an invalid configuration structure");
-      return result;
+      return result as GeneratedAiMentorRoleplayConfigurationFields;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       updateActiveObservation({ level: "ERROR", statusMessage: message });

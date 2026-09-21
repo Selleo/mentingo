@@ -15,6 +15,10 @@ import {
 } from "@repo/shared";
 import { and, eq, gt, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 
+import {
+  getGroupManagerGroupCourseScopeCondition,
+  getGroupManagerLiveTrainingScopeCondition,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { SettingsService } from "src/settings/settings.service";
 import {
@@ -450,6 +454,15 @@ export class CalendarService {
       )
     `;
 
+    const managerScopeCondition = getGroupManagerGroupCourseScopeCondition(
+      currentUser,
+      groupCourses.groupId,
+      groupCourses.courseId,
+      [PERMISSIONS.COURSE_ENROLLMENT, PERMISSIONS.COURSE_UPDATE_OWN],
+    );
+
+    if (managerScopeCondition) return managerScopeCondition;
+
     if (this.canManageAnyCourseDueDate(currentUser)) return sql`TRUE`;
 
     if (hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_UPDATE_OWN])) {
@@ -460,6 +473,14 @@ export class CalendarService {
   }
 
   private getLiveTrainingVisibilityCondition(currentUser: CurrentUserType): SQL {
+    const managerScopeCondition = getGroupManagerLiveTrainingScopeCondition(
+      currentUser,
+      liveTrainings.id,
+      [PERMISSIONS.LIVE_TRAINING_READ, PERMISSIONS.LIVE_TRAINING_STATISTICS],
+    );
+
+    if (managerScopeCondition) return managerScopeCondition;
+
     if (this.canManageAnyLiveTraining(currentUser)) {
       return sql`TRUE`;
     }

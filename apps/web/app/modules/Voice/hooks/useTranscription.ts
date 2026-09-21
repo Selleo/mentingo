@@ -1,4 +1,4 @@
-import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
+import { VOICE_ACTION, VOICE_ENDPOINTING_MODE, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
@@ -68,6 +68,7 @@ export function useTranscription({ setInput, onLevelChange }: TranscriptionProps
     try {
       await streamerRef.current.start({
         voiceAction: VOICE_ACTION.TRANSCRIPT,
+        endpointingMode: VOICE_ENDPOINTING_MODE.CLIENT_VAD,
       });
 
       setIsRecording(true);

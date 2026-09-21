@@ -11,9 +11,10 @@ describe("dashboard widget endpoint permissions", () => {
     StatisticsController.prototype.getDashboardDeadlineRiskSummary,
     StatisticsController.prototype.getDashboardIncompleteCourses,
     StatisticsController.prototype.getDashboardDeadlineRisks,
-  ])("protects %p with the shared statistics permission", (handler) => {
+  ])("allows %p for statistics readers and Group Managers", (handler) => {
     expect(Reflect.getMetadata(REQUIRED_PERMISSIONS_KEY, handler)).toEqual([
       PERMISSIONS.STATISTICS_READ,
+      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
     ]);
   });
 

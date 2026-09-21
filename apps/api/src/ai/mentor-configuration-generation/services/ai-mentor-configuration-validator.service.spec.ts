@@ -10,6 +10,7 @@ import { loadAiSdk } from "src/ai/utils/ai-esm";
 
 import { AiMentorConfigurationValidatorService } from "./ai-mentor-configuration-validator.service";
 
+import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import type { PromptService } from "src/ai/services/prompt.service";
 
 jest.mock("@langfuse/tracing", () => ({
@@ -38,12 +39,24 @@ describe("AiMentorConfigurationValidatorService", () => {
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
     };
+    const aiRuntimeService = {
+      validateMentorConfiguration: jest.fn(
+        (_input: unknown, validateCoreConfiguration: () => Promise<unknown>) =>
+          validateCoreConfiguration(),
+      ),
+    };
 
-    return new AiMentorConfigurationValidatorService(promptService as unknown as PromptService);
+    return {
+      aiRuntimeService,
+      service: new AiMentorConfigurationValidatorService(
+        promptService as unknown as PromptService,
+        aiRuntimeService as unknown as AiRuntimeService,
+      ),
+    };
   };
 
   it("derives a pass from warnings and validates the current type-specific target", async () => {
-    const service = createService({
+    const { aiRuntimeService, service } = createService({
       summary: "The configuration is usable.",
       issues: [
         {
@@ -63,10 +76,20 @@ describe("AiMentorConfigurationValidatorService", () => {
         configuration,
       }),
     ).resolves.toMatchObject({ passed: true });
+    expect(aiRuntimeService.validateMentorConfiguration).toHaveBeenCalledWith(
+      {
+        messages: [
+          { role: "system", content: "VALIDATOR" },
+          { role: "user", content: expect.stringContaining("<input_json>") },
+        ],
+        temperature: 0,
+      },
+      expect.any(Function),
+    );
   });
 
   it("rejects a target belonging to the other configuration type", async () => {
-    const service = createService({
+    const { service } = createService({
       summary: "The configuration needs review.",
       issues: [
         {
@@ -89,7 +112,7 @@ describe("AiMentorConfigurationValidatorService", () => {
   });
 
   it("rejects type as a model validation target", async () => {
-    const service = createService({
+    const { service } = createService({
       summary: "The type should change.",
       issues: [
         {

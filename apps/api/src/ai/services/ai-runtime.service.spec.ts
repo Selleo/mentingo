@@ -1,4 +1,5 @@
 import { AiCapability, AiCapabilityMode, AiCapabilityProvider } from "@japro/luma-sdk";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
@@ -41,6 +42,16 @@ describe("AiRuntimeService", () => {
       },
     ],
     blockingErrors: [],
+  };
+  const generatedMentorConfiguration = {
+    scenario: "A customer challenges a delayed delivery.",
+    aiRole: "Marek, the customer",
+    learnerRole: "Customer support specialist",
+    characterGoal: "Obtain a credible resolution date.",
+    difficulty: "realistic" as const,
+    factsAndConstraints: null,
+    openingInstruction: null,
+    additionalInstructions: null,
   };
 
   it("uses the Core Judge fallback with the structured result contract", async () => {
@@ -120,6 +131,89 @@ describe("AiRuntimeService", () => {
     expect(result).toEqual(lumaResult);
   });
 
+  it("passes the abort signal to a Luma mentor stream", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const abortController = new AbortController();
+    const input = {
+      messages: [{ role: "user" as const, content: "Continue" }],
+      temperature: 0.2,
+    };
+    const streamChat = jest.fn().mockResolvedValue({
+      data: (async function* () {
+        yield Buffer.from("response");
+      })(),
+    });
+    const createCoreStream = jest.fn();
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ mentor: { streamChat } }),
+    });
+
+    const result = await service.streamMentorChat(input, createCoreStream, abortController.signal);
+
+    expect(streamChat).toHaveBeenCalledWith(input, { signal: abortController.signal });
+    expect(createCoreStream).not.toHaveBeenCalled();
+    expect(result.source).toBe(AI_RUNTIME_SOURCES.LUMA);
+  });
+
+  it("preserves reserved markers and Unicode at every HTTP byte split", async () => {
+    const raw = "⟦say:zero przecinek cztery siedem⟧0,47⟦/say⟧ złoty 🧑🏽‍💻";
+    const bytes = Buffer.from(raw, "utf8");
+    const service = new AiRuntimeService({} as EnvService);
+    for (let split = 0; split <= bytes.length; split += 1) {
+      const chunks = (async function* () {
+        yield bytes.subarray(0, split);
+        yield bytes.subarray(split);
+      })();
+      let decoded = "";
+      for await (const text of service["readLumaTextStream"](chunks)) decoded += text;
+      expect(decoded).toBe(raw);
+    }
+    const chunks = (async function* () {
+      for (let index = 0; index < bytes.length; index += 1) yield bytes.subarray(index, index + 1);
+    })();
+    let decoded = "";
+    for await (const text of service["readLumaTextStream"](chunks)) decoded += text;
+    expect(decoded).toBe(raw);
+  });
+
+  it("flushes an incomplete final UTF-8 sequence without dropping preceding text", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const chunks = (async function* () {
+      yield Buffer.from([0x41, 0xe2]);
+    })();
+    let decoded = "";
+    for await (const text of service["readLumaTextStream"](chunks)) decoded += text;
+    expect(decoded).toBe("A\uFFFD");
+  });
+
+  it("does not fall back to Core when an interrupted Luma stream is aborted", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const abortController = new AbortController();
+    abortController.abort("MENTOR_RESPONSE_INTERRUPTED");
+    const cancellation = new Error("canceled");
+    const streamChat = jest.fn().mockRejectedValue(cancellation);
+    const createCoreStream = jest.fn();
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ mentor: { streamChat } }),
+    });
+
+    await expect(
+      service.streamMentorChat(
+        {
+          messages: [{ role: "user", content: "Continue" }],
+          temperature: 0.2,
+        },
+        createCoreStream,
+        abortController.signal,
+      ),
+    ).rejects.toBe(cancellation);
+    expect(createCoreStream).not.toHaveBeenCalled();
+  });
+
   it("falls back to Core when Luma returns the legacy Judge shape", async () => {
     const service = new AiRuntimeService({} as EnvService);
     const coreResult: AiJudgeModelResult = {
@@ -166,6 +260,45 @@ describe("AiRuntimeService", () => {
     expect(generateJudgeConfiguration).toHaveBeenCalledWith(authoringInput);
     expect(generateCore).not.toHaveBeenCalled();
     expect(result).toEqual(generatedConfiguration);
+  });
+
+  it("uses Luma for AI Mentor configuration generation", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const generateCore = jest.fn();
+    const generateMentorConfiguration = jest.fn().mockResolvedValue(generatedMentorConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { generateMentorConfiguration } }),
+    });
+    const input = { ...authoringInput, configurationType: AI_MENTOR_TYPE.ROLEPLAY };
+
+    const result = await service.generateMentorConfiguration(input, generateCore);
+
+    expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiMentorConfigurationGenerator);
+    expect(generateMentorConfiguration).toHaveBeenCalledWith(input);
+    expect(generateCore).not.toHaveBeenCalled();
+    expect(result).toEqual(generatedMentorConfiguration);
+  });
+
+  it("falls back to Core when Luma AI Mentor configuration generation is invalid", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const generateCore = jest.fn().mockResolvedValue(generatedMentorConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({
+        ai: { generateMentorConfiguration: jest.fn().mockResolvedValue({ scenario: "partial" }) },
+      }),
+    });
+
+    await expect(
+      service.generateMentorConfiguration(
+        { ...authoringInput, configurationType: AI_MENTOR_TYPE.ROLEPLAY },
+        generateCore,
+      ),
+    ).resolves.toEqual(generatedMentorConfiguration);
+    expect(generateCore).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to Core when Luma AI Judge configuration generation fails", async () => {
@@ -244,6 +377,45 @@ describe("AiRuntimeService", () => {
     await expect(service.validateJudgeConfiguration(authoringInput, validateCore)).resolves.toEqual(
       coreValidation,
     );
+    expect(validateCore).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the shared quality evaluator capability for AI Mentor configuration validation", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const validation = { summary: "The mentor behavior is ready.", issues: [] };
+    const validateCore = jest.fn();
+    const validateMentorConfiguration = jest.fn().mockResolvedValue(validation);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { validateMentorConfiguration } }),
+    });
+
+    const result = await service.validateMentorConfiguration(authoringInput, validateCore);
+
+    expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiJudgeConfigurationValidator);
+    expect(validateMentorConfiguration).toHaveBeenCalledWith(authoringInput);
+    expect(validateCore).not.toHaveBeenCalled();
+    expect(result).toEqual(validation);
+  });
+
+  it("falls back to Core when Luma AI Mentor configuration validation is invalid", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const coreValidation = { summary: "Core mentor validation result.", issues: [] };
+    const validateCore = jest.fn().mockResolvedValue(coreValidation);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({
+        ai: {
+          validateMentorConfiguration: jest.fn().mockResolvedValue({ summary: "Missing issues" }),
+        },
+      }),
+    });
+
+    await expect(
+      service.validateMentorConfiguration(authoringInput, validateCore),
+    ).resolves.toEqual(coreValidation);
     expect(validateCore).toHaveBeenCalledTimes(1);
   });
 });

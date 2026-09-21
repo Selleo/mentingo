@@ -9,6 +9,7 @@ import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateEmbedLesson } from "~/api/mutations/admin/useUpdateEmbedLesson";
 import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { embedLessonFormSchema } from "../schemas/embedLessonForm.schema";
@@ -37,6 +38,7 @@ export const useEmbedLessonForm = ({
   const { mutateAsync: createLesson } = useCreateEmbedLesson();
   const { mutateAsync: updateLesson } = useUpdateEmbedLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
+  const { setIsCurrectFormDirty } = useLeaveModal();
 
   const form = useForm<EmbedLessonFormValues>({
     resolver: zodResolver(embedLessonFormSchema(t)),
@@ -80,6 +82,7 @@ export const useEmbedLessonForm = ({
     }
 
     setContentTypeToDisplay(ContentTypes.EMPTY);
+    setIsCurrectFormDirty(false);
     await queryClient.invalidateQueries(courseQueryOptions(courseId, language));
   };
 
@@ -88,6 +91,7 @@ export const useEmbedLessonForm = ({
 
     await deleteLesson({ chapterId: chapterToEdit?.id, lessonId: lessonToEdit.id });
     await queryClient.invalidateQueries(courseQueryOptions(courseId, language));
+    setIsCurrectFormDirty(false);
     setContentTypeToDisplay(ContentTypes.EMPTY);
   };
 

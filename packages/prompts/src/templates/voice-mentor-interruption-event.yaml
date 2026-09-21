@@ -1,0 +1,6 @@
+id: voiceMentorInterruptionEvent
+description: Voice Mentor current interruption event instructions
+version: 1
+
+template: |
+  [VOICE_EVENT:MENTOR_RESPONSE_INTERRUPTED] The learner interrupted the previous mentor response in the current turn. Continue naturally from the conversation context and prioritize the learner's new message. Do not mention this internal event.

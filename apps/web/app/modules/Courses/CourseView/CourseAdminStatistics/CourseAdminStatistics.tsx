@@ -1,4 +1,6 @@
 import { TabsList } from "@radix-ui/react-tabs";
+import { PERMISSIONS } from "@repo/shared";
+import { Download } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -8,6 +10,7 @@ import { useCourseStatisticsFilter } from "~/api/queries/admin/useCourseLearning
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
 import { useCourseStudentsAiMentorResults } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Select,
@@ -18,6 +21,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { usePermissions } from "~/hooks/usePermissions";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import {
   SearchFilter,
@@ -26,6 +30,7 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { CourseStudentsLearningTimeTable } from "~/modules/Courses/CourseView/CourseAdminStatistics/components/CourseStudentsLearningTimeTable";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
 
@@ -36,6 +41,7 @@ import {
   CourseStudentsProgressTable,
   CourseStudentsQuizResultsTable,
 } from "./components";
+import { CourseCertificateRowsTable } from "./components/CourseCertificateRowsTable";
 import { CourseStudentsAiMentorResultsTable } from "./components/CourseStudentsAiMentorResults";
 import {
   CourseAdminStatisticsTabs,
@@ -73,6 +79,17 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const courseId = course?.id || "";
+  const { downloadReport, isDownloading } = useDownloadSummaryReport();
+  const { hasAccess: canViewStatistics } = usePermissions({
+    required: [
+      PERMISSIONS.COURSE_UPDATE,
+      PERMISSIONS.COURSE_UPDATE_OWN,
+      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    ],
+  });
+  const { hasAccess: canDownloadCourseReport } = usePermissions({
+    required: [PERMISSIONS.REPORT_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ],
+  });
 
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
 
@@ -90,6 +107,7 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
   );
 
   const [learningTimeParams, setLearningTimeParams] = useState<CourseLearningTimeFilterQuery>({});
+  const [certificateSearch, setCertificateSearch] = useState<string>();
 
   const [aiMentorSearchParams, setAiMentorSearchParams] =
     useState<CourseStudentsAiMentorResultsQueryParams>({});
@@ -143,7 +161,7 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
 
   const { data: aiMentorResultsPreview } = useCourseStudentsAiMentorResults({
     id: courseId,
-    enabled: canManageCourse && Boolean(courseId),
+    enabled: canViewStatistics && Boolean(courseId),
     query: {
       page: 1,
       perPage: 1,
@@ -225,8 +243,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
   const handleGroupFilterChange = (_name: string, value: FilterValue) => {
     const nextGroupId = value as string | undefined;
 
-    setGroupId(nextGroupId);
     startTransition(() => {
+      setGroupId(nextGroupId);
+
       const updateGroupId = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => {
         setter((prev) => {
           if (!nextGroupId) {
@@ -259,6 +278,8 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
         return aiMentorSearchParams.search;
       case "learningTime":
         return learningTimeParams.search;
+      case "certificates":
+        return certificateSearch;
       default:
         return undefined;
     }
@@ -278,6 +299,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
       case "learningTime":
         handleLearningTimeFilterChange(name, value);
         break;
+      case "certificates":
+        setCertificateSearch(value as string | undefined);
+        break;
     }
   };
 
@@ -285,10 +309,25 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
     <TooltipProvider>
       <Card data-testid={COURSE_STATISTICS_HANDLES.ROOT}>
         <CardHeader>
-          <h6 className="h6">{t("adminCourseView.statistics.title")}</h6>
-          <p className="body-base-md title-neutral-800">
-            {t("adminCourseView.statistics.subtitle")}
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h6 className="h6">{t("adminCourseView.statistics.title")}</h6>
+              <p className="body-base-md title-neutral-800">
+                {t("adminCourseView.statistics.subtitle")}
+              </p>
+            </div>
+            {canDownloadCourseReport && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void downloadReport(courseId)}
+                disabled={isDownloading}
+              >
+                <Download className="mr-2 size-4" />
+                {t("adminStatisticsView.other.downloadReport")}
+              </Button>
+            )}
+          </div>
         </CardHeader>
 
         <CardContent className="flex flex-col gap-8">
@@ -341,9 +380,9 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
           <Tabs value={activeTab} className="h-full">
             <div className="flex items-start gap-2 flex-col pb-6">
               <h6 className="h6">{t("adminCourseView.statistics.details")}</h6>
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 w-full">
-                <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
-                  <div className="max-w-[248px] min-w-52 shrink-0">
+              <div className="flex w-full flex-col gap-3">
+                <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <div className="w-full sm:w-[360px] sm:shrink-0">
                     <SearchFilter
                       filters={filterConfig}
                       values={{ search: getSearchValue() }}
@@ -423,26 +462,29 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
                     ))
                     .otherwise(() => null)}
                 </div>
-                <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50 flex items-center">
-                  {visibleStatisticsTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab}
-                      data-testid={
-                        {
-                          progress: COURSE_STATISTICS_HANDLES.PROGRESS_TAB,
-                          quizResults: COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TAB,
-                          aiMentorResults: COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TAB,
-                          learningTime: COURSE_STATISTICS_HANDLES.LEARNING_TIME_TAB,
-                        }[tab]
-                      }
-                      className="h-full grow md:w-fit"
-                      value={tab}
-                      onClick={() => setActiveTab(tab)}
-                    >
-                      {t(`adminCourseView.statistics.tabs.${tab}`)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="w-full overflow-x-auto pb-1">
+                  <TabsList className="flex h-[42px] min-w-full w-max items-center justify-start rounded-sm bg-primary-50 p-1">
+                    {visibleStatisticsTabs.map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        data-testid={
+                          {
+                            progress: COURSE_STATISTICS_HANDLES.PROGRESS_TAB,
+                            quizResults: COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TAB,
+                            aiMentorResults: COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TAB,
+                            learningTime: COURSE_STATISTICS_HANDLES.LEARNING_TIME_TAB,
+                            certificates: undefined,
+                          }[tab]
+                        }
+                        className="h-full grow"
+                        value={tab}
+                        onClick={() => setActiveTab(tab)}
+                      >
+                        {t(`adminCourseView.statistics.tabs.${tab}`)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
               </div>
             </div>
             <TabsContent value={CourseAdminStatisticsTabs.progress}>
@@ -476,6 +518,13 @@ export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminSt
                 courseId={courseId}
                 searchParams={learningTimeParams}
                 onFilterChange={handleLearningTimeFilterChange}
+              />
+            </TabsContent>
+            <TabsContent value={CourseAdminStatisticsTabs.certificates}>
+              <CourseCertificateRowsTable
+                courseId={courseId}
+                groupId={groupId}
+                search={certificateSearch}
               />
             </TabsContent>
           </Tabs>

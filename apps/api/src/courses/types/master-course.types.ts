@@ -123,17 +123,22 @@ export type MasterCourseResourceCollection = Record<
 
 export type CourseSelect = InferSelectModel<typeof courses>;
 export type CourseInsert = InferInsertModel<typeof courses>;
-export type CourseJsonbInsert = Omit<CourseInsert, "title" | "description" | "settings"> & {
+export type CourseJsonbInsert = Omit<
+  CourseInsert,
+  "title" | "description" | "settings" | "authorMetadata"
+> & {
   title: SQL<unknown>;
   description: SQL<unknown>;
   settings: SQL<unknown>;
+  authorMetadata?: SQL<unknown> | null;
 };
 export type CourseJsonbUpdate = Partial<
-  Omit<CourseInsert, "title" | "description" | "settings">
+  Omit<CourseInsert, "title" | "description" | "settings" | "authorMetadata">
 > & {
   title?: SQL<unknown>;
   description?: SQL<unknown>;
   settings?: SQL<unknown>;
+  authorMetadata?: SQL<unknown> | null;
 };
 
 export type CategorySelect = InferSelectModel<typeof categories>;

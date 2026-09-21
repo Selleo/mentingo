@@ -43,11 +43,14 @@ export const deriveLiveTrainingUiActions = ({
   const canUpdateOwn = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_UPDATE_OWN) && isAuthor;
   const canDeleteAny = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE);
   const canDeleteOwn = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE_OWN) && isAuthor;
-  const canEditDetails = canUpdateAny || canUpdateOwn || isHost;
   const canManageSession = hasHostRole || hasBroadManagePermission;
   const canViewAllMaterials = hasHostRole || hasBroadManagePermission;
   const canViewSessionData =
-    canManageSession || hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_STATISTICS);
+    canManageSession ||
+    hasAnyPermission(permissions, [
+      PERMISSIONS.LIVE_TRAINING_STATISTICS,
+      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    ]);
   const isActiveSession = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
   const canStartFromStatus =
     liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED ||
@@ -56,6 +59,7 @@ export const deriveLiveTrainingUiActions = ({
   const hasOpenSession =
     currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.WAITING ||
     currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.ACTIVE;
+  const canEditDetails = (canUpdateAny || canUpdateOwn || isHost) && !hasOpenSession;
   const isJoinable =
     liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE &&
     hasOpenSession &&
@@ -63,7 +67,7 @@ export const deriveLiveTrainingUiActions = ({
 
   return {
     canShowEdit: canEditDetails,
-    canShowDelete: canDeleteAny || canDeleteOwn,
+    canShowDelete: (canDeleteAny || canDeleteOwn) && !hasOpenSession,
     canShowStart:
       (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_START) || hasHostRole) &&
       canManageSession &&

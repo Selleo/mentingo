@@ -3,7 +3,6 @@ import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
   LIVE_TRAINING_SESSION_STATUSES,
-  PERMISSIONS,
 } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -25,7 +24,6 @@ import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
 import { queryClient } from "~/api/queryClient";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
-import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/components/ui/use-toast";
@@ -34,6 +32,7 @@ import { LiveTrainingDeleteDialog } from "~/modules/LiveTraining/components/Live
 import { LiveTrainingRoom } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingRoom";
 import { LiveTrainingSessionStage } from "~/modules/LiveTraining/components/LiveTrainingSessionStage";
 import { LiveTrainingWorkspace } from "~/modules/LiveTraining/components/LiveTrainingWorkspace";
+import { canReadLiveTrainingPage } from "~/modules/LiveTraining/utils/liveTrainingAccess";
 import { deriveLiveTrainingUiActions } from "~/modules/LiveTraining/utils/liveTrainingActions";
 import {
   buildLiveTrainingEditFormState,
@@ -88,9 +87,10 @@ export const clientLoader = async ({ params, request }: ClientLoaderFunctionArgs
     throw redirect("/auth/login");
   }
 
-  const canReadLiveTraining =
-    Boolean(globalSettings?.liveTrainingEnabled) &&
-    hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_READ);
+  const canReadLiveTraining = canReadLiveTrainingPage(
+    currentUser.permissions,
+    Boolean(globalSettings?.liveTrainingEnabled),
+  );
 
   if (!canReadLiveTraining) {
     throw redirect("/");

@@ -29,6 +29,7 @@ import { extractUrlFromClipboard } from "./extensions/utils/video";
 import { baseEditorPlugins, boldBulletEditorPlugins, getContentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
+import { uploadDroppedFilesAtPosition } from "./utils/uploadDroppedFiles";
 
 import type { AssetLibraryConfig } from "./components/AssetLibraryDialog";
 
@@ -49,6 +50,7 @@ type EditorProps = {
     file?: File,
     editor?: TiptapEditor | null,
     visibility?: EditableResourceVisibility,
+    position?: number,
   ) => Promise<void>;
   onCtrlSave?: (editor: TiptapEditor | null) => void;
   uploadProgress?: number | null;
@@ -111,13 +113,13 @@ const Editor = ({
 
       const activeEditor = editorRef.current;
       setPendingDrop(null);
-
-      for (const file of pendingDrop.files) {
-        activeEditor?.commands.setTextSelection(pendingDrop.position);
-        activeEditor?.commands.focus();
-        await onUpload(file, activeEditor, visibility);
-        activeEditor?.commands.focus();
-      }
+      await uploadDroppedFilesAtPosition({
+        editor: activeEditor,
+        files: pendingDrop.files,
+        position: pendingDrop.position,
+        visibility,
+        onUpload,
+      });
     },
     [onUpload, pendingDrop],
   );

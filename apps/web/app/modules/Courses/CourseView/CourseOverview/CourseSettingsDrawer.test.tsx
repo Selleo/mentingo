@@ -19,10 +19,11 @@ describe("CourseSettingsDrawer", () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
 
-    renderWith().render(
+    renderWith({ withQuery: true }).render(
       <CourseSettingsDrawer
         courseId="course-id"
         language="en"
+        isSharedCourse={false}
         onOpenChange={onOpenChange}
         open
         status="draft"
@@ -37,5 +38,23 @@ describe("CourseSettingsDrawer", () => {
     await user.keyboard("{Escape}");
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("only exposes local rollout controls for shared courses", () => {
+    renderWith({ withQuery: true }).render(
+      <CourseSettingsDrawer
+        courseId="course-id"
+        isSharedCourse
+        language="en"
+        onOpenChange={vi.fn()}
+        open
+        status="draft"
+        title="Course settings"
+        unsupportedLessonCount={0}
+      />,
+    );
+
+    expect(screen.getByTestId("course-overview-settings-tab-status")).toBeInTheDocument();
+    expect(screen.queryByText("Course settings switches")).not.toBeInTheDocument();
   });
 });

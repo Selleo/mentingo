@@ -1,4 +1,4 @@
-import { AudioLines, Mic, Square } from "lucide-react";
+import { AudioLines, LoaderCircle, Mic, Square } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Icon } from "~/components/Icon";
@@ -14,6 +14,7 @@ import { resolveLessonComposerPrimaryAction } from "./LessonComposerRightControl
 export function LessonComposerRightControls({
   isVoiceMode,
   isVoiceMentorMode,
+  isVoiceMentorStarting,
   canSubmit,
   canUseVoiceMentor,
   onStartVoiceMode,
@@ -33,6 +34,7 @@ export function LessonComposerRightControls({
     canSubmit,
     canUseVoiceMentor,
     isVoiceMentorMode,
+    isVoiceMentorStarting,
     isVoiceMode,
     sendLabel,
     startVoiceMentorLabel,
@@ -79,9 +81,12 @@ export function LessonComposerRightControls({
           {primaryAction.mode === LESSON_COMPOSER_PRIMARY_ACTION_MODE.SEND && (
             <Icon name="Send" className="size-4" />
           )}
-          {primaryAction.mode === LESSON_COMPOSER_PRIMARY_ACTION_MODE.VOICE && (
-            <AudioLines className="size-4" />
-          )}
+          {primaryAction.mode === LESSON_COMPOSER_PRIMARY_ACTION_MODE.VOICE &&
+            (isVoiceMentorStarting ? (
+              <LoaderCircle className="size-4 animate-spin" />
+            ) : (
+              <AudioLines className="size-4" />
+            ))}
         </motion.span>
       </AnimatePresence>
       {primaryAction.showText && primaryAction.label}

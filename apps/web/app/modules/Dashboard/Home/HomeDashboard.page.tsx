@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_SIZES, PERMISSIONS, hasPermission } from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, PERMISSIONS, hasAnyPermission } from "@repo/shared";
 import { Download, LayoutGrid, Loader2, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -113,7 +113,10 @@ export default function HomeDashboardPage() {
     useResetDashboardSettings();
   const { downloadReport, isDownloading } = useDownloadSummaryReport();
 
-  const canDownloadReport = hasPermission(currentUser?.permissions ?? [], PERMISSIONS.REPORT_READ);
+  const canDownloadReport = hasAnyPermission(currentUser?.permissions ?? [], [
+    PERMISSIONS.REPORT_READ,
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+  ]);
 
   const visibleLayout = (isEditing ? draftWidgets : savedWidgets).filter(
     (widget) => widget.visible !== false,

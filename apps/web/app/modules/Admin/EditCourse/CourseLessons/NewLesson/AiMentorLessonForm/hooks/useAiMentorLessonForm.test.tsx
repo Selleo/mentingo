@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   updateAiMentorLesson: vi.fn(),
   uploadAvatar: vi.fn(),
   invalidateQueries: vi.fn(),
+  setIsCurrectFormDirty: vi.fn(),
 }));
 
 vi.mock("@remix-run/react", () => ({
@@ -69,6 +70,13 @@ vi.mock("~/api/mutations/admin/useUploadAiMentorAvatar", () => ({
 
 vi.mock("~/api/queryClient", () => ({
   queryClient: { invalidateQueries: mocks.invalidateQueries },
+}));
+
+vi.mock("~/context/LeaveModalContext", () => ({
+  useLeaveModal: () => ({
+    isLeavingContent: false,
+    setIsCurrectFormDirty: mocks.setIsCurrectFormDirty,
+  }),
 }));
 
 import { useAiMentorLessonForm } from "./useAiMentorLessonForm";

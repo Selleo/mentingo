@@ -8,6 +8,8 @@ type StudentLearningPathCardProps = {
   language: SupportedLanguages;
   isPending: boolean;
   onEnroll: (learningPathId: string) => Promise<void>;
+  canSelfEnroll: boolean;
+  showCourseProgress: boolean;
 };
 
 export function StudentLearningPathCard({
@@ -15,6 +17,8 @@ export function StudentLearningPathCard({
   language,
   isPending,
   onEnroll,
+  canSelfEnroll,
+  showCourseProgress,
 }: StudentLearningPathCardProps) {
   return (
     <InlineLearningPathCard
@@ -32,9 +36,10 @@ export function StudentLearningPathCard({
       onAddCourses={async () => {}}
       onRemoveCourse={async () => {}}
       onReorderCourses={async () => {}}
-      onEnrollCurrentUser={() => onEnroll(learningPath.id)}
+      onEnrollCurrentUser={canSelfEnroll ? () => onEnroll(learningPath.id) : undefined}
       isPending={isPending}
       showCertificate
+      showCourseProgress={showCourseProgress}
     />
   );
 }

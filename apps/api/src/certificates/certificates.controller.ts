@@ -27,6 +27,7 @@ import {
   certificateValidityImpactResponseSchema,
   certificateValidityImpactSchema,
   certificateDashboardSummarySchema,
+  courseCertificateRowsSchema,
   certificateShareLinkResponseSchema,
   createCertificateShareLinkSchema,
   downloadCertificateSchema,
@@ -51,12 +52,48 @@ import type {
   CertificateShareLinkResponse,
   ResetCourseCertificatesResponse,
   SingleCertificateResponse,
+  CourseCertificateRowsResponse,
 } from "./certificates.types";
 
 @Controller("certificates")
 @UseGuards(PermissionsGuard)
 export class CertificatesController {
   constructor(private readonly certificatesService: CertificatesService) {}
+
+  @Get("course/:courseId")
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "groupId", schema: Type.Optional(UUIDSchema) },
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+    ],
+    response: baseResponse(courseCertificateRowsSchema),
+  })
+  async getCourseCertificateRows(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @Query("groupId") groupId: UUIDType | undefined,
+    @Query("search") search: string | undefined,
+    @Query("page") page = 1,
+    @Query("perPage") perPage = 20,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CourseCertificateRowsResponse>> {
+    return new BaseResponse(
+      await this.certificatesService.getCourseCertificateRows(
+        courseId,
+        language,
+        currentUser,
+        groupId,
+        search,
+        page,
+        perPage,
+      ),
+    );
+  }
 
   @Get("all")
   @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
@@ -146,7 +183,7 @@ export class CertificatesController {
   }
 
   @Post("download")
-  @RequirePermission(PERMISSIONS.CERTIFICATE_RENDER)
+  @RequirePermission(PERMISSIONS.CERTIFICATE_RENDER, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
     request: [{ type: "body", schema: downloadCertificateSchema }],
   })
@@ -160,7 +197,7 @@ export class CertificatesController {
     const requestBaseUrl = getRequestBaseUrl(req);
 
     const { pdfBuffer, filename } = await this.certificatesService.downloadCertificate(
-      currentUser.userId,
+      currentUser,
       certificateId,
       language,
       requestBaseUrl,

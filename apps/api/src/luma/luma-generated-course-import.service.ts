@@ -5,13 +5,10 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
   AI_MENTOR_VOICE_MODE,
-  AI_MENTOR_ROLEPLAY_DIFFICULTY,
-  AI_MENTOR_TEACHING_STYLE,
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
-  DEFAULT_AI_MENTOR_TYPE,
 } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import axios from "axios";
@@ -28,11 +25,11 @@ import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { AiJudgeConfigurationGraphService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-graph.service";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
+import { aiMentorConfigurationContentSchema } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 import { AiMentorConfigurationGraphService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonRepository } from "src/lesson/repositories/adminLesson.repository";
 import {
-  LUMA_GENERATED_COURSE_AI_MENTOR_TYPES,
   LUMA_GENERATED_COURSE_LESSON_TYPES,
   LUMA_GENERATED_COURSE_QUESTION_TYPES,
 } from "src/luma/luma-course-generation-sync.constants";
@@ -55,7 +52,7 @@ import {
 } from "src/storage/schema";
 
 import type { GeneratedCourseBundleResponse, GeneratedCourseResponse } from "@japro/luma-sdk";
-import type { AssessmentQuestionType, AiMentorTTSPreset, AiMentorType } from "@repo/shared";
+import type { AssessmentQuestionType, AiMentorTTSPreset } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type {
@@ -72,7 +69,6 @@ import type {
   InsertQuizLessonData,
 } from "src/luma/luma-generated-course-import.types";
 import type {
-  LumaGeneratedCourseAiMentorType,
   LumaGeneratedCourseAiMentor,
   LumaGeneratedCourseLesson,
   LumaGeneratedCourseImportResult,
@@ -229,7 +225,7 @@ export class LumaGeneratedCourseImportService {
 
   private async insertAiMentorLesson(data: InsertAiMentorLessonData) {
     const aiMentor = this.getAiMentor(data.lesson);
-    const description = this.sanitizeText(aiMentor?.taskDescription ?? data.lesson.content ?? "");
+    const description = this.sanitizeText(aiMentor.taskDescription ?? data.lesson.content ?? "");
     const [lesson] = await data.trx
       .insert(lessons)
       .values({
@@ -292,6 +288,12 @@ export class LumaGeneratedCourseImportService {
     if (
       !aiMentor ||
       typeof aiMentor !== "object" ||
+      !("aiMentorConfiguration" in aiMentor) ||
+      !Value.Check(aiMentorConfigurationContentSchema, aiMentor.aiMentorConfiguration)
+    )
+      throw new BadRequestException("luma.errors.invalidAiMentorConfiguration");
+
+    if (
       !("aiJudgeConfiguration" in aiMentor) ||
       !Value.Check(aiJudgeConfigurationInputSchema, aiMentor.aiJudgeConfiguration)
     )
@@ -798,41 +800,32 @@ export class LumaGeneratedCourseImportService {
     return sanitizedContext.length > 0 ? sanitizedContext : null;
   }
 
-  private mapAiMentorType(type: LumaGeneratedCourseAiMentorType | undefined): AiMentorType {
-    if (type === LUMA_GENERATED_COURSE_AI_MENTOR_TYPES.ROLEPLAY) {
-      return AI_MENTOR_TYPE.ROLEPLAY;
-    }
-
-    if (type === LUMA_GENERATED_COURSE_AI_MENTOR_TYPES.TEACHER) {
-      return AI_MENTOR_TYPE.TEACHER;
-    }
-
-    return DEFAULT_AI_MENTOR_TYPE;
-  }
-
   private buildImportedAiMentorConfiguration(aiMentor: LumaGeneratedCourseAiMentor) {
-    const type = this.mapAiMentorType(aiMentor.type);
-    const additionalInstructions = this.sanitizeText(aiMentor.aiMentorInstructions);
+    const configuration = aiMentor.aiMentorConfiguration;
 
-    if (type === AI_MENTOR_TYPE.TEACHER) {
+    if (configuration.type === AI_MENTOR_TYPE.TEACHER) {
       return {
         type: AI_MENTOR_TYPE.TEACHER,
-        taskGoal: "",
-        expertise: "",
-        contentScope: "",
-        teachingStyle: AI_MENTOR_TEACHING_STYLE.EXPLAIN_AND_PRACTICE,
-        additionalInstructions,
+        taskGoal: this.sanitizeText(configuration.taskGoal),
+        expertise: this.sanitizeText(configuration.expertise),
+        contentScope: this.sanitizeText(configuration.contentScope),
+        teachingStyle: configuration.teachingStyle,
+        feedbackGuidance: this.sanitizeOptionalText(configuration.feedbackGuidance),
+        openingInstruction: this.sanitizeOptionalText(configuration.openingInstruction),
+        additionalInstructions: this.sanitizeOptionalText(configuration.additionalInstructions),
       };
     }
 
     return {
       type: AI_MENTOR_TYPE.ROLEPLAY,
-      scenario: "",
-      aiRole: "",
-      learnerRole: "",
-      characterGoal: "",
-      difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
-      additionalInstructions,
+      scenario: this.sanitizeText(configuration.scenario),
+      aiRole: this.sanitizeText(configuration.aiRole),
+      learnerRole: this.sanitizeText(configuration.learnerRole),
+      characterGoal: this.sanitizeText(configuration.characterGoal),
+      difficulty: configuration.difficulty,
+      factsAndConstraints: this.sanitizeOptionalText(configuration.factsAndConstraints),
+      openingInstruction: this.sanitizeOptionalText(configuration.openingInstruction),
+      additionalInstructions: this.sanitizeOptionalText(configuration.additionalInstructions),
     };
   }
 
@@ -863,6 +856,10 @@ export class LumaGeneratedCourseImportService {
 
   private sanitizeText(value?: string | null): string {
     return (value ?? "").replace(/\u0000/g, "");
+  }
+
+  private sanitizeOptionalText(value?: string | null): string | null {
+    return value === null || value === undefined ? null : this.sanitizeText(value);
   }
 
   private async buildMulterFileFromSignedUrl(signedUrl: string) {

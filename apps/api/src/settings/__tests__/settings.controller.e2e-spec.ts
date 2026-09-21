@@ -254,7 +254,7 @@ describe("SettingsController (e2e)", () => {
         expect(response.body.data.layout.schemaVersion).toBe(2);
         expect(response.body.data.layout.revision).toBe(0);
         expect(response.body.data.layout.widgets[0].type).toBe(
-          DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+          DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
         );
       });
 

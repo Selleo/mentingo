@@ -1,5 +1,10 @@
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  ANNOUNCEMENT_SOURCE_TYPES,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguages,
+} from "@repo/shared";
 
+import type { NotificationAnnouncement } from "./notifications.types";
 import type { TranslationDraft, TranslationFormValues } from "./types";
 
 const emptyTranslation = (): TranslationDraft => ({ title: "", content: "" });
@@ -27,3 +32,11 @@ export const getDefaultAnnouncementFormValues = (): TranslationFormValues => ({
 
 export const buildAnnouncementScheduledAt = (date: string, time: string) =>
   new Date(`${date}T${time}:00`).toISOString();
+
+export const getNotificationHref = (announcement: NotificationAnnouncement) => {
+  if (announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT && announcement.sourceId) {
+    return `/course/${announcement.sourceId}`;
+  }
+
+  return null;
+};

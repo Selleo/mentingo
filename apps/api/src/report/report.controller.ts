@@ -1,8 +1,10 @@
 import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
+import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
+import { UUIDSchema } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
@@ -17,16 +19,20 @@ export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Get("summary")
-  @RequirePermission(PERMISSIONS.REPORT_READ)
+  @RequirePermission(PERMISSIONS.REPORT_READ, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
   @Validate({
-    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "courseId", schema: Type.Optional(UUIDSchema) },
+    ],
   })
   async downloadSummaryReport(
     @Query("language") language: SupportedLanguages,
+    @Query("courseId") courseId: string | undefined,
     @Res() res: Response,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
-    const buffer = await this.reportService.generateSummaryReport(language, currentUser);
+    const buffer = await this.reportService.generateSummaryReport(language, currentUser, courseId);
 
     const filename = `summary-report-${new Date().toISOString().split("T")[0]}.xlsx`;
 

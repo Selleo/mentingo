@@ -24,12 +24,16 @@ import {
   type LiveTrainingVisibilityScope,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, eq, gt, isNull, lt } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lt } from "drizzle-orm";
 
 import { DatabasePg, type Pagination, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { parsePagination } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import {
+  getGroupManagerCourseScopeCondition,
+  shouldApplyGroupManagerScope,
+} from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
 import {
@@ -43,8 +47,9 @@ import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
-import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
+import { calendarEvents, courses, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
+import { LiveTrainingSessionsRepository } from "./live-training-sessions/live-training-sessions.repository";
 import { LiveTrainingRepository } from "./live-training.repository";
 
 import type {
@@ -80,6 +85,7 @@ export class LiveTrainingService {
     private readonly fileService: FileService,
     private readonly envService: EnvService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly liveTrainingSessionsRepository: LiveTrainingSessionsRepository,
   ) {}
 
   async getLiveTrainings(
@@ -528,6 +534,7 @@ export class LiveTrainingService {
     }
 
     this.assertCanDeleteLiveTraining(row.authorId, currentUser);
+    await this.assertNoOpenSession(row.id);
     const linkedLessonCount = await this.liveTrainingRepository.getLinkedLessonCount(row.id);
 
     if (linkedLessonCount > 0) {
@@ -847,7 +854,17 @@ export class LiveTrainingService {
       throw new NotFoundException("liveTraining.errors.notFound");
     }
 
+    await this.assertNoOpenSession(row.id);
+
     return row;
+  }
+
+  private async assertNoOpenSession(id: UUIDType) {
+    const currentSession = await this.liveTrainingSessionsRepository.getCurrentSessionRow(id);
+
+    if (currentSession) {
+      throw new BadRequestException("liveTraining.errors.activeSessionUpdateForbidden");
+    }
   }
 
   private async canSeeLiveTraining(
@@ -856,6 +873,29 @@ export class LiveTrainingService {
     linkedCourses: LiveTrainingVisibilityLinkedCourse[],
     currentUser: CurrentUserType,
   ) {
+    if (
+      shouldApplyGroupManagerScope(currentUser, [
+        PERMISSIONS.LIVE_TRAINING_READ,
+        PERMISSIONS.LIVE_TRAINING_STATISTICS,
+      ])
+    ) {
+      const linkedCourseIds = linkedCourses.map((course) => course.id);
+
+      if (!linkedCourseIds.length) return false;
+
+      const managerCourseScope = getGroupManagerCourseScopeCondition(currentUser, courses.id, [
+        PERMISSIONS.LIVE_TRAINING_READ,
+        PERMISSIONS.LIVE_TRAINING_STATISTICS,
+      ]);
+
+      const [authorizedCourse] = await this.db
+        .select({ id: courses.id })
+        .from(courses)
+        .where(and(inArray(courses.id, linkedCourseIds), managerCourseScope));
+
+      return !!authorizedCourse;
+    }
+
     if (this.canManageAny(currentUser)) return true;
     if (row.authorId === currentUser.userId) return true;
     if (trainers.some((trainer) => trainer.id === currentUser.userId)) return true;

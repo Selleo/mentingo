@@ -3,6 +3,7 @@ export const CourseAdminStatisticsTabs = {
   quizResults: "quizResults",
   aiMentorResults: "aiMentorResults",
   learningTime: "learningTime",
+  certificates: "certificates",
 } as const;
 
 export type CourseAdminStatisticsTab =

@@ -17,6 +17,7 @@ import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
 
@@ -146,7 +147,7 @@ const CourseCertificateSetting = ({
   const isUploading = isLoadingSettings || isUpdatingCourseSettings;
   const isCertificateControlsDisabled = !isCertificateEnabled || isUpdatingCertificate;
   const previewCompletionDate = useMemo(() => {
-    return new Date().toLocaleDateString("en-GB").replaceAll("/", ".");
+    return formatCertificateDate(new Date().toISOString());
   }, []);
 
   const clearColorSaveTimeout = () => {

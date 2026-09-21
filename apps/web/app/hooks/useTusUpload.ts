@@ -18,7 +18,6 @@ export const useTusUpload = () => {
   const { toast } = useToast();
 
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const uploadFile = useCallback(
     async <TSession extends TusUploadSession>({
@@ -56,7 +55,6 @@ export const useTusUpload = () => {
       }
 
       setIsUploading(true);
-      setUploadProgress(0);
 
       try {
         await new Promise<void>((resolve, reject) => {
@@ -86,7 +84,6 @@ export const useTusUpload = () => {
             onProgress: (bytesUploaded, bytesTotal) => {
               if (bytesTotal === 0) return;
               const progress = Math.round((bytesUploaded / bytesTotal) * 100);
-              setUploadProgress(progress);
               onProgress?.(progress);
             },
             onError: (error) => {
@@ -119,7 +116,6 @@ export const useTusUpload = () => {
         });
       } finally {
         setIsUploading(false);
-        setUploadProgress(null);
       }
     },
     [t, toast],
@@ -128,6 +124,5 @@ export const useTusUpload = () => {
   return {
     uploadFile,
     isUploading,
-    uploadProgress,
   };
 };

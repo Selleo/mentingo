@@ -51,3 +51,4 @@ yarn-error.log*
 .pnpm-store
 
 /packages/prompts/src/generated-prompts.ts
+.local-packages

@@ -40,8 +40,7 @@ export type QuizForm = {
 };
 
 export type LessonPreviewUser = {
-  firstName?: string | null;
-  lastName?: string | null;
+  displayName: string;
   profilePictureUrl?: string | null;
 };
 
