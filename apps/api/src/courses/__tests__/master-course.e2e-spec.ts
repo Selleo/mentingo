@@ -1537,6 +1537,120 @@ describe("Master course export and sync (e2e)", () => {
     expect(targetResourcesAfterSync).toEqual([expect.objectContaining({ id: targetResource.id })]);
   });
 
+  it("syncs reordered and replaced choice options without changing surviving IDs", async () => {
+    const questionId = faker.string.uuid();
+    const firstId = faker.string.uuid();
+    const secondId = faker.string.uuid();
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceLessonId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .returning();
+          await db.insert(assessmentQuestions).values({
+            id: questionId,
+            assessmentId: assessment.id,
+            questionType: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+            gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+            prompt: { en: "Choose" },
+            title: { en: "Choose" },
+            displayOrder: 1,
+          });
+          await db.insert(assessmentQuestionChoiceOptions).values([
+            {
+              id: firstId,
+              questionId,
+              language: "en",
+              label: "First",
+              isCorrect: true,
+              displayOrder: 1,
+            },
+            {
+              id: secondId,
+              questionId,
+              language: "en",
+              label: "Second",
+              isCorrect: false,
+              displayOrder: 2,
+            },
+          ]);
+        });
+      },
+    });
+    const readOptions = () =>
+      runAsTenant(targetTenantId, () =>
+        db
+          .select({
+            id: assessmentQuestionChoiceOptions.id,
+            label: assessmentQuestionChoiceOptions.label,
+            displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+          })
+          .from(assessmentQuestionChoiceOptions)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionChoiceOptions.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .orderBy(asc(assessmentQuestionChoiceOptions.displayOrder)),
+      );
+    const original = await readOptions();
+    const [exportLink] = await baseDb
+      .select()
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
+    const sync = () =>
+      masterCourseService.processSyncJob({
+        exportId: exportLink.id,
+        sourceCourseId,
+        sourceTenantId,
+        targetTenantId,
+        triggerEventType: "UpdateCourseEvent",
+      });
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: -1 })
+        .where(eq(assessmentQuestionChoiceOptions.id, firstId));
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: 1 })
+        .where(eq(assessmentQuestionChoiceOptions.id, secondId));
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: 2 })
+        .where(eq(assessmentQuestionChoiceOptions.id, firstId));
+    });
+    await sync();
+    expect(await readOptions()).toEqual([
+      { ...original[1], displayOrder: 1 },
+      { ...original[0], displayOrder: 2 },
+    ]);
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .delete(assessmentQuestionChoiceOptions)
+        .where(eq(assessmentQuestionChoiceOptions.id, secondId));
+      await db.insert(assessmentQuestionChoiceOptions).values({
+        questionId,
+        language: "en",
+        label: "Replacement",
+        isCorrect: false,
+        displayOrder: 1,
+      });
+    });
+    await sync();
+    const replaced = await readOptions();
+    expect(replaced).toEqual([
+      { id: expect.any(String), label: "Replacement", displayOrder: 1 },
+      { ...original[0], displayOrder: 2 },
+    ]);
+    await sync();
+    expect(await readOptions()).toEqual(replaced);
+  });
+
   it("rewrites fill-in-the-blanks option markers for every localized question description", async () => {
     const sourceOptionId = faker.string.uuid();
     const untouchedOptionId = faker.string.uuid();
