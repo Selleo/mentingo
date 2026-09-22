@@ -658,12 +658,7 @@ export class QuizRuntimeService {
 
       if (isDragAndDrop && !selectedDragOption) throw this.invalidSubmission();
 
-      const submittedBlank = this.resolveSubmittedBlank(
-        quizQuestion,
-        answer,
-        answerIndex,
-        selectedDragOption?.targetBlankId,
-      );
+      const submittedBlank = this.resolveSubmittedBlank(quizQuestion, answer, answerIndex);
 
       if (!submittedBlank) throw this.invalidSubmission();
 
@@ -680,13 +675,7 @@ export class QuizRuntimeService {
     quizQuestion: QuizAuthoringLocalizedQuestion,
     answer: QuizSubmission["questionsAnswers"][number]["answers"][number],
     answerIndex: number,
-    targetBlankId?: UUIDType | null,
   ) {
-    if (targetBlankId) {
-      const targetBlank = quizQuestion.blanks.find((blank) => blank.id === targetBlankId);
-      if (targetBlank) return targetBlank;
-    }
-
     if ("answerId" in answer) {
       const submittedBlank = quizQuestion.blanks.find((blank) => blank.id === answer.answerId);
       if (submittedBlank) return submittedBlank;

@@ -40,6 +40,8 @@ import {
   lessons,
   assessments,
   assessmentAttempts,
+  assessmentAttemptBlankAnswers,
+  assessmentAttemptQuestionAnswers,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
   courseStudentMode,
@@ -1237,6 +1239,87 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       expect(remainingQuizAttempts).toHaveLength(0);
     });
   });
+
+  it.each([
+    { selected: ["Report", "Continue"], expectedScore: 0 },
+    { selected: ["Report", "Stop"], expectedScore: 0 },
+    { selected: ["Stop", "Report"], expectedScore: 100 },
+  ])(
+    "persists drag-and-drop placements $selected with score $expectedScore",
+    async ({ selected, expectedScore }) => {
+      const authoring = app.get(QuizAuthoringService);
+      const runtime = app.get(QuizRuntimeService);
+      const course = await courseFactory.create({ baseLanguage: SUPPORTED_LANGUAGES.PL });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const learner = await userFactory.create();
+      const firstBlankId = randomUUID();
+      const secondBlankId = randomUUID();
+      const lesson = await authoring.createQuizLesson({
+        chapterId: chapter.id,
+        title: "Drag-and-drop placement regression",
+        type: LESSON_TYPES.QUIZ,
+        thresholdScore: 50,
+        attemptsLimit: null,
+        quizCooldownInHours: null,
+        questions: [
+          {
+            type: ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND,
+            title: "Complete the procedure",
+            description: `First <blank-answer-${firstBlankId}> then <blank-answer-${secondBlankId}>.`,
+            options: [
+              { id: firstBlankId, optionText: "Stop", isCorrect: true, displayOrder: 1 },
+              { id: secondBlankId, optionText: "Report", isCorrect: true, displayOrder: 2 },
+              { optionText: "Continue", isCorrect: false, displayOrder: 3 },
+            ],
+          },
+        ],
+      });
+      const definition = await authoring.getQuizLessonForAuthoring(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+      );
+      const question = definition!.questions[0];
+      const result = await runtime.submitQuiz(
+        {
+          lessonId: lesson.id,
+          language: SUPPORTED_LANGUAGES.PL,
+          questionsAnswers: [
+            {
+              questionId: question.id,
+              answers: [
+                { answerId: firstBlankId, value: selected[0] },
+                { answerId: secondBlankId, value: selected[1] },
+              ],
+            },
+          ],
+        },
+        learner.id,
+      );
+      expect(result).toMatchObject({ attemptNumber: 1, score: expectedScore });
+      const persisted = await db
+        .select({
+          blankId: assessmentAttemptBlankAnswers.blankId,
+          selectedOptionId: assessmentAttemptBlankAnswers.selectedDragOptionId,
+        })
+        .from(assessmentAttemptBlankAnswers)
+        .innerJoin(
+          assessmentAttemptQuestionAnswers,
+          eq(assessmentAttemptQuestionAnswers.id, assessmentAttemptBlankAnswers.questionAnswerId),
+        )
+        .where(eq(assessmentAttemptQuestionAnswers.attemptId, result.attemptId));
+      expect(persisted).toHaveLength(2);
+      expect(persisted).toEqual(
+        expect.arrayContaining(
+          [firstBlankId, secondBlankId].map((blankId, index) => ({
+            blankId,
+            selectedOptionId: question.dragAndDropOptions.find(
+              (option) => option.label === selected[index],
+            )!.id,
+          })),
+        ),
+      );
+    },
+  );
 
   it.each(Object.values(ASSESSMENT_QUESTION_TYPES))(
     "preserves %s configuration and identity when editing and deleting questions",
