@@ -1,4 +1,4 @@
-import type { SupportedLanguages } from "@repo/shared";
+import type { AssessmentQuestionType, SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -8,7 +8,6 @@ import type {
   LumaGeneratedCourseLesson,
   LumaGeneratedCourseQuestionOption,
 } from "src/luma/luma.types";
-import type { QuestionType } from "src/questions/schema/question.types";
 
 type LumaGeneratedCourseImportDbContext = {
   language: SupportedLanguages;
@@ -46,7 +45,7 @@ export type InsertLessonData = InsertContentLessonData & {
 
 export type InsertQuestionOptionsData = {
   questionId: UUIDType;
-  questionType: QuestionType;
+  questionType: AssessmentQuestionType;
   options: LumaGeneratedCourseQuestionOption[];
   language: SupportedLanguages;
   trx: DatabasePg;

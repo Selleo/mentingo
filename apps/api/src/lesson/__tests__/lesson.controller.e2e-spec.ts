@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
 import {
@@ -5,13 +6,18 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_TYPE,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -22,7 +28,8 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
+import { QuizRuntimeService } from "src/quiz/services/quiz-runtime.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
@@ -31,16 +38,18 @@ import {
   chapters,
   courses,
   lessons,
-  quizAttempts,
-  questions,
-  questionAnswerOptions,
+  assessments,
+  assessmentAttempts,
+  assessmentAttemptBlankAnswers,
+  assessmentAttemptQuestionAnswers,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
   courseStudentMode,
   resources,
   resourceEntity,
   settings,
   studentCourses,
   studentLessonProgress,
-  studentQuestionAnswers,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -114,14 +123,14 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     await truncateTables(baseDb, [
       "resource_entity",
       "resources",
-      "quiz_attempts",
+      "assessment_attempts",
+      "assessment_questions",
+      "assessment_question_choice_options",
+      "assessments",
       "course_student_mode",
       "courses",
       "chapters",
       "lessons",
-      "questions",
-      "question_answer_options",
-      "student_question_answers",
       "student_lesson_progress",
       "student_chapter_progress",
       "student_courses",
@@ -950,7 +959,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     });
   });
 
-  const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, authorId: UUIDType) => {
+  const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, _authorId: UUIDType) => {
     await db
       .update(chapters)
       .set({ lessonCount: 1, updatedAt: new Date().toISOString() })
@@ -974,29 +983,39 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       })
       .returning();
 
-    const [question1] = await db
-      .insert(questions)
+    const [assessment] = await db
+      .insert(assessments)
       .values({
         id: crypto.randomUUID(),
         lessonId: lesson.id,
-        authorId,
-        type: QUESTION_TYPE.SINGLE_CHOICE,
+        passingScorePercentage: "70",
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
+      })
+      .returning();
+
+    const [question1] = await db
+      .insert(assessmentQuestions)
+      .values({
+        id: crypto.randomUUID(),
+        assessmentId: assessment.id,
+        questionType: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+        gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+        prompt: buildJsonbField("en", "What is 2+2?"),
         title: buildJsonbField("en", "What is 2+2?"),
         description: buildJsonbField("en", "Simple math question"),
         displayOrder: 1,
-        solutionExplanation: buildJsonbField("en", "The answer is 4"),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       })
       .returning();
 
     const options = await db
-      .insert(questionAnswerOptions)
+      .insert(assessmentQuestionChoiceOptions)
       .values([
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "3"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "3",
           isCorrect: false,
           displayOrder: 1,
           createdAt: new Date().toISOString(),
@@ -1005,7 +1024,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "4"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "4",
           isCorrect: true,
           displayOrder: 2,
           createdAt: new Date().toISOString(),
@@ -1014,7 +1034,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         {
           id: crypto.randomUUID(),
           questionId: question1.id,
-          optionText: buildJsonbField("en", "5"),
+          language: SUPPORTED_LANGUAGES.EN,
+          label: "5",
           isCorrect: false,
           displayOrder: 3,
           createdAt: new Date().toISOString(),
@@ -1049,23 +1070,25 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   const buildQuizAnswers = async (lessonId: UUIDType) => {
     const quizQuestions = await db
-      .select({ id: questions.id })
-      .from(questions)
-      .where(eq(questions.lessonId, lessonId))
-      .orderBy(questions.displayOrder);
+      .select({ id: assessmentQuestions.id })
+      .from(assessmentQuestions)
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .where(eq(assessments.lessonId, lessonId))
+      .orderBy(assessmentQuestions.displayOrder);
 
     const questionsAnswers = await Promise.all(
       quizQuestions.map(async (question) => {
         const [correctOption] = await db
-          .select({ id: questionAnswerOptions.id })
-          .from(questionAnswerOptions)
+          .select({ id: assessmentQuestionChoiceOptions.id })
+          .from(assessmentQuestionChoiceOptions)
           .where(
             and(
-              eq(questionAnswerOptions.questionId, question.id),
-              eq(questionAnswerOptions.isCorrect, true),
+              eq(assessmentQuestionChoiceOptions.questionId, question.id),
+              eq(assessmentQuestionChoiceOptions.isCorrect, true),
+              eq(assessmentQuestionChoiceOptions.language, SUPPORTED_LANGUAGES.EN),
             ),
           )
-          .orderBy(questionAnswerOptions.displayOrder)
+          .orderBy(assessmentQuestionChoiceOptions.displayOrder)
           .limit(1);
 
         if (!correctOption) {
@@ -1121,20 +1144,22 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   };
 
   const resetQuizAttemptState = async (studentId: UUIDType, lessonId: UUIDType) => {
-    const quizQuestions = await db
-      .select({ id: questions.id })
-      .from(questions)
-      .where(eq(questions.lessonId, lessonId));
+    const quizAssessment = await db
+      .select({ id: assessments.id })
+      .from(assessments)
+      .where(eq(assessments.lessonId, lessonId))
+      .limit(1);
 
-    await db.delete(studentQuestionAnswers).where(
-      and(
-        eq(studentQuestionAnswers.studentId, studentId),
-        inArray(
-          studentQuestionAnswers.questionId,
-          quizQuestions.map((question) => question.id),
-        ),
-      ),
-    );
+    if (quizAssessment[0]) {
+      await db
+        .delete(assessmentAttempts)
+        .where(
+          and(
+            eq(assessmentAttempts.assessmentId, quizAssessment[0].id),
+            eq(assessmentAttempts.learnerId, studentId),
+          ),
+        );
+    }
 
     await db
       .delete(studentLessonProgress)
@@ -1169,16 +1194,26 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
       const { lesson } = await createQuizLesson(course.id, chapter.id, admin.id);
 
-      await db.insert(quizAttempts).values({
+      const [assessment] = await db
+        .select({ id: assessments.id })
+        .from(assessments)
+        .where(eq(assessments.lessonId, lesson.id))
+        .limit(1);
+
+      await db.insert(assessmentAttempts).values({
         id: crypto.randomUUID(),
-        userId: student.id,
-        courseId: course.id,
-        lessonId: lesson.id,
-        correctAnswers: 1,
-        wrongAnswers: 0,
-        score: 100,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        assessmentId: assessment.id,
+        language: SUPPORTED_LANGUAGES.EN,
+        learnerId: student.id,
+        attemptNumber: 1,
+        submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+        result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+        availablePoints: "1",
+        awardedPoints: "1",
+        scorePercentage: "100",
+        hasQuestionLevelAnswers: false,
+        submittedAt: new Date().toISOString(),
       });
 
       const response = await request(app.getHttpServer())
@@ -1196,13 +1231,327 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .from(lessons)
         .where(eq(lessons.id, lesson.id));
       const remainingQuizAttempts = await db
-        .select({ id: quizAttempts.id })
-        .from(quizAttempts)
-        .where(eq(quizAttempts.lessonId, lesson.id));
+        .select({ id: assessmentAttempts.id })
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.assessmentId, assessment.id));
 
       expect(deletedLessons).toHaveLength(0);
       expect(remainingQuizAttempts).toHaveLength(0);
     });
+  });
+
+  it.each([
+    { selected: ["Report", "Continue"], expectedScore: 0 },
+    { selected: ["Report", "Stop"], expectedScore: 0 },
+    { selected: ["Stop", "Report"], expectedScore: 100 },
+  ])(
+    "persists drag-and-drop placements $selected with score $expectedScore",
+    async ({ selected, expectedScore }) => {
+      const authoring = app.get(QuizAuthoringService);
+      const runtime = app.get(QuizRuntimeService);
+      const course = await courseFactory.create({ baseLanguage: SUPPORTED_LANGUAGES.PL });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const learner = await userFactory.create();
+      const firstBlankId = randomUUID();
+      const secondBlankId = randomUUID();
+      const lesson = await authoring.createQuizLesson({
+        chapterId: chapter.id,
+        title: "Drag-and-drop placement regression",
+        type: LESSON_TYPES.QUIZ,
+        thresholdScore: 50,
+        attemptsLimit: null,
+        quizCooldownInHours: null,
+        questions: [
+          {
+            type: ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND,
+            title: "Complete the procedure",
+            description: `First <blank-answer-${firstBlankId}> then <blank-answer-${secondBlankId}>.`,
+            options: [
+              { id: firstBlankId, optionText: "Stop", isCorrect: true, displayOrder: 1 },
+              { id: secondBlankId, optionText: "Report", isCorrect: true, displayOrder: 2 },
+              { optionText: "Continue", isCorrect: false, displayOrder: 3 },
+            ],
+          },
+        ],
+      });
+      const definition = await authoring.getQuizLessonForAuthoring(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+      );
+      const question = definition!.questions[0];
+      const result = await runtime.submitQuiz(
+        {
+          lessonId: lesson.id,
+          language: SUPPORTED_LANGUAGES.PL,
+          questionsAnswers: [
+            {
+              questionId: question.id,
+              answers: [
+                { answerId: firstBlankId, value: selected[0] },
+                { answerId: secondBlankId, value: selected[1] },
+              ],
+            },
+          ],
+        },
+        learner.id,
+      );
+      expect(result).toMatchObject({ attemptNumber: 1, score: expectedScore });
+      const persisted = await db
+        .select({
+          blankId: assessmentAttemptBlankAnswers.blankId,
+          selectedOptionId: assessmentAttemptBlankAnswers.selectedDragOptionId,
+        })
+        .from(assessmentAttemptBlankAnswers)
+        .innerJoin(
+          assessmentAttemptQuestionAnswers,
+          eq(assessmentAttemptQuestionAnswers.id, assessmentAttemptBlankAnswers.questionAnswerId),
+        )
+        .where(eq(assessmentAttemptQuestionAnswers.attemptId, result.attemptId));
+      expect(persisted).toHaveLength(2);
+      expect(persisted).toEqual(
+        expect.arrayContaining(
+          [firstBlankId, secondBlankId].map((blankId, index) => ({
+            blankId,
+            selectedOptionId: question.dragAndDropOptions.find(
+              (option) => option.label === selected[index],
+            )!.id,
+          })),
+        ),
+      );
+    },
+  );
+
+  it.each(Object.values(ASSESSMENT_QUESTION_TYPES))(
+    "preserves %s configuration and identity when editing and deleting questions",
+    async (type) => {
+      const authoring = app.get(QuizAuthoringService);
+      const course = await courseFactory.create({ baseLanguage: SUPPORTED_LANGUAGES.EN });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const optionId = randomUUID();
+      const isBlank =
+        type === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT ||
+        type === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND;
+      const isOpenText =
+        type === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
+        type === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE;
+      const lesson = await authoring.createQuizLesson({
+        chapterId: chapter.id,
+        title: "Question configuration regression",
+        type: LESSON_TYPES.QUIZ,
+        thresholdScore: 50,
+        attemptsLimit: null,
+        quizCooldownInHours: null,
+        questions: [
+          {
+            type,
+            title: "Original question",
+            description: isBlank ? `Complete <blank-answer-${optionId}>.` : "Original description",
+            options: isOpenText
+              ? []
+              : [
+                  {
+                    id: optionId,
+                    optionText: "Answer",
+                    isCorrect: true,
+                    displayOrder: 1,
+                    ...(type === ASSESSMENT_QUESTION_TYPES.SCALE_1_5 ? { scaleAnswer: 3 } : {}),
+                  },
+                ],
+          },
+        ],
+      });
+      const original = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      const question = original!.questions![0];
+      await authoring.updateQuizLesson(lesson.id, {
+        language: SUPPORTED_LANGUAGES.EN,
+        questions: [{ ...question, title: "Edited question" }],
+      });
+      const updated = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      expect(updated!.questions![0]).toMatchObject({
+        id: question.id,
+        type,
+        title: "Edited question",
+        description: question.description,
+        options: question.options,
+      });
+      const definition = await authoring.getQuizLessonForAuthoring(lesson.id);
+      if (isOpenText) expect(definition!.questions[0].openTextSettings).not.toBeNull();
+      if (isBlank) expect(definition!.questions[0].blanks).toHaveLength(1);
+      if (type === ASSESSMENT_QUESTION_TYPES.SCALE_1_5) {
+        const runtime = app.get(QuizRuntimeService);
+        const learner = await userFactory.create();
+        const result = await runtime.submitQuiz(
+          {
+            lessonId: lesson.id,
+            language: SUPPORTED_LANGUAGES.EN,
+            questionsAnswers: [
+              { questionId: question.id!, answers: [{ answerId: question.options![0].id! }] },
+            ],
+          },
+          learner.id,
+        );
+        expect(result).toMatchObject({ attemptNumber: 1, score: 100, passed: true });
+        const feedback = await runtime.getQuizForDelivery(
+          lesson.id,
+          SUPPORTED_LANGUAGES.EN,
+          learner.id,
+          true,
+        );
+        expect(feedback.questions[0].options![0]).toMatchObject({
+          isStudentAnswer: true,
+          scaleAnswer: 3,
+        });
+      }
+      await authoring.updateQuizLesson(lesson.id, {
+        language: SUPPORTED_LANGUAGES.EN,
+        questions: [],
+      });
+      expect((await authoring.getQuizLessonForAuthoring(lesson.id))!.questions).toEqual([]);
+    },
+  );
+
+  it("preserves translated authoring, localized feedback and caller transaction rollback", async () => {
+    const authoring = app.get(QuizAuthoringService);
+    const runtime = app.get(QuizRuntimeService);
+    const course = await courseFactory.create({
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+    });
+    const chapter = await chapterFactory.create({ courseId: course.id });
+    const learner = await userFactory.create();
+    const lesson = await authoring.createQuizLesson({
+      chapterId: chapter.id,
+      title: "Capital cities",
+      type: LESSON_TYPES.QUIZ,
+      thresholdScore: 50,
+      attemptsLimit: null,
+      quizCooldownInHours: null,
+      questions: [
+        {
+          type: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+          title: "Capital of Poland?",
+          options: [
+            { optionText: "Warsaw", isCorrect: true, displayOrder: 1 },
+            { optionText: "Paris", isCorrect: false, displayOrder: 2 },
+          ],
+        },
+      ],
+    });
+    await db
+      .update(assessments)
+      .set({ availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL] })
+      .where(eq(assessments.lessonId, lesson.id));
+
+    const english = await authoring.getLegacyQuizLessonForAuthoring(
+      lesson.id,
+      SUPPORTED_LANGUAGES.EN,
+    );
+    expect(english?.questions?.[0].solutionExplanation).toBe("Warsaw");
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.PL,
+      title: "Stolice",
+      questions: [
+        {
+          id: english!.questions![0].id,
+          type: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+          title: "Stolica Polski?",
+          options: [
+            { optionText: "Warszawa", isCorrect: true, displayOrder: 1 },
+            { optionText: "Paryż", isCorrect: false, displayOrder: 2 },
+          ],
+        },
+      ],
+    });
+
+    const polish = await authoring.getLegacyQuizLessonForAuthoring(
+      lesson.id,
+      SUPPORTED_LANGUAGES.PL,
+    );
+    expect(polish?.title).toBe("Stolice");
+    expect(polish?.questions?.[0]).toMatchObject({
+      id: english!.questions![0].id,
+      title: "Stolica Polski?",
+      solutionExplanation: "Warszawa",
+    });
+    const fallback = await authoring.getLegacyQuizLessonForAuthoring(
+      lesson.id,
+      SUPPORTED_LANGUAGES.DE,
+    );
+    expect(fallback?.title).toBe("Capital cities");
+    expect(fallback?.questions?.[0].solutionExplanation).toBe("Warsaw");
+
+    const submission = {
+      lessonId: lesson.id,
+      language: SUPPORTED_LANGUAGES.PL,
+      questionsAnswers: [
+        {
+          questionId: polish!.questions![0].id!,
+          answers: [{ answerId: polish!.questions![0].options![0].id! }],
+        },
+      ],
+    };
+    const withoutFeedback = await runtime.getQuizForDelivery(
+      lesson.id,
+      SUPPORTED_LANGUAGES.PL,
+      learner.id,
+    );
+    expect(withoutFeedback.questions[0].solutionExplanation).toBeNull();
+    const firstAttempt = await runtime.submitQuiz(submission, learner.id);
+    expect(firstAttempt).toMatchObject({ attemptNumber: 1, score: 100, passed: true });
+    const feedback = await runtime.getQuizForDelivery(
+      lesson.id,
+      SUPPORTED_LANGUAGES.PL,
+      learner.id,
+      true,
+    );
+    expect(feedback.questions[0].solutionExplanation).toBe("Warszawa");
+    expect(feedback.questions[0].options?.[0]).toMatchObject({
+      isCorrect: true,
+      isStudentAnswer: true,
+    });
+
+    await expect(
+      db.transaction(async (trx) => {
+        const attempt = await runtime.submitQuiz(submission, learner.id, trx);
+        expect(attempt.attemptNumber).toBe(2);
+        throw new Error("Rollback quiz attempt");
+      }),
+    ).rejects.toThrow("Rollback quiz attempt");
+    const attempts = await db
+      .select()
+      .from(assessmentAttempts)
+      .where(eq(assessmentAttempts.learnerId, learner.id));
+    expect(attempts).toHaveLength(1);
+    expect(attempts[0].id).toBe(firstAttempt.attemptId);
+    expect(await runtime.submitQuiz(submission, learner.id)).toMatchObject({ attemptNumber: 2 });
+
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.PL,
+      questions: polish!.questions!.map((question) => ({
+        ...question,
+        title: "Wybierz stolicę Polski",
+      })),
+    });
+    const updated = await authoring.getLegacyQuizLessonForAuthoring(
+      lesson.id,
+      SUPPORTED_LANGUAGES.PL,
+    );
+    expect(updated?.questions?.[0].options?.map(({ id }) => id)).toEqual(
+      polish!.questions![0].options!.map(({ id }) => id),
+    );
+    const preservedFeedback = await runtime.getQuizForDelivery(
+      lesson.id,
+      SUPPORTED_LANGUAGES.PL,
+      learner.id,
+      true,
+    );
+    expect(preservedFeedback.questions[0].options?.[0].isStudentAnswer).toBe(true);
+
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.EN,
+      questions: [],
+    });
+    expect((await authoring.getQuizLessonForAuthoring(lesson.id))?.questions).toEqual([]);
   });
 
   describe("GET /api/lesson/:id - quiz feedback redaction", () => {

@@ -38,6 +38,7 @@ import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmation
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
+import { getBaseLanguageTextPlaceholder } from "~/modules/Admin/EditCourse/utils/baseLanguageText";
 
 import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { DeleteContentType } from "../../../EditCourse.types";
@@ -115,6 +116,7 @@ type AiMentorLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
+  baseLanguageLesson: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
@@ -124,6 +126,7 @@ const AiMentorLessonForm = ({
   setContentTypeToDisplay,
   chapterToEdit,
   lessonToEdit,
+  baseLanguageLesson,
   setSelectedLesson,
   language,
   baseLanguage,
@@ -858,9 +861,16 @@ const AiMentorLessonForm = ({
                 canEditAvatar={Boolean(lessonToEdit)}
                 onEditAvatar={onOpenAvatarDialog}
                 onRemoveAvatar={handleRemoveAvatar}
+                baseLanguageTitle={baseLanguageLesson?.title}
+                baseLanguageName={baseLanguageLesson?.aiMentor?.name}
               />
 
-              <AiMentorScenarioFields control={form.control} />
+              <AiMentorScenarioFields
+                control={form.control}
+                baseLanguageDescription={getBaseLanguageTextPlaceholder(
+                  baseLanguageLesson?.description,
+                )}
+              />
 
               {language === baseLanguage && (
                 <AiMentorScenarioTemplateSelect onSelect={handleScenarioTemplateSelect} />

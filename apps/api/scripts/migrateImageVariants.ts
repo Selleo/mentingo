@@ -23,7 +23,6 @@ import {
   aiMentorLessons,
   courses,
   learningPaths,
-  questions,
   resources,
   settings,
   users,
@@ -98,83 +97,68 @@ const withImageVariantMetadata = (metadata: ImageVariantMetadata) =>
   )}::jsonb, true)`;
 
 async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCandidate[]> {
-  const [
-    userRows,
-    courseRows,
-    aiMentorRows,
-    questionRows,
-    resourceRows,
-    learningPathRows,
-    globalSettingsRows,
-  ] = await Promise.all([
-    db
-      .select({
-        id: users.id,
-        tenantId: users.tenantId,
-        reference: users.avatarReference,
-      })
-      .from(users)
-      .where(isNotNull(users.avatarReference)),
-    db
-      .select({
-        id: courses.id,
-        tenantId: courses.tenantId,
-        thumbnailS3Key: courses.thumbnailS3Key,
-        certificateSignature: sql<string | null>`${courses.settings}->>'certificateSignature'`,
-      })
-      .from(courses),
-    db
-      .select({
-        id: aiMentorLessons.id,
-        tenantId: aiMentorLessons.tenantId,
-        reference: aiMentorLessons.avatarReference,
-      })
-      .from(aiMentorLessons)
-      .where(isNotNull(aiMentorLessons.avatarReference)),
-    db
-      .select({
-        id: questions.id,
-        tenantId: questions.tenantId,
-        reference: questions.photoS3Key,
-      })
-      .from(questions)
-      .where(isNotNull(questions.photoS3Key)),
-    db
-      .select({
-        id: resources.id,
-        tenantId: resources.tenantId,
-        reference: resources.reference,
-        contentType: resources.contentType,
-      })
-      .from(resources),
-    db
-      .select({
-        id: learningPaths.id,
-        tenantId: learningPaths.tenantId,
-        thumbnailReference: learningPaths.thumbnailReference,
-        certificateSignature: sql<
-          string | null
-        >`${learningPaths.settings}->>'certificateSignature'`,
-      })
-      .from(learningPaths),
-    db
-      .select({
-        id: settings.id,
-        tenantId: settings.tenantId,
-        certificateBackgroundImage: sql<
-          string | null
-        >`${settings.settings}->>'certificateBackgroundImage'`,
-        platformLogoS3Key: sql<string | null>`${settings.settings}->>'platformLogoS3Key'`,
-        platformSimpleLogoS3Key: sql<
-          string | null
-        >`${settings.settings}->>'platformSimpleLogoS3Key'`,
-        loginBackgroundImageS3Key: sql<
-          string | null
-        >`${settings.settings}->>'loginBackgroundImageS3Key'`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId)),
-  ]);
+  const [userRows, courseRows, aiMentorRows, resourceRows, learningPathRows, globalSettingsRows] =
+    await Promise.all([
+      db
+        .select({
+          id: users.id,
+          tenantId: users.tenantId,
+          reference: users.avatarReference,
+        })
+        .from(users)
+        .where(isNotNull(users.avatarReference)),
+      db
+        .select({
+          id: courses.id,
+          tenantId: courses.tenantId,
+          thumbnailS3Key: courses.thumbnailS3Key,
+          certificateSignature: sql<string | null>`${courses.settings}->>'certificateSignature'`,
+        })
+        .from(courses),
+      db
+        .select({
+          id: aiMentorLessons.id,
+          tenantId: aiMentorLessons.tenantId,
+          reference: aiMentorLessons.avatarReference,
+        })
+        .from(aiMentorLessons)
+        .where(isNotNull(aiMentorLessons.avatarReference)),
+      db
+        .select({
+          id: resources.id,
+          tenantId: resources.tenantId,
+          reference: resources.reference,
+          contentType: resources.contentType,
+        })
+        .from(resources),
+      db
+        .select({
+          id: learningPaths.id,
+          tenantId: learningPaths.tenantId,
+          thumbnailReference: learningPaths.thumbnailReference,
+          certificateSignature: sql<
+            string | null
+          >`${learningPaths.settings}->>'certificateSignature'`,
+        })
+        .from(learningPaths),
+      db
+        .select({
+          id: settings.id,
+          tenantId: settings.tenantId,
+          certificateBackgroundImage: sql<
+            string | null
+          >`${settings.settings}->>'certificateBackgroundImage'`,
+          platformLogoS3Key: sql<string | null>`${settings.settings}->>'platformLogoS3Key'`,
+          platformSimpleLogoS3Key: sql<
+            string | null
+          >`${settings.settings}->>'platformSimpleLogoS3Key'`,
+          loginBackgroundImageS3Key: sql<
+            string | null
+          >`${settings.settings}->>'loginBackgroundImageS3Key'`,
+        })
+        .from(settings)
+        .where(isNull(settings.userId)),
+    ]);
 
   return [
     ...userRows.map(
@@ -222,17 +206,6 @@ async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCand
             .update(aiMentorLessons)
             .set({ avatarReference: reference })
             .where(eq(aiMentorLessons.id, row.id));
-        },
-      }),
-    ),
-    ...questionRows.map(
-      (row): ReferenceCandidate => ({
-        label: "questions.photoS3Key",
-        id: row.id,
-        tenantId: row.tenantId,
-        reference: row.reference,
-        update: async ({ db, reference }) => {
-          await db.update(questions).set({ photoS3Key: reference }).where(eq(questions.id, row.id));
         },
       }),
     ),

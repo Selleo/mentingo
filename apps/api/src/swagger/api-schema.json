@@ -18873,6 +18873,10 @@
                 "type": "string"
               },
               {
+                "const": "assessment_question",
+                "type": "string"
+              },
+              {
                 "const": "news",
                 "type": "string"
               },

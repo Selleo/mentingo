@@ -20,10 +20,16 @@ import type { SupportedLanguages } from "@repo/shared";
 type NewChapterProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapter: Chapter | null;
+  baseLanguageChapter: Chapter | null;
   language: SupportedLanguages;
 };
 
-const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterProps) => {
+const NewChapter = ({
+  setContentTypeToDisplay,
+  chapter,
+  baseLanguageChapter,
+  language,
+}: NewChapterProps) => {
   const { id: courseId } = useParams<{ id: string }>();
   const { t } = useTranslation();
 
@@ -91,6 +97,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterPr
                     data-testid={CHAPTER_FORM_HANDLES.TITLE_INPUT}
                     id="title"
                     {...field}
+                    placeholder={baseLanguageChapter?.title}
                     required
                   />
                 </FormControl>

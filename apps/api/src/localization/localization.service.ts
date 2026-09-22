@@ -8,14 +8,18 @@ import { chapters, courses, learningPaths, lessons, questionsAndAnswers } from "
 
 import { ENTITY_TYPE } from "./localization.types";
 
-import type { BaseTable, EntityType } from "./localization.types";
+import type { BaseTable, EntityLocalization, EntityType } from "./localization.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class LocalizationService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
-  async getBaseLanguage(entityType: EntityType, entityId: UUIDType, language?: SupportedLanguages) {
+  async getBaseLanguage(
+    entityType: EntityType,
+    entityId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<EntityLocalization> {
     let query;
 
     switch (entityType) {
@@ -23,7 +27,7 @@ export class LocalizationService {
         query = this.db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
+            availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
           })
           .from(courses)
           .where(eq(courses.id, entityId));
@@ -32,7 +36,7 @@ export class LocalizationService {
         query = this.db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
+            availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
           })
           .from(chapters)
           .innerJoin(courses, eq(courses.id, chapters.courseId))
@@ -42,7 +46,7 @@ export class LocalizationService {
         query = this.db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
+            availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
           })
           .from(lessons)
           .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
@@ -53,7 +57,7 @@ export class LocalizationService {
         query = this.db
           .select({
             baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
-            availableLocales: sql<SupportedLanguages>`${questionsAndAnswers.availableLocales}`,
+            availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
           })
           .from(questionsAndAnswers)
           .where(eq(questionsAndAnswers.id, entityId));
@@ -62,7 +66,7 @@ export class LocalizationService {
         query = this.db
           .select({
             baseLanguage: sql<SupportedLanguages>`${learningPaths.baseLanguage}`,
-            availableLocales: sql<SupportedLanguages>`${learningPaths.availableLocales}`,
+            availableLocales: sql<SupportedLanguages[]>`${learningPaths.availableLocales}`,
           })
           .from(learningPaths)
           .where(eq(learningPaths.id, entityId));

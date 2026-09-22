@@ -12,8 +12,9 @@ import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmati
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
+import { findBaseLanguageOption } from "../quizTranslationPlaceholders";
 
-import type { QuestionOption } from "../QuizLessonForm.types";
+import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -21,12 +22,14 @@ type MatchWordsQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 };
 
 const MatchWordsQuestion = ({
   form,
   questionIndex,
   isStructureLocked = false,
+  baseLanguageQuestion,
 }: MatchWordsQuestionProps) => {
   const watchedOptions = form.watch(`questions.${questionIndex}.options`);
   const errors = form.formState.errors;
@@ -115,69 +118,82 @@ const MatchWordsQuestion = ({
                   });
                 }}
                 className="grid grid-cols-1"
-                renderItem={(item, index: number) => (
-                  <SortableList.Item id={item.sortableId}>
-                    <div className="mt-2">
-                      <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                        {!isStructureLocked && (
-                          <SortableList.DragHandle>
-                            <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
-                          </SortableList.DragHandle>
-                        )}
-                        <div className="flex w-full gap-2">
-                          <Input
-                            type="text"
-                            name={`questions.${questionIndex}.options.${index}.optionText`}
-                            value={item.optionText}
-                            onChange={(e) =>
-                              handleOptionChange(index, "optionText", e.target.value)
-                            }
-                            placeholder={t("adminCourseView.curriculum.lesson.placeholder.option")}
-                            required
-                            className="w-1/2"
-                          />
-                          <Input
-                            type="text"
-                            name={`questions.${questionIndex}.options.${index}.matchedWord`}
-                            value={item.matchedWord}
-                            onChange={(e) =>
-                              handleOptionChange(index, "matchedWord", e.target.value)
-                            }
-                            placeholder={t(
-                              "adminCourseView.curriculum.lesson.placeholder.matchedWords",
-                            )}
-                            required
-                            className="w-1/2"
-                          />
-                        </div>
-                        <div className="flex items-center">
-                          <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                              {!isStructureLocked && (
-                                <TooltipTrigger asChild>
-                                  <div className="group">
-                                    <Icon
-                                      name="TrashIcon"
-                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
-                                      onClick={() => handleRemoveOption(index)}
-                                    />
-                                  </div>
-                                </TooltipTrigger>
-                              )}
-                              <TooltipContent
-                                side="top"
-                                align="center"
-                                className="ml-4 rounded bg-black text-sm text-white shadow-md"
-                              >
-                                {t("common.button.delete")}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                renderItem={(item, index: number) => {
+                  const baseLanguageOption = findBaseLanguageOption(
+                    baseLanguageQuestion,
+                    watchedOptions,
+                    item,
+                    index,
+                  );
+
+                  return (
+                    <SortableList.Item id={item.sortableId}>
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
+                          {!isStructureLocked && (
+                            <SortableList.DragHandle>
+                              <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                            </SortableList.DragHandle>
+                          )}
+                          <div className="flex w-full gap-2">
+                            <Input
+                              type="text"
+                              name={`questions.${questionIndex}.options.${index}.optionText`}
+                              value={item.optionText}
+                              onChange={(e) =>
+                                handleOptionChange(index, "optionText", e.target.value)
+                              }
+                              placeholder={
+                                baseLanguageOption?.optionText ||
+                                t("adminCourseView.curriculum.lesson.placeholder.option")
+                              }
+                              required
+                              className="w-1/2"
+                            />
+                            <Input
+                              type="text"
+                              name={`questions.${questionIndex}.options.${index}.matchedWord`}
+                              value={item.matchedWord}
+                              onChange={(e) =>
+                                handleOptionChange(index, "matchedWord", e.target.value)
+                              }
+                              placeholder={
+                                baseLanguageOption?.matchedWord ||
+                                t("adminCourseView.curriculum.lesson.placeholder.matchedWords")
+                              }
+                              required
+                              className="w-1/2"
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip>
+                                {!isStructureLocked && (
+                                  <TooltipTrigger asChild>
+                                    <div className="group">
+                                      <Icon
+                                        name="TrashIcon"
+                                        className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                        onClick={() => handleRemoveOption(index)}
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                )}
+                                <TooltipContent
+                                  side="top"
+                                  align="center"
+                                  className="ml-4 rounded bg-black text-sm text-white shadow-md"
+                                >
+                                  {t("common.button.delete")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </SortableList.Item>
-                )}
+                    </SortableList.Item>
+                  );
+                }}
               />
             )}
           </div>

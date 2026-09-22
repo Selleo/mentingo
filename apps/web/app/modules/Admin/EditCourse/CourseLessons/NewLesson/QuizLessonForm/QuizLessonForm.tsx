@@ -28,6 +28,7 @@ import QuizSettingsSection from "./components/QuizSettingsSection";
 import ScaleQuestion from "./components/ScaleQuestion";
 import TrueOrFalseQuestion from "./components/TrueOrFalseQuestion";
 import { useQuizLessonForm } from "./hooks/useQuizLessonForm";
+import { findBaseLanguageQuestion } from "./quizTranslationPlaceholders";
 
 import type { Question, QuestionOption } from "./QuizLessonForm.types";
 import type { QuizLessonFormValues } from "./validators/quizLessonFormSchema";
@@ -39,6 +40,7 @@ type QuizLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
+  baseLanguageLesson: Lesson | null;
   setSelectedLesson: (lesson: Lesson | null) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
@@ -48,6 +50,7 @@ const QuizLessonForm = ({
   setContentTypeToDisplay,
   chapterToEdit,
   lessonToEdit,
+  baseLanguageLesson,
   setSelectedLesson,
   language,
   baseLanguage,
@@ -185,6 +188,12 @@ const QuizLessonForm = ({
       form: UseFormReturn<QuizLessonFormValues>,
       dragTrigger: React.ReactNode,
     ) => {
+      const baseLanguageQuestion = findBaseLanguageQuestion(
+        baseLanguageLesson?.questions,
+        question,
+        questionIndex,
+      );
+
       return (
         <QuestionWrapper
           key={questionIndex}
@@ -196,6 +205,7 @@ const QuizLessonForm = ({
           isOpen={openQuestionIndexes.has(question.sortableId)}
           handleToggle={() => handleToggleQuestion(question.sortableId)}
           isStructureLocked={isStructureLocked}
+          baseLanguageQuestion={baseLanguageQuestion}
         >
           {match(question.type)
             .with(QuestionType.SINGLE_CHOICE, QuestionType.MULTIPLE_CHOICE, () => (
@@ -203,6 +213,7 @@ const QuizLessonForm = ({
                 questionIndex={questionIndex}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
             .with(QuestionType.TRUE_OR_FALSE, () => (
@@ -210,6 +221,7 @@ const QuizLessonForm = ({
                 questionIndex={questionIndex}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
             .with(
@@ -221,6 +233,7 @@ const QuizLessonForm = ({
                   form={form}
                   lessonToEdit={lessonToEdit}
                   isStructureLocked={isStructureLocked}
+                  baseLanguageQuestion={baseLanguageQuestion}
                 />
               ),
             )
@@ -229,6 +242,7 @@ const QuizLessonForm = ({
                 questionIndex={questionIndex}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
             .with(QuestionType.FILL_IN_THE_BLANKS_TEXT, QuestionType.FILL_IN_THE_BLANKS_DND, () => (
@@ -237,6 +251,7 @@ const QuizLessonForm = ({
                 questionType={question.type}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
             .with(QuestionType.SCALE_1_5, () => (
@@ -244,13 +259,14 @@ const QuizLessonForm = ({
                 questionIndex={questionIndex}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
             .otherwise(() => null)}
         </QuestionWrapper>
       );
     },
-    [lessonToEdit, openQuestionIndexes, isStructureLocked],
+    [baseLanguageLesson?.questions, lessonToEdit, openQuestionIndexes, isStructureLocked],
   );
 
   useEffect(() => {
@@ -332,6 +348,7 @@ const QuizLessonForm = ({
                       data-testid={QUIZ_LESSON_FORM_HANDLES.TITLE_INPUT}
                       id="title"
                       {...field}
+                      placeholder={isStructureLocked ? baseLanguageLesson?.title : undefined}
                       required
                     />
                   </FormControl>

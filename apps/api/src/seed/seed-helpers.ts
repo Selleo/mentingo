@@ -3,6 +3,13 @@ import { ConfigService } from "@nestjs/config";
 import {
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TYPE,
+  ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_FEEDBACK_MODES,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_TEXT_COMPARISON_MODES,
+  ENTITY_TYPES,
+  RESOURCE_VISIBILITY,
   SYSTEM_ROLE_PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
@@ -14,9 +21,11 @@ import { and, eq, sql } from "drizzle-orm/sql";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
+import { EXTENSION_TO_MIME_TYPE_MAP, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { SearchIndexRepository } from "src/global-search/search-index.repository";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { BLANK_ANSWER_MARKER_REGEX } from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
   aiJudgeBlockingErrors,
@@ -38,23 +47,27 @@ import {
   permissionRuleSetPermissions,
   permissionRuleSets,
   permissionUserRoles,
-  questionAnswerOptions,
   questionsAndAnswers,
-  questions,
+  assessments,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestionTrueFalseStatements,
+  assessmentQuestionScaleOptions,
+  assessmentQuestionBlanks,
+  assessmentQuestionBlankAnswerSets,
+  assessmentQuestionDragAndDropOptions,
   tenants,
+  resources,
+  resourceEntity,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
 
-const BLANK_ANSWER_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
-
 type SeedQuestionData = NonNullable<
   NonNullable<NiceCourseData["chapters"][number]["lessons"][number]["questions"]>[number]
 >;
-
-type SeedQuestionOption = NonNullable<SeedQuestionData["options"]>[number];
 
 const isFillInTheBlanksQuestion = (questionType: SeedQuestionData["type"]) =>
   questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND ||
@@ -73,24 +86,156 @@ const replaceSeedBlankMarkers = (description: string | undefined, answerIds: UUI
 
 const normalizeOptionalString = (value: string | null | undefined) => value ?? undefined;
 
-const buildQuestionAnswerOptionList = (
-  questionOptions: SeedQuestionOption[],
-  questionId: UUIDType,
+const createSeedAssessmentQuestion = async (
+  db: DatabasePg,
+  assessmentId: UUIDType,
+  questionData: SeedQuestionData,
+  displayOrder: number,
   createdAt: string,
   tenantId: UUIDType,
-) =>
-  questionOptions.map((questionAnswerOption, index) => ({
-    id: crypto.randomUUID(),
-    createdAt: createdAt,
+) => {
+  const questionId = crypto.randomUUID();
+  const options = questionData.options ?? [];
+  const optionIds = options.map(() => crypto.randomUUID());
+  const correctOptionIds = options.flatMap((option, index) =>
+    option.isCorrect ? [optionIds[index]] : [],
+  );
+  const description = isFillInTheBlanksQuestion(questionData.type)
+    ? replaceSeedBlankMarkers(normalizeOptionalString(questionData.description), correctOptionIds)
+    : questionData.description;
+  const questionType =
+    questionData.type as (typeof ASSESSMENT_QUESTION_TYPES)[keyof typeof ASSESSMENT_QUESTION_TYPES];
+  const isManual =
+    questionData.type === QUESTION_TYPE.BRIEF_RESPONSE ||
+    questionData.type === QUESTION_TYPE.DETAILED_RESPONSE;
+
+  await db.insert(assessmentQuestions).values({
+    id: questionId,
+    assessmentId,
+    questionType,
+    displayOrder,
+    maximumPoints: "1",
+    gradingMode: isManual ? ASSESSMENT_GRADING_MODES.MANUAL : ASSESSMENT_GRADING_MODES.AUTOMATIC,
+    prompt: buildJsonbField(SUPPORTED_LANGUAGES.EN, description ?? questionData.title),
+    title: buildJsonbField(SUPPORTED_LANGUAGES.EN, questionData.title),
+    description: questionData.description
+      ? buildJsonbField(SUPPORTED_LANGUAGES.EN, questionData.description)
+      : null,
+    createdAt,
     updatedAt: createdAt,
-    questionId,
-    optionText: sql`json_build_object('en', ${questionAnswerOption.optionText}::text)`,
-    isCorrect: questionAnswerOption.isCorrect || false,
-    displayOrder: index + 1,
-    matchedWord: sql`json_build_object('en', ${questionAnswerOption.matchedWord || null}::text)`,
-    scaleAnswer: questionAnswerOption.scaleAnswer || null,
     tenantId,
-  }));
+  });
+
+  if (questionData.photoS3Key) {
+    const extension = questionData.photoS3Key.split(".").pop()?.toLowerCase() ?? "jpg";
+    const [resource] = await db
+      .insert(resources)
+      .values({
+        reference: questionData.photoS3Key,
+        contentType: EXTENSION_TO_MIME_TYPE_MAP[extension] ?? "image/jpeg",
+        metadata: {},
+        visibility: RESOURCE_VISIBILITY.PUBLIC,
+        uploadedBy: null,
+        archived: false,
+        createdAt,
+        updatedAt: createdAt,
+        tenantId,
+      })
+      .returning({ id: resources.id });
+
+    await db.insert(resourceEntity).values({
+      resourceId: resource.id,
+      entityId: questionId,
+      entityType: ENTITY_TYPES.ASSESSMENT_QUESTION,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.PROMPT_IMAGE,
+      createdAt,
+      updatedAt: createdAt,
+      tenantId,
+    });
+  }
+
+  if (questionType === ASSESSMENT_QUESTION_TYPES.TRUE_OR_FALSE) {
+    await db.insert(assessmentQuestionTrueFalseStatements).values(
+      options.map((option, index) => ({
+        id: optionIds[index],
+        questionId,
+        language: SUPPORTED_LANGUAGES.EN,
+        displayOrder: index + 1,
+        correctValue: option.isCorrect ?? false,
+        statement: option.optionText,
+        createdAt,
+        updatedAt: createdAt,
+        tenantId,
+      })),
+    );
+  } else if (questionType === ASSESSMENT_QUESTION_TYPES.SCALE_1_5) {
+    await db.insert(assessmentQuestionScaleOptions).values(
+      options.map((option, index) => ({
+        id: optionIds[index],
+        questionId,
+        displayOrder: index + 1,
+        scaleValue: option.scaleAnswer ?? index + 1,
+        label: buildJsonbField(SUPPORTED_LANGUAGES.EN, option.optionText),
+        createdAt,
+        updatedAt: createdAt,
+        tenantId,
+      })),
+    );
+  } else if (isFillInTheBlanksQuestion(questionData.type)) {
+    await db.insert(assessmentQuestionBlanks).values(
+      correctOptionIds.map((blankId) => ({
+        id: blankId,
+        questionId,
+        textComparisonMode: ASSESSMENT_TEXT_COMPARISON_MODES.EXACT,
+        createdAt,
+        updatedAt: createdAt,
+        tenantId,
+      })),
+    );
+    await db.insert(assessmentQuestionBlankAnswerSets).values(
+      correctOptionIds.map((blankId) => {
+        const answer = options.find((option, optionIndex) => optionIds[optionIndex] === blankId)!;
+        return {
+          blankId,
+          language: SUPPORTED_LANGUAGES.EN,
+          preferredAnswer: answer.matchedWord || answer.optionText,
+          acceptedAnswers: [answer.matchedWord || answer.optionText],
+          createdAt,
+          updatedAt: createdAt,
+          tenantId,
+        };
+      }),
+    );
+    if (questionType === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND)
+      await db.insert(assessmentQuestionDragAndDropOptions).values(
+        options.map((option, index) => ({
+          id: optionIds[index],
+          questionId,
+          language: SUPPORTED_LANGUAGES.EN,
+          label: option.optionText,
+          targetBlankId: option.isCorrect ? optionIds[index] : null,
+          displayOrder: index + 1,
+          createdAt,
+          updatedAt: createdAt,
+          tenantId,
+        })),
+      );
+  } else if (options.length) {
+    await db.insert(assessmentQuestionChoiceOptions).values(
+      options.map((option, index) => ({
+        id: optionIds[index],
+        questionId,
+        language: SUPPORTED_LANGUAGES.EN,
+        displayOrder: index + 1,
+        isCorrect: option.isCorrect ?? false,
+        label: option.optionText,
+        createdAt,
+        updatedAt: createdAt,
+        tenantId,
+      })),
+    );
+  }
+};
 
 export async function createNiceCourses(
   creatorUserIds: UUIDType[],
@@ -305,44 +450,31 @@ export async function createNiceCourses(
             );
         }
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({
+              lessonId: lesson.id,
+              passingScorePercentage: "0",
+              attemptLimitMode: ASSESSMENT_ATTEMPT_LIMIT_MODES.NONE,
+              maximumAttempts: null,
+              attemptCooldown: null,
+              feedbackMode: ASSESSMENT_FEEDBACK_MODES.FULL,
+              baseLanguage: SUPPORTED_LANGUAGES.EN,
+              availableLocales: [SUPPORTED_LANGUAGES.EN],
+              createdAt,
+              updatedAt: createdAt,
+              tenantId,
+            })
+            .returning({ id: assessments.id });
           for (const [index, questionData] of lessonData.questions.entries()) {
-            const questionId = crypto.randomUUID();
-            const questionAnswerOptionList = questionData.options
-              ? buildQuestionAnswerOptionList(questionData.options, questionId, createdAt, tenantId)
-              : [];
-            const correctFillBlankAnswerIds = questionAnswerOptionList
-              .filter(({ isCorrect }) => isCorrect)
-              .map(({ id }) => id);
-            const description = isFillInTheBlanksQuestion(questionData.type)
-              ? replaceSeedBlankMarkers(
-                  normalizeOptionalString(questionData.description),
-                  correctFillBlankAnswerIds,
-                )
-              : questionData.description;
-
-            await db
-              .insert(questions)
-              .values({
-                id: questionId,
-                type: questionData.type,
-                title: sql`json_build_object('en', ${questionData.title}::text)`,
-                description: sql`json_build_object('en', ${description ?? null}::text)`,
-                lessonId: lesson.id,
-                authorId: creatorUserId,
-                createdAt: createdAt,
-                updatedAt: createdAt,
-                displayOrder: index + 1,
-                solutionExplanation: sql`json_build_object('en', ${
-                  questionData.solutionExplanation ?? null
-                }::text)`,
-                photoS3Key: questionData.photoS3Key ?? null,
-                tenantId,
-              })
-              .returning();
-
-            if (questionAnswerOptionList.length > 0) {
-              await db.insert(questionAnswerOptions).values(questionAnswerOptionList);
-            }
+            await createSeedAssessmentQuestion(
+              db,
+              assessment.id,
+              questionData,
+              index + 1,
+              createdAt,
+              tenantId,
+            );
           }
         }
       }

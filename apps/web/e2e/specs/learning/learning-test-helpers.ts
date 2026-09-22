@@ -337,6 +337,7 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
     categoryTitle: (prefix) => `Learning All Quiz Types Category ${prefix}`,
     buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
       const textBlankAnswer = `${prefix}-text-answer`;
+      const textBlankAnswerId = randomUUID();
       const dndBlankAnswer = `${prefix}-dnd-answer`;
       const dndBlankAnswerId = randomUUID();
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
@@ -397,9 +398,16 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
           {
             type: "fill_in_the_blanks_text",
             title: `${prefix}-fill-text`,
-            description: "Type the [word] answer.",
+            description: `Type the <blank-answer-${textBlankAnswerId}> answer.`,
             displayOrder: 6,
-            options: [{ optionText: textBlankAnswer, displayOrder: 1, isCorrect: true }],
+            options: [
+              {
+                id: textBlankAnswerId,
+                optionText: textBlankAnswer,
+                displayOrder: 1,
+                isCorrect: true,
+              },
+            ],
           },
           {
             type: "fill_in_the_blanks_dnd",
@@ -439,6 +447,7 @@ export const createTextGapFillQuizCourse = async (
     categoryTitle: (prefix) => `Learning Text Gap Fill Category ${prefix}`,
     buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
       const textBlankAnswer = `${prefix}-correct-gap`;
+      const textBlankAnswerId = randomUUID();
       const wrongTextBlankAnswer = `${prefix}-wrong-gap`;
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
         chapterId,
@@ -449,9 +458,16 @@ export const createTextGapFillQuizCourse = async (
           {
             type: "fill_in_the_blanks_text",
             title: `${prefix}-fill-text`,
-            description: "Type the [word] answer.",
+            description: `Type the <blank-answer-${textBlankAnswerId}> answer.`,
             displayOrder: 1,
-            options: [{ optionText: textBlankAnswer, displayOrder: 1, isCorrect: true }],
+            options: [
+              {
+                id: textBlankAnswerId,
+                optionText: textBlankAnswer,
+                displayOrder: 1,
+                isCorrect: true,
+              },
+            ],
           },
         ],
       });

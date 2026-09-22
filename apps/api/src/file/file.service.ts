@@ -861,20 +861,30 @@ export class FileService {
     currentUser,
     contextId,
     visibility = RESOURCE_VISIBILITY.PUBLIC,
+    reuseExisting = false,
   }: CreateResourceForEntityParams) {
     const { insertedResource } = await this.db.transaction(async (trx) => {
-      const [insertedResource] = await trx
-        .insert(resources)
-        .values({
-          title: buildJsonbFieldWithMultipleEntries(title || {}),
-          description: buildJsonbFieldWithMultipleEntries(description || {}),
-          reference,
-          contentType,
-          metadata: settingsToJSONBuildObject(metadata),
-          uploadedBy: currentUser?.userId || null,
-          visibility,
-        })
-        .returning();
+      const [existingResource] = reuseExisting
+        ? await trx
+            .select()
+            .from(resources)
+            .where(and(eq(resources.reference, reference), eq(resources.archived, false)))
+            .limit(1)
+        : [];
+      const [insertedResource] = existingResource
+        ? [existingResource]
+        : await trx
+            .insert(resources)
+            .values({
+              title: buildJsonbFieldWithMultipleEntries(title || {}),
+              description: buildJsonbFieldWithMultipleEntries(description || {}),
+              reference,
+              contentType,
+              metadata: settingsToJSONBuildObject(metadata),
+              uploadedBy: currentUser?.userId || null,
+              visibility,
+            })
+            .returning();
 
       if (contextId) {
         const contextKey = getContextKey(contextId);
