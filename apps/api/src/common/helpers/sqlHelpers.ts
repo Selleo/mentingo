@@ -81,6 +81,10 @@ export function setJsonbStringArrayField(
 
 export type JsonbFieldUpdate = ReturnType<typeof setJsonbField>;
 
+export function buildJsonbField<T = unknown>(
+  key: SqlExpression<string>,
+  value: SqlExpression<string>,
+): SQL<T>;
 export function buildJsonbField(key: string, value: string, allowEmpty?: boolean): SQL<unknown>;
 export function buildJsonbField(
   key?: string | null,
@@ -88,8 +92,8 @@ export function buildJsonbField(
   allowEmpty?: boolean,
 ): SQL<unknown> | undefined;
 export function buildJsonbField(
-  key?: string | null,
-  value?: string | null,
+  key?: string | SqlExpression<string> | null,
+  value?: string | SqlExpression<string> | null,
   allowEmpty: boolean = false,
 ): SQL<unknown> | undefined {
   if (key == null || value === undefined) return undefined;

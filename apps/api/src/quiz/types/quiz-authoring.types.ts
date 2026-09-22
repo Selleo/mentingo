@@ -1,3 +1,4 @@
+import type { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 import type {
   AssessmentGradingMode,
   AssessmentAttemptLimitMode,
@@ -176,4 +177,25 @@ export type BlankAnswerSetRow = InferSelectModel<typeof assessmentQuestionBlankA
 export type PromptImageRow = {
   questionId: UUIDType;
   reference: string;
+};
+
+export type LocalizedChoiceOptionRow = Omit<ChoiceOptionRow, "label"> & { label: string };
+export type LocalizedTrueFalseStatementRow = Omit<TrueFalseStatementRow, "statement"> & {
+  statement: string;
+};
+export type LocalizedScaleOptionRow = Omit<ScaleOptionRow, "label"> & { label: string };
+export type LocalizedDragAndDropOptionRow = Omit<DragAndDropOptionRow, "label"> & { label: string };
+
+export type QuizAuthoringRows = {
+  lesson: NonNullable<Awaited<ReturnType<QuizAuthoringRepository["findLesson"]>>>;
+  assessment: NonNullable<Awaited<ReturnType<QuizAuthoringRepository["findAssessmentByLessonId"]>>>;
+  questions: Awaited<ReturnType<QuizAuthoringRepository["findQuestions"]>>;
+  choiceOptions: LocalizedChoiceOptionRow[];
+  trueFalseStatements: LocalizedTrueFalseStatementRow[];
+  scaleOptions: LocalizedScaleOptionRow[];
+  openTextSettings: OpenTextSettingsRow[];
+  blanks: BlankRow[];
+  answerSets: BlankAnswerSetRow[];
+  dragOptions: LocalizedDragAndDropOptionRow[];
+  promptImages: PromptImageRow[];
 };

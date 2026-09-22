@@ -22,7 +22,7 @@ const buildSolutionExplanation = (question: QuizAuthoringLocalizedQuestion) => {
 
   if (!correctAnswers.length) return undefined;
 
-  return `Correct answer: ${correctAnswers.join(", ")}`;
+  return correctAnswers.join(", ");
 };
 
 const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): AdminQuestionBody => {

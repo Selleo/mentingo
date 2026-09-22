@@ -25,6 +25,7 @@ import {
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  buildJsonbField,
   buildJsonbFieldWithMultipleEntries,
   getFirstJsonbObjectKey,
   getFirstJsonbObjectValue,
@@ -428,9 +429,6 @@ export class MasterCourseRepository {
         ...getTableColumns(assessmentQuestions),
         lessonId: assessments.lessonId,
         type: assessmentQuestions.questionType,
-        prompt: sql<LocalizedText>`${assessmentQuestions.prompt}`,
-        title: sql<LocalizedText | null>`${assessmentQuestions.title}`,
-        description: sql<LocalizedText | null>`${assessmentQuestions.description}`,
         solutionExplanation: sql<LocalizedText | null>`NULL`,
         photoS3Key: resources.reference,
         authorId: sql<UUIDType | null>`NULL`,
@@ -508,10 +506,10 @@ export class MasterCourseRepository {
       .select({
         id: assessmentQuestionChoiceOptions.id,
         questionId: assessmentQuestionChoiceOptions.questionId,
-        optionText: sql<LocalizedText>`JSONB_BUILD_OBJECT(
-          ${assessmentQuestionChoiceOptions.language},
-          ${assessmentQuestionChoiceOptions.label}
-        )`,
+        optionText: buildJsonbField<LocalizedText>(
+          assessmentQuestionChoiceOptions.language,
+          assessmentQuestionChoiceOptions.label,
+        ),
         matchedWord: sql<LocalizedText | null>`NULL`,
         isCorrect: assessmentQuestionChoiceOptions.isCorrect,
         displayOrder: assessmentQuestionChoiceOptions.displayOrder,
@@ -968,7 +966,7 @@ export class MasterCourseRepository {
         target: assessmentQuestionBlanks.id,
         set: {
           questionId: values.questionId,
-          textComparisonMode: values.textComparisonMode as never,
+          textComparisonMode: values.textComparisonMode,
         },
       });
   }

@@ -19,8 +19,8 @@ import {
   mapQuizAttemptToRuntimeSubmissionResult,
   mapQuizQuestionDescriptionForDelivery,
 } from "../mappers/quiz-runtime.mapper";
-import { QuizRuntimeRepository } from "../repositories/quiz-runtime.repository";
 
+import { QuizAttemptService } from "./quiz-attempt.service";
 import { QuizAuthoringService } from "./quiz-authoring.service";
 
 import type {
@@ -41,7 +41,7 @@ import type { QuestionBody } from "src/lesson/lesson.schema";
 export class QuizRuntimeService {
   constructor(
     private readonly quizAuthoringService: QuizAuthoringService,
-    private readonly quizRuntimeRepository: QuizRuntimeRepository,
+    private readonly quizAttemptService: QuizAttemptService,
   ) {}
 
   async getQuizForDelivery(
@@ -59,7 +59,7 @@ export class QuizRuntimeService {
 
     const attemptFeedback =
       includeFeedback && learnerId
-        ? await this.quizRuntimeRepository.findLatestAttemptFeedback(
+        ? await this.quizAttemptService.findLatestAttemptFeedback(
             quizDefinition.assessment.id,
             learnerId,
           )
@@ -87,10 +87,7 @@ export class QuizRuntimeService {
       throw new BadRequestException("studentLessonView.validation.quizEvaluationFailed");
 
     const attemptData = this.prepareAttempt(quizDefinition, submission, learnerId);
-    const persistedAttempt = await this.quizRuntimeRepository.createSubmittedAttempt(
-      attemptData,
-      db,
-    );
+    const persistedAttempt = await this.quizAttemptService.createSubmittedAttempt(attemptData, db);
 
     return mapQuizAttemptToRuntimeSubmissionResult(attemptData, persistedAttempt);
   }
@@ -299,7 +296,7 @@ export class QuizRuntimeService {
         .filter((answer): answer is string => Boolean(answer)),
     ];
 
-    return correctAnswers.length ? `Correct answer: ${correctAnswers.join(", ")}` : null;
+    return correctAnswers.length ? correctAnswers.join(", ") : null;
   }
 
   private buildFillInTheBlanksSolutionSentence(question: QuizAuthoringLocalizedQuestion) {

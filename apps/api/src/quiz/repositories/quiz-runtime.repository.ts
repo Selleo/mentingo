@@ -1,5 +1,4 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES } from "@repo/shared";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -14,80 +13,68 @@ import {
   assessmentAttemptStatementAnswers,
 } from "src/storage/schema";
 
-import type { PreparedQuizAttempt, QuizAttemptFeedback } from "../types/quiz-runtime.types";
+import type {
+  QuizAttemptInsert,
+  QuizAttemptQuestionAnswerInsert,
+  QuizAttemptChoiceSelectionInsert,
+  QuizAttemptStatementAnswerInsert,
+  QuizAttemptBlankAnswerInsert,
+  QuizAttemptOpenTextAnswerInsert,
+  QuizAttemptScaleSelectionInsert,
+} from "./quiz-runtime.repository.types";
 
 @Injectable()
 export class QuizRuntimeRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
-  async createSubmittedAttempt(attemptData: PreparedQuizAttempt, db?: DatabasePg) {
-    const database = db ?? this.db;
-    const persistAttempt = async (trx: DatabasePg) => {
-      const [latestAttempt] = await trx
-        .select({ attemptNumber: assessmentAttempts.attemptNumber })
-        .from(assessmentAttempts)
-        .where(
-          and(
-            eq(assessmentAttempts.assessmentId, attemptData.assessmentId),
-            eq(assessmentAttempts.learnerId, attemptData.learnerId),
-          ),
-        )
-        .orderBy(desc(assessmentAttempts.attemptNumber))
-        .limit(1);
-
-      const attemptNumber = (latestAttempt?.attemptNumber ?? 0) + 1;
-
-      const [attempt] = await trx
-        .insert(assessmentAttempts)
-        .values({
-          assessmentId: attemptData.assessmentId,
-          language: attemptData.language,
-          learnerId: attemptData.learnerId,
-          attemptNumber,
-          submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
-          gradingStatus: attemptData.gradingStatus,
-          result: attemptData.result,
-          availablePoints: attemptData.availablePoints,
-          awardedPoints: attemptData.awardedPoints,
-          scorePercentage: attemptData.scorePercentage,
-          submittedAt: attemptData.submittedAt,
-          gradedAt: attemptData.gradedAt,
-        })
-        .returning({ id: assessmentAttempts.id });
-
-      await trx.insert(assessmentAttemptQuestionAnswers).values(
-        attemptData.questionAnswers.map((answer) => ({
-          ...answer,
-          attemptId: attempt.id,
-        })),
-      );
-
-      if (attemptData.choiceSelections.length)
-        await trx.insert(assessmentAttemptChoiceSelections).values(attemptData.choiceSelections);
-      if (attemptData.statementAnswers.length)
-        await trx.insert(assessmentAttemptStatementAnswers).values(attemptData.statementAnswers);
-      if (attemptData.blankAnswers.length)
-        await trx.insert(assessmentAttemptBlankAnswers).values(attemptData.blankAnswers);
-      if (attemptData.openTextAnswers.length)
-        await trx.insert(assessmentAttemptOpenTextAnswers).values(attemptData.openTextAnswers);
-      if (attemptData.scaleSelections.length)
-        await trx.insert(assessmentAttemptScaleSelections).values(attemptData.scaleSelections);
-
-      return { attemptId: attempt.id, attemptNumber };
-    };
-
-    return database === this.db ? database.transaction(persistAttempt) : persistAttempt(database);
+  withTransaction<T>(work: (trx: DatabasePg) => Promise<T>, db: DatabasePg = this.db): Promise<T> {
+    return db === this.db ? this.db.transaction(work) : work(db);
   }
 
-  async findLatestAttemptFeedback(
-    assessmentId: UUIDType,
-    learnerId: UUIDType,
-    db: DatabasePg = this.db,
-  ): Promise<QuizAttemptFeedback | null> {
+  async insertAttempt(values: QuizAttemptInsert, db: DatabasePg) {
+    const [attempt] = await db
+      .insert(assessmentAttempts)
+      .values(values)
+      .returning({ id: assessmentAttempts.id });
+    return attempt;
+  }
+
+  async insertQuestionAnswers(values: QuizAttemptQuestionAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptQuestionAnswers).values(values);
+  }
+
+  async insertChoiceSelections(values: QuizAttemptChoiceSelectionInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptChoiceSelections).values(values);
+  }
+
+  async insertStatementAnswers(values: QuizAttemptStatementAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptStatementAnswers).values(values);
+  }
+
+  async insertBlankAnswers(values: QuizAttemptBlankAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptBlankAnswers).values(values);
+  }
+
+  async insertOpenTextAnswers(values: QuizAttemptOpenTextAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptOpenTextAnswers).values(values);
+  }
+
+  async insertScaleSelections(values: QuizAttemptScaleSelectionInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptScaleSelections).values(values);
+  }
+
+  async findLatestAttempt(assessmentId: UUIDType, learnerId: UUIDType, db: DatabasePg = this.db) {
     const [attempt] = await db
       .select({
         id: assessmentAttempts.id,
         scorePercentage: assessmentAttempts.scorePercentage,
+        attemptNumber: assessmentAttempts.attemptNumber,
       })
       .from(assessmentAttempts)
       .where(
@@ -99,8 +86,10 @@ export class QuizRuntimeRepository {
       .orderBy(desc(assessmentAttempts.attemptNumber))
       .limit(1);
 
-    if (!attempt) return null;
+    return attempt ?? null;
+  }
 
+  async findQuestionAnswers(attemptId: UUIDType, db: DatabasePg = this.db) {
     const questionAnswers = await db
       .select({
         id: assessmentAttemptQuestionAnswers.id,
@@ -108,54 +97,48 @@ export class QuizRuntimeRepository {
         awardedPoints: assessmentAttemptQuestionAnswers.awardedPoints,
       })
       .from(assessmentAttemptQuestionAnswers)
-      .where(eq(assessmentAttemptQuestionAnswers.attemptId, attempt.id));
+      .where(eq(assessmentAttemptQuestionAnswers.attemptId, attemptId));
 
-    const questionAnswerIds = questionAnswers.map(({ id }) => id);
+    return questionAnswers;
+  }
 
-    if (!questionAnswerIds.length) {
-      return {
-        attempt,
-        questionAnswers,
-        choiceSelections: [],
-        statementAnswers: [],
-        blankAnswers: [],
-        scaleSelections: [],
-        openTextAnswers: [],
-      };
-    }
+  async findChoiceSelections(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .select()
+      .from(assessmentAttemptChoiceSelections)
+      .where(inArray(assessmentAttemptChoiceSelections.questionAnswerId, questionAnswerIds));
+  }
 
-    const [choiceSelections, statementAnswers, blankAnswers, scaleSelections, openTextAnswers] =
-      await Promise.all([
-        db
-          .select()
-          .from(assessmentAttemptChoiceSelections)
-          .where(inArray(assessmentAttemptChoiceSelections.questionAnswerId, questionAnswerIds)),
-        db
-          .select()
-          .from(assessmentAttemptStatementAnswers)
-          .where(inArray(assessmentAttemptStatementAnswers.questionAnswerId, questionAnswerIds)),
-        db
-          .select()
-          .from(assessmentAttemptBlankAnswers)
-          .where(inArray(assessmentAttemptBlankAnswers.questionAnswerId, questionAnswerIds)),
-        db
-          .select()
-          .from(assessmentAttemptScaleSelections)
-          .where(inArray(assessmentAttemptScaleSelections.questionAnswerId, questionAnswerIds)),
-        db
-          .select()
-          .from(assessmentAttemptOpenTextAnswers)
-          .where(inArray(assessmentAttemptOpenTextAnswers.questionAnswerId, questionAnswerIds)),
-      ]);
+  async findStatementAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .select()
+      .from(assessmentAttemptStatementAnswers)
+      .where(inArray(assessmentAttemptStatementAnswers.questionAnswerId, questionAnswerIds));
+  }
 
-    return {
-      attempt,
-      questionAnswers,
-      choiceSelections,
-      statementAnswers,
-      blankAnswers,
-      scaleSelections,
-      openTextAnswers,
-    };
+  async findBlankAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .select()
+      .from(assessmentAttemptBlankAnswers)
+      .where(inArray(assessmentAttemptBlankAnswers.questionAnswerId, questionAnswerIds));
+  }
+
+  async findScaleSelections(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .select()
+      .from(assessmentAttemptScaleSelections)
+      .where(inArray(assessmentAttemptScaleSelections.questionAnswerId, questionAnswerIds));
+  }
+
+  async findOpenTextAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+    return db
+      .select()
+      .from(assessmentAttemptOpenTextAnswers)
+      .where(inArray(assessmentAttemptOpenTextAnswers.questionAnswerId, questionAnswerIds));
   }
 }

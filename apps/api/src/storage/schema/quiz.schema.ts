@@ -15,6 +15,7 @@ import {
   type AssessmentGradingMode,
   type AssessmentQuestionType,
   type SupportedLanguages,
+  type LocalizedText,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -94,9 +95,9 @@ export const assessmentQuestions = pgTable(
     displayOrder: integer("display_order").notNull(),
     maximumPoints: numeric("maximum_points", { precision: 8, scale: 2 }).notNull().default("1"),
     gradingMode: text("grading_mode").$type<AssessmentGradingMode>().notNull(),
-    prompt: jsonb("prompt").notNull().default({}),
-    title: jsonb("title"),
-    description: jsonb("description"),
+    prompt: jsonb("prompt").$type<LocalizedText>().notNull().default({}),
+    title: jsonb("title").$type<LocalizedText>(),
+    description: jsonb("description").$type<LocalizedText>(),
     ...timestamps,
     tenantId,
   },
@@ -167,7 +168,7 @@ export const assessmentQuestionScaleOptions = pgTable(
       .notNull(),
     scaleValue: smallint("scale_value").notNull(),
     displayOrder: integer("display_order").notNull(),
-    label: jsonb("label").notNull().default({}),
+    label: jsonb("label").$type<LocalizedText>().notNull().default({}),
     ...timestamps,
     tenantId,
   },

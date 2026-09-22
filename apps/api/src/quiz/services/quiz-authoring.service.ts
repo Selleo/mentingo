@@ -20,7 +20,10 @@ import { filterItemsByQuestionId, getBlankMarkerIds } from "../mappers/quiz-auth
 import { mapLocalizedQuizAuthoringReadModelToLegacy } from "../mappers/quiz-authoring-to-legacy.mapper";
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 
+import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
+
 import type {
+  QuizAuthoringRows,
   QuizAuthoringInput,
   QuizAuthoringQuestion,
   QuizAuthoringLocalizedReadModel,
@@ -32,10 +35,6 @@ import type {
   CreateQuizLessonBody,
   UpdateQuizLessonBody,
 } from "src/lesson/lesson.schema";
-
-type QuizAuthoringRows = NonNullable<
-  Awaited<ReturnType<QuizAuthoringRepository["getQuizLessonForAuthoring"]>>
->;
 
 const orderBlanksByPrompt = <Blank extends { id: UUIDType }>(prompt: string, blanks: Blank[]) => {
   const blanksById = new Map(blanks.map((blank) => [blank.id, blank]));
@@ -52,6 +51,7 @@ const orderBlanksByPrompt = <Blank extends { id: UUIDType }>(prompt: string, bla
 export class QuizAuthoringService {
   constructor(
     private readonly quizAuthoringRepository: QuizAuthoringRepository,
+    private readonly quizAuthoringPersistenceService: QuizAuthoringPersistenceService,
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
   ) {}
@@ -83,7 +83,7 @@ export class QuizAuthoringService {
       displayOrder: quizAuthoringInput.displayOrder,
     };
 
-    const createdLesson = await this.quizAuthoringRepository.createQuizLesson({
+    const createdLesson = await this.quizAuthoringPersistenceService.createQuizLesson({
       language: quizAuthoringInput.language,
       lesson,
       assessment: this.toAssessmentData(quizAuthoringInput),
@@ -99,7 +99,7 @@ export class QuizAuthoringService {
 
     const mappedQuizAuthoringInput = mapLegacyQuizAuthoringInput(input, lessonId);
 
-    const existingQuizAuthoringRows = await this.quizAuthoringRepository.getQuizLessonForAuthoring(
+    const existingQuizAuthoringRows = await this.getQuizAuthoringRows(
       lessonId,
       mappedQuizAuthoringInput.language,
     );
@@ -170,7 +170,7 @@ export class QuizAuthoringService {
       ...(input.questions === undefined ? {} : { questions: quizAuthoringInput.questions ?? [] }),
     };
 
-    const lesson = await this.quizAuthoringRepository.updateQuizLesson(data);
+    const lesson = await this.quizAuthoringPersistenceService.updateQuizLesson(data);
     if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
     await this.createPromptImageResources(quizAuthoringInput.questions ?? []);
 
@@ -203,7 +203,7 @@ export class QuizAuthoringService {
       lessonId,
       requestedLanguage,
     );
-    const rows = await this.quizAuthoringRepository.getQuizLessonForAuthoring(lessonId, language);
+    const rows = await this.getQuizAuthoringRows(lessonId, language);
     if (!rows) return null;
 
     return this.mapQuizAuthoringRows(rows);
@@ -222,6 +222,55 @@ export class QuizAuthoringService {
     if (!authoringModel) return null;
 
     return mapLocalizedQuizAuthoringReadModelToLegacy(authoringModel);
+  }
+
+  private async getQuizAuthoringRows(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<QuizAuthoringRows | null> {
+    const lesson = await this.quizAuthoringRepository.findLesson(lessonId, language);
+    const assessment = await this.quizAuthoringRepository.findAssessmentByLessonId(lessonId);
+    if (!lesson || !assessment) return null;
+
+    const questions = await this.quizAuthoringRepository.findQuestions(assessment.id, language);
+    const questionIds = questions.map(({ id }) => id);
+
+    const [
+      choiceOptions,
+      trueFalseStatements,
+      scaleOptions,
+      openTextSettings,
+      blanks,
+      dragOptions,
+    ] = await Promise.all([
+      this.quizAuthoringRepository.findChoiceOptions(questionIds, language),
+      this.quizAuthoringRepository.findTrueFalseStatements(questionIds, language),
+      this.quizAuthoringRepository.findScaleOptions(questionIds, language),
+      this.quizAuthoringRepository.findOpenTextSettings(questionIds),
+      this.quizAuthoringRepository.findBlanks(questionIds),
+      this.quizAuthoringRepository.findDragAndDropOptions(questionIds, language),
+    ]);
+
+    const blankIds = blanks.map(({ id }) => id);
+
+    const [answerSets, promptImages] = await Promise.all([
+      this.quizAuthoringRepository.findBlankAnswerSets(blankIds, language),
+      this.quizAuthoringRepository.findPromptImages(questionIds),
+    ]);
+
+    return {
+      lesson,
+      assessment,
+      questions,
+      choiceOptions,
+      trueFalseStatements,
+      scaleOptions,
+      openTextSettings,
+      blanks,
+      answerSets,
+      dragOptions,
+      promptImages,
+    };
   }
 
   private mapQuizAuthoringRows(rows: QuizAuthoringRows): QuizAuthoringLocalizedReadModel {
