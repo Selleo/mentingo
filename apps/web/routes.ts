@@ -49,6 +49,10 @@ export const routes: (
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
           route("dashboard", "modules/Dashboard/Home/HomeDashboard.page.tsx");
           route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
+          route("phishing", "modules/Phishing/Phishing.page.tsx");
+          route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
+          route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");
+          route("phishing/:id/hall-of-shame", "modules/Phishing/PhishingHall.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");

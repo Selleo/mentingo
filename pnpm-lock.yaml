@@ -89,6 +89,9 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@3.25.76))(zod@3.25.76)
+      '@mentingo/phishing':
+        specifier: file:../../../mentingo-plugins/packages/phishing
+        version: file:../mentingo-plugins/packages/phishing
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4478,6 +4481,9 @@ packages:
 
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
+
+  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing':
+    resolution: {directory: ../mentingo-plugins/packages/phishing, type: directory}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     resolution: {integrity: sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw==}
@@ -21848,6 +21854,8 @@ snapshots:
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
+
+  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing': {}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     dependencies:
