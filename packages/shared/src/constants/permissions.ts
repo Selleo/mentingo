@@ -9,6 +9,8 @@ export const SYSTEM_ROLE_SLUGS = {
 export type SystemRoleSlug = (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS];
 
 export const PERMISSIONS = {
+  PHISHING_MANAGE: "phishing.manage",
+  PHISHING_REPORT_READ: "phishing.report_read",
   ACCOUNT_READ_SELF: "account.read_self",
   ACCOUNT_UPDATE_SELF: "account.update_self",
   USER_READ_SELF: "user.read_self",
@@ -98,6 +100,7 @@ export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: [
+    PERMISSIONS.PHISHING_REPORT_READ,
     PERMISSIONS.ACCOUNT_READ_SELF,
     PERMISSIONS.ACCOUNT_UPDATE_SELF,
     PERMISSIONS.USER_READ_SELF,
@@ -222,6 +225,8 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.ANNOUNCEMENT_READ,
   ],
   [SYSTEM_ROLE_SLUGS.ADMIN]: [
+    PERMISSIONS.PHISHING_MANAGE,
+    PERMISSIONS.PHISHING_REPORT_READ,
     PERMISSIONS.AI_THREAD_READ,
     PERMISSIONS.ACCOUNT_READ_SELF,
     PERMISSIONS.ACCOUNT_UPDATE_SELF,

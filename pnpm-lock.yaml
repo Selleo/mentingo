@@ -89,6 +89,9 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@3.25.76))(zod@3.25.76)
+      '@mentingo/phishing':
+        specifier: file:../../../mentingo-plugins/packages/phishing
+        version: file:../mentingo-plugins/packages/phishing
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4466,6 +4469,9 @@ packages:
 
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
+
+  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing':
+    resolution: {directory: ../mentingo-plugins/packages/phishing, type: directory}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     resolution: {integrity: sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw==}
@@ -10045,9 +10051,6 @@ packages:
 
   axios@0.21.1:
     resolution: {integrity: sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==}
-
-  axios@1.13.5:
-    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   axios@1.20.0:
     resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
@@ -21056,7 +21059,7 @@ snapshots:
     dependencies:
       '@types/node': 18.19.127
       extend: 3.0.2
-      form-data: 4.0.5
+      form-data: 4.0.6
       ibm-cloud-sdk-core: 5.4.3
     transitivePeerDependencies:
       - supports-color
@@ -21231,7 +21234,7 @@ snapshots:
 
   '@japro/luma-sdk@0.2.22':
     dependencies:
-      axios: 1.20.0
+      axios: 1.20.0(debug@4.4.3)
       socket.io-client: 4.8.3
     transitivePeerDependencies:
       - bufferutil
@@ -21838,6 +21841,8 @@ snapshots:
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
+
+  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing': {}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     dependencies:
@@ -27828,7 +27833,7 @@ snapshots:
   '@types/node-fetch@2.6.13':
     dependencies:
       '@types/node': 24.10.0
-      form-data: 4.0.5
+      form-data: 4.0.6
 
   '@types/node@16.9.1': {}
 
@@ -28963,21 +28968,13 @@ snapshots:
 
   axios@0.21.1:
     dependencies:
-      follow-redirects: 1.15.11(debug@4.4.3)
+      follow-redirects: 1.15.11
     transitivePeerDependencies:
       - debug
 
-  axios@1.13.5(debug@4.4.3):
+  axios@1.20.0(debug@4.4.3):
     dependencies:
-      follow-redirects: 1.15.11(debug@4.4.3)
-      form-data: 4.0.5
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
-  axios@1.20.0:
-    dependencies:
-      follow-redirects: 1.16.0
+      follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6
       https-proxy-agent: 5.0.1
       proxy-from-env: 2.1.0
@@ -31566,13 +31563,13 @@ snapshots:
 
   flatted@3.3.2: {}
 
-  follow-redirects@1.15.11(debug@4.4.3):
-    optionalDependencies:
-      debug: 4.4.3
+  follow-redirects@1.15.11: {}
 
   follow-redirects@1.15.9: {}
 
-  follow-redirects@1.16.0: {}
+  follow-redirects@1.16.0(debug@4.4.3):
+    optionalDependencies:
+      debug: 4.4.3
 
   for-each@0.3.3:
     dependencies:
@@ -32320,17 +32317,17 @@ snapshots:
       '@types/debug': 4.1.12
       '@types/node': 18.19.127
       '@types/tough-cookie': 4.0.5
-      axios: 1.13.5(debug@4.4.3)
+      axios: 1.20.0(debug@4.4.3)
       camelcase: 6.3.0
       debug: 4.4.3
       dotenv: 16.4.5
       extend: 3.0.2
       file-type: 16.5.4
-      form-data: 4.0.5
+      form-data: 4.0.6
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.13.5(debug@4.4.3))
+      retry-axios: 2.6.0(axios@1.20.0(debug@4.4.3))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -36986,9 +36983,9 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.13.5(debug@4.4.3)):
+  retry-axios@2.6.0(axios@1.20.0(debug@4.4.3)):
     dependencies:
-      axios: 1.13.5(debug@4.4.3)
+      axios: 1.20.0(debug@4.4.3)
 
   retry@0.12.0: {}
 

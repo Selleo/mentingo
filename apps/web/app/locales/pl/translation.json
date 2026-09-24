@@ -1561,6 +1561,7 @@
       "aiCapabilities": {
         "title": "Możliwości AI",
         "names": {
+          "phishing": "Symulacje phishingowe",
           "aiMentor": "AI Mentor",
           "voiceMentor": "Voice Mentor",
           "courseGeneration": "Generowanie kursów",
@@ -1572,6 +1573,7 @@
         }
       },
       "serviceNames": {
+        "phishing": "Symulacje phishingowe",
         "stripe": "Płatności Stripe",
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
@@ -1582,6 +1584,7 @@
         "livekit": "LiveKit"
       },
       "serviceDescriptions": {
+        "phishing": "Prowadź kontrolowane ćwiczenia i przypisuj szkolenia po ryzykownych działaniach.",
         "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
         "bunny": "Przesyłanie strumieniowe wideo i efektywna dostawa treści",
         "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
@@ -5845,5 +5848,75 @@
         "lesson": "Lekcja"
       }
     }
+  },
+  "phishing": {
+    "title": "Symulacje phishingowe",
+    "description": "Prowadź kontrolowane ćwiczenia i przypisuj szkolenia po ryzykownych działaniach.",
+    "newCampaign": "Nowa kampania",
+    "loading": "Ładowanie…",
+    "retry": "Spróbuj ponownie",
+    "unavailable": "Symulacje phishingowe nie są włączone dla tej organizacji. Skontaktuj się z administratorem.",
+    "serviceError": "Usługa symulacji jest niedostępna. Spróbuj ponownie.",
+    "empty": "Brak kampanii.",
+    "report": "Raport kampanii",
+    "back": "Powrót do kampanii",
+    "name": "Nazwa kampanii",
+    "scenario": "Scenariusz",
+    "choose": "Wybierz opcję",
+    "scenarioLanguage": "Scenariusze i strony symulacji MVP są w języku angielskim.",
+    "course": "Kurs edukacyjny (opublikowany, bezpłatny)",
+    "people": "Osoby",
+    "groups": "Grupy / działy",
+    "selectionHelp": "Użyj Ctrl lub Command, aby zaznaczyć wiele pozycji. Powtarzający się odbiorcy otrzymają jedną wiadomość.",
+    "schedule": "Rozłóż wysyłkę losowo w przedziale czasu",
+    "start": "Początek (czas lokalny)",
+    "end": "Koniec (czas lokalny)",
+    "review": "Sprawdź kampanię",
+    "reviewAudience": "{{people}} unikalnych odbiorców wśród wybranych osób i {{groups}} grup. Członkostwo jest ponownie sprawdzane przy uruchomieniu.",
+    "authorization": "Uruchamiając kampanię, potwierdzasz zgodę organizacji na ćwiczenie. Po uruchomieniu nie można zmienić odbiorców ani kursu.",
+    "launch": "Uruchom kampanię",
+    "edit": "Edytuj",
+    "invalidRecipients": "Wybierz co najmniej jedną dostępną osobę lub grupę.",
+    "invalidCampaign": "Sprawdź nazwę i okno wysyłki (maksymalnie 30 dni).",
+    "invalidCourse": "Wybierz opublikowany, bezpłatny kurs.",
+    "createSuccess": "Utworzono kampanię.",
+    "cancelSuccess": "Anulowano oczekujące wiadomości.",
+    "hall": "Hall of Shame",
+    "refresh": "Odśwież",
+    "cancel": "Anuluj oczekujące wiadomości",
+    "cancelConfirm": "Wiadomości w trakcie wysyłania mogą jeszcze dotrzeć. Anulować pozostałe?",
+    "educationalOnly": "Prywatny raport edukacyjny. Wyniki służą wspieraniu nauki, nie automatycznym decyzjom kadrowym.",
+    "noResults": "Nie zarejestrowano ryzykownych działań.",
+    "pending": "Oczekuje",
+    "notFound": "Nie znaleziono kampanii.",
+    "conflict": "To żądanie zostało już użyte dla innej kampanii.",
+    "metrics": {
+      "recipients": "Odbiorcy",
+      "sent": "Wysłane (przyjęte przez SMTP)",
+      "clicked": "Kliknięcia",
+      "submitted": "Próby wysłania",
+      "riskRate": "Ryzyko"
+    },
+    "columns": {
+      "person": "Osoba",
+      "sent": "Wysłane (przyjęte przez SMTP)",
+      "clicked": "Kliknięcia",
+      "submitted": "Próby wysłania",
+      "courseStatus": "Status kursu"
+    },
+    "status": {
+      "scheduled": "Zaplanowana",
+      "completed": "Zakończona",
+      "cancelled": "Anulowana"
+    },
+    "courseStatuses": {
+      "not_enrolled": "Nieprzypisany",
+      "not_started": "Nierozpoczęty",
+      "in_progress": "W trakcie",
+      "completed": "Ukończony"
+    },
+    "PHISHING_API_KEY": "PHISHING_API_KEY",
+    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
   }
 }

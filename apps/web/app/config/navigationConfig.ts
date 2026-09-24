@@ -52,6 +52,21 @@ export const getNavigationConfig = (
 
   return [
     {
+      title: t("phishing.title"),
+      isExpandable: false,
+      restrictedAccessRequirement: {
+        anyOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.PHISHING_REPORT_READ],
+      },
+      items: [
+        {
+          label: t("phishing.title"),
+          path: "phishing",
+          iconName: "Email",
+          accessRequirement: routeAccessConfig["phishing"],
+        },
+      ],
+    },
+    {
       title: t("navigationSideBar.courses"),
       isExpandable: false,
       testId: NAVIGATION_HANDLES.COURSES_GROUP,

@@ -201,6 +201,8 @@ export interface CurrentUserResponse {
     profilePictureUrl: string | null;
     roleSlugs: string[];
     permissions: (
+      | "phishing.manage"
+      | "phishing.report_read"
       | "account.read_self"
       | "account.update_self"
       | "user.read_self"
@@ -8790,7 +8792,7 @@ export interface GetIsConfigSetupResponse {
       missingKeys: string[];
     }[];
     aiCapabilities: {
-      key: "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
+      key: "phishing" | "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
       status: "enabled" | "disabled";
     }[];
     hasIssues: boolean;
@@ -9992,6 +9994,9 @@ export interface UpdateTenantResponse {
 
 export interface UpdateTenantApiKeysBody {
   name:
+    | "PHISHING_API_KEY"
+    | "PHISHING_BASE_URL"
+    | "PHISHING_WEBHOOK_SECRET"
     | "MICROSOFT_CLIENT_ID"
     | "MICROSOFT_CLIENT_SECRET"
     | "MICROSOFT_CALENDAR_CLIENT_ID"
@@ -10031,6 +10036,9 @@ export interface UpdateTenantApiKeysResponse {
     /** @format uuid */
     tenantId: string;
     updatedKeys: (
+      | "PHISHING_API_KEY"
+      | "PHISHING_BASE_URL"
+      | "PHISHING_WEBHOOK_SECRET"
       | "MICROSOFT_CLIENT_ID"
       | "MICROSOFT_CLIENT_SECRET"
       | "MICROSOFT_CALENDAR_CLIENT_ID"
@@ -11031,6 +11039,187 @@ export interface GenerateArticlePreviewBody {
 export interface GenerateArticlePreviewResponse {
   data: {
     parsedContent: string;
+  };
+}
+
+export interface GetPhishingConfigurationResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface ListPhishingScenariosResponse {
+  data: {
+    id: string;
+    name: string;
+    description: string;
+    action: "clicked" | "submitted";
+  }[];
+}
+
+export interface GetPhishingOptionsResponse {
+  data: {
+    users: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    groups: {
+      /** @format uuid */
+      id: string;
+      label: string;
+      userIds: string[];
+    }[];
+    courses: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+  };
+}
+
+export interface ListPhishingCampaignsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  }[];
+}
+
+export interface CreatePhishingCampaignBody {
+  /** @format uuid */
+  requestId: string;
+  /**
+   * @minLength 1
+   * @maxLength 150
+   */
+  name: string;
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  scenarioId: string;
+  /** @format uuid */
+  courseId: string;
+  /**
+   * @maxItems 10000
+   * @uniqueItems true
+   */
+  userIds: string[];
+  /**
+   * @maxItems 1000
+   * @uniqueItems true
+   */
+  groupIds: string[];
+  sendWindow: {
+    /** @format date-time */
+    start: string;
+    /** @format date-time */
+    end: string;
+  };
+}
+
+export interface CreatePhishingCampaignResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export interface CancelPhishingCampaignResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export interface GetPhishingReportResponse {
+  data: {
+    campaign: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      scenarioId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      createdBy: string;
+      createdAt: string;
+      status: "scheduled" | "completed" | "cancelled";
+      sendWindow: {
+        start: string;
+        end: string;
+      };
+    };
+    recipients: {
+      /** @format uuid */
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      groupIds: string[];
+      sentAt: string | null;
+      clickedAt: string | null;
+      submittedAt: string | null;
+      failed: boolean;
+      courseStatus: string;
+    }[];
+    totals: {
+      recipients: number;
+      sent: number;
+      clicked: number;
+      submitted: number;
+      risky: number;
+      riskRate: number;
+    };
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      totals: {
+        recipients: number;
+        sent: number;
+        clicked: number;
+        submitted: number;
+        risky: number;
+        riskRate: number;
+      };
+    }[];
   };
 }
 
@@ -19863,6 +20052,135 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/analytics/active-users`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerGetPhishingConfiguration
+     * @request GET:/api/phishing/configuration
+     */
+    phishingControllerGetPhishingConfiguration: (params: RequestParams = {}) =>
+      this.request<GetPhishingConfigurationResponse, any>({
+        path: `/api/phishing/configuration`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerListPhishingScenarios
+     * @request GET:/api/phishing/scenarios
+     */
+    phishingControllerListPhishingScenarios: (params: RequestParams = {}) =>
+      this.request<ListPhishingScenariosResponse, any>({
+        path: `/api/phishing/scenarios`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerGetPhishingOptions
+     * @request GET:/api/phishing/options
+     */
+    phishingControllerGetPhishingOptions: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetPhishingOptionsResponse, any>({
+        path: `/api/phishing/options`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerListPhishingCampaigns
+     * @request GET:/api/phishing/campaigns
+     */
+    phishingControllerListPhishingCampaigns: (params: RequestParams = {}) =>
+      this.request<ListPhishingCampaignsResponse, any>({
+        path: `/api/phishing/campaigns`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerCreatePhishingCampaign
+     * @request POST:/api/phishing/campaigns
+     */
+    phishingControllerCreatePhishingCampaign: (
+      data: CreatePhishingCampaignBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePhishingCampaignResponse, any>({
+        path: `/api/phishing/campaigns`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerCancelPhishingCampaign
+     * @request POST:/api/phishing/campaigns/{id}/cancel
+     */
+    phishingControllerCancelPhishingCampaign: (id: string, params: RequestParams = {}) =>
+      this.request<CancelPhishingCampaignResponse, any>({
+        path: `/api/phishing/campaigns/${id}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingControllerGetPhishingReport
+     * @request GET:/api/phishing/campaigns/{id}/report
+     */
+    phishingControllerGetPhishingReport: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetPhishingReportResponse, any>({
+        path: `/api/phishing/campaigns/${id}/report`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingWebhookControllerWebhook
+     * @request POST:/api/phishing/webhook
+     */
+    phishingWebhookControllerWebhook: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/phishing/webhook`,
+        method: "POST",
         ...params,
       }),
 

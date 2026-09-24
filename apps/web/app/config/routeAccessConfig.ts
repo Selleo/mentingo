@@ -86,6 +86,10 @@ const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
 };
 
 export const routeAccessConfig = createRouteConfig({
+  phishing: { anyOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.PHISHING_REPORT_READ] },
+  "phishing/new": { allOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.COURSE_ENROLLMENT] },
+  "phishing/:id": { allOf: [PERMISSIONS.PHISHING_REPORT_READ] },
+  "phishing/:id/hall-of-shame": { allOf: [PERMISSIONS.PHISHING_REPORT_READ] },
   "auth/login": PUBLIC,
   "auth/register": PUBLIC,
   "auth/create-new-password": PUBLIC,

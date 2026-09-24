@@ -2,6 +2,12 @@ import { RATE_LIMITS, RATE_LIMIT_WINDOW_SEC } from "./rate-limit.constants";
 
 import type { ResolvedRateLimitPolicy } from "./rate-limit.types";
 
+export const PHISHING_WEBHOOK_POLICY: ResolvedRateLimitPolicy = {
+  key: "phishing.webhook",
+  limit: 120,
+  windowSec: RATE_LIMIT_WINDOW_SEC,
+};
+
 export const TECHNICAL_PATH_MATCHERS = [
   /^\/api\/healthcheck\/?$/,
   /^\/api\/?$/,
