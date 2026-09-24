@@ -1354,6 +1354,7 @@
       "aiCapabilities": {
         "title": "AI možnosti",
         "names": {
+          "phishing": "Phishingové simulace",
           "aiMentor": "AI Mentor",
           "voiceMentor": "Voice Mentor",
           "courseGeneration": "Generování kurzů",
@@ -1365,6 +1366,7 @@
         }
       },
       "serviceNames": {
+        "phishing": "Phishingové simulace",
         "stripe": "Stripe Payment",
         "bunny": "Králíček CDN",
         "google_authorization": "Google OAuth",
@@ -1375,6 +1377,7 @@
         "livekit": "LiveKit"
       },
       "serviceDescriptions": {
+        "phishing": "Provádějte řízená cvičení a po rizikovém jednání přiřazujte školení.",
         "stripe": "Zpracovávejte platby za kurzy a spravujte předplatné",
         "bunny": "Streamujte videa a dodávejte obsah efektivně",
         "google_authorization": "Povolit uživatelům přihlášení pomocí jejich účtu Google",
@@ -5789,5 +5792,75 @@
         "lesson": "Lekce"
       }
     }
+  },
+  "phishing": {
+    "title": "Phishingové simulace",
+    "description": "Provádějte řízená cvičení a po rizikovém jednání přiřazujte školení.",
+    "newCampaign": "Nová kampaň",
+    "loading": "Načítání…",
+    "retry": "Zkusit znovu",
+    "unavailable": "Phishingové simulace nejsou pro tuto organizaci zapnuté. Kontaktujte správce.",
+    "serviceError": "Služba simulací není dostupná. Zkuste to znovu.",
+    "empty": "Zatím žádné kampaně.",
+    "report": "Report kampaně",
+    "back": "Zpět na kampaně",
+    "name": "Název kampaně",
+    "scenario": "Scénář",
+    "choose": "Vyberte možnost",
+    "scenarioLanguage": "Scénáře a stránky simulací MVP jsou v angličtině.",
+    "course": "Vzdělávací kurz (zveřejněný, bezplatný)",
+    "people": "Osoby",
+    "groups": "Skupiny / oddělení",
+    "selectionHelp": "Pomocí Ctrl nebo Command vyberte více položek. Duplicitní příjemci dostanou jednu zprávu.",
+    "schedule": "Rozložit odesílání náhodně do časového okna",
+    "start": "Začátek (místní čas)",
+    "end": "Konec (místní čas)",
+    "review": "Zkontrolovat kampaň",
+    "reviewAudience": "{{people}} jedinečných příjemců z vybraných osob a {{groups}} skupin. Členství se při spuštění znovu ověří.",
+    "authorization": "Spuštěním potvrzujete souhlas organizace s cvičením. Příjemce ani kurz poté nelze změnit.",
+    "launch": "Spustit kampaň",
+    "edit": "Upravit",
+    "invalidRecipients": "Vyberte alespoň jednu způsobilou osobu nebo skupinu.",
+    "invalidCampaign": "Zkontrolujte název a časové okno odesílání (nejvýše 30 dní).",
+    "invalidCourse": "Vyberte zveřejněný bezplatný kurz.",
+    "createSuccess": "Kampaň vytvořena.",
+    "cancelSuccess": "Čekající zprávy zrušeny.",
+    "hall": "Hall of Shame",
+    "refresh": "Obnovit",
+    "cancel": "Zrušit čekající zprávy",
+    "cancelConfirm": "Již odesílané zprávy mohou dorazit. Zrušit ostatní?",
+    "educationalOnly": "Soukromý vzdělávací report. Výsledky slouží k podpoře učení, nikoli k automatickým personálním rozhodnutím.",
+    "noResults": "Nebyly zaznamenány rizikové akce.",
+    "pending": "Čeká",
+    "notFound": "Kampaň nenalezena.",
+    "conflict": "Tento požadavek byl již použit pro jinou kampaň.",
+    "metrics": {
+      "recipients": "Příjemci",
+      "sent": "Odesláno (přijato SMTP)",
+      "clicked": "Kliknutí",
+      "submitted": "Odeslání formuláře",
+      "riskRate": "Riziko"
+    },
+    "columns": {
+      "person": "Osoba",
+      "sent": "Odesláno (přijato SMTP)",
+      "clicked": "Kliknutí",
+      "submitted": "Odeslání formuláře",
+      "courseStatus": "Stav kurzu"
+    },
+    "status": {
+      "scheduled": "Naplánováno",
+      "completed": "Dokončeno",
+      "cancelled": "Zrušeno"
+    },
+    "courseStatuses": {
+      "not_enrolled": "Nepřiřazen",
+      "not_started": "Nezahájen",
+      "in_progress": "Probíhá",
+      "completed": "Dokončen"
+    },
+    "PHISHING_API_KEY": "PHISHING_API_KEY",
+    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
   }
 }

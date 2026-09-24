@@ -1581,6 +1581,18 @@
           "name": {
             "anyOf": [
               {
+                "const": "PHISHING_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "PHISHING_BASE_URL",
+                "type": "string"
+              },
+              {
+                "const": "PHISHING_WEBHOOK_SECRET",
+                "type": "string"
+              },
+              {
                 "const": "MICROSOFT_CLIENT_ID",
                 "type": "string"
               },
@@ -1716,6 +1728,18 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "PHISHING_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "PHISHING_BASE_URL",
+                      "type": "string"
+                    },
+                    {
+                      "const": "PHISHING_WEBHOOK_SECRET",
+                      "type": "string"
+                    },
                     {
                       "const": "MICROSOFT_CLIENT_ID",
                       "type": "string"

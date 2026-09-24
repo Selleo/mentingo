@@ -1351,6 +1351,7 @@
       "aiCapabilities": {
         "title": "AI Capabilities",
         "names": {
+          "phishing": "Phishing simulations",
           "aiMentor": "AI Mentor",
           "voiceMentor": "Voice Mentor",
           "courseGeneration": "Course Generation",
@@ -1362,6 +1363,7 @@
         }
       },
       "serviceNames": {
+        "phishing": "Phishing simulations",
         "stripe": "Stripe Payment",
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
@@ -1372,6 +1374,7 @@
         "livekit": "LiveKit"
       },
       "serviceDescriptions": {
+        "phishing": "Run controlled exercises and assign learning after risky actions.",
         "stripe": "Process course payments and manage subscriptions",
         "bunny": "Stream videos and deliver content efficiently",
         "google_authorization": "Allow users to sign in with their Google account",
@@ -5803,5 +5806,75 @@
         "lesson": "Lesson"
       }
     }
+  },
+  "phishing": {
+    "title": "Phishing simulations",
+    "description": "Run controlled exercises and assign learning after risky actions.",
+    "newCampaign": "New campaign",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "unavailable": "Phishing simulations are not enabled for this organization. Contact your administrator.",
+    "serviceError": "The simulation service is unavailable. Please try again.",
+    "empty": "No campaigns yet.",
+    "report": "Campaign report",
+    "back": "Back to campaigns",
+    "name": "Campaign name",
+    "scenario": "Scenario",
+    "choose": "Choose an option",
+    "scenarioLanguage": "MVP scenarios and simulation pages are in English.",
+    "course": "Educational course (published, free)",
+    "people": "People",
+    "groups": "Groups / departments",
+    "selectionHelp": "Use Ctrl or Command to select multiple entries. Duplicate recipients receive one message.",
+    "schedule": "Spread sending randomly over a time window",
+    "start": "Start (local time)",
+    "end": "End (local time)",
+    "review": "Review campaign",
+    "reviewAudience": "{{people}} unique recipients across the selected people and {{groups}} groups. Membership is checked again at launch.",
+    "authorization": "Launching confirms that your organization authorizes this exercise. The audience and course cannot be changed after launch.",
+    "launch": "Launch campaign",
+    "edit": "Edit",
+    "invalidRecipients": "Select at least one eligible person or group.",
+    "invalidCampaign": "Check the campaign name and sending window (maximum 30 days).",
+    "invalidCourse": "Choose a published, free course.",
+    "createSuccess": "Campaign created.",
+    "cancelSuccess": "Pending messages cancelled.",
+    "hall": "Hall of Shame",
+    "refresh": "Refresh",
+    "cancel": "Cancel pending messages",
+    "cancelConfirm": "Messages already being sent may still arrive. Cancel all other pending messages?",
+    "educationalOnly": "Private educational report. Use these results to support learning, not to make automatic employment decisions.",
+    "noResults": "No risky actions recorded.",
+    "pending": "Pending",
+    "notFound": "Campaign not found.",
+    "conflict": "This request was already used for a different campaign.",
+    "metrics": {
+      "recipients": "Recipients",
+      "sent": "Sent (SMTP accepted)",
+      "clicked": "Clicked",
+      "submitted": "Submitted",
+      "riskRate": "At risk"
+    },
+    "columns": {
+      "person": "Person",
+      "sent": "Sent (SMTP accepted)",
+      "clicked": "Clicked",
+      "submitted": "Submitted",
+      "courseStatus": "Course status"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "courseStatuses": {
+      "not_enrolled": "Not enrolled",
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "completed": "Completed"
+    },
+    "PHISHING_API_KEY": "PHISHING_API_KEY",
+    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
   }
 }

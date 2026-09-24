@@ -10,6 +10,7 @@ import type { CallHandler, ExecutionContext, NestInterceptor } from "@nestjs/com
 export class TenantRlsInterceptor implements NestInterceptor {
   private static readonly BYPASSED_PATHS = new Set<string>([
     "/api/healthcheck",
+    "/api/phishing/webhook",
     "/api/integration/tenants",
     "/api/certificates/share",
     "/api/certificates/share-image",

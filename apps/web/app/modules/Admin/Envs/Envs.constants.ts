@@ -92,6 +92,18 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.VITE_SLACK_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  PHISHING_API_KEY: {
+    labelKey: "phishing.PHISHING_API_KEY",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  PHISHING_BASE_URL: {
+    labelKey: "phishing.PHISHING_BASE_URL",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  PHISHING_WEBHOOK_SECRET: {
+    labelKey: "phishing.PHISHING_WEBHOOK_SECRET",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   LUMA_API_KEY: {
     labelKey: "adminEnvsView.form.LUMA_API_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",

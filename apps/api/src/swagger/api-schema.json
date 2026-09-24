@@ -18237,6 +18237,239 @@
         }
       }
     },
+    "/api/phishing/configuration": {
+      "get": {
+        "operationId": "PhishingController_getPhishingConfiguration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPhishingConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/scenarios": {
+      "get": {
+        "operationId": "PhishingController_listPhishingScenarios",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPhishingScenariosResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/options": {
+      "get": {
+        "operationId": "PhishingController_getPhishingOptions",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPhishingOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/campaigns": {
+      "get": {
+        "operationId": "PhishingController_listPhishingCampaigns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPhishingCampaignsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PhishingController_createPhishingCampaign",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePhishingCampaignBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePhishingCampaignResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/campaigns/{id}/cancel": {
+      "post": {
+        "operationId": "PhishingController_cancelPhishingCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelPhishingCampaignResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/campaigns/{id}/report": {
+      "get": {
+        "operationId": "PhishingController_getPhishingReport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPhishingReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/webhook": {
+      "post": {
+        "operationId": "PhishingWebhookController_webhook",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/calendar/events": {
       "get": {
         "operationId": "CalendarController_getEvents",
@@ -19569,6 +19802,14 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "phishing.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "phishing.report_read",
+                      "type": "string"
+                    },
                     {
                       "const": "account.read_self",
                       "type": "string"
@@ -62081,6 +62322,10 @@
                     "key": {
                       "anyOf": [
                         {
+                          "const": "phishing",
+                          "type": "string"
+                        },
+                        {
                           "const": "aiMentor",
                           "type": "string"
                         },
@@ -68011,6 +68256,18 @@
           "name": {
             "anyOf": [
               {
+                "const": "PHISHING_API_KEY",
+                "type": "string"
+              },
+              {
+                "const": "PHISHING_BASE_URL",
+                "type": "string"
+              },
+              {
+                "const": "PHISHING_WEBHOOK_SECRET",
+                "type": "string"
+              },
+              {
                 "const": "MICROSOFT_CLIENT_ID",
                 "type": "string"
               },
@@ -68146,6 +68403,18 @@
                 "type": "array",
                 "items": {
                   "anyOf": [
+                    {
+                      "const": "PHISHING_API_KEY",
+                      "type": "string"
+                    },
+                    {
+                      "const": "PHISHING_BASE_URL",
+                      "type": "string"
+                    },
+                    {
+                      "const": "PHISHING_WEBHOOK_SECRET",
+                      "type": "string"
+                    },
                     {
                       "const": "MICROSOFT_CLIENT_ID",
                       "type": "string"
@@ -72958,6 +73227,692 @@
             },
             "required": [
               "parsedContent"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListPhishingScenariosResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "action": {
+                  "anyOf": [
+                    {
+                      "const": "clicked",
+                      "type": "string"
+                    },
+                    {
+                      "const": "submitted",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "action"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "userIds"
+                  ]
+                }
+              },
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "users",
+              "groups",
+              "courses"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListPhishingCampaignsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "scenarioId": {
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdBy": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "scheduled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cancelled",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "sendWindow": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string"
+                    },
+                    "end": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "scenarioId",
+                "courseId",
+                "createdBy",
+                "createdAt",
+                "status",
+                "sendWindow"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePhishingCampaignBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "maxLength": 150,
+            "type": "string"
+          },
+          "scenarioId": {
+            "minLength": 1,
+            "maxLength": 100,
+            "type": "string"
+          },
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userIds": {
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "groupIds": {
+            "maxItems": 1000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "sendWindow": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "start": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "end": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          }
+        },
+        "required": [
+          "requestId",
+          "name",
+          "scenarioId",
+          "courseId",
+          "userIds",
+          "groupIds",
+          "sendWindow"
+        ]
+      },
+      "CreatePhishingCampaignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "scenarioId": {
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdBy": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sendWindow": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "scenarioId",
+              "courseId",
+              "createdBy",
+              "createdAt",
+              "status",
+              "sendWindow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CancelPhishingCampaignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "scenarioId": {
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdBy": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sendWindow": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "scenarioId",
+              "courseId",
+              "createdBy",
+              "createdAt",
+              "status",
+              "sendWindow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingReportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "campaign": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "scenarioId": {
+                    "type": "string"
+                  },
+                  "courseId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "createdBy": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "scheduled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cancelled",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "sendWindow": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "scenarioId",
+                  "courseId",
+                  "createdBy",
+                  "createdAt",
+                  "status",
+                  "sendWindow"
+                ]
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "groupIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    },
+                    "sentAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "clickedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "submittedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failed": {
+                      "type": "boolean"
+                    },
+                    "courseStatus": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "groupIds",
+                    "sentAt",
+                    "clickedAt",
+                    "submittedAt",
+                    "failed",
+                    "courseStatus"
+                  ]
+                }
+              },
+              "totals": {
+                "type": "object",
+                "properties": {
+                  "recipients": {
+                    "type": "number"
+                  },
+                  "sent": {
+                    "type": "number"
+                  },
+                  "clicked": {
+                    "type": "number"
+                  },
+                  "submitted": {
+                    "type": "number"
+                  },
+                  "risky": {
+                    "type": "number"
+                  },
+                  "riskRate": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "recipients",
+                  "sent",
+                  "clicked",
+                  "submitted",
+                  "risky",
+                  "riskRate"
+                ]
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "recipients": {
+                          "type": "number"
+                        },
+                        "sent": {
+                          "type": "number"
+                        },
+                        "clicked": {
+                          "type": "number"
+                        },
+                        "submitted": {
+                          "type": "number"
+                        },
+                        "risky": {
+                          "type": "number"
+                        },
+                        "riskRate": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "recipients",
+                        "sent",
+                        "clicked",
+                        "submitted",
+                        "risky",
+                        "riskRate"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "totals"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "campaign",
+              "recipients",
+              "totals",
+              "groups"
             ]
           }
         },

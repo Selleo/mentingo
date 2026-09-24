@@ -53,6 +53,7 @@ export const lumaConfiguredResponseSchema = Type.Object({
 
 export const aiCapabilityMatrixItemSchema = Type.Object({
   key: Type.Union([
+    Type.Literal("phishing"),
     Type.Literal("aiMentor"),
     Type.Literal("voiceMentor"),
     Type.Literal("courseGeneration"),

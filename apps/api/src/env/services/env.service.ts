@@ -6,6 +6,7 @@ import {
   createLumaClient,
   type PublicConfigurationResponse,
 } from "@japro/luma-sdk";
+import { createPhishingClient } from "@mentingo/phishing";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
@@ -13,6 +14,7 @@ import { ALLOWED_SECRETS, ENCRYPTION_ALG, SERVICE_GROUPS } from "src/env/env.con
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { UpdateEnvEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { dbAls } from "src/storage/db/db-als.store";
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
@@ -222,6 +224,26 @@ export class EnvService {
     return { enabled: !!(url && apiKey && apiSecret) };
   }
 
+  async getPhishingConfigured() {
+    const tenantId = dbAls.getStore()?.tenantId;
+    if (!tenantId) return { enabled: false };
+    const [apiKey, baseURL, webhookSecret] = await Promise.all(
+      ["PHISHING_API_KEY", "PHISHING_BASE_URL", "PHISHING_WEBHOOK_SECRET"].map((key) =>
+        this.getEnv(key)
+          .then(({ value }) => value)
+          .catch(() => process.env[key]),
+      ),
+    );
+    if (!apiKey || !baseURL || !webhookSecret || webhookSecret.length < 32)
+      return { enabled: false };
+    try {
+      const config = await createPhishingClient({ apiKey, baseURL, tenantId }).configuration.get();
+      return { enabled: config.capabilities.phishingSimulation.enabled === true };
+    } catch {
+      return { enabled: false };
+    }
+  }
+
   async getEnvSetup(userId: string) {
     const allKeys = Object.values(SERVICE_GROUPS).flat();
 
@@ -270,6 +292,10 @@ export class EnvService {
         partiallyConfigured.length > 0 ||
         notConfigured.some(({ service }) => service === "livekit"),
       aiCapabilities: [
+        {
+          key: "phishing",
+          status: this.toCapabilityStatus((await this.getPhishingConfigured()).enabled),
+        },
         {
           key: "aiMentor",
           status: this.toCapabilityStatus(aiMentorEnabled),

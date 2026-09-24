@@ -103,6 +103,7 @@ const Envs = (): React.ReactElement => {
 
     await upsertSecrets(secretPairs);
     await queryClient.invalidateQueries({ queryKey: ["secrets"] });
+    await queryClient.invalidateQueries({ queryKey: ["phishing"] });
     await queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey });
     await queryClient.invalidateQueries(stripePublishableKeyQueryOptions());
     await queryClient.invalidateQueries(liveKitConfiguredQueryOptions);

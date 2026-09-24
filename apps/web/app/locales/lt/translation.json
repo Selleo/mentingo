@@ -1348,6 +1348,7 @@
       "aiCapabilities": {
         "title": "AI galimybės",
         "names": {
+          "phishing": "Sukčiavimo el. paštu simuliacijos",
           "aiMentor": "AI Mentor",
           "voiceMentor": "Voice Mentor",
           "courseGeneration": "Kursų generavimas",
@@ -1359,6 +1360,7 @@
         }
       },
       "serviceNames": {
+        "phishing": "Sukčiavimo el. paštu simuliacijos",
         "stripe": "Mokėjimas juostelėmis",
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
@@ -1369,6 +1371,7 @@
         "livekit": "LiveKit"
       },
       "serviceDescriptions": {
+        "phishing": "Vykdykite kontroliuojamas pratybas ir skirkite mokymus po rizikingų veiksmų.",
         "stripe": "Apdorokite kursų mokėjimus ir tvarkykite prenumeratas",
         "bunny": "Perduokite vaizdo įrašus ir efektyviai pateikite turinį",
         "google_authorization": "Leisti naudotojams prisijungti naudojant „Google“ paskyrą",
@@ -5785,5 +5788,75 @@
         "lesson": "Pamoka"
       }
     }
+  },
+  "phishing": {
+    "title": "Sukčiavimo el. paštu simuliacijos",
+    "description": "Vykdykite kontroliuojamas pratybas ir skirkite mokymus po rizikingų veiksmų.",
+    "newCampaign": "Nauja kampanija",
+    "loading": "Įkeliama…",
+    "retry": "Bandyti dar kartą",
+    "unavailable": "Šiai organizacijai simuliacijos neįjungtos. Kreipkitės į administratorių.",
+    "serviceError": "Simuliacijų paslauga nepasiekiama. Bandykite dar kartą.",
+    "empty": "Kampanijų dar nėra.",
+    "report": "Kampanijos ataskaita",
+    "back": "Grįžti į kampanijas",
+    "name": "Kampanijos pavadinimas",
+    "scenario": "Scenarijus",
+    "choose": "Pasirinkite",
+    "scenarioLanguage": "MVP scenarijai ir simuliacijų puslapiai yra anglų kalba.",
+    "course": "Mokymo kursas (paskelbtas, nemokamas)",
+    "people": "Asmenys",
+    "groups": "Grupės / skyriai",
+    "selectionHelp": "Naudokite Ctrl arba Command keliems įrašams pasirinkti. Pasikartojantys gavėjai gaus vieną laišką.",
+    "schedule": "Siųsti atsitiktinai pasirinktu laikotarpiu",
+    "start": "Pradžia (vietos laiku)",
+    "end": "Pabaiga (vietos laiku)",
+    "review": "Peržiūrėti kampaniją",
+    "reviewAudience": "{{people}} unikalių gavėjų iš pasirinktų asmenų ir {{groups}} grupių. Narystė dar kartą tikrinama paleidžiant.",
+    "authorization": "Paleisdami patvirtinate organizacijos leidimą vykdyti pratybas. Vėliau gavėjų ir kurso keisti negalima.",
+    "launch": "Paleisti kampaniją",
+    "edit": "Redaguoti",
+    "invalidRecipients": "Pasirinkite bent vieną tinkamą asmenį ar grupę.",
+    "invalidCampaign": "Patikrinkite pavadinimą ir siuntimo laikotarpį (iki 30 dienų).",
+    "invalidCourse": "Pasirinkite paskelbtą nemokamą kursą.",
+    "createSuccess": "Kampanija sukurta.",
+    "cancelSuccess": "Laukiantys laiškai atšaukti.",
+    "hall": "Hall of Shame",
+    "refresh": "Atnaujinti",
+    "cancel": "Atšaukti laukiančius laiškus",
+    "cancelConfirm": "Jau siunčiami laiškai dar gali būti pristatyti. Atšaukti likusius?",
+    "educationalOnly": "Privati mokymosi ataskaita. Rezultatai skirti mokymuisi, o ne automatiniams personalo sprendimams.",
+    "noResults": "Rizikingų veiksmų neužfiksuota.",
+    "pending": "Laukiama",
+    "notFound": "Kampanija nerasta.",
+    "conflict": "Ši užklausa jau panaudota kitai kampanijai.",
+    "metrics": {
+      "recipients": "Gavėjai",
+      "sent": "Išsiųsta (SMTP priimta)",
+      "clicked": "Paspausta",
+      "submitted": "Pateikta",
+      "riskRate": "Rizika"
+    },
+    "columns": {
+      "person": "Asmuo",
+      "sent": "Išsiųsta (SMTP priimta)",
+      "clicked": "Paspausta",
+      "submitted": "Pateikta",
+      "courseStatus": "Kurso būsena"
+    },
+    "status": {
+      "scheduled": "Suplanuota",
+      "completed": "Baigta",
+      "cancelled": "Atšaukta"
+    },
+    "courseStatuses": {
+      "not_enrolled": "Neužregistruotas",
+      "not_started": "Nepradėtas",
+      "in_progress": "Vykdomas",
+      "completed": "Baigtas"
+    },
+    "PHISHING_API_KEY": "PHISHING_API_KEY",
+    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
   }
 }

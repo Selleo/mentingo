@@ -1350,6 +1350,7 @@
       "aiCapabilities": {
         "title": "Capacités de l'IA",
         "names": {
+          "phishing": "Simulations de phishing",
           "aiMentor": "AI Mentor",
           "voiceMentor": "Mentor vocal",
           "courseGeneration": "Génération de cours",
@@ -1361,6 +1362,7 @@
         }
       },
       "serviceNames": {
+        "phishing": "Simulations de phishing",
         "stripe": "Paiement Stripe",
         "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
@@ -1371,6 +1373,7 @@
         "livekit": "LiveKit"
       },
       "serviceDescriptions": {
+        "phishing": "Organisez des exercices contrôlés et attribuez des formations après les actions à risque.",
         "stripe": "Traiter les paiements des cours et gérer les abonnements",
         "bunny": "Diffuser efficacement les vidéos et autres contenus",
         "google_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Google",
@@ -5525,5 +5528,75 @@
         "lesson": "Leçon"
       }
     }
+  },
+  "phishing": {
+    "title": "Simulations de phishing",
+    "description": "Organisez des exercices contrôlés et attribuez des formations après les actions à risque.",
+    "newCampaign": "Nouvelle campagne",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "unavailable": "Les simulations ne sont pas activées pour cette organisation. Contactez votre administrateur.",
+    "serviceError": "Le service de simulation est indisponible. Veuillez réessayer.",
+    "empty": "Aucune campagne pour le moment.",
+    "report": "Rapport de campagne",
+    "back": "Retour aux campagnes",
+    "name": "Nom de la campagne",
+    "scenario": "Scénario",
+    "choose": "Choisir une option",
+    "scenarioLanguage": "Les scénarios et pages de simulation du MVP sont en anglais.",
+    "course": "Formation (publiée, gratuite)",
+    "people": "Personnes",
+    "groups": "Groupes / services",
+    "selectionHelp": "Utilisez Ctrl ou Command pour sélectionner plusieurs entrées. Les destinataires en double reçoivent un seul message.",
+    "schedule": "Répartir les envois aléatoirement sur une période",
+    "start": "Début (heure locale)",
+    "end": "Fin (heure locale)",
+    "review": "Vérifier la campagne",
+    "reviewAudience": "{{people}} destinataires uniques parmi les personnes et {{groups}} groupes sélectionnés. Les membres sont vérifiés au lancement.",
+    "authorization": "En lançant la campagne, vous confirmez son autorisation par votre organisation. Les destinataires et la formation ne pourront plus être modifiés.",
+    "launch": "Lancer la campagne",
+    "edit": "Modifier",
+    "invalidRecipients": "Sélectionnez au moins une personne ou un groupe admissible.",
+    "invalidCampaign": "Vérifiez le nom et la période d’envoi (30 jours maximum).",
+    "invalidCourse": "Choisissez une formation publiée et gratuite.",
+    "createSuccess": "Campagne créée.",
+    "cancelSuccess": "Messages en attente annulés.",
+    "hall": "Hall of Shame",
+    "refresh": "Actualiser",
+    "cancel": "Annuler les messages en attente",
+    "cancelConfirm": "Les messages en cours d’envoi peuvent encore arriver. Annuler les autres ?",
+    "educationalOnly": "Rapport pédagogique privé. Utilisez les résultats pour soutenir l’apprentissage, pas pour des décisions automatiques concernant le personnel.",
+    "noResults": "Aucune action à risque enregistrée.",
+    "pending": "En attente",
+    "notFound": "Campagne introuvable.",
+    "conflict": "Cette demande a déjà été utilisée pour une autre campagne.",
+    "metrics": {
+      "recipients": "Destinataires",
+      "sent": "Envoyés (acceptés par SMTP)",
+      "clicked": "Clics",
+      "submitted": "Formulaires soumis",
+      "riskRate": "Risque"
+    },
+    "columns": {
+      "person": "Personne",
+      "sent": "Envoyés (acceptés par SMTP)",
+      "clicked": "Clics",
+      "submitted": "Formulaires soumis",
+      "courseStatus": "État de la formation"
+    },
+    "status": {
+      "scheduled": "Planifiée",
+      "completed": "Terminée",
+      "cancelled": "Annulée"
+    },
+    "courseStatuses": {
+      "not_enrolled": "Non inscrit",
+      "not_started": "Non commencée",
+      "in_progress": "En cours",
+      "completed": "Terminée"
+    },
+    "PHISHING_API_KEY": "PHISHING_API_KEY",
+    "PHISHING_BASE_URL": "PHISHING_BASE_URL",
+    "PHISHING_WEBHOOK_SECRET": "PHISHING_WEBHOOK_SECRET"
   }
 }

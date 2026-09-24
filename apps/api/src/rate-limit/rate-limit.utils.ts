@@ -3,6 +3,7 @@ import {
   AUTH_PATHS_LIMIT_5_PER_MINUTE,
   AUTH_POLICY_LIMIT_10_PER_MINUTE,
   AUTH_POLICY_LIMIT_5_PER_MINUTE,
+  PHISHING_WEBHOOK_POLICY,
   GENERAL_GET_POLICY,
   GENERAL_WRITE_POLICY,
   INTEGRATION_READ_POLICY,
@@ -34,6 +35,8 @@ export const resolveRateLimitPolicy = (
 ): ResolvedRateLimitPolicy | null => {
   const normalizedMethod = method.toUpperCase();
   const normalizedPath = normalizePath(path);
+
+  if (normalizedPath === "/api/phishing/webhook") return PHISHING_WEBHOOK_POLICY;
 
   if (isTechnicalPath(normalizedPath)) return null;
 
