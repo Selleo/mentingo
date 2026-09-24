@@ -16,6 +16,8 @@ import type { SocketEmitSpec, StreamProtocol } from "./audio-stream";
 export type VoiceStartContext = {
   voiceAction: VoiceAction;
   lessonId?: string;
+  practiceSessionId?: string;
+  threadId?: string;
   metadata?: Record<string, unknown>;
   endpointingMode?: VoiceEndpointingMode;
 };
@@ -29,6 +31,9 @@ const buildVoiceStartEmit = (params: {
     {
       voiceAction: params.context.voiceAction,
       ...(params.context.lessonId ? { lessonId: params.context.lessonId } : {}),
+      ...(params.context.practiceSessionId
+        ? { practiceSessionId: params.context.practiceSessionId, threadId: params.context.threadId }
+        : {}),
       meta: params.init,
       ...(params.context.metadata ? { metadata: params.context.metadata } : {}),
     },

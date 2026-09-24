@@ -91,11 +91,7 @@ export class JudgeService {
 
     await this.persistJudgement(data.threadId, thread.data.userLanguage, rubric, response);
 
-    const { status } = await this.aiRepository.updateThread(data.threadId, {
-      status: THREAD_STATUS.COMPLETED,
-    });
-
-    return { data: { ...response, status } };
+    return { data: { ...response, status: THREAD_STATUS.COMPLETED } };
   }
 
   private async getRubric(
@@ -116,6 +112,9 @@ export class JudgeService {
     result: AiJudgePublicResult,
   ) {
     await this.db.transaction(async (transaction) => {
+      const completed = await this.aiRepository.completeActiveThread(threadId, transaction);
+      if (!completed) throw new BadRequestException("common.error.threadMustBeActive");
+
       const judgement = await this.aiRepository.upsertJudgeJudgement(
         {
           threadId,

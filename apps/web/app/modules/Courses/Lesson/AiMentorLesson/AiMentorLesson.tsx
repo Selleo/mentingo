@@ -129,19 +129,24 @@ const AiMentorLesson = ({
   }, [currentThreadMessages, setMessages]);
 
   const appendVoiceMessage = useCallback(
-    (role: UIMessage["role"], content: string) => {
+    (role: UIMessage["role"], content: string, messageId?: string) => {
       const nextContent = content.trim();
       if (!nextContent) {
         return;
       }
 
       const nextMessage = createTextUiMessage<UIMessage>({
-        id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        id: messageId ?? `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
         role,
         content: nextContent,
       });
 
-      setMessages((prev) => [...prev, nextMessage]);
+      setMessages((prev) => {
+        if (prev.some((message) => message.id === nextMessage.id)) {
+          return prev.map((message) => (message.id === nextMessage.id ? nextMessage : message));
+        }
+        return [...prev, nextMessage];
+      });
     },
     [setMessages],
   );
@@ -172,9 +177,9 @@ const AiMentorLesson = ({
   }, [input, lesson.threadId, sendMessage]);
 
   const handleVoiceLearnerTranscription = useCallback(
-    (text: string) => {
+    (text: string, turnId?: string) => {
       voiceResponseMessageIdRef.current = null;
-      appendVoiceMessage("user", text);
+      appendVoiceMessage(MESSAGE_ROLE.USER, text, turnId);
     },
     [appendVoiceMessage],
   );
@@ -222,7 +227,7 @@ const AiMentorLesson = ({
       voiceResponseMessageIdRef.current = null;
 
       if (!messageId) {
-        appendVoiceMessage("assistant", text);
+        appendVoiceMessage(MESSAGE_ROLE.MENTOR, text);
         return;
       }
 
@@ -269,7 +274,7 @@ const AiMentorLesson = ({
   const isLessonCompleted = lesson.lessonCompleted === true;
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
-    lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
+    lastMessage?.role === MESSAGE_ROLE.MENTOR && getUiMessageText(lastMessage).trim().length > 0;
   const showChatLoader = isProcessing && !hasStreamingAssistantText;
   const persistedEvaluation = useMemo<AiMentorEvaluation | null>(() => {
     if (!lesson.aiMentorDetails) return null;
@@ -460,7 +465,7 @@ const AiMentorLesson = ({
 
             {isThreadActive && !isJudgePending && !hideControls && (
               <LessonForm
-                lessonId={lesson.id}
+                voiceTarget={{ lessonId: lesson.id }}
                 mentorName={
                   lesson.aiMentor?.name || t("studentCourseView.lesson.aiMentorLesson.aiMentorName")
                 }

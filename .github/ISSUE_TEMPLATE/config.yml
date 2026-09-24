@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/Selleo/mentingo/discussions
+    about: Ask how something works, or propose an idea before it becomes an issue.
+  - name: Security vulnerability
+    url: https://github.com/Selleo/mentingo/security/advisories/new
+    about: Report privately. Please do not open a public issue.
+  - name: Commercial support, hosting or implementation
+    url: https://selleo.com/lms-software-development
+    about: Managed hosting, a branded instance in 7 days, or custom work on top of Mentingo.

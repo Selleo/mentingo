@@ -4,6 +4,9 @@ import request from "supertest";
 
 import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiPracticeService } from "src/ai/services/ai-practice.service";
+import { AiService } from "src/ai/services/ai.service";
+import { JudgeService } from "src/ai/services/judge.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
@@ -13,6 +16,10 @@ import {
   aiJudgeCriteria,
   aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorPracticeSessions,
+  aiMentorThreads,
+  aiMentorThreadMessages,
+  aiMentorJudgements,
   chapters,
   courses,
   lessons,
@@ -62,6 +69,140 @@ describe("AiController (e2e)", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  it("preserves completed practice history across concurrent grading and replay", async () => {
+    const owner = await userFactory.create();
+    const [session] = await db
+      .insert(aiMentorPracticeSessions)
+      .values({
+        userId: owner.id,
+        practiceDate: "2026-09-10",
+        language: "en",
+        scenario: "Replay test",
+        status: "ready",
+      })
+      .returning();
+    const [previous] = await db
+      .insert(aiMentorThreads)
+      .values({
+        practiceSessionId: session.id,
+        userId: owner.id,
+        status: THREAD_STATUS.ACTIVE,
+      })
+      .returning();
+    const [message] = await db
+      .insert(aiMentorThreadMessages)
+      .values({
+        threadId: previous.id,
+        role: "user",
+        content: "Original answer",
+        archived: true,
+      })
+      .returning();
+    const [configuration] = await db
+      .insert(aiJudgeConfigurations)
+      .values({
+        practiceSessionId: session.id,
+        taskGoal: { en: "Goal" },
+        passingThresholdPercent: 70,
+      })
+      .returning();
+    const judgeService = app.get(JudgeService);
+    const rubric = {
+      configurationId: configuration.id,
+      taskGoal: "Goal",
+      passingThresholdPercent: 70,
+      criteria: [],
+      blockingErrors: [],
+    };
+    const result = {
+      minScore: 1,
+      score: 1,
+      maxScore: 1,
+      percentage: 100,
+      passed: true,
+      criteria: [],
+      blockingErrors: [],
+    };
+    const lateResult = { ...result, score: 0, percentage: 0, passed: false };
+    const persist = (value = result) =>
+      judgeService["persistJudgement"](previous.id, "en", rubric, value);
+
+    // A failed write must also roll back the Active -> Completed claim.
+    await expect(
+      judgeService["persistJudgement"](
+        previous.id,
+        "en",
+        { ...rubric, configurationId: owner.id },
+        result,
+      ),
+    ).rejects.toThrow();
+    expect((await aiRepository.findPracticeSessionById(session.id)).threadStatus).toBe(
+      THREAD_STATUS.ACTIVE,
+    );
+    const grading = await Promise.allSettled([persist(), persist()]);
+    expect(grading.filter((outcome) => outcome.status === "fulfilled")).toHaveLength(1);
+    expect(grading.filter((outcome) => outcome.status === "rejected")).toHaveLength(1);
+    await expect(persist(lateResult)).rejects.toThrow("common.error.threadMustBeActive");
+    const [judgement] = await db
+      .select()
+      .from(aiMentorJudgements)
+      .where(eq(aiMentorJudgements.threadId, previous.id));
+    expect(judgement.earnedPoints).toBe(1);
+    const prepareReplay = jest
+      .spyOn(app.get(AiService), "preparePracticeReplay")
+      .mockResolvedValue([{ role: "assistant", content: "New welcome", tokenCount: 2 }]);
+    const practiceService = app.get(AiPracticeService);
+    const viewer = { userId: owner.id, tenantId: owner.tenantId, permissions: [] };
+    const outcomes = await Promise.allSettled([
+      practiceService.replay(session.id, viewer as never),
+      practiceService.replay(session.id, viewer as never),
+    ]);
+    prepareReplay.mockRestore();
+    expect(outcomes.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(outcomes.filter((result) => result.status === "rejected")).toHaveLength(1);
+    const rejected = outcomes.find((result) => result.status === "rejected");
+    if (rejected?.status === "rejected") expect(rejected.reason.getStatus()).toBe(409);
+    const threads = await db
+      .select()
+      .from(aiMentorThreads)
+      .where(eq(aiMentorThreads.practiceSessionId, session.id));
+    expect(threads).toHaveLength(2);
+    expect(threads.find((thread) => thread.id === previous.id)?.status).toBe(
+      THREAD_STATUS.ARCHIVED,
+    );
+    expect(
+      await db
+        .select()
+        .from(aiMentorThreadMessages)
+        .where(eq(aiMentorThreadMessages.id, message.id)),
+    ).toHaveLength(1);
+    expect(
+      await db.select().from(aiMentorJudgements).where(eq(aiMentorJudgements.id, judgement.id)),
+    ).toHaveLength(1);
+    const current = await aiRepository.findPracticeSessionById(session.id);
+    expect(current.threadId).not.toBe(previous.id);
+    expect(current.threadStatus).toBe(THREAD_STATUS.ACTIVE);
+    expect(current.evaluation).toBeNull();
+    // Simulate another grading response arriving after this attempt has been replayed.
+    await expect(persist(lateResult)).rejects.toThrow("common.error.threadMustBeActive");
+    const [historicalJudgement] = await db
+      .select()
+      .from(aiMentorJudgements)
+      .where(eq(aiMentorJudgements.id, judgement.id));
+    expect(historicalJudgement).toEqual(judgement);
+    await expect(app.get(AiService).isThreadActive(previous.id, owner.id)).rejects.toThrow(
+      "common.error.threadMustBeActive",
+    );
+    await expect(
+      app
+        .get(JudgeService)
+        .runJudge(
+          { threadId: previous.id, userId: owner.id },
+          { userId: owner.id, permissions: [] },
+        ),
+    ).rejects.toThrow("common.error.threadMustBeActive");
   });
 
   describe("AI mentor lesson localization", () => {

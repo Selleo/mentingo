@@ -13,9 +13,13 @@ import type { Control } from "react-hook-form";
 
 type AiMentorScenarioFieldsProps = {
   control: Control<AiMentorLessonFormValues>;
+  baseLanguageDescription?: string;
 };
 
-export const AiMentorScenarioFields = ({ control }: AiMentorScenarioFieldsProps) => {
+export const AiMentorScenarioFields = ({
+  control,
+  baseLanguageDescription,
+}: AiMentorScenarioFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -47,7 +51,10 @@ export const AiMentorScenarioFields = ({ control }: AiMentorScenarioFieldsProps)
               <BaseEditor
                 id="description"
                 content={field.value}
-                placeholder={t("adminCourseView.curriculum.lesson.placeholder.taskDescription")}
+                placeholder={
+                  baseLanguageDescription ||
+                  t("adminCourseView.curriculum.lesson.placeholder.taskDescription")
+                }
                 parentClassName="flex h-[11lh] flex-col"
                 contentClassName="min-h-0 flex-1 overflow-y-auto"
                 editorClassName="min-h-0"

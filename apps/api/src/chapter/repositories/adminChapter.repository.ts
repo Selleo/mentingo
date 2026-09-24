@@ -12,8 +12,6 @@ import {
   courses,
   liveLessons,
   lessons,
-  questionAnswerOptions,
-  questions,
   scormPackages,
   settings,
 } from "src/storage/schema";
@@ -25,7 +23,6 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CreateChapterForCourseData } from "src/courses/types/course.types";
 import type {
   AdminLessonWithContentSchema,
-  AdminQuestionBody,
   AiMentorBody,
   LessonResource,
 } from "src/lesson/lesson.schema";
@@ -144,47 +141,6 @@ export class AdminChapterRepository {
         thresholdScore: sql<number>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
-        questions: sql<AdminQuestionBody[]>`
-        (
-          SELECT ARRAY(
-            SELECT json_build_object(
-              'id', ${questions.id},
-              'title', ${this.localizationService.getFieldByLanguage(questions.title, language)},
-              'type', ${questions.type},
-              'description', ${this.localizationService.getFieldByLanguage(
-                questions.description,
-                language,
-              )},
-              'photoS3Key', ${questions.photoS3Key},
-              'displayOrder', ${questions.displayOrder},
-              'options', (
-                SELECT ARRAY(
-                  SELECT json_build_object(
-                    'id', ${questionAnswerOptions.id},
-                    'optionText', ${this.localizationService.getFieldByLanguage(
-                      questionAnswerOptions.optionText,
-                      language,
-                    )},
-                    'isCorrect', ${questionAnswerOptions.isCorrect},
-                    'displayOrder', ${questionAnswerOptions.displayOrder},
-                    'matchedWord', ${this.localizationService.getFieldByLanguage(
-                      questionAnswerOptions.matchedWord,
-                      language,
-                    )},
-                    'scaleAnswer', ${questionAnswerOptions.scaleAnswer}
-                  )
-                  FROM ${questionAnswerOptions}
-                  WHERE ${questionAnswerOptions.questionId} = questions.id
-                  ORDER BY ${questionAnswerOptions.displayOrder}
-                )
-              )
-            )
-            FROM ${questions}
-            WHERE ${questions.lessonId} = lessons.id
-            ORDER BY ${questions.displayOrder}
-          )
-        )
-      `,
         aiMentor: sql<AiMentorBody>`
         (
           SELECT json_build_object(

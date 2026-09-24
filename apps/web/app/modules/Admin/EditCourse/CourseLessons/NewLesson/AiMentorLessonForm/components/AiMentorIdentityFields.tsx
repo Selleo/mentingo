@@ -21,6 +21,8 @@ type AiMentorIdentityFieldsProps = {
   canEditAvatar: boolean;
   onEditAvatar: () => void;
   onRemoveAvatar: () => void;
+  baseLanguageTitle?: string;
+  baseLanguageName?: string;
 };
 
 export const AiMentorIdentityFields = ({
@@ -29,6 +31,8 @@ export const AiMentorIdentityFields = ({
   canEditAvatar,
   onEditAvatar,
   onRemoveAvatar,
+  baseLanguageTitle,
+  baseLanguageName,
 }: AiMentorIdentityFieldsProps) => {
   const { t } = useTranslation();
 
@@ -46,7 +50,9 @@ export const AiMentorIdentityFields = ({
           control={control}
           name="title"
           id="title"
-          placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
+          placeholder={
+            baseLanguageTitle || t("adminCourseView.curriculum.lesson.placeholder.title")
+          }
           className="mb-4"
         />
       </div>
@@ -120,6 +126,7 @@ export const AiMentorIdentityFields = ({
                   type="text"
                   className="border-b bg-transparent text-sm outline-0"
                   value={field.value}
+                  placeholder={baseLanguageName}
                   onChange={field.onChange}
                 />
               </FormItem>

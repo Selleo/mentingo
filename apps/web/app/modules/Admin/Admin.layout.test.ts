@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import { canAccessAdminLayout } from "./Admin.layout";
 
 describe("canAccessAdminLayout", () => {
+  it("allows AI conversation readers into the admin layout", () => {
+    expect(canAccessAdminLayout([PERMISSIONS.AI_THREAD_READ])).toBe(true);
+  });
   it("rejects a Group Manager from the admin layout", () => {
     expect(canAccessAdminLayout([PERMISSIONS.MANAGED_GROUP_RESULTS_READ])).toBe(false);
   });

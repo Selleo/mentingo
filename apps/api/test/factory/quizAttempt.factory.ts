@@ -1,11 +1,20 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_TYPE, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
+  ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  COURSE_TYPE,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
+import { eq } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 
 import {
-  quizAttempts,
+  assessments,
+  assessmentAttempts,
   users,
   courses,
   chapters,
@@ -15,10 +24,17 @@ import {
 import { assignSystemRoleToUserInTests } from "../helpers/permission-role-helpers";
 import { ensureTenant } from "../helpers/tenant-helpers";
 
-import type { InferSelectModel } from "drizzle-orm";
+import type { InferInsertModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-type QuizAttemptTest = InferSelectModel<typeof quizAttempts>;
+type QuizAttemptTest = InferInsertModel<typeof assessmentAttempts> & {
+  courseId?: UUIDType;
+  lessonId?: UUIDType;
+  userId?: UUIDType;
+  correctAnswers: number;
+  wrongAnswers: number;
+  score?: number;
+};
 
 const ensureUser = async (
   db: DatabasePg,
@@ -194,18 +210,53 @@ export const createQuizAttemptFactory = (db: DatabasePg) => {
         attempt.courseId,
       );
 
+      let [assessment] = await db
+        .select()
+        .from(assessments)
+        .where(eq(assessments.lessonId, lessonId))
+        .limit(1);
+
+      if (!assessment) {
+        [assessment] = await db
+          .insert(assessments)
+          .values({
+            lessonId,
+            passingScorePercentage: "0",
+            baseLanguage: SUPPORTED_LANGUAGES.EN,
+            availableLocales: [SUPPORTED_LANGUAGES.EN],
+            tenantId,
+          })
+          .returning();
+      }
+
       const [inserted] = await db
-        .insert(quizAttempts)
+        .insert(assessmentAttempts)
         .values({
-          ...attempt,
-          userId,
-          courseId,
-          lessonId,
+          assessmentId: assessment.id,
+          language: SUPPORTED_LANGUAGES.EN,
+          learnerId: userId,
+          attemptNumber: attempt.attemptNumber ?? 1,
+          submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+          gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+          result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+          availablePoints: String(attempt.correctAnswers + attempt.wrongAnswers),
+          awardedPoints: String(attempt.correctAnswers),
+          scorePercentage: String(attempt.scorePercentage ?? attempt.score ?? 0),
+          hasQuestionLevelAnswers: false,
+          submittedAt: attempt.submittedAt ?? new Date().toISOString(),
           tenantId,
         })
         .returning();
 
-      return inserted;
+      return {
+        ...inserted,
+        userId,
+        courseId,
+        lessonId,
+        correctAnswers: attempt.correctAnswers,
+        wrongAnswers: attempt.wrongAnswers,
+        score: attempt.score,
+      };
     });
 
     const correctAnswers = faker.number.int({ min: 0, max: 10 });
@@ -215,11 +266,20 @@ export const createQuizAttemptFactory = (db: DatabasePg) => {
 
     return {
       id: faker.string.uuid(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: "", // Will be auto-created if empty
+      attemptNumber: 1,
+      language: SUPPORTED_LANGUAGES.EN,
+      learnerId: "" as UUIDType,
       courseId: "", // Will be auto-created if empty
       lessonId: "", // Will be auto-created if empty
+      assessmentId: "" as UUIDType,
+      submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+      availablePoints: String(totalQuestions),
+      awardedPoints: String(correctAnswers),
+      scorePercentage: String(score),
+      hasQuestionLevelAnswers: false,
+      submittedAt: new Date().toISOString(),
       correctAnswers,
       wrongAnswers,
       score,

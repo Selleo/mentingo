@@ -9,7 +9,9 @@ import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
-import type { QuestionOption } from "../QuizLessonForm.types";
+import { findBaseLanguageOption } from "../quizTranslationPlaceholders";
+
+import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -17,9 +19,15 @@ type ScaleQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 };
 
-const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: ScaleQuestionProps) => {
+const ScaleQuestion = ({
+  form,
+  questionIndex,
+  isStructureLocked = false,
+  baseLanguageQuestion,
+}: ScaleQuestionProps) => {
   const watchedOptions = form.watch(`questions.${questionIndex}.options`);
   const errors = form.formState.errors;
   const { t } = useTranslation();
@@ -79,23 +87,34 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
                   });
                 }}
                 className="grid grid-cols-1"
-                renderItem={(item, index: number) => (
-                  <SortableList.Item id={item.sortableId}>
-                    <div className="mt-2 flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                      <div className="flex w-full items-center gap-2">
-                        <Input
-                          type="text"
-                          name={`questions.${questionIndex}.options.${index}.optionText`}
-                          value={item.optionText}
-                          onChange={(e) => handleOptionChange(index, "optionText", e.target.value)}
-                          placeholder={`${index + 1}`}
-                          required
-                          className="flex-1"
-                        />
+                renderItem={(item, index: number) => {
+                  const baseLanguageOption = findBaseLanguageOption(
+                    baseLanguageQuestion,
+                    watchedOptions,
+                    item,
+                    index,
+                  );
+
+                  return (
+                    <SortableList.Item id={item.sortableId}>
+                      <div className="mt-2 flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
+                        <div className="flex w-full items-center gap-2">
+                          <Input
+                            type="text"
+                            name={`questions.${questionIndex}.options.${index}.optionText`}
+                            value={item.optionText}
+                            onChange={(e) =>
+                              handleOptionChange(index, "optionText", e.target.value)
+                            }
+                            placeholder={baseLanguageOption?.optionText || `${index + 1}`}
+                            required
+                            className="flex-1"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </SortableList.Item>
-                )}
+                    </SortableList.Item>
+                  );
+                }}
               />
             )}
           </div>

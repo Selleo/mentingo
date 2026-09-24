@@ -6,6 +6,11 @@ import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 import type { TFunction } from "i18next";
 
 describe("findMatchingRoute", () => {
+  it("protects both AI conversation routes", () => {
+    for (const path of ["admin/ai-conversations", "admin/ai-conversations/thread-id"]) {
+      expect(findMatchingRoute(path)).toEqual({ allOf: [PERMISSIONS.AI_THREAD_READ] });
+    }
+  });
   it("should find exact matches", () => {
     const requirement = findMatchingRoute("admin/courses");
     expect(requirement).toEqual({

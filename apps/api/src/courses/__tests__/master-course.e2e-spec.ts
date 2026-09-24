@@ -6,11 +6,13 @@ import {
   AI_MENTOR_TYPE,
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
 } from "@repo/shared";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -18,7 +20,6 @@ import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/
 import { MasterCourseService } from "src/courses/master-course.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -34,8 +35,9 @@ import {
   courses,
   lessons,
   masterCourseExports,
-  questionAnswerOptions,
-  questions,
+  assessments,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
   resourceEntity,
   resources,
   tenants,
@@ -250,8 +252,9 @@ describe("Master course export and sync (e2e)", () => {
       "master_course_exports",
       "resource_entity",
       "resources",
-      "question_answer_options",
-      "questions",
+      "assessment_question_choice_options",
+      "assessment_questions",
+      "assessments",
       "ai_judge_score_guidance",
       "ai_judge_blocking_errors",
       "ai_judge_criteria",
@@ -370,6 +373,14 @@ describe("Master course export and sync (e2e)", () => {
           learningOutcomes: {
             en: ["Understand the source course"],
             pl: ["Zrozumiec kurs zrodlowy"],
+          },
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: sourceAdmin.firstName,
+            lastName: sourceAdmin.lastName,
+            jobTitle: null,
+            description: null,
+            profilePictureReference: sourceAdmin.avatarReference,
           },
           showAuthorSection: false,
           thumbnailPositionY: 72,
@@ -597,8 +608,14 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
-    const { sourceCourseId, sourceChapterId, sourceLessonId, targetCourseId, targetCookie } =
-      await setupAndExport();
+    const {
+      sourceAdmin,
+      sourceCourseId,
+      sourceChapterId,
+      sourceLessonId,
+      targetCourseId,
+      targetCookie,
+    } = await setupAndExport();
 
     const targetCourseResponse = await withTenantHost(
       request(app.getHttpServer())
@@ -618,6 +635,19 @@ describe("Master course export and sync (e2e)", () => {
       "Master Source Lesson",
     );
 
+    const targetCoursesResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ page: 1, perPage: 100, language: "en" })
+        .set("Cookie", targetCookie),
+      TARGET_HOST,
+    ).expect(200);
+
+    expect(
+      targetCoursesResponse.body.data.find((course: { id: string }) => course.id === targetCourseId)
+        .author,
+    ).toBe(`${sourceAdmin.firstName} ${sourceAdmin.lastName}`);
+
     await runAsTenant(targetTenantId, async () => {
       const [targetCourse] = await db
         .select({
@@ -634,12 +664,20 @@ describe("Master course export and sync (e2e)", () => {
           baseLanguage: courses.baseLanguage,
           availableLocales: courses.availableLocales,
           categoryId: courses.categoryId,
+          authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
 
       expect(targetCourse).toBeDefined();
+      expect(targetCourse.authorMetadataType).toBe("object");
+      expect(targetCourse.authorMetadata).toMatchObject({
+        authorId: sourceAdmin.id,
+        firstName: sourceAdmin.firstName,
+        lastName: sourceAdmin.lastName,
+      });
       expect(targetCourse.title).toEqual({
         en: "Master Source Course",
         pl: "Kurs zrodlowy master",
@@ -749,7 +787,7 @@ describe("Master course export and sync (e2e)", () => {
   });
 
   it("syncs course overview fields while preserving the target course status", async () => {
-    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const { sourceAdmin, sourceCourseId, targetCourseId } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
     await runAsTenant(targetTenantId, () =>
@@ -769,6 +807,14 @@ describe("Master course export and sync (e2e)", () => {
           },
           showAuthorSection: true,
           thumbnailPositionY: 28,
+          authorMetadata: {
+            authorId: sourceAdmin.id,
+            firstName: "Updated",
+            lastName: "Source Author",
+            jobTitle: null,
+            description: null,
+            profilePictureReference: null,
+          },
         })
         .where(eq(courses.id, sourceCourseId)),
     );
@@ -796,6 +842,8 @@ describe("Master course export and sync (e2e)", () => {
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
+          authorMetadata: courses.authorMetadata,
+          authorMetadataType: sql<string>`jsonb_typeof(${courses.authorMetadata})`,
         })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
@@ -812,6 +860,12 @@ describe("Master course export and sync (e2e)", () => {
     expect(syncedTargetCourse?.showAuthorSection).toBe(true);
     expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
     expect(syncedTargetCourse?.status).toBe("published");
+    expect(syncedTargetCourse?.authorMetadataType).toBe("object");
+    expect(syncedTargetCourse?.authorMetadata).toMatchObject({
+      authorId: sourceAdmin.id,
+      firstName: "Updated",
+      lastName: "Source Author",
+    });
   });
 
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
@@ -1488,47 +1542,52 @@ describe("Master course export and sync (e2e)", () => {
     const untouchedOptionId = faker.string.uuid();
 
     const { targetCourseId } = await setupAndExport({
-      beforeExport: async ({ sourceAdmin, sourceLessonId }) => {
+      beforeExport: async ({ sourceLessonId }) => {
         await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({
+              lessonId: sourceLessonId,
+              passingScorePercentage: "0",
+              baseLanguage: "en",
+              availableLocales: ["en", "pl"],
+            })
+            .returning({ id: assessments.id });
+
           const [question] = await db
-            .insert(questions)
+            .insert(assessmentQuestions)
             .values({
               id: faker.string.uuid(),
-              lessonId: sourceLessonId,
-              authorId: sourceAdmin.id,
-              type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
-              title: buildJsonbFieldWithMultipleEntries({
-                en: "Fill blank",
-                pl: "Uzupelnij luke",
+              assessmentId: assessment.id,
+              questionType: ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT,
+              gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+              prompt: buildJsonbFieldWithMultipleEntries({
+                en: `Answer <blank-answer-${sourceOptionId}> now`,
+                pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
+              title: buildJsonbFieldWithMultipleEntries({ en: "Fill blank", pl: "Uzupelnij luke" }),
               description: buildJsonbFieldWithMultipleEntries({
                 en: `Answer <blank-answer-${sourceOptionId}> now`,
                 pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
-              solutionExplanation: buildJsonbField("en", "Because it matches"),
               displayOrder: 1,
             })
-            .returning({ id: questions.id });
+            .returning({ id: assessmentQuestions.id });
 
-          await db.insert(questionAnswerOptions).values([
+          await db.insert(assessmentQuestionChoiceOptions).values([
             {
               id: sourceOptionId,
               questionId: question.id,
-              optionText: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
-              matchedWord: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
+              language: "en",
+              label: "Correct",
               isCorrect: true,
               displayOrder: 1,
             },
             {
               id: untouchedOptionId,
               questionId: question.id,
-              optionText: buildJsonbField("en", "Distractor"),
+              language: "en",
+              label: "Distractor",
               isCorrect: false,
               displayOrder: 2,
             },
@@ -1540,29 +1599,29 @@ describe("Master course export and sync (e2e)", () => {
     const targetQuestionData = await runAsTenant(targetTenantId, async () => {
       const [targetQuestion] = await db
         .select({
-          id: questions.id,
-          description: questions.description,
+          id: assessmentQuestions.id,
+          description: assessmentQuestions.description,
         })
-        .from(questions)
-        .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
         .where(eq(chapters.courseId, targetCourseId))
         .limit(1);
 
       const targetOptions = await db
         .select({
-          id: questionAnswerOptions.id,
-          optionText: questionAnswerOptions.optionText,
+          id: assessmentQuestionChoiceOptions.id,
+          optionText: assessmentQuestionChoiceOptions.label,
         })
-        .from(questionAnswerOptions)
-        .where(eq(questionAnswerOptions.questionId, targetQuestion.id));
+        .from(assessmentQuestionChoiceOptions)
+        .where(eq(assessmentQuestionChoiceOptions.questionId, targetQuestion.id));
 
       return { targetQuestion, targetOptions };
     });
 
     const targetCorrectOption = targetQuestionData.targetOptions.find((option) => {
-      const optionText = option.optionText as Record<string, string>;
-      return optionText.en === "Correct";
+      return option.optionText === "Correct";
     });
     const targetQuestionDescription = targetQuestionData.targetQuestion.description as Record<
       string,

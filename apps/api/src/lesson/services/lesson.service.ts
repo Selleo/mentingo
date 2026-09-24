@@ -41,8 +41,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
-import { QuestionRepository } from "src/questions/question.repository";
-import { QuestionService } from "src/questions/question.service";
+import { QuizRuntimeService } from "src/quiz/services/quiz-runtime.service";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import {
   chapters,
@@ -83,8 +82,6 @@ export class LessonService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly lessonRepository: LessonRepository,
-    private readonly questionService: QuestionService,
-    private readonly questionRepository: QuestionRepository,
     private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly aiService: AiService,
@@ -94,6 +91,7 @@ export class LessonService {
     private readonly liveTrainingService: LiveTrainingService,
     private readonly lessonVideoProgressService: LessonVideoProgressService,
     private readonly resourceLibraryService: ResourceLibraryService,
+    private readonly quizRuntimeService: QuizRuntimeService,
   ) {}
 
   async getLessonById(
@@ -295,12 +293,19 @@ export class LessonService {
       return { ...lesson, liveTraining };
     }
 
-    const questionList = await this.questionRepository.getQuestionsForLesson(
-      lesson.id,
-      lesson.lessonCompleted,
-      effectiveUserId,
-      basicInfo?.languageAnswered ?? actualLanguage,
-    );
+    const questionLanguage = basicInfo?.languageAnswered ?? actualLanguage;
+
+    const questionList =
+      lesson.type === LESSON_TYPES.QUIZ
+        ? (
+            await this.quizRuntimeService.getQuizForDelivery(
+              lesson.id,
+              questionLanguage,
+              effectiveUserId,
+              lesson.lessonCompleted,
+            )
+          ).questions
+        : [];
 
     const isQuizFeedbackRedacted = !lesson.quizFeedbackEnabled;
 
@@ -407,79 +412,23 @@ export class LessonService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
 
-    const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
-
-    const correctAnswersForQuizQuestions =
-      await this.questionRepository.getQuizQuestionsToEvaluation(
-        studentQuizAnswers.lessonId,
-        studentQuizAnswers.language,
-      );
-
-    const expectedQuestionIds = new Set(
-      correctAnswersForQuizQuestions.map((question) => question.id),
-    );
-
-    const submittedQuestionIds = new Set(
-      studentQuizAnswers.questionsAnswers.map((questionAnswer) => questionAnswer.questionId),
-    );
-
-    const missingQuestionIds = [...expectedQuestionIds].filter(
-      (questionId) => !submittedQuestionIds.has(questionId),
-    );
-
-    if (missingQuestionIds.length > 0) {
-      const missingQuestionNames = correctAnswersForQuizQuestions
-        .filter((question) => missingQuestionIds.includes(question.id))
-        .map((question) => `"${question.title}"`)
-        .slice(0, 2);
-
-      const hasMoreMissingQuestions = missingQuestionIds.length > missingQuestionNames.length;
-
-      const formattedQuestionNames = [
-        ...missingQuestionNames,
-        ...(hasMoreMissingQuestions ? ["..."] : []),
-      ].join(", ");
-
-      throw new ConflictException({
-        message: "studentLessonView.validation.unansweredQuestionsWithNames",
-        translationParams: {
-          questionNames: formattedQuestionNames,
-        },
-      });
-    }
-
     return await this.db.transaction(async (trx) => {
       try {
-        const evaluationResult = await this.questionService.evaluationsQuestions(
-          correctAnswersForQuizQuestions,
+        const evaluationResult = await this.quizRuntimeService.submitQuiz(
           studentQuizAnswers,
           userId,
           trx,
         );
 
-        const requiredCorrect = Math.ceil(
-          ((quizSettings?.thresholdScore ?? 0) *
-            (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) /
-            100,
-        );
-
-        const quizScore = Math.floor(
-          (evaluationResult.correctAnswerCount /
-            (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) *
-            100,
-        );
-
-        const isQuizPassed = quizSettings?.thresholdScore
-          ? requiredCorrect <= evaluationResult.correctAnswerCount
-          : true;
+        const isQuizPassed = evaluationResult.passed;
 
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
           userId,
-          evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
-          quizScore,
-          accessCourseLessonWithDetails.attempts ?? 1,
+          evaluationResult.questionCount,
+          evaluationResult.score,
+          evaluationResult.attemptNumber,
           isQuizPassed,
           true,
           trx,
@@ -493,8 +442,7 @@ export class LessonService {
             userPermissions: currentUser.permissions,
             actor: currentUser,
             quizCompleted: true,
-            completedQuestionCount:
-              evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
+            completedQuestionCount: evaluationResult.questionCount,
             dbInstance: trx,
             isQuizPassed,
             language: studentQuizAnswers.language,
@@ -508,7 +456,7 @@ export class LessonService {
             lessonId: studentQuizAnswers.lessonId,
             correctAnswers: evaluationResult.correctAnswerCount,
             wrongAnswers: evaluationResult.wrongAnswerCount,
-            score: quizScore,
+            score: evaluationResult.score,
           }),
           trx,
         );
@@ -516,8 +464,8 @@ export class LessonService {
         return {
           correctAnswerCount: evaluationResult.correctAnswerCount,
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
-          questionCount: evaluationResult.wrongAnswerCount + evaluationResult.correctAnswerCount,
-          score: quizScore,
+          questionCount: evaluationResult.questionCount,
+          score: evaluationResult.score,
         };
       } catch (error) {
         throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
@@ -564,16 +512,8 @@ export class LessonService {
 
     attempts += 1;
 
-    const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
-
-    if (questions.length === 0) {
-      return;
-    }
-
     return await this.db.transaction(async (trx) => {
       try {
-        await this.questionRepository.deleteStudentQuizAnswers(questions, userId, trx);
-
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           lessonId,

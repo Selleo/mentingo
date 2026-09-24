@@ -18,6 +18,7 @@ import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
 import { VoiceConversationTranscript } from "./VoiceConversationTranscript";
 
+import type { UIMessage } from "@ai-sdk/react";
 import type {
   LearnerTranscriptRevision,
   MentorSpeechPresentation,
@@ -40,10 +41,12 @@ type VoiceMentorModeOverlayProps = {
   mentorSpeech: MentorSpeechPresentation | null;
   mentorName: string;
   mentorAvatarUrl?: string | null;
+  messages?: UIMessage[];
   hasTaskDescription: boolean;
   taskDescription: string;
   onJudge: () => void;
   isJudgePending: boolean;
+  canJudge?: boolean;
   isMicMuted: boolean;
   connectionState: VoiceConnectionState;
   isRestarting: boolean;
@@ -62,10 +65,12 @@ export function VoiceMentorModeOverlay({
   mentorSpeech,
   mentorName,
   mentorAvatarUrl,
+  messages,
   hasTaskDescription,
   taskDescription,
   onJudge,
   isJudgePending,
+  canJudge = true,
   isMicMuted,
   connectionState,
   isRestarting,
@@ -142,7 +147,7 @@ export function VoiceMentorModeOverlay({
                   type="button"
                   variant="primary"
                   onClick={onJudge}
-                  disabled={isJudgePending || isConnectionUnavailable}
+                  disabled={!canJudge || isJudgePending || isConnectionUnavailable}
                   className="h-10 min-w-28 gap-2 rounded-xl px-4"
                 >
                   <ClipboardCheck className="size-4" />
@@ -265,6 +270,7 @@ export function VoiceMentorModeOverlay({
                 </div>
 
                 <VoiceConversationTranscript
+                  messages={messages}
                   learnerTranscript={learnerTranscript}
                   mentorResponse={response}
                   mentorSpeech={mentorSpeech}
@@ -332,7 +338,7 @@ export function VoiceMentorModeOverlay({
               size="icon"
               aria-label={t("studentCourseView.lesson.aiMentorLesson.check")}
               onClick={onJudge}
-              disabled={isJudgePending || isConnectionUnavailable}
+              disabled={!canJudge || isJudgePending || isConnectionUnavailable}
               className={MOBILE_CHECK_CLASS_NAME}
             >
               <ClipboardCheck className="size-5" />

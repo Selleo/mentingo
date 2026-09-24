@@ -192,6 +192,17 @@ export class PromptService implements OnModuleInit {
   }
 
   async setSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {
+    const prompt = await this.buildSystemPrompt(data, mentorType);
+    await this.aiRepository.insertMessage({
+      tokenCount: this.tokenService.countTokens(OPENAI_MODELS.BASIC, prompt),
+      threadId: data.threadId,
+      role: MESSAGE_ROLE.SYSTEM,
+      content: prompt,
+    });
+    return prompt;
+  }
+
+  async buildSystemPrompt(data: ThreadOwnershipBody, mentorType?: AiMentorType) {
     const { userLanguage } = await this.aiRepository.findThread([
       eq(aiMentorThreads.id, data.threadId),
     ]);
@@ -257,15 +268,6 @@ export class PromptService implements OnModuleInit {
       });
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
-
-    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, prompt);
-
-    await this.aiRepository.insertMessage({
-      tokenCount,
-      threadId: data.threadId,
-      role: MESSAGE_ROLE.SYSTEM,
-      content: prompt,
-    });
 
     return prompt;
   }

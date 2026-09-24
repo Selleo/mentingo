@@ -9,7 +9,8 @@ import {
   chapters,
   courses,
   lessons,
-  questions,
+  assessments,
+  assessmentQuestions,
   resourceEntity,
   resources,
 } from "src/storage/schema";
@@ -111,11 +112,12 @@ export class CourseDurationRepository {
         chapterId: lessons.chapterId,
         type: lessons.type,
         description: lessons.description,
-        questionCount: sql<number>`COALESCE(${count(questions.id)}, 0)`,
+        questionCount: sql<number>`COALESCE(${count(assessmentQuestions.id)}, 0)`,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .leftJoin(questions, eq(questions.lessonId, lessons.id))
+      .leftJoin(assessments, eq(assessments.lessonId, lessons.id))
+      .leftJoin(assessmentQuestions, eq(assessmentQuestions.assessmentId, assessments.id))
       .where(eq(chapters.courseId, courseId))
       .groupBy(lessons.id);
   }

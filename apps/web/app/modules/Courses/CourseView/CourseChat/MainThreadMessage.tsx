@@ -148,6 +148,7 @@ export function MainThreadMessage({
                 size="sm"
                 className="h-7 self-start px-2 text-xs text-neutral-600"
                 disabled={isFetchingMoreReplies}
+                data-testid={COURSE_DISCUSSION_HANDLES.LOAD_MORE_REPLIES_BUTTON}
                 onClick={onLoadMoreReplies}
               >
                 {t("studentCourseView.courseChat.loadMoreReplies")}

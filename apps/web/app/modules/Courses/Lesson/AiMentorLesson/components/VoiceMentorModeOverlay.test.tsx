@@ -38,6 +38,7 @@ const renderOverlay = ({
   onExit = vi.fn(),
   connectionState = VOICE_CONNECTION_STATE.CONNECTED,
   response = "",
+  canJudge = true,
 }: {
   onJudge?: () => Promise<void>;
   onMicMutedChange?: (muted: boolean) => void;
@@ -45,6 +46,7 @@ const renderOverlay = ({
   onExit?: () => void;
   connectionState?: (typeof VOICE_CONNECTION_STATE)[keyof typeof VOICE_CONNECTION_STATE];
   response?: string;
+  canJudge?: boolean;
 } = {}) => {
   renderWith().render(
     <VoiceMentorModeOverlay
@@ -60,6 +62,7 @@ const renderOverlay = ({
       taskDescription="Practice the customer conversation."
       onJudge={onJudge}
       isJudgePending={false}
+      canJudge={canJudge}
       isMicMuted={false}
       connectionState={connectionState}
       isRestarting={false}
@@ -73,6 +76,17 @@ const renderOverlay = ({
 };
 
 describe("VoiceMentorModeOverlay", () => {
+  it("disables evaluation on desktop and mobile until the Practice turn is ready", () => {
+    const { onJudge } = renderOverlay({ canJudge: false });
+    const desktop = screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_CHECK_BUTTON);
+    const mobile = screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_MOBILE_CHECK_BUTTON);
+    expect(desktop).toBeDisabled();
+    expect(mobile).toBeDisabled();
+    fireEvent.click(desktop);
+    fireEvent.click(mobile);
+    expect(onJudge).not.toHaveBeenCalled();
+  });
+
   it("opens the task panel by default when entering voice mode", () => {
     renderOverlay();
 

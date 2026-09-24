@@ -1,5 +1,5 @@
-import { LEARNER_TRANSCRIPT_STATUSES } from "@repo/shared";
-import { useMemo } from "react";
+import { getUiMessageText, LEARNER_TRANSCRIPT_STATUSES, MESSAGE_ROLE } from "@repo/shared";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUserSuspense } from "~/api/queries";
@@ -7,6 +7,7 @@ import { Icon } from "~/components/Icon";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 
+import type { UIMessage } from "@ai-sdk/react";
 import type {
   LearnerTranscriptRevision,
   MentorSpeechPresentation,
@@ -18,6 +19,14 @@ type VoiceConversationTranscriptProps = {
   mentorSpeech: MentorSpeechPresentation | null;
   mentorName: string;
   mentorAvatarUrl?: string | null;
+  messages?: UIMessage[];
+};
+
+type TranscriptMessage = {
+  id: string;
+  role: UIMessage["role"];
+  text: string;
+  learner: LearnerTranscriptRevision | null;
 };
 
 function getDisplaySegments(text: string, words: MentorSpeechPresentation["words"]) {
@@ -82,13 +91,18 @@ function MentorTimedText({ speech, text }: { speech: MentorSpeechPresentation; t
   );
 }
 
-export function VoiceConversationTranscript({
+function TranscriptMessages({
   learnerTranscript,
   mentorResponse,
   mentorSpeech,
   mentorName,
   mentorAvatarUrl,
-}: VoiceConversationTranscriptProps) {
+  animateFinalization = false,
+  onFinalizationEnd,
+}: VoiceConversationTranscriptProps & {
+  animateFinalization?: boolean;
+  onFinalizationEnd?: () => void;
+}) {
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUserSuspense();
   const isLearnerPartial = learnerTranscript?.status === LEARNER_TRANSCRIPT_STATUSES.PARTIAL;
@@ -102,7 +116,7 @@ export function VoiceConversationTranscript({
   }
 
   return (
-    <div className="mx-auto flex min-h-24 w-full max-w-3xl flex-col justify-end gap-3">
+    <div className="mx-auto flex w-full max-w-3xl flex-col justify-end gap-3">
       {learnerTranscript && (
         <div className="flex max-w-[88%] self-start items-start gap-3">
           <div className="mt-0.5 shrink-0">
@@ -125,7 +139,12 @@ export function VoiceConversationTranscript({
                 },
               )}
             >
-              <span className={cn(!isLearnerPartial && "transcript-finalized-text")}>
+              <span
+                className={cn(
+                  animateFinalization && !isLearnerPartial && "transcript-finalized-text",
+                )}
+                onAnimationEnd={onFinalizationEnd}
+              >
                 {learnerTranscript.text}
               </span>
             </div>
@@ -153,6 +172,151 @@ export function VoiceConversationTranscript({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function VoiceConversationTranscript(props: VoiceConversationTranscriptProps) {
+  const { messages, mentorResponse, learnerTranscript } = props;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const followRef = useRef(true);
+  const previousScrollTopRef = useRef(0);
+  const committedLearnerTurnsRef = useRef(new Set<string>());
+  const previousTranscriptRef = useRef(learnerTranscript);
+  const [finalizingTurnId, setFinalizingTurnId] = useState<string | null>(null);
+  const [fade, setFade] = useState(0);
+  useLayoutEffect(() => {
+    const previous = previousTranscriptRef.current;
+    previousTranscriptRef.current = learnerTranscript;
+    if (
+      learnerTranscript?.status === LEARNER_TRANSCRIPT_STATUSES.FINAL &&
+      (previous?.turnId !== learnerTranscript.turnId ||
+        previous.status !== LEARNER_TRANSCRIPT_STATUSES.FINAL) &&
+      !committedLearnerTurnsRef.current.has(learnerTranscript.turnId)
+    ) {
+      setFinalizingTurnId(learnerTranscript.turnId);
+    }
+  }, [learnerTranscript]);
+  const recentMessages = useMemo(() => {
+    if (!messages) return undefined;
+    const result: TranscriptMessage[] = messages
+      .filter(
+        (message) => message.role === MESSAGE_ROLE.USER || message.role === MESSAGE_ROLE.MENTOR,
+      )
+      .map((message) => ({
+        id: message.id,
+        role: message.role,
+        text: getUiMessageText(message),
+        learner:
+          message.role === MESSAGE_ROLE.USER
+            ? {
+                turnId: message.id,
+                segmentId: message.id,
+                revision: 0,
+                status: LEARNER_TRANSCRIPT_STATUSES.FINAL,
+                text: getUiMessageText(message),
+              }
+            : null,
+      }))
+      .filter((message) => message.text.trim());
+    if (
+      learnerTranscript?.text.trim() &&
+      !committedLearnerTurnsRef.current.has(learnerTranscript.turnId) &&
+      !result.some((message) => message.id === learnerTranscript.turnId)
+    ) {
+      result.push({
+        id: learnerTranscript.turnId,
+        role: MESSAGE_ROLE.USER,
+        text: learnerTranscript.text,
+        learner: learnerTranscript,
+      });
+    }
+    return result.slice(-12);
+  }, [messages, learnerTranscript]);
+  useLayoutEffect(() => {
+    if (
+      learnerTranscript?.status === LEARNER_TRANSCRIPT_STATUSES.FINAL &&
+      messages?.some(
+        (message) => message.role === MESSAGE_ROLE.USER && message.id === learnerTranscript.turnId,
+      )
+    ) {
+      committedLearnerTurnsRef.current.add(learnerTranscript.turnId);
+    }
+  }, [messages, learnerTranscript]);
+  const measureScroll = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    previousScrollTopRef.current = viewport.scrollTop;
+    setFade(Math.min(Math.max(viewport.scrollTop, 0) / 24, 1));
+  }, []);
+  const followLatest = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (viewport && followRef.current) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+    measureScroll();
+  }, [measureScroll]);
+
+  useLayoutEffect(followLatest, [
+    recentMessages,
+    mentorResponse,
+    props.learnerTranscript,
+    followLatest,
+  ]);
+  useLayoutEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(followLatest);
+    if (viewportRef.current) observer.observe(viewportRef.current);
+    if (contentRef.current) observer.observe(contentRef.current);
+    return () => observer.disconnect();
+  }, [followLatest]);
+
+  return (
+    <div
+      ref={viewportRef}
+      role="region"
+      aria-label={props.mentorName}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The scroll viewport must support keyboard navigation.
+      tabIndex={0}
+      onScroll={(event) => {
+        const viewport = event.currentTarget;
+        if (viewport.scrollTop < previousScrollTopRef.current) followRef.current = false;
+        if (viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 8) {
+          followRef.current = true;
+        }
+        measureScroll();
+      }}
+      className="mx-auto min-h-24 max-h-[clamp(8rem,28dvh,18rem)] w-full max-w-3xl shrink-0 overflow-y-auto overscroll-contain scroll-auto rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-400"
+      style={{ maskImage: `linear-gradient(to bottom, rgba(0,0,0,${1 - fade}), black 24px)` }}
+    >
+      <div ref={contentRef} className="flex flex-col gap-3 px-1 py-1">
+        {recentMessages ? (
+          recentMessages.map((message, index) => (
+            <TranscriptMessages
+              key={message.id}
+              {...props}
+              animateFinalization={message.id === finalizingTurnId}
+              onFinalizationEnd={() => setFinalizingTurnId(null)}
+              learnerTranscript={message.learner}
+              mentorResponse={message.role === MESSAGE_ROLE.MENTOR ? message.text : ""}
+              mentorSpeech={
+                index === recentMessages.length - 1 && message.text.trim() === mentorResponse.trim()
+                  ? props.mentorSpeech
+                  : null
+              }
+            />
+          ))
+        ) : (
+          <TranscriptMessages
+            {...props}
+            animateFinalization={Boolean(
+              finalizingTurnId && finalizingTurnId === learnerTranscript?.turnId,
+            )}
+            onFinalizationEnd={() => setFinalizingTurnId(null)}
+          />
+        )}
+      </div>
     </div>
   );
 }

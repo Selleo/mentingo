@@ -24,6 +24,7 @@ interface QuestionTitleProps {
   item: Question;
   isOpenQuestion: boolean;
   isStructureLocked?: boolean;
+  baseLanguageQuestion?: Question;
 }
 
 const QuestionTitle = ({
@@ -36,6 +37,7 @@ const QuestionTitle = ({
   item,
   isOpenQuestion,
   isStructureLocked = false,
+  baseLanguageQuestion,
 }: QuestionTitleProps) => {
   const questionTypeToIconMap: Record<QuestionType, QuestionIcons> = {
     [QuestionType.MULTIPLE_CHOICE]: QuestionIcons.MultiSelect,
@@ -99,6 +101,7 @@ const QuestionTitle = ({
         type="text"
         name={`questions.${questionIndex}.title`}
         value={item.title}
+        placeholder={baseLanguageQuestion?.title}
         onChange={(e) => handleOptionChange(e.target.value)}
         required
         className="flex-1"

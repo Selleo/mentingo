@@ -6,11 +6,63 @@ import {
   DASHBOARD_WIDGET_TYPES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
+import sharp from "sharp";
 
 import { SettingsService } from "./settings.service";
 
 import type { DashboardSettingsResponseSchema } from "./schemas/settings.schema";
 import type { DashboardSettings } from "@repo/shared";
+
+describe("SettingsService email logo", () => {
+  const logoKey = "tenant/platform-logos/variants/logo.webp";
+
+  function createService(buffer: Buffer | null) {
+    const service = Object.create(SettingsService.prototype) as SettingsService;
+    const getFileBuffer = jest.fn().mockResolvedValue(buffer);
+    Object.defineProperties(service, {
+      db: {
+        value: {
+          select: () => ({
+            from: () => ({
+              where: async () => [{ platformLogoS3Key: logoKey }],
+            }),
+          }),
+        },
+      },
+      fileService: { value: { getFileBuffer } },
+    });
+    return { service, getFileBuffer };
+  }
+
+  it.each(["png", "webp"] as const)(
+    "returns actual PNG bytes and preserves alpha for a %s logo",
+    async (format) => {
+      const pixels = Buffer.from([255, 0, 0, 0, 0, 255, 0, 128, 0, 0, 255, 255]);
+      const buffer = await sharp(pixels, { raw: { width: 3, height: 1, channels: 4 } })
+        .toFormat(format)
+        .toBuffer();
+      const { service, getFileBuffer } = createService(buffer);
+
+      const result = await service.getPlatformLogoBuffer();
+
+      expect(getFileBuffer).toHaveBeenCalledWith(logoKey);
+      expect(result).not.toBeNull();
+      const metadata = await sharp(result!).metadata();
+      expect(metadata.format).toBe("png");
+      expect(metadata.hasAlpha).toBe(true);
+      const decoded = await sharp(result!).raw().toBuffer();
+      expect([decoded[3], decoded[7], decoded[11]]).toEqual([0, 128, 255]);
+    },
+  );
+
+  it.each([null, Buffer.from("invalid image")])(
+    "omits unavailable or invalid logos",
+    async (buffer) => {
+      const { service } = createService(buffer);
+      await expect(service.getPlatformLogoBuffer()).resolves.toBeNull();
+    },
+  );
+});
 
 describe("SettingsService dashboard normalization", () => {
   it.each(Object.entries(DASHBOARD_DEFAULT_LAYOUTS))(

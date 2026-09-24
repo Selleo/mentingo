@@ -16,6 +16,7 @@ import {
   type AudioOutputErrorPayload,
   type AudioOutputCompletePayload,
   type AudioOutputAlignmentPayload,
+  type AudioOutputChunkPayload,
   type AudioOutputInterruptedPayload,
   type AudioProtocolErrorPayload,
   type AudioReconnectPayload,
@@ -29,6 +30,7 @@ import {
 } from "@japro/luma-sdk";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
+  AI_MENTOR_PRACTICE_STATUSES,
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
   PERMISSIONS,
@@ -36,6 +38,7 @@ import {
   VOICE_ACTION,
   VOICE_SOCKET_EVENT,
 } from "@repo/shared";
+import { validate as isUuid } from "uuid";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -52,8 +55,6 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
 
 import type {
-  AiMentorTTSPreset,
-  AudioSpeechEventPayload,
   AudioOutputAlignmentEventPayload,
   ClientSpeechBoundaryPayload,
   MentorResponseDeltaEventPayload,
@@ -69,7 +70,11 @@ import type {
   ExternalAudioSession,
   ExternalAudioSpeechBoundaryOperation,
 } from "src/audio/types/external-audio-session.types";
-import type { ExternalAudioStartResult } from "src/audio/types/external-audio.types";
+import type {
+  ExternalAudioStartResult,
+  VoiceMentorSessionContext,
+  VoiceMentorStartConfig,
+} from "src/audio/types/external-audio.types";
 import type { UUIDType } from "src/common";
 import type { WsUser } from "src/websocket/websocket.types";
 
@@ -83,7 +88,7 @@ type VoiceMentorSocketHandlers = {
   audioReconnectError: (payload: AudioProtocolErrorPayload) => void;
   learnerTranscription: (payload: LearnerTranscriptionPayload) => Promise<void>;
   audioOutputAlignment: (payload: AudioOutputAlignmentPayload) => void;
-  audioOutputChunk: (payload: { data: AudioSpeechEventPayload }) => void;
+  audioOutputChunk: (payload: AudioOutputChunkPayload) => void;
   audioOutputInterrupted: (payload: AudioOutputInterruptedPayload) => void;
   audioOutputError: (payload: AudioOutputErrorPayload) => void;
   audioOutputComplete: (payload: AudioOutputCompletePayload) => void;
@@ -270,6 +275,7 @@ export class ExternalAudioService {
       return;
     }
 
+    session.activeMentorStream?.abortController.abort();
     this.clearRecoveryTimers(session);
     session.socket.removeAllListeners();
     session.socket.disconnect();
@@ -279,7 +285,7 @@ export class ExternalAudioService {
   async triggerTTS(sessionId: string, payload: SendTTSTriggerBody) {
     const session = this.sessionStore.get(sessionId);
     if (session) {
-      session.activeTurnId = `tts-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      session.pendingTtsTrigger = true;
       session.socket.sendTTSTrigger(payload);
       return true;
     }
@@ -292,17 +298,21 @@ export class ExternalAudioService {
     currentUser: WsUser,
     payload: StartAudioBody,
   ): Promise<ExternalAudioStartResult> {
-    if (!payload.lessonId) {
-      return { ok: false, translationKey: "common.toast.somethingWentWrong" };
-    }
-
-    if (this.sessionStore.has(sessionId)) {
-      return { ok: true };
-    }
-
-    const hasLessonAccess = await this.canAccessLesson(payload.lessonId, currentUser);
-    if (!hasLessonAccess) {
+    const context = await this.resolveVoiceMentorContext(payload, currentUser);
+    if (!context) {
       return { ok: false, translationKey: "common.toast.noAccess" };
+    }
+
+    const existingSession = this.sessionStore.get(sessionId);
+    if (existingSession) {
+      if (
+        existingSession.threadId === context.threadId &&
+        existingSession.currentUser.userId === currentUser.userId &&
+        existingSession.currentUser.tenantId === currentUser.tenantId
+      ) {
+        return { ok: true };
+      }
+      await this.cancelAudio(sessionId);
     }
 
     const apiKey = await this.envService
@@ -316,23 +326,7 @@ export class ExternalAudioService {
       return { ok: false, translationKey: "adminCourseView.toast.lumaNotConfigured" };
     }
 
-    const threadData = await this.threadService.createThreadIfNoneExist({
-      lessonId: payload.lessonId,
-      userId: currentUser.userId,
-      userLanguage: SUPPORTED_LANGUAGES.EN,
-      status: THREAD_STATUS.ACTIVE,
-    });
-
-    const { language: lessonLanguage } = await this.localizationService.getBaseLanguage(
-      ENTITY_TYPE.LESSON,
-      payload.lessonId,
-      threadData.thread.userLanguage as SupportedLanguages,
-    );
-    const voiceConfig = await this.aiRepository.findAiMentorVoiceConfigByLessonId(
-      payload.lessonId,
-      lessonLanguage,
-    );
-    const voiceStartConfig = this.resolveVoiceStartConfig(voiceConfig);
+    const voiceStartConfig = this.resolveVoiceStartConfig(context.voiceConfig);
 
     const socket = createLumaSocket({
       apiKey,
@@ -340,7 +334,8 @@ export class ExternalAudioService {
       socketData: {
         sessionId,
         userId: currentUser.userId,
-        lessonId: payload.lessonId,
+        // Identify Practice in Luma logs through its existing lesson metadata field.
+        lessonId: payload.lessonId ?? `practice:${payload.practiceSessionId}`,
       },
     });
 
@@ -348,8 +343,9 @@ export class ExternalAudioService {
       sessionId,
       socket,
       currentUser,
-      threadId: threadData.thread.id,
+      threadId: context.threadId,
       lessonId: payload.lessonId,
+      practiceSessionId: payload.practiceSessionId,
       userId: currentUser.userId,
       sessionRunId: null,
       recoveryState: EXTERNAL_AUDIO_RECOVERY_STATE.CONNECTED,
@@ -362,6 +358,7 @@ export class ExternalAudioService {
       recoveryRetryTimeout: null,
       clientDisconnectTimeout: null,
       activeTurnId: null,
+      pendingTtsTrigger: false,
       audioOutputErrors: new Map(),
       pendingInterruption: false,
       interruptedTurnIds: new Set(),
@@ -372,9 +369,61 @@ export class ExternalAudioService {
     this.sessionStore.set(session);
 
     socket.connect();
-    socket.startAudio(this.buildStartAudioPayload(payload, lessonLanguage, voiceStartConfig));
+    socket.startAudio(this.buildStartAudioPayload(payload, context.language, voiceStartConfig));
 
     return { ok: true };
+  }
+
+  private async resolveVoiceMentorContext(
+    payload: StartAudioBody,
+    currentUser: WsUser,
+  ): Promise<VoiceMentorSessionContext | null> {
+    if (payload.practiceSessionId !== undefined || payload.threadId !== undefined) {
+      if (
+        payload.lessonId !== undefined ||
+        typeof payload.practiceSessionId !== "string" ||
+        !isUuid(payload.practiceSessionId) ||
+        typeof payload.threadId !== "string" ||
+        !isUuid(payload.threadId)
+      )
+        return null;
+
+      const practice = await this.aiRepository.findPracticeSessionById(payload.practiceSessionId);
+      if (
+        !practice ||
+        practice.userId !== currentUser.userId ||
+        practice.tenantId !== currentUser.tenantId ||
+        practice.status !== AI_MENTOR_PRACTICE_STATUSES.READY ||
+        practice.threadStatus !== THREAD_STATUS.ACTIVE ||
+        practice.threadId !== payload.threadId
+      )
+        return null;
+
+      return {
+        threadId: practice.threadId,
+        language: practice.language as SupportedLanguages,
+      };
+    }
+
+    if (typeof payload.lessonId !== "string" || !payload.lessonId) return null;
+    if (!(await this.canAccessLesson(payload.lessonId, currentUser))) return null;
+
+    const { thread } = await this.threadService.createThreadIfNoneExist({
+      lessonId: payload.lessonId,
+      userId: currentUser.userId,
+      userLanguage: SUPPORTED_LANGUAGES.EN,
+      status: THREAD_STATUS.ACTIVE,
+    });
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      payload.lessonId,
+      thread.userLanguage as SupportedLanguages,
+    );
+    const voiceConfig = await this.aiRepository.findAiMentorVoiceConfigByLessonId(
+      payload.lessonId,
+      language,
+    );
+    return { threadId: thread.id, language, voiceConfig };
   }
 
   private registerVoiceMentorHandlers(session: ExternalAudioSession): void {
@@ -467,7 +516,11 @@ export class ExternalAudioService {
         );
       },
       audioOutputChunk: (payload) => {
-        if (!session.activeTurnId) {
+        if (session.pendingTtsTrigger) {
+          session.activeTurnId = payload.jobId;
+          session.pendingTtsTrigger = false;
+        }
+        if (!session.activeTurnId || payload.jobId !== session.activeTurnId) {
           return;
         }
 
@@ -476,7 +529,7 @@ export class ExternalAudioService {
           codec: payload.data.codec,
           chunkBase64: payload.data.chunkBase64,
           sampleRate: payload.data.sampleRate,
-          turnId: session.activeTurnId,
+          turnId: payload.jobId,
         };
         this.realtimePublisher.emitToRoom(
           VOICE_SOCKET_EVENT.AUDIO_SPEECH,
@@ -785,6 +838,7 @@ export class ExternalAudioService {
     const voiceDeliveryContext = this.resolveVoiceDeliveryContext(payload.data.timing);
 
     session.activeTurnId = payload.jobId ?? null;
+    session.pendingTtsTrigger = false;
     const voiceTurnWasInterrupted = session.pendingInterruption;
     session.pendingInterruption = false;
     const abortController = new AbortController();
@@ -812,6 +866,7 @@ export class ExternalAudioService {
           session.currentUser,
           true,
         );
+        if (this.sessionStore.get(session.sessionId) !== session) return;
         shouldForwardMentorText = stream.source === AI_RUNTIME_SOURCES.CORE;
 
         let responseText = "";
@@ -819,6 +874,7 @@ export class ExternalAudioService {
         const displayParser = new VoiceMarkupDisplayParser();
         let seq = 1;
         for await (const delta of stream.textStream) {
+          if (this.sessionStore.get(session.sessionId) !== session) return;
           if (shouldForwardMentorText && session.audioOutputErrors.has(payload.jobId)) {
             stoppedByAudioOutputError = true;
             break;
@@ -842,6 +898,7 @@ export class ExternalAudioService {
           pendingDeltaChunk = "";
         }
 
+        if (this.sessionStore.get(session.sessionId) !== session) return;
         const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
         if (wasInterrupted) {
           session.audioOutputErrors.delete(payload.jobId);
@@ -900,6 +957,7 @@ export class ExternalAudioService {
         });
       });
     } catch (error) {
+      if (this.sessionStore.get(session.sessionId) !== session) return;
       this.logger.error("Failed to stream mentor response", error);
 
       const wasInterrupted = session.interruptedTurnIds.delete(payload.jobId);
@@ -1087,7 +1145,7 @@ export class ExternalAudioService {
   private buildStartAudioPayload(
     payload: StartAudioBody,
     language: SupportedLanguages,
-    voiceStartConfig: { preset?: AiMentorTTSPreset; customTtsReference?: string },
+    voiceStartConfig: VoiceMentorStartConfig,
   ): StartAudioPayload {
     return {
       type: LUMA_SOCKET_MESSAGE_TYPES.AUDIO_START,
@@ -1106,11 +1164,9 @@ export class ExternalAudioService {
     };
   }
 
-  private resolveVoiceStartConfig(voiceConfig?: {
-    voiceMode: string;
-    ttsPreset: string;
-    customTtsReference: string | null;
-  }): { preset?: AiMentorTTSPreset; customTtsReference?: string } {
+  private resolveVoiceStartConfig(
+    voiceConfig?: VoiceMentorSessionContext["voiceConfig"],
+  ): VoiceMentorStartConfig {
     const customTtsReference = voiceConfig?.customTtsReference?.trim() || null;
     const ttsPreset =
       voiceConfig?.ttsPreset === AI_MENTOR_TTS_PRESET.FEMALE

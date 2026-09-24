@@ -1,4 +1,4 @@
-import { VOICE_SOCKET_EVENT } from "@repo/shared";
+import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
 import { voiceSocketProtocol } from "./voiceSocketProtocol";
@@ -24,4 +24,23 @@ describe("voiceSocketProtocol speech boundaries", () => {
       args: [boundary],
     });
   });
+});
+
+describe("voiceSocketProtocol conversation target", () => {
+  const init = { sr: 16000, channels: 1, format: "pcm_s16le" } as const;
+
+  it.each([{ lessonId: "lesson-1" }, { practiceSessionId: "practice-1", threadId: "attempt-2" }])(
+    "preserves the target in audio startup: %j",
+    (target) => {
+      expect(
+        voiceSocketProtocol.buildStartEmit({
+          init,
+          context: { voiceAction: VOICE_ACTION.VOICE_MENTOR, ...target },
+        }),
+      ).toEqual({
+        event: VOICE_SOCKET_EVENT.START_AUDIO,
+        args: [{ voiceAction: VOICE_ACTION.VOICE_MENTOR, ...target, meta: init }],
+      });
+    },
+  );
 });

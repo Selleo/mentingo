@@ -148,6 +148,11 @@ export function CourseChatTab({
               currentPage={messagesResponse.pagination.page}
               canChangeItemsPerPage={false}
               onPageChange={setPage}
+              testIds={{
+                previous: COURSE_DISCUSSION_HANDLES.PAGINATION_PREVIOUS_BUTTON,
+                next: COURSE_DISCUSSION_HANDLES.PAGINATION_NEXT_BUTTON,
+                page: COURSE_DISCUSSION_HANDLES.paginationPageButton,
+              }}
               className="border-t border-neutral-200 bg-background px-3 py-2"
             />
           )}

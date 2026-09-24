@@ -50,6 +50,6 @@ Discussion APIs are feature-gated and permission-gated. Reading, posting, reacti
 
 ## Test Evidence
 
-- Web E2E coverage verifies the Discussion tab is hidden when globally disabled, the empty state appears when enabled, learners can create threads, reply, react and toggle reactions, delete a thread with replies, and select mentioned enrolled users.
-- Backend behavior is evidenced by the Course Chat controller, service, gateway, presence store/service, repository, and mention email handler.
-- I did not find a dedicated Course Chat backend E2E spec in the current API test tree.
+- Web E2E coverage verifies feature visibility, the empty state, thread and reply creation, reactions, deletion, mentions, presence, pagination, and realtime updates between enrolled learners.
+- Backend E2E coverage verifies the feature gate, authentication, permissions, enrollment isolation, moderation rules, message and reply pagination, validation, and deleted-thread behavior.
+- Mention email delivery remains covered by the dedicated Course Chat mention handler test.

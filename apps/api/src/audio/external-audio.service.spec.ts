@@ -19,6 +19,7 @@ import type {
   LumaSocket,
 } from "@japro/luma-sdk";
 import type { StartAudioBody } from "src/audio/types/audio.types";
+import type { ExternalAudioSession } from "src/audio/types/external-audio-session.types";
 import type { WsUser } from "src/websocket/websocket.types";
 
 jest.mock("@japro/luma-sdk", () => ({
@@ -276,6 +277,65 @@ describe("ExternalAudioService recovery", () => {
 });
 
 describe("ExternalAudioService voice markup streaming", () => {
+  it("uses the Luma welcome turn for audio, alignment, and completion", async () => {
+    const socket = { sendTTSTrigger: jest.fn() };
+    const session = {
+      sessionId: "session-1",
+      socket: socket as unknown as LumaSocket,
+      activeTurnId: null,
+      pendingTtsTrigger: false,
+      audioOutputErrors: new Map(),
+    } as ExternalAudioSession;
+    const sessionStore = new ExternalAudioSessionStore();
+    sessionStore.set(session);
+    const realtimePublisher = { emitToRoom: jest.fn() };
+    const service = new ExternalAudioService(
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      sessionStore,
+      {} as never,
+      realtimePublisher as never,
+    );
+    const handlers = service["createVoiceMentorSocketHandlers"](session);
+    await service.triggerTTS("session-1", { content: "Welcome" });
+    const envelope = { sessionId: "session-1", jobId: "luma-welcome-1", tsMs: 1 };
+    handlers.audioOutputAlignment({
+      ...envelope,
+      type: LUMA_MENTOR_STREAM_EVENT_TYPES.AUDIO_OUTPUT_ALIGNMENT,
+      data: { sequence: 1, words: [{ text: "Welcome", startMs: 0, endMs: 500 }] },
+    });
+    handlers.audioOutputChunk({
+      ...envelope,
+      type: LUMA_MENTOR_STREAM_EVENT_TYPES.AUDIO_OUTPUT_CHUNK,
+      data: { seq: 0, codec: "pcm_s16le", chunkBase64: "AAAA", sampleRate: 44100 },
+    });
+    for (const event of [
+      VOICE_SOCKET_EVENT.AUDIO_OUTPUT_ALIGNMENT,
+      VOICE_SOCKET_EVENT.AUDIO_SPEECH,
+    ]) {
+      expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
+        event,
+        "session-1",
+        expect.objectContaining({ turnId: envelope.jobId }),
+      );
+    }
+    handlers.audioOutputComplete({
+      ...envelope,
+      type: LUMA_MENTOR_STREAM_EVENT_TYPES.AUDIO_OUTPUT_COMPLETE,
+      data: { totalChunks: 1 },
+    });
+    expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
+      VOICE_SOCKET_EVENT.AUDIO_OUTPUT_COMPLETED,
+      "session-1",
+      { turnId: envelope.jobId },
+    );
+    expect(session.activeTurnId).toBeNull();
+    expect(session.pendingTtsTrigger).toBe(false);
+  });
+
   it.each(["core", "luma"])(
     "keeps raw %s speech markup separate from display events across character chunks",
     async (source) => {
@@ -306,6 +366,7 @@ describe("ExternalAudioService voice markup streaming", () => {
         recoveryRetryTimeout: null,
         clientDisconnectTimeout: null,
         activeTurnId: null,
+        pendingTtsTrigger: false,
         audioOutputErrors: new Map(),
         pendingInterruption: false,
         interruptedTurnIds: new Set(),

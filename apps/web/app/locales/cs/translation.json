@@ -1,4 +1,52 @@
 {
+  "aiConversations": {
+    "session": "Relace",
+    "context": "Kontext",
+    "activity": "Aktivita",
+    "filters": "Filtry",
+    "details": "Podrobnosti",
+    "selectConversation": "Vyberte konverzaci",
+    "pageSize": "Konverzace na stránku",
+    "conversation": "Konverzace",
+    "source": "Kurz",
+    "view": "Zobrazit konverzaci",
+    "title": "Konverzace s AI",
+    "description": "Prohlížejte cvičné relace a lekce s AI mentorem.",
+    "owner": "Uživatel",
+    "loading": "Načítání…",
+    "retry": "Zkusit znovu",
+    "noMatches": "Těmto filtrům neodpovídají žádné konverzace.",
+    "loadMore": "Načíst další",
+    "back": "Zpět na konverzace",
+    "readOnly": "Konverzace pouze pro čtení",
+    "unavailable": "Tato konverzace není dostupná.",
+    "untitled": "Konverzace bez názvu",
+    "started": "Zahájeno",
+    "lastActivity": "Poslední aktivita",
+    "language": "Jazyk",
+    "result": "Zobrazit hodnocení",
+    "emptyTranscript": "Tato konverzace zatím neobsahuje zprávy.",
+    "messagesError": "Zprávy se nepodařilo načíst.",
+    "search": "Hledat názvy konverzací",
+    "type": "Typ",
+    "allTypes": "Všechny typy",
+    "status": "Stav",
+    "allStatuses": "Všechny stavy",
+    "from": "Zahájeno od",
+    "to": "Zahájeno do",
+    "listError": "Konverzace se nepodařilo načíst.",
+    "errors": { "invalidDateRange": "Datum ukončení musí být pozdější než datum zahájení." },
+    "empty": "Zatím žádné konverzace.",
+    "types": {
+      "practice": "Cvičná relace",
+      "ai-mentor": "Lekce s AI mentorem"
+    },
+    "statuses": {
+      "active": "Probíhá",
+      "completed": "Dokončená",
+      "archived": "Archivovaná"
+    }
+  },
   "emailTemplates": {
     "variableDescriptions": {
       "assignment_deadline_message": "Přidá termín povinného kurzu, pokud je stanoven. Bez termínu se nezobrazí.",
@@ -2104,6 +2152,7 @@
         "live_training_start": "Může spouštět relace živého školení.",
         "live_training_end": "Může ukončovat relace živého školení.",
         "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
+        "ai_thread_read": "Může zobrazit všechny konverzace s AI a jejich uložená hodnocení.",
         "activity_log_read": "Může zobrazit protokoly aktivit."
       }
     },
