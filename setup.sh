@@ -372,7 +372,7 @@ echo ""
 echo -e "${GREEN}[11/11]${NC} Verifying setup..."
 
 # Check if critical services are running
-CRITICAL_SERVICES=("project-db" "redis" "minio")
+CRITICAL_SERVICES=("project-db" "redis" "rustfs")
 ALL_RUNNING=true
 
 for service in "${CRITICAL_SERVICES[@]}"; do
