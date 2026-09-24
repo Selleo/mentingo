@@ -932,6 +932,33 @@ export class MasterCourseRepository {
       .where(eq(assessmentQuestions.id, questionId));
   }
 
+  async releaseTargetOptionDisplayOrders(questionIds: UUIDType[]) {
+    if (!questionIds.length) return;
+
+    const options = await this.db
+      .select({
+        id: assessmentQuestionChoiceOptions.id,
+        displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+      })
+      .from(assessmentQuestionChoiceOptions)
+      .where(inArray(assessmentQuestionChoiceOptions.questionId, questionIds))
+      .orderBy(asc(assessmentQuestionChoiceOptions.id));
+
+    let temporaryOrder = options.reduce(
+      (minimum, option) => Math.min(minimum, option.displayOrder),
+      0,
+    );
+
+    for (const option of options) {
+      temporaryOrder -= 1;
+
+      await this.db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: temporaryOrder })
+        .where(eq(assessmentQuestionChoiceOptions.id, option.id));
+    }
+  }
+
   async createTargetOption(values: QuestionAnswerOptionJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db
       .insert(assessmentQuestionChoiceOptions)

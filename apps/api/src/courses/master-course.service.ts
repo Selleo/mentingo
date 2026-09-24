@@ -1213,41 +1213,70 @@ export class MasterCourseService {
     };
   }
 
-  private async syncOptions(params: SyncOptionsParams) {
-    const optionMap = new Map<UUIDType, UUIDType>();
+  private async syncOptions({ exportId, sourceSnapshot, questionMap }: SyncOptionsParams) {
+    await this.cleanupMissingMappings(
+      exportId,
+      MASTER_COURSE_ENTITY_TYPES.OPTION,
+      sourceSnapshot.options.map(({ id }) => id),
+      assessmentQuestionChoiceOptions,
+    );
 
-    for (const sourceOption of params.sourceSnapshot.options) {
-      const mappedQuestionId = params.questionMap.get(sourceOption.questionId);
-      if (!mappedQuestionId) continue;
+    const mappings = await this.masterCourseRepository.getMappings(
+      exportId,
+      MASTER_COURSE_ENTITY_TYPES.OPTION,
+    );
 
-      const mappedId = await this.resolveOrCreateMappedTargetId(
-        params.exportId,
+    const existingOptionMap = new Map(
+      mappings.map(({ sourceEntityId, targetEntityId }) => [sourceEntityId, targetEntityId]),
+    );
+
+    const optionMap = await this.tenantRunner.transaction(async () => {
+      await this.masterCourseRepository.releaseTargetOptionDisplayOrders([...questionMap.values()]);
+
+      const syncedOptions = new Map<UUIDType, UUIDType>();
+      for (const sourceOption of sourceSnapshot.options) {
+        const targetQuestionId = questionMap.get(sourceOption.questionId);
+        if (!targetQuestionId) continue;
+
+        const targetOptionId = await this.syncTargetOption(
+          sourceOption,
+          targetQuestionId,
+          existingOptionMap.get(sourceOption.id),
+        );
+        syncedOptions.set(sourceOption.id, targetOptionId);
+      }
+      return syncedOptions;
+    });
+
+    for (const [sourceId, targetId] of optionMap) {
+      await this.masterCourseRepository.upsertMap(
+        exportId,
         MASTER_COURSE_ENTITY_TYPES.OPTION,
-        sourceOption.id,
-        () =>
-          this.masterCourseRepository.createTargetOption({
-            questionId: mappedQuestionId,
-            optionText: toJsonbBuildObject(sourceOption.optionText),
-            isCorrect: sourceOption.isCorrect,
-            displayOrder: sourceOption.displayOrder,
-            matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
-            scaleAnswer: sourceOption.scaleAnswer,
-          }),
+        sourceId,
+        targetId,
       );
-
-      await this.masterCourseRepository.updateTargetOption(mappedId, {
-        questionId: mappedQuestionId,
-        optionText: toJsonbBuildObject(sourceOption.optionText),
-        isCorrect: sourceOption.isCorrect,
-        displayOrder: sourceOption.displayOrder,
-        matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
-        scaleAnswer: sourceOption.scaleAnswer,
-      });
-
-      optionMap.set(sourceOption.id, mappedId);
     }
-
     return optionMap;
+  }
+
+  private async syncTargetOption(
+    sourceOption: SourceSnapshot["options"][number],
+    targetQuestionId: UUIDType,
+    targetOptionId?: UUIDType,
+  ): Promise<UUIDType> {
+    const values = {
+      questionId: targetQuestionId,
+      optionText: toJsonbBuildObject(sourceOption.optionText),
+      isCorrect: sourceOption.isCorrect,
+      displayOrder: sourceOption.displayOrder,
+      matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
+      scaleAnswer: sourceOption.scaleAnswer,
+    };
+
+    if (!targetOptionId) return this.masterCourseRepository.createTargetOption(values);
+
+    await this.masterCourseRepository.updateTargetOption(targetOptionId, values);
+    return targetOptionId;
   }
 
   private async duplicateOptions(params: DuplicateOptionsParams) {
