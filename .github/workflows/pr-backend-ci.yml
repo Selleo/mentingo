@@ -115,6 +115,9 @@ jobs:
       - name: Build the app
         run: pnpm run build
 
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
       - name: Verify build output
         env:
           BUILD_VERIFICATION: "true"
