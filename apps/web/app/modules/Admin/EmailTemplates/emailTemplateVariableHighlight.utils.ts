@@ -4,5 +4,5 @@ export const getEmailTemplateVariableRanges = (text: string, variables: EmailTem
   const keys = new Set(variables.map((variable) => variable.key));
   return Array.from(text.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g))
     .filter((match) => keys.has(match[1]))
-    .map((match) => ({ from: match.index!, to: match.index! + match[0].length }));
+    .map((match) => ({ from: match.index, to: match.index + match[0].length }));
 };

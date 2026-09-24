@@ -4,11 +4,13 @@ import {
   type EmailTemplateDocument,
   type LocalizedEmailTemplateContent,
 } from "@repo/email-templates";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, RESOURCE_VISIBILITY } from "@repo/shared";
+import { RESOURCE_VISIBILITY } from "@repo/shared";
 import sharp from "sharp";
 
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
+import { isSupportedImageVariantMimeType } from "src/file/image-variants/image-variant.utils";
 
 import {
   EMAIL_TEMPLATE_ASSET_FOLDER,
@@ -39,6 +41,12 @@ export class EmailTemplateAssetService {
   }
 
   async uploadEmailTemplateImage(file: Express.Multer.File, currentUser: CurrentUserType) {
+    const detectedMimeType = (await FileGuard.getFileType(file))?.mime;
+
+    if (!detectedMimeType || !isSupportedImageVariantMimeType(detectedMimeType)) {
+      throw new BadRequestException("files.toast.invalidData");
+    }
+
     try {
       await sharp(file.buffer, { limitInputPixels: EMAIL_TEMPLATE_IMAGE_MAX_PIXELS }).metadata();
     } catch {
@@ -46,7 +54,7 @@ export class EmailTemplateAssetService {
     }
 
     const uploaded = await this.fileService.uploadResource({
-      file,
+      file: { ...file, mimetype: detectedMimeType },
       folder: EMAIL_TEMPLATE_ASSET_FOLDER,
       resource: RESOURCE_CATEGORIES.EMAIL_TEMPLATE,
       currentUser,
@@ -95,7 +103,7 @@ export class EmailTemplateAssetService {
       if (!source) {
         const attachment = await this.createEmailTemplateAttachment(id, tenantId);
         source = preview
-          ? `data:image/png;base64,${attachment.content.toString("base64")}`
+          ? `data:image/webp;base64,${attachment.content.toString("base64")}`
           : `cid:${attachment.cid}`;
 
         sources.set(id, source);
@@ -113,14 +121,9 @@ export class EmailTemplateAssetService {
     const buffer = await this.fileService.getRawFileBuffer(resource.reference);
     if (!buffer) throw new BadRequestException("files.toast.invalidData");
 
-    const content = await sharp(buffer, { limitInputPixels: EMAIL_TEMPLATE_IMAGE_MAX_PIXELS })
-      .resize({ width: 1200, withoutEnlargement: true })
-      .png()
-      .toBuffer();
-
     const cid = `email-template-${id}`;
 
-    return { filename: `${cid}.png`, content, contentType: "image/png", cid };
+    return { filename: `${cid}.webp`, content: buffer, contentType: "image/webp", cid };
   }
 
   private async getOwnedEmailTemplateAsset(id: UUIDType, tenantId: UUIDType) {
@@ -129,7 +132,7 @@ export class EmailTemplateAssetService {
     if (
       !resource ||
       !resource.reference.startsWith(`${tenantId}/${EMAIL_TEMPLATE_ASSET_FOLDER}/`) ||
-      !ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(resource.contentType)
+      resource.contentType !== "image/webp"
     ) {
       throw new BadRequestException("files.toast.invalidData");
     }

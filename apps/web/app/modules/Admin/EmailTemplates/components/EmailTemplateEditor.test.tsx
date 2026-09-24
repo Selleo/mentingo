@@ -72,8 +72,34 @@ const template: EmailTemplate = {
   archivedAt: null,
 };
 
+const imageTemplate: EmailTemplate = {
+  ...template,
+  content: {
+    en: {
+      type: "doc",
+      version: 1,
+      content: [{ type: "image", attrs: { src: "", alt: "Original description" } }],
+    },
+  },
+};
+
 describe("EmailTemplateEditor", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("keeps a block selected while editing its content", async () => {
+    const user = userEvent.setup();
+    renderWith({ withQuery: true }).render(<EmailTemplateEditor template={imageTemplate} />);
+
+    await user.click(screen.getByRole("button", { name: "Edit block Image" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Alternative text" }), {
+      target: { value: "Updated description" },
+    });
+
+    expect(screen.getByRole("textbox", { name: "Alternative text" })).toHaveValue(
+      "Updated description",
+    );
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+  });
 
   it("keeps image settings selected during and after upload", async () => {
     let finishUpload!: (value: unknown) => void;
@@ -82,16 +108,6 @@ describe("EmailTemplateEditor", () => {
         finishUpload = resolve;
       }),
     );
-    const imageTemplate: EmailTemplate = {
-      ...template,
-      content: {
-        en: {
-          type: "doc",
-          version: 1,
-          content: [{ type: "image", attrs: { src: "", alt: "Original description" } }],
-        },
-      },
-    };
     renderWith({ withQuery: true }).render(<EmailTemplateEditor template={imageTemplate} />);
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Edit block Image" }));

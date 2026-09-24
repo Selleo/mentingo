@@ -219,7 +219,7 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
     }
   });
 
-  it.each(["png", "jpeg", "gif", "webp", "tiff"] as const)(
+  it.each(["png", "jpeg", "webp"] as const)(
     "uploads a valid %s into a private tenant resource",
     async (format) => {
       const image = await sharp(t.png).toFormat(format).toBuffer();
@@ -237,9 +237,13 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
         uploadedBy: t.admin.id,
         tenantId: t.defaultTenantId,
         visibility: RESOURCE_VISIBILITY.PRIVATE,
-        contentType: `image/${format}`,
+        contentType: "image/webp",
       });
       expect(resource.reference).toMatch(new RegExp(`^${t.defaultTenantId}/email-templates/`));
+      expect(resource.reference).toContain("/variants/");
+      expect(
+        [...t.storage.keys()].some((key) => key.includes("/variants/") && key.endsWith(".webp")),
+      ).toBe(true);
       t.read.mockClear();
       expect((await t.http("get", `/images/${resourceId}`).expect(200)).body.data).toEqual(
         response.body.data,
@@ -248,23 +252,29 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
     },
   );
 
-  // BMP is allowlisted by FileGuard, but Sharp rejects its metadata before upload.
-  // Keep the intended acceptance test until the image pipeline supports this format.
-  it.skip("uploads an allowlisted BMP image (blocked by Sharp BMP support)", async () => {
-    const bmp = Buffer.alloc(58);
-    bmp.write("BM");
-    bmp.writeUInt32LE(58, 2);
-    bmp.writeUInt32LE(54, 10);
-    bmp.writeUInt32LE(40, 14);
-    bmp.writeInt32LE(1, 18);
-    bmp.writeInt32LE(1, 22);
-    bmp.writeUInt16LE(1, 26);
-    bmp.writeUInt16LE(24, 28);
-    bmp.writeUInt32LE(4, 34);
+  it.each(["gif", "tiff"] as const)("rejects %s uploads before storage", async (format) => {
+    const image = await sharp(t.png).toFormat(format).toBuffer();
+    const before = await t.runAsTenant(t.defaultTenantId, () => t.db.select().from(resources));
     await t
       .http("post", "/images")
-      .attach("file", bmp, { filename: "image.bmp", contentType: "image/bmp" })
+      .attach("file", image, { filename: `image.${format}`, contentType: `image/${format}` })
+      .expect(400);
+    expect(t.upload).not.toHaveBeenCalled();
+    expect(await t.runAsTenant(t.defaultTenantId, () => t.db.select().from(resources))).toEqual(
+      before,
+    );
+  });
+
+  it("uses decoded PNG bytes for variant generation when the claimed MIME is JPEG", async () => {
+    const response = await t
+      .http("post", "/images")
+      .attach("file", t.png, { filename: "image.jpg", contentType: "image/jpeg" })
       .expect(201);
+    const [resource] = await t.runAsTenant(t.defaultTenantId, () =>
+      t.db.select().from(resources).where(eq(resources.id, response.body.data.resourceId)),
+    );
+    expect(resource.contentType).toBe("image/webp");
+    expect(resource.reference).toContain("/variants/");
   });
 
   it.each([
@@ -273,7 +283,6 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
     "multiple",
     "corrupt",
     "unsupported",
-    "mismatch",
     "too-large",
     "too-many-pixels",
   ])("rejects %s image uploads without storing resources", async (kind) => {
@@ -291,8 +300,6 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
         filename: "image.txt",
         contentType: "text/plain",
       });
-    if (kind === "mismatch")
-      req.attach("file", t.png, { filename: "image.jpg", contentType: "image/jpeg" });
     if (kind === "too-large")
       req.attach("file", Buffer.concat([t.png, Buffer.alloc(EMAIL_TEMPLATE_IMAGE_MAX_BYTES)]), {
         filename: "image.png",
@@ -356,7 +363,7 @@ describe("Email template preview and image HTTP endpoints (e2e)", () => {
         .send({ ...previewBody(), content: body.content })
         .expect(201)
     ).body.data;
-    expect(preview.html).toContain("data:image/png;base64,");
+    expect(preview.html).toContain("data:image/webp;base64,");
     expect(preview.html).not.toContain(asset.src);
     expect(preview.html).not.toContain("https://storage.example");
     expect(t.read).toHaveBeenCalledTimes(1);

@@ -276,7 +276,12 @@ describe("Email template delivery integration (e2e)", () => {
     expect(email.attachments).toContainEqual(attachment);
     expect(
       email.attachments?.filter(({ cid }) => cid === `email-template-${asset.resourceId}`),
-    ).toHaveLength(1);
+    ).toEqual([
+      expect.objectContaining({
+        contentType: "image/webp",
+        filename: `email-template-${asset.resourceId}.webp`,
+      }),
+    ]);
     expect(
       email.html?.match(new RegExp(`cid:email-template-${asset.resourceId}`, "g")),
     ).toHaveLength(2);

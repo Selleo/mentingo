@@ -1,8 +1,5 @@
-import type {
-  ALL_IMAGE_QUALITY_VALUES,
-  IMAGE_RESIZE_MODES,
-  SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
-} from "./image-variant.constants";
+import type { ALL_IMAGE_QUALITY_VALUES, IMAGE_RESIZE_MODES } from "./image-variant.constants";
+import type { SUPPORTED_IMAGE_VARIANT_MIME_TYPES } from "@repo/shared";
 
 export type ImageResizeMode = IMAGE_RESIZE_MODES;
 

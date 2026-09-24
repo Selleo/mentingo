@@ -8,6 +8,8 @@ import request from "supertest";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
+import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { emailTemplates, resources, settings, tenants } from "src/storage/schema";
@@ -60,9 +62,24 @@ export const textDocument = (text = "Template body"): EmailTemplateDocument => (
 export async function setupEmailTemplateTest(options: { worker?: boolean } = {}) {
   const originalRateLimit = process.env.DISABLE_RATE_LIMITING;
   process.env.DISABLE_RATE_LIMITING = "true";
+  const storage = new Map<string, Buffer>();
+  const s3Service = {
+    uploadFile: jest.fn(async (buffer: Buffer, key: string) => {
+      storage.set(key, Buffer.from(buffer));
+    }),
+    getSignedUrl: jest.fn(async (key: string) => `https://storage.example/${key}`),
+    getFileBuffer: jest.fn(async (key: string) => {
+      const buffer = storage.get(key);
+      if (!buffer) throw new Error(`Missing test object: ${key}`);
+      return buffer;
+    }),
+  };
   const context = await createE2ETest({
     useDbProxy: true,
-    customProviders: options.worker ? [] : [{ provide: EmailTemplateTestWorker, useValue: {} }],
+    customProviders: [
+      { provide: S3Service, useValue: s3Service },
+      ...(!options.worker ? [{ provide: EmailTemplateTestWorker, useValue: {} }] : []),
+    ],
   });
   const { app, defaultTenantId, runAsTenant } = context;
   const close = app.close.bind(app);
@@ -77,25 +94,28 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
   const db = app.get<DatabasePg>(DB);
   const adapter = app.get<EmailTestingAdapter>(EmailAdapter);
   const fileService = app.get(FileService);
-  const storage = new Map<string, Buffer>();
   const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: "#123456" } })
     .png()
     .toBuffer();
 
-  // Keep resource persistence and asset validation real; replace storage I/O only.
-  const upload = jest
-    .spyOn(fileService, "uploadFile")
-    .mockImplementation(async (file, folder, tenantId) => {
-      const fileKey = `${tenantId}/${folder}/${randomUUID()}`;
-      storage.set(fileKey, file.buffer);
-      return { fileKey, fileUrl: `https://storage.example/${fileKey}`, contentType: file.mimetype };
-    });
-  const sign = jest
-    .spyOn(fileService, "getFileUrl")
-    .mockImplementation(async (key) => `https://storage.example/${key}`);
-  const read = jest
-    .spyOn(fileService, "getRawFileBuffer")
-    .mockImplementation(async (key) => storage.get(key) ?? null);
+  jest.spyOn(FileGuard, "getFileType").mockImplementation(async (file) => {
+    try {
+      const buffer = Buffer.isBuffer(file) ? file : file.buffer;
+      const { format } = await sharp(buffer).metadata();
+      if (format === "jpeg") return { ext: "jpg", mime: "image/jpeg" };
+      if (format === "png") return { ext: "png", mime: "image/png" };
+      if (format === "gif") return { ext: "gif", mime: "image/gif" };
+      if (format === "webp") return { ext: "webp", mime: "image/webp" };
+      if (format === "tiff") return { ext: "tif", mime: "image/tiff" };
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  });
+
+  const upload = jest.spyOn(fileService, "uploadFile");
+  const sign = jest.spyOn(fileService, "getFileUrl");
+  const read = jest.spyOn(fileService, "getRawFileBuffer");
   const settingsService = app.get(SettingsService);
   jest.spyOn(settingsService, "getPlatformLogoBuffer").mockResolvedValue(png);
   jest.spyOn(settingsService, "getEmailBorderCircleBuffer").mockResolvedValue(png);

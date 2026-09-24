@@ -3,12 +3,15 @@ import { EMAIL_TEMPLATE_STATUSES, type EmailTemplateEvent } from "@repo/email-te
 import { and, count, desc, eq, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { mergeJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  buildJsonbFieldWithMultipleEntries,
+  mergeJsonbField,
+  setJsonbField,
+} from "src/common/helpers/sqlHelpers";
 import { DB } from "src/storage/db/db.providers";
 import { emailTemplates } from "src/storage/schema";
 
 import type { EmailTemplateRecord, EmailTemplateTranslationUpdate } from "../email-template.types";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 @Injectable()
 export class EmailTemplateRepository {
@@ -66,14 +69,27 @@ export class EmailTemplateRepository {
   }
 
   async createEmailTemplate(values: typeof emailTemplates.$inferInsert) {
-    const [template] = await this.db.insert(emailTemplates).values(values).returning();
+    const [template] = await this.db
+      .insert(emailTemplates)
+      .values({
+        ...values,
+        name: buildJsonbFieldWithMultipleEntries(values.name),
+        subject: buildJsonbFieldWithMultipleEntries(values.subject),
+        content: buildJsonbFieldWithMultipleEntries(values.content),
+      })
+      .returning();
     return template;
   }
 
   async createExampleEmailTemplateIfMissing(values: typeof emailTemplates.$inferInsert) {
     await this.db
       .insert(emailTemplates)
-      .values(values)
+      .values({
+        ...values,
+        name: buildJsonbFieldWithMultipleEntries(values.name),
+        subject: buildJsonbFieldWithMultipleEntries(values.subject),
+        content: buildJsonbFieldWithMultipleEntries(values.content),
+      })
       .onConflictDoNothing({ target: emailTemplates.id });
   }
 
@@ -109,10 +125,7 @@ export class EmailTemplateRepository {
         name: this.patchLocalizedText(emailTemplates.name, name),
         subject: this.patchLocalizedText(emailTemplates.subject, subject),
         content: content
-          ? mergeJsonbField(
-              this.getLocalizedJsonObject(emailTemplates.content),
-              sql`${content}::jsonb`,
-            )
+          ? mergeJsonbField(emailTemplates.content, buildJsonbFieldWithMultipleEntries(content))
           : undefined,
       })
       .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
@@ -128,13 +141,8 @@ export class EmailTemplateRepository {
 
     return Object.entries(translations).reduce(
       (field, [language, value]) => setJsonbField(field, language, value, true, true) ?? field,
-      this.getLocalizedJsonObject(column),
+      sql`${column}`,
     );
-  }
-
-  private getLocalizedJsonObject(column: AnyPgColumn) {
-    return sql`CASE WHEN jsonb_typeof(${column}) = 'string'
-      THEN (${column} #>> '{}')::jsonb ELSE ${column} END`;
   }
 
   publishEmailTemplate(id: UUIDType, event: EmailTemplateEvent) {

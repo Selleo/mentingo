@@ -1,5 +1,6 @@
 import { useNavigate } from "@remix-run/react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useArchiveEmailTemplate } from "~/api/mutations/emailTemplates/useArchiveEmailTemplate";
@@ -64,11 +65,13 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
 
   const [savedTemplate, setSavedTemplate] = useState(template);
 
-  const [formValues, setFormValues] = useState<EmailTemplateFormValues>(() => ({
-    name: template.name,
-    subject: template.subject,
-    content: template.content,
-  }));
+  const { watch, getValues, setValue, reset } = useForm<
+    Pick<EmailTemplateFormValues, "name" | "subject">
+  >({
+    defaultValues: { name: template.name, subject: template.subject },
+  });
+  const [content, setContent] = useState(template.content);
+  const formValues: EmailTemplateFormValues = { ...watch(), content };
 
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguages>(
     template.baseLanguage,
@@ -115,7 +118,8 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
 
   const applySavedTemplate = (result: EmailTemplate) => {
     setSavedTemplate(result);
-    setFormValues({ name: result.name, subject: result.subject, content: result.content });
+    reset({ name: result.name, subject: result.subject });
+    setContent(result.content);
   };
 
   const runTemplateAction = async <T,>(action: () => Promise<T>, validateContent = false) => {
@@ -150,9 +154,9 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
   };
 
   const handleDocumentChange = (content: typeof activeLanguageDocument.content) =>
-    setFormValues((current) => ({
+    setContent((current) => ({
       ...current,
-      content: { ...current.content, [selectedLanguage]: { ...activeLanguageDocument, content } },
+      [selectedLanguage]: { ...activeLanguageDocument, content },
     }));
 
   return (
@@ -271,10 +275,13 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
                   value={formValues.name[selectedLanguage] ?? ""}
                   disabled={isReadonly || isActionPending}
                   onChange={(name) =>
-                    setFormValues((current) => ({
-                      ...current,
-                      name: { ...current.name, [selectedLanguage]: name },
-                    }))
+                    setValue(
+                      "name",
+                      { ...getValues("name"), [selectedLanguage]: name },
+                      {
+                        shouldDirty: true,
+                      },
+                    )
                   }
                 />
               </div>
@@ -287,10 +294,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
                   highlightVariables
                   disabled={isReadonly || isActionPending}
                   onChange={(subject) =>
-                    setFormValues((current) => ({
-                      ...current,
-                      subject: { ...current.subject, [selectedLanguage]: subject },
-                    }))
+                    setValue(
+                      "subject",
+                      { ...getValues("subject"), [selectedLanguage]: subject },
+                      { shouldDirty: true },
+                    )
                   }
                 />
               </div>

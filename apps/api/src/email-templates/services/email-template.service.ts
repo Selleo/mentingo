@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -230,8 +231,12 @@ export class EmailTemplateService {
       body.language,
       body.baseLanguage,
     );
-    const subject = body.subject[language]!;
-    const document = body.content[language]!;
+    const subject = body.subject[language];
+    const document = body.content[language];
+
+    if (!subject || !document)
+      throw new BadRequestException("emailTemplates.errors.incompleteBaseLanguage");
+
     const variables = this.emailTemplateValidationService.getSampleVariables(body.event);
 
     await this.emailTemplateAssetService.validateEmailTemplateAssets(body.content, tenantId);

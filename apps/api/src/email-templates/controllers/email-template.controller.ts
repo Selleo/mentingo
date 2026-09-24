@@ -13,7 +13,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { EmailTemplateEvent } from "@repo/email-templates";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_IMAGE_VARIANT_MIME_TYPES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -103,7 +103,7 @@ export class EmailTemplateController {
   async uploadEmailTemplateImage(
     @UploadedFile(
       getBaseFileTypePipe(
-        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        buildFileTypeRegex(SUPPORTED_IMAGE_VARIANT_MIME_TYPES),
         EMAIL_TEMPLATE_IMAGE_MAX_BYTES,
       ).build({ fileIsRequired: true }),
     )

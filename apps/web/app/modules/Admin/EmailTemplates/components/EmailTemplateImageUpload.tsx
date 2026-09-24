@@ -1,4 +1,4 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { SUPPORTED_IMAGE_VARIANT_MIME_TYPES } from "@repo/shared";
 import { useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -43,7 +43,7 @@ export function EmailTemplateImageUpload({
         imageUrl={imageUrl}
         imageFit="contain"
         size={IMAGE_UPLOAD_SIZES.SMALL}
-        accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
+        accept={SUPPORTED_IMAGE_VARIANT_MIME_TYPES.join(",")}
         disabled={disabled}
         isUploading={disabled}
         handleImageUpload={handleUploadImage}

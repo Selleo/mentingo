@@ -81,7 +81,7 @@ export function EmailTemplateBlocks({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const isEditingDisabled = disabled || isPreviewMode;
   const [hoveredBlockIndex, setHoveredBlockIndex] = useState<number | null>(null);
-  const emailPrimaryColor = primaryColor || "#4796FD";
+  const emailPrimaryColor = primaryColor || "var(--primary-700)";
 
   let footerStartIndex = blocks.length;
 
