@@ -143,6 +143,7 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/development-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,
+  "admin/email-templates/*": { allOf: [PERMISSIONS.EMAIL_TEMPLATE_MANAGE] },
   "admin/groups/*": {
     allOf: [PERMISSIONS.GROUP_MANAGE],
   },

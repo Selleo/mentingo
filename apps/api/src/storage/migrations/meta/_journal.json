@@ -1436,6 +1436,20 @@
       "when": 1790013484825,
       "tag": "0204_drop_legacy_quiz_dependent_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 205,
+      "version": "7",
+      "when": 1790247098294,
+      "tag": "0205_add_email_templates_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1790247103382,
+      "tag": "0206_enable_email_templates_rls",
+      "breakpoints": true
     }
   ]
 }

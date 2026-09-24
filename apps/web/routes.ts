@@ -70,6 +70,17 @@ export const routes: (
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");
+          route("email-templates", "modules/Admin/EmailTemplates/EmailTemplates.page.tsx");
+          route(
+            "email-templates/defaults/:event",
+            "modules/Admin/EmailTemplates/EmailTemplateEditor.page.tsx",
+            { id: "email-template-default" },
+          );
+          route(
+            "email-templates/:id",
+            "modules/Admin/EmailTemplates/EmailTemplateEditor.page.tsx",
+            { id: "email-template-editor" },
+          );
           route("users/:id", "modules/Admin/Users/User.page.tsx");
           route("users/new", "modules/Admin/Users/CreateNewUser.page.tsx");
           route("categories", "modules/Admin/Categories/Categories.page.tsx");

@@ -13,6 +13,7 @@ import {
 } from "~/components/ui/dialog";
 
 type UnsavedChangesExitGuardProps = {
+  testIds?: { cancel: string; leave: string };
   enabled: boolean;
   dialogTitle: string;
   message: string;
@@ -25,6 +26,7 @@ export const BLOCKER_STATES = {
 } as const;
 
 export function UnsavedChangesExitGuard({
+  testIds,
   enabled,
   dialogTitle,
   message,
@@ -75,10 +77,15 @@ export function UnsavedChangesExitGuard({
           <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={cancelNavigation}>
+          <Button
+            data-testid={testIds?.cancel}
+            type="button"
+            variant="outline"
+            onClick={cancelNavigation}
+          >
             {cancelLabel ?? t("common.button.cancel")}
           </Button>
-          <Button type="button" onClick={proceedNavigation}>
+          <Button data-testid={testIds?.leave} type="button" onClick={proceedNavigation}>
             {leaveLabel}
           </Button>
         </DialogFooter>

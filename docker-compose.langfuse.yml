@@ -133,36 +133,38 @@ services:
       retries: 10
       start_period: 1s
 
-  minio:
-    image: quay.io/minio/minio:latest
-    container_name: minio
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs
     restart: always
     ports:
-      - "9100:9000" # MinIO API
+      - "9100:9000" # S3 API
       - "9101:9001" # Web console
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
     volumes:
-      - minio-data:/data
-    command: server /data --console-address ":9001"
+      - rustfs-data:/data
+    command: /data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/health/ready >/dev/null"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  create-minio-bucket:
-    image: quay.io/minio/mc:latest
-    container_name: minio-setup
+  create-rustfs-bucket:
+    image: amazon/aws-cli:latest
+    container_name: rustfs-setup
     depends_on:
-      minio:
+      rustfs:
         condition: service_healthy
     restart: "no"
     env_file: ./apps/api/.env
+    environment:
+      S3_ENDPOINT: http://rustfs:9000
     volumes:
-      - ./create-minio-bucket.sh:/create-minio-bucket.sh
-    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
+      - ./create-rustfs-bucket.sh:/create-rustfs-bucket.sh:ro
+    entrypoint: ["/bin/sh", "/create-rustfs-bucket.sh"]
 
 volumes:
   lms-db-data:
@@ -175,5 +177,5 @@ volumes:
     driver: local
   langfuse-db-data:
     driver: local
-  minio-data:
+  rustfs-data:
     driver: local

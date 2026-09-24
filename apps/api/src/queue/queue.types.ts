@@ -3,6 +3,7 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
+  EMAIL_TEMPLATE_TEST: "email-template-test",
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",

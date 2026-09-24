@@ -152,6 +152,7 @@ export const getNavigationConfig = (
           PERMISSIONS.GROUP_MANAGE,
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
+          PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
         ],
       },
       items: [
@@ -160,6 +161,12 @@ export const getNavigationConfig = (
           path: "admin/users",
           iconName: "User",
           testId: NAVIGATION_HANDLES.USERS_LINK,
+        },
+        {
+          label: t("emailTemplates.ui.title"),
+          path: "admin/email-templates",
+          iconName: "Email",
+          testId: NAVIGATION_HANDLES.EMAIL_TEMPLATES_LINK,
         },
         {
           label: t("navigationSideBar.groups"),

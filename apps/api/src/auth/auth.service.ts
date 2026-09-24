@@ -10,7 +10,11 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { CreatePasswordReminderEmail, MagicLinkEmail } from "@repo/email-templates";
+import {
+  EMAIL_TEMPLATE_EVENTS,
+  CreatePasswordReminderEmail,
+  MagicLinkEmail,
+} from "@repo/email-templates";
 import {
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
@@ -698,7 +702,19 @@ export class AuthService {
             text: emailTemplate.text,
             html: emailTemplate.html,
           },
-          { tenantId },
+          {
+            tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
+              language: defaultEmailSettings.language,
+              variables: {
+                create_password_link: buildCreateNewPasswordLink(
+                  await this.resolveTenantOrigin(tenantId),
+                  { createToken },
+                ),
+              },
+            },
+          },
         );
 
         await transaction.delete(createTokens).where(eq(createTokens.tokenHash, oldTokenHash));
@@ -881,7 +897,14 @@ export class AuthService {
           text,
           html,
         },
-        { tenantId: user.tenantId },
+        {
+          tenantId: user.tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.MAGIC_LINK,
+            language: defaultEmailSettings.language,
+            variables: { magic_link: magicLinkUrl.toString() },
+          },
+        },
       );
     } catch {
       return;

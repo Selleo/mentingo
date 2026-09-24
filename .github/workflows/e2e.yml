@@ -14,8 +14,8 @@ env:
   SMTP_USER: ""
   SMTP_PASSWORD: ""
   AWS_REGION: "us-east-1"
-  AWS_ACCESS_KEY_ID: "minioadmin"
-  AWS_SECRET_ACCESS_KEY: "minioadmin"
+  AWS_ACCESS_KEY_ID: "rustfsadmin"
+  AWS_SECRET_ACCESS_KEY: "rustfsadmin"
   AWS_BUCKET_NAME: "test-bucket"
   AWS_ENDPOINT_URL: "http://localhost:9100"
   SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
@@ -164,40 +164,28 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
 
-      - name: Start MinIO
+      - name: Start RustFS
         run: |
-          docker run -d --name minio \
+          docker run -d --name rustfs \
             -p 9100:9000 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1" \
-            --health-interval 5s \
-            --health-timeout 5s \
-            --health-retries 5 \
-            quay.io/minio/minio:latest server /data --console-address ":9001"
+            -e RUSTFS_ACCESS_KEY="$AWS_ACCESS_KEY_ID" \
+            -e RUSTFS_SECRET_KEY="$AWS_SECRET_ACCESS_KEY" \
+            rustfs/rustfs:latest /data
 
-          health_status="starting"
           for i in {1..30}; do
-            health_status="$(docker inspect --format='{{.State.Health.Status}}' minio)"
-            if [ "$health_status" = "healthy" ]; then
-              echo "MinIO is ready"
+            if curl -fsS http://localhost:9100/health/ready >/dev/null; then
+              echo "RustFS is ready"
               break
             fi
-            if [ "$health_status" = "unhealthy" ]; then
-              echo "MinIO became unhealthy"
-              docker logs minio || true
+            if ! docker ps --format '{{.Names}}' | grep -qx rustfs; then
+              docker logs rustfs || true
               exit 1
             fi
             sleep 2
           done
+          curl -fsS http://localhost:9100/health/ready >/dev/null || { docker logs rustfs; exit 1; }
 
-          if [ "$health_status" != "healthy" ]; then
-            echo "MinIO failed to become healthy in time"
-            docker logs minio || true
-            exit 1
-          fi
-
-      - name: Setup MinIO bucket
+      - name: Setup RustFS bucket
         run: |
           docker run --rm \
             --network host \
@@ -206,13 +194,10 @@ jobs:
             -e S3_BUCKET_NAME="$AWS_BUCKET_NAME" \
             -e S3_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
             -e S3_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-            quay.io/minio/mc:latest \
-            -ec '
-              mc alias set local "$S3_ENDPOINT" "$S3_ACCESS_KEY_ID" "$S3_SECRET_ACCESS_KEY"
-              mc mb --ignore-existing "local/$S3_BUCKET_NAME"
-              echo "{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}" > /tmp/cors.json
-              mc cors set "local/$S3_BUCKET_NAME" /tmp/cors.json || true
-            '
+            -e S3_REGION="$AWS_REGION" \
+            -e S3_CONFIGURE_CORS=true \
+            -v "$PWD/create-rustfs-bucket.sh:/create-rustfs-bucket.sh:ro" \
+            amazon/aws-cli:latest /create-rustfs-bucket.sh
 
       - name: Run tests
         shell: bash
@@ -258,6 +243,6 @@ jobs:
             **/*.zip
           retention-days: 3
 
-      - name: Stop MinIO
+      - name: Stop RustFS
         if: always()
-        run: docker rm -f minio || true
+        run: docker rm -f rustfs || true

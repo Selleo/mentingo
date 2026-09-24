@@ -1,3 +1,5 @@
+import { SUPPORTED_IMAGE_VARIANT_MIME_TYPES } from "@repo/shared";
+
 export const IMAGE_VARIANT_CONTENT_TYPE = "image/webp";
 
 export enum IMAGE_RESIZE_MODES {
@@ -50,12 +52,6 @@ export const ALL_IMAGE_VARIANT_DEFINITIONS = [
 export const ALL_IMAGE_QUALITY_VALUES = [
   ...Object.values(IMAGE_QUALITY),
   ...Object.values(PWA_ICON_IMAGE_QUALITY),
-] as const;
-
-export const SUPPORTED_IMAGE_VARIANT_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
 ] as const;
 
 export const SUPPORTED_IMAGE_VARIANT_MIME_TYPE_SET = new Set<string>(
