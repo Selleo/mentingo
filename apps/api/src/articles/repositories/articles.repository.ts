@@ -11,7 +11,6 @@ import { articleSections, articles, resourceEntity, resources, users } from "src
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import type { InitialArticleDraft } from "src/articles/articles.types";
 import type { ArticleItem } from "src/articles/schemas/articleToc.schema";
 import type { UUIDType } from "src/common";
 
@@ -109,20 +108,19 @@ export class ArticlesRepository {
     titleJsonb: unknown,
     authorId: UUIDType,
     sectionId: UUIDType,
-    draft?: InitialArticleDraft,
   ) {
     return this.db
       .insert(articles)
       .values({
-        title: draft ? { [language]: draft.title } : titleJsonb,
-        summary: draft ? { [language]: draft.summary } : {},
-        content: draft ? { [language]: draft.content } : {},
+        title: titleJsonb,
+        summary: {},
+        content: {},
         baseLanguage: language,
         availableLocales: [language],
         authorId,
         articleSectionId: sectionId,
-        status: draft ? ARTICLE_STATUS.DRAFT : ARTICLE_STATUS.PUBLISHED,
-        publishedAt: draft ? null : sql`NOW()`,
+        status: ARTICLE_STATUS.PUBLISHED,
+        publishedAt: sql`NOW()`,
       })
       .returning({
         id: articles.id,

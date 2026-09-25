@@ -53,7 +53,7 @@ import { getLocalizedText } from "src/utils/jsonb";
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
 import { ArticlesRepository } from "../repositories/articles.repository";
 
-import type { ArticleRecord, InitialArticleDraft } from "../articles.types";
+import type { ArticleRecord } from "../articles.types";
 import type { GetArticleSectionResponse } from "../schemas/articleSection.schema";
 import type { GetArticleTocResponse } from "../schemas/articleToc.schema";
 import type {
@@ -301,11 +301,7 @@ export class ArticlesService {
     );
   }
 
-  async createArticle(
-    createArticleBody: CreateArticle,
-    currentUser: CurrentUserType,
-    draft?: InitialArticleDraft,
-  ) {
+  async createArticle(createArticleBody: CreateArticle, currentUser: CurrentUserType) {
     const { language, sectionId } = createArticleBody;
 
     await this.validateArticleSectionExists(sectionId, undefined, false);
@@ -315,7 +311,6 @@ export class ArticlesService {
       buildJsonbField(language, baseArticleTitle[language]),
       currentUser.userId,
       sectionId,
-      draft,
     );
 
     if (!createdArticle) throw new BadRequestException("adminArticleView.toast.createError");
