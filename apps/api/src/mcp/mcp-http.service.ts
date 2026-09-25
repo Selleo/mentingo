@@ -2538,23 +2538,35 @@ export class McpHttpService {
     server.registerTool(
       "update_article",
       {
-        description: "Update an article title, summary, or rich content in one language.",
+        description:
+          "Update an article title, summary, or rich content in one language, and optionally set public visibility.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateArticleInputSchema),
       },
-      async ({ id, language, title, summary, content }) =>
+      async ({ id, language, title, summary, content, isPublic }) =>
         this.run(
           actor,
           [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
           async (user) => {
             await this.assertFeatureEnabled(FEATURES.ARTICLES);
-            if (title === undefined && summary === undefined && content === undefined)
+            if (
+              title === undefined &&
+              summary === undefined &&
+              content === undefined &&
+              isPublic === undefined
+            )
               throw new ForbiddenException("No changes supplied");
             await this.articlesService.updateArticle(
               id,
-              { translations: [{ language, title, summary, content }] },
+              {
+                translations:
+                  title !== undefined || summary !== undefined || content !== undefined
+                    ? [{ language, title, summary, content }]
+                    : [],
+                isPublic,
+              },
               user,
             );
-            return { id, language };
+            return { id, language, isPublic };
           },
         ),
     );
@@ -2624,19 +2636,25 @@ export class McpHttpService {
       "list_news",
       {
         description:
-          "List manageable news drafts in a language, with IDs, titles and status. Pages start at 1; the first page has up to 7 posts and later pages up to 9.",
+          "List manageable news posts by language and status (draft or published). Defaults to draft. Pages start at 1; the first page has up to 7 posts and later pages up to 9.",
         inputSchema: asMcpInputSchema(McpToolSchemas.listNewsInputSchema),
         annotations: { readOnlyHint: true },
       },
-      async ({ language, page }) =>
+      async ({ language, status, page }) =>
         this.run(actor, [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN], async (user) => {
           await this.assertFeatureEnabled(FEATURES.NEWS);
-          const result = await this.newsService.getDraftNewsList(language, page ?? 1, user);
+          const result = await this.newsService.getManageableNewsList(
+            language,
+            page ?? 1,
+            user,
+            status ?? NEWS_STATUS.DRAFT,
+          );
           return {
             news: result.data.map((item) => ({
               id: item.id,
               title: item.title,
               status: item.status,
+              isPublic: item.isPublic,
             })),
             pagination: result.pagination,
           };
@@ -2666,6 +2684,7 @@ export class McpHttpService {
             summary: news.summary,
             content: news.plainContent,
             status: news.status,
+            isPublic: news.isPublic,
             baseLanguage: news.baseLanguage,
             availableLocales: news.availableLocales,
             revision: await this.getRevision(ENTITY_TYPES.NEWS, id),
@@ -2690,18 +2709,30 @@ export class McpHttpService {
     server.registerTool(
       "update_news",
       {
-        description: "Update a news post title, summary, or rich content in one language.",
+        description:
+          "Update a news post title, summary, or rich content in one language, and optionally set public visibility.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateNewsInputSchema),
       },
-      async ({ id, language, title, summary, content, expectedRevision }) =>
+      async ({ id, language, title, summary, content, isPublic, expectedRevision }) =>
         this.run(actor, [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN], async (user) => {
           await this.assertFeatureEnabled(FEATURES.NEWS);
-          if (title === undefined && summary === undefined && content === undefined)
+          if (
+            title === undefined &&
+            summary === undefined &&
+            content === undefined &&
+            isPublic === undefined
+          )
             throw new ForbiddenException("No changes supplied");
           await this.withExpectedRevision(ENTITY_TYPES.NEWS, id, expectedRevision, () =>
             this.newsService.updateNews(
               id,
-              { translations: [{ language, title, summary, content }] },
+              {
+                translations:
+                  title !== undefined || summary !== undefined || content !== undefined
+                    ? [{ language, title, summary, content }]
+                    : [],
+                isPublic,
+              },
               user,
             ),
           );
@@ -2862,27 +2893,36 @@ export class McpHttpService {
     server.registerTool(
       "create_development_path",
       {
-        description: "Create a draft development path with title and description.",
+        description:
+          "Create a development path with title, description, optional status, sequence and certificate settings. It defaults to draft; publishing requires confirmPublish.",
         inputSchema: asMcpInputSchema(McpToolSchemas.createDevelopmentPathInputSchema),
       },
-      async ({ language, title, description }) =>
+      async ({ idempotencyKey: _idempotencyKey, confirmPublish, ...body }) =>
         this.run(actor, [PERMISSIONS.LEARNING_PATH_CREATE], async (user) => {
           await this.assertLearningPathsEnabled();
-          const path = await this.learningPathService.createLearningPath(
-            { language, title, description },
-            user,
-          );
-          return { id: path.id, language, status: path.status };
+          if (body.status === LEARNING_PATH_STATUSES.PUBLISHED && confirmPublish !== true)
+            throw new ForbiddenException("Publishing requires confirmation");
+          const path = await this.learningPathService.createLearningPath(body, user);
+          return { id: path.id, language: body.language, status: path.status };
         }),
     );
 
     server.registerTool(
       "update_development_path",
       {
-        description: "Update localized development path text or supported path settings.",
+        description:
+          "Update localized development path text, sequence and certificate settings, including certificate font color or signature removal.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateDevelopmentPathInputSchema),
       },
-      async ({ pathId, language, title, description, sequenceEnabled, includesCertificate }) =>
+      async ({
+        pathId,
+        language,
+        title,
+        description,
+        sequenceEnabled,
+        includesCertificate,
+        settings,
+      }) =>
         this.run(
           actor,
           [PERMISSIONS.LEARNING_PATH_UPDATE, PERMISSIONS.LEARNING_PATH_UPDATE_OWN],
@@ -2891,12 +2931,14 @@ export class McpHttpService {
             if (
               [title, description, sequenceEnabled, includesCertificate].every(
                 (value) => value === undefined,
-              )
+              ) &&
+              (settings === undefined ||
+                Object.values(settings).every((value) => value === undefined))
             )
               throw new ForbiddenException("No changes supplied");
             const path = await this.learningPathService.updateLearningPath(
               pathId,
-              { language, title, description, sequenceEnabled, includesCertificate },
+              { language, title, description, sequenceEnabled, includesCertificate, settings },
               user,
             );
             return { id: path.id, language };
