@@ -1,4 +1,17 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Plattformlogo",
+    "title": "{{clientName}} mit Mentingo verbinden?",
+    "description": "Dieser Assistent kann Mentingo mit Ihren aktuellen Berechtigungen nutzen.",
+    "signedInAs": "Angemeldet als {{email}}",
+    "allow": "Zulassen",
+    "deny": "Ablehnen",
+    "loading": "Verbindung wird geladen…",
+    "unavailableTitle": "Verbindung nicht verfügbar",
+    "unavailable": "Kehren Sie zum Assistenten zurück und starten Sie die Verbindung erneut.",
+    "signInRequired": "Melden Sie sich bei Mentingo an und starten Sie die Verbindung erneut.",
+    "signIn": "Anmelden"
+  },
   "aiConversations": {
     "session": "Sitzung",
     "context": "Kontext",

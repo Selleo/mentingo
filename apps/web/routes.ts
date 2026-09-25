@@ -15,6 +15,7 @@ export const routes: (
         route("change-password", "modules/Auth/ForcedPasswordChange.page.tsx");
       });
       route("tenant-inactive", "modules/Errors/TenantInactive.page.tsx");
+      route("oauth/connect", "modules/Auth/McpConsent.page.tsx");
       route("", "modules/Navigation/NavigationWrapper.tsx", () => {
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");

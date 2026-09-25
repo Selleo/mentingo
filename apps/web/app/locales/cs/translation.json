@@ -1,4 +1,17 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logo platformy",
+    "title": "Připojit {{clientName}} k Mentingo?",
+    "description": "Tento asistent může používat Mentingo podle vašich aktuálních oprávnění.",
+    "signedInAs": "Přihlášeni jako {{email}}",
+    "allow": "Povolit",
+    "deny": "Odmítnout",
+    "loading": "Načítání připojení…",
+    "unavailableTitle": "Připojení není dostupné",
+    "unavailable": "Vraťte se k asistentovi a začněte připojení znovu.",
+    "signInRequired": "Přihlaste se do Mentingo a začněte připojení znovu.",
+    "signIn": "Přihlásit se"
+  },
   "aiConversations": {
     "session": "Relace",
     "context": "Kontext",

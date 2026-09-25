@@ -1,4 +1,17 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Platformos logotipas",
+    "title": "Prijungti {{clientName}} prie Mentingo?",
+    "description": "Šis asistentas gali naudotis Mentingo pagal jūsų dabartinius leidimus.",
+    "signedInAs": "Prisijungta kaip {{email}}",
+    "allow": "Leisti",
+    "deny": "Atmesti",
+    "loading": "Įkeliamas prisijungimas…",
+    "unavailableTitle": "Prisijungimas negalimas",
+    "unavailable": "Grįžkite į asistentą ir pradėkite jungimą iš naujo.",
+    "signInRequired": "Prisijunkite prie Mentingo ir pradėkite jungimą iš naujo.",
+    "signIn": "Prisijungti"
+  },
   "aiConversations": {
     "session": "Sesija",
     "context": "Kontekstas",

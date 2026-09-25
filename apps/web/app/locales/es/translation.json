@@ -1,4 +1,17 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logotipo de la plataforma",
+    "title": "¿Conectar {{clientName}} con Mentingo?",
+    "description": "Este asistente puede usar Mentingo según tus permisos actuales.",
+    "signedInAs": "Sesión iniciada como {{email}}",
+    "allow": "Permitir",
+    "deny": "Denegar",
+    "loading": "Cargando conexión…",
+    "unavailableTitle": "Conexión no disponible",
+    "unavailable": "Vuelve a tu asistente e inicia la conexión de nuevo.",
+    "signInRequired": "Inicia sesión en Mentingo e inicia la conexión de nuevo.",
+    "signIn": "Iniciar sesión"
+  },
   "aiConversations": {
     "session": "Sesión",
     "context": "Contexto",

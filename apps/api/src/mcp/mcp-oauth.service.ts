@@ -1,19 +1,16 @@
 import { createHash, randomBytes } from "node:crypto";
 
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import OAuth2Server from "@node-oauth/oauth2-server";
 
 import { REDIS_CLIENT, type RedisClient } from "src/redis";
-import { SettingsService } from "src/settings/settings.service";
-import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import { escapeOAuthHtml, renderMcpOAuthPage } from "./mcp-oauth-page";
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
 
-import type { McpOAuthPageBrand } from "./mcp-oauth-page.types";
+import type { McpConsentDetails } from "./mcp-oauth-consent.schema";
 import type {
   McpClient,
   McpUser,
@@ -43,8 +40,6 @@ export class McpOAuthService {
     private readonly jwt: JwtService,
     private readonly mcpTokens: McpTokenService,
     private readonly resources: McpResourceService,
-    private readonly settings: SettingsService,
-    private readonly tenantRunner: TenantDbRunnerService,
   ) {
     const model: OAuth2Server.AuthorizationCodeModel & OAuth2Server.RefreshTokenModel = {
       getClient: (id, secret) => this.getClient(id, secret),
@@ -158,34 +153,7 @@ export class McpOAuthService {
   async authorizationPage(req: Request, res: Response): Promise<void> {
     const query = this.stringParams(req.query);
     const resource = await this.resources.fromRequest(req);
-    const brand = await this.pageBrand(resource.tenantId);
-    const user = await this.webUser(req);
     const client = query.client_id ? await this.getClient(query.client_id, "") : null;
-    if (!user) {
-      const loginUrl = new URL("/auth/login", resource.origin);
-      const retryUrl = new URL(req.originalUrl, resource.origin);
-      res.setHeader("Cache-Control", "no-store");
-      res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'none'; img-src 'self' https:; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
-      );
-      res
-        .type("html")
-        .status(401)
-        .send(
-          renderMcpOAuthPage({
-            brand,
-            title: "Sign in to Mentingo",
-            description: "Sign in, then continue connecting your assistant.",
-            actions: `<a class="button" href="${escapeOAuthHtml(
-              loginUrl.href,
-            )}">Open Mentingo sign-in</a><a class="button secondary" href="${escapeOAuthHtml(
-              retryUrl.href,
-            )}">Continue</a>`,
-          }),
-        );
-      return;
-    }
     if (
       !client ||
       !query.redirect_uri ||
@@ -198,21 +166,16 @@ export class McpOAuthService {
       !query.state
     ) {
       res.setHeader("Cache-Control", "no-store");
-      res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'none'; img-src 'self' https:; style-src 'unsafe-inline'; frame-ancestors 'none'",
-      );
-      res
-        .type("html")
-        .status(400)
-        .send(
-          renderMcpOAuthPage({
-            brand,
-            title: "Connection request invalid",
-            description: "Return to your assistant and try again.",
-            actions: "",
-          }),
-        );
+      res.redirect(303, "/oauth/connect?error=invalid");
+      return;
+    }
+
+    const user = await this.webUser(req);
+    if (!user) {
+      const loginUrl = new URL("/auth/login", resource.origin);
+      loginUrl.searchParams.set("returnTo", req.originalUrl);
+      res.setHeader("Cache-Control", "no-store");
+      res.redirect(303, loginUrl.pathname + loginUrl.search);
       return;
     }
 
@@ -226,19 +189,24 @@ export class McpOAuthService {
       { EX: CONSENT_TTL },
     );
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader(
-      "Content-Security-Policy",
-      `default-src 'none'; img-src 'self' https:; style-src 'unsafe-inline'; form-action 'self' ${new URL(query.redirect_uri).origin}; frame-ancestors 'none'`,
-    );
-    res.type("html").send(
-      renderMcpOAuthPage({
-        brand,
-        title: `Connect ${client.name} to Mentingo?`,
-        description: "This assistant can use Mentingo tools with your current permissions.",
-        detail: `Signed in as ${user.email}`,
-        actions: `<form method="post" action="/api/oauth/authorize"><input type="hidden" name="consent" value="${nonce}"><button name="decision" value="approve">Allow</button> <button class="secondary" name="decision" value="deny">Deny</button></form>`,
-      }),
-    );
+    res.redirect(303, `/oauth/connect?consent=${encodeURIComponent(nonce)}`);
+  }
+
+  async consentDetails(req: Request, nonce: string): Promise<McpConsentDetails> {
+    const resource = await this.resources.fromRequest(req);
+    const user = await this.webUser(req);
+    if (!user) throw new UnauthorizedException("Connection requires sign in");
+    const raw = await this.redis.get(`mcp:oauth:consent:${digest(nonce)}`);
+    if (!raw) throw new NotFoundException("Connection request expired or invalid");
+    const consent = JSON.parse(raw) as ConsentRequest;
+    if (consent.userId !== user.userId || consent.query.resource !== resource.url) {
+      throw new NotFoundException("Connection request expired or invalid");
+    }
+    const client = consent.query.client_id
+      ? await this.getClient(consent.query.client_id, "")
+      : false;
+    if (!client) throw new NotFoundException("Connection request expired or invalid");
+    return { clientName: client.name, accountEmail: user.email };
   }
 
   async authorize(req: Request, res: Response): Promise<void> {
@@ -382,22 +350,6 @@ export class McpOAuthService {
       }
     }
     return result;
-  }
-
-  private async pageBrand(tenantId: string): Promise<McpOAuthPageBrand> {
-    try {
-      const settings = await this.tenantRunner.runWithTenantContext(tenantId, () =>
-        this.settings.getPublicGlobalSettings(),
-      );
-      return {
-        logoUrl: settings.platformLogoS3Key,
-        backgroundUrl: settings.loginBackgroundImageS3Key,
-        primaryColor: settings.primaryColor,
-        contrastColor: settings.contrastColor,
-      };
-    } catch {
-      return {};
-    }
   }
 
   private async webUser(req: Request): Promise<(McpUser & { email: string }) | null> {

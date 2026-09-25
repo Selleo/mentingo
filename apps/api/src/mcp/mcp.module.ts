@@ -16,6 +16,7 @@ import { ScormModule } from "src/scorm/scorm.module";
 import { SettingsModule } from "src/settings/settings.module";
 
 import { McpAuthGuard } from "./mcp-auth.guard";
+import { McpConsentController } from "./mcp-consent.controller";
 import { McpHttpService } from "./mcp-http.service";
 import { McpOAuthController } from "./mcp-oauth.controller";
 import { McpOAuthService } from "./mcp-oauth.service";
@@ -49,7 +50,7 @@ import { McpController } from "./mcp.controller";
     McpOAuthService,
     McpResourceService,
   ],
-  controllers: [McpOAuthController, McpController],
+  controllers: [McpOAuthController, McpConsentController, McpController],
   exports: [
     McpHttpService,
     McpTokenService,
