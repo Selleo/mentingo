@@ -19,6 +19,8 @@ import { createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import { updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import { certificateValiditySchema } from "src/courses/types/settings";
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { createLearningPathSchema } from "src/learning-path/learning-path.schema";
+import { updateLearningPathSettingsSchema } from "src/learning-path/types/learning-path-settings.types";
 import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
 import { aiMentorConfigurationContentSchema } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 import {
@@ -842,6 +844,7 @@ export const updateArticleInputSchema = Type.Object(
     title: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
     summary: Type.Optional(Type.String({ maxLength: 20000 })),
     content: Type.Optional(Type.String({ maxLength: 200000 })),
+    isPublic: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false },
 );
@@ -866,7 +869,11 @@ export const deleteArticleInputSchema = Type.Object(
 );
 
 export const listNewsInputSchema = Type.Object(
-  { language: languageInputSchema, page: Type.Optional(Type.Integer({ minimum: 1 })) },
+  {
+    language: languageInputSchema,
+    status: Type.Optional(Type.Enum(NEWS_STATUS)),
+    page: Type.Optional(Type.Integer({ minimum: 1 })),
+  },
   { additionalProperties: false },
 );
 
@@ -888,6 +895,7 @@ export const updateNewsInputSchema = Type.Object(
     title: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
     summary: Type.Optional(Type.String({ maxLength: 20000 })),
     content: Type.Optional(Type.String({ maxLength: 200000 })),
+    isPublic: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false },
 );
@@ -925,13 +933,22 @@ export const getDevelopmentPathInputSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const createDevelopmentPathInputSchema = Type.Object(
-  {
-    idempotencyKey: idempotencyKeyInputSchema,
-    language: languageInputSchema,
-    title: Type.String({ minLength: 1, maxLength: 500 }),
-    description: Type.String({ maxLength: 20000 }),
-  },
+export const createDevelopmentPathInputSchema = Type.Composite(
+  [
+    Type.Pick(createLearningPathSchema, [
+      "language",
+      "title",
+      "description",
+      "status",
+      "includesCertificate",
+      "sequenceEnabled",
+      "settings",
+    ]),
+    Type.Object({
+      idempotencyKey: idempotencyKeyInputSchema,
+      confirmPublish: Type.Optional(Type.Boolean()),
+    }),
+  ],
   { additionalProperties: false },
 );
 
@@ -943,6 +960,7 @@ export const updateDevelopmentPathInputSchema = Type.Object(
     description: Type.Optional(Type.String({ maxLength: 20000 })),
     sequenceEnabled: Type.Optional(Type.Boolean()),
     includesCertificate: Type.Optional(Type.Boolean()),
+    settings: Type.Optional(updateLearningPathSettingsSchema),
   },
   { additionalProperties: false },
 );
