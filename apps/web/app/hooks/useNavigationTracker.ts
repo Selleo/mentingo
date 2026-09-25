@@ -16,10 +16,10 @@ export function useNavigationTracker() {
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const isAuthRoute = location.pathname.startsWith("/auth");
-  const isRootRoute = location.pathname === LOGIN_REDIRECT_URL;
+  const isLandingRoute = location.pathname === "/" || location.pathname === LOGIN_REDIRECT_URL;
 
   useEffect(() => {
-    if (currentUser || isAuthRoute || isRootRoute) return;
+    if (currentUser || isAuthRoute || isLandingRoute) return;
 
     addLastUnauthorizedEntry({
       pathname: `${location.pathname}${location.search}`,
@@ -31,11 +31,11 @@ export function useNavigationTracker() {
     addLastUnauthorizedEntry,
     currentUser,
     isAuthRoute,
-    isRootRoute,
+    isLandingRoute,
   ]);
 
   useEffect(() => {
-    if (!currentUser || isAuthRoute || isRootRoute || !lastEntry) return;
+    if (!currentUser || isAuthRoute || isLandingRoute || !lastEntry) return;
     if (lastEntry.pathname !== `${location.pathname}${location.search}`) return;
 
     clearHistory();
@@ -43,7 +43,7 @@ export function useNavigationTracker() {
     clearHistory,
     currentUser,
     isAuthRoute,
-    isRootRoute,
+    isLandingRoute,
     lastEntry,
     location.pathname,
     location.search,
