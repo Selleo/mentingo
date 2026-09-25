@@ -47,6 +47,11 @@ import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import {
+  assertAvatarUploadGrant,
+  assertLessonUploadGrant,
+} from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 
 import {
   AnswerQuestionBody,
@@ -85,7 +90,6 @@ import type {
   LessonsFilters,
   LessonShow,
 } from "./lesson.schema";
-
 @Controller("lesson")
 export class LessonController {
   constructor(
@@ -470,6 +474,7 @@ export class LessonController {
     },
   })
   async uploadFileToLesson(
+    @Req() request: McpRequest,
     @CurrentUser() currentUser: CurrentUserType,
     @UploadedFile(
       getBaseFileTypePipe(
@@ -492,6 +497,19 @@ export class LessonController {
     @Body("contextId") contextId?: string,
     @Body("visibility") visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
   ) {
+    if (request.mcpUploadGrant) {
+      assertLessonUploadGrant(
+        request.mcpUploadGrant,
+        file,
+        lessonId,
+        language,
+        title,
+        description,
+        contextId,
+        visibility,
+      );
+    }
+
     const fileData = await this.adminLessonsService.uploadFileToLesson(
       currentUser,
       file,
@@ -621,7 +639,10 @@ export class LessonController {
       }),
     )
     uploadedFile: Express.Multer.File | null,
+    @Req() request: McpRequest,
   ) {
+    if (request.mcpUploadGrant)
+      assertAvatarUploadGrant(request.mcpUploadGrant, lessonId, uploadedFile);
     await this.adminLessonsService.uploadAvatarToAiMentorLesson(
       currentUser,
       lessonId,

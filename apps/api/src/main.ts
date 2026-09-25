@@ -21,6 +21,7 @@ import {
 } from "./common/utils/swagger-docs-access";
 import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
+import { McpOAuthService } from "./mcp/mcp-oauth.service";
 import { REDIS_PUBLISHER_CLIENT, REDIS_SUBSCRIBER_CLIENT, type RedisClient } from "./redis";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
@@ -28,6 +29,8 @@ import { Environment, environmentValidation } from "./utils/environment-validati
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
 import { RedisIoAdapter } from "./websocket/websocket.adapter";
+
+import type { Request, Response } from "express";
 
 patchNestJsSwagger();
 applyFormats();
@@ -76,6 +79,25 @@ async function bootstrap() {
   );
   app.setGlobalPrefix("api");
 
+  const mcpOAuth = app.get(McpOAuthService);
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get(
+    ["/.well-known/oauth-protected-resource/api/mcp", "/.well-known/oauth-protected-resource"],
+    async (req: Request, res: Response) => {
+      try {
+        res.json(await mcpOAuth.metadata(req));
+      } catch {
+        res.status(404).json({ error: "unknown_tenant" });
+      }
+    },
+  );
+  expressApp.get("/.well-known/oauth-authorization-server", async (req: Request, res: Response) => {
+    try {
+      res.json(await mcpOAuth.serverMetadata(req));
+    } catch {
+      res.status(404).json({ error: "unknown_tenant" });
+    }
+  });
   const jwtService = app.get(JwtService);
   const jwtSecret = app.get(ConfigService).get<string>("jwt.secret");
 
