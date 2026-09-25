@@ -17,7 +17,12 @@ import {
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { DEFAULT_TUS_CHUNK_SIZE, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import {
+  DEFAULT_TUS_CHUNK_SIZE,
+  PERMISSIONS,
+  SCORM_IMPORT_ACTION,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -28,6 +33,8 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { assertScormTusGrant, assertScormUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -71,6 +78,7 @@ import type {
   ScormRuntimeCommitResponse,
   ScormRuntimeFinishResponse,
 } from "./schemas/scormRuntime.schema";
+
 @Controller("scorm")
 export class ScormController {
   constructor(
@@ -129,7 +137,7 @@ export class ScormController {
     PERMISSIONS.COURSE_UPDATE_OWN,
   )
   async createTusUpload(
-    @Req() req: Request,
+    @Req() req: McpRequest,
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
@@ -143,6 +151,7 @@ export class ScormController {
     if (!packageId) {
       throw new BadRequestException("adminScorm.errors.uploadIdMissing");
     }
+    if (req.mcpUploadGrant) assertScormTusGrant(req.mcpUploadGrant, packageId);
 
     const session = await this.scormTusUploadService.getSession(packageId);
     if (!session || session.userId !== currentUserId) {
@@ -163,11 +172,12 @@ export class ScormController {
   )
   async getTusUpload(
     @Param("packageId") packageId: UUIDType,
-    @Req() req: Request,
+    @Req() req: McpRequest,
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
     this.scormService.ensureTusVersion(req);
+    if (req.mcpUploadGrant) assertScormTusGrant(req.mcpUploadGrant, packageId);
 
     const session = await this.scormTusUploadService.getSession(packageId);
     if (!session || session.userId !== currentUserId) {
@@ -190,11 +200,12 @@ export class ScormController {
   )
   async patchTusUpload(
     @Param("packageId") packageId: UUIDType,
-    @Req() req: Request,
+    @Req() req: McpRequest,
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
     this.scormService.ensureTusVersion(req);
+    if (req.mcpUploadGrant) assertScormTusGrant(req.mcpUploadGrant, packageId);
 
     const uploadOffset = Number(req.headers["upload-offset"]);
     const chunk = req.body;
@@ -230,7 +241,9 @@ export class ScormController {
   async completeScormImport(
     @Param("packageId") packageId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<CompleteScormImportResponse>> {
+    if (request.mcpUploadGrant) assertScormTusGrant(request.mcpUploadGrant, packageId);
     const session = await this.scormTusUploadService.completeUpload(packageId, currentUser.userId);
 
     const result = await this.scormService.completeTusImport({ session, currentUser });
@@ -276,10 +289,19 @@ export class ScormController {
     createScormCourseBody: CreateScormCourseBody,
     @UploadedFiles(new ValidateScormCourseFilesPipe()) files: CreateScormCourseFiles,
     @CurrentUser() currentUser: CurrentUserType,
-    @Req() request: Request,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
     const thumbnail = files?.[SCORM_THUMBNAIL_FIELD]?.[0];
+    if (request.mcpUploadGrant)
+      assertScormUploadGrant(
+        request.mcpUploadGrant,
+        SCORM_IMPORT_ACTION.CREATE_COURSE,
+        scormPackage!,
+        createScormCourseBody,
+        undefined,
+        thumbnail,
+      );
 
     const thumbnailS3Key = await this.scormService.resolveThumbnailS3Key(
       createScormCourseBody.thumbnailS3Key,
@@ -287,7 +309,8 @@ export class ScormController {
       currentUser,
     );
 
-    const isPlaywrightTest = Boolean(request.headers["x-playwright-test"]);
+    const isPlaywrightTest =
+      !request.mcpUploadGrant && Boolean(request.headers["x-playwright-test"]);
     const { id } = await this.scormService.createCourseImport({
       scormPackage: scormPackage!,
       metadata: {
@@ -328,8 +351,16 @@ export class ScormController {
     createScormLessonBody: CreateScormLessonBody,
     @UploadedFiles(new ValidateScormCourseFilesPipe()) files: CreateScormCourseFiles,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
+    if (request.mcpUploadGrant)
+      assertScormUploadGrant(
+        request.mcpUploadGrant,
+        SCORM_IMPORT_ACTION.CREATE_LESSON,
+        scormPackage!,
+        createScormLessonBody,
+      );
     const { id } = await this.scormService.createLessonImport({
       scormPackage: scormPackage!,
       metadata: createScormLessonBody,
@@ -372,8 +403,18 @@ export class ScormController {
     attachScormLessonPackageBody: AttachScormLessonPackageBody,
     @UploadedFiles(new ValidateScormCourseFilesPipe()) files: CreateScormCourseFiles,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
+    if (request.mcpUploadGrant)
+      assertScormUploadGrant(
+        request.mcpUploadGrant,
+        SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE,
+        scormPackage!,
+        attachScormLessonPackageBody,
+        lessonId,
+        files?.[SCORM_THUMBNAIL_FIELD]?.[0],
+      );
     const { id } = await this.scormService.attachLessonPackage({
       lessonId,
       scormPackage: scormPackage!,

@@ -62,6 +62,7 @@ import { LessonVideoProgressModule } from "./lesson-video-progress/lesson-video-
 import { LiveTrainingModule } from "./live-training/live-training.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
+import { McpModule } from "./mcp/mcp.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
@@ -187,6 +188,7 @@ import type { RedisClient } from "src/redis";
     OutboxModule,
     AudioModule,
     LumaModule,
+    McpModule,
     LiveTrainingModule,
     CalendarModule,
     TodoTasksModule,

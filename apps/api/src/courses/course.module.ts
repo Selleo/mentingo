@@ -103,6 +103,12 @@ import { CourseTranslationService } from "./services/course-translation.service"
     MasterCourseSyncHandler,
     ManagingTenantAdminGuard,
   ],
-  exports: [CourseService, CourseFeaturePolicyService, CourseSlugService, MasterCourseService],
+  exports: [
+    CourseService,
+    CourseFeaturePolicyService,
+    CourseSlugService,
+    CourseTranslationService,
+    MasterCourseService,
+  ],
 })
 export class CourseModule {}

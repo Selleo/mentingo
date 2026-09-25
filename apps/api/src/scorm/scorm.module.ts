@@ -31,6 +31,6 @@ import { ScormService } from "./scorm.service";
     ScormImportWorker,
     ScormRepository,
   ],
-  exports: [ScormService, ScormRepository],
+  exports: [ScormService, ScormRepository, ScormTusUploadService],
 })
 export class ScormModule {}

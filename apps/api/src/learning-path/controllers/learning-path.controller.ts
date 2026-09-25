@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -28,6 +29,8 @@ import {
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { assertLearningPathUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
@@ -166,7 +169,10 @@ export class LearningPathController {
     @UploadedFiles()
     files: LearningPathUploadFiles,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<LearningPathSchema>> {
+    if (request.mcpUploadGrant)
+      assertLearningPathUploadGrant(request.mcpUploadGrant, learningPathId, files ?? {}, body);
     const learningPath = await this.learningPathService.updateLearningPath(
       learningPathId,
       body,

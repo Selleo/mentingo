@@ -127,6 +127,8 @@ import {
   learningTimeStatisticsSortOptions,
   LearningTimeStatisticsSortOptions,
 } from "src/learning-time";
+import { assertCourseUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -668,7 +670,16 @@ export class CourseController {
     )
     image: Express.Multer.File | undefined,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ message: string }>> {
+    if (request.mcpUploadGrant)
+      assertCourseUploadGrant(
+        request.mcpUploadGrant,
+        "thumbnail",
+        id,
+        image,
+        updateCourseMediaBody,
+      );
     await this.courseService.updateCourseMedia(id, updateCourseMediaBody, currentUser, image);
 
     return new BaseResponse({ message: "Course updated successfully" });
@@ -759,7 +770,16 @@ export class CourseController {
     )
     certificateSignature: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<BaseResponse<{ message: string }>> {
+    if (request.mcpUploadGrant)
+      assertCourseUploadGrant(
+        request.mcpUploadGrant,
+        "certificateSignature",
+        courseId,
+        certificateSignature,
+        body,
+      );
     await this.courseService.updateCourseSettings(
       courseId,
       body,
