@@ -25,13 +25,18 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   const addLastUnauthorizedEntry = useNavigationHistoryStore(
     (state) => state.addLastUnauthorizedEntry,
   );
+  const requestedReturnTo = new URLSearchParams(location.search).get("returnTo");
+  const oauthReturnTo =
+    location.pathname === "/auth/login" && requestedReturnTo?.startsWith("/api/oauth/authorize?")
+      ? requestedReturnTo
+      : null;
 
   const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
   const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
   const requiresPasswordChange = Boolean(currentUser?.requiresPasswordChange);
   const requestedCourse = mode === "auth" ? courseReturnPath(location.search) : null;
   const redirectPath = resolvePostAuthRedirectPath({
-    pathname: requestedCourse ?? lastEntry?.pathname,
+    pathname: oauthReturnTo ?? requestedCourse ?? lastEntry?.pathname,
   });
 
   useEffect(() => {
@@ -40,10 +45,14 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   }, [addLastUnauthorizedEntry, lastEntry?.pathname, requestedCourse]);
 
   useEffect(() => {
-    if (mode !== "auth" || !currentUser || shouldVerifyMFA) return;
+    if (mode !== "auth" || !currentUser || shouldVerifyMFA || requiresPasswordChange) return;
 
+    if (redirectPath.startsWith("/api/oauth/authorize?")) {
+      window.location.assign(redirectPath);
+      return;
+    }
     navigate(redirectPath, { replace: true });
-  }, [currentUser, mode, navigate, redirectPath, shouldVerifyMFA]);
+  }, [currentUser, mode, navigate, redirectPath, requiresPasswordChange, shouldVerifyMFA]);
 
   if (isLoading) {
     return null;
@@ -56,7 +65,15 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
       }
 
       if (shouldVerifyMFA && location.pathname !== "/auth/mfa") {
-        return <Navigate to="/auth/mfa" />;
+        return (
+          <Navigate
+            to={
+              oauthReturnTo
+                ? `/auth/mfa?returnTo=${encodeURIComponent(oauthReturnTo)}`
+                : "/auth/mfa"
+            }
+          />
+        );
       }
 
       if (requiresPasswordChange && location.pathname !== REQUIRED_PASSWORD_CHANGE_URL) {
