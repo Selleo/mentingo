@@ -1,6 +1,10 @@
 app.lms.localhost {
-    reverse_proxy /api/* {
-        to http://localhost:3000
+    handle /.well-known/oauth-* {
+        reverse_proxy localhost:3000
+    }
+
+    handle /api/* {
+        reverse_proxy localhost:3000
     }
 
     handle {
@@ -9,8 +13,12 @@ app.lms.localhost {
 }
 
 *.lms.localhost {
-    reverse_proxy /api/* {
-        to http://localhost:3000
+    handle /.well-known/oauth-* {
+        reverse_proxy localhost:3000
+    }
+
+    handle /api/* {
+        reverse_proxy localhost:3000
     }
 
     handle {

@@ -113,6 +113,8 @@ export class ArticlesRepository {
       .insert(articles)
       .values({
         title: titleJsonb,
+        summary: {},
+        content: {},
         baseLanguage: language,
         availableLocales: [language],
         authorId,

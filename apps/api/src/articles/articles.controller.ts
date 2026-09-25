@@ -23,8 +23,10 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  ENTITY_TYPES,
   FEATURES,
   PERMISSIONS,
+  RESOURCE_VISIBILITY,
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -47,6 +49,11 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import {
+  assertEditorialCoverUploadGrant,
+  assertEditorialUploadGrant,
+} from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { getArticleSectionResponseSchema as getArticleSectionDetailsResponseSchema } from "./schemas/articleSection.schema";
@@ -346,7 +353,16 @@ export class ArticlesController {
     )
     covers: Express.Multer.File[] = [],
     @CurrentUser() currentUser?: CurrentUserType,
+    @Req() request?: McpRequest,
   ) {
+    if (request?.mcpUploadGrant)
+      assertEditorialCoverUploadGrant(
+        request.mcpUploadGrant,
+        ENTITY_TYPES.ARTICLES,
+        id,
+        covers,
+        updateArticleBody,
+      );
     const updatedArticle = await this.articlesService.updateArticle(
       id,
       updateArticleBody,
@@ -436,8 +452,21 @@ export class ArticlesController {
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,
-    @CurrentUser() currentUser?: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | undefined,
+    @Req() request: McpRequest,
   ) {
+    if (request.mcpUploadGrant) {
+      assertEditorialUploadGrant(
+        request.mcpUploadGrant,
+        ENTITY_TYPES.ARTICLES,
+        id,
+        file,
+        uploadFileBody.language,
+        uploadFileBody.title,
+        uploadFileBody.description,
+        uploadFileBody.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
+      );
+    }
     const fileData = await this.articlesService.uploadFileToArticle(
       id,
       file,

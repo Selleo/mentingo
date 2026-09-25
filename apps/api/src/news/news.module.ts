@@ -10,7 +10,7 @@ import { NewsController } from "./news.controller";
 import { NewsService } from "./news.service";
 
 @Module({
-  exports: [NewsModule],
+  exports: [NewsService],
   imports: [
     LocalizationModule,
     FileModule,
