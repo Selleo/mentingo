@@ -2519,21 +2519,18 @@ export class McpHttpService {
     server.registerTool(
       "create_article",
       {
-        description: "Create an article draft in an existing section.",
+        description:
+          "Create a published article in an existing section, matching the Mentingo article API. It starts with the default title and empty content; use update_article immediately to set its title, summary, and content.",
         inputSchema: asMcpInputSchema(McpToolSchemas.createArticleInputSchema),
       },
-      async ({ language, sectionId, title, summary, content }) =>
+      async ({ language, sectionId }) =>
         this.run(
           actor,
           [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
           async (user) => {
             await this.assertFeatureEnabled(FEATURES.ARTICLES);
-            const article = await this.articlesService.createArticle(
-              { language, sectionId },
-              user,
-              { title, summary, content },
-            );
-            return { id: article.id, sectionId, language, status: ARTICLE_STATUS.DRAFT };
+            const article = await this.articlesService.createArticle({ language, sectionId }, user);
+            return { id: article.id, sectionId, language, status: ARTICLE_STATUS.PUBLISHED };
           },
         ),
     );

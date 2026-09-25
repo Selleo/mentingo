@@ -831,9 +831,6 @@ export const createArticleInputSchema = Type.Object(
     idempotencyKey: idempotencyKeyInputSchema,
     language: languageInputSchema,
     sectionId: uuidInputSchema,
-    title: Type.String({ minLength: 1, maxLength: 500 }),
-    summary: Type.String({ maxLength: 20000 }),
-    content: Type.String({ maxLength: 200000 }),
   },
   { additionalProperties: false },
 );
