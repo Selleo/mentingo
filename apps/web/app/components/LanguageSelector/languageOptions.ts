@@ -15,4 +15,5 @@ export const languageOptions: LanguageOption[] = [
   { key: "lt", iconName: "LT", translationKey: "changeUserLanguageView.options.lithuanian" },
   { key: "es", iconName: "ES", translationKey: "changeUserLanguageView.options.spanish" },
   { key: "fr", iconName: "FR", translationKey: "changeUserLanguageView.options.french" },
+  { key: "ru", iconName: "RU", translationKey: "changeUserLanguageView.options.russian" },
 ];

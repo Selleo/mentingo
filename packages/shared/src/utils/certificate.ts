@@ -139,6 +139,19 @@ const certificateTranslations = {
     expiryDate: "Expire le",
     signature: "Signature",
   },
+  ru: {
+    certificate: "СЕРТИФИКАТ",
+    courseCompletion: "О ПРОХОЖДЕНИИ КУРСА",
+    certifyThat: "НАСТОЯЩИМ ПОДТВЕРЖДАЕТСЯ, ЧТО",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "успешно завершил(а) курс",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "успешно завершил(а) траекторию обучения",
+    },
+    confirmation: "что подтверждает участие во всей программе обучения.",
+    date: "Дата",
+    expiryDate: "Действителен до",
+    signature: "Подпись",
+  },
 };
 
 export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): string {

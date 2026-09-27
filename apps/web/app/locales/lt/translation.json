@@ -1250,7 +1250,8 @@
       "czech": "Čekų",
       "lithuanian": "Lietuvių",
       "spanish": "Ispanų",
-      "french": "Prancūzų"
+      "french": "Prancūzų",
+      "russian": "Rusų"
     }
   },
   "resetOnboarding": {
@@ -4517,6 +4518,10 @@
       "gbp": {
         "label": "Didžiosios Britanijos svaras",
         "sign": "£"
+      },
+      "rub": {
+        "label": "Rusijos rublis",
+        "sign": "₽"
       }
     }
   },

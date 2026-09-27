@@ -7,7 +7,6 @@ import {
 } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { parseISO } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { debounce } from "lodash-es";
 import { Search } from "lucide-react";
 import { useCallback, useMemo, useState, useTransition } from "react";
@@ -30,6 +29,7 @@ import { ActivityLogAccordionRow } from "~/modules/ActivityLogs/components/Activ
 import { ActivityLogActionMultiSelect } from "~/modules/ActivityLogs/components/ActivityLogActionMultiSelect";
 import { ActivityLogDateFilter } from "~/modules/ActivityLogs/components/ActivityLogDateFilter";
 import { ActivityLogSingleSelect } from "~/modules/ActivityLogs/components/ActivityLogSingleSelect";
+import { getDateLocale } from "~/utils/getDateLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -62,7 +62,7 @@ export default function ActivityLogsPage() {
   });
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+  const calendarLocale = getDateLocale(i18n.language);
 
   const updateSearchParams = useCallback(
     (updates: Partial<ActivityLogsSearchState>, resetPage = true) => {

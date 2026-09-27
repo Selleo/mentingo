@@ -1,13 +1,12 @@
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { format, isValid, parseISO } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 import { COURSE_ENROLLED_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { Icon } from "../../../../components/Icon";
@@ -53,9 +52,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
   const { currentYear, calendarLocale } = useMemo(() => {
     const year = new Date().getFullYear();
 
-    const locale = match(language)
-      .with("pl", () => pl)
-      .otherwise(() => enUS);
+    const locale = getDateLocale(language);
 
     return { currentYear: year, calendarLocale: locale };
   }, [language]);

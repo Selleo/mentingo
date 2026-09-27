@@ -59,6 +59,14 @@ export const getWelcomeEmailTranslations = (language: SupportedLanguages) => {
       ],
       buttonText: "VOIR LES COURS",
     },
+    ru: {
+      heading: "Добро пожаловать",
+      paragraphs: [
+        "Рады видеть вас 🙂",
+        "Ваша учётная запись успешно создана. Ознакомьтесь с доступными курсами.",
+      ],
+      buttonText: "ПЕРЕЙТИ К КУРСАМ",
+    },
   };
 
   return emailContent[language];

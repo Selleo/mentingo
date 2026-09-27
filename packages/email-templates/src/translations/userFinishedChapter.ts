@@ -63,6 +63,14 @@ export const getUserFinishedChapterEmailTranslations = (
       ],
       buttonText: "CHAPITRE SUIVANT",
     },
+    ru: {
+      heading: "Глава завершена",
+      paragraphs: [
+        "Прогресс обновлён 🧩",
+        `Вы завершили главу ${chapterName} курса ${courseName}. Следующие материалы уже доступны.`,
+      ],
+      buttonText: "СЛЕДУЮЩАЯ ГЛАВА",
+    },
   };
 
   return emailContent[language];

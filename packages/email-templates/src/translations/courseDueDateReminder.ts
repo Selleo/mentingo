@@ -1,6 +1,21 @@
 import { SupportedLanguages } from "@repo/shared";
 import { EmailContent } from "types";
 
+const getRuDaysWord = (days: number) => {
+  const mod10 = days % 10;
+  const mod100 = days % 100;
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return "день";
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return "дня";
+  }
+
+  return "дней";
+};
+
 const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) => {
   const normalizedDaysBeforeDueDate = Number(daysBeforeDueDate);
 
@@ -13,6 +28,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       cs: "brzy",
       es: "pronto",
       fr: "bientôt",
+      ru: "в ближайшее время",
     };
 
     return labels[language];
@@ -27,6 +43,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       cs: "zítra",
       es: "mañana",
       fr: "demain",
+      ru: "завтра",
     };
 
     return labels[language];
@@ -41,6 +58,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       cs: "dnes",
       es: "hoy",
       fr: "aujourd'hui",
+      ru: "сегодня",
     };
 
     return labels[language];
@@ -54,6 +72,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
     cs: `za ${daysBeforeDueDate} dní`,
     es: `en ${normalizedDaysBeforeDueDate} días`,
     fr: `dans ${normalizedDaysBeforeDueDate} jours`,
+    ru: `через ${normalizedDaysBeforeDueDate} ${getRuDaysWord(normalizedDaysBeforeDueDate)}`,
   };
 
   return labels[language];
@@ -102,6 +121,11 @@ export const getCourseDueDateReminderEmailTranslations = (
       heading: "L'échéance du cours approche",
       paragraphs: [`La date limite pour terminer le cours « ${courseName} » est ${daysLabel}.`],
       buttonText: "OUVRIR LE COURS",
+    },
+    ru: {
+      heading: "Приближается срок прохождения курса",
+      paragraphs: [`Срок прохождения курса «${courseName}» истекает ${daysLabel}.`],
+      buttonText: "ОТКРЫТЬ КУРС",
     },
   };
 

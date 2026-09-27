@@ -10,4 +10,5 @@ export const COURSE_DUPLICATION_COPY_SUFFIX: Record<SupportedLanguages, string> 
   [SUPPORTED_LANGUAGES.CS]: "(Kopie)",
   [SUPPORTED_LANGUAGES.ES]: "(Copia)",
   [SUPPORTED_LANGUAGES.FR]: "(Copie)",
+  [SUPPORTED_LANGUAGES.RU]: "(копия)",
 };

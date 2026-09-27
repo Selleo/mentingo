@@ -9,6 +9,7 @@ import esTranslations from "app/locales/es/translation.json";
 import frTranslations from "app/locales/fr/translation.json";
 import ltTranslations from "app/locales/lt/translation.json";
 import plTranslations from "app/locales/pl/translation.json";
+import ruTranslations from "app/locales/ru/translation.json";
 
 // eslint-disable-next-line import/no-named-as-default-member
 i18n.use(initReactI18next).init({
@@ -40,6 +41,9 @@ i18n.use(initReactI18next).init({
     },
     fr: {
       translation: frTranslations,
+    },
+    ru: {
+      translation: ruTranslations,
     },
   },
 });

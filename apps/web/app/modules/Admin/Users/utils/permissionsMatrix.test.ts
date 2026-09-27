@@ -8,13 +8,14 @@ import es from "~/locales/es/translation.json";
 import fr from "~/locales/fr/translation.json";
 import lt from "~/locales/lt/translation.json";
 import pl from "~/locales/pl/translation.json";
+import ru from "~/locales/ru/translation.json";
 
 import { buildPermissionMatrix, buildPermissionsUnionForRoleSlugs } from "./permissionsMatrix";
 
 import type { PermissionKey } from "@repo/shared";
 
 const permissionsOrder = Object.values(PERMISSIONS) as PermissionKey[];
-const translationsByLocale = { cs, de, en, es, fr, lt, pl };
+const translationsByLocale = { cs, de, en, es, fr, lt, pl, ru };
 
 describe("permissionsMatrix utils", () => {
   it("builds matrix rows for role grants", () => {

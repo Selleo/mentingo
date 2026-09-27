@@ -5,3 +5,4 @@ export { default as CS } from "./cs-flag.svg?react";
 export { default as LT } from "./lt-flag.svg?react";
 export { default as ES } from "./es-flag.svg?react";
 export { default as FR } from "./fr-flag.svg?react";
+export { default as RU } from "./ru-flag.svg?react";

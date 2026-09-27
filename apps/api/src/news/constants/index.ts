@@ -6,4 +6,5 @@ export const baseNewsTitle = {
   cs: "Nepojmenovaný článek",
   es: "Artículo sin título",
   fr: "Article sans titre",
+  ru: "Новость без названия",
 };

@@ -64,4 +64,4 @@ export const DEFAULT_ADMIN_SETTINGS = {
   configWarningDismissed: false,
 };
 
-export const ALLOWED_CURRENCIES = ["pln", "eur", "gbp", "usd"] as const;
+export const ALLOWED_CURRENCIES = ["pln", "eur", "gbp", "usd", "rub"] as const;

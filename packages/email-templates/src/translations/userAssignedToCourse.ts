@@ -27,6 +27,9 @@ export const getUserAssignedToCourseEmailTranslations = (
   const frMandatoryCourseParagraph = formatedCourseDueDate
     ? `Ce cours est obligatoire et doit être terminé avant le ${formatedCourseDueDate}.`
     : undefined;
+  const ruMandatoryCourseParagraph = formatedCourseDueDate
+    ? `Этот курс обязателен для прохождения и должен быть завершён до ${formatedCourseDueDate}.`
+    : undefined;
 
   const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
@@ -91,6 +94,15 @@ export const getUserAssignedToCourseEmailTranslations = (
         frMandatoryCourseParagraph,
       ].filter(Boolean) as string[],
       buttonText: "MES COURS",
+    },
+    ru: {
+      heading: "Новый курс",
+      paragraphs: [
+        "Вы записаны на курс 🎓",
+        `Теперь у вас есть доступ к курсу ${courseName}. Он уже доступен в вашей учётной записи.`,
+        ruMandatoryCourseParagraph,
+      ].filter(Boolean) as string[],
+      buttonText: "МОИ КУРСЫ",
     },
   };
 

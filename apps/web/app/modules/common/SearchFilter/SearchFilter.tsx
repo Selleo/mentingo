@@ -1,5 +1,4 @@
 import { format, isAfter, isBefore, parseISO } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { debounce } from "lodash-es";
 import { CalendarDays, Search } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
@@ -18,6 +17,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 import type React from "react";
 import type { Option } from "~/components/ui/multiselect";
@@ -104,7 +104,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t, i18n } = useTranslation();
-  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+  const calendarLocale = getDateLocale(i18n.language);
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;

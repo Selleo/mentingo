@@ -17,6 +17,7 @@ describe("CourseChatMentionEmailHandler", () => {
       cs: "Bezpečnost",
       es: "Seguridad",
       fr: "Sécurité",
+      ru: "Безопасность",
     };
     const createAnnouncement = jest.fn().mockResolvedValue(undefined);
     const courseChatRepository = {
@@ -75,6 +76,7 @@ describe("CourseChatMentionEmailHandler", () => {
           cs: 'V kurzu "Bezpečnost"',
           es: 'En el curso "Seguridad"',
           fr: "Dans le cours « Sécurité »",
+          ru: "В курсе «Безопасность»",
         },
         sourceId: courseId,
         usersToNotify: [mentionedUserId],

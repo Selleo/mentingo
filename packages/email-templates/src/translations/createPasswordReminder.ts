@@ -59,6 +59,14 @@ export const getCreatePasswordReminderEmailTranslations = (language: SupportedLa
       ],
       buttonText: "CRÉER UN MOT DE PASSE",
     },
+    ru: {
+      heading: "Напоминание",
+      paragraphs: [
+        "Напоминаем, что настройка вашей учётной записи ещё не завершена. 🔒",
+        "Чтобы завершить настройку, создайте пароль, нажав кнопку ниже. Если вы уже создали пароль, просто проигнорируйте это напоминание.",
+      ],
+      buttonText: "СОЗДАТЬ ПАРОЛЬ",
+    },
   };
 
   return emailContent[language];

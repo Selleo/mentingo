@@ -909,6 +909,10 @@
                 {
                   "const": "fr",
                   "type": "string"
+                },
+                {
+                  "const": "ru",
+                  "type": "string"
                 }
               ]
             }
@@ -1429,6 +1433,10 @@
               },
               {
                 "const": "fr",
+                "type": "string"
+              },
+              {
+                "const": "ru",
                 "type": "string"
               }
             ]
@@ -2462,6 +2470,10 @@
               {
                 "const": "fr",
                 "type": "string"
+              },
+              {
+                "const": "ru",
+                "type": "string"
               }
             ]
           }
@@ -2681,6 +2693,10 @@
                       {
                         "const": "fr",
                         "type": "string"
+                      },
+                      {
+                        "const": "ru",
+                        "type": "string"
                       }
                     ]
                   }
@@ -2713,6 +2729,10 @@
                     },
                     {
                       "const": "fr",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ru",
                       "type": "string"
                     }
                   ]

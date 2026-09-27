@@ -13,6 +13,7 @@ export const getUserShortInactivityEmailTranslations = (
     cs: courseName ? `v kurzu ${courseName}` : "na platformě",
     es: courseName ? `en ${courseName}` : "en la plataforma",
     fr: courseName ? `dans le cours ${courseName}` : "sur la plateforme",
+    ru: courseName ? `в курсе ${courseName}` : "на платформе",
   };
 
   const emailContent: Record<SupportedLanguages, EmailContent> = {
@@ -71,6 +72,14 @@ export const getUserShortInactivityEmailTranslations = (
         `Cela fait 14 jours depuis votre dernière activité ${activityContext.fr}. Continuez pour maintenir votre progression.`,
       ],
       buttonText: courseName ? "CONTINUER LE COURS" : "OUVRIR LA PLATEFORME",
+    },
+    ru: {
+      heading: "Напоминание",
+      paragraphs: [
+        "Вернитесь к обучению 🔔",
+        `Прошло 14 дней с момента вашей последней активности ${activityContext.ru}. Продолжите, чтобы не отставать от графика.`,
+      ],
+      buttonText: courseName ? "ПРОДОЛЖИТЬ КУРС" : "ОТКРЫТЬ ПЛАТФОРМУ",
     },
   };
 

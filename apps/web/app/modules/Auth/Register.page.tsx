@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@remix-run/react";
 import { format, startOfDay, subYears } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { useEffect, useMemo } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -25,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { REGISTER_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
@@ -159,7 +159,7 @@ export default function RegisterPage() {
     return today;
   }, [globalSettings?.ageLimit]);
 
-  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+  const calendarLocale = getDateLocale(i18n.language);
 
   return (
     <>

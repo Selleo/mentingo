@@ -1,7 +1,7 @@
 /**
  * Supported currency codes.
  */
-export type CurrencyCode = "USD" | "EUR" | "GBP" | "JPY" | "KRW" | "BHD" | "PLN" | string;
+export type CurrencyCode = "USD" | "EUR" | "GBP" | "JPY" | "KRW" | "BHD" | "PLN" | "RUB" | string;
 
 /**
  * Formats a price in minor units to a localized string representation.
@@ -45,6 +45,7 @@ const conversionRates: Record<CurrencyCode, number> = {
   KRW: 1,
   BHD: 1000,
   PLN: 100,
+  RUB: 100,
 };
 
 function convertToMajorUnits(amount: number, currency: CurrencyCode): number {
@@ -69,7 +70,16 @@ export function convertToMinorUnits(amount: number, currency?: CurrencyCode): nu
  * @returns The minimum number of fraction digits.
  */
 function getMinimumFractionDigits(currency: CurrencyCode): number {
-  const noFractionCurrencies: CurrencyCode[] = ["JPY", "KRW", "VND", "PLN", "EUR", "USD", "GBP"];
+  const noFractionCurrencies: CurrencyCode[] = [
+    "JPY",
+    "KRW",
+    "VND",
+    "PLN",
+    "EUR",
+    "USD",
+    "GBP",
+    "RUB",
+  ];
   return noFractionCurrencies.includes(currency) ? 0 : 2;
 }
 
@@ -94,6 +104,7 @@ export function getCurrencySymbol(language: string): CurrencyCode {
     en: "USD",
     es: "EUR",
     fr: "EUR",
+    ru: "RUB",
   };
 
   return languageCurrencyMap[loweCaseLanguage];

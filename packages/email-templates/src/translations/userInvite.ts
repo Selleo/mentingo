@@ -62,6 +62,14 @@ export const getUserInviteEmailTranslations = (
       ],
       buttonText: "REJOINDRE MAINTENANT",
     },
+    ru: {
+      heading: "Вас пригласили",
+      paragraphs: [
+        "Здравствуйте 👋",
+        `${invitedByUserName} приглашает вас на платформу онлайн-обучения. Нажмите кнопку ниже, чтобы начать развивать свои навыки.`,
+      ],
+      buttonText: "ПРИСОЕДИНИТЬСЯ",
+    },
   };
 
   return emailContent[language];

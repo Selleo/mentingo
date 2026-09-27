@@ -52,6 +52,13 @@ export const getMagicLinkEmailTranslations = (language: SupportedLanguages) => {
       ],
       buttonText: "OUVRIR LE LIEN DE CONNEXION",
     },
+    ru: {
+      heading: "Ссылка для входа",
+      paragraphs: [
+        "Вы получили ссылку для входа в свою учётную запись. Нажмите кнопку ниже, чтобы войти.",
+      ],
+      buttonText: "ВОЙТИ",
+    },
   };
 
   return emailContent[language];

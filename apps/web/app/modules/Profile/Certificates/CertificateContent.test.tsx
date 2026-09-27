@@ -14,6 +14,7 @@ describe("CertificateContent", () => {
       [SUPPORTED_LANGUAGES.CS]: "TÍMTO SE POTVRZUJE, ŽE",
       [SUPPORTED_LANGUAGES.ES]: "SE CERTIFICA QUE",
       [SUPPORTED_LANGUAGES.FR]: "CECI CERTIFIE QUE",
+      [SUPPORTED_LANGUAGES.RU]: "НАСТОЯЩИМ ПОДТВЕРЖДАЕТСЯ, ЧТО",
     };
 
     for (const [language, label] of Object.entries(expectedLabels)) {

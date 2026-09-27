@@ -6,6 +6,7 @@ export const baseArticleTitle = {
   cs: "Nezařazený článek",
   es: "Artículo sin título",
   fr: "Article sans titre",
+  ru: "Статья без названия",
 };
 
 export const baseArticleSectionTitle = {
@@ -16,4 +17,5 @@ export const baseArticleSectionTitle = {
   cs: "Nezařazená sekce",
   es: "Sección sin título",
   fr: "Section sans titre",
+  ru: "Раздел без названия",
 };

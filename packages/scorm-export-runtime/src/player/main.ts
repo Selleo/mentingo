@@ -198,6 +198,21 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     expectedAnswer: "Tiketinas atsakymas",
     retakeQuiz: "Perimti",
   },
+  ru: {
+    passed: "Пройдено",
+    notPassed: "Не пройдено",
+    score: "Результат",
+    correct: "Правильно",
+    passingThreshold:
+      "Проходной балл: {{threshold}}% ({{correct}} из {{questionsNumber}} вопросов)",
+    submitQuiz: "Отправить",
+    true: "Верно",
+    false: "Неверно",
+    yourAnswer: "Ваш ответ",
+    correctAnswer: "Правильный ответ",
+    expectedAnswer: "Ожидаемый ответ",
+    retakeQuiz: "Пройти заново",
+  },
 };
 const QUESTION_TYPE = {
   SINGLE_CHOICE: "single_choice",

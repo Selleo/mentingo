@@ -1,5 +1,4 @@
 import { format, parseISO } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -8,6 +7,7 @@ import { Calendar } from "~/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 import { CalendarFormFieldLabel } from "./CalendarFormFieldLabel";
 import { CalendarTimeInput } from "./CalendarTimeInput";
@@ -53,7 +53,7 @@ export function CalendarDateTimeField({
 }: CalendarDateTimeFieldProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const calendarLocale = language === "pl" ? pl : enUS;
+  const calendarLocale = getDateLocale(language);
   const selectedDate = parseDateInputValue(date);
 
   return (

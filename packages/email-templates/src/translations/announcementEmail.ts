@@ -43,6 +43,11 @@ export const getAnnouncementEmailTranslations = (
       paragraphs: [content],
       buttonText: "Ouvrir les notifications",
     },
+    ru: {
+      heading: title,
+      paragraphs: [content],
+      buttonText: "Открыть уведомления",
+    },
   };
 
   return emailContent[language];

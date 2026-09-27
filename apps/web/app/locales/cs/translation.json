@@ -1256,7 +1256,8 @@
       "czech": "Čeština",
       "lithuanian": "Litevština",
       "spanish": "Španělština",
-      "french": "Francouzština"
+      "french": "Francouzština",
+      "russian": "Ruština"
     }
   },
   "resetOnboarding": {
@@ -4522,6 +4523,10 @@
       "gbp": {
         "label": "Britská libra",
         "sign": "£"
+      },
+      "rub": {
+        "label": "Ruský rubl",
+        "sign": "₽"
       }
     }
   },

@@ -10,6 +10,7 @@ export const getCourseChatMentionEmailHeading = (language: SupportedLanguages) =
       cs: "Byl(a) jste zmíněn(a) v chatu kurzu",
       es: "Te han mencionado en el chat del curso",
       fr: "Vous avez été mentionné(e) dans la discussion du cours",
+      ru: "Вас упомянули в чате курса",
     }) satisfies Record<SupportedLanguages, string>
   )[language];
 
@@ -23,6 +24,7 @@ export const getCourseChatMentionEmailButtonText = (language: SupportedLanguages
       cs: "Otevřít diskuzi kurzu",
       es: "Abrir debate del curso",
       fr: "Ouvrir la discussion du cours",
+      ru: "Открыть обсуждение курса",
     }) satisfies Record<SupportedLanguages, string>
   )[language];
 
@@ -63,6 +65,10 @@ export const getCourseChatMentionEmailParagraphs = (
     fr: [
       `Bonjour ${params.recipientName}, ${params.authorName} vous a mentionné(e) dans ${params.courseName}.`,
       `"${params.messageContent}"`,
+    ],
+    ru: [
+      `Здравствуйте, ${params.recipientName}! ${params.authorName} упомянул(а) вас в курсе ${params.courseName}.`,
+      `«${params.messageContent}»`,
     ],
   } satisfies Record<SupportedLanguages, string[]>;
 

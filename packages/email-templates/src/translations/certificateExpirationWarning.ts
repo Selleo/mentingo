@@ -63,6 +63,14 @@ export const getCertificateExpirationWarningEmailTranslations = (
       ],
       buttonText: "OUVRIR LE COURS",
     },
+    ru: {
+      heading: "Срок действия сертификата скоро истекает",
+      paragraphs: [
+        `Срок действия вашего сертификата по курсу ${courseName} истекает ${expiresAt}.`,
+        "После этого ваш прогресс по курсу будет сброшен, и для получения нового сертификата потребуется пройти курс заново.",
+      ],
+      buttonText: "ОТКРЫТЬ КУРС",
+    },
   };
 
   return emailContent[language];

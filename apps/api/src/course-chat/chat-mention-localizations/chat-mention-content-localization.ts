@@ -11,6 +11,7 @@ export function getLocalizedUserMentionContentAnnouncement(
     cs: `V kurzu "${courseNames.cs}"`,
     es: `En el curso "${courseNames.es}"`,
     fr: `Dans le cours « ${courseNames.fr} »`,
+    ru: `В курсе «${courseNames.ru}»`,
   };
   return content;
 }

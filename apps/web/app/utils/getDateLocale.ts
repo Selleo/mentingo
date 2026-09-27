@@ -1,5 +1,5 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
-import { cs, de, enUS, es, fr, lt, pl } from "date-fns/locale";
+import { cs, de, enUS, es, fr, lt, pl, ru } from "date-fns/locale";
 import { match } from "ts-pattern";
 
 export function getDateLocale(language: string) {
@@ -12,5 +12,6 @@ export function getDateLocale(language: string) {
     .with(SUPPORTED_LANGUAGES.LT, () => lt)
     .with(SUPPORTED_LANGUAGES.ES, () => es)
     .with(SUPPORTED_LANGUAGES.FR, () => fr)
+    .with(SUPPORTED_LANGUAGES.RU, () => ru)
     .otherwise(() => enUS);
 }

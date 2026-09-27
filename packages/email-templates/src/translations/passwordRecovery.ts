@@ -62,6 +62,14 @@ export const getPasswordRecoveryEmailTranslations = (
       ],
       buttonText: "RÉINITIALISER LE MOT DE PASSE",
     },
+    ru: {
+      heading: "Восстановление пароля",
+      paragraphs: [
+        `Здравствуйте, ${name}! Вы запросили сброс пароля 🔑`,
+        "Сбросить пароль можно с помощью кнопки ниже.",
+      ],
+      buttonText: "СБРОСИТЬ ПАРОЛЬ",
+    },
   };
 
   return emailContent[language];

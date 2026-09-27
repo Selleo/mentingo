@@ -44,6 +44,14 @@ export const getNewUserEmailTranslations = (language: SupportedLanguages, userNa
       ],
       buttonText: "OUVRIR LE PROFIL",
     },
+    ru: {
+      heading: "Профиль нового пользователя",
+      paragraphs: [
+        "Здравствуйте! 🧑‍💻",
+        `Пользователь ${userName} зарегистрировался на платформе. Просмотрите профиль и назначьте курсы.`,
+      ],
+      buttonText: "ОТКРЫТЬ ПРОФИЛЬ",
+    },
   };
 
   return emailContent[language];

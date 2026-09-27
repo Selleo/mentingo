@@ -81,6 +81,16 @@ export const getCertificateExpiredEmailTranslations = (
       ],
       buttonText: "OUVRIR LE COURS",
     },
+    ru: {
+      heading: isManualReset ? "Сертификат аннулирован" : "Срок действия сертификата истёк",
+      paragraphs: [
+        isManualReset
+          ? `Ваш сертификат по курсу ${courseName} был аннулирован администратором.`
+          : `Срок действия вашего сертификата по курсу ${courseName} истёк.`,
+        "Сертификат перемещён в архив, а ваш прогресс по курсу сброшен. Пройдите курс заново, чтобы получить новый сертификат.",
+      ],
+      buttonText: "ОТКРЫТЬ КУРС",
+    },
   };
 
   return emailContent[language];

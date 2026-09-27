@@ -156,6 +156,7 @@ export class LiveTrainingAnnouncementsService {
           cs: `Živé školení ${linkedTitle} začne ${formattedStart}.`,
           es: `La formación en vivo ${linkedTitle} comienza el ${formattedStart}.`,
           fr: `La formation en direct ${linkedTitle} commence le ${formattedStart}.`,
+          ru: `Онлайн-занятие ${linkedTitle} начнётся ${formattedStart}.`,
         });
       case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED:
         return this.translate(language, {
@@ -166,6 +167,7 @@ export class LiveTrainingAnnouncementsService {
           cs: `Živé školení ${linkedTitle} nyní probíhá.`,
           es: `La formación en vivo ${linkedTitle} está activa ahora.`,
           fr: `La formation en direct ${linkedTitle} est en cours.`,
+          ru: `Онлайн-занятие ${linkedTitle} уже идёт.`,
         });
       default:
         return this.translate(language, {
@@ -176,6 +178,7 @@ export class LiveTrainingAnnouncementsService {
           cs: `Živé školení ${linkedTitle} skončilo.`,
           es: `La formación en vivo ${linkedTitle} ha finalizado.`,
           fr: `La formation en direct ${linkedTitle} est terminée.`,
+          ru: `Онлайн-занятие ${linkedTitle} завершилось.`,
         });
     }
   }

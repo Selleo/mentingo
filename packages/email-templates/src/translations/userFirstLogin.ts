@@ -59,6 +59,14 @@ export const getUserFirstLoginEmailTranslations = (language: SupportedLanguages,
       ],
       buttonText: "MES COURS",
     },
+    ru: {
+      heading: "Добро пожаловать",
+      paragraphs: [
+        "Рады видеть вас 🙂",
+        `Первый вход выполнен успешно. ${name}, посмотрите назначенные вам курсы.`,
+      ],
+      buttonText: "МОИ КУРСЫ",
+    },
   };
 
   return emailContent[language];

@@ -54,6 +54,14 @@ export const getFinishedCourseEmailTranslations = (
       ],
       buttonText: "VOIR LA PROGRESSION",
     },
+    ru: {
+      heading: "Пользователь завершил курс",
+      paragraphs: [
+        "Здравствуйте! 🧑‍💻",
+        `Пользователь ${userName} завершил курс ${courseName}. Посмотрите его прогресс.`,
+      ],
+      buttonText: "ПОСМОТРЕТЬ ПРОГРЕСС",
+    },
   };
 
   return emailContent[language];
