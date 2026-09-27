@@ -42,7 +42,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   loginBackgroundImageS3Key: null,
   platformSimpleLogoS3Key: null,
   MFAEnforcedRoles: [],
-  defaultCourseCurrency: "pln",
+  defaultCourseCurrency: "rub",
   inviteOnlyRegistration: false,
   userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
@@ -51,7 +51,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {
-  language: SUPPORTED_LANGUAGES.EN,
+  language: SUPPORTED_LANGUAGES.RU,
   isMFAEnabled: false,
   MFASecret: null,
 };

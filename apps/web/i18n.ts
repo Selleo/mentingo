@@ -14,7 +14,7 @@ import ruTranslations from "app/locales/ru/translation.json";
 // eslint-disable-next-line import/no-named-as-default-member
 i18n.use(initReactI18next).init({
   fallbackLng: SUPPORTED_LANGUAGES.EN,
-  lng: import.meta.env.VITE_E2E === "true" ? "en" : "pl",
+  lng: import.meta.env.VITE_E2E === "true" ? "en" : "ru",
   ns: ["translation"],
   defaultNS: "translation",
   interpolation: {

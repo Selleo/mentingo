@@ -6,7 +6,7 @@ export const coursePricingFormSchema = (t: typeof i18next.t) =>
   z
     .object({
       priceInCents: z.number().optional(),
-      currency: z.string().optional().default("pln"),
+      currency: z.string().optional().default("rub"),
       isFree: z.boolean().default(false),
     })
     .superRefine((data, ctx) => {

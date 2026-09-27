@@ -4,14 +4,14 @@ export type SupportedLanguage = SupportedLanguages;
 
 export function detectBrowserLanguage(): SupportedLanguage {
   if (typeof navigator === "undefined") {
-    return SUPPORTED_LANGUAGES.EN;
+    return SUPPORTED_LANGUAGES.RU;
   }
 
   const browserLang =
     navigator.language || (navigator as Navigator & { userLanguage: string }).userLanguage;
 
   if (!browserLang) {
-    return SUPPORTED_LANGUAGES.EN;
+    return SUPPORTED_LANGUAGES.RU;
   }
 
   const langCode = browserLang.split("-")[0].toLowerCase();
@@ -20,7 +20,7 @@ export function detectBrowserLanguage(): SupportedLanguage {
     return langCode as SupportedLanguages;
   }
 
-  return SUPPORTED_LANGUAGES.EN;
+  return SUPPORTED_LANGUAGES.RU;
 }
 
 export function isSupportedLanguage(lang: string): lang is SupportedLanguage {
