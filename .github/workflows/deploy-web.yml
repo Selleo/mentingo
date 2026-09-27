@@ -1,0 +1,85 @@
+# Сборка образа фронтенда и публикация в GHCR.
+# Заменяет deploy-ui.yml вендора, который пушит в AWS ECR.
+# Путь в форке: .github/workflows/deploy-web.yml
+#
+# Список build-args сверен с web.Dockerfile форка (tulubyev/mentingo).
+# Все переменные VITE_* запекаются в статику на этапе сборки и в
+# рантайме не читаются — менять их можно только пересборкой образа.
+
+name: Build Web image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "web.Dockerfile"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/mentingo-web
+  LMS_URL: https://lms.wiki
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=long
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./web.Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=${{ env.LMS_URL }}
+            VITE_APP_URL=${{ env.LMS_URL }}
+            VITE_GOOGLE_OAUTH_ENABLED=false
+            VITE_MICROSOFT_OAUTH_ENABLED=false
+            VITE_SLACK_OAUTH_ENABLED=false
+            VITE_STRIPE_PUBLISHABLE_KEY=
+            VITE_SENTRY_DSN=
+            VITE_POSTHOG_KEY=
+            VITE_POSTHOG_HOST=
+
+# Пустые значения выключают интеграции на уровне статики: кнопки
+# «Войти через Google / Microsoft / Slack» не отрисуются, платёжные
+# экраны Stripe не появятся, телеметрия никуда не пойдёт.
+#
+# Никаких Secrets в репозитории заводить не нужно.
+#
+# Обязательны только VITE_API_URL и VITE_APP_URL. При смене домена
+# поменять LMS_URL выше и пересобрать образ — переменные запекаются
+# в статику, в рантайме не читаются.
