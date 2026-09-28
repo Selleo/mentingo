@@ -55,11 +55,13 @@ import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import {
+  articles as articleRows,
   categories as categoryRows,
   chapters as chapterRows,
   courses as courseRows,
   groupCourses,
   groups as groupRows,
+  learningPaths as learningPathRows,
   lessons as lessonRows,
   news as newsRows,
   resources as resourceRows,
@@ -2466,6 +2468,7 @@ export class McpHttpService {
               availableLocales: article.availableLocales,
               sectionId: article.articleSectionId,
               isPublic: article.isPublic,
+              revision: await this.getRevision(ENTITY_TYPES.ARTICLES, article.id),
             };
           },
         ),
@@ -2542,7 +2545,7 @@ export class McpHttpService {
           "Update an article title, summary, or rich content in one language, and optionally set public visibility.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateArticleInputSchema),
       },
-      async ({ id, language, title, summary, content, isPublic }) =>
+      async ({ id, language, expectedRevision, title, summary, content, isPublic }) =>
         this.run(
           actor,
           [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
@@ -2555,18 +2558,25 @@ export class McpHttpService {
               isPublic === undefined
             )
               throw new ForbiddenException("No changes supplied");
-            await this.articlesService.updateArticle(
-              id,
-              {
-                translations:
-                  title !== undefined || summary !== undefined || content !== undefined
-                    ? [{ language, title, summary, content }]
-                    : [],
-                isPublic,
-              },
-              user,
+            await this.withExpectedRevision(ENTITY_TYPES.ARTICLES, id, expectedRevision, () =>
+              this.articlesService.updateArticle(
+                id,
+                {
+                  translations:
+                    title !== undefined || summary !== undefined || content !== undefined
+                      ? [{ language, title, summary, content }]
+                      : [],
+                  isPublic,
+                },
+                user,
+              ),
             );
-            return { id, language, isPublic };
+            return {
+              id,
+              language,
+              isPublic,
+              revision: await this.getRevision(ENTITY_TYPES.ARTICLES, id),
+            };
           },
         ),
     );
@@ -2917,6 +2927,7 @@ export class McpHttpService {
       async ({
         pathId,
         language,
+        expectedRevision,
         title,
         description,
         sequenceEnabled,
@@ -2936,12 +2947,14 @@ export class McpHttpService {
                 Object.values(settings).every((value) => value === undefined))
             )
               throw new ForbiddenException("No changes supplied");
-            const path = await this.learningPathService.updateLearningPath(
-              pathId,
-              { language, title, description, sequenceEnabled, includesCertificate, settings },
-              user,
+            const path = await this.withExpectedLearningPathRevision(pathId, expectedRevision, () =>
+              this.learningPathService.updateLearningPath(
+                pathId,
+                { language, title, description, sequenceEnabled, includesCertificate, settings },
+                user,
+              ),
             );
-            return { id: path.id, language };
+            return { id: path.id, language, revision: path.updatedAt };
           },
         ),
     );
@@ -2959,19 +2972,13 @@ export class McpHttpService {
           [PERMISSIONS.LEARNING_PATH_UPDATE, PERMISSIONS.LEARNING_PATH_UPDATE_OWN],
           async (user) => {
             await this.assertLearningPathsEnabled();
-            const current = await this.learningPathService.getLearningPathById(
-              pathId,
-              user,
-              language,
-            );
-            if (current.updatedAt !== expectedRevision)
-              throw new ForbiddenException("Development path changed; read it again");
+            await this.learningPathService.getLearningPathById(pathId, user, language);
             if (status === LEARNING_PATH_STATUSES.PUBLISHED && !confirmPublish)
               throw new ForbiddenException("Publication requires confirmation");
-            const updated = await this.learningPathService.updateLearningPath(
+            const updated = await this.withExpectedLearningPathRevision(
               pathId,
-              { status },
-              user,
+              expectedRevision,
+              () => this.learningPathService.updateLearningPath(pathId, { status }, user),
             );
             return { id: pathId, status: updated.status, revision: updated.updatedAt };
           },
@@ -3106,11 +3113,13 @@ export class McpHttpService {
             user,
             language,
           );
-          if (current.title !== confirmTitle || current.updatedAt !== expectedRevision)
+          if (current.title !== confirmTitle)
             throw new ForbiddenException(
               "Development path confirmation or revision does not match",
             );
-          await this.learningPathService.deleteLearningPath(pathId, user);
+          await this.withExpectedLearningPathRevision(pathId, expectedRevision, () =>
+            this.learningPathService.deleteLearningPath(pathId, user),
+          );
           return { deletedId: pathId };
         }),
     );
@@ -3358,7 +3367,27 @@ export class McpHttpService {
         return lessonRows;
       case ENTITY_TYPES.NEWS:
         return newsRows;
+      case ENTITY_TYPES.ARTICLES:
+        return articleRows;
     }
+  }
+
+  private async withExpectedLearningPathRevision<T>(
+    pathId: string,
+    expectedRevision: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    return this.tenantDbRunnerService.transactionWithHandle(async (trx) => {
+      const [row] = await trx
+        .select({ updatedAt: learningPathRows.updatedAt })
+        .from(learningPathRows)
+        .where(eq(learningPathRows.id, pathId))
+        .for("update");
+      if (!row) throw new NotFoundException("Authoring entity not found");
+      if (row.updatedAt !== expectedRevision)
+        throw new ForbiddenException("Development path changed; read it again");
+      return operation();
+    });
   }
 
   private async assertFeatureEnabled(

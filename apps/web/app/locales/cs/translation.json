@@ -4,6 +4,7 @@
     "title": "Připojit {{clientName}} k Mentingo?",
     "description": "Tento asistent může používat Mentingo podle vašich aktuálních oprávnění.",
     "signedInAs": "Přihlášeni jako {{email}}",
+    "redirectUri": "Přístup bude odeslán na: {{redirectUri}}",
     "allow": "Povolit",
     "deny": "Odmítnout",
     "loading": "Načítání připojení…",

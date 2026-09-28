@@ -841,6 +841,7 @@ export const updateArticleInputSchema = Type.Object(
   {
     id: uuidInputSchema,
     language: languageInputSchema,
+    expectedRevision: revisionInputSchema,
     title: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
     summary: Type.Optional(Type.String({ maxLength: 20000 })),
     content: Type.Optional(Type.String({ maxLength: 200000 })),
@@ -956,6 +957,7 @@ export const updateDevelopmentPathInputSchema = Type.Object(
   {
     pathId: uuidInputSchema,
     language: languageInputSchema,
+    expectedRevision: revisionInputSchema,
     title: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
     description: Type.Optional(Type.String({ maxLength: 20000 })),
     sequenceEnabled: Type.Optional(Type.Boolean()),

@@ -5,6 +5,7 @@ import {
   Get,
   Head,
   Headers,
+  Inject,
   Options,
   Param,
   Patch,
@@ -33,8 +34,10 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
 import { assertScormTusGrant, assertScormUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
+import { REDIS_CLIENT, type RedisClient } from "src/redis";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -84,6 +87,7 @@ export class ScormController {
   constructor(
     private readonly scormService: ScormService,
     private readonly scormTusUploadService: ScormTusUploadService,
+    @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
   ) {}
 
   @Post("import/init")
@@ -249,6 +253,10 @@ export class ScormController {
     const result = await this.scormService.completeTusImport({ session, currentUser });
 
     await this.scormTusUploadService.clearSession(packageId);
+
+    if (request.mcpUploadGrant && request.mcpUploadGrantToken) {
+      await revokeMcpUploadGrant(this.redis, request.mcpUploadGrantToken);
+    }
 
     return new BaseResponse(result);
   }

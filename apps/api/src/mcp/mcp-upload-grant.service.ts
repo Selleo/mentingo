@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { basename } from "node:path";
 
 import {
@@ -59,6 +59,9 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
+import { mcpUploadGrantKey } from "./mcp-upload-grant-key";
+
+export { mcpUploadGrantKey, revokeMcpUploadGrant } from "./mcp-upload-grant-key";
 
 import type {
   McpAvatarUploadGrant,
@@ -590,6 +593,7 @@ export class McpUploadGrantService {
   async authenticate(request: Request): Promise<{
     user: CurrentUserType;
     grant: McpUploadGrant;
+    token: string;
   }> {
     const authorization = request.headers.authorization;
     if (!["POST", "PATCH", "HEAD", "GET"].includes(request.method) || !authorization) {
@@ -609,22 +613,9 @@ export class McpUploadGrantService {
     const grantKey = this.key(token);
     const storedGrant = await this.redis.get(grantKey);
     if (!storedGrant) throw new UnauthorizedException("Upload grant expired or already used");
-    let stored: McpUploadGrant;
-    try {
-      stored = JSON.parse(storedGrant) as McpUploadGrant;
-    } catch {
-      throw new UnauthorizedException("Invalid upload grant");
-    }
-    const rawGrant = isTusGrant(stored)
-      ? storedGrant
-      : await this.redis.sendCommand(["GETDEL", grantKey]);
-    if (!rawGrant || typeof rawGrant !== "string") {
-      throw new UnauthorizedException("Upload grant expired or already used");
-    }
-
     let grant: McpUploadGrant;
     try {
-      grant = JSON.parse(rawGrant) as McpUploadGrant;
+      grant = JSON.parse(storedGrant) as McpUploadGrant;
     } catch {
       throw new UnauthorizedException("Invalid upload grant");
     }
@@ -749,7 +740,12 @@ export class McpUploadGrantService {
         });
       }
     });
-    return { user, grant };
+
+    if (!isTusGrant(grant)) {
+      const claimed = await this.redis.sendCommand(["GETDEL", grantKey]);
+      if (!claimed) throw new UnauthorizedException("Upload grant expired or already used");
+    }
+    return { user, grant, token };
   }
 
   private validateUploadFile(
@@ -841,7 +837,6 @@ export class McpUploadGrantService {
   }
 
   private key(token: string): string {
-    const digest = createHash("sha256").update(token).digest("hex");
-    return `mcp:upload:${digest}`;
+    return mcpUploadGrantKey(token);
   }
 }

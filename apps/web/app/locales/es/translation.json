@@ -4,6 +4,7 @@
     "title": "¿Conectar {{clientName}} con Mentingo?",
     "description": "Este asistente puede usar Mentingo según tus permisos actuales.",
     "signedInAs": "Sesión iniciada como {{email}}",
+    "redirectUri": "Se enviará acceso a: {{redirectUri}}",
     "allow": "Permitir",
     "deny": "Denegar",
     "loading": "Cargando conexión…",

@@ -57,6 +57,9 @@ export default function McpConsentPage() {
               <p className="text-sm text-muted-foreground">
                 {t("mcpConnection.signedInAs", { email: data.accountEmail })}
               </p>
+              <p className="mt-2 break-all text-sm text-muted-foreground">
+                {t("mcpConnection.redirectUri", { redirectUri: data.redirectUri })}
+              </p>
               <form
                 method="post"
                 action="/api/oauth/authorize"

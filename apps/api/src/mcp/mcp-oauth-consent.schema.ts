@@ -2,6 +2,8 @@ import { Type, type Static } from "@sinclair/typebox";
 
 export const mcpConsentDetailsSchema = Type.Object({
   clientName: Type.String(),
+  clientId: Type.String(),
+  redirectUri: Type.String(),
   accountEmail: Type.String(),
 });
 

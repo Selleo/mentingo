@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   Head,
+  Inject,
   Options,
   Param,
   Patch,
@@ -36,11 +37,13 @@ import {
   TUS_VERSION,
 } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
+import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
 import {
   assertGenericFileUploadGrant,
   assertVideoTusGrant,
 } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
+import { REDIS_CLIENT, type RedisClient } from "src/redis";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
@@ -64,6 +67,7 @@ export class FileController {
   constructor(
     private readonly fileService: FileService,
     private readonly tusUploadService: TusUploadService,
+    @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
   ) {}
 
   @RequirePermission(PERMISSIONS.FILE_UPLOAD)
@@ -259,6 +263,10 @@ export class FileController {
 
     if (result.conflict) {
       return res.status(409).send();
+    }
+
+    if (result.completed && req.mcpUploadGrant && req.mcpUploadGrantToken) {
+      await revokeMcpUploadGrant(this.redis, req.mcpUploadGrantToken);
     }
 
     return res.status(204).send();

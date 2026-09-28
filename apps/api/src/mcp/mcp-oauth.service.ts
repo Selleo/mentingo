@@ -105,7 +105,7 @@ export class McpOAuthService {
   }
 
   async register(req: Request, res: Response): Promise<void> {
-    await this.resources.fromRequest(req);
+    const resource = await this.resources.fromRequest(req);
     const body = req.body as Record<string, unknown> | undefined;
     const redirectUris = body?.redirect_uris;
     const name = body?.client_name;
@@ -134,6 +134,7 @@ export class McpOAuthService {
     const client: McpClient = {
       id,
       name: typeof name === "string" && name ? name : "MCP client",
+      tenantId: resource.tenantId,
       redirectUris,
       grants: ["authorization_code", "refresh_token"],
       accessTokenLifetime: ACCESS_TTL,
@@ -156,6 +157,7 @@ export class McpOAuthService {
     const client = query.client_id ? await this.getClient(query.client_id, "") : null;
     if (
       !client ||
+      client.tenantId !== resource.tenantId ||
       !query.redirect_uri ||
       !client.redirectUris?.includes(query.redirect_uri) ||
       query.resource !== resource.url ||
@@ -205,18 +207,27 @@ export class McpOAuthService {
     const client = consent.query.client_id
       ? await this.getClient(consent.query.client_id, "")
       : false;
-    if (!client) throw new NotFoundException("Connection request expired or invalid");
-    return { clientName: client.name, accountEmail: user.email };
+    if (!client || client.tenantId !== resource.tenantId) {
+      throw new NotFoundException("Connection request expired or invalid");
+    }
+    return {
+      clientName: client.name,
+      clientId: client.id,
+      redirectUri: consent.query.redirect_uri,
+      accountEmail: user.email,
+    };
   }
 
   async authorize(req: Request, res: Response): Promise<void> {
     const nonce = typeof req.body?.consent === "string" ? req.body.consent : "";
-    const raw = nonce
-      ? await this.redis.sendCommand(["GETDEL", `mcp:oauth:consent:${digest(nonce)}`])
-      : null;
     const resource = await this.resources.fromRequest(req);
     const user = await this.webUser(req);
-    if (!raw || typeof raw !== "string" || !user) {
+    if (!nonce || !user) {
+      res.status(401).json({ error: "invalid_request" });
+      return;
+    }
+    const raw = await this.redis.sendCommand(["GETDEL", `mcp:oauth:consent:${digest(nonce)}`]);
+    if (!raw || typeof raw !== "string") {
       res.status(401).json({ error: "invalid_request" });
       return;
     }

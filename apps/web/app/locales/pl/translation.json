@@ -4,6 +4,7 @@
     "title": "Połączyć {{clientName}} z Mentingo?",
     "description": "Ten asystent może korzystać z Mentingo zgodnie z Twoimi uprawnieniami.",
     "signedInAs": "Zalogowano jako {{email}}",
+    "redirectUri": "Dostęp zostanie przesłany do: {{redirectUri}}",
     "allow": "Zezwól",
     "deny": "Odrzuć",
     "loading": "Wczytywanie połączenia…",

@@ -13,7 +13,8 @@ export type McpRevisionEntity =
   | typeof ENTITY_TYPES.COURSE
   | typeof ENTITY_TYPES.CHAPTER
   | typeof ENTITY_TYPES.LESSON
-  | typeof ENTITY_TYPES.NEWS;
+  | typeof ENTITY_TYPES.NEWS
+  | typeof ENTITY_TYPES.ARTICLES;
 
 export type McpCallContext = {
   tool: string;
@@ -190,4 +191,8 @@ export type McpUploadGrant =
   | McpScormUploadGrant
   | McpScormTusGrant;
 
-export type McpRequest = Request & { mcpUploadGrant?: McpUploadGrant; mcpActor?: McpToolActor };
+export type McpRequest = Request & {
+  mcpUploadGrant?: McpUploadGrant;
+  mcpUploadGrantToken?: string;
+  mcpActor?: McpToolActor;
+};

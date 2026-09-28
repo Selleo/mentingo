@@ -25958,6 +25958,8 @@ export interface GenerateArticlePreviewResponse {
 export interface GetConsentResponse {
   data: {
     clientName: string;
+    clientId: string;
+    redirectUri: string;
     accountEmail: string;
   };
 }

@@ -134706,12 +134706,20 @@
               "clientName": {
                 "type": "string"
               },
+              "clientId": {
+                "type": "string"
+              },
+              "redirectUri": {
+                "type": "string"
+              },
               "accountEmail": {
                 "type": "string"
               }
             },
             "required": [
               "clientName",
+              "clientId",
+              "redirectUri",
               "accountEmail"
             ]
           }

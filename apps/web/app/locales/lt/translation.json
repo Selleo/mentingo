@@ -4,6 +4,7 @@
     "title": "Prijungti {{clientName}} prie Mentingo?",
     "description": "Šis asistentas gali naudotis Mentingo pagal jūsų dabartinius leidimus.",
     "signedInAs": "Prisijungta kaip {{email}}",
+    "redirectUri": "Prieiga bus siunčiama į: {{redirectUri}}",
     "allow": "Leisti",
     "deny": "Atmesti",
     "loading": "Įkeliamas prisijungimas…",

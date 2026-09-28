@@ -12,6 +12,8 @@ import { MCP_UPLOAD_TOKEN_PREFIX, McpUploadGrantService } from "src/mcp/mcp-uplo
 import { SessionRevocationService } from "src/redis";
 import { extractToken } from "src/utils/extract-token";
 
+import type { McpRequest } from "src/mcp/mcp.types";
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
@@ -29,14 +31,8 @@ export class JwtAuthGuard implements CanActivate {
     ]);
 
     const request = context.switchToHttp().getRequest();
-    if (
-      request.headers.authorization?.startsWith("Upload ") ||
-      request.headers.authorization?.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`)
-    ) {
-      const { user, grant } = await this.mcpUploadGrants.authenticate(request);
-      request.user = user;
-      request.mcpUploadGrant = grant;
-      return true;
+    if (this.isMcpUploadGrantRequest(request)) {
+      return this.authenticateUploadGrant(request);
     }
 
     const token = extractToken(request, "access_token");
@@ -92,5 +88,21 @@ export class JwtAuthGuard implements CanActivate {
 
       throw new UnauthorizedException("Invalid access token");
     }
+  }
+
+  private isMcpUploadGrantRequest(request: McpRequest): boolean {
+    return (
+      request.headers.authorization?.startsWith("Upload ") ||
+      request.headers.authorization?.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`) ||
+      false
+    );
+  }
+
+  private async authenticateUploadGrant(request: McpRequest): Promise<boolean> {
+    const { user, grant, token } = await this.mcpUploadGrants.authenticate(request);
+    request.user = user;
+    request.mcpUploadGrant = grant;
+    request.mcpUploadGrantToken = token;
+    return true;
   }
 }
