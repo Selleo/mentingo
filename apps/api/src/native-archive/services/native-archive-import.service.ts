@@ -63,9 +63,9 @@ export class NativeArchiveImportService {
 
     try {
       await this.assertImportPermissions(parsed, actor);
-      if (await this.findExistingImport(parsed)) return this.createAlreadyExistsResult(parsed);
+      const plan = await this.prepareImportPlan(parsed, actor.tenantId);
+      if (plan.alreadyExists) return this.createAlreadyExistsResult(parsed, plan.targetRootId);
 
-      const plan = await this.prepareImportPlan(parsed);
       await this.assertLiveTrainingAvailable(plan.missing);
       const staged = await this.nativeArchiveAssetsService.stageArchiveAssets(
         parsed,
@@ -80,11 +80,12 @@ export class NativeArchiveImportService {
           parsed,
           actor,
           staged,
+          plan,
           plan.learningPath,
         );
         return {
           kind: parsed.manifest.kind,
-          rootId: parsed.manifest.rootId,
+          rootId: plan.targetRootId,
           alreadyExists: false,
           createdCourseIds,
           reusedCourseIds: plan.reusedCourseIds,
@@ -92,7 +93,7 @@ export class NativeArchiveImportService {
       } catch (error) {
         await staged.deleteStaged();
 
-        await this.deleteUncommittedCopiedFiles(plan.missing, actor.tenantId);
+        await this.deleteUncommittedCopiedFiles(plan, actor.tenantId);
 
         throw error;
       }
@@ -114,46 +115,35 @@ export class NativeArchiveImportService {
     }
   }
 
-  private async findExistingImport(parsed: ParsedNativeArchive): Promise<boolean> {
-    if (parsed.manifest.kind === NATIVE_ARCHIVE_KIND.LEARNING_PATH) {
-      return Boolean(
-        await this.nativeArchiveImportRepository.findLearningPathById(parsed.manifest.rootId),
-      );
-    }
-
-    return Boolean(
-      await this.masterCourseRepository.findCourseByIdInTenant(parsed.manifest.rootId),
-    );
-  }
-
-  private createAlreadyExistsResult(parsed: ParsedNativeArchive): NativeArchiveImportResult {
+  private createAlreadyExistsResult(
+    parsed: ParsedNativeArchive,
+    targetRootId: UUIDType,
+  ): NativeArchiveImportResult {
     return {
       kind: parsed.manifest.kind,
-      rootId: parsed.manifest.rootId,
+      rootId: targetRootId,
       alreadyExists: true,
       createdCourseIds: [],
       reusedCourseIds: [],
     };
   }
 
-  private async prepareImportPlan(parsed: ParsedNativeArchive): Promise<NativeArchiveImportPlan> {
+  private async prepareImportPlan(
+    parsed: ParsedNativeArchive,
+    tenantId: UUIDType,
+  ): Promise<NativeArchiveImportPlan> {
     const missing: NativeArchiveValidatedCourseSnapshot[] = [];
     const reusedCourseIds: UUIDType[] = [];
-
-    for (const id of parsed.manifest.courseIds) {
+    const courseIdMap = new Map<UUIDType, UUIDType>();
+    const snapshots = parsed.manifest.courseIds.map((id) => {
       const snapshot = this.nativeArchiveValidationService.validateCourseSnapshot(
         parsed.courses[id],
       );
       if (snapshot.course.id !== id) {
         throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
       }
-
-      if (await this.masterCourseRepository.findCourseByIdInTenant(id)) {
-        reusedCourseIds.push(id);
-      } else {
-        missing.push(snapshot);
-      }
-    }
+      return snapshot;
+    });
 
     const learningPath = this.nativeArchiveValidationService.validateLearningPathSnapshot(
       parsed.learningPath,
@@ -161,8 +151,71 @@ export class NativeArchiveImportService {
       parsed.manifest.rootId,
       parsed.manifest.courseIds,
     );
+
+    const sourceRoot = learningPath ?? snapshots[0]?.course;
+    if (!sourceRoot) throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
+
+    const originalRootId = sourceRoot.originalId ?? sourceRoot.id;
+    const existingRoot = learningPath
+      ? await this.nativeArchiveImportRepository.findLearningPathByArchiveIdentity(
+          sourceRoot.id,
+          originalRootId,
+          tenantId,
+        )
+      : await this.nativeArchiveImportRepository.findCourseByArchiveIdentity(
+          sourceRoot.id,
+          originalRootId,
+          tenantId,
+        );
+
+    if (existingRoot) {
+      return {
+        missing,
+        reusedCourseIds,
+        learningPath,
+        courseIdMap,
+        targetRootId: existingRoot.id,
+        alreadyExists: true,
+      };
+    }
+
+    for (const snapshot of snapshots) {
+      const sourceId = snapshot.course.id;
+      const originalId = snapshot.course.originalId ?? sourceId;
+      const existing = await this.nativeArchiveImportRepository.findCourseByArchiveIdentity(
+        sourceId,
+        originalId,
+        tenantId,
+      );
+
+      if (existing) {
+        courseIdMap.set(sourceId, existing.id);
+        reusedCourseIds.push(existing.id);
+      } else {
+        courseIdMap.set(sourceId, this.getTargetId(originalId, tenantId));
+        missing.push(snapshot);
+      }
+    }
+
     this.nativeArchiveValidationService.assertRequiredAssetsPresent(parsed, missing, learningPath);
-    return { missing, reusedCourseIds, learningPath };
+
+    const targetRootId = learningPath
+      ? this.getTargetId(originalRootId, tenantId)
+      : courseIdMap.get(parsed.manifest.rootId);
+    if (!targetRootId) throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
+
+    return {
+      missing,
+      reusedCourseIds,
+      learningPath,
+      courseIdMap,
+      targetRootId,
+      alreadyExists: false,
+    };
+  }
+
+  private getTargetId(originalId: UUIDType, tenantId: UUIDType): UUIDType {
+    return uuidv5(`native-archive:${originalId}`, tenantId);
   }
 
   private async assertLiveTrainingAvailable(
@@ -198,17 +251,27 @@ export class NativeArchiveImportService {
     parsed: ParsedNativeArchive,
     actor: CurrentUserType,
     staged: NativeArchiveStagedAssets,
+    plan: NativeArchiveImportPlan,
     learningPath?: NativeArchiveLearningPathImportSnapshot,
   ): Promise<UUIDType[]> {
     return this.tenantDbRunnerService.transaction(async () => {
       const createdCourseIds: UUIDType[] = [];
       for (const snapshot of staged.snapshots) {
-        createdCourseIds.push(await this.createImportedCourse(snapshot, actor));
+        const targetCourseId = plan.courseIdMap.get(snapshot.course.id);
+        if (!targetCourseId)
+          throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
+        createdCourseIds.push(await this.createImportedCourse(snapshot, targetCourseId, actor));
       }
 
       if (parsed.manifest.kind === NATIVE_ARCHIVE_KIND.LEARNING_PATH) {
         if (!learningPath) throw new BadRequestException("nativeArchive.error.invalidLearningPath");
-        await this.createImportedLearningPath(parsed, actor, staged, learningPath);
+        await this.createImportedLearningPath(
+          actor,
+          staged,
+          learningPath,
+          plan.targetRootId,
+          plan.courseIdMap,
+        );
       }
 
       return createdCourseIds;
@@ -217,6 +280,7 @@ export class NativeArchiveImportService {
 
   private async createImportedCourse(
     snapshot: NativeArchiveValidatedCourseSnapshot,
+    targetCourseId: UUIDType,
     actor: CurrentUserType,
   ): Promise<UUIDType> {
     const source = snapshot.course;
@@ -244,13 +308,13 @@ export class NativeArchiveImportService {
     if (!categoryId) throw new BadRequestException("nativeArchive.error.categoryCreationFailed");
 
     await this.nativeArchiveImportRepository.createCourse(
-      buildNativeArchiveCourseInsert(source, actor.userId, categoryId),
+      buildNativeArchiveCourseInsert(source, actor.userId, categoryId, targetCourseId),
     );
-    await this.masterCourseRepository.ensureCourseSummaryStats(source.id, actor.userId);
+    await this.masterCourseRepository.ensureCourseSummaryStats(targetCourseId, actor.userId);
 
     const maps = await this.masterCourseService.duplicateCourseIntoExistingCourse({
       sourceCourseId: source.id,
-      targetCourseId: source.id,
+      targetCourseId,
       actorId: actor.userId,
       tenantId: actor.tenantId,
       sourceSnapshot: snapshot,
@@ -261,15 +325,17 @@ export class NativeArchiveImportService {
       snapshot,
       maps.chapterMap,
       actor,
+      targetCourseId,
     );
-    return source.id;
+    return targetCourseId;
   }
 
   private async createImportedLearningPath(
-    parsed: ParsedNativeArchive,
     actor: CurrentUserType,
     staged: NativeArchiveStagedAssets,
     learningPath: NativeArchiveLearningPathImportSnapshot,
+    targetPathId: UUIDType,
+    courseIdMap: ReadonlyMap<UUIDType, UUIDType>,
   ): Promise<void> {
     const { courseLinks } = learningPath;
     const insert = buildNativeArchiveLearningPathInsert(
@@ -277,36 +343,47 @@ export class NativeArchiveImportService {
       actor.userId,
       staged.rewriteReference(learningPath.thumbnailReference),
       staged.rewriteValue(learningPath.settings),
+      targetPathId,
     );
     await this.nativeArchiveImportRepository.createLearningPath(insert);
     if (!courseLinks.length) return;
 
     await this.nativeArchiveImportRepository.createLearningPathCourses(
       courseLinks.map((link) => ({
-        learningPathId: parsed.manifest.rootId,
-        courseId: link.courseId,
+        learningPathId: targetPathId,
+        courseId: this.getMappedCourseId(courseIdMap, link.courseId),
         displayOrder: link.displayOrder,
       })),
     );
   }
 
+  private getMappedCourseId(
+    courseIdMap: ReadonlyMap<UUIDType, UUIDType>,
+    sourceId: UUIDType,
+  ): UUIDType {
+    const targetId = courseIdMap.get(sourceId);
+    if (!targetId) throw new BadRequestException("nativeArchive.error.invalidLearningPath");
+    return targetId;
+  }
+
   private async deleteUncommittedCopiedFiles(
-    snapshots: SourceSnapshot[],
+    plan: NativeArchiveImportPlan,
     tenantId: UUIDType,
   ): Promise<void> {
-    const uncommitted: SourceSnapshot[] = [];
+    const uncommitted: { snapshot: SourceSnapshot; targetId: UUIDType }[] = [];
 
-    for (const snapshot of snapshots) {
-      if (!(await this.masterCourseRepository.findCourseByIdInTenant(snapshot.course.id))) {
-        uncommitted.push(snapshot);
+    for (const snapshot of plan.missing) {
+      const targetId = plan.courseIdMap.get(snapshot.course.id);
+      if (targetId && !(await this.masterCourseRepository.findCourseByIdInTenant(targetId))) {
+        uncommitted.push({ snapshot, targetId });
       }
     }
 
-    const prefixes = uncommitted.flatMap((snapshot) => [
-      prefixTenantStorageKey(`master-course/${snapshot.course.id}/`, tenantId),
+    const prefixes = uncommitted.flatMap(({ snapshot, targetId }) => [
+      prefixTenantStorageKey(`master-course/${targetId}/`, tenantId),
       ...snapshot.scormPackages.map((pkg) => {
         const targetPackageId = uuidv5(
-          `master-course:${snapshot.course.id}:scorm-package:${pkg.id}`,
+          `master-course:${targetId}:scorm-package:${pkg.id}`,
           SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
         );
 

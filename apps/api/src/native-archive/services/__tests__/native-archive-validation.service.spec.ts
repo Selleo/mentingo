@@ -163,6 +163,33 @@ describe("NativeArchiveValidationService", () => {
     ).not.toThrow();
   });
 
+  it("accepts blank answer sets keyed by blank ID and language", () => {
+    expect(() =>
+      service.validateCourseSnapshot({
+        ...snapshot(),
+        assessmentQuestionBlankAnswerSets: [
+          {
+            blankId: LESSON_ID,
+            language: SUPPORTED_LANGUAGES.EN,
+            preferredAnswer: "Answer",
+            acceptedAnswers: ["Answer", "Alternative"],
+          },
+        ],
+      }),
+    ).not.toThrow();
+  });
+
+  it("rejects blank answer sets without their composite key", () => {
+    expect(() =>
+      service.validateCourseSnapshot({
+        ...snapshot(),
+        assessmentQuestionBlankAnswerSets: [
+          { language: SUPPORTED_LANGUAGES.EN, preferredAnswer: "Answer", acceptedAnswers: [] },
+        ],
+      }),
+    ).toThrow(new BadRequestException("nativeArchive.error.invalidCourseSnapshot"));
+  });
+
   it("rejects open text settings without a valid question ID", () => {
     expect(() =>
       service.validateCourseSnapshot({

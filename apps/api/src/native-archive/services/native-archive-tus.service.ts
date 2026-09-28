@@ -8,6 +8,7 @@ import { CACHE_MANAGER_TOKEN, type Cache } from "src/cache/cache.types";
 import { FileGuard } from "src/file/guards/file.guard";
 import { S3Service } from "src/s3/s3.service";
 
+import { getNativeArchiveUploadKey } from "../native-archive-storage-paths";
 import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 
 import type {
@@ -41,7 +42,7 @@ export class NativeArchiveTusService {
     }
 
     const id = randomUUID();
-    const key = `native-archive/uploads/${actor.tenantId}/${id}.zip`;
+    const key = getNativeArchiveUploadKey(actor.tenantId, id);
     const { uploadId: multipartId } = await this.s3Service.createMultipartUpload(
       key,
       "application/zip",

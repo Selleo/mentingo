@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Courses and learning paths with an existing identifier are skipped. New content is created as a draft.",
     "uploadPrompt": "Choose or drop a Mentingo package ZIP",
-    "uploadDescription": "Use a package exported from Mentingo. ZIP files only.",
     "dropPrompt": "Drop the Mentingo package here",
     "fileReady": "Ready to import",
     "replaceFile": "Replace package",
@@ -16,7 +15,6 @@
     "preparing": "Preparing Mentingo package…",
     "exportReady": "Mentingo package downloaded",
     "importTitle": "Import a Mentingo package",
-    "importDescription": "Choose a Mentingo package ZIP containing a course or learning path. Its saved structure and settings will be restored as a draft.",
     "selectFile": "Select Mentingo package ZIP",
     "importButton": "Import Mentingo package",
     "uploading": "Uploading…",
@@ -5160,6 +5158,9 @@
   },
   "adminLearningPathsView": {
     "title": "Development Paths",
+    "importPackage": {
+      "title": "Import development path"
+    },
     "description": "Manage path metadata, sequence settings, ordered courses, enrollment, exports, and certificates.",
     "summary": "{{count}} development paths are available in this workspace.",
     "breadcrumbs": {

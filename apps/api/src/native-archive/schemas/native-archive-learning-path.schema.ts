@@ -16,6 +16,7 @@ export const nativeArchiveLearningPathLanguageSchema = Type.Object({
 
 export const nativeArchiveLearningPathSchema = Type.Object({
   id: UUIDSchema,
+  originalId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   title: nativeArchiveLocalizedTextSchema,
   description: nativeArchiveLocalizedTextSchema,
   thumbnailReference: nullableStringSchema,

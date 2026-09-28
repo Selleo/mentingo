@@ -13,6 +13,7 @@ import type { UUIDType } from "src/common";
 import type { SourceSnapshot } from "src/courses/types/master-course.types";
 
 const TENANT_ID = "1c720b6d-390d-4613-aa75-a5cc0b642147" as UUIDType;
+const IMAGE_FILE_KEY = `${TENANT_ID}/course/native-archive/variants/imported.webp`;
 const IMAGE_BASE = "course/variants/cover.webp";
 const IMAGE_VARIANT = "course/variants/cover-320w.webp";
 const SCORM_DIRECTORY = "course/scorm/extracted";
@@ -82,7 +83,7 @@ describe("NativeArchiveAssetsService", () => {
     const fileService = {
       uploadResource: jest.fn().mockResolvedValue({
         resourceId: "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
-        fileKey: "tenant/course/native-archive/variants/imported.webp",
+        fileKey: IMAGE_FILE_KEY,
       }),
       deleteFile: jest.fn().mockResolvedValue(undefined),
       archiveResources: jest.fn().mockResolvedValue(undefined),
@@ -118,9 +119,9 @@ describe("NativeArchiveAssetsService", () => {
       }),
     );
     expect(storage.uploadFile).toHaveBeenCalledTimes(1);
-    expect(staged.snapshots[0].course.thumbnailS3Key).toMatch(/^tenant\/course\/native-archive\//);
+    expect(staged.snapshots[0].course.thumbnailS3Key).toBe(IMAGE_FILE_KEY);
     expect(staged.snapshots[0].scormPackages[0].extractedFilesReference).toMatch(
-      /^native-archive\//,
+      new RegExp(`^${TENANT_ID}/native-archive/imports/`),
     );
     expect(staged.rewriteReference(IMAGE_VARIANT)).toContain("-320w.webp");
     expect(staged.rewriteReference(UNUSED_FILE)).toBe(UNUSED_FILE);
@@ -174,7 +175,7 @@ describe("NativeArchiveAssetsService", () => {
     const fileService = {
       uploadResource: jest.fn().mockResolvedValue({
         resourceId: "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
-        fileKey: "tenant/course/native-archive/variants/imported.webp",
+        fileKey: IMAGE_FILE_KEY,
       }),
       deleteFile: jest.fn().mockResolvedValue(undefined),
       archiveResources: jest.fn().mockResolvedValue(undefined),
@@ -205,9 +206,7 @@ describe("NativeArchiveAssetsService", () => {
     expect(fileService.uploadResource.mock.calls[0]![0].file.buffer).toEqual(
       await readFile(filePath),
     );
-    expect(staged.rewriteReference("course/variants/cover.webp")).toBe(
-      "tenant/course/native-archive/variants/imported.webp",
-    );
+    expect(staged.rewriteReference("course/variants/cover.webp")).toBe(IMAGE_FILE_KEY);
     expect(staged.rewriteReference("course/variants/cover-1280w.webp")).toContain("1280w.webp");
     await rm(directory, { recursive: true, force: true });
   });
@@ -221,7 +220,7 @@ describe("NativeArchiveAssetsService", () => {
     const fileService = {
       uploadResource: jest.fn().mockResolvedValue({
         resourceId: "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
-        fileKey: "tenant/course/native-archive/variants/imported.webp",
+        fileKey: IMAGE_FILE_KEY,
       }),
       deleteFile: jest.fn().mockResolvedValue(undefined),
       archiveResources: jest.fn().mockResolvedValue(undefined),
@@ -252,9 +251,7 @@ describe("NativeArchiveAssetsService", () => {
       ),
     ).rejects.toThrow("nativeArchive.error.missingAsset");
 
-    expect(fileService.deleteFile).toHaveBeenCalledWith(
-      "tenant/course/native-archive/variants/imported.webp",
-    );
+    expect(fileService.deleteFile).toHaveBeenCalledWith(IMAGE_FILE_KEY);
     expect(fileService.archiveResources).toHaveBeenCalledWith([
       "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
     ]);
@@ -271,7 +268,7 @@ describe("NativeArchiveAssetsService", () => {
     const fileService = {
       uploadResource: jest.fn().mockResolvedValue({
         resourceId: "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
-        fileKey: "tenant/course/native-archive/variants/imported.webp",
+        fileKey: IMAGE_FILE_KEY,
       }),
       deleteFile: jest.fn().mockResolvedValue(undefined),
       archiveResources: jest.fn().mockResolvedValue(undefined),
@@ -301,7 +298,7 @@ describe("NativeArchiveAssetsService", () => {
     const fileService = {
       uploadResource: jest.fn().mockResolvedValue({
         resourceId: "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
-        fileKey: "tenant/course/native-archive/variants/imported.webp",
+        fileKey: IMAGE_FILE_KEY,
       }),
       deleteFile: jest.fn().mockResolvedValue(undefined),
       archiveResources: jest.fn().mockResolvedValue(undefined),
@@ -355,9 +352,11 @@ describe("NativeArchiveAssetsService", () => {
     expect(fileService.uploadResource).toHaveBeenCalledTimes(3);
     expect(storage.uploadFile).toHaveBeenCalledTimes(1);
     references.slice(0, 3).forEach((reference) => {
-      expect(staged.rewriteReference(reference)).toMatch(/^tenant\/course\/native-archive\//);
+      expect(staged.rewriteReference(reference)).toBe(IMAGE_FILE_KEY);
     });
-    expect(staged.rewriteReference(references[3]!)).toMatch(/^native-archive\//);
+    expect(staged.rewriteReference(references[3]!)).toMatch(
+      new RegExp(`^${TENANT_ID}/native-archive/imports/`),
+    );
     await rm(directory, { recursive: true, force: true });
   });
 });

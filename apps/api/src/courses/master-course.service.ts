@@ -274,7 +274,7 @@ export class MasterCourseService {
     await this.copySourceResourceReferences(resourceCollection, {
       targetCourseId: params.targetCourseId,
       sourceTenantId: params.tenantId,
-      sourceTenantOrigin: this.toTenantOrigin(tenantHost),
+      sourceTenantOrigin: tenantHost,
       targetTenantId: params.tenantId,
     });
 
@@ -298,6 +298,7 @@ export class MasterCourseService {
       "createdAt",
       "updatedAt",
       "tenantId",
+      "originalId",
     ] as const);
 
     await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
@@ -587,7 +588,7 @@ export class MasterCourseService {
     await this.copySourceResourceReferences(resourceCollection, {
       targetCourseId,
       sourceTenantId: exportLink.sourceTenantId,
-      sourceTenantOrigin: this.toTenantOrigin(sourceTenantHost),
+      sourceTenantOrigin: sourceTenantHost,
       targetTenantId: exportLink.targetTenantId,
     });
 
@@ -2623,11 +2624,6 @@ export class MasterCourseService {
     } catch {
       return false;
     }
-  }
-
-  private toTenantOrigin(host: string) {
-    const normalizedHost = host.trim().replace(/\/+$/, "");
-    return /^https?:\/\//i.test(normalizedHost) ? normalizedHost : `https://${normalizedHost}`;
   }
 
   private isVideoReference(source: MasterCourseCopySourceReference) {

@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Se omiten los cursos y rutas cuyo identificador ya existe. El contenido nuevo se crea como borrador.",
     "uploadPrompt": "Seleccionar o soltar un ZIP de paquete de Mentingo",
-    "uploadDescription": "Usa un paquete exportado desde Mentingo. Solo archivos ZIP.",
     "dropPrompt": "Suelta aquí el paquete de Mentingo",
     "fileReady": "Listo para importar",
     "replaceFile": "Reemplazar paquete",
@@ -16,7 +15,6 @@
     "preparing": "Preparando paquete de Mentingo…",
     "exportReady": "Paquete de Mentingo descargado",
     "importTitle": "Importar un paquete de Mentingo",
-    "importDescription": "Selecciona un ZIP de paquete de Mentingo con un curso o una ruta de aprendizaje. Su estructura y configuración se restaurarán como borrador.",
     "selectFile": "Seleccionar ZIP de paquete de Mentingo",
     "importButton": "Importar paquete de Mentingo",
     "uploading": "Subiendo…",
@@ -5092,6 +5090,9 @@
   },
   "adminLearningPathsView": {
     "title": "Rutas de desarrollo",
+    "importPackage": {
+      "title": "Importar ruta de desarrollo"
+    },
     "description": "Administre metadatos de ruta, configuración de secuencia, cursos ordenados, inscripción, exportaciones y certificados.",
     "summary": "Las rutas de desarrollo de {{count}} están disponibles en este espacio de trabajo.",
     "breadcrumbs": {

@@ -1,4 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 
 import i18next from "~/utils/mocks/i18next.mock";
@@ -32,6 +33,8 @@ describe("NativeArchiveImport", () => {
     renderWith({ withQuery: true }).render(<NativeArchiveImport />);
     const submitButton = screen.getByRole("button", { name: "Import Mentingo package" });
     expect(submitButton).toBeDisabled();
+    expect(screen.getByText("Choose or drop a Mentingo package ZIP")).toBeInTheDocument();
+    expect(screen.queryByText("Use a package exported from Mentingo. ZIP files only.")).toBeNull();
 
     const archiveFile = new File(["zip"], "course.zip", { type: "application/zip" });
     fireEvent.change(screen.getByLabelText("Select Mentingo package ZIP"), {
@@ -43,5 +46,18 @@ describe("NativeArchiveImport", () => {
 
     expect(submitImport).toHaveBeenCalledWith(archiveFile, expect.any(Object));
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("uses the supplied return path for Cancel", () => {
+    renderWith({ withQuery: true }).render(
+      <MemoryRouter>
+        <NativeArchiveImport cancelTo="/admin/beta-courses/new" />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Cancel" })).toHaveAttribute(
+      "href",
+      "/admin/beta-courses/new",
+    );
   });
 });

@@ -67,7 +67,7 @@ export class NativeArchiveSnapshotService {
 
     return {
       courses: { [courseId]: document },
-      files: await this.collectReferencedAssets([snapshot], null, null, [document]),
+      files: await this.collectReferencedAssets(actor.tenantId, [snapshot], null, null, [document]),
     };
   }
 
@@ -110,6 +110,7 @@ export class NativeArchiveSnapshotService {
       ),
       learningPath: learningPathSnapshot,
       files: await this.collectReferencedAssets(
+        actor.tenantId,
         snapshots,
         learningPath.thumbnailReference,
         learningPath.settings.certificateSignature,
@@ -241,6 +242,7 @@ export class NativeArchiveSnapshotService {
   }
 
   private async collectReferencedAssets(
+    tenantId: UUIDType,
     snapshots: SourceSnapshot[],
     pathThumbnail: string | null = null,
     pathCertificateSignature: string | null = null,
@@ -263,7 +265,7 @@ export class NativeArchiveSnapshotService {
     const variantReferences = await this.resolveImageVariantReferences(variantBases);
 
     return [...new Set([...directReferences, ...variantReferences])].map((sourceReference) =>
-      this.toArchiveFile(sourceReference),
+      this.toArchiveFile(sourceReference, tenantId),
     );
   }
 
@@ -333,16 +335,20 @@ export class NativeArchiveSnapshotService {
     return references;
   }
 
-  private toArchiveFile(sourceReference: string): NativeArchiveFile {
+  private toArchiveFile(sourceReference: string, tenantId: UUIDType): NativeArchiveFile {
     if (sourceReference.startsWith("bunny-")) {
       return {
         path: sourceReference,
         sourceReference,
         contentType: "video/mp4",
         open: async () => {
+          const tenantHost = await this.masterCourseRepository.getTenantHost(tenantId);
+          if (!tenantHost) throw new NotFoundException("masterCourse.error.sourceTenantMissing");
+
           const video = await this.bunnyStreamService.downloadMp4Fallback(
             sourceReference.slice("bunny-".length),
             720,
+            tenantHost,
           );
 
           return video.stream;

@@ -25,6 +25,7 @@ import {
 } from "src/file/image-variants/image-variant.utils";
 import { S3Service } from "src/s3/s3.service";
 
+import { getNativeArchiveImportPrefix } from "../native-archive-storage-paths";
 import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 import { nativeArchiveImageFilePipe } from "../pipes/native-archive-image-file.pipe";
 
@@ -85,7 +86,7 @@ export class NativeArchiveAssetsService {
       throw new BadRequestException("nativeArchive.error.storageUnavailable");
     }
 
-    const importPrefix = `native-archive/${actor.tenantId}/${randomUUID()}`;
+    const importPrefix = getNativeArchiveImportPrefix(actor.tenantId, randomUUID());
     const scormDirectories = this.createScormDirectories(snapshots, importPrefix);
     const assetReferences = new Set<string>();
     snapshots.forEach((snapshot) => this.collectCourseAssetReferences(snapshot, assetReferences));

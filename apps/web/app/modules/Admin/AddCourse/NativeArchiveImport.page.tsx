@@ -1,8 +1,6 @@
-import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
-import { Button } from "~/components/ui/button";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Breadcrumb from "./components/Breadcrumb";
@@ -29,12 +27,7 @@ export default function NativeArchiveImportPage() {
           <p className="body-base-md text-sky-700">{t("adminCourseTypeSelector.eyebrow")}</p>
           <h1 className="h3 text-neutral-950">{t("nativeArchive.importTitle")}</h1>
         </hgroup>
-        <NativeArchiveImport />
-        <div>
-          <Button asChild type="button" variant="outline">
-            <Link to="/admin/beta-courses/new">{t("common.button.cancel")}</Link>
-          </Button>
-        </div>
+        <NativeArchiveImport cancelTo="/admin/beta-courses/new" />
       </div>
     </main>
   );

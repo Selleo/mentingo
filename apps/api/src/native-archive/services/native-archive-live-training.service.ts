@@ -32,6 +32,7 @@ export class NativeArchiveLiveTrainingService {
     snapshot: SourceSnapshot,
     chapterMap: Map<UUIDType, UUIDType>,
     actor: CurrentUserType,
+    targetCourseId: UUIDType,
   ): Promise<void> {
     const records = this.readLiveTrainingRecords(snapshot);
 
@@ -44,7 +45,7 @@ export class NativeArchiveLiveTrainingService {
     };
 
     for (const item of restoreItems) {
-      await this.restoreLiveTrainingLesson(snapshot, item, actor, state);
+      await this.restoreLiveTrainingLesson(targetCourseId, item, actor, state);
     }
 
     await this.updateChapterLessonCounts(snapshot, chapterMap);
@@ -112,12 +113,12 @@ export class NativeArchiveLiveTrainingService {
   }
 
   private async restoreLiveTrainingLesson(
-    snapshot: SourceSnapshot,
+    targetCourseId: UUIDType,
     item: NativeArchiveLiveTrainingRestoreItem,
     actor: CurrentUserType,
     state: NativeArchiveLiveTrainingRestoreState,
   ): Promise<void> {
-    const training = await this.restoreTrainingIfNeeded(snapshot, item.record, actor, state);
+    const training = await this.restoreTrainingIfNeeded(targetCourseId, item.record, actor, state);
     const lessonId = await this.restoreLessonIfNeeded(item, state);
 
     await this.nativeArchiveImportRepository.createLiveLesson({
@@ -129,7 +130,7 @@ export class NativeArchiveLiveTrainingService {
   }
 
   private async restoreTrainingIfNeeded(
-    snapshot: SourceSnapshot,
+    targetCourseId: UUIDType,
     record: NativeArchiveLiveTrainingLesson,
     actor: CurrentUserType,
     state: NativeArchiveLiveTrainingRestoreState,
@@ -160,7 +161,7 @@ export class NativeArchiveLiveTrainingService {
     const linkId = await this.nativeArchiveImportRepository.createLiveTrainingLink({
       liveTrainingId: trainingId,
       entityType: LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE,
-      entityId: snapshot.course.id,
+      entityId: targetCourseId,
     });
 
     const restored = { trainingId, linkId };
@@ -199,8 +200,9 @@ export class NativeArchiveLiveTrainingService {
 
     if (existingLessonId) return existingLessonId;
 
+    const { id: _sourceLessonId, ...lessonFields } = item.sourceLesson;
     const lessonId = await this.nativeArchiveImportRepository.createLesson({
-      ...item.sourceLesson,
+      ...lessonFields,
       chapterId: item.mappedChapterId,
     });
 

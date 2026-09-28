@@ -29,10 +29,11 @@ describe("native archive insert projections", () => {
       thumbnailS3Key: "attacker-thumbnail",
     } as never;
 
-    const insert = buildNativeArchiveCourseInsert(source, "actor-id", "category-id");
+    const insert = buildNativeArchiveCourseInsert(source, "actor-id", "category-id", "target-id");
 
     expect(insert).toMatchObject({
-      id: "course-id",
+      id: "target-id",
+      originalId: "course-id",
       status: COURSE_STATUSES.DRAFT,
       authorId: "actor-id",
       categoryId: "category-id",
@@ -46,6 +47,7 @@ describe("native archive insert projections", () => {
   it("keeps learning path inserts to approved fields and forces actor-controlled values", () => {
     const source = {
       id: "path-id",
+      originalId: "first-path-id",
       title: { en: "Path" },
       description: { en: "Description" },
       thumbnailReference: "source-thumbnail",
@@ -61,13 +63,17 @@ describe("native archive insert projections", () => {
       status: "published",
     } as never;
 
-    const insert = buildNativeArchiveLearningPathInsert(source, "actor-id", "rewritten-thumbnail", {
-      certificateSignature: null,
-      certificateFontColor: null,
-    });
+    const insert = buildNativeArchiveLearningPathInsert(
+      source,
+      "actor-id",
+      "rewritten-thumbnail",
+      { certificateSignature: null, certificateFontColor: null },
+      "target-id",
+    );
 
     expect(insert).toMatchObject({
-      id: "path-id",
+      id: "target-id",
+      originalId: "first-path-id",
       status: LEARNING_PATH_STATUSES.DRAFT,
       authorId: "actor-id",
       thumbnailReference: "rewritten-thumbnail",

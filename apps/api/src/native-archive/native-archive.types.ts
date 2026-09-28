@@ -43,6 +43,9 @@ export type NativeArchiveImportPlan = {
   missing: NativeArchiveValidatedCourseSnapshot[];
   reusedCourseIds: UUIDType[];
   learningPath?: NativeArchiveLearningPathImportSnapshot;
+  courseIdMap: Map<UUIDType, UUIDType>;
+  targetRootId: UUIDType;
+  alreadyExists: boolean;
 };
 
 export type NativeArchiveLiveLesson = typeof liveLessons.$inferSelect;

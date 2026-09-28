@@ -348,6 +348,7 @@ export const courses = pgTable(
       .default(COURSE_ORIGIN_TYPES.REGULAR),
     sourceCourseId: uuid("source_course_id"),
     sourceTenantId: uuid("source_tenant_id"),
+    originalId: uuid("original_id"),
     settings: coursesSettings.column.notNull(),
     baseLanguage,
     availableLocales,
@@ -355,6 +356,10 @@ export const courses = pgTable(
   },
   withTenantIdIndex("courses", (table) => ({
     shortIdUniqueIdx: uniqueIndex("courses_short_id_unique_idx").on(table.shortId),
+    originalIdUniqueIdx: uniqueIndex("courses_tenant_original_id_unique_idx").on(
+      table.tenantId,
+      table.originalId,
+    ),
   })),
 );
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
@@ -2726,11 +2731,17 @@ export const learningPaths = pgTable(
       .default(COURSE_ORIGIN_TYPES.REGULAR),
     sourceLearningPathId: uuid("source_learning_path_id"),
     sourceTenantId: uuid("source_tenant_id"),
+    originalId: uuid("original_id"),
     baseLanguage,
     availableLocales,
     tenantId,
   },
-  withTenantIdIndex("learning_paths"),
+  withTenantIdIndex("learning_paths", (table) => ({
+    originalIdUniqueIdx: uniqueIndex("learning_paths_tenant_original_id_unique_idx").on(
+      table.tenantId,
+      table.originalId,
+    ),
+  })),
 );
 
 export const learningPathCourses = pgTable(

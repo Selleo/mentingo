@@ -86,6 +86,7 @@ describe("NativeArchiveLiveTrainingService", () => {
       snapshot({ en: "Workshop", pl: "Warsztat" }),
       new Map([[chapterId, targetChapterId]]),
       actor,
+      "target-course-id",
     );
 
     expect(archiveRepository.createCalendarEvent).toHaveBeenCalledWith(
@@ -100,6 +101,10 @@ describe("NativeArchiveLiveTrainingService", () => {
         description: { en: "Notes" },
       }),
     );
+    expect(archiveRepository.createLiveTrainingLink).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: "target-course-id" }),
+    );
+    expect(archiveRepository.createLesson.mock.calls[0][0]).not.toHaveProperty("id");
   });
 
   it("cleans extra archive event fields before inserting with a generated uid", async () => {
@@ -118,6 +123,7 @@ describe("NativeArchiveLiveTrainingService", () => {
       sourceSnapshot,
       new Map([[chapterId, targetChapterId]]),
       actor,
+      "target-course-id",
     );
 
     const [event] = archiveRepository.createCalendarEvent.mock.calls[0];
@@ -141,6 +147,7 @@ describe("NativeArchiveLiveTrainingService", () => {
         snapshot({ xx: "Unsupported" }),
         new Map([[chapterId, targetChapterId]]),
         actor,
+        "target-course-id",
       ),
     ).rejects.toThrow(BadRequestException);
     expect(archiveRepository.createCalendarEvent).not.toHaveBeenCalled();
@@ -162,6 +169,7 @@ describe("NativeArchiveLiveTrainingService", () => {
         sourceSnapshot,
         new Map([[chapterId, targetChapterId]]),
         actor,
+        "target-course-id",
       ),
     ).rejects.toThrow(BadRequestException);
 

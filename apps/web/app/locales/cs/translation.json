@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Kurzy a vzdělávací cesty s existujícím identifikátorem se přeskočí. Nový obsah se vytvoří jako koncept.",
     "uploadPrompt": "Vyberte nebo přetáhněte ZIP balíček Mentingo",
-    "uploadDescription": "Použijte balíček exportovaný z Mentinga. Pouze soubory ZIP.",
     "dropPrompt": "Přetáhněte balíček Mentingo sem",
     "fileReady": "Připraveno k importu",
     "replaceFile": "Nahradit balíček",
@@ -16,7 +15,6 @@
     "preparing": "Příprava balíčku Mentingo…",
     "exportReady": "Balíček Mentingo byl stažen",
     "importTitle": "Importovat balíček Mentingo",
-    "importDescription": "Vyberte ZIP balíček Mentingo s kurzem nebo vzdělávací cestou. Struktura a nastavení se obnoví jako koncept.",
     "selectFile": "Vybrat ZIP balíček Mentingo",
     "importButton": "Importovat balíček Mentingo",
     "uploading": "Nahrávání…",
@@ -5291,6 +5289,9 @@
   },
   "adminLearningPathsView": {
     "title": "Rozvojové cesty",
+    "importPackage": {
+      "title": "Importovat rozvojovou cestu"
+    },
     "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
     "summary": "{{count}} rozvojových cest je dostupných v tomto prostoru.",
     "breadcrumbs": {

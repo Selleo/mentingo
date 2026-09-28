@@ -27,6 +27,7 @@ Learners open the development paths page, browse available paths, enroll when el
 - Track path progress and issue certificates when path certification is enabled.
 - Export learning paths and linked courses to active recipient organizations where permitted.
 - Download a learning path and all its linked courses as one Mentingo package for later import into a compatible instance.
+- Import a Mentingo learning-path package from the development paths management view.
 
 ## End-User Value
 
@@ -36,7 +37,7 @@ Group enrollment, sequence rules, certificates, and export support larger organi
 
 ## How It Works
 
-An editor who can manage a learning path can download a Mentingo package ZIP containing its ordered course set and the managed files those courses need. The Mentingo package card in the new-course experience opens a dedicated ZIP picker that can restore the path as a draft. After a new path is imported, the user returns to the development paths list. Existing courses with matching UUIDs are reused without being changed, and an existing path UUID makes the import a no-op. New courses are free drafts owned by the importer; the path keeps its original UUID, localized metadata, order, and authored settings. Learner assignments and progress are excluded.
+An editor who can manage a learning path can download a Mentingo package ZIP containing its ordered course set and the managed files those courses need. An administrator with both learning-path and course creation access can import a package in a dialog on `/development-paths`; the dialog closes after the import completes. The package picker remains available in the new-course experience. Mentingo creates draft copies of paths and courses with identifiers belonging to the destination tenant, while retaining their source identifiers so another import can recognize and reuse those copies. The path retains its localized metadata, course order, and authored settings. Learner assignments and progress are excluded.
 
 When learning paths are enabled, learners with access can open `/development-paths` and see path cards in their selected language. If they are eligible, they can enroll and start working through the path's courses.
 
@@ -48,9 +49,10 @@ In sequence mode, learners receive access to the next course only after prior co
 
 - Mentingo package path export requires management access to the path itself; separate management access to every linked course is not required. Import needs both learning-path and course creation access.
 - Mentingo package import is tenant-scoped and performs the new course and path database writes in one transaction. ZIP entries and asset hashes are checked before restore.
+- Imported courses and paths store their original identifiers separately from destination identifiers. Course links and import results use destination identifiers; a repeated import finds the existing destination copy.
 
 - Learner UI lives in `apps/web/app/modules/LearningPaths`; admin UI lives in `apps/web/app/modules/Admin/LearningPaths`.
-- Main routes are `/development-paths`, `/admin/development-paths`, `/admin/development-paths/new`, and `/admin/development-paths/:id`.
+- The development paths management view is served at `/development-paths`. Package import opens in a dialog on that view.
 - Backend controllers live in `apps/api/src/learning-path/controllers`.
 - Learning-path endpoints are protected by `LearningPathsEnabledGuard`.
 - Key permissions include `PERMISSIONS.LEARNING_PATH_READ`, create/update/delete, course update, enrollment, export, and certificate permissions.
@@ -59,7 +61,7 @@ In sequence mode, learners receive access to the next course only after prior co
 
 ## Test Evidence
 
-- Archive package tests cover ZIP parsing and format version rejection, and a web component test covers the shared ZIP-only import control. A full learning-path import/export E2E flow is not yet covered.
+- Archive package tests cover ZIP parsing, format version rejection, and destination identifier mapping. Web component tests cover the shared ZIP-only import control and the management view's permission-gated import dialog. A full learning-path import/export E2E test is not yet covered; local import jobs for the reported package completed successfully.
 
 - API E2E coverage verifies the feature gate, create/read/update/delete, localization, own-path permissions, course add/remove/reorder, sequence synchronization, direct and group enrollment/unenrollment, active-recipient export behavior, rejection of inactive recipients, course access retention/removal rules, duplicate sync handling, future group members, and learning-path certificate rendering/share flows.
 - I did not find a dedicated Playwright learning-path spec under `apps/web/e2e/specs`; frontend behavior is supported by source evidence and strong backend workflow coverage.

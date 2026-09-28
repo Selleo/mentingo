@@ -14,6 +14,7 @@ const jsonObjectSchema = Type.Record(Type.String(), Type.Unknown());
 const courseSchema = Type.Object(
   {
     id: UUIDSchema,
+    originalId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
     title: nativeArchiveLocalizedTextSchema,
     description: nativeArchiveLocalizedTextSchema,
     authorMetadata: Type.Optional(
@@ -77,6 +78,15 @@ const openTextSettingsSchema = Type.Object(
   { questionId: UUIDSchema },
   { additionalProperties: true },
 );
+const blankAnswerSetSchema = Type.Object(
+  {
+    blankId: UUIDSchema,
+    language: nativeArchiveLanguageSchema,
+    preferredAnswer: Type.String(),
+    acceptedAnswers: Type.Array(Type.String()),
+  },
+  { additionalProperties: true },
+);
 const rowSchema = Type.Object(
   {
     id: UUIDSchema,
@@ -124,7 +134,7 @@ export const nativeArchiveCourseSnapshotSchema = Type.Object(
     questions: Type.Array(questionSchema),
     options: Type.Array(rowSchema),
     assessmentQuestionBlanks: Type.Array(rowSchema),
-    assessmentQuestionBlankAnswerSets: Type.Array(rowSchema),
+    assessmentQuestionBlankAnswerSets: Type.Array(blankAnswerSetSchema),
     assessmentQuestionDragAndDropOptions: Type.Array(rowSchema),
     assessmentQuestionScaleOptions: Type.Array(rowSchema),
     assessmentQuestionTrueFalseStatements: Type.Array(rowSchema),

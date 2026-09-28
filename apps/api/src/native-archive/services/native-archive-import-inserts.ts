@@ -14,9 +14,11 @@ export function buildNativeArchiveCourseInsert(
   source: SourceSnapshot["course"],
   actorId: UUIDType,
   categoryId: UUIDType,
+  targetId: UUIDType,
 ): NativeArchiveCourseInsert {
   return {
-    id: source.id,
+    id: targetId,
+    originalId: source.originalId ?? source.id,
     title: source.title,
     description: source.description,
     status: COURSE_STATUSES.DRAFT,
@@ -36,9 +38,11 @@ export function buildNativeArchiveLearningPathInsert(
   actorId: UUIDType,
   thumbnailReference: string | null,
   settings: NativeArchiveLearningPathInsert["settings"],
+  targetId: UUIDType,
 ): NativeArchiveLearningPathInsert {
   return {
-    id: source.id,
+    id: targetId,
+    originalId: source.originalId ?? source.id,
     title: source.title,
     description: source.description,
     thumbnailReference,

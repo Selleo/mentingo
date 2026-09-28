@@ -52,7 +52,7 @@ describe("NativeArchiveTusService", () => {
     expect(FileGuard.getFileType).toHaveBeenCalledWith(chunk);
     expect(storage.uploadMultipartPart).toHaveBeenCalledTimes(1);
     expect(storage.completeMultipartUpload).toHaveBeenCalledTimes(1);
-    expect(key).toContain(`/uploads/${ACTOR.tenantId}/`);
+    expect(key).toMatch(new RegExp(`^${ACTOR.tenantId}/native-archive/uploads/`));
   });
 
   it("rejects a non-ZIP first chunk before uploading it to S3", async () => {
@@ -94,8 +94,8 @@ describe("NativeArchiveTusService", () => {
     ).rejects.toThrow("S3 unavailable");
     expect((await service.getImportUploadSession(session.uploadId, ACTOR)).offset).toBe(6);
 
-    await expect(service.completeImportUpload(session.uploadId, ACTOR)).resolves.toContain(
-      `/uploads/${ACTOR.tenantId}/`,
+    await expect(service.completeImportUpload(session.uploadId, ACTOR)).resolves.toMatch(
+      new RegExp(`^${ACTOR.tenantId}/native-archive/uploads/`),
     );
     expect(storage.uploadMultipartPart).toHaveBeenCalledTimes(1);
     expect(storage.completeMultipartUpload).toHaveBeenCalledTimes(2);

@@ -20,6 +20,12 @@ import { S3Service } from "src/s3/s3.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import {
+  getNativeArchiveExportKey,
+  getNativeArchiveExportPrefix,
+  getNativeArchiveUploadKey,
+  getNativeArchiveUploadPrefix,
+} from "../native-archive-storage-paths";
+import {
   NATIVE_ARCHIVE_EXPORT_TTL_MS,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_PAGE_SIZE,
@@ -101,7 +107,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       throw new BadRequestException("nativeArchive.error.storageUnavailable");
     }
 
-    const key = `native-archive/uploads/${actor.tenantId}/${randomUUID()}.zip`;
+    const key = getNativeArchiveUploadKey(actor.tenantId, randomUUID());
 
     try {
       await this.s3Service.uploadStreamMultipart(
@@ -120,7 +126,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     key: string,
     actor: CurrentUserType,
   ): Promise<NativeArchiveJobReceipt> {
-    if (!key.startsWith(`native-archive/uploads/${actor.tenantId}/`)) {
+    if (!key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
       throw new ForbiddenException("nativeArchive.error.invalidUpload");
     }
 
@@ -166,7 +172,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
 
     const key = this.getArchiveExportKey(job.returnvalue);
 
-    if (!key || !key.startsWith(`native-archive/exports/${actor.tenantId}/`)) {
+    if (!key || !this.isArchiveExportKeyForTenant(key, actor.tenantId)) {
       throw new NotFoundException("nativeArchive.error.notReady");
     }
 
@@ -205,7 +211,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     key: string | undefined,
     actor: CurrentUserType,
   ): Promise<NativeArchiveJobResult> {
-    if (!key || !key.startsWith(`native-archive/uploads/${actor.tenantId}/`)) {
+    if (!key || !key.startsWith(getNativeArchiveUploadPrefix(actor.tenantId))) {
       throw new ForbiddenException("nativeArchive.error.invalidUpload");
     }
 
@@ -243,14 +249,15 @@ export class NativeArchiveJobService implements OnModuleDestroy {
         ? NATIVE_ARCHIVE_KIND.COURSE
         : NATIVE_ARCHIVE_KIND.LEARNING_PATH;
 
-    const snapshot = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-      kind === NATIVE_ARCHIVE_KIND.COURSE
-        ? this.nativeArchiveSnapshotService.buildCourseExportSnapshot(rootId, actor)
-        : this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(rootId, actor),
-    );
+    const archive = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
+      const snapshot =
+        kind === NATIVE_ARCHIVE_KIND.COURSE
+          ? await this.nativeArchiveSnapshotService.buildCourseExportSnapshot(rootId, actor)
+          : await this.nativeArchiveSnapshotService.buildLearningPathExportSnapshot(rootId, actor);
 
-    const archive = await buildNativeArchive({ kind, rootId, ...snapshot });
-    const exportKey = `native-archive/exports/${actor.tenantId}/${randomUUID()}.zip`;
+      return buildNativeArchive({ kind, rootId, ...snapshot });
+    });
+    const exportKey = getNativeArchiveExportKey(actor.tenantId, randomUUID());
 
     try {
       await this.s3Service.uploadStreamMultipart(archive.stream, exportKey, "application/zip");
@@ -269,7 +276,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   async removeExpiredArchives(): Promise<void> {
     const queue = this.queueService.getQueue(QUEUE_NAMES.NATIVE_ARCHIVE);
     const cutoff = Date.now() - NATIVE_ARCHIVE_EXPORT_TTL_MS;
-    const expiredJobs: Job[] = [];
+    const expiredJobs: Job<NativeArchiveJob>[] = [];
 
     for (let offset = 0; ; offset += NATIVE_ARCHIVE_JOB_PAGE_SIZE) {
       const page = await queue.getJobs(
@@ -287,11 +294,12 @@ export class NativeArchiveJobService implements OnModuleDestroy {
     }
   }
 
-  private async removeExpiredArchiveJob(job: Job): Promise<void> {
+  private async removeExpiredArchiveJob(job: Job<NativeArchiveJob>): Promise<void> {
     const key = this.getArchiveExportKey(job.returnvalue);
+    const tenantId = job.data?.actor?.tenantId;
 
     try {
-      if (key?.startsWith("native-archive/exports/")) {
+      if (key && tenantId && this.isArchiveExportKeyForTenant(key, tenantId)) {
         await this.s3Service.deleteFile(key);
       }
 
@@ -304,5 +312,9 @@ export class NativeArchiveJobService implements OnModuleDestroy {
   private getArchiveExportKey(result: unknown): string | undefined {
     if (!isRecord(result)) return;
     return typeof result.key === "string" ? result.key : undefined;
+  }
+
+  private isArchiveExportKeyForTenant(key: string, tenantId: UUIDType): boolean {
+    return key.startsWith(getNativeArchiveExportPrefix(tenantId));
   }
 }

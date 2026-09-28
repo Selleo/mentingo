@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+
 import { LESSON_TYPES } from "@repo/shared";
 
 import { NativeArchiveSnapshotService } from "../native-archive-snapshot.service";
@@ -186,5 +188,41 @@ describe("NativeArchiveSnapshotService", () => {
       variantKey,
     ]);
     expect(storage.getFileExists).toHaveBeenCalled();
+  });
+
+  it("uses the stored tenant host when downloading a Bunny video", async () => {
+    const tenantHost = "https://tenant1.lms.localhost";
+    const snapshot = {
+      ...sourceSnapshot,
+      lessons: sourceSnapshot.lessons.map((lesson) => ({
+        ...lesson,
+        type: LESSON_TYPES.CONTENT,
+        fileS3Key: "bunny-video-id",
+      })),
+    };
+    const masterCourseRepository = {
+      getCourseById: jest.fn().mockResolvedValue(course),
+      getTenantHost: jest.fn().mockResolvedValue(tenantHost),
+    };
+    const bunnyStreamService = {
+      downloadMp4Fallback: jest.fn().mockResolvedValue({ stream: Readable.from([]) }),
+    };
+    const service = new NativeArchiveSnapshotService(
+      { findUserManagePermissions: jest.fn().mockResolvedValue({ global: true }) } as never,
+      masterCourseRepository as never,
+      { buildSourceSnapshot: jest.fn().mockResolvedValue(snapshot) } as never,
+      {} as never,
+      bunnyStreamService as never,
+    );
+
+    const result = await service.buildCourseExportSnapshot(COURSE_ID, ACTOR);
+    await result.files[0]?.open();
+
+    expect(masterCourseRepository.getTenantHost).toHaveBeenCalledWith(ACTOR.tenantId);
+    expect(bunnyStreamService.downloadMp4Fallback).toHaveBeenCalledWith(
+      "video-id",
+      720,
+      tenantHost,
+    );
   });
 });

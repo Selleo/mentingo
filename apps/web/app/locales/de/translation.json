@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Kurse und Lernpfade mit bereits vorhandener Kennung werden übersprungen. Neue Inhalte werden als Entwurf erstellt.",
     "uploadPrompt": "Mentingo-Paket-ZIP auswählen oder ablegen",
-    "uploadDescription": "Verwenden Sie ein aus Mentingo exportiertes Paket. Nur ZIP-Dateien.",
     "dropPrompt": "Mentingo-Paket hier ablegen",
     "fileReady": "Bereit zum Import",
     "replaceFile": "Paket ersetzen",
@@ -16,7 +15,6 @@
     "preparing": "Mentingo-Paket wird vorbereitet…",
     "exportReady": "Mentingo-Paket heruntergeladen",
     "importTitle": "Mentingo-Paket importieren",
-    "importDescription": "Wählen Sie eine Mentingo-Paket-ZIP-Datei mit einem Kurs oder Lernpfad. Struktur und Einstellungen werden als Entwurf wiederhergestellt.",
     "selectFile": "Mentingo-Paket-ZIP auswählen",
     "importButton": "Mentingo-Paket importieren",
     "uploading": "Wird hochgeladen…",
@@ -5283,6 +5281,9 @@
   },
   "adminLearningPathsView": {
     "title": "Entwicklungspfade",
+    "importPackage": {
+      "title": "Entwicklungspfad importieren"
+    },
     "description": "Verwalten Sie Metadaten, Sequenzeinstellungen, Kurse, Einschreibungen, Exporte und Zertifikate.",
     "summary": "{{count}} Entwicklungspfade sind in diesem Arbeitsbereich verfügbar.",
     "breadcrumbs": {

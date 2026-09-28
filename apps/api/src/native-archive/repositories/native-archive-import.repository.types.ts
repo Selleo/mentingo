@@ -4,6 +4,7 @@ import type { calendarEvents, courses, learningPaths, resources } from "src/stor
 export type NativeArchiveCourseInsert = Pick<
   typeof courses.$inferInsert,
   | "id"
+  | "originalId"
   | "status"
   | "priceInCents"
   | "currency"
@@ -21,6 +22,7 @@ export type NativeArchiveCourseInsert = Pick<
 export type NativeArchiveLearningPathInsert = Pick<
   typeof learningPaths.$inferInsert,
   | "id"
+  | "originalId"
   | "thumbnailReference"
   | "status"
   | "includesCertificate"

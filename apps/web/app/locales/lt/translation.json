@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Kursai ir mokymosi keliai su jau esančiu identifikatoriumi bus praleisti. Naujas turinys bus sukurtas kaip juodraštis.",
     "uploadPrompt": "Pasirinkite arba nutempkite Mentingo paketo ZIP",
-    "uploadDescription": "Naudokite iš Mentingo eksportuotą paketą. Tik ZIP failai.",
     "dropPrompt": "Nutempkite Mentingo paketą čia",
     "fileReady": "Paruošta importuoti",
     "replaceFile": "Pakeisti paketą",
@@ -16,7 +15,6 @@
     "preparing": "Ruošiamas Mentingo paketas…",
     "exportReady": "Mentingo paketas atsisiųstas",
     "importTitle": "Importuoti Mentingo paketą",
-    "importDescription": "Pasirinkite kurso arba mokymosi kelio Mentingo paketo ZIP failą. Struktūra ir nustatymai bus atkurti kaip juodraštis.",
     "selectFile": "Pasirinkti Mentingo paketo ZIP",
     "importButton": "Importuoti Mentingo paketą",
     "uploading": "Įkeliama…",
@@ -5287,6 +5285,9 @@
   },
   "adminLearningPathsView": {
     "title": "Tobulėjimo keliai",
+    "importPackage": {
+      "title": "Importuoti tobulėjimo kelią"
+    },
     "description": "Tvarkykite metaduomenis, sekos nustatymus, kursus, registracijas, eksportą ir sertifikatus.",
     "summary": "{{count}} tobulėjimo keliai yra pasiekiami šioje darbo srityje.",
     "breadcrumbs": {

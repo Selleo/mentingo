@@ -30,6 +30,7 @@ export class NativeArchiveSnapshotRepository {
     const [row] = await this.db
       .select({
         id: learningPaths.id,
+        originalId: learningPaths.originalId,
         title: learningPaths.title,
         description: learningPaths.description,
         thumbnailReference: learningPaths.thumbnailReference,

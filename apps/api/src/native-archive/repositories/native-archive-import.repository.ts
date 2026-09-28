@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -32,14 +32,38 @@ import type { NativeArchivePermission } from "../native-archive.types";
 export class NativeArchiveImportRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
-  async findLearningPathById(id: UUIDType) {
+  async findLearningPathByArchiveIdentity(
+    sourceId: UUIDType,
+    originalId: UUIDType,
+    tenantId: UUIDType,
+  ) {
     const rows = await this.db
       .select({ id: learningPaths.id })
       .from(learningPaths)
-      .where(eq(learningPaths.id, id))
+      .where(
+        and(
+          eq(learningPaths.tenantId, tenantId),
+          or(eq(learningPaths.id, sourceId), eq(learningPaths.originalId, originalId)),
+        ),
+      )
       .limit(1);
 
     return rows[0];
+  }
+
+  async findCourseByArchiveIdentity(sourceId: UUIDType, originalId: UUIDType, tenantId: UUIDType) {
+    const [row] = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(
+        and(
+          eq(courses.tenantId, tenantId),
+          or(eq(courses.id, sourceId), eq(courses.originalId, originalId)),
+        ),
+      )
+      .limit(1);
+
+    return row;
   }
 
   async findUserPermission(userId: UUIDType, permission: NativeArchivePermission) {

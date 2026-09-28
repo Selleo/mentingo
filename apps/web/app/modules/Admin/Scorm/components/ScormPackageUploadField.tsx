@@ -15,13 +15,14 @@ type ScormPackageUploadFieldProps = {
   readonlyTitle?: string;
   readonlyDescription?: string;
   importNotice?: string;
+  showUploadDescription?: boolean;
   isProcessing?: boolean;
   processingAriaLabel?: string;
   icon?: LucideIcon;
   inputAriaLabel?: string;
   labels?: {
     upload: string;
-    uploadDescription: string;
+    uploadDescription?: string;
     drop: string;
     ready: string;
     replace: string;
@@ -52,6 +53,7 @@ export const ScormPackageUploadField = ({
   readonlyTitle,
   readonlyDescription,
   importNotice,
+  showUploadDescription = true,
   isProcessing = false,
   processingAriaLabel,
   icon: PackageIcon,
@@ -154,9 +156,11 @@ export const ScormPackageUploadField = ({
                 ? (labels?.drop ?? t("adminScorm.create.dropPackage"))
                 : (labels?.upload ?? t("adminScorm.create.uploadPackage"))}
             </p>
-            <p className="body-sm mt-2 max-w-md text-neutral-700">
-              {labels?.uploadDescription ?? t("adminScorm.create.uploadPackageDescription")}
-            </p>
+            {showUploadDescription && (
+              <p className="body-sm mt-2 max-w-md text-neutral-700">
+                {labels?.uploadDescription ?? t("adminScorm.create.uploadPackageDescription")}
+              </p>
+            )}
           </div>
         )}
         {isProcessing && (

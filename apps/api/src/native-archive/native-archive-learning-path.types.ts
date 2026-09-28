@@ -3,6 +3,7 @@ import type { learningPathCourses, learningPaths } from "src/storage/schema";
 export type NativeArchiveLearningPathSnapshot = Pick<
   typeof learningPaths.$inferSelect,
   | "id"
+  | "originalId"
   | "title"
   | "description"
   | "thumbnailReference"
@@ -34,7 +35,7 @@ export type NativeArchiveLearningPathImportSnapshot = Pick<
   | "baseLanguage"
   | "availableLocales"
   | "courseLinks"
->;
+> & { originalId?: typeof learningPaths.$inferSelect.originalId };
 
 export type NativeArchiveLearningPathAssetFields = Pick<
   NativeArchiveLearningPathImportSnapshot,

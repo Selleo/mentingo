@@ -2,7 +2,6 @@
   "nativeArchive": {
     "importNotice": "Kursy i ścieżki o istniejącym identyfikatorze zostaną pominięte. Nowa zawartość powstanie jako szkic.",
     "uploadPrompt": "Wybierz lub upuść ZIP pakietu Mentingo",
-    "uploadDescription": "Użyj pakietu wyeksportowanego z Mentingo. Tylko pliki ZIP.",
     "dropPrompt": "Upuść tutaj pakiet Mentingo",
     "fileReady": "Gotowy do importu",
     "replaceFile": "Zastąp pakiet",
@@ -16,7 +15,6 @@
     "preparing": "Przygotowywanie pakietu Mentingo…",
     "exportReady": "Pakiet Mentingo został pobrany",
     "importTitle": "Importuj pakiet Mentingo",
-    "importDescription": "Wybierz plik ZIP pakietu Mentingo z kursem lub ścieżką. Struktura i ustawienia zostaną odtworzone jako szkic.",
     "selectFile": "Wybierz ZIP pakietu Mentingo",
     "importButton": "Importuj pakiet Mentingo",
     "uploading": "Przesyłanie…",
@@ -1456,6 +1454,9 @@
   },
   "adminLearningPathsView": {
     "title": "Ścieżki Rozwoju",
+    "importPackage": {
+      "title": "Importuj ścieżkę rozwoju"
+    },
     "description": "Zarządzaj metadanymi, ustawieniami sekwencji, kursami, zapisami, eksportem i certyfikatami.",
     "summary": "{{count}} ścieżek rozwoju jest dostępnych w tej organizacji.",
     "breadcrumbs": {
