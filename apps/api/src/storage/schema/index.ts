@@ -149,10 +149,13 @@ export const users = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    phone: text("phone"),
+    phoneVerifiedAt: timestampWithTimezone({ name: "phone_verified_at" }),
     tenantId,
   },
   withTenantIdIndex("users", (table) => ({
     emailUniqueIdx: uniqueIndex("users_tenant_id_email_unique_idx").on(table.tenantId, table.email),
+    phoneUniqueIdx: uniqueIndex("users_tenant_id_phone_unique_idx").on(table.tenantId, table.phone),
   })),
 );
 

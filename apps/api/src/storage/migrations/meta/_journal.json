@@ -1408,6 +1408,13 @@
       "when": 1789631517227,
       "tag": "0200_normalize_course_author_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1790581888813,
+      "tag": "0201_add_phone_to_users",
+      "breakpoints": true
     }
   ]
 }

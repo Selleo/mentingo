@@ -111,6 +111,8 @@ export const createUserFactory = (db: DatabasePg) => {
           archived: user.archived,
           avatarReference: user.avatarReference,
           deletedAt: user.deletedAt,
+          phone: user.phone,
+          phoneVerifiedAt: user.phoneVerifiedAt,
           tenantId,
         })
         .returning();
@@ -152,6 +154,8 @@ export const createUserFactory = (db: DatabasePg) => {
       archived: false,
       avatarReference: null,
       deletedAt: null,
+      phone: null,
+      phoneVerifiedAt: null,
       tenantId: faker.string.uuid(),
     };
   });
