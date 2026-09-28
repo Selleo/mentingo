@@ -137,7 +137,7 @@ describe("NativeArchive export (e2e)", () => {
       expect.objectContaining({
         sourceReference: assetReference,
         byteLength: sourceAssetBytes.length,
-        contentType: "application/octet-stream",
+        contentType: "application/pdf",
         sha256: createHash("sha256").update(sourceAssetBytes).digest("hex"),
       }),
     );
@@ -311,6 +311,16 @@ describe("NativeArchive export (e2e)", () => {
       expect(manifestAsset).toBeDefined();
       expect(archive.assetContents.get(manifestAsset!.path)).toEqual(expected.bytes);
     }
+    expect(
+      archive.manifest.assets.find(
+        (asset) => asset.sourceReference === `${scorm.extractedFilesReference}/index.html`,
+      )?.contentType,
+    ).toBe("text/html");
+    expect(
+      archive.manifest.assets.find(
+        (asset) => asset.sourceReference === `${scorm.extractedFilesReference}/scripts/runtime.js`,
+      )?.contentType,
+    ).toContain("javascript");
   });
 
   it("rejects access to an export job from another user and reports a missing course as failed", async () => {

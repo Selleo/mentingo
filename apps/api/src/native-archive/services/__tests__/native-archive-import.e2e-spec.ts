@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -7,6 +8,7 @@ import {
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
   LIVE_TRAINING_STATUSES,
+  RESOURCE_VISIBILITY,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
@@ -174,6 +176,62 @@ describe("Native archive import (e2e)", () => {
     expect(savedLesson?.id).not.toBe(sourceLessonId);
   });
 
+  it("rewrites resource IDs and URLs in imported lesson descriptions", async () => {
+    jest.spyOn(app.get(MasterCourseService), "duplicateCourseIntoExistingCourse").mockRestore();
+
+    const sourceCourseId = randomUUID();
+    const sourceResourceId = randomUUID();
+    const sourceReference = `https://assets.example.test/${sourceResourceId}.png`;
+    const source = createNativeArchiveCourseSnapshot(sourceCourseId, { withContent: true });
+    const content = `<div data-node-type="image" data-src="https://tenant1.lms.localhost/api/lesson/lesson-resource/${sourceResourceId}" data-resource-id="${sourceResourceId}"></div>`;
+    const resource = {
+      id: sourceResourceId,
+      title: { en: "Course image" },
+      description: { en: "Course image" },
+      reference: sourceReference,
+      contentType: "image/png",
+      metadata: {},
+      visibility: RESOURCE_VISIBILITY.PUBLIC,
+    };
+    const snapshot = {
+      ...source,
+      lessons: source.lessons.map((lesson) => ({ ...lesson, description: { en: content } })),
+      lessonContentResources: [resource],
+    };
+    const zipPath = await writeNativeArchiveZip(
+      {
+        kind: NATIVE_ARCHIVE_KIND.COURSE,
+        rootId: sourceCourseId,
+        courses: { [sourceCourseId]: snapshot },
+        files: [],
+      },
+      temporaryDirectory,
+    );
+
+    const result = await importArchive(zipPath);
+    const [targetResource] = await db
+      .select()
+      .from(resources)
+      .where(eq(resources.reference, sourceReference));
+    const [targetChapter] = await db
+      .select()
+      .from(chapters)
+      .where(eq(chapters.courseId, result.rootId));
+    expect(result).toMatchObject({ alreadyExists: false, createdCourseIds: [result.rootId] });
+    expect(targetChapter).toBeDefined();
+    const [targetLesson] = await db
+      .select()
+      .from(lessons)
+      .where(eq(lessons.chapterId, targetChapter.id));
+
+    expect(targetResource?.id).toBeDefined();
+    expect(targetResource.id).not.toBe(sourceResourceId);
+    expect(targetLesson.description?.en).toContain(`lesson-resource/${targetResource.id}`);
+    expect(targetLesson.description?.en).toContain(`data-resource-id="${targetResource.id}"`);
+    expect(targetLesson.description?.en).not.toContain(sourceResourceId);
+    expect(targetLesson.description?.en).not.toContain("tenant1.lms.localhost");
+  });
+
   it("restores a live training, its linked course, lesson, event, and material", async () => {
     jest.restoreAllMocks();
     const [globalSettings] = await db
@@ -277,6 +335,7 @@ describe("Native archive import (e2e)", () => {
       reference: "https://assets.example.test/pre-training-handout.pdf",
       title: { en: "Pre-training handout" },
     });
+    expect(material?.id).not.toBe(NATIVE_ARCHIVE_IMPORT_FIXTURE_IDS.liveTrainingResource);
   });
 
   it("imports a learning path, maps course links, and treats repeat import as idempotent", async () => {

@@ -182,7 +182,7 @@ export async function createNativeArchiveScormPackage({
 
 export function createNativeArchiveExportStorage() {
   const archives = new Map<string, Buffer>();
-  const sourceAssets = new Map<string, Buffer>();
+  const sourceAssets = new Map<string, { bytes: Buffer; contentType: string }>();
   const uploadedKeys: string[] = [];
   const s3ServiceMock = {
     isConfigured: jest.fn(() => true),
@@ -193,9 +193,14 @@ export function createNativeArchiveExportStorage() {
       uploadedKeys.push(key);
     }),
     getFileStream: jest.fn(async (key: string) => {
-      const buffer = sourceAssets.get(key) ?? archives.get(key);
+      const buffer = sourceAssets.get(key)?.bytes ?? archives.get(key);
       if (!buffer) throw new Error(`Missing test S3 object ${key}`);
       return { stream: Readable.from([buffer]), contentLength: buffer.length };
+    }),
+    getFileContentType: jest.fn(async (key: string) => {
+      const asset = sourceAssets.get(key);
+      if (!asset) throw new Error(`Missing test S3 object ${key}`);
+      return asset.contentType;
     }),
     listFileKeysByPrefix: jest.fn(async (prefix: string) =>
       [...sourceAssets.keys()].filter((key) => key.startsWith(prefix)),
@@ -206,7 +211,8 @@ export function createNativeArchiveExportStorage() {
   return {
     provider: { provide: S3Service, useValue: s3ServiceMock },
     uploadedKeys,
-    addSourceAsset: (key: string, bytes: Buffer) => sourceAssets.set(key, bytes),
+    addSourceAsset: (key: string, bytes: Buffer, contentType = "application/octet-stream") =>
+      sourceAssets.set(key, { bytes, contentType }),
     clear: () => {
       archives.clear();
       sourceAssets.clear();

@@ -24,6 +24,7 @@ import {
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
 import { S3Service } from "src/s3/s3.service";
+import { resolveScormContentTypeFromFilename } from "src/scorm/scorm-content-type";
 
 import { getNativeArchiveImportPrefix } from "../native-archive-storage-paths";
 import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
@@ -235,7 +236,11 @@ export class NativeArchiveAssetsService {
       );
       context.uploadedS3Keys.push(targetReference);
 
-      await this.uploadAsset(context.archive, asset, targetReference);
+      const contentType = scormDirectory
+        ? resolveScormContentTypeFromFilename(asset.sourceReference, asset.contentType)
+        : asset.contentType;
+
+      await this.uploadAsset(context.archive, asset, targetReference, contentType);
       context.referenceMap.set(asset.sourceReference, targetReference);
     }
   }
@@ -412,13 +417,14 @@ export class NativeArchiveAssetsService {
     archive: ParsedNativeArchive,
     asset: NativeArchiveAsset,
     targetReference: string,
+    contentType: string,
   ): Promise<void> {
     const filePath = archive.assetFiles.get(asset.path);
 
     if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
 
     if (asset.byteLength === 0) {
-      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, asset.contentType, 0);
+      await this.s3Service.uploadFile(Buffer.alloc(0), targetReference, contentType, 0);
 
       return;
     }
@@ -426,7 +432,7 @@ export class NativeArchiveAssetsService {
     await this.s3Service.uploadStreamMultipart(
       createReadStream(filePath),
       targetReference,
-      asset.contentType,
+      contentType,
     );
   }
 

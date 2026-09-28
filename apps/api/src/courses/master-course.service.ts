@@ -1818,6 +1818,7 @@ export class MasterCourseService {
     await this.masterCourseRepository.removeScormPackagesForMappedTargets({
       targetCourseId: params.targetCourseId,
       targetLessonIds,
+      targetPackageIds: targetPackages.map(({ targetPackageId }) => targetPackageId),
     });
 
     for (const targetPackage of targetPackages) {

@@ -347,6 +347,7 @@ export type SyncAssessmentQuestionDetailsParams = {
 export type RemoveScormPackagesForMappedTargetsParams = {
   targetCourseId: UUIDType;
   targetLessonIds: UUIDType[];
+  targetPackageIds?: UUIDType[];
 };
 export type QuestionAnswerOptionJsonbInsert = Omit<
   QuestionAnswerOptionInsert,

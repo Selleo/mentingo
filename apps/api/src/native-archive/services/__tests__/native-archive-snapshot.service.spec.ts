@@ -135,7 +135,7 @@ describe("NativeArchiveSnapshotService", () => {
       archiveRepository as never,
       masterCourseRepository as never,
       masterCourseSnapshotService as never,
-      {} as never,
+      { getFileContentType: jest.fn().mockResolvedValue("application/pdf") } as never,
       {} as never,
     );
 
@@ -172,6 +172,7 @@ describe("NativeArchiveSnapshotService", () => {
     } as unknown as SourceSnapshot;
     const storage = {
       getFileExists: jest.fn().mockImplementation(async (key: string) => key === variantKey),
+      getFileContentType: jest.fn().mockResolvedValue(null),
     };
     const service = new NativeArchiveSnapshotService(
       { findUserManagePermissions: jest.fn().mockResolvedValue({ global: true }) } as never,
@@ -188,6 +189,7 @@ describe("NativeArchiveSnapshotService", () => {
       variantKey,
     ]);
     expect(storage.getFileExists).toHaveBeenCalled();
+    expect(result.files.map((file) => file.contentType)).toEqual(["application/pdf", "image/webp"]);
   });
 
   it("uses the stored tenant host when downloading a Bunny video", async () => {

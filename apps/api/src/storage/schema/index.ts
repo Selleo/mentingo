@@ -1226,7 +1226,7 @@ export const aiMentorJudgements = pgTable(
       .notNull()
       .unique(),
     configurationId: uuid("configuration_id")
-      .references(() => aiJudgeConfigurations.id, { onDelete: "restrict" })
+      .references(() => aiJudgeConfigurations.id, { onDelete: "cascade" })
       .notNull(),
     language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
     earnedPoints: integer("earned_points").notNull(),

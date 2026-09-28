@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 import { LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { MasterCourseSnapshotService } from "src/courses/master-course-snapshot.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import {
@@ -9,8 +10,12 @@ import {
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
 import { S3Service } from "src/s3/s3.service";
+import { resolveScormContentTypeFromFilename } from "src/scorm/scorm-content-type";
 
-import { NATIVE_ARCHIVE_OMITTED_ROW_FIELDS } from "../native-archive.constants";
+import {
+  NATIVE_ARCHIVE_LIMITS,
+  NATIVE_ARCHIVE_OMITTED_ROW_FIELDS,
+} from "../native-archive.constants";
 import { NativeArchiveSnapshotRepository } from "../repositories/native-archive-snapshot.repository";
 
 import type { NativeArchiveLearningPathSnapshot } from "../native-archive-learning-path.types";
@@ -264,8 +269,10 @@ export class NativeArchiveSnapshotService {
     );
     const variantReferences = await this.resolveImageVariantReferences(variantBases);
 
-    return [...new Set([...directReferences, ...variantReferences])].map((sourceReference) =>
-      this.toArchiveFile(sourceReference, tenantId),
+    return processInBatches(
+      [...new Set([...directReferences, ...variantReferences])],
+      (sourceReference) => this.toArchiveFile(sourceReference, tenantId),
+      { batchSize: NATIVE_ARCHIVE_LIMITS.ASSET_METADATA_BATCH_SIZE },
     );
   }
 
@@ -335,7 +342,10 @@ export class NativeArchiveSnapshotService {
     return references;
   }
 
-  private toArchiveFile(sourceReference: string, tenantId: UUIDType): NativeArchiveFile {
+  private async toArchiveFile(
+    sourceReference: string,
+    tenantId: UUIDType,
+  ): Promise<NativeArchiveFile> {
     if (sourceReference.startsWith("bunny-")) {
       return {
         path: sourceReference,
@@ -356,10 +366,16 @@ export class NativeArchiveSnapshotService {
       };
     }
 
+    const storedContentType = await this.s3Service.getFileContentType(sourceReference);
+    const contentType =
+      storedContentType && storedContentType !== "application/octet-stream"
+        ? storedContentType
+        : resolveScormContentTypeFromFilename(sourceReference);
+
     return {
       path: sourceReference,
       sourceReference,
-      contentType: "application/octet-stream",
+      contentType,
       open: async () => (await this.s3Service.getFileStream(sourceReference)).stream,
     };
   }

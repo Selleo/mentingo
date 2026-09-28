@@ -46,7 +46,7 @@ export type NativeArchiveCalendarEventInsert = Omit<
 
 export type NativeArchiveResourceInsert = Omit<
   typeof resources.$inferInsert,
-  "title" | "description"
+  "id" | "title" | "description"
 > & {
   title: LocalizedText;
   description: LocalizedText;

@@ -40,6 +40,7 @@ export const NATIVE_ARCHIVE_IMPORT_FIXTURE_IDS = {
   liveTrainingChapter: "03888646-5227-47e3-91e7-4bd87d617dc3",
   liveTrainingLesson: "2ef14a82-4884-4a9c-b968-60b831eaf685",
   liveTraining: "33481812-f1d6-498d-8d82-6866247f2358",
+  liveTrainingResource: "1de662c3-fdca-4c87-9b78-3c90d9d688fa",
   scormCourse: "db083599-e04a-43ec-adc4-42ab5309ba74",
   scormChapter: "53908cf7-1327-4356-ad1a-dbc566c6e97d",
   scormLesson: "7f36206f-206f-4d41-8e55-c76047071d52",
@@ -168,6 +169,7 @@ export function createNativeArchiveCourseSnapshot(
               {
                 relationshipType: LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
                 resource: {
+                  id: NATIVE_ARCHIVE_IMPORT_FIXTURE_IDS.liveTrainingResource,
                   title: { en: "Pre-training handout" },
                   description: { en: "Read before the training" },
                   reference: "https://assets.example.test/pre-training-handout.pdf",
@@ -214,8 +216,10 @@ export function createNativeArchiveScormFixture() {
     ),
   );
   packageZip.addFile("index.html", Buffer.from("<html><body>SCORM launch file</body></html>"));
+  packageZip.addFile("scripts/runtime.js", Buffer.from("window.archiveScormReady = true;"));
   const originalPackageBytes = packageZip.toBuffer();
   const extractedFileBytes = Buffer.from("<html><body>Copied extracted SCO</body></html>");
+  const nestedFileBytes = Buffer.from("window.archiveScormReady = true;");
   const snapshot = {
     ...createNativeArchiveCourseSnapshot(ids.scormCourse),
     chapters: [
@@ -289,6 +293,11 @@ export function createNativeArchiveScormFixture() {
       `${extractedFilesReference}/index.html`,
       extractedFileBytes,
     ),
+    file(
+      "assets/scorm/extracted-script",
+      `${extractedFilesReference}/scripts/runtime.js`,
+      nestedFileBytes,
+    ),
   ];
 
   return {
@@ -304,6 +313,7 @@ export function createNativeArchiveScormFixture() {
     sourcePackageId: ids.scormPackage,
     originalPackageBytes,
     extractedFileBytes,
+    nestedFileBytes,
     files,
   };
 }
@@ -390,5 +400,6 @@ export function createInMemoryNativeArchiveStorage() {
     copiedKeys,
     has: (key: string) => storedObjects.has(key),
     getBytes: (key: string) => storedObjects.get(key)?.bytes,
+    getContentType: (key: string) => storedObjects.get(key)?.contentType,
   };
 }

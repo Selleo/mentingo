@@ -14,7 +14,11 @@ export const nativeArchiveAssetSchema = Type.Object({
     minimum: 0,
     maximum: NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES,
   }),
-  contentType: Type.Union([Type.Literal("application/octet-stream"), Type.Literal("video/mp4")]),
+  contentType: Type.String({
+    maxLength: 200,
+    pattern:
+      "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+(?:;[ \\t]*[A-Za-z0-9!#$&^_.+-]+=[A-Za-z0-9!#$&^_.+-]+)*$",
+  }),
   sourceReference: Type.String({ maxLength: 500 }),
 });
 
