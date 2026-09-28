@@ -1967,6 +1967,35 @@
                 {
                   "type": "object",
                   "properties": {
+                    "phone": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "phoneVerifiedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "phone",
+                    "phoneVerifiedAt"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
                     "roleSlugs": {
                       "type": "array",
                       "items": {
@@ -2337,6 +2366,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -2401,6 +2450,8 @@
               "lastName",
               "archived",
               "deletedAt",
+              "phone",
+              "phoneVerifiedAt",
               "profilePictureUrl",
               "roleSlugs",
               "groups"
@@ -2550,6 +2601,17 @@
           },
           "archived": {
             "type": "boolean"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },

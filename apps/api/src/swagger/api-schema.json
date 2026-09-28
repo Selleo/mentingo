@@ -12360,6 +12360,148 @@
         }
       }
     },
+    "/api/auth/phone/config": {
+      "get": {
+        "operationId": "PhoneAuthController_getPhoneAuthConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPhoneAuthConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/phone/request-code": {
+      "post": {
+        "operationId": "PhoneAuthController_requestLoginCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestLoginCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestLoginCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/phone/verify": {
+      "post": {
+        "operationId": "PhoneAuthController_verifyLoginCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyLoginCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyLoginCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/phone/request-code": {
+      "post": {
+        "operationId": "UserPhoneController_requestAttachCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAttachCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestAttachCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/phone/verify": {
+      "post": {
+        "operationId": "UserPhoneController_verifyAttachCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyAttachCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyAttachCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/phone": {
+      "delete": {
+        "operationId": "UserPhoneController_removeOwnPhone",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveOwnPhoneResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -19685,6 +19827,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
@@ -19752,6 +19914,8 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
@@ -19831,6 +19995,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
@@ -19898,6 +20082,8 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
@@ -19953,6 +20139,26 @@
                 ]
               },
               "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -20419,6 +20625,8 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
               "roleSlugs",
               "permissions",
               "shouldVerifyMFA",
@@ -20597,6 +20805,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
@@ -20664,6 +20892,8 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
@@ -20852,6 +21082,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
@@ -20919,6 +21169,8 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
               "shouldVerifyMFA",
               "requiresPasswordChange",
               "onboardingStatus",
@@ -27330,6 +27582,35 @@
                 {
                   "type": "object",
                   "properties": {
+                    "phone": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "phoneVerifiedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "phone",
+                    "phoneVerifiedAt"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
                     "roleSlugs": {
                       "type": "array",
                       "items": {
@@ -27467,6 +27748,26 @@
                   }
                 ]
               },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -27531,6 +27832,8 @@
               "lastName",
               "archived",
               "deletedAt",
+              "phone",
+              "phoneVerifiedAt",
               "profilePictureUrl",
               "roleSlugs",
               "groups"
@@ -27679,6 +27982,17 @@
           },
           "archived": {
             "type": "boolean"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -27830,6 +28144,17 @@
           },
           "archived": {
             "type": "boolean"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -64082,6 +64407,365 @@
               "created",
               "restrictions",
               "timesRedeemed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhoneAuthConfigResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RequestLoginCodeBody": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "minLength": 3,
+            "maxLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "RequestLoginCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "resendAvailableInSeconds": {
+                "type": "number"
+              },
+              "codeTtlSeconds": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "message",
+              "resendAvailableInSeconds",
+              "codeTtlSeconds"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "VerifyLoginCodeBody": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "minLength": 3,
+            "maxLength": 32,
+            "type": "string"
+          },
+          "code": {
+            "pattern": "^\\d{6}$",
+            "type": "string"
+          },
+          "rememberMe": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "phone",
+          "code"
+        ]
+      },
+      "VerifyLoginCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
+              },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "email",
+              "firstName",
+              "lastName",
+              "archived",
+              "deletedAt",
+              "profilePictureUrl",
+              "phone",
+              "phoneVerifiedAt",
+              "shouldVerifyMFA",
+              "requiresPasswordChange",
+              "onboardingStatus",
+              "isManagingTenantAdmin"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RequestAttachCodeBody": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "minLength": 3,
+            "maxLength": 32,
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "RequestAttachCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "resendAvailableInSeconds": {
+                "type": "number"
+              },
+              "codeTtlSeconds": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "message",
+              "resendAvailableInSeconds",
+              "codeTtlSeconds"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "VerifyAttachCodeBody": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "minLength": 3,
+            "maxLength": 32,
+            "type": "string"
+          },
+          "code": {
+            "pattern": "^\\d{6}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone",
+          "code"
+        ]
+      },
+      "VerifyAttachCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "phone",
+              "phoneVerifiedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RemoveOwnPhoneResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phoneVerifiedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "phone",
+              "phoneVerifiedAt"
             ]
           }
         },

@@ -126,6 +126,8 @@ export interface RegisterResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
     onboardingStatus: {
@@ -166,6 +168,8 @@ export interface LoginResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
     onboardingStatus: {
@@ -199,6 +203,8 @@ export interface CurrentUserResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     roleSlugs: string[];
     permissions: (
       | "account.read_self"
@@ -349,6 +355,8 @@ export interface CreatePasswordResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
     onboardingStatus: {
@@ -411,6 +419,8 @@ export interface HandleMagicLinkResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
     onboardingStatus: {
@@ -1624,6 +1634,9 @@ export interface GetUsersResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
+    phone: string | null;
+    phoneVerifiedAt: string | null;
+  } & {
     roleSlugs: string[];
     groups: {
       /** @format uuid */
@@ -1659,6 +1672,8 @@ export interface GetUserByIdResponse {
     lastName: string;
     archived: boolean;
     deletedAt: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
     profilePictureUrl: string | null;
     roleSlugs: string[];
     groups: {
@@ -1697,6 +1712,7 @@ export interface UpdateUserBody {
   email?: string;
   roleSlugs?: string[];
   archived?: boolean;
+  phone?: string | null;
 }
 
 export interface UpdateUserResponse {
@@ -1738,6 +1754,7 @@ export interface AdminUpdateUserBody {
   email?: string;
   roleSlugs?: string[];
   archived?: boolean;
+  phone?: string | null;
 }
 
 export interface AdminUpdateUserResponse {
@@ -8995,6 +9012,110 @@ export interface UpdatePromotionCodeResponse {
       minimumAmountCurrency?: string | null;
     };
     timesRedeemed: number;
+  };
+}
+
+export interface GetPhoneAuthConfigResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface RequestLoginCodeBody {
+  /**
+   * @minLength 3
+   * @maxLength 32
+   */
+  phone: string;
+}
+
+export interface RequestLoginCodeResponse {
+  data: {
+    message: string;
+    resendAvailableInSeconds: number;
+    codeTtlSeconds: number;
+  };
+}
+
+export interface VerifyLoginCodeBody {
+  /**
+   * @minLength 3
+   * @maxLength 32
+   */
+  phone: string;
+  /** @pattern ^\d{6}$ */
+  code: string;
+  rememberMe?: boolean;
+}
+
+export interface VerifyLoginCodeResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    archived: boolean;
+    deletedAt: string | null;
+    profilePictureUrl: string | null;
+    phone: string | null;
+    phoneVerifiedAt: string | null;
+    shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
+    isManagingTenantAdmin: boolean;
+  };
+}
+
+export interface RequestAttachCodeBody {
+  /**
+   * @minLength 3
+   * @maxLength 32
+   */
+  phone: string;
+}
+
+export interface RequestAttachCodeResponse {
+  data: {
+    message: string;
+    resendAvailableInSeconds: number;
+    codeTtlSeconds: number;
+  };
+}
+
+export interface VerifyAttachCodeBody {
+  /**
+   * @minLength 3
+   * @maxLength 32
+   */
+  phone: string;
+  /** @pattern ^\d{6}$ */
+  code: string;
+}
+
+export interface VerifyAttachCodeResponse {
+  data: {
+    phone: string | null;
+    phoneVerifiedAt: string | null;
+  };
+}
+
+export interface RemoveOwnPhoneResponse {
+  data: {
+    phone: string | null;
+    phoneVerifiedAt: string | null;
   };
 }
 
@@ -17269,6 +17390,101 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhoneAuthControllerGetPhoneAuthConfig
+     * @request GET:/api/auth/phone/config
+     */
+    phoneAuthControllerGetPhoneAuthConfig: (params: RequestParams = {}) =>
+      this.request<GetPhoneAuthConfigResponse, any>({
+        path: `/api/auth/phone/config`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhoneAuthControllerRequestLoginCode
+     * @request POST:/api/auth/phone/request-code
+     */
+    phoneAuthControllerRequestLoginCode: (data: RequestLoginCodeBody, params: RequestParams = {}) =>
+      this.request<RequestLoginCodeResponse, any>({
+        path: `/api/auth/phone/request-code`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhoneAuthControllerVerifyLoginCode
+     * @request POST:/api/auth/phone/verify
+     */
+    phoneAuthControllerVerifyLoginCode: (data: VerifyLoginCodeBody, params: RequestParams = {}) =>
+      this.request<VerifyLoginCodeResponse, any>({
+        path: `/api/auth/phone/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserPhoneControllerRequestAttachCode
+     * @request POST:/api/user/phone/request-code
+     */
+    userPhoneControllerRequestAttachCode: (
+      data: RequestAttachCodeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<RequestAttachCodeResponse, any>({
+        path: `/api/user/phone/request-code`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserPhoneControllerVerifyAttachCode
+     * @request POST:/api/user/phone/verify
+     */
+    userPhoneControllerVerifyAttachCode: (data: VerifyAttachCodeBody, params: RequestParams = {}) =>
+      this.request<VerifyAttachCodeResponse, any>({
+        path: `/api/user/phone/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserPhoneControllerRemoveOwnPhone
+     * @request DELETE:/api/user/phone
+     */
+    userPhoneControllerRemoveOwnPhone: (params: RequestParams = {}) =>
+      this.request<RemoveOwnPhoneResponse, any>({
+        path: `/api/user/phone`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),
