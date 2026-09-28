@@ -64,6 +64,7 @@ import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
+import { PhoneAuthModule } from "./phone-auth/phone-auth.module";
 import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
@@ -138,6 +139,7 @@ import type { RedisClient } from "src/redis";
       }),
     }),
     AuthModule,
+    PhoneAuthModule,
     HealthModule,
     UserModule,
     EmailModule,

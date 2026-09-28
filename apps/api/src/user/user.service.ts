@@ -31,6 +31,7 @@ import {
   ilike,
   inArray,
   isNull,
+  ne,
   not,
   or,
   sql,
@@ -63,6 +64,8 @@ import { GroupService } from "src/group/group.service";
 import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PHONE_AUTH_ERRORS } from "src/phone-auth/phone-auth.constants";
+import { normalizePhone } from "src/phone-auth/phone.utils";
 import { SessionRevocationService } from "src/redis";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -426,14 +429,28 @@ export class UserService {
     const shouldRefreshCourseAuthorMetadata =
       data.firstName !== undefined || data.lastName !== undefined;
 
+    const phoneUpdate = await this.resolveAdminPhoneUpdate(
+      id,
+      existingUser.users.phone,
+      data.phone,
+    );
+
     const updatedUser = await this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
-      const { groups, managedGroupIds: _managedGroupIds, roleSlugs, ...userData } = data;
+      const {
+        groups,
+        managedGroupIds: _managedGroupIds,
+        roleSlugs,
+        phone: _phone,
+        ...restUserData
+      } = data;
+
+      const userData = { ...restUserData, ...phoneUpdate };
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
-        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
+        ? await this.updateUserRow(id, userData, trx)
         : [existingUser.users];
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
@@ -490,6 +507,61 @@ export class UserService {
     if (shouldRefreshCourseAuthorMetadata) await this.courseService.refreshAuthorMetadata(id);
 
     return updatedUser;
+  }
+
+  /**
+   * Admin-side phone change. The number is normalized to E.164 and stored unverified; it becomes
+   * verified on the user's first successful SMS login. Empty string / null clears it.
+   */
+  private async resolveAdminPhoneUpdate(
+    userId: UUIDType,
+    currentPhone: string | null,
+    rawPhone: string | null | undefined,
+  ): Promise<{ phone?: string | null; phoneVerifiedAt?: null }> {
+    if (rawPhone === undefined) return {};
+
+    const trimmed = rawPhone?.trim() ?? "";
+
+    if (!trimmed) return currentPhone === null ? {} : { phone: null, phoneVerifiedAt: null };
+
+    const phone = normalizePhone(trimmed);
+
+    if (!phone) throw new BadRequestException(PHONE_AUTH_ERRORS.INVALID_PHONE);
+
+    if (phone === currentPhone) return {};
+
+    const [owner] = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.phone, phone), ne(users.id, userId)))
+      .limit(1);
+
+    if (owner) throw new ConflictException(PHONE_AUTH_ERRORS.PHONE_TAKEN);
+
+    return { phone, phoneVerifiedAt: null };
+  }
+
+  private async updateUserRow(
+    id: UUIDType,
+    userData: Partial<typeof users.$inferInsert>,
+    dbInstance: DatabasePg,
+  ) {
+    try {
+      return await dbInstance.update(users).set(userData).where(eq(users.id, id)).returning();
+    } catch (error) {
+      if (userData.phone && this.isUniqueViolation(error)) {
+        throw new ConflictException(PHONE_AUTH_ERRORS.PHONE_TAKEN);
+      }
+
+      throw error;
+    }
+  }
+
+  private isUniqueViolation(error: unknown): boolean {
+    const code =
+      (error as { code?: string })?.code ?? (error as { cause?: { code?: string } })?.cause?.code;
+
+    return code === "23505";
   }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
@@ -679,6 +751,8 @@ export class UserService {
           email: `deleted_${idPart}@user.com`,
           firstName: "deleted user",
           lastName: "deleted user",
+          phone: null,
+          phoneVerifiedAt: null,
         })
         .where(eq(users.id, id))
         .returning();
@@ -745,6 +819,8 @@ export class UserService {
               email: `deleted_${id.split("-")[0]}@user.com`,
               firstName: "deleted user",
               lastName: "deleted user",
+              phone: null,
+              phoneVerifiedAt: null,
             })
             .where(eq(users.id, id)),
         ),

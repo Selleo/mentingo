@@ -223,9 +223,14 @@ export class UserController {
       }
 
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
-      const { roleSlugs, groups, managedGroupIds, archived } = data;
+      const { roleSlugs, groups, managedGroupIds, archived, phone } = data;
 
       if ((roleSlugs !== undefined || archived !== undefined) && !canManageUsers) {
+        throw new ForbiddenException("common.toast.noAccess");
+      }
+
+      // A self-service phone change must go through SMS verification (POST /user/phone/*).
+      if (phone !== undefined && !canManageUsers) {
         throw new ForbiddenException("common.toast.noAccess");
       }
 

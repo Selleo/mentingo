@@ -12,6 +12,19 @@ describe("resolveRateLimitPolicy", () => {
     });
   });
 
+  it.each([
+    "/api/auth/phone/request-code",
+    "/api/auth/phone/verify",
+    "/api/user/phone/request-code",
+    "/api/user/phone/verify",
+  ])("returns strict 10/min policy for phone auth route %s", (path) => {
+    expect(resolveRateLimitPolicy("POST", path)).toEqual({
+      key: "auth.strict.10",
+      limit: RATE_LIMITS.AUTH_STANDARD_ENDPOINTS_REQUESTS_PER_MINUTE,
+      windowSec: RATE_LIMIT_WINDOW_SEC,
+    });
+  });
+
   it("returns integration read policy for integration GET routes", () => {
     const policy = resolveRateLimitPolicy("GET", "/api/integration/groups");
 

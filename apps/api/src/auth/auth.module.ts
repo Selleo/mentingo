@@ -57,6 +57,6 @@ import { TokenService } from "./token.service";
     MicrosoftOAuthGuard,
     SettingsService,
   ],
-  exports: [CreatePasswordService],
+  exports: [CreatePasswordService, AuthService, TokenService],
 })
 export class AuthModule {}

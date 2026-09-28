@@ -62,6 +62,7 @@ import { TokenService } from "./token.service";
 
 import type { CreateAccountBody } from "./schemas/create-account.schema";
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
+import type { LoginResponse } from "./schemas/login.schema";
 import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
@@ -443,6 +444,8 @@ export class AuthService {
         archived: users.archived,
         avatarReference: users.avatarReference,
         deletedAt: users.deletedAt,
+        phone: users.phone,
+        phoneVerifiedAt: users.phoneVerifiedAt,
         tenantId: users.tenantId,
       })
       .from(users)
@@ -958,6 +961,65 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange: user.requiresPasswordChange ?? false,
+      onboardingStatus,
+      isManagingTenantAdmin,
+    };
+  }
+
+  /**
+   * Issues the same session as email/password login for a user whose phone ownership was just
+   * proven with a one-time SMS code. Respects MFA (temporary cookies + shouldVerifyMFA) exactly
+   * like the other login flows.
+   */
+  async loginWithVerifiedPhone(
+    response: Response,
+    userId: UUIDType,
+    rememberMe: boolean = false,
+  ): Promise<LoginResponse> {
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
+    const user = await this.userService.getUserById(userId);
+
+    if (user.archived) throw new UnauthorizedException("user.error.archived");
+
+    const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
+
+    const { accessToken, refreshToken } = await this.getTokens(user);
+
+    if (isRevoked) await this.sessionRevocationService.clearUserRevocation(user.id);
+
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({
+        userId: user.id,
+        method: USER_LOGIN_METHOD.PHONE,
+        actor: {
+          userId: user.id,
+          email: user.email,
+          roleSlugs,
+          permissions,
+          tenantId: user.tenantId,
+        },
+      }),
+    );
+
+    const shouldVerifyMFA =
+      this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || Boolean(userSettings.isMFAEnabled);
+
+    if (shouldVerifyMFA) {
+      this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+    } else {
+      this.tokenService.setTokenCookies(response, accessToken, refreshToken, rememberMe);
+    }
+
+    return {
+      ...user,
+      shouldVerifyMFA,
       requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
       isManagingTenantAdmin,

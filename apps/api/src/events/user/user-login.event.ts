@@ -6,6 +6,7 @@ export const USER_LOGIN_METHOD = {
   PROVIDER: "provider",
   REFRESH_TOKEN: "refresh_token",
   MAGIC_LINK: "magic_link",
+  PHONE: "phone",
 } as const;
 
 export type UserLoginMethod = (typeof USER_LOGIN_METHOD)[keyof typeof USER_LOGIN_METHOD];

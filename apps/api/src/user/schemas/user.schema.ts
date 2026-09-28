@@ -3,7 +3,7 @@ import { type Static, Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
 import { UUIDSchema } from "src/common";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
+import { commonUserSchema, userPhoneFieldsSchema } from "src/common/schemas/common-user.schema";
 import { userOnboarding } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
@@ -18,6 +18,7 @@ export const userOnboardingStatusSchema = omitTenantId(createSelectSchema(userOn
 
 export const currentUserResponseSchema = Type.Composite([
   baseUserResponseSchema,
+  userPhoneFieldsSchema,
   Type.Object({
     roleSlugs: Type.Array(Type.String()),
     permissions: Type.Array(
@@ -45,6 +46,7 @@ export const currentUserResponseSchema = Type.Composite([
 export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
+    userPhoneFieldsSchema,
     Type.Object({
       roleSlugs: Type.Array(Type.String()),
       groups: Type.Array(
@@ -68,6 +70,7 @@ export const allRolesSchema = Type.Array(roleSchema);
 
 export const userSchema = Type.Composite([
   Type.Omit(commonUserSchema, ["avatarReference"]),
+  userPhoneFieldsSchema,
   Type.Object({
     profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
     roleSlugs: Type.Array(Type.String()),

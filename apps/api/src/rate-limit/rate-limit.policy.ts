@@ -22,6 +22,10 @@ export const AUTH_PATHS_LIMIT_10_PER_MINUTE = new Set([
   "/api/auth/create-password",
   "/api/auth/reset-password",
   "/api/auth/mfa/verify",
+  "/api/auth/phone/request-code",
+  "/api/auth/phone/verify",
+  "/api/user/phone/request-code",
+  "/api/user/phone/verify",
 ]);
 
 export const AUTH_POLICY_LIMIT_5_PER_MINUTE: ResolvedRateLimitPolicy = {
