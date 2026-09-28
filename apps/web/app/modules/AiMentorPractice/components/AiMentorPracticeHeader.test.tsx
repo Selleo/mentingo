@@ -16,7 +16,7 @@ describe("AiMentorPracticeHeader", () => {
 
     expect(screen.getByRole("dialog")).toBeVisible();
     expect(
-      within(screen.getByRole("dialog")).getByRole("heading", { name: "Opis zadania" }),
+      within(screen.getByRole("dialog")).getByRole("heading", { name: "Описание задания" }),
     ).toBeVisible();
     expect(
       screen.getByText(
