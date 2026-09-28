@@ -400,7 +400,8 @@
       "lt": "Lithuanian",
       "cs": "Czech",
       "es": "Spanish",
-      "fr": "French"
+      "fr": "French",
+      "ru": "Russian"
     },
     "lessonTypes": {
       "content": "Content",

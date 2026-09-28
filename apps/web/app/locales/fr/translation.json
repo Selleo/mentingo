@@ -405,7 +405,8 @@
       "lt": "Lituanien",
       "cs": "Tchèque",
       "es": "Espagnol",
-      "fr": "Français"
+      "fr": "Français",
+      "ru": "Russe"
     },
     "lessonTypes": {
       "content": "Contenu",
