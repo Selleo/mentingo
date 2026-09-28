@@ -70,7 +70,7 @@ jobs:
             VITE_MICROSOFT_OAUTH_ENABLED=false
             VITE_SLACK_OAUTH_ENABLED=false
             VITE_STRIPE_PUBLISHABLE_KEY=
-            VITE_SENTRY_DSN=
+            VITE_SENTRY_DSN=https://2af1c1171fb44290849d94430f30194a@errors.baikal.link/2
             VITE_POSTHOG_KEY=
             VITE_POSTHOG_HOST=
 
