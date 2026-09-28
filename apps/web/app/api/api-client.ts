@@ -55,7 +55,8 @@ ApiClient.instance.interceptors.request.use((config) => {
     config.url?.includes("/login") ||
     config.url?.includes("/refresh") ||
     config.url?.includes("/forgot-password") ||
-    config.url?.includes("/register");
+    config.url?.includes("/register") ||
+    config.url?.includes("/auth/phone/");
 
   const isPublicSettingsEndpoint =
     config.url?.includes("/settings/global") || config.url?.includes("/settings/registration-form");

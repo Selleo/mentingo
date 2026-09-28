@@ -29,15 +29,19 @@ import type { PhoneOtpContext } from "./phone-auth.types";
 const HASH_FIELD = "hash";
 const ATTEMPTS_FIELD = "attempts";
 
-const tooManyRequests = (message: string, retryAfterSeconds: number) =>
-  new HttpException(
+const tooManyRequests = (message: string, retryAfterSeconds: number) => {
+  const seconds = Math.max(1, retryAfterSeconds);
+
+  return new HttpException(
     {
       statusCode: HttpStatus.TOO_MANY_REQUESTS,
       message,
-      retryAfterSeconds: Math.max(1, retryAfterSeconds),
+      retryAfterSeconds: seconds,
+      translationParams: { seconds, minutes: Math.ceil(seconds / 60) },
     },
     HttpStatus.TOO_MANY_REQUESTS,
   );
+};
 
 /**
  * One-time codes for phone verification, stored in Redis:

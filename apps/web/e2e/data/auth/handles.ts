@@ -47,3 +47,14 @@ export const MFA_PAGE_HANDLES = {
   TOKEN: "mfa-token-input",
   SUBMIT: "mfa-submit-button",
 } as const;
+
+export const PHONE_LOGIN_HANDLES = {
+  EMAIL_TAB: "login-page-email-tab",
+  PHONE_TAB: "login-page-phone-tab",
+  PHONE_INPUT: "phone-login-phone-input",
+  REQUEST_CODE: "phone-login-request-code-button",
+  CODE_INPUT: "phone-login-code-input",
+  RESEND_CODE: "phone-login-resend-code-button",
+  CHANGE_PHONE: "phone-login-change-phone-button",
+  SUBMIT: "phone-login-submit-button",
+} as const;

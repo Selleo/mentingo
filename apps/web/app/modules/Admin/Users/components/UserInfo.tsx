@@ -48,6 +48,8 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         return user.lastName;
       case "email":
         return user.email;
+      case "phone":
+        return user.phone ?? "";
       case "roleSlugs":
         return user.roleSlugs;
       case "groups":
@@ -73,6 +75,8 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         return user.lastName;
       case "email":
         return user.email;
+      case "phone":
+        return user.phone ?? "";
       case "archived":
         return user.archived.toString();
     }
@@ -86,6 +90,8 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         return USER_PAGE_HANDLES.LAST_NAME_INPUT;
       case "email":
         return USER_PAGE_HANDLES.EMAIL_INPUT;
+      case "phone":
+        return USER_PAGE_HANDLES.PHONE_INPUT;
       default:
         return undefined;
     }
@@ -182,6 +188,27 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
               >
                 {t("common.other.archived")}
               </label>
+            </div>
+          );
+        }
+
+        if (name === "phone") {
+          return (
+            <div className="flex flex-col gap-1">
+              <Input
+                {...field}
+                data-testid={getInputTestId()}
+                value={(field.value as string | null | undefined) ?? ""}
+                type="tel"
+                inputMode="tel"
+                placeholder={t("phoneAuth.placeholder.phone")}
+                className="w-full rounded-md border border-neutral-300 px-2 py-1"
+              />
+              <span className="text-xs text-neutral-500">
+                {user.phone && user.phoneVerifiedAt
+                  ? t("phoneAuth.status.verified")
+                  : t("phoneAuth.admin.unverifiedHint")}
+              </span>
             </div>
           );
         }

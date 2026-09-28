@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "@remix-run/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 import { z } from "zod";
 
 import { version } from "~/../version.json";
@@ -10,6 +11,7 @@ import { useHandleMagicLink } from "~/api/mutations/useHandleMagicLink";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import useLoginPageFiles from "~/api/queries/useLoginPageFiles";
+import { useIsPhoneAuthEnabled } from "~/api/queries/usePhoneAuthConfig";
 import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { PlatformLogo } from "~/components/PlatformLogo";
@@ -18,14 +20,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { toast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { UploadFilesToLoginPagePreviewDialog } from "~/modules/Dashboard/Settings/components/admin/UploadFilesToLoginPagePreviewDialog";
 import { setPageTitle } from "~/utils/setPageTitle";
 
-import { LOGIN_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+import { LOGIN_PAGE_HANDLES, PHONE_LOGIN_HANDLES } from "../../../e2e/data/auth/handles";
 
-import { SocialLogin } from "./components";
+import { PhoneLoginForm, SocialLogin } from "./components";
 import { MagicLinkVerificationCard } from "./components/MagicLinkVerificationCard";
 
 import type { LoginPageResource } from "../Dashboard/Settings/components/admin/UploadFilesToLoginPageItem";
@@ -75,6 +78,7 @@ export default function LoginPage() {
   const { t } = useTranslation();
 
   const { data: ssoEnabled } = useSSOEnabled();
+  const isPhoneAuthEnabled = useIsPhoneAuthEnabled();
 
   const handlePreviewClick = (resource: LoginPageResource) => {
     setPreviewResource(resource);
@@ -133,6 +137,52 @@ export default function LoginPage() {
     loginUser({ data });
   };
 
+  const subHeaderKey = match({ isSSOEnforced, isPhoneAuthEnabled })
+    .with({ isSSOEnforced: true }, () => "loginView.subHeaderSSO")
+    .with({ isPhoneAuthEnabled: true }, () => "phoneAuth.subHeader")
+    .otherwise(() => "loginView.subHeader");
+
+  const emailLoginForm = (
+    <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid gap-2">
+        <Label htmlFor="email">{t("loginView.field.email")}</Label>
+        <Input
+          id="email"
+          data-testid={LOGIN_PAGE_HANDLES.EMAIL}
+          type="email"
+          placeholder="user@example.com"
+          className={cn({ "border-red-500": errors.email })}
+          {...register("email")}
+        />
+        {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
+      </div>
+      <div className="grid gap-2">
+        <div className="flex items-center">
+          <Label htmlFor="password">{t("loginView.field.password")}</Label>
+          <Link
+            to="/auth/password-recovery"
+            data-testid={LOGIN_PAGE_HANDLES.FORGOT_PASSWORD_LINK}
+            className="ml-auto inline-block text-sm underline"
+          >
+            {t("loginView.other.forgotPassword")}
+          </Link>
+        </div>
+        <Input
+          id="password"
+          data-testid={LOGIN_PAGE_HANDLES.PASSWORD}
+          type="password"
+          className={cn({ "border-red-500": errors.password })}
+          {...register("password")}
+        />
+        {errors.password && <div className="text-sm text-red-500">{errors.password.message}</div>}
+      </div>
+      <FormCheckbox control={control} name="rememberMe" label={t("loginView.other.rememberMe")} />
+      <Button type="submit" className="w-full" data-testid={LOGIN_PAGE_HANDLES.LOGIN}>
+        {t("loginView.button.login")}
+      </Button>
+    </form>
+  );
+
   if (magicLinkToken) {
     const statusMessage = isMagicLinkPending
       ? t("loginView.magicLink.checking")
@@ -171,56 +221,26 @@ export default function LoginPage() {
             </div>
             {t("loginView.header")}
           </CardTitle>
-          <CardDescription>
-            {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
-          </CardDescription>
+          <CardDescription>{t(subHeaderKey)}</CardDescription>
         </CardHeader>
         <CardContent>
-          {!isSSOEnforced && (
-            <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid gap-2">
-                <Label htmlFor="email">{t("loginView.field.email")}</Label>
-                <Input
-                  id="email"
-                  data-testid={LOGIN_PAGE_HANDLES.EMAIL}
-                  type="email"
-                  placeholder="user@example.com"
-                  className={cn({ "border-red-500": errors.email })}
-                  {...register("email")}
-                />
-                {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{t("loginView.field.password")}</Label>
-                  <Link
-                    to="/auth/password-recovery"
-                    data-testid={LOGIN_PAGE_HANDLES.FORGOT_PASSWORD_LINK}
-                    className="ml-auto inline-block text-sm underline"
-                  >
-                    {t("loginView.other.forgotPassword")}
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  data-testid={LOGIN_PAGE_HANDLES.PASSWORD}
-                  type="password"
-                  className={cn({ "border-red-500": errors.password })}
-                  {...register("password")}
-                />
-                {errors.password && (
-                  <div className="text-sm text-red-500">{errors.password.message}</div>
-                )}
-              </div>
-              <FormCheckbox
-                control={control}
-                name="rememberMe"
-                label={t("loginView.other.rememberMe")}
-              />
-              <Button type="submit" className="w-full" data-testid={LOGIN_PAGE_HANDLES.LOGIN}>
-                {t("loginView.button.login")}
-              </Button>
-            </form>
+          {!isSSOEnforced && !isPhoneAuthEnabled && emailLoginForm}
+
+          {!isSSOEnforced && isPhoneAuthEnabled && (
+            <Tabs defaultValue="email" className="w-full">
+              <TabsList className="mb-4 grid w-full grid-cols-2">
+                <TabsTrigger value="email" data-testid={PHONE_LOGIN_HANDLES.EMAIL_TAB}>
+                  {t("phoneAuth.tabs.email")}
+                </TabsTrigger>
+                <TabsTrigger value="phone" data-testid={PHONE_LOGIN_HANDLES.PHONE_TAB}>
+                  {t("phoneAuth.tabs.phone")}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="email">{emailLoginForm}</TabsContent>
+              <TabsContent value="phone">
+                <PhoneLoginForm />
+              </TabsContent>
+            </Tabs>
           )}
 
           <SocialLogin

@@ -2099,6 +2099,7 @@
       "firstName": "Křestní jméno",
       "lastName": "Příjmení",
       "email": "E-mail",
+      "phone": "Telefon",
       "role": "Role",
       "language": "Jazyk",
       "status": "Postavení",
@@ -5794,6 +5795,70 @@
         "aiMentor": "AI mentor",
         "lesson": "Lekce"
       }
+    }
+  },
+  "phoneAuth": {
+    "subHeader": "Sign in with your email or phone number",
+    "tabs": {
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "field": {
+      "phone": "Phone number",
+      "code": "Code from SMS"
+    },
+    "placeholder": {
+      "phone": "+7 900 000-00-00"
+    },
+    "description": {
+      "enterPhone": "We will send an SMS with a sign-in code to this number.",
+      "codeSent": "Enter the 6-digit code sent to {{phone}}. The code is valid for 5 minutes."
+    },
+    "button": {
+      "getCode": "Get code",
+      "resend": "Send the code again",
+      "resendIn": "Resend in {{seconds}} s",
+      "signIn": "Sign in",
+      "changePhone": "Change number",
+      "verify": "Verify",
+      "remove": "Remove number"
+    },
+    "validation": {
+      "phone": "Enter a valid phone number",
+      "code": "Enter the 6-digit code"
+    },
+    "status": {
+      "verified": "Verified",
+      "notVerified": "Not verified"
+    },
+    "toast": {
+      "codeSent": "If this number is registered, we have sent a sign-in code to it",
+      "attachCodeSent": "We have sent a verification code to the new number",
+      "phoneVerified": "Phone number verified",
+      "phoneRemoved": "Phone number removed"
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "disabled": "Phone sign-in is disabled",
+      "invalidPhone": "Enter a valid phone number (Russia, Kazakhstan or Mongolia)",
+      "invalidOrExpiredCode": "The code is invalid or has expired",
+      "tooManyAttempts": "Too many attempts. Request a new code.",
+      "resendCooldown": "You can request a new code in {{seconds}} s",
+      "tooManyCodes": "Too many codes requested for this number. Try again in {{minutes}} min.",
+      "phoneTaken": "This phone number is already used by another user",
+      "alreadyVerified": "This phone number is already verified for your account",
+      "smsSendFailed": "Could not send the SMS. Please try again later.",
+      "ssoEnforced": "SSO is enforced, sign-in by phone is not allowed"
+    },
+    "settings": {
+      "header": "Phone number",
+      "description": "Use your phone number to sign in with a one-time SMS code.",
+      "current": "Current number",
+      "none": "Not set",
+      "newPhone": "New phone number"
+    },
+    "admin": {
+      "unverifiedHint": "Not verified yet: it will be verified at the user's first SMS sign-in"
     }
   }
 }

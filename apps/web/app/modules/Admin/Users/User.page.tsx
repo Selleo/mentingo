@@ -10,6 +10,7 @@ import { useAdminUpdateUser } from "~/api/mutations/admin/useAdminUpdateUser";
 import { useBulkSendPasswordEmails } from "~/api/mutations/admin/useBulkSendPasswordEmails";
 import { userQueryOptions, useUserById } from "~/api/queries/admin/useUserById";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
+import { useIsPhoneAuthEnabled } from "~/api/queries/usePhoneAuthConfig";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Badge } from "~/components/ui/badge";
@@ -33,10 +34,20 @@ import type { UpdateUserBody } from "~/api/generated-api";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.userDetails");
 
-const displayedFields: Array<keyof UpdateUserBody> = [
+const baseDisplayedFields: Array<keyof UpdateUserBody> = [
   "firstName",
   "lastName",
   "email",
+  "roleSlugs",
+  "groups",
+  "archived",
+];
+
+const displayedFieldsWithPhone: Array<keyof UpdateUserBody> = [
+  "firstName",
+  "lastName",
+  "email",
+  "phone",
   "roleSlugs",
   "groups",
   "archived",
@@ -50,6 +61,8 @@ const User = () => {
   if (!id) throw new Error(t("adminUserView.error.userNotFound"));
 
   const { data: user, isLoading } = useUserById(id, language);
+  const isPhoneAuthEnabled = useIsPhoneAuthEnabled();
+  const displayedFields = isPhoneAuthEnabled ? displayedFieldsWithPhone : baseDisplayedFields;
   const { mutateAsync: updateUser } = useAdminUpdateUser();
   const { mutateAsync: sendPasswordEmail, isPending: isSendingPasswordEmail } =
     useBulkSendPasswordEmails();
@@ -65,6 +78,7 @@ const User = () => {
   const getFieldLabel = (field: keyof UpdateUserBody) => {
     if (field === "archived") return t("adminUserView.field.status");
     if (field === "roleSlugs") return t("adminUsersView.dropdown.roles");
+    if (field === "phone") return t("adminUserView.field.phone");
     return startCase(t(`adminUserView.field.${field}`));
   };
 

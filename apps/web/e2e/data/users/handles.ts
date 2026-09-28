@@ -59,6 +59,7 @@ export const USER_PAGE_HANDLES = {
   FIRST_NAME_INPUT: "user-page-first-name-input",
   LAST_NAME_INPUT: "user-page-last-name-input",
   EMAIL_INPUT: "user-page-email-input",
+  PHONE_INPUT: "user-page-phone-input",
   ROLE_SELECT: "user-page-role-select",
   roleOption: (roleSlug: string) => `user-page-role-option-${roleSlug}`,
   MANAGED_GROUPS_SELECT: "user-page-managed-groups-select",
