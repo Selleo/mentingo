@@ -1,4 +1,40 @@
 {
+  "nativeArchive": {
+    "importNotice": "Se omiten los cursos y rutas cuyo identificador ya existe. El contenido nuevo se crea como borrador.",
+    "uploadPrompt": "Seleccionar o soltar un ZIP de paquete de Mentingo",
+    "uploadDescription": "Usa un paquete exportado desde Mentingo. Solo archivos ZIP.",
+    "dropPrompt": "Suelta aquí el paquete de Mentingo",
+    "fileReady": "Listo para importar",
+    "replaceFile": "Reemplazar paquete",
+    "removeFile": "Eliminar paquete",
+    "exportTitle": "Paquete de Mentingo",
+    "exportDescription": {
+      "course": "Exporta este curso, su estructura, configuración y archivos como un paquete que puedes importar en Mentingo.",
+      "learning-path": "Exporta esta ruta de aprendizaje, sus cursos, configuración y archivos como un paquete que puedes importar en Mentingo."
+    },
+    "exportButton": "Exportar paquete de Mentingo",
+    "preparing": "Preparando paquete de Mentingo…",
+    "exportReady": "Paquete de Mentingo descargado",
+    "importTitle": "Importar un paquete de Mentingo",
+    "importDescription": "Selecciona un ZIP de paquete de Mentingo con un curso o una ruta de aprendizaje. Su estructura y configuración se restaurarán como borrador.",
+    "selectFile": "Seleccionar ZIP de paquete de Mentingo",
+    "importButton": "Importar paquete de Mentingo",
+    "uploading": "Subiendo…",
+    "importing": "Importando paquete de Mentingo…",
+    "alreadyExists": "Este elemento ya existe. No se cambió nada.",
+    "importComplete": "Importación completa: {{count}} cursos creados, {{reused}} reutilizados.",
+    "liveTrainingReview": "Revisa el horario y los materiales de esta formación en directo importada antes de usarla.",
+    "dismissReview": "Marcar como revisada",
+    "error": "No se pudo procesar el paquete de Mentingo.",
+    "errors": {
+      "storageUnavailable": "El almacenamiento de archivos no está disponible. Vuelve a intentarlo cuando esté configurado.",
+      "liveTrainingUnavailable": "La formación en directo debe estar activada para importar este paquete de Mentingo.",
+      "embeddingUnavailable": "El procesamiento de documentos de IA no está disponible.",
+      "unsupportedVersion": "Esta versión del paquete de Mentingo no es compatible.",
+      "missingAsset": "Falta un archivo obligatorio en el paquete de Mentingo.",
+      "invalidArchive": "Este ZIP no es un paquete de Mentingo válido."
+    }
+  },
   "aiConversations": {
     "session": "Sesión",
     "context": "Contexto",
@@ -824,7 +860,7 @@
     "back": "Atrás",
     "eyebrow": "Configuración del curso",
     "title": "Crear nuevo curso",
-    "subtitle": "Elija si desea crear el curso con el editor estándar o crearlo desde un paquete SCORM.",
+    "subtitle": "Elige el editor estándar, un paquete SCORM o un paquete de Mentingo.",
     "standard": {
       "title": "Estándar",
       "description": "Cree un curso con el plan de estudios, las lecciones, los cuestionarios y la configuración integrados.",
@@ -843,6 +879,16 @@
         "tracking": "Se admite la finalización de SCO y el seguimiento del tiempo de ejecución",
         "structure": "Se conserva la estructura del paquete importado.",
         "future": "Precios, estado y certificados incluidos"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Paquete de Mentingo",
+      "description": "Restaura un curso o una ruta de aprendizaje desde un paquete de Mentingo.",
+      "features": {
+        "structure": "Se restauran la estructura y las traducciones",
+        "settings": "Se restauran los ajustes y metadatos",
+        "assets": "Se incluyen los archivos relacionados",
+        "learningPath": "Se admiten rutas y sus cursos"
       }
     }
   },

@@ -1,4 +1,40 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kursai ir mokymosi keliai su jau esančiu identifikatoriumi bus praleisti. Naujas turinys bus sukurtas kaip juodraštis.",
+    "uploadPrompt": "Pasirinkite arba nutempkite Mentingo paketo ZIP",
+    "uploadDescription": "Naudokite iš Mentingo eksportuotą paketą. Tik ZIP failai.",
+    "dropPrompt": "Nutempkite Mentingo paketą čia",
+    "fileReady": "Paruošta importuoti",
+    "replaceFile": "Pakeisti paketą",
+    "removeFile": "Pašalinti paketą",
+    "exportTitle": "Mentingo paketas",
+    "exportDescription": {
+      "course": "Eksportuokite šį kursą, jo struktūrą, nustatymus ir failus kaip paketą, kurį galima importuoti į Mentingo.",
+      "learning-path": "Eksportuokite mokymosi kelią, jo kursus, nustatymus ir failus kaip paketą, kurį galima importuoti į Mentingo."
+    },
+    "exportButton": "Eksportuoti Mentingo paketą",
+    "preparing": "Ruošiamas Mentingo paketas…",
+    "exportReady": "Mentingo paketas atsisiųstas",
+    "importTitle": "Importuoti Mentingo paketą",
+    "importDescription": "Pasirinkite kurso arba mokymosi kelio Mentingo paketo ZIP failą. Struktūra ir nustatymai bus atkurti kaip juodraštis.",
+    "selectFile": "Pasirinkti Mentingo paketo ZIP",
+    "importButton": "Importuoti Mentingo paketą",
+    "uploading": "Įkeliama…",
+    "importing": "Importuojamas Mentingo paketas…",
+    "alreadyExists": "Šis elementas jau yra. Niekas nebuvo pakeista.",
+    "importComplete": "Importas baigtas: sukurta {{count}} kursų, panaudota esamų {{reused}}.",
+    "liveTrainingReview": "Prieš naudodami patikrinkite importuotų tiesioginių mokymų tvarkaraštį ir medžiagą.",
+    "dismissReview": "Pažymėti kaip patikrintą",
+    "error": "Nepavyko apdoroti Mentingo paketo.",
+    "errors": {
+      "storageUnavailable": "Failų saugykla nepasiekiama.",
+      "liveTrainingUnavailable": "Norint importuoti Mentingo paketą, reikia įjungti tiesioginius mokymus.",
+      "embeddingUnavailable": "AI dokumentų apdorojimas nepasiekiamas.",
+      "unsupportedVersion": "Ši Mentingo paketo versija nepalaikoma.",
+      "missingAsset": "Mentingo pakete trūksta būtino failo.",
+      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas."
+    }
+  },
   "aiConversations": {
     "session": "Sesija",
     "context": "Kontekstas",
@@ -820,7 +856,7 @@
     "back": "Atgal",
     "eyebrow": "Kurso nustatymas",
     "title": "Sukurti naują kursą",
-    "subtitle": "Pasirinkite, ar kursą kurti standartiniame redaktoriuje, ar iš SCORM paketo.",
+    "subtitle": "Pasirinkite standartinį redaktorių, SCORM paketą arba Mentingo paketą.",
     "standard": {
       "title": "Standartinis",
       "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
@@ -839,6 +875,16 @@
         "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
         "structure": "Importuoto paketo struktūra išsaugoma",
         "future": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Mentingo paketas",
+      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo.",
+      "features": {
+        "structure": "Atkuriama kurso struktūra ir vertimai",
+        "settings": "Atkuriami nustatymai ir metaduomenys",
+        "assets": "Pridedami susiję failai",
+        "learningPath": "Palaikomi mokymosi keliai ir jų kursai"
       }
     }
   },

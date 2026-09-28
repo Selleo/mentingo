@@ -1,4 +1,40 @@
 {
+  "nativeArchive": {
+    "importNotice": "Courses and learning paths with an existing identifier are skipped. New content is created as a draft.",
+    "uploadPrompt": "Choose or drop a Mentingo package ZIP",
+    "uploadDescription": "Use a package exported from Mentingo. ZIP files only.",
+    "dropPrompt": "Drop the Mentingo package here",
+    "fileReady": "Ready to import",
+    "replaceFile": "Replace package",
+    "removeFile": "Remove package",
+    "exportTitle": "Mentingo package",
+    "exportDescription": {
+      "course": "Export this course, its structure, settings, and assets as a package you can import into Mentingo.",
+      "learning-path": "Export this learning path and its courses, settings, and assets as a package you can import into Mentingo."
+    },
+    "exportButton": "Export Mentingo package",
+    "preparing": "Preparing Mentingo package…",
+    "exportReady": "Mentingo package downloaded",
+    "importTitle": "Import a Mentingo package",
+    "importDescription": "Choose a Mentingo package ZIP containing a course or learning path. Its saved structure and settings will be restored as a draft.",
+    "selectFile": "Select Mentingo package ZIP",
+    "importButton": "Import Mentingo package",
+    "uploading": "Uploading…",
+    "importing": "Importing Mentingo package…",
+    "alreadyExists": "This item already exists. Nothing was changed.",
+    "importComplete": "Import complete: {{count}} courses created, {{reused}} reused.",
+    "liveTrainingReview": "Review this imported live training schedule and materials before use.",
+    "dismissReview": "Mark reviewed",
+    "error": "Could not process the Mentingo package.",
+    "errors": {
+      "storageUnavailable": "Managed file storage is unavailable. Try again after it is configured.",
+      "liveTrainingUnavailable": "Live training must be enabled to import this Mentingo package.",
+      "embeddingUnavailable": "AI document processing is unavailable. Try again when it is configured.",
+      "unsupportedVersion": "This Mentingo package version is not supported.",
+      "missingAsset": "The Mentingo package is missing a required file.",
+      "invalidArchive": "This ZIP is not a valid Mentingo package."
+    }
+  },
   "aiConversations": {
     "session": "Session",
     "context": "Context",
@@ -820,7 +856,7 @@
     "back": "Back",
     "eyebrow": "Course setup",
     "title": "Create New Course",
-    "subtitle": "Choose whether to build the course with the standard editor or create it from a SCORM package.",
+    "subtitle": "Choose the standard editor, a SCORM package, or a Mentingo package.",
     "standard": {
       "title": "Standard",
       "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings.",
@@ -839,6 +875,16 @@
         "tracking": "SCO completion and runtime tracking supported",
         "structure": "Imported package structure preserved",
         "future": "Pricing, status, and certificates included"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Mentingo package",
+      "description": "Restore a course or learning path from a Mentingo package.",
+      "features": {
+        "structure": "Course structure and translations restored",
+        "settings": "Settings and metadata restored",
+        "assets": "Related files included",
+        "learningPath": "Learning paths and their courses supported"
       }
     }
   },

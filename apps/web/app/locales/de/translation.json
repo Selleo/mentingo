@@ -1,4 +1,40 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kurse und Lernpfade mit bereits vorhandener Kennung werden übersprungen. Neue Inhalte werden als Entwurf erstellt.",
+    "uploadPrompt": "Mentingo-Paket-ZIP auswählen oder ablegen",
+    "uploadDescription": "Verwenden Sie ein aus Mentingo exportiertes Paket. Nur ZIP-Dateien.",
+    "dropPrompt": "Mentingo-Paket hier ablegen",
+    "fileReady": "Bereit zum Import",
+    "replaceFile": "Paket ersetzen",
+    "removeFile": "Paket entfernen",
+    "exportTitle": "Mentingo-Paket",
+    "exportDescription": {
+      "course": "Exportieren Sie diesen Kurs mit Struktur, Einstellungen und Dateien als Paket für den Import in Mentingo.",
+      "learning-path": "Exportieren Sie diesen Lernpfad mit Kursen, Einstellungen und Dateien als Paket für den Import in Mentingo."
+    },
+    "exportButton": "Mentingo-Paket exportieren",
+    "preparing": "Mentingo-Paket wird vorbereitet…",
+    "exportReady": "Mentingo-Paket heruntergeladen",
+    "importTitle": "Mentingo-Paket importieren",
+    "importDescription": "Wählen Sie eine Mentingo-Paket-ZIP-Datei mit einem Kurs oder Lernpfad. Struktur und Einstellungen werden als Entwurf wiederhergestellt.",
+    "selectFile": "Mentingo-Paket-ZIP auswählen",
+    "importButton": "Mentingo-Paket importieren",
+    "uploading": "Wird hochgeladen…",
+    "importing": "Mentingo-Paket wird importiert…",
+    "alreadyExists": "Dieses Element existiert bereits. Es wurde nichts geändert.",
+    "importComplete": "Import abgeschlossen: {{count}} Kurse erstellt, {{reused}} wiederverwendet.",
+    "liveTrainingReview": "Prüfen Sie den Zeitplan und die Materialien dieser importierten Live-Schulung vor der Nutzung.",
+    "dismissReview": "Als geprüft markieren",
+    "error": "Das Mentingo-Paket konnte nicht verarbeitet werden.",
+    "errors": {
+      "storageUnavailable": "Der Dateispeicher ist nicht verfügbar.",
+      "liveTrainingUnavailable": "Live-Schulungen müssen für den Import des Mentingo-Pakets aktiviert sein.",
+      "embeddingUnavailable": "Die Verarbeitung von KI-Dokumenten ist nicht verfügbar.",
+      "unsupportedVersion": "Diese Mentingo-Paketversion wird nicht unterstützt.",
+      "missingAsset": "Im Mentingo-Paket fehlt eine erforderliche Datei.",
+      "invalidArchive": "Diese ZIP-Datei ist kein gültiges Mentingo-Paket."
+    }
+  },
   "aiConversations": {
     "session": "Sitzung",
     "context": "Kontext",
@@ -820,7 +856,7 @@
     "back": "Zurück",
     "eyebrow": "Kurseinrichtung",
     "title": "Neuen Kurs erstellen",
-    "subtitle": "Wählen Sie, ob der Kurs mit dem Standardeditor oder aus einem SCORM-Paket erstellt werden soll.",
+    "subtitle": "Wählen Sie den Standardeditor, ein SCORM-Paket oder ein Mentingo-Paket.",
     "standard": {
       "title": "Standard",
       "description": "Erstellen Sie einen Kurs mit integriertem Curriculum, Lektionen, Quizzen und Einstellungen.",
@@ -839,6 +875,16 @@
         "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
         "structure": "Importierte Paketstruktur bleibt erhalten",
         "future": "Preise, Status und Zertifikate enthalten"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Mentingo-Paket",
+      "description": "Stellen Sie einen Kurs oder Lernpfad aus einem Mentingo-Paket wieder her.",
+      "features": {
+        "structure": "Kursstruktur und Übersetzungen wiederherstellen",
+        "settings": "Einstellungen und Metadaten wiederherstellen",
+        "assets": "Zugehörige Dateien enthalten",
+        "learningPath": "Lernpfade und ihre Kurse unterstützt"
       }
     }
   },

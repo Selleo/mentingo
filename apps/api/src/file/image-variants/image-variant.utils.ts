@@ -37,6 +37,14 @@ export const getImageVariantKey = (reference: string, quality: ImageQuality) => 
   return `${reference.slice(0, -extension.length)}-${quality}${extension}`;
 };
 
+export const getImageVariantBase = (reference: string) => {
+  const match = reference.match(/-(\d+w)\.webp$/);
+  const quality = match?.[1];
+  if (!match || !quality || !isImageQuality(quality)) return reference;
+
+  return `${reference.slice(0, -match[0].length)}.webp`;
+};
+
 export const getAllImageVariantKeys = (reference: string) =>
   ALL_IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
 

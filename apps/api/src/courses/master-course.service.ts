@@ -248,16 +248,22 @@ export class MasterCourseService {
 
   async duplicateCourseIntoExistingCourse(
     params: DuplicateCourseIntoExistingCourseParams,
-  ): Promise<void> {
-    const sourceCourse = await this.masterCourseRepository.getCourseById(params.sourceCourseId);
-    if (!sourceCourse) throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
+  ): Promise<{ chapterMap: Map<UUIDType, UUIDType>; lessonMap: Map<UUIDType, UUIDType> }> {
+    const sourceCourse = params.sourceSnapshot
+      ? null
+      : await this.masterCourseRepository.getCourseById(params.sourceCourseId);
+    if (!params.sourceSnapshot && !sourceCourse) {
+      throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
+    }
 
     const targetCourse = await this.masterCourseRepository.findCourseByIdInTenant(
       params.targetCourseId,
     );
     if (!targetCourse) throw new NotFoundException("courseDuplication.error.targetCourseNotFound");
 
-    const sourceSnapshot = await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse);
+    const sourceSnapshot =
+      params.sourceSnapshot ??
+      (sourceCourse && (await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse)));
     if (!sourceSnapshot)
       throw new NotFoundException("courseDuplication.error.sourceCategoryMissing");
 
@@ -310,11 +316,11 @@ export class MasterCourseService {
       status: "draft",
       hasCertificate: sourceSnapshot.course.hasCertificate,
       priceInCents: 0,
-      currency: sourceSnapshot.course.currency,
+      currency: params.targetCurrency ?? sourceSnapshot.course.currency,
       chapterCount: sourceSnapshot.course.chapterCount,
       courseType: sourceSnapshot.course.courseType,
       authorId: params.actorId,
-      categoryId: sourceSnapshot.course.categoryId,
+      categoryId: params.targetCategoryId ?? sourceSnapshot.course.categoryId,
       stripeProductId: null,
       stripePriceId: null,
       settings: toJsonbBuildObject(copiedCourseSettings),
@@ -396,6 +402,7 @@ export class MasterCourseService {
     );
 
     await this.courseDurationService.refreshCourseDurationEstimates(params.targetCourseId);
+    return { chapterMap, lessonMap };
   }
 
   async assertCourseContentEditable(

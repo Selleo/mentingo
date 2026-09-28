@@ -74,6 +74,7 @@ export const shouldHideTopbarAndSidebar = (pathname: string) =>
     .with("/admin/beta-courses/new", () => true)
     .with("/admin/beta-courses/new/standard", () => true)
     .with("/admin/courses/new-scorm", () => true)
+    .with("/admin/courses/import-package", () => true)
     .otherwise(() => false);
 
 const AdminLayout = () => {

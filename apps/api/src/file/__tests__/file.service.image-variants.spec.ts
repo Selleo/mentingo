@@ -4,6 +4,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { RESOURCE_CATEGORIES } from "../file.constants";
 import { FileService } from "../file.service";
 import { IMAGE_QUALITY, PWA_ICON_IMAGE_QUALITY } from "../image-variants/image-variant.constants";
 import { ImageVariantService } from "../image-variants/image-variant.service";
@@ -24,10 +25,12 @@ type S3ServiceMock = {
 describe("FileService image variant references", () => {
   let service: FileService;
   let s3Service: S3ServiceMock;
+  let db: { transaction: jest.Mock };
 
   const variantReference = "tenant/course/variants/image.webp";
 
   beforeEach(async () => {
+    db = { transaction: jest.fn() };
     const moduleRef = await Test.createTestingModule({
       providers: [
         FileService,
@@ -50,7 +53,7 @@ describe("FileService image variant references", () => {
         { provide: S3VideoProvider, useValue: {} },
         { provide: ThumbnailService, useValue: {} },
         { provide: ImageVariantService, useValue: {} },
-        { provide: "DB", useValue: {} },
+        { provide: "DB", useValue: db },
         { provide: "CACHE_MANAGER", useValue: {} },
         { provide: VideoUploadNotificationGateway, useValue: {} },
         { provide: VideoMetadataQueueService, useValue: {} },
@@ -127,5 +130,29 @@ describe("FileService image variant references", () => {
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-960w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-1280w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-1920w.webp");
+  });
+
+  it("removes uploaded image variants when resource registration fails", async () => {
+    db.transaction = jest.fn().mockRejectedValue(new Error("database unavailable"));
+    jest.spyOn(service, "uploadFile").mockResolvedValue({
+      fileKey: variantReference,
+      fileUrl: "signed:image",
+      contentType: "image/webp",
+    });
+
+    await expect(
+      service.uploadResource({
+        file: {
+          buffer: Buffer.from("image"),
+          originalname: "image.webp",
+          mimetype: "image/webp",
+          size: 5,
+        } as Express.Multer.File,
+        resource: RESOURCE_CATEGORIES.COURSE,
+        folder: "native-archive",
+      }),
+    ).rejects.toThrow("database unavailable");
+
+    expect(s3Service.deleteFile).toHaveBeenCalledTimes(8);
   });
 });

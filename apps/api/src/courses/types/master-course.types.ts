@@ -309,6 +309,9 @@ export type DuplicateCourseIntoExistingCourseParams = {
   targetCourseId: UUIDType;
   actorId: UUIDType;
   tenantId: UUIDType;
+  sourceSnapshot?: SourceSnapshot;
+  targetCategoryId?: UUIDType;
+  targetCurrency?: string;
 };
 
 export type DuplicateChaptersParams = {

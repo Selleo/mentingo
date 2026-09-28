@@ -381,6 +381,9 @@ importers:
       '@types/adm-zip':
         specifier: 0.5.7
         version: 0.5.7
+      '@types/archiver':
+        specifier: 6.0.3
+        version: 6.0.3
       '@types/bcrypt':
         specifier: 5.0.2
         version: 5.0.2
@@ -447,6 +450,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 6.0.0
         version: 6.0.0(eslint@8.42.0)(typescript@5.4.5)
+      archiver:
+        specifier: 7.0.1
+        version: 7.0.1
       domhandler:
         specifier: 5.0.3
         version: 5.0.3

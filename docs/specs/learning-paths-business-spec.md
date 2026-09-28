@@ -26,6 +26,7 @@ Learners open the development paths page, browse available paths, enroll when el
 - Let eligible learners self-enroll in available paths.
 - Track path progress and issue certificates when path certification is enabled.
 - Export learning paths and linked courses to active recipient organizations where permitted.
+- Download a learning path and all its linked courses as one Mentingo package for later import into a compatible instance.
 
 ## End-User Value
 
@@ -35,6 +36,8 @@ Group enrollment, sequence rules, certificates, and export support larger organi
 
 ## How It Works
 
+An editor who can manage a learning path can download a Mentingo package ZIP containing its ordered course set and the managed files those courses need. The Mentingo package card in the new-course experience opens a dedicated ZIP picker that can restore the path as a draft. After a new path is imported, the user returns to the development paths list. Existing courses with matching UUIDs are reused without being changed, and an existing path UUID makes the import a no-op. New courses are free drafts owned by the importer; the path keeps its original UUID, localized metadata, order, and authored settings. Learner assignments and progress are excluded.
+
 When learning paths are enabled, learners with access can open `/development-paths` and see path cards in their selected language. If they are eligible, they can enroll and start working through the path's courses.
 
 Administrators and content creators with learning-path authoring access use the learning-path management experience to define localized title and description, status, thumbnail, certificate settings, course order, and sequencing. They can enroll selected learners or groups. Managing-tenant administrators can share a path only with active recipient organizations; inactive organizations are omitted from the selector and rejected by the export API. When the path's courses, enrollment, order, or sequence setting changes, Mentingo synchronizes the course access each enrolled learner should have.
@@ -42,6 +45,9 @@ Administrators and content creators with learning-path authoring access use the 
 In sequence mode, learners receive access to the next course only after prior course requirements are met. When all required courses are completed and certificates are enabled, Mentingo can create a learning-path certificate that learners can view, download, or share.
 
 ## Key Technical Context
+
+- Mentingo package path export requires management access to the path itself; separate management access to every linked course is not required. Import needs both learning-path and course creation access.
+- Mentingo package import is tenant-scoped and performs the new course and path database writes in one transaction. ZIP entries and asset hashes are checked before restore.
 
 - Learner UI lives in `apps/web/app/modules/LearningPaths`; admin UI lives in `apps/web/app/modules/Admin/LearningPaths`.
 - Main routes are `/development-paths`, `/admin/development-paths`, `/admin/development-paths/new`, and `/admin/development-paths/:id`.
@@ -52,6 +58,8 @@ In sequence mode, learners receive access to the next course only after prior co
 - Course access and sequence synchronization use learning-path sync services and background queue processing.
 
 ## Test Evidence
+
+- Archive package tests cover ZIP parsing and format version rejection, and a web component test covers the shared ZIP-only import control. A full learning-path import/export E2E flow is not yet covered.
 
 - API E2E coverage verifies the feature gate, create/read/update/delete, localization, own-path permissions, course add/remove/reorder, sequence synchronization, direct and group enrollment/unenrollment, active-recipient export behavior, rejection of inactive recipients, course access retention/removal rules, duplicate sync handling, future group members, and learning-path certificate rendering/share flows.
 - I did not find a dedicated Playwright learning-path spec under `apps/web/e2e/specs`; frontend behavior is supported by source evidence and strong backend workflow coverage.

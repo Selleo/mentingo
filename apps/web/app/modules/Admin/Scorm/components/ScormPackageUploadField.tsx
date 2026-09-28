@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import Loader from "~/modules/common/Loader/Loader";
+
+import type { LucideIcon } from "lucide-react";
 
 type ScormPackageUploadFieldProps = {
   file?: File;
@@ -12,6 +15,18 @@ type ScormPackageUploadFieldProps = {
   readonlyTitle?: string;
   readonlyDescription?: string;
   importNotice?: string;
+  isProcessing?: boolean;
+  processingAriaLabel?: string;
+  icon?: LucideIcon;
+  inputAriaLabel?: string;
+  labels?: {
+    upload: string;
+    uploadDescription: string;
+    drop: string;
+    ready: string;
+    replace: string;
+    remove: string;
+  };
   testIds?: {
     root?: string;
     input?: string;
@@ -37,11 +52,18 @@ export const ScormPackageUploadField = ({
   readonlyTitle,
   readonlyDescription,
   importNotice,
+  isProcessing = false,
+  processingAriaLabel,
+  icon: PackageIcon,
+  inputAriaLabel,
+  labels,
   testIds,
   onChange,
   onClear,
 }: ScormPackageUploadFieldProps) => {
   const { t } = useTranslation();
+  const SelectedIcon = PackageIcon ?? FileArchive;
+  const EmptyIcon = PackageIcon ?? UploadCloud;
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: {
@@ -61,19 +83,20 @@ export const ScormPackageUploadField = ({
       <div
         {...getRootProps({ "data-testid": testIds?.root })}
         className={cn(
-          "group w-full min-w-0 cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
+          "group relative w-full min-w-0 cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
           file ? "border-primary-200" : "border-neutral-300 hover:border-primary-400",
           isDragActive && "border-primary-600 bg-primary-50",
           error && "border-red-400 bg-red-50/40",
           disabled &&
+            !isProcessing &&
             "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-75 hover:border-neutral-200",
         )}
       >
-        <input {...getInputProps()} data-testid={testIds?.input} />
-        {disabled ? (
+        <input {...getInputProps()} aria-label={inputAriaLabel} data-testid={testIds?.input} />
+        {disabled && !isProcessing ? (
           <div data-testid={testIds?.readonly} className="flex w-full min-w-0 items-start gap-4">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
-              <FileArchive className="size-6" aria-hidden="true" />
+              <SelectedIcon className="size-6" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="body-base-md text-neutral-950">
@@ -88,12 +111,13 @@ export const ScormPackageUploadField = ({
           <div data-testid={testIds?.selectedFile} className="flex w-full min-w-0 flex-col gap-5">
             <div className="flex w-full min-w-0 items-start gap-4">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-800">
-                <FileArchive className="size-6" aria-hidden="true" />
+                <SelectedIcon className="size-6" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="body-base-md truncate text-neutral-950">{file.name}</p>
                 <p className="body-sm mt-1 text-neutral-700">
-                  {formatFileSize(file.size)} · {t("adminScorm.create.packageReady")}
+                  {formatFileSize(file.size)} ·{" "}
+                  {labels?.ready ?? t("adminScorm.create.packageReady")}
                 </p>
               </div>
             </div>
@@ -102,35 +126,52 @@ export const ScormPackageUploadField = ({
                 type="button"
                 variant="outline"
                 data-testid={testIds?.replaceButton}
+                disabled={disabled}
                 onClick={open}
               >
                 <Replace className="mr-2 size-4" />
-                {t("adminScorm.create.replacePackage")}
+                {labels?.replace ?? t("adminScorm.create.replacePackage")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 data-testid={testIds?.removeButton}
+                disabled={disabled}
                 onClick={onClear}
               >
                 <Trash2 className="mr-2 size-4" />
-                {t("adminScorm.create.removePackage")}
+                {labels?.remove ?? t("adminScorm.create.removePackage")}
               </Button>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center px-4 py-8 text-center">
             <div className="mb-4 flex size-14 items-center justify-center rounded-lg bg-primary-50 text-primary-800">
-              <UploadCloud className="size-7" aria-hidden="true" />
+              <EmptyIcon className="size-7" aria-hidden="true" />
             </div>
             <p className="body-base-md text-neutral-950">
               {isDragActive
-                ? t("adminScorm.create.dropPackage")
-                : t("adminScorm.create.uploadPackage")}
+                ? (labels?.drop ?? t("adminScorm.create.dropPackage"))
+                : (labels?.upload ?? t("adminScorm.create.uploadPackage"))}
             </p>
             <p className="body-sm mt-2 max-w-md text-neutral-700">
-              {t("adminScorm.create.uploadPackageDescription")}
+              {labels?.uploadDescription ?? t("adminScorm.create.uploadPackageDescription")}
             </p>
+          </div>
+        )}
+        {isProcessing && (
+          <div
+            role="status"
+            aria-label={processingAriaLabel}
+            className="absolute inset-0 z-50 flex items-center justify-center rounded-lg"
+          >
+            <div
+              className="absolute inset-0 rounded-lg bg-neutral-950 opacity-60"
+              aria-hidden="true"
+            />
+            <div className="relative z-10 w-full" aria-hidden="true">
+              <Loader />
+            </div>
           </div>
         )}
       </div>
