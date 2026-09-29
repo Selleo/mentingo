@@ -1687,6 +1687,8 @@
     "dropdown": {
       "changeCategory": "Changer de catégorie",
       "changeStatus": "Changer de statut",
+      "archive": "Archiver",
+      "restore": "Restaurer",
       "delete": "Supprimer"
     },
     "deleteModal": {
@@ -1694,6 +1696,14 @@
       "titleMultiple": "Supprimer des cours",
       "descriptionSingle": "Êtes-vous sûr de vouloir supprimer ce cours ? Cette action ne peut pas être annulée.",
       "descriptionMultiple": "Êtes-vous sûr de vouloir supprimer {{count}} cours ? Cette action ne peut pas être annulée."
+    },
+    "archiveModal": {
+      "title": "Archiver les cours",
+      "description": "Archiver {{count}} cours sélectionnés ? Les apprenants inscrits conserveront l’accès."
+    },
+    "restoreModal": {
+      "title": "Restaurer les cours",
+      "description": "Restaurer {{count}} cours sélectionnés dans le catalogue actif ?"
     },
     "statusModal": {
       "title": "Changer le statut du cours",
@@ -1711,6 +1721,9 @@
       "bulkCategoryUpdateFailed": "Échec de la mise à jour des catégories de cours",
       "bulkCategoryUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
       "bulkCategoryUpdateCategoryNotFound": "La catégorie sélectionnée n'a pas été trouvée.",
+      "bulkArchiveUpdateSuccessfully": "Statut d’archivage des cours mis à jour",
+      "bulkArchiveUpdateFailed": "Échec de la mise à jour du statut d’archivage des cours",
+      "bulkArchiveUpdateForbidden": "Vous ne pouvez pas archiver ou restaurer un ou plusieurs cours sélectionnés.",
       "bulkStatusUpdateSuccessfully": "Statuts des cours mis à jour avec succès",
       "bulkStatusUpdateFailed": "Échec de la mise à jour des statuts des cours",
       "bulkStatusUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
@@ -2358,6 +2371,9 @@
         "chapter": "Chapitre introuvable.",
         "lesson": "Leçon introuvable."
       },
+      "forbidden": {
+        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
+      },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
       "create": {
         "courseFailed": "Échec de la création du cours.",
@@ -2508,6 +2524,10 @@
         "enableQuizFeedbackDescription": "Après avoir soumis le quiz, l'apprenant verra quelles réponses étaient correctes, incorrectes ou sans réponse.",
         "enableVideoCompletionTracking": "Suivi de l'achèvement de la vidéo",
         "enableVideoCompletionTrackingDescription": "Exigez des apprenants qu'ils regardent au moins 90 % de chaque vidéo d'une leçon avant qu'elle ne soit marquée comme terminée.",
+        "archiveCourseDescription": "L'archivage masque le cours dans le catalogue et empêche les nouvelles auto-inscriptions. Les apprenants déjà inscrits conservent leur accès.",
+        "archiveCourseTitle": "Archiver le cours",
+        "archivedCourseTitle": "Cours archivé",
+        "courseAvailabilityTitle": "Disponibilité du cours",
         "fallbackLanguageWarningTitle": "Attention : traductions manquantes",
         "fallbackLanguageWarningDescription": "Certains champs de cette version linguistique sont vides. À ces endroits, les apprenants verront le contenu de la langue par défaut jusqu'à ce que vous ajoutiez des traductions.",
         "baseLanguageTooltip": "Vous ne pouvez pas modifier ou supprimer cette langue. C'est la valeur par défaut et fera toujours partie du cours."

@@ -1905,6 +1905,8 @@
     "dropdown": {
       "changeCategory": "Zmień kategorię",
       "changeStatus": "Zmień status",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć",
       "delete": "Usuń"
     },
     "deleteModal": {
@@ -1912,6 +1914,14 @@
       "titleMultiple": "Usuń kursy",
       "descriptionSingle": "Czy na pewno chcesz usunąć ten kurs? Ta operacja nie może zostać cofnięta.",
       "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} kursów? Ta operacja nie może zostać cofnięta."
+    },
+    "archiveModal": {
+      "title": "Archiwizuj kursy",
+      "description": "Zarchiwizować {{count}} wybranych kursów? Zapisani uczestnicy zachowają dostęp."
+    },
+    "restoreModal": {
+      "title": "Przywróć kursy",
+      "description": "Przywrócić {{count}} wybranych kursów do aktywnego katalogu?"
     },
     "statusModal": {
       "title": "Zmień status kursu",
@@ -1929,6 +1939,9 @@
       "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
       "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
       "bulkCategoryUpdateCategoryNotFound": "Nie znaleziono wybranej kategorii.",
+      "bulkArchiveUpdateSuccessfully": "Stan archiwizacji kursów został zaktualizowany",
+      "bulkArchiveUpdateFailed": "Nie udało się zmienić stanu archiwizacji kursów",
+      "bulkArchiveUpdateForbidden": "Nie masz uprawnień do archiwizacji lub przywrócenia co najmniej jednego z wybranych kursów.",
       "bulkStatusUpdateSuccessfully": "Statusy kursów zostały zaktualizowane",
       "bulkStatusUpdateFailed": "Nie udało się zaktualizować statusów kursów",
       "bulkStatusUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
@@ -2581,7 +2594,8 @@
         "lesson": "Nie znaleziono lekcji."
       },
       "forbidden": {
-        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
+        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu.",
+        "archivedCourseEnrollment": "Ten kurs został zarchiwizowany i nie można się już na niego zapisać."
       },
       "media": {
         "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
@@ -2738,6 +2752,10 @@
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
         "enableVideoCompletionTracking": "Śledzenie ukończenia wideo",
         "enableVideoCompletionTrackingDescription": "Uczestnik musi obejrzeć co najmniej 90% każdego filmu w lekcji, aby lekcja została oznaczona jako ukończona.",
+        "archiveCourseDescription": "Archiwizacja ukrywa kurs w katalogu i blokuje nowe samodzielne zapisy. Zapisani uczestnicy zachowują dostęp.",
+        "archiveCourseTitle": "Zarchiwizuj kurs",
+        "archivedCourseTitle": "Kurs zarchiwizowany",
+        "courseAvailabilityTitle": "Dostępność kursu",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."

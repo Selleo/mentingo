@@ -1,9 +1,10 @@
 import { COURSE_STATUSES } from "@repo/shared";
 import { isEmpty } from "lodash-es";
-import { CopyPlus, FilePenLine, Tags, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, CopyPlus, FilePenLine, Tags, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useBulkArchiveCourse } from "~/api/mutations/admin/useBulkArchiveCourse";
 import { useBulkUpdateCourseCategory } from "~/api/mutations/admin/useBulkUpdateCourseCategory";
 import { useBulkUpdateCourseStatus } from "~/api/mutations/admin/useBulkUpdateCourseStatus";
 import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
@@ -49,6 +50,8 @@ enum BulkCourseAction {
   Duplicate = "duplicate",
   ChangeCategory = "changeCategory",
   ChangeStatus = "changeStatus",
+  Archive = "archive",
+  Restore = "restore",
   Delete = "delete",
 }
 
@@ -62,6 +65,7 @@ const COURSE_STATUS_OPTIONS = [
 
 type CourseBulkActionsProps = {
   selectedCourseIds: string[];
+  selectedArchivedStates: boolean[];
   categories: CourseCategory[];
   onBulkActionComplete: () => void;
   onDuplicateCourse?: (courseId: string) => void;
@@ -71,6 +75,7 @@ type CourseBulkActionsProps = {
 
 export const CourseBulkActions = ({
   selectedCourseIds,
+  selectedArchivedStates,
   categories,
   onBulkActionComplete,
   onDuplicateCourse,
@@ -87,7 +92,9 @@ export const CourseBulkActions = ({
     useBulkUpdateCourseCategory();
   const { mutateAsync: bulkUpdateCourseStatus, isPending: isBulkStatusUpdatePending } =
     useBulkUpdateCourseStatus();
-  const isBulkActionPending = isBulkCategoryUpdatePending || isBulkStatusUpdatePending;
+  const { mutateAsync: bulkArchiveCourse, isPending: isArchivePending } = useBulkArchiveCourse();
+  const isBulkActionPending =
+    isBulkCategoryUpdatePending || isBulkStatusUpdatePending || isArchivePending;
 
   const resetBulkActionState = () => {
     setSelectedBulkAction(null);
@@ -158,6 +165,19 @@ export const CourseBulkActions = ({
       return;
     }
 
+    if (
+      selectedBulkAction === BulkCourseAction.Archive ||
+      selectedBulkAction === BulkCourseAction.Restore
+    ) {
+      await bulkArchiveCourse({
+        ids: selectedCourseIds,
+        isArchived: selectedBulkAction === BulkCourseAction.Archive,
+      });
+      onBulkActionComplete();
+      resetBulkActionState();
+      return;
+    }
+
     await handleBulkStatusUpdate();
   };
 
@@ -187,6 +207,28 @@ export const CourseBulkActions = ({
       destructive: false,
       testId: COURSES_PAGE_HANDLES.BULK_EDIT_STATUS_ACTION,
     },
+    ...(!selectedArchivedStates.every(Boolean)
+      ? [
+          {
+            icon: <Archive className="size-4 shrink-0" />,
+            translationKey: "adminCoursesView.dropdown.archive",
+            action: () => setSelectedBulkAction(BulkCourseAction.Archive),
+            destructive: true,
+            testId: COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
+          },
+        ]
+      : []),
+    ...(selectedArchivedStates.some(Boolean)
+      ? [
+          {
+            icon: <ArchiveRestore className="size-4 shrink-0" />,
+            translationKey: "adminCoursesView.dropdown.restore",
+            action: () => setSelectedBulkAction(BulkCourseAction.Restore),
+            destructive: false,
+            testId: COURSES_PAGE_HANDLES.BULK_EDIT_RESTORE_ACTION,
+          },
+        ]
+      : []),
     {
       icon: <Trash2 className="size-4 shrink-0" />,
       translationKey: "adminCoursesView.dropdown.delete",
@@ -223,10 +265,22 @@ export const CourseBulkActions = ({
       return t("adminCoursesView.categoryModal.title");
     }
 
+    if (selectedBulkAction === BulkCourseAction.Archive) {
+      return t("adminCoursesView.archiveModal.title");
+    }
+    if (selectedBulkAction === BulkCourseAction.Restore) {
+      return t("adminCoursesView.restoreModal.title");
+    }
+
     return t("adminCoursesView.statusModal.title");
   };
 
   const getDialogTestId = () => {
+    if (
+      selectedBulkAction === BulkCourseAction.Archive ||
+      selectedBulkAction === BulkCourseAction.Restore
+    )
+      return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG;
     if (selectedBulkAction === BulkCourseAction.Delete) return COURSES_PAGE_HANDLES.DELETE_DIALOG;
     if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
       return COURSES_PAGE_HANDLES.CATEGORY_DIALOG;
@@ -236,6 +290,11 @@ export const CourseBulkActions = ({
   };
 
   const getCancelButtonTestId = () => {
+    if (
+      selectedBulkAction === BulkCourseAction.Archive ||
+      selectedBulkAction === BulkCourseAction.Restore
+    )
+      return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CANCEL_BUTTON;
     if (selectedBulkAction === BulkCourseAction.Delete) {
       return COURSES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON;
     }
@@ -247,6 +306,11 @@ export const CourseBulkActions = ({
   };
 
   const getConfirmButtonTestId = () => {
+    if (
+      selectedBulkAction === BulkCourseAction.Archive ||
+      selectedBulkAction === BulkCourseAction.Restore
+    )
+      return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON;
     if (selectedBulkAction === BulkCourseAction.Delete) {
       return COURSES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON;
     }
@@ -270,6 +334,13 @@ export const CourseBulkActions = ({
       });
     }
 
+    if (selectedBulkAction === BulkCourseAction.Archive) {
+      return t("adminCoursesView.archiveModal.description", { count: selectedCourseIds.length });
+    }
+    if (selectedBulkAction === BulkCourseAction.Restore) {
+      return t("adminCoursesView.restoreModal.description", { count: selectedCourseIds.length });
+    }
+
     return t("adminCoursesView.statusModal.description", {
       count: selectedCourseIds.length,
     });
@@ -278,6 +349,20 @@ export const CourseBulkActions = ({
   const isConfirmDisabled =
     isBulkActionPending ||
     (selectedBulkAction === BulkCourseAction.ChangeCategory && !selectedCategoryId);
+  const isDestructiveAction =
+    selectedBulkAction === BulkCourseAction.Archive ||
+    selectedBulkAction === BulkCourseAction.Delete;
+
+  const getConfirmLabel = () => {
+    if (selectedBulkAction === BulkCourseAction.Delete) return t("common.button.delete");
+    if (selectedBulkAction === BulkCourseAction.Archive) {
+      return t("adminCoursesView.dropdown.archive");
+    }
+    if (selectedBulkAction === BulkCourseAction.Restore) {
+      return t("adminCoursesView.dropdown.restore");
+    }
+    return t("common.button.save");
+  };
 
   return (
     <div
@@ -430,7 +515,7 @@ export const CourseBulkActions = ({
               </div>
             )}
             <div className="flex justify-end gap-3 px-6 py-5">
-              <DialogClose>
+              <DialogClose asChild>
                 <Button
                   data-testid={getCancelButtonTestId()}
                   variant="ghost"
@@ -443,14 +528,11 @@ export const CourseBulkActions = ({
                 data-testid={getConfirmButtonTestId()}
                 onClick={handleConfirmBulkAction}
                 className={cn({
-                  "bg-error-500 text-white hover:bg-error-600":
-                    selectedBulkAction === BulkCourseAction.Delete,
+                  "bg-error-500 text-white hover:bg-error-600": isDestructiveAction,
                 })}
                 disabled={isConfirmDisabled}
               >
-                {selectedBulkAction === BulkCourseAction.Delete
-                  ? t("common.button.delete")
-                  : t("common.button.save")}
+                {getConfirmLabel()}
               </Button>
             </div>
           </DialogContent>

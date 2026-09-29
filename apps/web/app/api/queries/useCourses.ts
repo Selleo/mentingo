@@ -1,5 +1,11 @@
-import { SUPPORTED_LANGUAGES, type CourseStatus, type SupportedLanguages } from "@repo/shared";
+import {
+  COURSE_ARCHIVED_QUERY_VALUES,
+  SUPPORTED_LANGUAGES,
+  type CourseStatus,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { match } from "ts-pattern";
 
 import { ApiClient } from "../api-client";
 
@@ -17,7 +23,8 @@ export type CourseParams = {
   state?: CourseStatus;
   sort?: SortOption;
   authorId?: string;
-  archived?: boolean;
+  isArchived?: boolean;
+  includeArchived?: boolean;
   language?: SupportedLanguages;
 };
 
@@ -33,6 +40,12 @@ export const allCoursesQueryOptions = (
 ) => ({
   queryKey: [...ALL_COURSES_QUERY_KEY, searchParams],
   queryFn: async () => {
+    const isArchived = match(searchParams)
+      .with({ includeArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.ALL)
+      .with({ isArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.TRUE)
+      .with({ isArchived: false }, () => COURSE_ARCHIVED_QUERY_VALUES.FALSE)
+      .otherwise(() => undefined);
+
     const response = await ApiClient.api.courseControllerGetAllCourses({
       ...(searchParams?.title && { title: searchParams.title }),
       ...(searchParams?.description && { description: searchParams.description }),
@@ -40,7 +53,7 @@ export const allCoursesQueryOptions = (
       ...(searchParams?.authorId && { authorId: searchParams.authorId }),
       ...(searchParams?.state && { status: searchParams.state }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(searchParams?.archived && { archived: searchParams.archived }),
+      ...(isArchived && { isArchived }),
       language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
       page: 1,
       perPage: 100,

@@ -1692,6 +1692,8 @@
     "dropdown": {
       "changeCategory": "Změnit kategorii",
       "changeStatus": "Změnit stav",
+      "archive": "Archivovat",
+      "restore": "Obnovit",
       "delete": "Smazat"
     },
     "deleteModal": {
@@ -1699,6 +1701,14 @@
       "titleMultiple": "Smazat kurzy",
       "descriptionSingle": "Opravdu chcete tento kurz smazat? Tuto akci nelze vrátit zpět.",
       "descriptionMultiple": "Opravdu chcete smazat {{count}} kurzy? Tuto akci nelze vrátit zpět."
+    },
+    "archiveModal": {
+      "title": "Archivovat kurzy",
+      "description": "Archivovat {{count}} vybraných kurzů? Zapsaní studenti si ponechají přístup."
+    },
+    "restoreModal": {
+      "title": "Obnovit kurzy",
+      "description": "Obnovit {{count}} vybraných kurzů do aktivního katalogu?"
     },
     "statusModal": {
       "title": "Změnit stav kurzu",
@@ -1716,6 +1726,9 @@
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
       "bulkCategoryUpdateCategoryNotFound": "Vybraná kategorie nebyla nalezena.",
+      "bulkArchiveUpdateSuccessfully": "Stav archivace kurzů byl aktualizován",
+      "bulkArchiveUpdateFailed": "Stav archivace kurzů se nepodařilo aktualizovat",
+      "bulkArchiveUpdateForbidden": "Nemáte oprávnění archivovat nebo obnovit jeden či více vybraných kurzů.",
       "bulkStatusUpdateSuccessfully": "Stavy kurzů byly úspěšně aktualizovány",
       "bulkStatusUpdateFailed": "Nepodařilo se aktualizovat stavy kurzů",
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
@@ -2365,7 +2378,8 @@
         "lesson": "Lekce nenalezena."
       },
       "forbidden": {
-        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz.",
+        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat."
       },
       "media": {
         "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
@@ -2521,6 +2535,10 @@
         "enableQuizFeedbackDescription": "Po odeslání kvízu student uvidí, které odpovědi byly správné, nesprávné nebo nezodpovězené.",
         "enableVideoCompletionTracking": "Sledování dokončení videa",
         "enableVideoCompletionTrackingDescription": "Účastník musí zhlédnout alespoň 90 % každého videa v lekci, aby byla lekce označena jako dokončená.",
+        "archiveCourseDescription": "Archivace skryje kurz v katalogu a zabrání novým samostatným zápisům. Již zapsaní účastníci si zachovají přístup.",
+        "archiveCourseTitle": "Archivovat kurz",
+        "archivedCourseTitle": "Kurz je archivován",
+        "courseAvailabilityTitle": "Dostupnost kurzu",
         "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
         "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
         "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."

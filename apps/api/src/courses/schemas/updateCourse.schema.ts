@@ -21,7 +21,6 @@ export const updateCourseSchema = Type.Partial(
     currency: Type.String(),
     categoryId: Type.String({ format: "uuid" }),
     chapters: Type.Array(Type.String({ format: "uuid" })),
-    archived: Type.Optional(Type.Boolean()),
     language: supportedLanguagesSchema,
   }),
 );

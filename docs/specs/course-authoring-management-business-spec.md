@@ -26,6 +26,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - See a compact warning when any supported course content is still missing in the selected translation.
 - Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
 - Change course category and status individually or in bulk, including draft, private, and published states.
+- Archive and restore courses from the course list or an individual course's settings, while preserving access for learners already enrolled.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.
 - Add, switch, delete, and generate course language variants directly from the modern course overview while editing media and metadata.
@@ -48,7 +49,9 @@ Course reporting follows the same ownership model. Content creators can review o
 
 ## How It Works
 
-Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose curriculum, pricing when available, status, enrollment, and export areas. Course metadata and operational settings are managed from the modern course overview instead of a duplicate Settings tab in the legacy edit screen.
+Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose curriculum, pricing when available, status, enrollment, and export areas. Course metadata and operational settings are managed from the modern course overview instead of a duplicate Settings tab in the legacy edit screen. Administrators and content creators can archive courses they manage from row or bulk actions or from the Status tab in the course settings drawer. Archiving from settings requires confirmation; restoring from the same area is immediate. The Archived filter in the course list also lets them find and restore courses later; the list shows active courses by default.
+
+Archived courses leave the learner catalog, recommendations, and available-course search. Enrolled learners keep their course access and progress, while new learners cannot join through self-enrollment or start a new checkout. Administrators may still assign learners to an archived course. If a learner has already started a paid checkout, a later successful payment still completes enrollment after archival.
 
 While maintaining a course curriculum, authorized administrators can create, reorder, update, and remove chapters. Removing a chapter also removes the learner progress that belongs only to that chapter, so obsolete curriculum does not leave broken learner records behind.
 
@@ -90,6 +93,7 @@ From a course view, an eligible administrator opens the Statistics tab to review
 - Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
 - Chapter editing is provided by the curriculum area and `apps/api/src/chapter`; chapter deletion removes its related learner chapter-progress data in the same database operation.
 - Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
+- Course archive state is separate from publication status; the protected bulk archive endpoint enforces full-course or own-course update permissions, and the learner catalog and direct-course access checks enforce visibility.
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; course update snapshots detect learning outcomes, author-section visibility, and cover-image positioning, while both the create and update mappings copy those values to the target course. Copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`. Course Overview editor visibility follows the API update rule: `COURSE_UPDATE` applies to any course, while `COURSE_UPDATE_OWN` additionally requires matching the course author.
 - The category-management shortcut is shown only with `PERMISSIONS.CATEGORY_MANAGE` and uses the tenant-relative `/admin/categories` route.
@@ -110,6 +114,8 @@ From a course view, an eligible administrator opens the Statistics tab to review
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
+- API E2E coverage verifies archive and restore, active/archived/all filtering, enrolled learner access, catalog exclusion, blocked self-enrollment, and allowed administrator assignment. Web E2E coverage is present for bulk archive and restore but currently cannot reach the UI in this environment because its Mailhog invitation setup times out.
+- Focused component coverage verifies that the Status tab requires confirmation before archiving, allows direct restoration, and shows the archive control in the modern settings drawer.
 - API E2E coverage verifies that content creators can access their own course statistics, cannot access another author's statistics, and that any-course administrators retain access.
 - Curriculum web E2E coverage verifies an administrator can create, update, reorder, and delete a chapter; chapter API E2E coverage verifies deletion also clears the chapter's learner progress.
 - Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.

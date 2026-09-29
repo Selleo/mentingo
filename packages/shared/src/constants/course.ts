@@ -10,6 +10,15 @@ export const COURSE_STATUSES = {
 
 export type CourseStatus = (typeof COURSE_STATUSES)[keyof typeof COURSE_STATUSES];
 
+export const COURSE_ARCHIVED_QUERY_VALUES = {
+  TRUE: "true",
+  FALSE: "false",
+  ALL: "all",
+} as const;
+
+export type CourseArchivedQueryValue =
+  (typeof COURSE_ARCHIVED_QUERY_VALUES)[keyof typeof COURSE_ARCHIVED_QUERY_VALUES];
+
 export const COURSE_PROGRESS_STATUSES = {
   NOT_STARTED: "not_started",
   IN_PROGRESS: "in_progress",

@@ -138,7 +138,7 @@ export async function createNiceCourses(
     const { enabled: isStripeConfigured } = await envService.getStripeConfigured();
 
     if (isStripeConfigured) {
-      const stripeService = new StripeService(envService);
+      const stripeService = new StripeService(envService, db);
 
       const existingStripeProduct = await stripeService.searchProducts({
         query: `name:\'${courseData.title}\'`,

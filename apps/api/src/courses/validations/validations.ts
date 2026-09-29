@@ -1,3 +1,4 @@
+import { COURSE_ARCHIVED_QUERY_VALUES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { categorySchema } from "src/category/schemas/category.schema";
@@ -32,6 +33,15 @@ export const allCoursesValidation = {
       type: "query" as const,
       name: "status",
       schema: coursesStatusOptions,
+    },
+    {
+      type: "query" as const,
+      name: "isArchived",
+      schema: Type.Union([
+        Type.Literal(COURSE_ARCHIVED_QUERY_VALUES.TRUE),
+        Type.Literal(COURSE_ARCHIVED_QUERY_VALUES.FALSE),
+        Type.Literal(COURSE_ARCHIVED_QUERY_VALUES.ALL),
+      ]),
     },
     { type: "query" as const, name: "sort", schema: sortCourseFieldsOptions },
     {

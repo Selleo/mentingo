@@ -1687,6 +1687,8 @@
     "dropdown": {
       "changeCategory": "Kategorie ändern",
       "changeStatus": "Status ändern",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
       "delete": "Löschen"
     },
     "deleteModal": {
@@ -1694,6 +1696,14 @@
       "titleMultiple": "Kurse löschen",
       "descriptionSingle": "Möchten Sie diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kurse löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "archiveModal": {
+      "title": "Kurse archivieren",
+      "description": "{{count}} ausgewählte Kurse archivieren? Eingeschriebene Lernende behalten Zugriff."
+    },
+    "restoreModal": {
+      "title": "Kurse wiederherstellen",
+      "description": "{{count}} ausgewählte Kurse in den aktiven Katalog zurückholen?"
     },
     "statusModal": {
       "title": "Kursstatus ändern",
@@ -1711,6 +1721,9 @@
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
       "bulkCategoryUpdateCategoryNotFound": "Die ausgewählte Kategorie wurde nicht gefunden.",
+      "bulkArchiveUpdateSuccessfully": "Archivstatus der Kurse aktualisiert",
+      "bulkArchiveUpdateFailed": "Archivstatus der Kurse konnte nicht aktualisiert werden",
+      "bulkArchiveUpdateForbidden": "Sie dürfen einen oder mehrere ausgewählte Kurse nicht archivieren oder wiederherstellen.",
       "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
       "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -2360,7 +2373,8 @@
         "lesson": "Lektion nicht gefunden."
       },
       "forbidden": {
-        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren."
+        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren.",
+        "archivedCourseEnrollment": "Dieser Kurs wurde archiviert und ist nicht mehr für die Anmeldung verfügbar."
       },
       "media": {
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
@@ -2516,6 +2530,10 @@
         "enableQuizFeedbackDescription": "Nach dem Absenden des Quiz sieht der Schüler, welche Antworten richtig, falsch oder unbeantwortet waren.",
         "enableVideoCompletionTracking": "Video-Abschlussverfolgung",
         "enableVideoCompletionTrackingDescription": "Lernende müssen mindestens 90% jedes Videos in einer Lektion ansehen, bevor sie als abgeschlossen markiert wird.",
+        "archiveCourseDescription": "Durch die Archivierung wird der Kurs aus dem Katalog ausgeblendet und neue Selbstanmeldungen werden verhindert. Bereits eingeschriebene Lernende behalten Zugriff.",
+        "archiveCourseTitle": "Kurs archivieren",
+        "archivedCourseTitle": "Kurs archiviert",
+        "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
         "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."

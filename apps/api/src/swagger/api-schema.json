@@ -3670,6 +3670,27 @@
                 }
               ]
             }
+          },
+          {
+            "name": "isArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -5036,6 +5057,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BulkUpdateCourseStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/bulk/archive": {
+      "patch": {
+        "operationId": "CourseController_bulkArchiveCourse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkArchiveCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkArchiveCourseResponse"
                 }
               }
             }
@@ -29447,6 +29495,9 @@
                     }
                   ]
                 },
+                "isArchived": {
+                  "type": "boolean"
+                },
                 "courseType": {
                   "anyOf": [
                     {
@@ -29714,6 +29765,9 @@
                       "type": "string"
                     }
                   ]
+                },
+                "isArchived": {
+                  "type": "boolean"
                 },
                 "courseType": {
                   "anyOf": [
@@ -30246,6 +30300,9 @@
                     }
                   ]
                 },
+                "isArchived": {
+                  "type": "boolean"
+                },
                 "courseType": {
                   "anyOf": [
                     {
@@ -30616,6 +30673,9 @@
                     }
                   ]
                 },
+                "isArchived": {
+                  "type": "boolean"
+                },
                 "courseType": {
                   "anyOf": [
                     {
@@ -30827,6 +30887,9 @@
                     }
                   ]
                 },
+                "isArchived": {
+                  "type": "boolean"
+                },
                 "courseType": {
                   "anyOf": [
                     {
@@ -30935,7 +30998,7 @@
           "data": {
             "type": "object",
             "properties": {
-              "archived": {
+              "isArchived": {
                 "type": "boolean"
               },
               "authorId": {
@@ -31485,7 +31548,7 @@
           "data": {
             "type": "object",
             "properties": {
-              "archived": {
+              "isArchived": {
                 "type": "boolean"
               },
               "authorId": {
@@ -32393,6 +32456,45 @@
           "data"
         ]
       },
+      "BulkArchiveCourseBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "isArchived": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ids",
+          "isArchived"
+        ]
+      },
+      "BulkArchiveCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "BulkUpdateCourseCategoryBody": {
         "type": "object",
         "properties": {
@@ -32628,9 +32730,6 @@
               "format": "uuid",
               "type": "string"
             }
-          },
-          "archived": {
-            "type": "boolean"
           },
           "language": {
             "default": "en",

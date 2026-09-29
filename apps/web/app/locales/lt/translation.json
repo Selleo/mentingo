@@ -1686,6 +1686,8 @@
     "dropdown": {
       "changeCategory": "Keisti kategoriją",
       "changeStatus": "Keisti būseną",
+      "archive": "Archyvuoti",
+      "restore": "Atkurti",
       "delete": "Ištrinti"
     },
     "deleteModal": {
@@ -1693,6 +1695,14 @@
       "titleMultiple": "Ištrinti kursus",
       "descriptionSingle": "Ar tikrai norite ištrinti šį kursą? Šio veiksmo anuliuoti negalima.",
       "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kursus? Šio veiksmo anuliuoti negalima."
+    },
+    "archiveModal": {
+      "title": "Archyvuoti kursus",
+      "description": "Archyvuoti {{count}} pasirinktų kursų? Užsiregistravę mokiniai išsaugos prieigą."
+    },
+    "restoreModal": {
+      "title": "Atkurti kursus",
+      "description": "Atkurti {{count}} pasirinktų kursų į aktyvų katalogą?"
     },
     "statusModal": {
       "title": "Keisti kurso būseną",
@@ -1710,6 +1720,9 @@
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
       "bulkCategoryUpdateCategoryNotFound": "Pasirinkta kategorija nerasta.",
+      "bulkArchiveUpdateSuccessfully": "Kursų archyvavimo būsena atnaujinta",
+      "bulkArchiveUpdateFailed": "Nepavyko atnaujinti kursų archyvavimo būsenos",
+      "bulkArchiveUpdateForbidden": "Neturite teisės archyvuoti arba atkurti vieno ar daugiau pasirinktų kursų.",
       "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
       "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -2359,7 +2372,8 @@
         "lesson": "Pamoka nerasta."
       },
       "forbidden": {
-        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso.",
+        "archivedCourseEnrollment": "Šis kursas buvo archyvuotas ir į jį nebegalima užsiregistruoti."
       },
       "media": {
         "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
@@ -2515,6 +2529,10 @@
         "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
         "enableVideoCompletionTracking": "Vaizdo įrašo užbaigimo sekimas",
         "enableVideoCompletionTrackingDescription": "Besimokantysis turi peržiūrėti bent 90 % kiekvieno pamokos vaizdo įrašo, kad pamoka būtų pažymėta kaip baigta.",
+        "archiveCourseDescription": "Archyvavus kursas paslepiamas kataloge ir neleidžiama naujai užsiregistruoti savarankiškai. Jau užsiregistravę dalyviai išsaugo prieigą.",
+        "archiveCourseTitle": "Archyvuoti kursą",
+        "archivedCourseTitle": "Kursas archyvuotas",
+        "courseAvailabilityTitle": "Kurso prieinamumas",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
         "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."

@@ -7,7 +7,7 @@ import { UUIDSchema } from "src/common";
 import { coursesStatusOptions } from "./courseQuery";
 
 export const commonShowCourseSchema = Type.Object({
-  archived: Type.Optional(Type.Boolean()),
+  isArchived: Type.Optional(Type.Boolean()),
   authorId: Type.Optional(UUIDSchema),
   author: Type.Optional(
     Type.Object({
@@ -55,7 +55,7 @@ export const commonShowCourseSchema = Type.Object({
 });
 
 export const commonShowBetaCourseSchema = Type.Object({
-  archived: Type.Optional(Type.Boolean()),
+  isArchived: Type.Optional(Type.Boolean()),
   authorId: Type.Optional(UUIDSchema),
   category: Type.String(),
   categoryId: Type.Optional(Type.String({ format: "uuid" })),

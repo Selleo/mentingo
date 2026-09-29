@@ -1680,6 +1680,8 @@
     "dropdown": {
       "changeCategory": "Cambiar categoría",
       "changeStatus": "Cambiar estado",
+      "archive": "Archivar",
+      "restore": "Restaurar",
       "delete": "Eliminar"
     },
     "deleteModal": {
@@ -1687,6 +1689,14 @@
       "titleMultiple": "Eliminar cursos",
       "descriptionSingle": "¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer.",
       "descriptionMultiple": "¿Está seguro de que desea eliminar los cursos {{count}}? Esta acción no se puede deshacer."
+    },
+    "archiveModal": {
+      "title": "Archivar cursos",
+      "description": "¿Archivar {{count}} cursos seleccionados? Los alumnos inscritos conservarán el acceso."
+    },
+    "restoreModal": {
+      "title": "Restaurar cursos",
+      "description": "¿Restaurar {{count}} cursos seleccionados al catálogo activo?"
     },
     "statusModal": {
       "title": "Cambiar estado del curso",
@@ -1704,6 +1714,9 @@
       "bulkCategoryUpdateFailed": "No se pudieron actualizar las categorías del curso",
       "bulkCategoryUpdateForbidden": "No tienes permiso para actualizar uno o más cursos seleccionados.",
       "bulkCategoryUpdateCategoryNotFound": "No se encontró la categoría seleccionada.",
+      "bulkArchiveUpdateSuccessfully": "Estado de archivo de cursos actualizado",
+      "bulkArchiveUpdateFailed": "No se pudo actualizar el estado de archivo de los cursos",
+      "bulkArchiveUpdateForbidden": "No tiene permiso para archivar o restaurar uno o más cursos seleccionados.",
       "bulkStatusUpdateSuccessfully": "Estados del curso actualizados exitosamente",
       "bulkStatusUpdateFailed": "No se pudieron actualizar los estados del curso",
       "bulkStatusUpdateForbidden": "No tienes permiso para actualizar uno o más cursos seleccionados.",
@@ -2353,7 +2366,8 @@
         "lesson": "Lección no encontrada."
       },
       "forbidden": {
-        "updateCourse": "No tienes permiso para actualizar este curso."
+        "updateCourse": "No tienes permiso para actualizar este curso.",
+        "archivedCourseEnrollment": "Este curso se ha archivado y ya no está disponible para inscribirse."
       },
       "media": {
         "imageUploadFailed": "No se pudo subir la imagen del curso.",
@@ -2509,6 +2523,10 @@
         "enableQuizFeedbackDescription": "Después de enviar el cuestionario, el estudiante verá qué respuestas fueron correctas, incorrectas o no respondidas.",
         "enableVideoCompletionTracking": "Seguimiento de finalización de vídeo",
         "enableVideoCompletionTrackingDescription": "Exija que los alumnos vean al menos el 90 % de cada vídeo de una lección antes de que se marque como completado.",
+        "archiveCourseDescription": "Al archivar el curso, se oculta del catálogo y se impiden nuevas autoinscripciones. Los alumnos ya inscritos conservan el acceso.",
+        "archiveCourseTitle": "Archivar curso",
+        "archivedCourseTitle": "Curso archivado",
+        "courseAvailabilityTitle": "Disponibilidad del curso",
         "fallbackLanguageWarningTitle": "Nota: faltan traducciones",
         "fallbackLanguageWarningDescription": "Algunos campos en esta versión de idioma están vacíos. En esos lugares, los estudiantes verán el contenido del idioma predeterminado hasta que usted agregue traducciones.",
         "baseLanguageTooltip": "No puede cambiar ni eliminar este idioma. Es el valor predeterminado y siempre será parte del curso."

@@ -2197,6 +2197,246 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/bulk/archive", () => {
+    it.each([
+      [{ ids: [], isArchived: true }],
+      [{ ids: ["not-a-uuid"], isArchived: true }],
+      [{ ids: [faker.string.uuid()] }],
+    ])("rejects invalid archive payloads: %j", async (payload) => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send(payload)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(400);
+    });
+
+    it("lets content creators archive only their own courses", async () => {
+      const creator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create();
+      const otherCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create();
+      const ownCourse = await courseFactory.create({
+        authorId: creator.id,
+        status: "published",
+        thumbnailS3Key: null,
+      });
+      const otherCourse = await courseFactory.create({
+        authorId: otherCreator.id,
+        status: "published",
+        thumbnailS3Key: null,
+      });
+      const cookies = await cookieFor(creator, app);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [ownCourse.id, otherCourse.id], isArchived: true })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      const unchangedCourses = await db
+        .select({ id: courses.id, isArchived: courses.isArchived })
+        .from(courses)
+        .where(inArray(courses.id, [ownCourse.id, otherCourse.id]));
+      expect(unchangedCourses).toEqual(
+        expect.arrayContaining([
+          { id: ownCourse.id, isArchived: false },
+          { id: otherCourse.id, isArchived: false },
+        ]),
+      );
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [ownCourse.id], isArchived: true })
+        .expect(401);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [faker.string.uuid()], isArchived: true })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [ownCourse.id, ownCourse.id], isArchived: true })
+        .set("Cookie", cookies)
+        .expect(200);
+    });
+
+    it("archives and restores a course while preserving enrolled learner access", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const learner = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const otherLearner = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
+      const paidLearner = await userFactory.create();
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+      });
+      await db.insert(studentCourses).values({
+        studentId: learner.id,
+        courseId: course.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      });
+      await setFeaturedCourseId(course.id);
+
+      const adminCookies = await cookieFor(admin, app);
+      const learnerCookies = await cookieFor(learner, app);
+      const otherCookies = await cookieFor(otherLearner, app);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [course.id], isArchived: true })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(await getFeaturedCourseId()).toBeUndefined();
+
+      const defaultList = await request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ language: "en" })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(defaultList.body.data.some(({ id }: { id: string }) => id === course.id)).toBe(false);
+
+      const archivedList = await request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ language: "en", isArchived: true })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(archivedList.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: course.id,
+            status: COURSE_STATUSES.PUBLISHED,
+            isArchived: true,
+          }),
+        ]),
+      );
+
+      const allList = await request(app.getHttpServer())
+        .get("/api/course/all")
+        .query({ language: "en", isArchived: "all" })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(allList.body.data.some(({ id }: { id: string }) => id === course.id)).toBe(true);
+
+      const catalog = await request(app.getHttpServer())
+        .get("/api/course/available-courses")
+        .query({ language: "en" })
+        .expect(200);
+      expect(catalog.body.data.some(({ id }: { id: string }) => id === course.id)).toBe(false);
+
+      const learnerCourse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", learnerCookies)
+        .expect(200);
+      expect(learnerCourse.body.data.status).toBe("found");
+      await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", otherCookies)
+        .expect(404);
+      await request(app.getHttpServer())
+        .post("/api/course/enroll-course")
+        .query({ id: course.id })
+        .set("Cookie", otherCookies)
+        .expect(403);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [course.id], isArchived: false })
+        .set("Cookie", learnerCookies)
+        .expect(403);
+
+      await request(app.getHttpServer())
+        .post(`/api/course/${course.id}/enroll-courses`)
+        .send({ studentIds: [otherLearner.id] })
+        .set("Cookie", adminCookies)
+        .expect(201);
+
+      await app.get(CourseService).enrollCourse(course.id, paidLearner.id, undefined, "pi_paid");
+      const [paidEnrollment] = await db
+        .select({ status: studentCourses.status })
+        .from(studentCourses)
+        .where(
+          and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, paidLearner.id)),
+        );
+      expect(paidEnrollment?.status).toBe(COURSE_ENROLLMENT.ENROLLED);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [course.id], isArchived: false })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      const restored = await db
+        .select({ status: courses.status, isArchived: courses.isArchived })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(restored[0]).toEqual({ status: COURSE_STATUSES.PUBLISHED, isArchived: false });
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [course.id], isArchived: false })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      const restoredAgain = await db
+        .select({ status: courses.status, isArchived: courses.isArchived })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(restoredAgain[0]).toEqual({ status: COURSE_STATUSES.PUBLISHED, isArchived: false });
+    });
+
+    it("keeps archive state independent from bulk status changes", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+        thumbnailS3Key: null,
+      });
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/archive")
+        .send({ ids: [course.id], isArchived: true })
+        .set("Cookie", cookies)
+        .expect(200);
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({ ids: [course.id], status: COURSE_STATUSES.DRAFT })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const [updatedCourse] = await db
+        .select({ status: courses.status, isArchived: courses.isArchived })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(updatedCourse).toEqual({ status: COURSE_STATUSES.DRAFT, isArchived: true });
+    });
+  });
+
   describe("PATCH /api/course/bulk/status", () => {
     it("updates statuses for selected courses", async () => {
       const admin = await userFactory

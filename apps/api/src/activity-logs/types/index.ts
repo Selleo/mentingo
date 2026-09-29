@@ -109,6 +109,7 @@ export type LessonActivityLogSnapshot = {
 
 export type CourseActivityLogSnapshot = {
   id: UUIDType;
+  archived?: boolean;
   title?: string | null;
   description?: string | null;
   status?: string | null;

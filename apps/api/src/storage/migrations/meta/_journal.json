@@ -1408,6 +1408,13 @@
       "when": 1789631517227,
       "tag": "0200_normalize_course_author_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1790683250080,
+      "tag": "0201_add_archived_field_to_courses",
+      "breakpoints": true
     }
   ]
 }
