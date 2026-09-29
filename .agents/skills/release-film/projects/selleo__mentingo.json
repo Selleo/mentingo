@@ -1,0 +1,121 @@
+{
+ "language": "en",
+ "brand": {
+  "font": {
+   "family": "all-round-gothic",
+   "weight": 600,
+   "source": "https://use.typekit.net/af/964f70/00000000000000007735c47d/31/a?primer=592708b04bace7901bbf402b49fc07acf6f622abacda535ca47331b6917becfb&fvd=n6&v=3",
+   "kit": "https://use.typekit.net/qqt7bjl.css"
+  },
+  "body_font": {
+   "family": "Open Sans",
+   "css": "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+  },
+  "colors": {
+   "accent": "#3f58b6",
+   "frame": "#222949"
+  }
+ },
+ "harness": {
+  "config": "apps/web/playwright.config.ts",
+  "node": "22.15.0",
+  "pnpm": "10.22.0",
+  "install": [
+   "cd ../.. && pnpm install --frozen-lockfile",
+   "cd ../.. && pnpm -w packages:build",
+   "pnpm exec playwright install chromium"
+  ],
+  "services": [
+   {
+    "name": "postgres",
+    "image": "pgvector/pgvector:pg16",
+    "ports": [
+     "54321:5432"
+    ],
+    "env": {
+     "POSTGRES_USER": "test_user",
+     "POSTGRES_PASSWORD": "test_password",
+     "POSTGRES_DB": "test_db"
+    },
+    "health": "pg_isready -U test_user"
+   },
+   {
+    "name": "redis",
+    "image": "redis:alpine",
+    "ports": [
+     "6380:6379"
+    ],
+    "health": "redis-cli ping"
+   },
+   {
+    "name": "mailhog",
+    "image": "mailhog/mailhog:v1.0.1",
+    "ports": [
+     "1025:1025",
+     "8025:8025"
+    ]
+   },
+   {
+    "name": "minio",
+    "image": "quay.io/minio/minio:latest",
+    "ports": [
+     "9100:9000"
+    ],
+    "env": {
+     "MINIO_ROOT_USER": "minioadmin",
+     "MINIO_ROOT_PASSWORD": "minioadmin"
+    },
+    "args": [
+     "server",
+     "/data"
+    ],
+    "health": "curl -f http://localhost:9000/minio/health/live || exit 1"
+   }
+  ],
+  "setup": [
+   "docker exec {service:minio} sh -c 'mc alias set local http://localhost:9000 minioadmin minioadmin >/dev/null && mc mb --ignore-existing local/test-bucket'"
+  ],
+  "env": {
+   "CI": "true",
+   "HUSKY": "0",
+   "VITE_TEST": "true",
+   "NODE_ENV": "test",
+   "API_URL": "http://localhost:3000",
+   "JWT_SECRET": "test_secret",
+   "JWT_REFRESH_SECRET": "test_refresh",
+   "JWT_EXPIRATION_TIME": "15min",
+   "CORS_ORIGIN": "http://localhost:5173",
+   "EMAIL_ADAPTER": "mailhog",
+   "DATABASE_URL": "postgresql://test_user:test_password@localhost:54321/test_db",
+   "REDIS_URL": "redis://localhost:6380",
+   "SMTP_HOST": "localhost",
+   "SMTP_PORT": "1025",
+   "SMTP_USER": "",
+   "SMTP_PASSWORD": "",
+   "AWS_REGION": "us-east-1",
+   "AWS_ACCESS_KEY_ID": "minioadmin",
+   "AWS_SECRET_ACCESS_KEY": "minioadmin",
+   "AWS_BUCKET_NAME": "test-bucket",
+   "AWS_ENDPOINT_URL": "http://localhost:9100",
+   "SMTP_EMAIL_FROM": "noreply@lms.selleo.app",
+   "SEED_MANAGE_DB_ROLE": "true",
+   "MASTER_KEY": "<random-base64>"
+  },
+  "args": [
+   "--project",
+   "chromium"
+  ],
+  "isolate": true,
+  "unavailable": [
+   "No configured OpenAI, Luma or local LLM provider: AI course generation and AI settings show Disabled; do not select scenes that require generated AI results."
+  ],
+  "scene_limit": 8
+ },
+ "specs": {
+  "avoid": [
+   "audit",
+   "\\.smoke\\.",
+   "\\.setup\\."
+  ]
+ }
+}

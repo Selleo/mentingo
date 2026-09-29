@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+"""A recorded film's release assets: staged after the recording (release-film.yml), published by another,
+separately started workflow (release-film-publish.yml).
+
+  release_assets.py stage   --run <run dir> --tag <tag> --commit <sha> --out <dir>
+  release_assets.py publish --dir <staged dir> --target draft|release
+  release_assets.py site    --out <dir>
+
+stage checks the film the run made (a plain file of video and audio that decodes to the end, of a plausible length)
+and copies it, its captions, its poster and its page (a ZIP) under release asset names, with release.json naming the
+release and each file's SHA-256. publish checks those files against release.json and attaches them to the tag's
+release (target release) or to a test draft release made for it (target draft), with a section of links in its
+notes. It never replaces or deletes an asset: a re-run adds what is missing and stops at an asset of the same name
+and other content. site builds the GitHub Pages site of the films from the releases themselves: each published
+release's page (its ZIP asset) at /<tag>/ and an index of them, newest first.
+"""
+import argparse
+import hashlib
+import html
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import zipfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
+import core  # noqa: E402
+from page import head  # noqa: E402  the film page's own look, in the project's brand
+
+FILM_SECONDS = (10, 600)  # a film outside this is broken, not merely long or short (one scene lasts 20-30 s)
+MARK_START, MARK_END = '<!-- release-film -->', '<!-- /release-film -->'
+PAGE_FILES = ('index.html', 'demo.mp4', 'poster.jpg')  # with the captions: the page's own files
+
+
+def asset_names(tag, code):
+    """Release asset name of each staged file (``code``: the film's language)."""
+    return {'film': f'release-film-{tag}.mp4', 'captions_vtt': f'release-film-{tag}.{code}.vtt',
+            'captions_srt': f'release-film-{tag}.{code}.srt', 'poster': f'release-film-{tag}-poster.jpg',
+            'page': f'release-film-{tag}-page.zip'}
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def check(condition, message):
+    if not condition:
+        raise SystemExit(f'::error::{message}')
+
+
+def plain_file(path, inside):
+    path = Path(path)
+    return path.is_file() and not path.is_symlink() and path.resolve().is_relative_to(inside) and path.stat().st_size > 0
+
+
+def stage(run, tag, commit, out):
+    run = Path(run).resolve()
+    meta = json.loads((run / 'meta.json').read_text(encoding='utf-8'))
+    check(meta.get('tag') == tag, f'the run recorded {meta.get("tag")}, not {tag}')
+    check((run / 'story.json').is_file() and (run / 'film.json').is_file(), 'the run made no film')
+    public = (run / 'public').resolve()
+    captions = sorted(public.glob('captions-*.vtt'))
+    check(len(captions) == 1, 'the page has no single captions file')
+    code = re.fullmatch(r'captions-([a-z]{2})\.vtt', captions[0].name)
+    check(code, f'unexpected captions file {captions[0].name}')
+    code = code.group(1)
+    files = {'film': public / 'demo.mp4', 'captions_vtt': captions[0], 'captions_srt': public / f'captions-{code}.srt',
+             'poster': public / 'poster.jpg', 'index': public / 'index.html'}
+    for key, path in files.items():
+        check(plain_file(path, public), f'{key} ({path.name}) is missing or not a plain file of the page')
+    probed = subprocess.run(['ffprobe', '-v', 'error', '-show_format', '-show_streams', '-of', 'json', str(files['film'])],
+                            capture_output=True, text=True, errors='replace')
+    check(probed.returncode == 0, f'the film cannot be read: {probed.stderr.strip()[-300:]}')
+    probe = json.loads(probed.stdout)
+    seconds = float(probe['format']['duration'])
+    check(FILM_SECONDS[0] <= seconds <= FILM_SECONDS[1], f'the film lasts {seconds:.0f} s')
+    check({'audio', 'video'} <= {s.get('codec_type') for s in probe['streams']}, 'the film needs audio and video')
+    # decodes to the end: -xerror stops at the first error (a cut or damaged file), which ffmpeg would otherwise skip
+    decoded = subprocess.run(['ffmpeg', '-v', 'error', '-xerror', '-i', str(files['film']), '-f', 'null', '-'],
+                             capture_output=True, text=True, errors='replace')
+    check(decoded.returncode == 0, f'the film does not decode to its end: {decoded.stderr.strip()[-300:]}')
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    names = asset_names(tag, code)
+    for key in ('film', 'captions_vtt', 'captions_srt', 'poster'):
+        shutil.copyfile(files[key], out / names[key])
+    with zipfile.ZipFile(out / names['page'], 'w', zipfile.ZIP_STORED) as page:  # the film is compressed already
+        for name in (*PAGE_FILES, files['captions_vtt'].name, files['captions_srt'].name):
+            page.write(public / name, f'release-film-{tag}/{name}')
+    with zipfile.ZipFile(out / names['page']) as page:
+        check(page.testzip() is None, 'the page ZIP does not read back')
+    manifest = {'tag': tag, 'commit': commit, 'language': code, 'film_seconds': round(seconds, 1),
+                'assets': {name: sha256(out / name) for name in names.values()}}
+    (out / 'release.json').write_text(json.dumps(manifest, indent=1) + '\n', encoding='utf-8')
+    return manifest
+
+
+def plan_uploads(staged, existing):
+    """Which staged assets to upload given the release's assets ``{name: digest}``: identical ones are kept (a re-run
+    resumes), missing ones uploaded, and a different asset of the same name is a conflict."""
+    conflicts = [name for name, digest in staged.items() if name in existing and existing[name] != f'sha256:{digest}']
+    return [name for name in staged if name not in existing], conflicts
+
+
+def notes_section(tag, code, links):
+    """The notes section linking the film's assets the release has."""
+    labels = (('film', 'film (MP4)'), ('page', 'page with the film and every pull request (ZIP)'),
+              ('captions_vtt', 'narration subtitles (VTT)'))
+    names = asset_names(tag, code)
+    parts = [f'[{label}]({links[names[key]]})' for key, label in labels if names[key] in links]
+    return f'{MARK_START}\n## 🎬 Release film\n\nA narrated demo of this release: {" · ".join(parts)}\n{MARK_END}'
+
+
+def with_section(body, section):
+    """The notes with the film's section replaced, or added once at the end."""
+    body = body or ''
+    pattern = re.compile(re.escape(MARK_START) + r'.*?' + re.escape(MARK_END), re.S)
+    if pattern.search(body):
+        return pattern.sub(lambda _: section, body, count=1)
+    return body.rstrip() + '\n\n' + section + '\n'
+
+
+def gh(*args, input_text=None):
+    done = subprocess.run(['gh', *args], capture_output=True, text=True, input=input_text)
+    check(done.returncode == 0, f'gh {" ".join(args[:3])} failed: {done.stderr.strip()[:300]}')
+    return done.stdout
+
+
+def draft_tag(tag):
+    return f'release-film-test-{tag}'
+
+
+def draft_name(tag):
+    return f'Release film test: {tag}'
+
+
+def find_release(repo, tag, target, commit):
+    """The release to publish to: the tag's published release, or the test draft release made for it (made now when
+    missing; a draft has no tag until it is published, so nothing else sees it). A draft is found by its name: GitHub
+    lists it under a tag of its own (untagged-…), not the one it was made with."""
+    if target == 'release':
+        data = json.loads(gh('api', f'repos/{repo}/releases/tags/{tag}'))
+        check(not data.get('draft'), f'{tag} is a draft release')
+        return data
+    for release in json.loads(gh('api', f'repos/{repo}/releases?per_page=100')):  # newest first: a draft made today
+        if release.get('draft') and release.get('name') == draft_name(tag):
+            return release
+    return json.loads(gh('api', '-X', 'POST', f'repos/{repo}/releases', '-f', f'tag_name={draft_tag(tag)}',
+                         '-f', f'target_commitish={commit}', '-f', f'name={draft_name(tag)}', '-F', 'draft=true',
+                         '-f', 'body=A test of the release film publication: delete this draft after checking it.'))
+
+
+def publish(folder, target, repo=None):
+    folder = Path(folder)
+    repo = repo or os.environ['GITHUB_REPOSITORY']
+    manifest = json.loads((folder / 'release.json').read_text(encoding='utf-8'))
+    tag, code = manifest['tag'], manifest['language']
+    check(set(manifest['assets']) == set(asset_names(tag, code).values()), 'release.json names other assets')
+    for name, digest in manifest['assets'].items():
+        check(plain_file(folder / name, folder.resolve()) and sha256(folder / name) == digest, f'{name} is not the file staged')
+    release = find_release(repo, tag, target, manifest['commit'])
+    existing = {a['name']: a.get('digest') for a in release.get('assets') or []}
+    uploads, conflicts = plan_uploads(manifest['assets'], existing)
+    check(not conflicts, f'the release already has other assets named {conflicts}; nothing was replaced')
+    if uploads:
+        gh('release', 'upload', release['tag_name'], '--repo', repo, *[str(folder / name) for name in uploads])
+    release = json.loads(gh('api', f'repos/{repo}/releases/{release["id"]}'))
+    links = {a['name']: a['browser_download_url'] for a in release.get('assets') or []}
+    body = with_section(release.get('body'), notes_section(tag, code, links))
+    if body != (release.get('body') or ''):
+        gh('api', '-X', 'PATCH', f'repos/{repo}/releases/{release["id"]}', '-F', 'body=@-', input_text=body)
+    return {'target': target, 'release': release.get('html_url'), 'uploaded': uploads,
+            'kept': [name for name in manifest['assets'] if name not in uploads],
+            'notes': 'updated' if body != (release.get('body') or '') else 'unchanged'}
+
+
+def index_page(repo, releases, brand=None):
+    """The site's front page: each release's film (its poster, name and date), newest first, in the project's brand
+    (the skill's project add-on: its fonts and accent)."""
+    links, css = head(brand)
+    esc = html.escape
+    name = repo.split('/')[-1]
+    items = ''.join(
+        f'<li class="card"><a href="{esc(r["tag_name"])}/"><img src="{esc(r["tag_name"])}/poster.jpg" alt=""></a>'
+        f'<div><a href="{esc(r["tag_name"])}/"><b>{esc(r.get("name") or r["tag_name"])}</b></a><br>'
+        f'<span class="muted">{esc((r.get("published_at") or "")[:10])}</span></div></li>' for r in releases)
+    extra = ('.films{list-style:none;margin:0;padding:0;display:grid;gap:16px}'
+             '.films li{display:flex;gap:16px;align-items:center;flex-wrap:wrap}'
+             '.films img{width:240px;max-width:100%;border-radius:6px;display:block}')
+    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<title>{esc(name)}: release films</title>{links}<style>{css}{extra}</style></head><body><main>'
+            f'<header><h1>{esc(name)}: release films</h1><p class="muted">A narrated demo film of each release, newest '
+            f'first.</p></header><ul class="films">{items or "<li>No film yet.</li>"}</ul></main></body></html>')
+
+
+def site(out, repo=None):
+    """The Pages site rebuilt from the releases: each published release with a film page ZIP at /<tag>/ (the ZIP's
+    files only, each checked to stay inside its folder), an index of them, newest first. Returns the tags shown."""
+    repo = repo or os.environ['GITHUB_REPOSITORY']
+    out = Path(out)
+    shutil.rmtree(out, ignore_errors=True)
+    out.mkdir(parents=True)
+    listed = gh('api', '--paginate', f'repos/{repo}/releases?per_page=100', '--jq',
+                '.[] | {tag_name, name, published_at, draft, assets: [.assets[].name]}')
+    releases = sorted((json.loads(line) for line in listed.splitlines() if line.strip()),
+                      key=lambda r: r.get('published_at') or '', reverse=True)
+    shown = []
+    with tempfile.TemporaryDirectory() as folder:
+        for release in releases:
+            tag = release['tag_name']
+            name = asset_names(tag, 'en')['page']
+            if release.get('draft') or name not in release['assets']:
+                continue
+            check(re.fullmatch(r'[A-Za-z0-9._-]+', tag), f'unexpected tag name {tag!r}')
+            gh('release', 'download', tag, '--repo', repo, '--pattern', name, '--dir', str(Path(folder) / tag))
+            prefix = f'release-film-{tag}/'
+            with zipfile.ZipFile(Path(folder) / tag / name) as page:
+                for member in page.infolist():
+                    inner = member.filename[len(prefix):]
+                    check(member.filename.startswith(prefix) and inner and '..' not in Path(inner).parts
+                          and not Path(inner).is_absolute(), f'{name} holds {member.filename!r}')
+                    if not member.is_dir():
+                        target = out / tag / inner
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(page.read(member))
+            shown.append(release)
+    (out / 'index.html').write_text(index_page(repo, shown, core.addon(repo).get('brand')), encoding='utf-8')
+    (out / '.nojekyll').touch()  # served as they are
+    return {'films': [r['tag_name'] for r in shown], 'out': str(out)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('command', choices=['stage', 'publish', 'site'])
+    parser.add_argument('--run')
+    parser.add_argument('--tag')
+    parser.add_argument('--commit')
+    parser.add_argument('--out')
+    parser.add_argument('--dir')
+    parser.add_argument('--target', choices=['draft', 'release'])
+    args = parser.parse_args()
+    if args.command == 'stage':
+        result = stage(args.run, args.tag, args.commit, args.out)
+    elif args.command == 'site':
+        result = site(args.out)
+    else:
+        check(args.target, 'publish needs --target draft or release')
+        result = publish(args.dir, args.target)
+    print(json.dumps(result, ensure_ascii=False, indent=1))
+
+
+if __name__ == '__main__':
+    main()

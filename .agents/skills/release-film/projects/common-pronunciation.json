@@ -1,0 +1,21 @@
+{
+ "_note": "Written term -> how a Polish film's voice says it, where the rules would not (pronunciation.py spells other abbreviations in Polish letter names and says numbers in Polish words). English words and names stay as written: Marek and VoxCPM2 say them best so (Whisper, 2026-09-28). Captions keep the written term.",
+ "PDF": "pe de ef",
+ "OK": "okej",
+ "CEO": "si i oł",
+ "IT": "aj ti",
+ "QA": "kju ej",
+ "UX": "ju eks",
+ "JSON": "dżejson",
+ "B2B": "bi tu bi",
+ "DOCX": "doks",
+ "CSV": "ce es fał",
+ "XLSX": "iks el es iks",
+ "API": "a pe i",
+ "URL": "u er el",
+ "UI": "ju aj",
+ "AI": "a i",
+ "SSO": "es es o",
+ "QR": "ku er",
+ "ID": "aj di"
+}
