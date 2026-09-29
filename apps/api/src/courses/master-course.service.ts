@@ -1465,7 +1465,7 @@ export class MasterCourseService {
       if (!existingAiMentor) {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
-          name: sourceAiMentor.name,
+          name: toJsonbBuildObject(sourceAiMentor.name),
           avatarReference,
           voiceMode: sourceAiMentor.voiceMode,
           ttsPreset: sourceAiMentor.ttsPreset,
@@ -1476,7 +1476,7 @@ export class MasterCourseService {
       }
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
-        name: sourceAiMentor.name,
+        name: toJsonbBuildObject(sourceAiMentor.name),
         avatarReference,
         voiceMode: sourceAiMentor.voiceMode,
         ttsPreset: sourceAiMentor.ttsPreset,
@@ -1516,13 +1516,13 @@ export class MasterCourseService {
             targetAiMentorLessonId,
             transaction,
           );
-        const rootValues = this.omitCopiedRowFields(sourceConfiguration, [
-          "id",
-          "createdAt",
-          "updatedAt",
-          "tenantId",
-          "aiMentorLessonId",
-        ] as const);
+        const rootValues = {
+          type: sourceConfiguration.type,
+          openingInstruction: toNullableJsonbBuildObject(sourceConfiguration.openingInstruction),
+          additionalInstructions: toNullableJsonbBuildObject(
+            sourceConfiguration.additionalInstructions,
+          ),
+        };
         const targetConfigurationId = existingConfiguration
           ? existingConfiguration.id
           : await this.masterCourseRepository.createAiMentorConfiguration(
@@ -1541,23 +1541,24 @@ export class MasterCourseService {
         const sourceRoleplay = roleplayByConfigurationId.get(sourceConfiguration.id);
         const teacher =
           sourceConfiguration.type === AI_MENTOR_TYPE.TEACHER && sourceTeacher
-            ? this.omitCopiedRowFields(sourceTeacher, [
-                "id",
-                "createdAt",
-                "updatedAt",
-                "tenantId",
-                "configurationId",
-              ] as const)
+            ? {
+                taskGoal: toJsonbBuildObject(sourceTeacher.taskGoal),
+                expertise: toJsonbBuildObject(sourceTeacher.expertise),
+                contentScope: toJsonbBuildObject(sourceTeacher.contentScope),
+                teachingStyle: sourceTeacher.teachingStyle,
+                feedbackGuidance: toNullableJsonbBuildObject(sourceTeacher.feedbackGuidance),
+              }
             : null;
         const roleplay =
           sourceConfiguration.type === AI_MENTOR_TYPE.ROLEPLAY && sourceRoleplay
-            ? this.omitCopiedRowFields(sourceRoleplay, [
-                "id",
-                "createdAt",
-                "updatedAt",
-                "tenantId",
-                "configurationId",
-              ] as const)
+            ? {
+                scenario: toJsonbBuildObject(sourceRoleplay.scenario),
+                aiRole: toJsonbBuildObject(sourceRoleplay.aiRole),
+                learnerRole: toJsonbBuildObject(sourceRoleplay.learnerRole),
+                characterGoal: toJsonbBuildObject(sourceRoleplay.characterGoal),
+                difficulty: sourceRoleplay.difficulty,
+                factsAndConstraints: toNullableJsonbBuildObject(sourceRoleplay.factsAndConstraints),
+              }
             : null;
 
         await this.masterCourseRepository.replaceAiMentorConfigurationSubtype(

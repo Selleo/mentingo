@@ -15,6 +15,7 @@ import {
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { MasterCourseService } from "src/courses/master-course.service";
@@ -30,6 +31,7 @@ import {
   aiMentorConfigurations,
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
+  aiMentorThreads,
   categories,
   chapters,
   courses,
@@ -109,6 +111,7 @@ describe("Master course export and sync (e2e)", () => {
   let sourceTenantId: string;
   let targetTenantId: string;
   let masterCourseService: MasterCourseService;
+  let aiRepository: AiRepository;
   let mockS3Service: {
     copyFile: jest.Mock;
     getFileExists: jest.Mock;
@@ -194,6 +197,7 @@ describe("Master course export and sync (e2e)", () => {
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     masterCourseService = app.get(MasterCourseService);
+    aiRepository = app.get(AiRepository);
     runAsTenant = e2e.runAsTenant;
     sourceTenantId = e2e.defaultTenantId;
 
@@ -255,6 +259,7 @@ describe("Master course export and sync (e2e)", () => {
       "assessment_question_choice_options",
       "assessment_questions",
       "assessments",
+      "ai_mentor_threads",
       "ai_judge_score_guidance",
       "ai_judge_blocking_errors",
       "ai_judge_criteria",
@@ -1386,6 +1391,238 @@ describe("Master course export and sync (e2e)", () => {
         pl: "cartesia-updated-polish",
       },
     });
+  });
+
+  it("injects the duplicated AI Mentor name and AI Judge rubric into the runtime prompt after same-tenant course duplication (#1998)", async () => {
+    const sourceAdmin = await runAsTenant(sourceTenantId, async () =>
+      userFactory
+        .withCredentials({ password: PASSWORD })
+        .withAdminSettings(db)
+        .create({
+          email: `admin+dup-${faker.string.alphanumeric(8)}@example.com`,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          tenantId: sourceTenantId,
+        }),
+    );
+    const learner = await runAsTenant(sourceTenantId, async () =>
+      userFactory.create({ tenantId: sourceTenantId }),
+    );
+
+    const { sourceCourseId } = await runAsTenant(sourceTenantId, async () => {
+      const category = await categoryFactory.create({
+        title: `Dup category ${faker.string.nanoid(8)}`,
+      });
+      const sourceCourse = await courseFactory.create({
+        title: "Duplication Source Course",
+        status: "published",
+        authorId: sourceAdmin.id,
+        categoryId: category.id,
+        chapterCount: 1,
+      });
+      const sourceChapter = await chapterFactory.create({
+        title: "Duplication Source Chapter",
+        courseId: sourceCourse.id,
+        authorId: sourceAdmin.id,
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+
+      const [sourceLesson] = await db
+        .insert(lessons)
+        .values({
+          id: faker.string.uuid(),
+          chapterId: sourceChapter.id,
+          type: LESSON_TYPES.AI_MENTOR,
+          title: buildJsonbField("en", "Discovery Conversation"),
+          displayOrder: 1,
+        })
+        .returning({ id: lessons.id });
+
+      const [sourceAiMentor] = await db
+        .insert(aiMentorLessons)
+        .values({
+          lessonId: sourceLesson.id,
+          name: buildJsonbFieldWithMultipleEntries({
+            en: "Professional Conversation Practice",
+            pl: "Praktyka rozmowy zawodowej",
+          }),
+        })
+        .returning({ id: aiMentorLessons.id });
+
+      const [sourceMentorConfiguration] = await db
+        .insert(aiMentorConfigurations)
+        .values({
+          aiMentorLessonId: sourceAiMentor.id,
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+          additionalInstructions: buildJsonbField("en", "Run a discovery conversation"),
+        })
+        .returning({ id: aiMentorConfigurations.id });
+
+      await db.insert(aiMentorRoleplayConfigurations).values({
+        configurationId: sourceMentorConfiguration.id,
+        difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      });
+
+      const [sourceJudgeConfiguration] = await db
+        .insert(aiJudgeConfigurations)
+        .values({
+          aiMentorLessonId: sourceAiMentor.id,
+          taskGoal: buildJsonbField("en", "Discover the client's needs"),
+          passingThresholdPercent: 70,
+        })
+        .returning({ id: aiJudgeConfigurations.id });
+
+      const [sourceCriterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: sourceJudgeConfiguration.id,
+          title: buildJsonbField("en", "Needs discovery"),
+          expectedBehavior: buildJsonbField("en", "Asks relevant open questions"),
+          maxScore: 2,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+
+      await db.insert(aiJudgeScoreGuidance).values({
+        criterionId: sourceCriterion.id,
+        score: 2,
+        description: buildJsonbField("en", "Explores the important needs"),
+      });
+
+      // A second criterion, authored later, guards against duplication collapsing
+      // criteria order: CURRENT_TIMESTAMP is transaction-frozen in Postgres, so if the
+      // duplication code ever stops copying the source rows' createdAt explicitly,
+      // every criterion created in the same duplication transaction would get an
+      // identical timestamp and the runtime rubric's `ORDER BY createdAt` would become
+      // non-deterministic.
+      const [secondSourceCriterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: sourceJudgeConfiguration.id,
+          title: buildJsonbField("en", "Next step"),
+          expectedBehavior: buildJsonbField("en", "Proposes a concrete next step"),
+          maxScore: 1,
+          createdAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
+          updatedAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+
+      await db.insert(aiJudgeScoreGuidance).values({
+        criterionId: secondSourceCriterion.id,
+        score: 1,
+        description: buildJsonbField("en", "Proposes a clear next step"),
+      });
+
+      await db.insert(aiJudgeBlockingErrors).values({
+        configurationId: sourceJudgeConfiguration.id,
+        description: buildJsonbField("en", "Invents unsupported product claims"),
+      });
+
+      return { sourceCourseId: sourceCourse.id };
+    });
+
+    const sourceCookie = ensureCookieArray(await cookieFor(sourceAdmin, app, SOURCE_HOST));
+
+    const duplicateResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .post(`/api/course/${sourceCourseId}/duplicate`)
+        .set("Cookie", sourceCookie),
+      SOURCE_HOST,
+    ).expect(201);
+
+    const { courseId: targetCourseId, jobId } = duplicateResponse.body.data as {
+      courseId: string;
+      jobId: string;
+    };
+    expect(targetCourseId).not.toBe(sourceCourseId);
+
+    await waitFor(
+      async () => {
+        const response = await withTenantHost(
+          request(app.getHttpServer())
+            .get(`/api/course/duplication-jobs/${jobId}`)
+            .set("Cookie", sourceCookie),
+          SOURCE_HOST,
+        ).expect(200);
+
+        return response.body.data as { state: string; failedReason: string | null };
+      },
+      (job) => {
+        if (job.state === "failed") {
+          throw new Error(`Duplication job failed: ${job.failedReason ?? "unknown reason"}`);
+        }
+
+        return job.state === "completed";
+      },
+    );
+
+    const targetAiMentor = await runAsTenant(sourceTenantId, async () => {
+      const [row] = await db
+        .select({
+          aiMentorLessonId: aiMentorLessons.id,
+          name: aiMentorLessons.name,
+        })
+        .from(aiMentorLessons)
+        .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .where(eq(chapters.courseId, targetCourseId))
+        .limit(1);
+
+      return row;
+    });
+
+    // Regression check for the reported "AI mentor name disappears after duplication" symptom.
+    expect(targetAiMentor.name).toEqual({
+      en: "Professional Conversation Practice",
+      pl: "Praktyka rozmowy zawodowej",
+    });
+
+    const threadId = await runAsTenant(sourceTenantId, async () => {
+      const [thread] = await db
+        .insert(aiMentorThreads)
+        .values({
+          userId: learner.id,
+          aiMentorLessonId: targetAiMentor.aiMentorLessonId,
+        })
+        .returning({ id: aiMentorThreads.id });
+
+      return thread.id;
+    });
+
+    const mentorPromptContext = await runAsTenant(sourceTenantId, async () =>
+      aiRepository.findMentorLessonByThreadId(threadId, "en"),
+    );
+
+    // Regression check for "ai mentor didn't get loaded prompt instructions after
+    // duplication" (#1998) - the actual additionalInstructions/subtype fields that feed
+    // buildSystemPrompt(), as opposed to the AI Judge rubric checked below.
+    expect(mentorPromptContext?.name).toBe("Professional Conversation Practice");
+    expect(mentorPromptContext?.additionalInstructions).toBe("Run a discovery conversation");
+    expect(mentorPromptContext?.type).toBe(AI_MENTOR_TYPE.ROLEPLAY);
+
+    const rubricContext = await runAsTenant(sourceTenantId, async () =>
+      aiRepository.findJudgeRubricByThreadId(threadId, "en"),
+    );
+
+    // Regression check for the reported "AI Judge config visible in UI, but not injected into
+    // the runtime system prompt until manually re-saved" symptom (#1998).
+    expect(rubricContext?.rubric).not.toBeNull();
+    expect(rubricContext?.rubric?.taskGoal).toBe("Discover the client's needs");
+    expect(rubricContext?.rubric?.passingThresholdPercent).toBe(70);
+    expect(rubricContext?.rubric?.criteria).toEqual([
+      expect.objectContaining({
+        title: "Needs discovery",
+        expectedBehavior: "Asks relevant open questions",
+        maxScore: 2,
+      }),
+      expect.objectContaining({
+        title: "Next step",
+        expectedBehavior: "Proposes a concrete next step",
+        maxScore: 1,
+      }),
+    ]);
+    expect(rubricContext?.rubric?.blockingErrors).toEqual([
+      expect.objectContaining({ description: "Invents unsupported product claims" }),
+    ]);
   });
 
   it("copies rich-text S3 resources, rewrites localized content, and reuses target resource rows on sync", async () => {
