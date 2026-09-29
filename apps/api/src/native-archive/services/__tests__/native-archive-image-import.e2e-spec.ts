@@ -6,7 +6,8 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq } from "drizzle-orm";
 import { v5 as uuidv5 } from "uuid";
 
-import { getAllImageVariantKeys } from "src/file/image-variants/image-variant.utils";
+import { IMAGE_VARIANT_DEFINITIONS } from "src/file/image-variants/image-variant.constants";
+import { getImageVariantKey } from "src/file/image-variants/image-variant.utils";
 import { NativeArchiveImportService } from "src/native-archive/services/native-archive-import.service";
 import { DB } from "src/storage/db/db.providers";
 import { courses, resources } from "src/storage/schema";
@@ -88,12 +89,14 @@ describe("Native archive image asset import (e2e)", () => {
     expect(thumbnailReference).toBeTruthy();
     if (!thumbnailReference) throw new Error("Imported course thumbnail reference is missing");
 
-    const [resource] = await db
+    const uploadedResources = await db
       .select()
       .from(resources)
       .where(eq(resources.uploadedBy, actor.userId));
+    expect(uploadedResources).toHaveLength(1);
+    const [resource] = uploadedResources;
     expect(resource).toMatchObject({
-      reference: expect.stringContaining("/variants/"),
+      reference: thumbnailReference,
       contentType: "image/webp",
       title: { en: "course-cover.png" },
       visibility: "private",
@@ -116,8 +119,11 @@ describe("Native archive image asset import (e2e)", () => {
     if (!firstStoredVariant) throw new Error("FileService did not upload image variants");
     expect(storage.getObject(firstStoredVariant)?.contentType).toBe("image/webp");
     expect(thumbnailReference).toContain("/variants/");
-    const expectedVariantKeys = getAllImageVariantKeys(thumbnailReference);
-    expect(storage.copiedKeys.length).toBeGreaterThan(0);
-    expect(storage.copiedKeys.every((key) => expectedVariantKeys.includes(key))).toBe(true);
+    const expectedVariantKeys = IMAGE_VARIANT_DEFINITIONS.map(({ quality }) =>
+      getImageVariantKey(thumbnailReference, quality),
+    );
+    expect(storedVariants).toHaveLength(expectedVariantKeys.length);
+    expect(storedVariants).toEqual(expect.arrayContaining(expectedVariantKeys));
+    expect(storage.copiedKeys).toHaveLength(0);
   });
 });
