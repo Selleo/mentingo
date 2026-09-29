@@ -501,7 +501,7 @@ FAILURE = re.compile(r'\b(error|failed|failure|fail|invalid|cannot|can\'t|could 
 def proofs(texts):
     """Up to two UI texts a viewer can read: short labels and titles (a sentence is mostly a validation message), no
     placeholders (…), test ids, code, error messages (a scene told to show one provokes the error instead of the
-    feature) or empty states ("No active contractors": a scene told to show one films an empty list)."""
+    feature) or empty states ("No active members": a scene told to show one films an empty list)."""
     readable = [t for t in texts if 4 <= len(t) <= 80 and '…' not in t and not re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)+', t)
                 and len(t.split()) <= 5 and not re.search(r'[.!?]$', t.strip())
                 and not FAILURE.search(t) and not re.match(r'\s*(no|nothing|empty|none)\b', t, re.I)

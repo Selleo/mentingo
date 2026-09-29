@@ -852,10 +852,10 @@ class TimeLimits(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             run = Path(folder)
             scene = self.ready_scene(run)
-            # r25a pr2796's direct-client/query shape, without connection details.
+            # a scene's direct-client/query shape, without connection details.
             (scene / 'scene.spec.ts').write_text(
                 'import { Client } from "pg";\nconst db = new Client({});\n'
-                'await db.query(`UPDATE work_units SET decisions_legal_notes=$1 WHERE id=$2`, [html, projectId]);')
+                'await db.query(`UPDATE orders SET internal_notes=$1 WHERE id=$2`, [html, orderId]);')
             with mock.patch.object(gaps.harness, 'list_tests') as listed, mock.patch.object(gaps.harness, 'keep_set') as keep:
                 result = gaps.try_scene(run, {'config': 'playwright.config.ts'}, {}, 'pr1')
             self.assertFalse(result['ok'])
@@ -1128,7 +1128,7 @@ class Failures(unittest.TestCase):
 
 class SceneCopies(unittest.TestCase):
     def test_a_scene_copy_is_named_like_its_base_so_the_projects_test_match_lists_it(self):
-        self.assertEqual(gaps.test_suffix('allocation.spec.ts'), '.spec.ts')
+        self.assertEqual(gaps.test_suffix('invoice.spec.ts'), '.spec.ts')
         self.assertEqual(gaps.test_suffix('checkout.e2e.ts'), '.e2e.ts')
         self.assertEqual(gaps.test_suffix('checkout.e2e.spec.ts'), '.e2e.spec.ts')
         self.assertEqual(gaps.test_suffix('login.test.tsx'), '.test.ts')  # the scene stays TypeScript

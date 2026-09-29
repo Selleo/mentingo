@@ -18,17 +18,17 @@ import sources  # noqa: E402
 class UiTexts(unittest.TestCase):
     def test_texts_from_markup_toasts_and_translations(self):
         added = {
-            'frontend/src/Settings.tsx': ['      <Toggle aria-label="Idle income protection" />', '        Preserve full income',
+            'frontend/src/Settings.tsx': ['      <Toggle aria-label="Weekly summary email" />', '        Send a weekly summary',
                                           '  const total = items.reduce((a, b) => a + b, 0);', '  toast.error("Could not update")'],
             'frontend/src/Settings.test.tsx': ['  expect(screen.getByText("Test only")).toBeVisible();'],
-            'web/src/locales/pl.json': ['  "idle": "Ochrona dochodu",'],
-            'app/services/export.rb': ['  "Payroll::ExportStatementToDocx",']}
+            'web/src/locales/pl.json': ['  "summary": "Podsumowanie tygodnia",'],
+            'app/services/export.rb': ['  "Billing::ExportInvoiceToPdf",']}
         texts = sources.ui_strings(added)
-        self.assertIn('Idle income protection', texts)
-        self.assertIn('Preserve full income', texts)
+        self.assertIn('Weekly summary email', texts)
+        self.assertIn('Send a weekly summary', texts)
         self.assertIn('Could not update', texts)
-        self.assertIn('Ochrona dochodu', texts)
-        self.assertFalse([t for t in texts if 'Test only' in t or 'Payroll' in t or 'reduce' in t])
+        self.assertIn('Podsumowanie tygodnia', texts)
+        self.assertFalse([t for t in texts if 'Test only' in t or 'Billing' in t or 'reduce' in t])
 
     def test_english_translations_win(self):
         added = {'app/locales/cs/translation.json': ['  "a": "Přizpůsobit dashboard",'],
@@ -40,7 +40,7 @@ class UiTexts(unittest.TestCase):
     def test_code_is_not_text(self):
         for line in ('type DatePickerProps', 'addDays', 'initialData?.dates ?? []', 'return null;'):
             self.assertFalse(sources.looks_like_text(line), line)
-        for line in ('Stats', 'Preserve full income while this person is idle.'):
+        for line in ('Stats', 'Send a weekly summary while this person is away.'):
             self.assertTrue(sources.looks_like_text(line), line)
 
 

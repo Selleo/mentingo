@@ -23,9 +23,9 @@ def release(texts, notes=''):
 
 class Choose(unittest.TestCase):
     def test_the_releases_own_texts_decide_and_the_add_on_overrides(self):
-        english = release([('feat: require project status on budget comments', 'This closes #3062. Require a '
-                            'delivery-health assessment on every new project budget comment.')])
-        polish = release([('feat: dodaj status projektu', 'Teraz każdy komentarz do budżetu wymaga oceny, która '
+        english = release([('feat: require a priority on order comments', 'This closes #62. Require a '
+                            'priority on every new order comment.')])
+        polish = release([('feat: dodaj priorytet zamówienia', 'Teraz każdy komentarz do zamówienia wymaga priorytetu, który '
                            'pokazuje się na liście.')])
         self.assertEqual((language.detect(english), language.detect(polish)), ('en', 'pl'))
         self.assertEqual(language.detect(release([])), None)
@@ -90,7 +90,7 @@ class Lines(unittest.TestCase):
         self.assertEqual(story['chapters'][1]['sentences'][0]['text'], 'Now we also save notes.')
         self.assertEqual(editor.unlabel(story, said), ['1.2'])
         self.assertEqual(story['chapters'][0]['sentences'][1]['text'], 'A “Weekend” note.')
-        self.assertEqual(editor.short_label('Idle cutoff on”: only Anna', opening='“'), '“Idle cutoff on”: only Anna')
+        self.assertEqual(editor.short_label('Weekly summary on”: only Anna', opening='“'), '“Weekly summary on”: only Anna')
 
 
 if __name__ == '__main__':

@@ -39,7 +39,7 @@ async function probe(html) {
 }
 
 test('documentation can quote an empty-state label inside an article', async () => {
-  const data = await probe('<article><p>When an authorised viewer opens a contractor without an assigned path, they see <strong>No path assigned yet.</strong></p></article>');
+  const data = await probe('<article><p>When an authorised viewer opens a project without an assigned owner, they see <strong>No owner assigned yet.</strong></p></article>');
   assert.deepEqual(data.empty, []);
 });
 
@@ -59,8 +59,8 @@ test('a short explanatory paragraph is not itself an empty state', async () => {
 });
 
 test('an actual standalone empty state inside an article is still detected', async () => {
-  const data = await probe('<article><p>No path assigned yet.</p></article>');
-  assert.deepEqual(data.empty, ['No path assigned yet.']);
+  const data = await probe('<article><p>No owner assigned yet.</p></article>');
+  assert.deepEqual(data.empty, ['No owner assigned yet.']);
 });
 
 test('documentation list items can explain a missing control without becoming an empty state', async () => {
@@ -84,7 +84,7 @@ test('a real empty-state sentence can be split by inline markup', async () => {
 });
 
 test('an explanatory quote does not hide a separate real empty state', async () => {
-  const data = await probe('<article><p>The message is <code>No path assigned yet.</code></p><section><p>No invoices found.</p></section></article>');
+  const data = await probe('<article><p>The message is <code>No owner assigned yet.</code></p><section><p>No invoices found.</p></section></article>');
   assert.deepEqual(data.empty, ['No invoices found.']);
 });
 

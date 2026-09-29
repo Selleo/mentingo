@@ -77,10 +77,10 @@ page.getByRole('textbox');
 
     def test_direct_clients_and_raw_queries_are_rejected_with_line_numbers(self):
         sources = [
-            'import { Client } from "pg";\nconst db = new Client({});\nawait db.query(`UPDATE work_units SET decisions_legal_notes=$1`, [html]);',
+            'import { Client } from "pg";\nconst db = new Client({});\nawait db.query(`UPDATE orders SET internal_notes=$1`, [html]);',
             'const pg = require("pg");',
             'const client = await import("pg");',
-            'await db.query("SELECT id FROM finance_project_budgets");',
+            'await db.query("SELECT id FROM order_totals");',
             'await db.execute(`INSERT INTO snapshots (hours) VALUES (27.5)`);',
             'await prisma.$queryRaw`SELECT id FROM users`;',
             'await prisma.$executeRawUnsafe(statement);',
@@ -147,12 +147,12 @@ class Learning(Run):
         (home / 'scenes.json').write_text(json.dumps([old]))
         recipes = [
             {'text': 'Booking: upsert the snapshot rows.', 'words': ['booking'], 'scene': 'pr7', 'tag': 'v1.0'},
-            {'text': 'Booking: UPDATE work_units SET notes=1.', 'words': ['booking'], 'scene': 'pr8', 'tag': 'v0'},
+            {'text': 'Booking: UPDATE orders SET notes=1.', 'words': ['booking'], 'scene': 'pr8', 'tag': 'v0'},
             {'text': 'Booking: SELECT id, title FROM booking.', 'words': ['booking'], 'scene': 'pr8', 'tag': 'v0'},
             {'text': 'Booking: createBooking from fixtures/booking.', 'words': ['booking'], 'scene': 'pr9', 'tag': 'v0'},
         ]
         (home / 'recipes.json').write_text(json.dumps(recipes))
-        (home / 'lessons.md').write_text('- Insert with pg Client into work_units.\n- Use the admin fixture.\n')
+        (home / 'lessons.md').write_text('- Insert with pg Client into orders.\n- Use the admin fixture.\n')
         recalled = knowledge.recall('Acme/shop', gap)
         self.assertNotIn('upsert', recalled)
         self.assertNotIn('UPDATE', recalled)

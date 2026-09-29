@@ -374,7 +374,7 @@ class Cut(unittest.TestCase):
     def test_the_page_a_sentences_click_opened_plays_before_the_steps_after_it_are_cut(self):
         spec = {'steps': [{'cmd': ['click', '#customer'], 'beat': 1}, {'cmd': ['look', 'heading']}, {'cmd': ['goBack']},
                           {'cmd': ['hover', '#budget']}, {'cmd': ['look', 'tooltip'], 'beat': 2}]}
-        click = step(0, 0.2, 0.4, 3.0, (100, 100), pre={'url': 'http://app/dashboard'}, post={'url': 'http://app/burnout'})
+        click = step(0, 0.2, 0.4, 3.0, (100, 100), pre={'url': 'http://app/dashboard'}, post={'url': 'http://app/reports'})
         heading = step(1, 1.6, 1.7, 3.0, acting=False, look=True)  # the chart page the click opened, checked
         back = step(2, 3.0, 3.1, 5.0, None, acting=False, navigate=True)
         taken = capture([click, heading, back, step(3, 5.1, 5.3, 5.7, (300, 300), click=False),

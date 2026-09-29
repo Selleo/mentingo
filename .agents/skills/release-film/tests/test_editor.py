@@ -25,12 +25,12 @@ class Picking(unittest.TestCase):
         root = Path(self.temp.name)
         (root / 'e2e/specs').mkdir(parents=True)
         (root / 'e2e/page-objects').mkdir(parents=True)
-        (root / 'e2e/specs/allocation.spec.ts').write_text('test("adds an allocation", async () => {})')
+        (root / 'e2e/specs/invoice.spec.ts').write_text('test("adds an invoice", async () => {})')
         (root / 'e2e/specs/leave.spec.ts').write_text('import { LeaveRequestModal } from "../page-objects/LeaveRequestModal";')
         (root / 'e2e/specs/login.smoke.spec.ts').write_text('test("logs in", async () => {})')
         self.root = root
         self.sources = {'prs': [
-            pr(1, 'feat: allocation percentages', ['frontend/src/Allocation.tsx', 'e2e/specs/allocation.spec.ts']),
+            pr(1, 'feat: invoice percentages', ['frontend/src/Invoice.tsx', 'e2e/specs/invoice.spec.ts']),
             pr(2, 'feat: holiday picker', ['frontend/src/components/AddLeaveRequestModal.tsx']),
             pr(3, 'chore: bump deps', ['package-lock.json']),
             pr(4, 'feat: faster login', ['frontend/src/Login.tsx', 'e2e/specs/login.smoke.spec.ts'])]}
@@ -40,7 +40,7 @@ class Picking(unittest.TestCase):
 
     def test_changed_specs_first_then_specs_that_drive_the_changed_screens(self):
         specs, reasons = editor.pick_specs(self.sources, 'e2e', {}, checkout=self.root)
-        self.assertEqual(specs, ['e2e/specs/allocation.spec.ts', 'e2e/specs/leave.spec.ts'])
+        self.assertEqual(specs, ['e2e/specs/invoice.spec.ts', 'e2e/specs/leave.spec.ts'])
         self.assertEqual(reasons['e2e/specs/leave.spec.ts'], [2])  # LeaveRequestModal drives the changed modal
         self.assertNotIn('e2e/specs/login.smoke.spec.ts', specs)  # smoke checks are avoided by default
 
@@ -52,14 +52,14 @@ class Picking(unittest.TestCase):
 class Answers(unittest.TestCase):
     def test_the_line_format(self):
         story = editor.parse('''Here you go:
-# chapter F2 | 12, 13 | Alokacje: procent czasu | proof: "Idle income protection"; „Idle · 75% income”
-0 | W tym wydaniu widać alokacje.
+# chapter F2 | 12, 13 | Faktury: procent sumy | proof: "Weekly summary email"; „Summary · 75% sent”
+0 | W tym wydaniu widać faktury.
 - | Ten sam ekran.
 3. Otwieramy okno.
 # not shown | 14,15 | Zmiany techniczne.''')
         chapter = story['chapters'][0]
-        self.assertEqual((chapter['film'], chapter['prs'], chapter['title']), ('F2', [12, 13], 'Alokacje: procent czasu'))
-        self.assertEqual(chapter['proofs'], ['Idle income protection', 'Idle · 75% income'])
+        self.assertEqual((chapter['film'], chapter['prs'], chapter['title']), ('F2', [12, 13], 'Faktury: procent sumy'))
+        self.assertEqual(chapter['proofs'], ['Weekly summary email', 'Summary · 75% sent'])
         self.assertEqual([s['action'] for s in chapter['sentences']], [0, None, 3])
         self.assertEqual(story['not_shown'], [{'prs': [14, 15], 'reason': 'Zmiany techniczne.'}])
 
@@ -97,7 +97,7 @@ class Checks(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def story(self, actions, title='Alokacje', chapters=4, words=25):
+    def story(self, actions, title='Faktury', chapters=4, words=25):
         text = ' '.join(['słowo'] * words) + '.'
         return {'chapters': [{'film': 'F1', 'prs': [index + 1], 'title': title, 'proofs': ['save 4'],
                               'sentences': [{'text': text, 'action': a} for a in actions]} for index in range(chapters)]}
@@ -168,11 +168,11 @@ class Checks(unittest.TestCase):
 
 class NewTexts(unittest.TestCase):
     def test_a_film_names_the_new_ui_texts_it_shows(self):
-        sources = {'prs': [{'number': 2945, 'ui': ['Idle income protection', 'Go to profile', 'Set']},
-                           {'number': 2926, 'ui': ['Edit']}]}
-        lines = ['3 click getByRole(\'button\', { name: \'Go to profile\' }) | on screen: dialog "Idle income protection"',
+        sources = {'prs': [{'number': 45, 'ui': ['Weekly summary email', 'Go to profile', 'Set']},
+                           {'number': 26, 'ui': ['Edit']}]}
+        lines = ['3 click getByRole(\'button\', { name: \'Go to profile\' }) | on screen: dialog "Weekly summary email"',
                  '4 click getByRole(\'button\', { name: \'Edit\' }) @ /x']
-        self.assertEqual(editor.new_texts(sources, lines), '#2945 "Idle income protection", "Go to profile"')  # no bare words
+        self.assertEqual(editor.new_texts(sources, lines), '#45 "Weekly summary email", "Go to profile"')  # no bare words
 
 
 
@@ -211,14 +211,14 @@ class StepLabels(unittest.TestCase):
 
     def story(self):
         return {'chapters': [
-            {'film': 'F1', 'title': 'Alokacje: procent czasu i zakres dat w jednym oknie edycji', 'sentences': [
+            {'film': 'F1', 'title': 'Faktury: procent sumy i zakres dat w jednym oknie edycji', 'sentences': [
                 {'text': 'W tym wydaniu pokazujemy nowości.', 'action': None},
-                {'text': 'Otwieramy okno alokacji.', 'action': 0}, {'text': 'Zapisujemy.', 'action': 1}]},
+                {'text': 'Otwieramy okno faktury.', 'action': 0}, {'text': 'Zapisujemy.', 'action': 1}]},
             {'film': 'F1', 'title': 'Raport', 'sentences': [{'text': 'Raport ma nową kolumnę.', 'action': 0}]}]}
 
     def test_each_sentence_gets_its_label_or_keeps_the_one_before(self):
         story = self.story()
-        answer = ('1.1 | Nowości wydania\n1.2 | Otwieramy okno alokacji\n1.3 | -\n'
+        answer = ('1.1 | Nowości wydania\n1.2 | Otwieramy okno faktury\n1.3 | -\n'
                   '2.1 | „Raport godzin pracy całego zespołu ma teraz nową kolumnę z sumą nadgodzin każdej osoby w danym '
                   'miesiącu i w całym roku”\n')
         with mock.patch.object(editor, 'ask', return_value=(answer, {'usd_list': 0.01})) as asked:
@@ -226,11 +226,11 @@ class StepLabels(unittest.TestCase):
         self.assertEqual(asked.call_count, 2)  # one quick call per chapter, all at once: each answers its own lines
         self.assertEqual({call[0][2] for call in asked.call_args_list}, {editor.RESERVE_EFFORT})
         prompts = sorted(call[0][0] for call in asked.call_args_list)
-        self.assertIn('1.2 | Otwieramy okno alokacji.', prompts[0])
+        self.assertIn('1.2 | Otwieramy okno faktury.', prompts[0])
         self.assertNotIn('2.1 |', prompts[0])
         self.assertIn('2.1 | Raport ma nową kolumnę.', prompts[1])
         labels = [[s.get('label') for s in c['sentences']] for c in story['chapters']]
-        self.assertEqual(labels[0], ['Nowości wydania', 'Otwieramy okno alokacji', None])
+        self.assertEqual(labels[0], ['Nowości wydania', 'Otwieramy okno faktury', None])
         self.assertEqual(labels[1], ['Raport godzin pracy całego zespołu ma teraz nową kolumnę z sumą nadgodzin każdej '
                                      'osoby w danym miesiącu i w'])  # two lines at most: cut at a word, no outer quotes
         self.assertIn('watches without sound', asked.call_args[0][0])
@@ -242,11 +242,11 @@ class StepLabels(unittest.TestCase):
         def ask(prompt, *rest, **kwargs):  # the second chapter's call timed out
             if 'Chapter 2:' in prompt:
                 raise editor.Unanswered('timed out')
-            return '1.1 | Nowości wydania\n1.2 | Otwieramy okno alokacji\n1.3 | Zapisujemy zmiany\n', {'usd_list': 0.01}
+            return '1.1 | Nowości wydania\n1.2 | Otwieramy okno faktury\n1.3 | Zapisujemy zmiany\n', {'usd_list': 0.01}
         with mock.patch.object(editor, 'ask', side_effect=ask):
             usage = editor.write_labels(story, {}, {'repo': 'Acme/shop', 'tag': 'v2'})
         self.assertEqual([[s.get('label') for s in c['sentences']] for c in story['chapters']],
-                         [['Nowości wydania', 'Otwieramy okno alokacji', 'Zapisujemy zmiany'], ['Raport']])
+                         [['Nowości wydania', 'Otwieramy okno faktury', 'Zapisujemy zmiany'], ['Raport']])
         self.assertEqual(usage, [{'usd_list': 0.01}, None])
 
     def test_captions_marked_up_or_numbered_by_the_sentence_alone_are_read_and_an_answer_without_any_is_missing(self):
@@ -255,11 +255,11 @@ class StepLabels(unittest.TestCase):
         def ask(prompt, *rest, **kwargs):
             if 'Chapter 2:' in prompt:  # an answer that names no sentence: no caption, so the chapter is missing
                 return 'Raport: nowa kolumna.', {'usd_list': 0.01}
-            return '**1.1** | Nowości wydania\n- 2 | Otwieramy okno alokacji\n3 | Zapisujemy zmiany\n', {'usd_list': 0.01}
+            return '**1.1** | Nowości wydania\n- 2 | Otwieramy okno faktury\n3 | Zapisujemy zmiany\n', {'usd_list': 0.01}
         with mock.patch.object(editor, 'ask', side_effect=ask):
             usage = editor.write_labels(story, {}, {'repo': 'Acme/shop', 'tag': 'v2'})
         self.assertEqual([[s.get('label') for s in c['sentences']] for c in story['chapters']],
-                         [['Nowości wydania', 'Otwieramy okno alokacji', 'Zapisujemy zmiany'], ['Raport']])
+                         [['Nowości wydania', 'Otwieramy okno faktury', 'Zapisujemy zmiany'], ['Raport']])
         self.assertEqual(usage, [{'usd_list': 0.01}, None])  # film.labels lists chapter 2 as missing
         # the one chapter asked about, numbered otherwise by the answer, keeps its captions
         self.assertEqual(editor.caption_lines('1.1 | A\n1.2 | B\n', 4), {1: 'A', 2: 'B'})
@@ -270,12 +270,12 @@ class StepLabels(unittest.TestCase):
         with mock.patch.object(editor, 'ask', side_effect=editor.Unanswered('no model')):
             editor.write_labels(story, {}, {'repo': 'Acme/shop', 'tag': 'v2'})
         self.assertEqual([[s.get('label') for s in c['sentences']] for c in story['chapters']],
-                         [['Alokacje: procent czasu i zakres dat w jednym oknie edycji', None, None], ['Raport']])
+                         [['Faktury: procent sumy i zakres dat w jednym oknie edycji', None, None], ['Raport']])
         self.assertEqual(editor.short_label('Zgoda: „Acceptance required”.'), 'Zgoda: „Acceptance required”')
         self.assertEqual(editor.short_label('Status „Waiting for the finance department approval”', 32),
                          'Status „Waiting for the finance”')  # a quote the cut leaves open is closed
-        self.assertEqual(editor.short_label('Idle cutoff on”: tylko Anna Kowalczyk'),
-                         '„Idle cutoff on”: tylko Anna Kowalczyk')  # and one the model never opened is opened
+        self.assertEqual(editor.short_label('Weekly summary on”: tylko Anna Kowalczyk'),
+                         '„Weekly summary on”: tylko Anna Kowalczyk')  # and one the model never opened is opened
         with mock.patch.object(editor, 'ask') as asked:  # a story without sentences asks nothing
             self.assertEqual(editor.write_labels({'chapters': []}, {}, {}), [])
         asked.assert_not_called()
@@ -285,25 +285,25 @@ class Proofs(unittest.TestCase):
     def test_a_proof_the_film_lines_lack_word_for_word_never_stops_the_chapter(self):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / 'capture.json').write_text(json.dumps({'steps': [{'step': i} for i in range(4)], 'actions_text': [
-                '0 goto /plans @ /plans', '1 click "Hot Desk" @ /plans',
-                '2 look to have text: toast expects "The Hot Desk plan has been set as the next plan." @ /plans',
-                '3 look be visible: getByText(/selected plan/) expects "/Your selected plan .*/" @ /plans']}))
-            chapter = {'film': 'F8', 'title': 'Plany', 'proofs': ['Your selected plan for next month is Hot Desk'],
+                '0 goto /reports @ /reports', '1 click "Monthly" @ /reports',
+                '2 look to have text: toast expects "The Monthly report has been set as the next report." @ /reports',
+                '3 look be visible: getByText(/selected report/) expects "/Your selected report .*/" @ /reports']}))
+            chapter = {'film': 'F8', 'title': 'Raporty', 'proofs': ['Your selected report for next month is Monthly'],
                        'sentences': [{'action': 1, 'text': 'a'}, {'action': 3, 'text': 'b'}]}
             story = {'chapters': [chapter]}
-            self.assertEqual(editor.mend_proofs(story, {'F8': folder}), ['Plany'])
+            self.assertEqual(editor.mend_proofs(story, {'F8': folder}), ['Raporty'])
             # the words the pattern starts with, which the page showed, or the toast the next check expects
-            self.assertIn(chapter['proofs'], (['Your selected plan'], ['The Hot Desk plan has been set as the next plan.']))
+            self.assertIn(chapter['proofs'], (['Your selected report'], ['The Monthly report has been set as the next report.']))
             self.assertEqual(editor.mend_proofs(story, {'F8': folder}), [])  # a proof the lines hold stays
             (Path(folder) / 'capture.json').write_text(json.dumps({'steps': [{'step': i} for i in range(3)], 'actions_text': [
-                '0 hover budget @ /d', '1 look be visible: getByText(/^Budget amount: 96/) | on screen: headings "Budget amount: 96 000 zł / Predicted cost" @ /d',
+                '0 hover total @ /d', '1 look be visible: getByText(/^Order total: 96/) | on screen: headings "Order total: 96 000 zł / Expected cost" @ /d',
                 '2 look have count: rows expects "12" @ /d']}))
-            chapter.update(proofs=['Budget amount: 96 000 zł'], sentences=[{'action': 0, 'text': 'a'}, {'action': 2, 'text': 'b'}])
-            editor.mend_proofs(story, {'F8': folder})  # the lines hold "Budget amount: 96 000 zł / …" in other words
-            self.assertIn(chapter['proofs'], (['Budget amount: 96 000 zł'], ['Budget amount: 96 000'], ['Budget amount']))
-            chapter.update(proofs=['Kwota budżetu widoczna na kafelku'])  # nothing of it: a text on screen instead
+            chapter.update(proofs=['Order total: 96 000 zł'], sentences=[{'action': 0, 'text': 'a'}, {'action': 2, 'text': 'b'}])
+            editor.mend_proofs(story, {'F8': folder})  # the lines hold "Order total: 96 000 zł / …" in other words
+            self.assertIn(chapter['proofs'], (['Order total: 96 000 zł'], ['Order total: 96 000'], ['Order total']))
+            chapter.update(proofs=['Suma zamówienia widoczna na kafelku'])  # nothing of it: a text on screen instead
             editor.mend_proofs(story, {'F8': folder})
-            self.assertEqual(chapter['proofs'], ['Budget amount: 96 000 zł / Predicted cost'])
+            self.assertEqual(chapter['proofs'], ['Order total: 96 000 zł / Expected cost'])
 
 
 class Ending(unittest.TestCase):
