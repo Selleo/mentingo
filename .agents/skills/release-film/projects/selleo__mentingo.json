@@ -56,24 +56,24 @@
     ]
    },
    {
-    "name": "minio",
-    "image": "quay.io/minio/minio:latest",
+    "name": "rustfs",
+    "image": "rustfs/rustfs:latest",
     "ports": [
      "9100:9000"
     ],
     "env": {
-     "MINIO_ROOT_USER": "minioadmin",
-     "MINIO_ROOT_PASSWORD": "minioadmin"
+     "RUSTFS_ACCESS_KEY": "rustfsadmin",
+     "RUSTFS_SECRET_KEY": "rustfsadmin"
     },
     "args": [
-     "server",
      "/data"
     ],
-    "health": "curl -f http://localhost:9000/minio/health/live || exit 1"
+    "health": "curl -fsS http://localhost:9000/health/ready || exit 1"
    }
   ],
   "setup": [
-   "docker exec {service:minio} sh -c 'mc alias set local http://localhost:9000 minioadmin minioadmin >/dev/null && mc mb --ignore-existing local/test-bucket'"
+   "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION --entrypoint sh amazon/aws-cli:latest -c 'aws --endpoint-url http://localhost:9000 s3api head-bucket --bucket test-bucket 2>/dev/null || aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket test-bucket'",
+   "docker run --rm --network container:{service:runner} -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION amazon/aws-cli:latest --endpoint-url http://localhost:9000 s3api put-bucket-cors --bucket test-bucket --cors-configuration '{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}'"
   ],
   "env": {
    "CI": "true",
@@ -93,8 +93,8 @@
    "SMTP_USER": "",
    "SMTP_PASSWORD": "",
    "AWS_REGION": "us-east-1",
-   "AWS_ACCESS_KEY_ID": "minioadmin",
-   "AWS_SECRET_ACCESS_KEY": "minioadmin",
+   "AWS_ACCESS_KEY_ID": "rustfsadmin",
+   "AWS_SECRET_ACCESS_KEY": "rustfsadmin",
    "AWS_BUCKET_NAME": "test-bucket",
    "AWS_ENDPOINT_URL": "http://localhost:9100",
    "SMTP_EMAIL_FROM": "noreply@lms.selleo.app",
