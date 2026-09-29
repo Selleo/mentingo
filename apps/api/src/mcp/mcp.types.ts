@@ -2,6 +2,16 @@ import type { ENTITY_TYPES, SCORM_IMPORT_ACTION, SupportedLanguages } from "@rep
 import type { Request } from "express";
 import type { UUIDType } from "src/common";
 
+export const MCP_UPLOAD_GRANT_KIND = {
+  THUMBNAIL: "thumbnail",
+  CERTIFICATE_SIGNATURE: "certificateSignature",
+  COVER: "cover",
+  AI_MENTOR_AVATAR: "aiMentorAvatar",
+  GENERIC_FILE: "genericFile",
+  VIDEO_TUS: "videoTus",
+  SCORM_TUS: "scormTus",
+} as const;
+
 export type McpUploadTargetType =
   | typeof ENTITY_TYPES.COURSE
   | typeof ENTITY_TYPES.LESSON
@@ -70,7 +80,7 @@ export type McpEditorialUploadGrant = {
 };
 
 export type McpEditorialCoverUploadGrant = McpEditorialUploadGrant & {
-  kind: "cover";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.COVER;
   translations: Array<{
     language: SupportedLanguages;
     title?: string;
@@ -82,7 +92,7 @@ export type McpEditorialCoverUploadGrant = McpEditorialUploadGrant & {
 export type McpCourseUploadGrant = {
   targetType: typeof ENTITY_TYPES.COURSE;
   targetId: UUIDType;
-  kind: "thumbnail" | "certificateSignature";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.THUMBNAIL | typeof MCP_UPLOAD_GRANT_KIND.CERTIFICATE_SIGNATURE;
   userId: UUIDType;
   tenantId: UUIDType;
   language: SupportedLanguages;
@@ -96,7 +106,7 @@ export type McpCourseUploadGrant = {
 export type McpLearningPathUploadGrant = {
   targetType: typeof ENTITY_TYPES.LEARNING_PATH;
   targetId: UUIDType;
-  kind: "thumbnail" | "certificateSignature";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.THUMBNAIL | typeof MCP_UPLOAD_GRANT_KIND.CERTIFICATE_SIGNATURE;
   userId: UUIDType;
   tenantId: UUIDType;
   filename: string;
@@ -108,7 +118,7 @@ export type McpLearningPathUploadGrant = {
 export type McpAvatarUploadGrant = {
   targetType: typeof ENTITY_TYPES.LESSON;
   targetId: UUIDType;
-  kind: "aiMentorAvatar";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.AI_MENTOR_AVATAR;
   userId: UUIDType;
   tenantId: UUIDType;
   filename: string;
@@ -118,7 +128,7 @@ export type McpAvatarUploadGrant = {
 };
 
 export type McpGenericFileUploadGrant = {
-  kind: "genericFile";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.GENERIC_FILE;
   resource: typeof ENTITY_TYPES.COURSE | typeof ENTITY_TYPES.LESSON;
   userId: UUIDType;
   tenantId: UUIDType;
@@ -129,7 +139,7 @@ export type McpGenericFileUploadGrant = {
 };
 
 export type McpVideoTusGrant = {
-  kind: "videoTus";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.VIDEO_TUS;
   targetType:
     | typeof ENTITY_TYPES.COURSE
     | typeof ENTITY_TYPES.LESSON
@@ -147,7 +157,7 @@ export type McpVideoTusGrant = {
 };
 
 export type McpScormTusGrant = {
-  kind: "scormTus";
+  kind: typeof MCP_UPLOAD_GRANT_KIND.SCORM_TUS;
   operation: McpScormUploadGrant["operation"];
   targetType: McpScormUploadGrant["targetType"];
   targetId: UUIDType;

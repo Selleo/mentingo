@@ -136,7 +136,7 @@ import {
   LearningTimeStatisticsSortOptions,
 } from "src/learning-time";
 import { assertCourseUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
-import { McpRequest } from "src/mcp/mcp.types";
+import { MCP_UPLOAD_GRANT_KIND, McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -703,7 +703,7 @@ export class CourseController {
     if (request.mcpUploadGrant)
       assertCourseUploadGrant(
         request.mcpUploadGrant,
-        "thumbnail",
+        MCP_UPLOAD_GRANT_KIND.THUMBNAIL,
         id,
         image,
         updateCourseMediaBody,
@@ -803,7 +803,7 @@ export class CourseController {
     if (request.mcpUploadGrant)
       assertCourseUploadGrant(
         request.mcpUploadGrant,
-        "certificateSignature",
+        MCP_UPLOAD_GRANT_KIND.CERTIFICATE_SIGNATURE,
         courseId,
         certificateSignature,
         body,

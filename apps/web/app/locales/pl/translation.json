@@ -685,6 +685,9 @@
       "videoUploading": "Przesyłamy Twoje wideo. Proszę nie zamykaj karty.",
       "videoUploadedProcessing": "Przesyłanie zakończone. Twoje wideo jest teraz przetwarzane. Możesz zamknąć kartę."
     },
+    "errors": {
+      "uploadForbidden": "To przesyłanie nie należy do bieżącego użytkownika."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",
       "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 5GB)",

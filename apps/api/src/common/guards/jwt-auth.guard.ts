@@ -91,11 +91,7 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private isMcpUploadGrantRequest(request: McpRequest): boolean {
-    return (
-      request.headers.authorization?.startsWith("Upload ") ||
-      request.headers.authorization?.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`) ||
-      false
-    );
+    return request.headers.authorization?.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`) ?? false;
   }
 
   private async authenticateUploadGrant(request: McpRequest): Promise<boolean> {

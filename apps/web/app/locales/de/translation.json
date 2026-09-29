@@ -685,6 +685,9 @@
       "videoUploading": "Wir laden Ihr Video hoch. Bitte schließen Sie den Tab nicht.",
       "videoUploadedProcessing": "Ihr Upload ist abgeschlossen. Jetzt wird Ihr Video verarbeitet. Schließen Sie den Tab gerne."
     },
+    "errors": {
+      "uploadForbidden": "Dieser Upload gehört nicht zum aktuellen Benutzer."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG oder SVG",
       "video": "MP4, MOV, MPEG-2 oder Hevc (max. bis 5 GB)",

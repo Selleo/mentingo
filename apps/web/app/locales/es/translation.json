@@ -688,6 +688,9 @@
       "videoUploading": "Estamos subiendo tu vídeo. Por favor, no cierres la pestaña.",
       "videoUploadedProcessing": "La subida ha finalizado. Ahora el vídeo se está procesando. Puedes cerrar la pestaña."
     },
+    "errors": {
+      "uploadForbidden": "Esta subida no pertenece al usuario actual."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG o SVG",
       "video": "MP4, MOV, MPEG-2 o HEVC (máx. 5 GB)",

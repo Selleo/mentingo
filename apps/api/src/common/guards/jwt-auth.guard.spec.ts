@@ -60,14 +60,14 @@ describe("JwtAuthGuard", () => {
     await expect(guard.canActivate(createContext(request))).rejects.toThrow(UnauthorizedException);
   });
 
-  it("authenticates an MCP upload-grant request via the Upload scheme", async () => {
+  it("authenticates an MCP upload-grant request via the Bearer mcpup_ scheme", async () => {
     const grant = { targetType: "lesson" };
     const user = { userId: "user-2" };
     const mcpAuthenticate = jest.fn(() => Promise.resolve({ user, grant, token: "mcpup_abc" }));
     const { guard, mcpUploadGrants } = buildGuard({ mcpAuthenticate });
     const request: Record<string, unknown> = {
       cookies: {},
-      headers: { authorization: "Upload mcpup_abc" },
+      headers: { authorization: "Bearer mcpup_abc" },
     };
 
     await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
@@ -77,26 +77,24 @@ describe("JwtAuthGuard", () => {
     expect(request.mcpUploadGrantToken).toBe("mcpup_abc");
   });
 
-  it("authenticates an MCP upload-grant request via the Bearer mcpup_ scheme", async () => {
-    const mcpAuthenticate = jest.fn(() =>
-      Promise.resolve({ user: { userId: "user-3" }, grant: {}, token: "mcpup_xyz" }),
-    );
-    const { guard } = buildGuard({ mcpAuthenticate });
-    const request = { cookies: {}, headers: { authorization: "Bearer mcpup_xyz" } };
-
-    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
-    expect(mcpAuthenticate).toHaveBeenCalledWith(request);
-  });
-
   it("propagates rejection from an invalid MCP upload grant instead of falling back to JWT auth", async () => {
     const mcpAuthenticate = jest.fn(() =>
       Promise.reject(new UnauthorizedException("Upload grant expired or already used")),
     );
     const { guard } = buildGuard({ mcpAuthenticate });
-    const request = { cookies: {}, headers: { authorization: "Upload mcpup_bad" } };
+    const request = { cookies: {}, headers: { authorization: "Bearer mcpup_bad" } };
 
     await expect(guard.canActivate(createContext(request))).rejects.toThrow(
       "Upload grant expired or already used",
     );
+  });
+
+  it("does not treat a legacy Upload-scheme header as an MCP upload grant", async () => {
+    const mcpAuthenticate = jest.fn();
+    const { guard } = buildGuard({ mcpAuthenticate });
+    const request = { cookies: {}, headers: { authorization: "Upload mcpup_abc" } };
+
+    await expect(guard.canActivate(createContext(request))).rejects.toThrow(UnauthorizedException);
+    expect(mcpAuthenticate).not.toHaveBeenCalled();
   });
 });

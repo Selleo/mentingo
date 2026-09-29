@@ -10,6 +10,7 @@ import {
   assertScormUploadGrant,
 } from "./mcp-upload-grant.assertions";
 import { mcpUploadGrantKey, McpUploadGrantService } from "./mcp-upload-grant.service";
+import { MCP_UPLOAD_GRANT_KIND } from "./mcp.types";
 
 import type { McpGenericFileUploadGrant, McpScormUploadGrant } from "./mcp.types";
 import type { Request } from "express";
@@ -21,7 +22,7 @@ const categoryId = "33333333-3333-4333-8333-333333333333";
 describe("MCP native upload grants", () => {
   it("accepts a bound generic course image and rejects another resource", () => {
     const grant: McpGenericFileUploadGrant = {
-      kind: "genericFile",
+      kind: MCP_UPLOAD_GRANT_KIND.GENERIC_FILE,
       resource: ENTITY_TYPES.COURSE,
       userId,
       tenantId,
@@ -179,7 +180,7 @@ describe("McpUploadGrantService.authenticate", () => {
 
   const storeGrant = (redisStore: Map<string, string>, token: string, expiresAt: number) => {
     const grant: McpGenericFileUploadGrant = {
-      kind: "genericFile",
+      kind: MCP_UPLOAD_GRANT_KIND.GENERIC_FILE,
       resource: ENTITY_TYPES.COURSE,
       userId,
       tenantId,

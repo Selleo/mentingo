@@ -7,6 +7,7 @@ import OAuth2Server from "@node-oauth/oauth2-server";
 
 import { REDIS_CLIENT, type RedisClient } from "src/redis";
 
+import { ACCESS_TTL, CLIENT_TTL, CODE_TTL, CONSENT_TTL, REFRESH_TTL } from "./mcp-oauth.constants";
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
 
@@ -19,12 +20,6 @@ import type {
   ConsentRequest,
 } from "./mcp-oauth.types";
 import type { Request, Response } from "express";
-
-const ACCESS_TTL = 3600;
-const REFRESH_TTL = 14 * 24 * 3600;
-const CODE_TTL = 300;
-const CONSENT_TTL = 300;
-const CLIENT_TTL = 365 * 24 * 3600;
 
 function digest(token: string): string {
   return createHash("sha256").update(token).digest("hex");

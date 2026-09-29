@@ -212,7 +212,7 @@ export class FileController {
       throw new BadRequestException("Upload session not found");
     }
     if (session.userId !== currentUserId)
-      throw new ForbiddenException("Upload does not belong to the current user");
+      throw new ForbiddenException("uploadFile.errors.uploadForbidden");
     if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, uploadId);
 
     this.setTusHeaders(res, {

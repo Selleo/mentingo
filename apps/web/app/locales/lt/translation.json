@@ -685,6 +685,9 @@
       "videoUploading": "Įkeliame jūsų vaizdo įrašą. Neuždarykite skirtuko.",
       "videoUploadedProcessing": "Jūsų įkėlimas baigtas. Dabar jūsų vaizdo įrašas apdorojamas. Nedvejodami uždarykite skirtuką."
     },
+    "errors": {
+      "uploadForbidden": "Šis įkėlimas nepriklauso dabartiniam vartotojui."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG arba SVG",
       "video": "MP4, MOV, MPEG-2 arba Hevc (maks. iki 5 GB)",

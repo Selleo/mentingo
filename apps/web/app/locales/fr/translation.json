@@ -687,6 +687,9 @@
       "videoUploading": "Importation de votre vidéo en cours. Ne fermez pas cet onglet.",
       "videoUploadedProcessing": "Votre vidéo a bien été importée et son traitement est en cours. Vous pouvez fermer cet onglet."
     },
+    "errors": {
+      "uploadForbidden": "Cet import n'appartient pas à l'utilisateur actuel."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG ou SVG",
       "video": "MP4, MOV, MPEG-2 ou HEVC (max. 5 Go)",

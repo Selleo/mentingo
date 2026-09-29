@@ -691,6 +691,9 @@
       "videoUploading": "Nahráváme vaše video. Záložku prosím nezavírejte.",
       "videoUploadedProcessing": "Vaše nahrávání bylo dokončeno. Nyní se vaše video zpracovává. Neváhejte a zavřete kartu."
     },
+    "errors": {
+      "uploadForbidden": "Toto nahrání nepatří aktuálnímu uživateli."
+    },
     "details": {
       "imageCrop": "PNG, JPG, JPEG nebo SVG",
       "video": "MP4, MOV, MPEG-2 nebo Hevc (max. do 5 GB)",

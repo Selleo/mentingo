@@ -60,6 +60,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
 import { mcpUploadGrantKey } from "./mcp-upload-grant-key";
+import { MCP_UPLOAD_GRANT_KIND } from "./mcp.types";
 
 export { mcpUploadGrantKey, revokeMcpUploadGrant } from "./mcp-upload-grant-key";
 
@@ -89,7 +90,11 @@ const createUploadToken = () =>
   `${MCP_UPLOAD_TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
 
 function isTusGrant(grant: McpUploadGrant): grant is McpVideoTusGrant | McpScormTusGrant {
-  return "kind" in grant && (grant.kind === "videoTus" || grant.kind === "scormTus");
+  return (
+    "kind" in grant &&
+    (grant.kind === MCP_UPLOAD_GRANT_KIND.VIDEO_TUS ||
+      grant.kind === MCP_UPLOAD_GRANT_KIND.SCORM_TUS)
+  );
 }
 
 function genericFileAuthoringPermissions(resource: McpGenericFileUploadGrant["resource"]) {
@@ -189,7 +194,7 @@ export class McpUploadGrantService {
     >,
   ) {
     const allowedTypes: readonly string[] =
-      input.kind === "thumbnail"
+      input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
         ? ALLOWED_LESSON_IMAGE_FILE_TYPES
         : ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES;
     if (
@@ -199,12 +204,13 @@ export class McpUploadGrantService {
       !input.filename ||
       input.filename.length > 255 ||
       basename(input.filename) !== input.filename ||
-      (input.kind === "thumbnail" &&
+      (input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL &&
         (input.thumbnailPositionY === undefined ||
           !Number.isInteger(input.thumbnailPositionY) ||
           input.thumbnailPositionY < 0 ||
           input.thumbnailPositionY > 100)) ||
-      (input.kind === "certificateSignature" && input.thumbnailPositionY !== undefined)
+      (input.kind === MCP_UPLOAD_GRANT_KIND.CERTIFICATE_SIGNATURE &&
+        input.thumbnailPositionY !== undefined)
     )
       throw new BadRequestException("Unsupported course upload");
 
@@ -220,16 +226,16 @@ export class McpUploadGrantService {
     await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
     return {
       uploadPath:
-        input.kind === "thumbnail"
+        input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
           ? `/api/course/${input.targetId}/media`
           : `/api/course/settings/${input.targetId}`,
       method: "PATCH" as const,
       authorizationScheme: "Bearer" as const,
       token,
       expiresAt: new Date(grant.expiresAt).toISOString(),
-      fileField: input.kind === "thumbnail" ? "image" : "certificateSignature",
+      fileField: input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL ? "image" : "certificateSignature",
       fields:
-        input.kind === "thumbnail"
+        input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
           ? { language: input.language, thumbnailPositionY: String(input.thumbnailPositionY) }
           : {},
     };
@@ -240,7 +246,7 @@ export class McpUploadGrantService {
     input: Pick<McpLearningPathUploadGrant, "targetId" | "kind" | "filename" | "mimeType" | "size">,
   ) {
     const allowed =
-      input.kind === "thumbnail"
+      input.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
         ? ALLOWED_LESSON_IMAGE_FILE_TYPES
         : ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES;
     this.validateNamedFile(input, allowed, MAX_FILE_SIZE);
@@ -281,7 +287,7 @@ export class McpUploadGrantService {
     const token = createUploadToken();
     const grant: McpEditorialCoverUploadGrant = {
       ...input,
-      kind: "cover",
+      kind: MCP_UPLOAD_GRANT_KIND.COVER,
       userId: actor.userId,
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
@@ -308,7 +314,7 @@ export class McpUploadGrantService {
     const token = createUploadToken();
     const grant: McpAvatarUploadGrant = {
       ...input,
-      kind: "aiMentorAvatar",
+      kind: MCP_UPLOAD_GRANT_KIND.AI_MENTOR_AVATAR,
       targetType: ENTITY_TYPES.LESSON,
       userId: actor.userId,
       tenantId: actor.tenantId,
@@ -348,7 +354,7 @@ export class McpUploadGrantService {
     const token = createUploadToken();
     const grant: McpGenericFileUploadGrant = {
       ...input,
-      kind: "genericFile",
+      kind: MCP_UPLOAD_GRANT_KIND.GENERIC_FILE,
       userId: actor.userId,
       tenantId: actor.tenantId,
       expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
@@ -514,7 +520,7 @@ export class McpUploadGrantService {
     });
     const token = createUploadToken();
     const grant: McpScormTusGrant = {
-      kind: "scormTus",
+      kind: MCP_UPLOAD_GRANT_KIND.SCORM_TUS,
       operation: input.operation,
       targetType: input.targetType,
       targetId: input.targetId,
@@ -574,7 +580,7 @@ export class McpUploadGrantService {
     const token = createUploadToken();
     const grant: McpVideoTusGrant = {
       ...input,
-      kind: "videoTus",
+      kind: MCP_UPLOAD_GRANT_KIND.VIDEO_TUS,
       uploadId: upload.uploadId,
       userId: actor.userId,
       tenantId: actor.tenantId,
@@ -600,14 +606,10 @@ export class McpUploadGrantService {
       throw new UnauthorizedException("Invalid upload grant");
     }
 
-    let token: string;
-    if (authorization.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`)) {
-      token = authorization.slice("Bearer ".length);
-    } else if (authorization.startsWith("Upload ")) {
-      token = authorization.slice("Upload ".length);
-    } else {
+    if (!authorization.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`)) {
       throw new UnauthorizedException("Invalid upload grant");
     }
+    const token = authorization.slice("Bearer ".length);
     if (!token || token.length > 256) throw new UnauthorizedException("Invalid upload grant");
 
     const grantKey = this.key(token);
@@ -622,7 +624,7 @@ export class McpUploadGrantService {
     if (grant.expiresAt <= Date.now()) throw new UnauthorizedException("Upload grant expired");
     let allowedRoute = false;
     if (isTusGrant(grant)) {
-      if (grant.kind === "videoTus") {
+      if (grant.kind === MCP_UPLOAD_GRANT_KIND.VIDEO_TUS) {
         allowedRoute =
           (request.method === "POST" && request.path === "/api/file/videos/tus") ||
           (["HEAD", "PATCH"].includes(request.method) &&
@@ -648,19 +650,19 @@ export class McpUploadGrantService {
           expectedPath = `/api/scorm/lesson/${grant.targetId}/package`;
           expectedMethod = "PATCH";
         }
-      } else if ("kind" in grant && grant.kind === "genericFile") {
+      } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) {
         expectedPath = GENERIC_FILE_UPLOAD_ROUTE;
-      } else if ("kind" in grant && grant.kind === "cover") {
+      } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.COVER) {
         expectedPath = `/api/${grant.targetType}/${grant.targetId}`;
         expectedMethod = "PATCH";
       } else if (grant.targetType === ENTITY_TYPES.LEARNING_PATH) {
         expectedPath = `/api/learning-path/${grant.targetId}`;
         expectedMethod = "PATCH";
-      } else if ("kind" in grant && grant.kind === "aiMentorAvatar") {
+      } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.AI_MENTOR_AVATAR) {
         expectedPath = "/api/lesson/ai-mentor/avatar";
       } else if (grant.targetType === ENTITY_TYPES.COURSE) {
         expectedPath =
-          grant.kind === "thumbnail"
+          grant.kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL
             ? `/api/course/${grant.targetId}/media`
             : `/api/course/settings/${grant.targetId}`;
         expectedMethod = "PATCH";
@@ -680,7 +682,7 @@ export class McpUploadGrantService {
       this.permissionsService.getUserAccess(grant.userId),
     );
     let requiredPermissions;
-    if ("kind" in grant && grant.kind === "genericFile") {
+    if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) {
       requiredPermissions = [PERMISSIONS.FILE_UPLOAD];
       if (!hasAnyPermission(access.permissions, genericFileAuthoringPermissions(grant.resource)))
         throw new ForbiddenException("Authoring permission was revoked");
@@ -713,8 +715,8 @@ export class McpUploadGrantService {
       permissions: access.permissions,
     };
     await this.tenantDbRunnerService.runWithTenantContext(grant.tenantId, async () => {
-      if ("kind" in grant && grant.kind === "genericFile") return;
-      if (isTusGrant(grant) && grant.kind === "videoTus") {
+      if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) return;
+      if (isTusGrant(grant) && grant.kind === MCP_UPLOAD_GRANT_KIND.VIDEO_TUS) {
         await this.validateAuthoringTargetAccess(user, grant);
         return;
       }

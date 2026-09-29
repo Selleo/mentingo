@@ -1,6 +1,8 @@
 import { ForbiddenException } from "@nestjs/common";
 import { ENTITY_TYPES, RESOURCE_VISIBILITY, SCORM_IMPORT_ACTION } from "@repo/shared";
 
+import { MCP_UPLOAD_GRANT_KIND } from "./mcp.types";
+
 import type {
   McpCourseUploadGrant,
   McpEditorialCoverUploadGrant,
@@ -12,7 +14,11 @@ import type {
 } from "./mcp.types";
 
 function isTusGrant(grant: McpUploadGrant): grant is McpVideoTusGrant | McpScormTusGrant {
-  return "kind" in grant && (grant.kind === "videoTus" || grant.kind === "scormTus");
+  return (
+    "kind" in grant &&
+    (grant.kind === MCP_UPLOAD_GRANT_KIND.VIDEO_TUS ||
+      grant.kind === MCP_UPLOAD_GRANT_KIND.SCORM_TUS)
+  );
 }
 
 export function assertCourseUploadGrant(
@@ -32,11 +38,11 @@ export function assertCourseUploadGrant(
     grant.filename !== file.originalname ||
     grant.mimeType !== file.mimetype ||
     grant.size !== file.size ||
-    (kind === "thumbnail" &&
+    (kind === MCP_UPLOAD_GRANT_KIND.THUMBNAIL &&
       (body.language !== grant.language ||
         Number(body.thumbnailPositionY) !== grant.thumbnailPositionY ||
         Object.keys(body).some((key) => !["language", "thumbnailPositionY"].includes(key)))) ||
-    (kind === "certificateSignature" && Object.keys(body).length > 0)
+    (kind === MCP_UPLOAD_GRANT_KIND.CERTIFICATE_SIGNATURE && Object.keys(body).length > 0)
   )
     throw new ForbiddenException("Course upload does not match its grant");
 }
@@ -72,7 +78,7 @@ export function assertEditorialCoverUploadGrant(
   if (
     "operation" in grant ||
     !("kind" in grant) ||
-    grant.kind !== "cover" ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.COVER ||
     grant.targetType !== targetType ||
     grant.targetId !== targetId
   )
@@ -100,7 +106,7 @@ export function assertAvatarUploadGrant(
     !("targetType" in grant) ||
     grant.targetType !== ENTITY_TYPES.LESSON ||
     !("kind" in grant) ||
-    grant.kind !== "aiMentorAvatar" ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.AI_MENTOR_AVATAR ||
     grant.targetId !== lessonId ||
     file.originalname !== grant.filename ||
     file.mimetype !== grant.mimeType ||
@@ -117,7 +123,7 @@ export function assertGenericFileUploadGrant(
   if (
     !file ||
     !("kind" in grant) ||
-    grant.kind !== "genericFile" ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.GENERIC_FILE ||
     grant.resource !== resource ||
     grant.filename !== file.originalname ||
     grant.mimeType !== file.mimetype ||
@@ -134,7 +140,7 @@ export function assertVideoTusGrant(
 ): void {
   if (
     !isTusGrant(grant) ||
-    grant.kind !== "videoTus" ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.VIDEO_TUS ||
     grant.uploadId !== uploadId ||
     (uploadLength !== undefined && uploadLength !== grant.size) ||
     (metadata &&
@@ -146,7 +152,11 @@ export function assertVideoTusGrant(
 }
 
 export function assertScormTusGrant(grant: McpUploadGrant, packageId: string): void {
-  if (!isTusGrant(grant) || grant.kind !== "scormTus" || grant.packageId !== packageId)
+  if (
+    !isTusGrant(grant) ||
+    grant.kind !== MCP_UPLOAD_GRANT_KIND.SCORM_TUS ||
+    grant.packageId !== packageId
+  )
     throw new ForbiddenException("SCORM upload does not match its grant");
 }
 
