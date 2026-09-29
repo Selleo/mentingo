@@ -127172,6 +127172,9 @@
                 "authorName": {
                   "type": "string"
                 },
+                "authorDeleted": {
+                  "type": "boolean"
+                },
                 "authorId": {
                   "format": "uuid",
                   "type": "string"
@@ -127379,6 +127382,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorDeleted",
                 "authorId",
                 "createdAt",
                 "updatedAt"
@@ -127594,6 +127598,9 @@
               "authorName": {
                 "type": "string"
               },
+              "authorDeleted": {
+                "type": "boolean"
+              },
               "authorId": {
                 "format": "uuid",
                 "type": "string"
@@ -127802,6 +127809,7 @@
               "availableLocales",
               "publishedAt",
               "authorName",
+              "authorDeleted",
               "authorId",
               "createdAt",
               "updatedAt"
@@ -127919,6 +127927,9 @@
                 },
                 "authorName": {
                   "type": "string"
+                },
+                "authorDeleted": {
+                  "type": "boolean"
                 },
                 "authorId": {
                   "format": "uuid",
@@ -128127,6 +128138,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorDeleted",
                 "authorId",
                 "createdAt",
                 "updatedAt"
@@ -128717,6 +128729,9 @@
             "authorName": {
               "type": "string"
             },
+            "authorDeleted": {
+              "type": "boolean"
+            },
             "authorId": {
               "format": "uuid",
               "type": "string"
@@ -128932,6 +128947,7 @@
             "isPublic",
             "publishedAt",
             "authorName",
+            "authorDeleted",
             "authorId",
             "createdAt",
             "updatedAt"
@@ -129101,6 +129117,9 @@
               },
               "authorName": {
                 "type": "string"
+              },
+              "authorDeleted": {
+                "type": "boolean"
               },
               "authorId": {
                 "format": "uuid",
@@ -129322,6 +129341,7 @@
               "availableLocales",
               "publishedAt",
               "authorName",
+              "authorDeleted",
               "authorId",
               "createdAt",
               "updatedAt"
@@ -129361,6 +129381,9 @@
             },
             "authorName": {
               "type": "string"
+            },
+            "authorDeleted": {
+              "type": "boolean"
             },
             "authorId": {
               "format": "uuid",
@@ -129577,6 +129600,7 @@
             "isPublic",
             "publishedAt",
             "authorName",
+            "authorDeleted",
             "authorId",
             "createdAt",
             "updatedAt"

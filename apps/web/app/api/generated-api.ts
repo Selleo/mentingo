@@ -24326,6 +24326,7 @@ export interface GetDraftNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    authorDeleted: boolean;
     /** @format uuid */
     authorId: string;
     resources?: {
@@ -24407,6 +24408,7 @@ export interface GetNewsResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    authorDeleted: boolean;
     /** @format uuid */
     authorId: string;
     resources?: {
@@ -24467,6 +24469,7 @@ export interface GetNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    authorDeleted: boolean;
     /** @format uuid */
     authorId: string;
     resources?: {
@@ -24631,6 +24634,7 @@ export type GetDraftArticlesResponse = {
   isPublic: boolean;
   publishedAt: string | null;
   authorName: string;
+  authorDeleted: boolean;
   /** @format uuid */
   authorId: string;
   resources?: {
@@ -24710,6 +24714,7 @@ export interface GetArticleResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
     publishedAt: string | null;
     authorName: string;
+    authorDeleted: boolean;
     /** @format uuid */
     authorId: string;
     resources?: {
@@ -24768,6 +24773,7 @@ export type GetArticlesResponse = {
   isPublic: boolean;
   publishedAt: string | null;
   authorName: string;
+  authorDeleted: boolean;
   /** @format uuid */
   authorId: string;
   resources?: {

@@ -512,6 +512,7 @@
     "send": "Send"
   },
   "common": {
+    "deletedUser": "Deleted user",
     "button": {
       "save": "Save",
       "saving": "Saving...",

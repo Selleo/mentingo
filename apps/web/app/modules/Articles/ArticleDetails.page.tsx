@@ -8,6 +8,7 @@ import { useDeleteArticle } from "~/api/mutations/useDeleteArticle";
 import { useCurrentUser } from "~/api/queries";
 import { useArticle } from "~/api/queries/useArticle";
 import { hasPermission } from "~/common/permissions/permission.utils";
+import { AuthorName } from "~/components/AuthorName";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
@@ -124,7 +125,9 @@ export default function ArticleDetailsPage() {
             <div className="flex flex-wrap items-center gap-1 text-sm font-normal leading-5 text-neutral-700">
               <div className="flex items-center gap-2 px-3 py-1">
                 <Icon name="User" className="text-neutral-600 size-4" />
-                <p className="text-neutral-800">{article.authorName}</p>
+                <p className="text-neutral-800">
+                  <AuthorName name={article.authorName} deleted={article.authorDeleted} />
+                </p>
               </div>
               <div className="flex items-center gap-2 px-3 py-1">
                 <Icon name="Calendar" className="text-neutral-600 size-4" />

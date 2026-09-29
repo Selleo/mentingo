@@ -512,6 +512,7 @@
     "send": "Siųsti"
   },
   "common": {
+    "deletedUser": "Ištrintas naudotojas",
     "button": {
       "previous": "Ankstesnis",
       "next": "Kitas",

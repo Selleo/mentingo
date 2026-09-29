@@ -1,10 +1,10 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { isNull } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { settings } from "src/storage/schema";
+import { settings, users } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -196,6 +196,45 @@ describe("ArticlesController (e2e)", () => {
   });
 
   describe("GET /api/articles/:id", () => {
+    it("identifies a deleted author in article details and list", async () => {
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Deleted author" });
+      const article = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        isPublic: true,
+      });
+
+      const activeResponse = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en`)
+        .expect(200);
+      expect(activeResponse.body.data.authorDeleted).toBe(false);
+
+      await db
+        .update(users)
+        .set({
+          firstName: "deleted user",
+          lastName: "deleted user",
+          deletedAt: new Date().toISOString(),
+        })
+        .where(eq(users.id, author.id));
+
+      const detailResponse = await request(app.getHttpServer())
+        .get(`/api/articles/${article.id}?language=en`)
+        .expect(200);
+      const listResponse = await request(app.getHttpServer())
+        .get("/api/articles?language=en")
+        .expect(200);
+
+      expect(detailResponse.body.data).toMatchObject({
+        authorName: "deleted user deleted user",
+        authorDeleted: true,
+      });
+      expect(listResponse.body).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: article.id, authorDeleted: true })]),
+      );
+    });
+
     it("returns 404 for draft article without draft mode", async () => {
       const author = await userFactory.create();
       const section = await sectionFactory.create({ title: "Draft" });
