@@ -73,6 +73,7 @@ import { asMcpInputSchema } from "./mcp-tool.schema";
 import * as McpToolSchemas from "./mcp-tool.schemas";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
 import { withMcpUploadInstructions } from "./mcp-upload-response";
+import { MCP_SERVER_NAME, MCP_SERVER_VERSION } from "./mcp.constants";
 
 import type {
   McpCallContext,
@@ -159,7 +160,7 @@ export class McpHttpService {
     permissions: PermissionKey[],
     settings: Awaited<ReturnType<SettingsService["getGlobalSettings"]>>,
   ): McpServer {
-    const server = new McpServer({ name: "mentingo", version: "0.1.0" });
+    const server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
     const registerTool = server.registerTool.bind(server);
     server.registerTool = ((name: string, config: unknown, callback: unknown) => {
       const tool = Reflect.apply(registerTool, server, [name, config, callback]) as RegisteredTool;
