@@ -84,6 +84,7 @@ export type NativeArchiveScormAssetDirectory = {
 
 export type NativeArchiveStagedAssets = {
   snapshots: NativeArchiveValidatedCourseSnapshot[];
+  uploadedResourceIdsByFileKey: ReadonlyMap<string, UUIDType>;
   rewriteReference: (reference: string | null) => string | null;
   rewriteValue: <T>(value: T) => T;
   deleteStaged: () => Promise<void>;

@@ -89,6 +89,7 @@ describe("NativeArchiveImportService", () => {
     const assetsService = {
       stageArchiveAssets: jest.fn().mockResolvedValue({
         snapshots: [snapshot],
+        uploadedResourceIdsByFileKey: new Map(),
         rewriteReference: (reference: string | null) => reference,
         rewriteValue: (value: unknown) => value,
       }),

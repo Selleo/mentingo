@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 
 import {
   ENTITY_TYPES,
@@ -90,6 +91,7 @@ describe("Native archive import (e2e)", () => {
       .spyOn(app.get(NativeArchiveAssetsService), "stageArchiveAssets")
       .mockImplementation(async (_archive, _actor, snapshots) => ({
         snapshots,
+        uploadedResourceIdsByFileKey: new Map(),
         rewriteReference: (reference) => reference,
         rewriteValue: (value) => value,
         deleteStaged: async () => undefined,
@@ -176,12 +178,13 @@ describe("Native archive import (e2e)", () => {
     expect(savedLesson?.id).not.toBe(sourceLessonId);
   });
 
-  it("rewrites resource IDs and URLs in imported lesson descriptions", async () => {
+  it("reuses a staged image resource and rewrites the lesson description", async () => {
     jest.spyOn(app.get(MasterCourseService), "duplicateCourseIntoExistingCourse").mockRestore();
 
     const sourceCourseId = randomUUID();
     const sourceResourceId = randomUUID();
-    const sourceReference = `https://assets.example.test/${sourceResourceId}.png`;
+    const sourceReference = `archive-assets/${sourceResourceId}.png`;
+    const stagedReference = `${actor.tenantId}/course/native-archive/${sourceResourceId}.png`;
     const source = createNativeArchiveCourseSnapshot(sourceCourseId, { withContent: true });
     const content = `<div data-node-type="image" data-src="https://tenant1.lms.localhost/api/lesson/lesson-resource/${sourceResourceId}" data-resource-id="${sourceResourceId}"></div>`;
     const resource = {
@@ -198,21 +201,65 @@ describe("Native archive import (e2e)", () => {
       lessons: source.lessons.map((lesson) => ({ ...lesson, description: { en: content } })),
       lessonContentResources: [resource],
     };
+    let stagedResourceId: string | undefined;
+
+    jest
+      .spyOn(app.get(NativeArchiveAssetsService), "stageArchiveAssets")
+      .mockImplementation(async (_archive, _actor, snapshots) => {
+        const [stagedResource] = await db
+          .insert(resources)
+          .values({
+            title: { en: "Uploaded image" },
+            description: {},
+            reference: stagedReference,
+            contentType: "image/png",
+            metadata: { checksum: "staged-image-checksum" },
+            visibility: RESOURCE_VISIBILITY.PRIVATE,
+            uploadedBy: actor.userId,
+          })
+          .returning({ id: resources.id });
+        stagedResourceId = stagedResource.id;
+
+        return {
+          snapshots: snapshots.map((sourceSnapshot) => ({
+            ...sourceSnapshot,
+            lessonContentResources: sourceSnapshot.lessonContentResources.map(
+              (contentResource) => ({
+                ...contentResource,
+                reference: stagedReference,
+              }),
+            ),
+          })),
+          uploadedResourceIdsByFileKey: new Map([[stagedReference, stagedResource.id]]),
+          rewriteReference: (reference) => reference,
+          rewriteValue: (value) => value,
+          deleteStaged: async () => undefined,
+        };
+      });
+
     const zipPath = await writeNativeArchiveZip(
       {
         kind: NATIVE_ARCHIVE_KIND.COURSE,
         rootId: sourceCourseId,
         courses: { [sourceCourseId]: snapshot },
-        files: [],
+        files: [
+          {
+            path: "assets/course-image.png",
+            sourceReference,
+            contentType: "application/octet-stream",
+            open: async () => Readable.from([Buffer.from("archive-image")]),
+          },
+        ],
       },
       temporaryDirectory,
     );
 
     const result = await importArchive(zipPath);
-    const [targetResource] = await db
+    const resourcesForImage = await db
       .select()
       .from(resources)
-      .where(eq(resources.reference, sourceReference));
+      .where(eq(resources.reference, stagedReference));
+    const [targetResource] = resourcesForImage;
     const [targetChapter] = await db
       .select()
       .from(chapters)
@@ -225,6 +272,10 @@ describe("Native archive import (e2e)", () => {
       .where(eq(lessons.chapterId, targetChapter.id));
 
     expect(targetResource?.id).toBeDefined();
+    expect(resourcesForImage).toHaveLength(1);
+    expect(targetResource.id).toBe(stagedResourceId);
+    expect(targetResource.reference).toBe(stagedReference);
+    expect(targetResource.metadata).toMatchObject({ checksum: "staged-image-checksum" });
     expect(targetResource.id).not.toBe(sourceResourceId);
     expect(targetLesson.description?.en).toContain(`lesson-resource/${targetResource.id}`);
     expect(targetLesson.description?.en).toContain(`data-resource-id="${targetResource.id}"`);

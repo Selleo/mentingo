@@ -260,7 +260,9 @@ export class NativeArchiveImportService {
         const targetCourseId = plan.courseIdMap.get(snapshot.course.id);
         if (!targetCourseId)
           throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
-        createdCourseIds.push(await this.createImportedCourse(snapshot, targetCourseId, actor));
+        createdCourseIds.push(
+          await this.createImportedCourse(snapshot, targetCourseId, actor, staged),
+        );
       }
 
       if (parsed.manifest.kind === NATIVE_ARCHIVE_KIND.LEARNING_PATH) {
@@ -282,6 +284,7 @@ export class NativeArchiveImportService {
     snapshot: NativeArchiveValidatedCourseSnapshot,
     targetCourseId: UUIDType,
     actor: CurrentUserType,
+    staged: NativeArchiveStagedAssets,
   ): Promise<UUIDType> {
     const source = snapshot.course;
     if (source.authorMetadata)
@@ -320,6 +323,7 @@ export class NativeArchiveImportService {
       sourceSnapshot: snapshot,
       targetCategoryId: categoryId,
       targetCurrency: NATIVE_ARCHIVE_DEFAULT_CURRENCY,
+      uploadedResourceIdsByFileKey: staged.uploadedResourceIdsByFileKey,
     });
     await this.nativeArchiveLiveTrainingService.restoreLiveTrainingLessons(
       snapshot,

@@ -276,6 +276,7 @@ export class MasterCourseService {
       sourceTenantId: params.tenantId,
       sourceTenantOrigin: tenantHost,
       targetTenantId: params.tenantId,
+      uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
     });
 
     const sourceCourseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
@@ -381,6 +382,7 @@ export class MasterCourseService {
       targetTenantId: params.tenantId,
       targetAuthorId: params.actorId,
       resourceCollection,
+      uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
     });
 
     await this.syncLessonResourceReferences({
@@ -2412,6 +2414,7 @@ export class MasterCourseService {
         targetBunnyConfigured,
         sourceAndTargetShareBunnyMediaConfiguration,
         copiedReferences,
+        uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
       });
 
       resourceReference.target.reference = targetReference;
@@ -2422,6 +2425,8 @@ export class MasterCourseService {
     source: MasterCourseCopySourceReference,
     params: ResolveTargetResourceReferenceParams,
   ) {
+    if (params.uploadedResourceIdsByFileKey?.has(source.reference)) return source.reference;
+
     const existingTargetReference = params.copiedReferences.get(source.reference);
     if (existingTargetReference) return existingTargetReference;
 
@@ -2875,16 +2880,27 @@ export class MasterCourseService {
     for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
       const sourceResource = resourceReference.source.resource;
       const reference = resourceReference.target.reference ?? resourceReference.source.reference;
-      const targetResourceId = await this.masterCourseRepository.createResource({
+      const resourceValues = {
         title: toJsonbBuildObject(sourceResource.title),
         description: toJsonbBuildObject(sourceResource.description),
-        reference,
-        contentType: sourceResource.contentType,
-        metadata: toJsonbBuildObject(sourceResource.metadata),
         uploadedBy: params.targetAuthorId,
         visibility: sourceResource.visibility,
         archived: false,
-      });
+      };
+      const uploadedResourceId = params.uploadedResourceIdsByFileKey?.get(reference);
+
+      const targetResourceId =
+        uploadedResourceId ??
+        (await this.masterCourseRepository.createResource({
+          ...resourceValues,
+          reference,
+          contentType: sourceResource.contentType,
+          metadata: toJsonbBuildObject(sourceResource.metadata),
+        }));
+
+      if (uploadedResourceId) {
+        await this.masterCourseRepository.updateResource(uploadedResourceId, resourceValues);
+      }
 
       await this.enqueueBunnyDurationDiscovery(reference, targetResourceId, params.targetTenantId);
 

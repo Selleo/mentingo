@@ -312,6 +312,7 @@ export type DuplicateCourseIntoExistingCourseParams = {
   sourceSnapshot?: SourceSnapshot;
   targetCategoryId?: UUIDType;
   targetCurrency?: string;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type DuplicateChaptersParams = {
@@ -598,6 +599,7 @@ export type CopySourceResourceReferencesParams = {
   sourceTenantId: UUIDType;
   sourceTenantOrigin: string;
   targetTenantId: UUIDType;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type ResolveTargetResourceReferenceParams = CopySourceResourceReferencesParams & {
@@ -640,6 +642,7 @@ export type DuplicateResourcesParams = {
   targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
   resourceCollection: MasterCourseResourceCollection;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type CreateOrQueueExportForTargetParams = {

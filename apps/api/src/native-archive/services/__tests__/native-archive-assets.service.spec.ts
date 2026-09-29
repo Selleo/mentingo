@@ -111,6 +111,9 @@ describe("NativeArchiveAssetsService", () => {
     const staged = await service.stageArchiveAssets(archive, ACTOR, [snapshot]);
 
     expect(fileService.uploadResource).toHaveBeenCalledTimes(1);
+    expect(staged.uploadedResourceIdsByFileKey.get(IMAGE_FILE_KEY)).toBe(
+      "b3da5ec2-9e50-4da5-96d7-d3ca5ee4c740",
+    );
     expect(fileService.uploadResource).toHaveBeenCalledWith(
       expect.objectContaining({
         file: expect.objectContaining({ mimetype: "image/png" }),

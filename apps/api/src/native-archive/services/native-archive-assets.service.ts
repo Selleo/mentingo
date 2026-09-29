@@ -102,6 +102,7 @@ export class NativeArchiveAssetsService {
       referenceMap: new Map(
         scormDirectories.map((directory) => [directory.sourceReference, directory.targetReference]),
       ),
+      uploadedResourceIdsByFileKey: new Map(),
       assetReferences,
       uploadedFileReferences: [],
       uploadedS3Keys: [],
@@ -122,6 +123,7 @@ export class NativeArchiveAssetsService {
 
       context.uploadedFileReferences.push(uploaded.fileKey);
       context.resourceIds.push(uploaded.resourceId);
+      context.uploadedResourceIdsByFileKey.set(uploaded.fileKey, uploaded.resourceId);
       context.referenceMap.set(sourceBase, uploaded.fileKey);
     }
   }
@@ -253,6 +255,7 @@ export class NativeArchiveAssetsService {
 
     return {
       snapshots: snapshots.map(rewriteValue),
+      uploadedResourceIdsByFileKey: context.uploadedResourceIdsByFileKey,
       rewriteReference: (reference) =>
         reference ? (context.referenceMap.get(reference) ?? reference) : null,
       rewriteValue,
