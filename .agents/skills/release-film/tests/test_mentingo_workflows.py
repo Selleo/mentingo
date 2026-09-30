@@ -157,9 +157,16 @@ class Workflows(unittest.TestCase):
         self.assertEqual(publish['env']['PUBLISH'], "${{ github.event_name == 'workflow_dispatch' }}")
         commands = '\n'.join(s.get('run') or '' for job in self.publish['jobs'].values() for s in job['steps'])
         self.assertNotIn('film.py', commands)
-        self.assertEqual(pages['permissions'], {'contents': 'read', 'pages': 'write', 'id-token': 'write'})
+        # the site alone may take a recording's film (that run's artifact, read only), never a release
+        self.assertEqual(pages['permissions'], {'actions': 'read', 'contents': 'read', 'pages': 'write', 'id-token': 'write'})
         self.assertEqual(pages['environment']['name'], 'github-pages')
         self.assertIn("inputs.target == 'release' && needs.publish.result == 'success'", pages['if'])
+        recorded, = [s for s in pages['steps'] if str(s.get('uses', '')).startswith('actions/download-artifact@')]
+        self.assertEqual(recorded['if'], "inputs.target == 'pages' && inputs.run_id != ''")
+        self.assertEqual(recorded['with']['run-id'], '${{ inputs.run_id }}')
+        site = '\n'.join(s.get('run') or '' for s in pages['steps'])
+        self.assertNotIn('release_assets.py publish', site)
+        self.assertIn('--base-url', site)
         helper = (SKILL / 'ci' / 'release_assets.py').read_text(encoding='utf-8')
         self.assertIsNone(re.search(r"'DELETE'|\"DELETE\"|'release', 'delete'|--clobber", helper))
 

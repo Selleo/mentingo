@@ -275,7 +275,10 @@ release with a section of links in its notes (`ci/release_assets.py`), never
 replacing or deleting an asset, and rebuilds the public GitHub Pages site of the
 films from every release's page ZIP (`site`: an index and each film at
 `/<tag>/`). Started by hand, the same workflow publishes an earlier recording to
-a test draft release or to the release, or rebuilds only the site. Neither
+a test draft release or to the release, or to the Pages site alone
+(`target=pages` with the recording's `run_id`: no release changes), or rebuilds
+only the site. The site keeps every film it already shows (its `films.json`),
+and a release's film replaces a recording's of the same tag. Neither
 workflow starts on its own.
 `RELEASE_FILM_CI=1` sizes a run for a 2-core, 8 GB runner: the film renders
 on 2 jobs, at most 3 scenes are checked at once, and the page is only written

@@ -4,17 +4,19 @@ separately started workflow (release-film-publish.yml).
 
   release_assets.py stage   --run <run dir> --tag <tag> --commit <sha> --out <dir>
   release_assets.py publish --dir <staged dir> --target draft|release
-  release_assets.py site    --out <dir>
+  release_assets.py site    --out <dir> [--film <staged dir>] [--base-url <site url>]
 
 stage checks the film the run made (a plain file of video and audio that decodes to the end, of a plausible length)
 and copies it, its captions, its poster and its page (a ZIP) under release asset names, with release.json naming the
 release and each file's SHA-256. publish checks those files against release.json and attaches them to the tag's
 release (target release) or to a test draft release made for it (target draft), with a section of links in its
 notes. It never replaces or deletes an asset: a re-run adds what is missing and stops at an asset of the same name
-and other content. site builds the GitHub Pages site of the films from the releases themselves: each published
-release's page (its ZIP asset) at /<tag>/ and an index of them, newest first.
+and other content. site builds the GitHub Pages site of the films: each published release's page (its ZIP asset) at
+/<tag>/, a recording's page for the site alone (--film: its staged files, no release touched) and every film the live
+site already shows (--base-url: read back from its films.json), with an index of them, newest first.
 """
 import argparse
+import datetime as dt
 import hashlib
 import html
 import json
@@ -25,6 +27,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
@@ -34,6 +37,8 @@ from page import head  # noqa: E402  the film page's own look, in the project's 
 FILM_SECONDS = (10, 600)  # a film outside this is broken, not merely long or short (one scene lasts 20-30 s)
 MARK_START, MARK_END = '<!-- release-film -->', '<!-- /release-film -->'
 PAGE_FILES = ('index.html', 'demo.mp4', 'poster.jpg')  # with the captions: the page's own files
+SITE_MANIFEST = 'films.json'  # the site's own list of its films: the next rebuild keeps the ones nothing else gives
+PLAIN_NAME = re.compile(r'[A-Za-z0-9._-]+')  # a tag or a file name that stays in its own folder
 
 
 def asset_names(tag, code):
@@ -202,40 +207,113 @@ def index_page(repo, releases, brand=None):
             f'first.</p></header><ul class="films">{items or "<li>No film yet.</li>"}</ul></main></body></html>')
 
 
-def site(out, repo=None):
-    """The Pages site rebuilt from the releases: each published release with a film page ZIP at /<tag>/ (the ZIP's
-    files only, each checked to stay inside its folder), an index of them, newest first. Returns the tags shown."""
+def page_files(page, tag):
+    """The files of a film's page ZIP as (name, bytes), each checked to stay inside its folder."""
+    prefix = f'release-film-{tag}/'
+    with zipfile.ZipFile(page) as zipped:
+        for member in zipped.infolist():
+            inner = member.filename[len(prefix):]
+            check(member.filename.startswith(prefix) and inner and '..' not in Path(inner).parts
+                  and not Path(inner).is_absolute(), f'{Path(page).name} holds {member.filename!r}')
+            if not member.is_dir():
+                yield inner, zipped.read(member)
+
+
+def written(folder, files):
+    """``files`` (name, bytes) written into ``folder``: the names written."""
+    names = []
+    for name, data in files:
+        target = folder / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        names.append(name)
+    return sorted(names)
+
+
+def recorded_film(folder):
+    """A recording's staged film (its release-film artifact): (tag, page ZIP), the ZIP checked against release.json."""
+    folder = Path(folder)
+    manifest = json.loads((folder / 'release.json').read_text(encoding='utf-8'))
+    tag = manifest.get('tag') or ''
+    check(PLAIN_NAME.fullmatch(tag), f'unexpected tag name {tag!r}')
+    name = asset_names(tag, manifest.get('language') or 'en')['page']
+    digest = (manifest.get('assets') or {}).get(name)
+    check(digest and plain_file(folder / name, folder.resolve()) and sha256(folder / name) == digest,
+          f'{name} is not the file staged')
+    return tag, folder / name
+
+
+def fetch(url):
+    with urllib.request.urlopen(url, timeout=60) as reply:  # noqa: S310 the site's own https address
+        return reply.read()
+
+
+def live_films(base_url):
+    """The films the live site shows (its films.json): {tag: film}; none when there is no site or list yet."""
+    if not base_url:
+        return {}
+    try:
+        listed = json.loads(fetch(f'{base_url.rstrip("/")}/{SITE_MANIFEST}').decode('utf-8'))
+    except (OSError, ValueError):
+        return {}
+    films = {}
+    for film in listed.get('films') or [] if isinstance(listed, dict) else []:
+        if isinstance(film, dict) and PLAIN_NAME.fullmatch(str(film.get('tag') or '')) and isinstance(film.get('files'), list):
+            films[film['tag']] = film
+    return films
+
+
+def site(out, repo=None, film=None, base_url=None):
+    """The Pages site: each published release's film page (its ZIP asset) at /<tag>/; ``film``, a recording's staged
+    files, for a tag whose release has no film (the site alone: no release changes); and every film the live site at
+    ``base_url`` already shows that neither gives now, its files taken from there (the site keeps what it showed). A
+    release's film replaces a recording's of its tag. An index of them, newest first, and films.json, the list the
+    next rebuild reads. A film the live site lists but cannot serve stops the rebuild: nothing is deployed then.
+    Returns the tags shown."""
     repo = repo or os.environ['GITHUB_REPOSITORY']
     out = Path(out)
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
     listed = gh('api', '--paginate', f'repos/{repo}/releases?per_page=100', '--jq',
                 '.[] | {tag_name, name, published_at, draft, assets: [.assets[].name]}')
-    releases = sorted((json.loads(line) for line in listed.splitlines() if line.strip()),
-                      key=lambda r: r.get('published_at') or '', reverse=True)
-    shown = []
+    published = {r['tag_name']: r for r in (json.loads(line) for line in listed.splitlines() if line.strip())
+                 if not r.get('draft')}
+    films = {}
+
+    def shown(tag, source, files):
+        release = published.get(tag) or {}
+        date = (release.get('published_at') or dt.datetime.now(dt.timezone.utc).isoformat())[:10]
+        films[tag] = {'tag': tag, 'name': release.get('name') or tag, 'date': date, 'source': source,
+                      'files': written(out / tag, files)}
+
     with tempfile.TemporaryDirectory() as folder:
-        for release in releases:
-            tag = release['tag_name']
+        for tag, release in published.items():
             name = asset_names(tag, 'en')['page']
-            if release.get('draft') or name not in release['assets']:
+            if name not in release['assets']:
                 continue
-            check(re.fullmatch(r'[A-Za-z0-9._-]+', tag), f'unexpected tag name {tag!r}')
+            check(PLAIN_NAME.fullmatch(tag), f'unexpected tag name {tag!r}')
             gh('release', 'download', tag, '--repo', repo, '--pattern', name, '--dir', str(Path(folder) / tag))
-            prefix = f'release-film-{tag}/'
-            with zipfile.ZipFile(Path(folder) / tag / name) as page:
-                for member in page.infolist():
-                    inner = member.filename[len(prefix):]
-                    check(member.filename.startswith(prefix) and inner and '..' not in Path(inner).parts
-                          and not Path(inner).is_absolute(), f'{name} holds {member.filename!r}')
-                    if not member.is_dir():
-                        target = out / tag / inner
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        target.write_bytes(page.read(member))
-            shown.append(release)
-    (out / 'index.html').write_text(index_page(repo, shown, core.addon(repo).get('brand')), encoding='utf-8')
+            shown(tag, 'release', page_files(Path(folder) / tag / name, tag))
+    if film:
+        tag, page = recorded_film(film)
+        if tag not in films:
+            shown(tag, 'recording', page_files(page, tag))
+    for tag, kept in live_films(base_url).items():
+        if tag in films:
+            continue
+        names = [str(name) for name in kept['files']]
+        check(all(PLAIN_NAME.fullmatch(name) for name in names), f'the live site lists odd files for {tag}')
+        try:
+            files = [(name, fetch(f'{base_url.rstrip("/")}/{tag}/{name}')) for name in names]
+        except OSError as failed:
+            check(False, f'the live site lists {tag} but does not serve it ({failed}); nothing was deployed')
+        films[tag] = dict(kept, files=written(out / tag, files))
+    ordered = sorted(films.values(), key=lambda f: (f.get('date') or '', f['tag']), reverse=True)
+    releases = [{'tag_name': f['tag'], 'name': f.get('name'), 'published_at': f.get('date')} for f in ordered]
+    (out / 'index.html').write_text(index_page(repo, releases, core.addon(repo).get('brand')), encoding='utf-8')
+    (out / SITE_MANIFEST).write_text(json.dumps({'films': ordered}, indent=1) + '\n', encoding='utf-8')
     (out / '.nojekyll').touch()  # served as they are
-    return {'films': [r['tag_name'] for r in shown], 'out': str(out)}
+    return {'films': [f['tag'] for f in ordered], 'out': str(out)}
 
 
 def main():
@@ -247,11 +325,13 @@ def main():
     parser.add_argument('--out')
     parser.add_argument('--dir')
     parser.add_argument('--target', choices=['draft', 'release'])
+    parser.add_argument('--film', help='site: a recording\'s staged files (its release-film artifact)')
+    parser.add_argument('--base-url', help='site: the live site, whose films it keeps')
     args = parser.parse_args()
     if args.command == 'stage':
         result = stage(args.run, args.tag, args.commit, args.out)
     elif args.command == 'site':
-        result = site(args.out)
+        result = site(args.out, film=args.film, base_url=args.base_url)
     else:
         check(args.target, 'publish needs --target draft or release')
         result = publish(args.dir, args.target)

@@ -278,6 +278,101 @@ class Site(unittest.TestCase):
         self.assertIn(':root{--accent:#3f58b6}', index)
         self.assertNotIn('<link', release_assets.index_page('Acme/shop', []))  # without one, the page's own look
 
+    def staged(self, folder, tag, digest=None):
+        """A recording's staged files (its release-film artifact): the page ZIP and release.json naming its digest."""
+        import zipfile
+        folder = Path(folder)
+        folder.mkdir(parents=True, exist_ok=True)
+        page = folder / f'release-film-{tag}-page.zip'
+        with zipfile.ZipFile(page, 'w') as zipped:
+            for name in ('index.html', 'demo.mp4', 'poster.jpg'):
+                zipped.writestr(f'release-film-{tag}/{name}', f'recorded {name}')
+        (folder / 'release.json').write_text(json.dumps({'tag': tag, 'commit': 'abc', 'language': 'en', 'assets': {
+            page.name: digest or release_assets.sha256(page)}}))
+        return folder
+
+    def serving(self, folder):
+        """The live site: ``folder`` served on 127.0.0.1 until the test ends; its address."""
+        import functools
+        import http.server
+        import threading
+
+        class Quiet(http.server.SimpleHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(folder)))
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        return f'http://127.0.0.1:{server.server_address[1]}/'
+
+    def live(self, folder, films):
+        """A live site holding ``films`` {tag: {file: text}} and their films.json."""
+        folder = Path(folder)
+        for tag, files in films.items():
+            for name, text in files.items():
+                (folder / tag).mkdir(parents=True, exist_ok=True)
+                (folder / tag / name).write_text(text)
+        (folder / 'films.json').write_text(json.dumps({'films': [
+            {'tag': tag, 'name': tag, 'date': '2026-07-01', 'source': 'recording', 'files': sorted(files)}
+            for tag, files in films.items()]}))
+        return self.serving(folder)
+
+    def test_a_recordings_film_goes_on_the_site_alone_and_no_release_changes(self):
+        releases = [{'name': 'v1', 'tag_name': 'v1', 'draft': False, 'published_at': '2026-08-01T09:00:00Z',
+                     'assets': ['release-film-v1-page.zip']},
+                    {'name': 'v2', 'tag_name': 'v2', 'draft': False, 'published_at': '2026-09-01T09:00:00Z', 'assets': []}]
+        members = lambda tag: [f'release-film-{tag}/{n}' for n in ('index.html', 'demo.mp4', 'poster.jpg')]
+        asked = []
+        gh = self.fake_gh(releases, members)
+        with tempfile.TemporaryDirectory() as folder, \
+                mock.patch.object(release_assets, 'gh', lambda *a, **k: asked.append(a[:2]) or gh(*a, **k)):
+            out = Path(folder) / 'site'
+            result = release_assets.site(out, repo='Acme/shop', film=self.staged(Path(folder) / 'film', 'v2'))
+            self.assertEqual(result['films'], ['v2', 'v1'])  # the release's date orders the recording's film
+            self.assertEqual((out / 'v2' / 'index.html').read_text(), 'recorded index.html')
+            listed = {f['tag']: f for f in json.loads((out / 'films.json').read_text())['films']}
+            self.assertEqual((listed['v2']['source'], listed['v2']['date']), ('recording', '2026-09-01'))
+            self.assertEqual(listed['v1']['files'], ['demo.mp4', 'index.html', 'poster.jpg'])
+        self.assertEqual({a for a in asked if a[0] != 'api'}, {('release', 'download')})  # nothing uploaded or edited
+
+    def test_the_site_keeps_the_films_it_already_shows(self):
+        releases = [{'name': 'v1', 'tag_name': 'v1', 'draft': False, 'published_at': '2026-08-01T09:00:00Z',
+                     'assets': ['release-film-v1-page.zip']}]
+        members = lambda tag: [f'release-film-{tag}/index.html']
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh(releases, members)):
+            base = self.live(Path(folder) / 'live', {'v0': {'index.html': 'page v0', 'poster.jpg': 'poster v0'}})
+            out = Path(folder) / 'site'
+            result = release_assets.site(out, repo='Acme/shop', base_url=base)
+            self.assertEqual(result['films'], ['v1', 'v0'])
+            self.assertEqual((out / 'v0' / 'poster.jpg').read_text(), 'poster v0')
+            again = release_assets.site(Path(folder) / 'again', repo='Acme/shop', base_url=self.serving(out))
+            self.assertEqual(again['films'], ['v1', 'v0'])  # and the next rebuild keeps it again
+
+    def test_a_releases_film_replaces_a_recordings_of_its_tag(self):
+        releases = [{'name': 'v1', 'tag_name': 'v1', 'draft': False, 'published_at': '2026-08-01T09:00:00Z',
+                     'assets': ['release-film-v1-page.zip']}]
+        members = lambda tag: [f'release-film-{tag}/index.html']
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh(releases, members)):
+            base = self.live(Path(folder) / 'live', {'v1': {'index.html': 'recorded page'}})
+            out = Path(folder) / 'site'
+            release_assets.site(out, repo='Acme/shop', film=self.staged(Path(folder) / 'film', 'v1'), base_url=base)
+            self.assertEqual((out / 'v1' / 'index.html').read_text(), 'release-film-v1/index.html')
+            self.assertEqual(json.loads((out / 'films.json').read_text())['films'][0]['source'], 'release')
+
+    def test_a_recording_whose_page_is_not_the_one_staged_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):
+            film = self.staged(Path(folder) / 'film', 'v2', digest='0' * 64)
+            with self.assertRaisesRegex(SystemExit, 'is not the file staged'):
+                release_assets.site(Path(folder) / 'site', repo='o/r', film=film)
+
+    def test_a_film_the_live_site_lists_but_does_not_serve_stops_the_rebuild(self):
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):
+            base = self.live(Path(folder) / 'live', {'v0': {'index.html': 'page v0'}})
+            (Path(folder) / 'live' / 'v0' / 'index.html').unlink()
+            with self.assertRaisesRegex(SystemExit, 'does not serve it'):
+                release_assets.site(Path(folder) / 'site', repo='o/r', base_url=base)
+
     def test_a_page_zip_reaching_outside_its_folder_is_refused(self):
         releases = [{'name': 'v1', 'tag_name': 'v1', 'draft': False, 'assets': ['release-film-v1-page.zip']}]
         members = lambda tag: [f'release-film-{tag}/../../escape.html']
