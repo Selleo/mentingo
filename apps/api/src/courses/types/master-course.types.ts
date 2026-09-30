@@ -309,6 +309,10 @@ export type DuplicateCourseIntoExistingCourseParams = {
   targetCourseId: UUIDType;
   actorId: UUIDType;
   tenantId: UUIDType;
+  sourceSnapshot?: SourceSnapshot;
+  targetCategoryId?: UUIDType;
+  targetCurrency?: string;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type DuplicateChaptersParams = {
@@ -344,6 +348,7 @@ export type SyncAssessmentQuestionDetailsParams = {
 export type RemoveScormPackagesForMappedTargetsParams = {
   targetCourseId: UUIDType;
   targetLessonIds: UUIDType[];
+  targetPackageIds?: UUIDType[];
 };
 export type QuestionAnswerOptionJsonbInsert = Omit<
   QuestionAnswerOptionInsert,
@@ -632,6 +637,7 @@ export type CopySourceResourceReferencesParams = {
   sourceTenantId: UUIDType;
   sourceTenantOrigin: string;
   targetTenantId: UUIDType;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type ResolveTargetResourceReferenceParams = CopySourceResourceReferencesParams & {
@@ -674,6 +680,7 @@ export type DuplicateResourcesParams = {
   targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
   resourceCollection: MasterCourseResourceCollection;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type CreateOrQueueExportForTargetParams = {

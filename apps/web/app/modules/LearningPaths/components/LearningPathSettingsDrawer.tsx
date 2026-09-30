@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
+import { NativeArchiveExportCard } from "~/modules/Admin/components/NativeArchiveExportCard";
 import { LearningPathExportsSection } from "~/modules/LearningPaths/components/LearningPathExportsSection";
 import { CERTIFICATE_KIND } from "~/modules/Profile/Certificates/certificateKind";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
@@ -289,6 +290,11 @@ export function LearningPathSettingsDrawer({
               </>
             )}
 
+            {canEdit && (
+              <div className="border-t border-primary-100 pt-4">
+                <NativeArchiveExportCard kind="learning-path" id={learningPathId} />
+              </div>
+            )}
             {canExport && (
               <div className="border-t border-primary-100 pt-4">
                 <LearningPathExportsSection learningPathId={learningPathId} />

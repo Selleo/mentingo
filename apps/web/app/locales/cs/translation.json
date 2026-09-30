@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kurzy a vzdělávací cesty s existujícím identifikátorem se přeskočí. Nový obsah se vytvoří jako koncept.",
+    "uploadPrompt": "Vyberte nebo přetáhněte ZIP balíček Mentingo",
+    "dropPrompt": "Přetáhněte balíček Mentingo sem",
+    "fileReady": "Připraveno k importu",
+    "replaceFile": "Nahradit balíček",
+    "removeFile": "Odebrat balíček",
+    "exportTitle": "Balíček Mentingo",
+    "exportDescription": {
+      "course": "Exportujte kurz, jeho strukturu, nastavení a soubory jako balíček pro import do Mentinga.",
+      "learning-path": "Exportujte vzdělávací cestu, její kurzy, nastavení a soubory jako balíček pro import do Mentinga."
+    },
+    "exportButton": "Exportovat balíček Mentingo",
+    "preparing": "Příprava balíčku Mentingo…",
+    "exportReady": "Balíček Mentingo byl stažen",
+    "importTitle": "Importovat balíček Mentingo",
+    "selectFile": "Vybrat ZIP balíček Mentingo",
+    "importButton": "Importovat balíček Mentingo",
+    "uploading": "Nahrávání…",
+    "importing": "Import balíčku Mentingo…",
+    "alreadyExists": "Tato položka již existuje. Nic se nezměnilo.",
+    "importComplete": "Import dokončen: vytvořeno {{count}} kurzů, znovu použito {{reused}}.",
+    "liveTrainingReview": "Před použitím zkontrolujte rozvrh a materiály importovaného živého školení.",
+    "dismissReview": "Označit jako zkontrolované",
+    "error": "Balíček Mentingo se nepodařilo zpracovat.",
+    "errors": {
+      "storageUnavailable": "Úložiště souborů není dostupné.",
+      "liveTrainingUnavailable": "Pro import balíčku Mentingo je nutné zapnout živá školení.",
+      "embeddingUnavailable": "Zpracování dokumentů AI není dostupné.",
+      "unsupportedVersion": "Tato verze balíčku Mentingo není podporována.",
+      "missingAsset": "V balíčku Mentingo chybí požadovaný soubor.",
+      "invalidArchive": "Tento ZIP není platným balíčkem Mentingo."
+    }
+  },
   "aiConversations": {
     "session": "Relace",
     "context": "Kontext",
@@ -826,7 +860,7 @@
     "back": "Zpět",
     "eyebrow": "Nastavení kurzu",
     "title": "Vytvořit nový kurz",
-    "subtitle": "Vyberte, zda chcete kurz vytvořit ve standardním editoru, nebo z balíčku SCORM.",
+    "subtitle": "Vyberte standardní editor, balíček SCORM nebo balíček Mentingo.",
     "standard": {
       "title": "Standardní",
       "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
@@ -845,6 +879,16 @@
         "tracking": "Podpora dokončení SCO a runtime stavu",
         "structure": "Struktura importovaného balíčku zachována",
         "future": "Ceny, stav a certifikáty jsou součástí"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Balíček Mentingo",
+      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo.",
+      "features": {
+        "structure": "Obnovení struktury kurzu a překladů",
+        "settings": "Obnovení nastavení a metadat",
+        "assets": "Související soubory součástí",
+        "learningPath": "Podpora vzdělávacích cest a jejich kurzů"
       }
     }
   },
@@ -5245,6 +5289,9 @@
   },
   "adminLearningPathsView": {
     "title": "Rozvojové cesty",
+    "importPackage": {
+      "title": "Importovat rozvojovou cestu"
+    },
     "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
     "summary": "{{count}} rozvojových cest je dostupných v tomto prostoru.",
     "breadcrumbs": {

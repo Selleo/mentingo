@@ -36,6 +36,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Delete draft courses individually or in bulk while protecting private and published courses.
 - Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
 - Export supported courses as SCORM packages when permissions and configuration allow it.
+- Download an editable Mentingo package and import one from a ZIP file to recreate the course as a draft.
 - Review learner progress, learning time, quiz outcomes, and AI Mentor results for courses the user manages.
 
 ## End-User Value
@@ -47,6 +48,10 @@ Operational controls reduce mistakes. Permissions distinguish full course manage
 Course reporting follows the same ownership model. Content creators can review outcomes for their own courses, while users with broader course-management responsibility can review the courses they oversee. This keeps learner reporting useful without exposing another creator's operational data.
 
 ## How It Works
+
+An editor who can manage a course can download a Mentingo package ZIP from the sharing area, next to the SCORM export option. To restore one, a course creator selects the Mentingo package card in the new-course experience, then chooses or drops the ZIP on a dedicated upload page. Mentingo uploads it in resumable chunks and shows progress over the file picker. When import creates a course, the course overview opens; an existing course identifier produces a notice without changing it. The imported course keeps its original UUID and author display attribution, belongs to the importer, starts as a free draft, and uses the destination's category when its base-language title matches. Learner progress and enrollments do not move with it.
+
+Imported live training keeps its authored schedule and materials and displays a review reminder that an editor can dismiss. The reminder does not prevent publication. Mentingo package export is separate from SCORM packages and live tenant sharing.
 
 Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose curriculum, pricing when available, status, enrollment, and export areas. Course metadata and operational settings are managed from the modern course overview instead of a duplicate Settings tab in the legacy edit screen.
 
@@ -86,6 +91,9 @@ From a course view, an eligible administrator opens the Statistics tab to review
 
 ## Key Technical Context
 
+- Mentingo package handling lives in `apps/api/src/native-archive`; ZIP processing runs through a tenant-scoped queue, and the format includes a versioned manifest and checksums for packaged files.
+- Course archive export requires course management access. Import requires course creation access and skips a course whose UUID already exists in the destination tenant.
+
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
 - Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
 - Chapter editing is provided by the curriculum area and `apps/api/src/chapter`; chapter deletion removes its related learner chapter-progress data in the same database operation.
@@ -107,6 +115,8 @@ From a course view, an eligible administrator opens the Statistics tab to review
 - Trailer videos use the existing resumable video-upload integration and the course `trailer` relationship rather than a separate upload path.
 
 ## Test Evidence
+
+- Focused API tests cover ZIP round-trip parsing, preservation of distinct asset references with identical bytes, rejection of unsupported versions, resumable upload offset handling, and the no-op when a course UUID already exists. A web component test covers the ZIP-only import control. Full course import/export E2E coverage remains to be added.
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.

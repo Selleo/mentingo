@@ -248,16 +248,22 @@ export class MasterCourseService {
 
   async duplicateCourseIntoExistingCourse(
     params: DuplicateCourseIntoExistingCourseParams,
-  ): Promise<void> {
-    const sourceCourse = await this.masterCourseRepository.getCourseById(params.sourceCourseId);
-    if (!sourceCourse) throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
+  ): Promise<{ chapterMap: Map<UUIDType, UUIDType>; lessonMap: Map<UUIDType, UUIDType> }> {
+    const sourceCourse = params.sourceSnapshot
+      ? null
+      : await this.masterCourseRepository.getCourseById(params.sourceCourseId);
+    if (!params.sourceSnapshot && !sourceCourse) {
+      throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
+    }
 
     const targetCourse = await this.masterCourseRepository.findCourseByIdInTenant(
       params.targetCourseId,
     );
     if (!targetCourse) throw new NotFoundException("courseDuplication.error.targetCourseNotFound");
 
-    const sourceSnapshot = await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse);
+    const sourceSnapshot =
+      params.sourceSnapshot ??
+      (sourceCourse && (await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse)));
     if (!sourceSnapshot)
       throw new NotFoundException("courseDuplication.error.sourceCategoryMissing");
 
@@ -268,8 +274,9 @@ export class MasterCourseService {
     await this.copySourceResourceReferences(resourceCollection, {
       targetCourseId: params.targetCourseId,
       sourceTenantId: params.tenantId,
-      sourceTenantOrigin: this.toTenantOrigin(tenantHost),
+      sourceTenantOrigin: tenantHost,
       targetTenantId: params.tenantId,
+      uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
     });
 
     const sourceCourseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
@@ -292,6 +299,7 @@ export class MasterCourseService {
       "createdAt",
       "updatedAt",
       "tenantId",
+      "originalId",
     ] as const);
 
     await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
@@ -310,11 +318,11 @@ export class MasterCourseService {
       status: "draft",
       hasCertificate: sourceSnapshot.course.hasCertificate,
       priceInCents: 0,
-      currency: sourceSnapshot.course.currency,
+      currency: params.targetCurrency ?? sourceSnapshot.course.currency,
       chapterCount: sourceSnapshot.course.chapterCount,
       courseType: sourceSnapshot.course.courseType,
       authorId: params.actorId,
-      categoryId: sourceSnapshot.course.categoryId,
+      categoryId: params.targetCategoryId ?? sourceSnapshot.course.categoryId,
       stripeProductId: null,
       stripePriceId: null,
       settings: toJsonbBuildObject(copiedCourseSettings),
@@ -374,6 +382,7 @@ export class MasterCourseService {
       targetTenantId: params.tenantId,
       targetAuthorId: params.actorId,
       resourceCollection,
+      uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
     });
 
     await this.syncLessonResourceReferences({
@@ -396,6 +405,7 @@ export class MasterCourseService {
     );
 
     await this.courseDurationService.refreshCourseDurationEstimates(params.targetCourseId);
+    return { chapterMap, lessonMap };
   }
 
   async assertCourseContentEditable(
@@ -580,7 +590,7 @@ export class MasterCourseService {
     await this.copySourceResourceReferences(resourceCollection, {
       targetCourseId,
       sourceTenantId: exportLink.sourceTenantId,
-      sourceTenantOrigin: this.toTenantOrigin(sourceTenantHost),
+      sourceTenantOrigin: sourceTenantHost,
       targetTenantId: exportLink.targetTenantId,
     });
 
@@ -1811,6 +1821,7 @@ export class MasterCourseService {
     await this.masterCourseRepository.removeScormPackagesForMappedTargets({
       targetCourseId: params.targetCourseId,
       targetLessonIds,
+      targetPackageIds: targetPackages.map(({ targetPackageId }) => targetPackageId),
     });
 
     for (const targetPackage of targetPackages) {
@@ -2404,6 +2415,7 @@ export class MasterCourseService {
         targetBunnyConfigured,
         sourceAndTargetShareBunnyMediaConfiguration,
         copiedReferences,
+        uploadedResourceIdsByFileKey: params.uploadedResourceIdsByFileKey,
       });
 
       resourceReference.target.reference = targetReference;
@@ -2414,6 +2426,8 @@ export class MasterCourseService {
     source: MasterCourseCopySourceReference,
     params: ResolveTargetResourceReferenceParams,
   ) {
+    if (params.uploadedResourceIdsByFileKey?.has(source.reference)) return source.reference;
+
     const existingTargetReference = params.copiedReferences.get(source.reference);
     if (existingTargetReference) return existingTargetReference;
 
@@ -2617,11 +2631,6 @@ export class MasterCourseService {
     } catch {
       return false;
     }
-  }
-
-  private toTenantOrigin(host: string) {
-    const normalizedHost = host.trim().replace(/\/+$/, "");
-    return /^https?:\/\//i.test(normalizedHost) ? normalizedHost : `https://${normalizedHost}`;
   }
 
   private isVideoReference(source: MasterCourseCopySourceReference) {
@@ -2872,16 +2881,27 @@ export class MasterCourseService {
     for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
       const sourceResource = resourceReference.source.resource;
       const reference = resourceReference.target.reference ?? resourceReference.source.reference;
-      const targetResourceId = await this.masterCourseRepository.createResource({
+      const resourceValues = {
         title: toJsonbBuildObject(sourceResource.title),
         description: toJsonbBuildObject(sourceResource.description),
-        reference,
-        contentType: sourceResource.contentType,
-        metadata: toJsonbBuildObject(sourceResource.metadata),
         uploadedBy: params.targetAuthorId,
         visibility: sourceResource.visibility,
         archived: false,
-      });
+      };
+      const uploadedResourceId = params.uploadedResourceIdsByFileKey?.get(reference);
+
+      const targetResourceId =
+        uploadedResourceId ??
+        (await this.masterCourseRepository.createResource({
+          ...resourceValues,
+          reference,
+          contentType: sourceResource.contentType,
+          metadata: toJsonbBuildObject(sourceResource.metadata),
+        }));
+
+      if (uploadedResourceId) {
+        await this.masterCourseRepository.updateResource(uploadedResourceId, resourceValues);
+      }
 
       await this.enqueueBunnyDurationDiscovery(reference, targetResourceId, params.targetTenantId);
 

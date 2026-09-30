@@ -12,6 +12,7 @@ export const QUEUE_NAMES = {
   LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
   SCORM_IMPORT: "scorm-import",
+  NATIVE_ARCHIVE: "native-archive",
   COURSE_DUPLICATION: "course-duplication",
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",

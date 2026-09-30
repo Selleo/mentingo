@@ -63,6 +63,7 @@ export const createLearningPathFactory = (db: DatabasePg) => {
       originType: "regular",
       sourceLearningPathId: null,
       sourceTenantId: null,
+      originalId: null,
       baseLanguage: "pl",
       availableLocales: ["pl"],
     };

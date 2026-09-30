@@ -19,6 +19,7 @@ import {
   DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   PERMISSIONS,
+  SCORM_PACKAGE_ENTITY_TYPE,
   type PermissionKey,
   type SupportedLanguages,
   type StudentCourseUrgency,
@@ -3707,17 +3708,8 @@ export class CourseService {
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
 
-    const scormPackageToDelete =
-      course.courseType === COURSE_TYPE.SCORM
-        ? await this.db
-            .select({ id: scormPackages.id })
-            .from(scormPackages)
-            .where(eq(scormPackages.entityId, id))
-            .limit(1)
-            .then(([row]) => row ?? null)
-        : null;
-
     await this.db.transaction(async (trx) => {
+      const scormPackageIds = await this.removeScormPackagesForCourses([id], trx);
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
@@ -3742,10 +3734,10 @@ export class CourseService {
         db: trx,
       });
 
-      if (scormPackageToDelete) {
+      if (scormPackageIds.length) {
         await this.outboxPublisher.publish(
           new DeleteScormEvent({
-            scormIds: [{ scormId: scormPackageToDelete.id }],
+            scormIds: scormPackageIds.map((scormId) => ({ scormId })),
             actor: currentUser,
           }),
           trx,
@@ -3787,19 +3779,8 @@ export class CourseService {
       throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
 
-    const scormCourseIds = selectedCourses
-      .filter((course) => course.courseType === COURSE_TYPE.SCORM)
-      .map((course) => course.id);
-
-    const scormPackagesToDelete =
-      scormCourseIds.length > 0
-        ? await this.db
-            .select({ id: scormPackages.id })
-            .from(scormPackages)
-            .where(inArray(scormPackages.entityId, scormCourseIds))
-        : [];
-
     return this.db.transaction(async (trx) => {
+      const scormPackageIds = await this.removeScormPackagesForCourses(ids, trx);
       await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
       await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
       await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
@@ -3819,10 +3800,10 @@ export class CourseService {
         });
       }
 
-      if (scormPackagesToDelete.length > 0) {
+      if (scormPackageIds.length > 0) {
         await this.outboxPublisher.publish(
           new DeleteScormEvent({
-            scormIds: scormPackagesToDelete.map((scormPkg) => ({ scormId: scormPkg.id })),
+            scormIds: scormPackageIds.map((scormId) => ({ scormId })),
             actor: currentUser,
           }),
           trx,
@@ -3846,6 +3827,35 @@ export class CourseService {
 
       return null;
     });
+  }
+
+  private async removeScormPackagesForCourses(
+    courseIds: UUIDType[],
+    trx: DatabasePg,
+  ): Promise<UUIDType[]> {
+    const courseLessonIds = trx
+      .select({ id: lessons.id })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(inArray(chapters.courseId, courseIds));
+
+    const deleted = await trx
+      .delete(scormPackages)
+      .where(
+        or(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
+            inArray(scormPackages.entityId, courseIds),
+          ),
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+            inArray(scormPackages.entityId, courseLessonIds),
+          ),
+        ),
+      )
+      .returning({ id: scormPackages.id });
+
+    return deleted.map(({ id }) => id);
   }
 
   async unenrollCourse(courseId: UUIDType, userIds: UUIDType[]) {

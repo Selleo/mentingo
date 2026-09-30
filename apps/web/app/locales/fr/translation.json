@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Les cours et parcours dont l’identifiant existe déjà sont ignorés. Le nouveau contenu est créé comme brouillon.",
+    "uploadPrompt": "Choisir ou déposer un ZIP de package Mentingo",
+    "dropPrompt": "Déposez le package Mentingo ici",
+    "fileReady": "Prêt à importer",
+    "replaceFile": "Remplacer le package",
+    "removeFile": "Supprimer le package",
+    "exportTitle": "Package Mentingo",
+    "exportDescription": {
+      "course": "Exportez ce cours, sa structure, ses réglages et ses fichiers dans un package importable dans Mentingo.",
+      "learning-path": "Exportez ce parcours, ses cours, ses réglages et ses fichiers dans un package importable dans Mentingo."
+    },
+    "exportButton": "Exporter le package Mentingo",
+    "preparing": "Préparation du package Mentingo…",
+    "exportReady": "Package Mentingo téléchargé",
+    "importTitle": "Importer un package Mentingo",
+    "selectFile": "Choisir un ZIP de package Mentingo",
+    "importButton": "Importer le package Mentingo",
+    "uploading": "Téléversement…",
+    "importing": "Importation du package Mentingo…",
+    "alreadyExists": "Cet élément existe déjà. Aucune modification n’a été apportée.",
+    "importComplete": "Importation terminée : {{count}} cours créés, {{reused}} réutilisés.",
+    "liveTrainingReview": "Vérifiez le calendrier et les documents de cette formation en direct importée avant utilisation.",
+    "dismissReview": "Marquer comme vérifiée",
+    "error": "Le package Mentingo n’a pas pu être traité.",
+    "errors": {
+      "storageUnavailable": "Le stockage des fichiers est indisponible.",
+      "liveTrainingUnavailable": "La formation en direct doit être activée pour importer ce package Mentingo.",
+      "embeddingUnavailable": "Le traitement des documents IA est indisponible.",
+      "unsupportedVersion": "Cette version du package Mentingo n’est pas prise en charge.",
+      "missingAsset": "Un fichier requis manque dans le package Mentingo.",
+      "invalidArchive": "Ce ZIP n’est pas un package Mentingo valide."
+    }
+  },
   "aiConversations": {
     "session": "Session",
     "context": "Contexte",
@@ -823,7 +857,7 @@
     "back": "Retour",
     "eyebrow": "Configuration du cours",
     "title": "Créer un nouveau cours",
-    "subtitle": "Choisissez si vous souhaitez créer le cours avec l'éditeur standard ou le créer à partir d'un package SCORM.",
+    "subtitle": "Choisissez l’éditeur standard, un package SCORM ou un package Mentingo.",
     "standard": {
       "title": "Norme",
       "description": "Créez un cours avec le programme d'études, les leçons, les quiz et les paramètres intégrés.",
@@ -842,6 +876,16 @@
         "tracking": "Achèvement SCO et suivi de l'exécution pris en charge",
         "structure": "Structure du package importé préservée",
         "future": "Prix, statut et certificats inclus"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Package Mentingo",
+      "description": "Restaurez un cours ou un parcours à partir d’un package Mentingo.",
+      "features": {
+        "structure": "Structure et traductions du cours restaurées",
+        "settings": "Réglages et métadonnées restaurés",
+        "assets": "Fichiers associés inclus",
+        "learningPath": "Parcours et leurs cours pris en charge"
       }
     }
   },
@@ -4836,6 +4880,9 @@
   },
   "adminLearningPathsView": {
     "title": "Parcours de développement",
+    "importPackage": {
+      "title": "Importer un parcours de développement"
+    },
     "description": "Gérez les informations du parcours, l'ordre des cours, les inscriptions, les exportations et les certificats.",
     "summary": "{{count}} parcours de développement sont disponibles dans cet espace de travail.",
     "breadcrumbs": {

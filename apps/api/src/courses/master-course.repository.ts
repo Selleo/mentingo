@@ -386,6 +386,17 @@ export class MasterCourseRepository {
   ) {
     if (!targetIds.length) return;
 
+    if (targetTable === lessons) {
+      await this.db
+        .delete(scormPackages)
+        .where(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+            inArray(scormPackages.entityId, targetIds),
+          ),
+        );
+    }
+
     await this.db.delete(targetTable).where(inArray((targetTable as any).id, targetIds));
   }
 
@@ -1400,6 +1411,10 @@ export class MasterCourseRepository {
           inArray(scormPackages.entityId, params.targetLessonIds),
         ),
       );
+    }
+
+    if (params.targetPackageIds?.length) {
+      conditions.push(inArray(scormPackages.id, params.targetPackageIds));
     }
 
     await this.db.delete(scormPackages).where(or(...conditions));

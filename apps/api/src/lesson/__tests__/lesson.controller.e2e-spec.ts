@@ -13,6 +13,9 @@ import {
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+  SCORM_STANDARD,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
   type SupportedLanguages,
@@ -34,7 +37,9 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
   aiMentorConfigurations,
+  aiMentorJudgements,
   aiMentorLessons,
+  aiMentorThreads,
   chapters,
   courses,
   lessons,
@@ -46,6 +51,7 @@ import {
   assessmentQuestionChoiceOptions,
   courseStudentMode,
   resources,
+  scormPackages,
   resourceEntity,
   settings,
   studentCourses,
@@ -340,7 +346,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     });
   });
 
-  describe("AI mentor lesson translations", () => {
+  describe("AI mentor lessons", () => {
     const teacherConfiguration = (additionalInstructions: string) => ({
       type: AI_MENTOR_TYPE.TEACHER,
       taskGoal: "Guide the learner through the practice",
@@ -412,6 +418,45 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       return { admin, adminCookies, chapterId: chapter.id, courseId: course.id, lessonId };
     };
+
+    it("deletes an AI Mentor lesson with a completed judgement", async () => {
+      const { admin, adminCookies, lessonId } = await createAiMentorLessonSetup();
+      const [aiMentorLesson] = await db
+        .select({ id: aiMentorLessons.id })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+      const [configuration] = await db
+        .select({ id: aiJudgeConfigurations.id })
+        .from(aiJudgeConfigurations)
+        .where(eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLesson.id));
+      const [thread] = await db
+        .insert(aiMentorThreads)
+        .values({ userId: admin.id, aiMentorLessonId: aiMentorLesson.id })
+        .returning({ id: aiMentorThreads.id });
+
+      await db.insert(aiMentorJudgements).values({
+        threadId: thread.id,
+        configurationId: configuration.id,
+        language: SUPPORTED_LANGUAGES.EN,
+        earnedPoints: 1,
+        maxScore: 1,
+        percentage: 100,
+        passed: true,
+      });
+
+      await request(app.getHttpServer())
+        .delete("/api/lesson")
+        .query({ lessonId })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(
+        await db
+          .select()
+          .from(aiMentorJudgements)
+          .where(eq(aiMentorJudgements.threadId, thread.id)),
+      ).toHaveLength(0);
+    });
 
     const getAiMentorFromCourse = async (
       courseId: UUIDType,
@@ -1171,7 +1216,49 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       );
   };
 
-  describe("DELETE /api/lesson - quiz lesson deletion", () => {
+  describe("DELETE /api/lesson", () => {
+    it("removes the package when deleting a SCORM lesson", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({ authorId: admin.id });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: admin.id });
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.SCORM,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "SCORM lesson"),
+          displayOrder: 0,
+        })
+        .returning({ id: lessons.id });
+      const [scormPackage] = await db
+        .insert(scormPackages)
+        .values({
+          entityType: SCORM_PACKAGE_ENTITY_TYPE.LESSON,
+          entityId: lesson.id,
+          language: SUPPORTED_LANGUAGES.EN,
+          standard: SCORM_STANDARD.SCORM_1_2,
+          originalFileReference: "test/scorm/original.zip",
+          extractedFilesReference: "test/scorm/extracted",
+          manifestEntryPoint: "test/scorm/extracted/index.html",
+          status: SCORM_PACKAGE_STATUS.READY,
+        })
+        .returning({ id: scormPackages.id });
+
+      await request(app.getHttpServer())
+        .delete("/api/lesson")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(
+        await db.select().from(scormPackages).where(eq(scormPackages.id, scormPackage.id)),
+      ).toHaveLength(0);
+    });
+
     it("should delete a quiz lesson with linked quiz attempts", async () => {
       const category = await categoryFactory.create();
       const admin = await userFactory

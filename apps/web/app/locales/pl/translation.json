@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kursy i ścieżki o istniejącym identyfikatorze zostaną pominięte. Nowa zawartość powstanie jako szkic.",
+    "uploadPrompt": "Wybierz lub upuść ZIP pakietu Mentingo",
+    "dropPrompt": "Upuść tutaj pakiet Mentingo",
+    "fileReady": "Gotowy do importu",
+    "replaceFile": "Zastąp pakiet",
+    "removeFile": "Usuń pakiet",
+    "exportTitle": "Pakiet Mentingo",
+    "exportDescription": {
+      "course": "Wyeksportuj kurs, jego strukturę, ustawienia i pliki do pakietu, który można zaimportować w Mentingo.",
+      "learning-path": "Wyeksportuj ścieżkę, jej kursy, ustawienia i pliki do pakietu, który można zaimportować w Mentingo."
+    },
+    "exportButton": "Eksportuj pakiet Mentingo",
+    "preparing": "Przygotowywanie pakietu Mentingo…",
+    "exportReady": "Pakiet Mentingo został pobrany",
+    "importTitle": "Importuj pakiet Mentingo",
+    "selectFile": "Wybierz ZIP pakietu Mentingo",
+    "importButton": "Importuj pakiet Mentingo",
+    "uploading": "Przesyłanie…",
+    "importing": "Importowanie pakietu Mentingo…",
+    "alreadyExists": "Ten element już istnieje. Nic nie zmieniono.",
+    "importComplete": "Import zakończony: utworzono {{count}} kursów, użyto ponownie {{reused}}.",
+    "liveTrainingReview": "Sprawdź harmonogram i materiały zaimportowanego szkolenia na żywo przed użyciem.",
+    "dismissReview": "Oznacz jako sprawdzone",
+    "error": "Nie udało się przetworzyć pakietu Mentingo.",
+    "errors": {
+      "storageUnavailable": "Magazyn plików jest niedostępny. Spróbuj ponownie po jego skonfigurowaniu.",
+      "liveTrainingUnavailable": "Aby zaimportować pakiet Mentingo, należy włączyć szkolenia na żywo.",
+      "embeddingUnavailable": "Przetwarzanie dokumentów AI jest niedostępne.",
+      "unsupportedVersion": "Ta wersja pakietu Mentingo nie jest obsługiwana.",
+      "missingAsset": "W pakiecie Mentingo brakuje wymaganego pliku.",
+      "invalidArchive": "Ten plik ZIP nie jest poprawnym pakietem Mentingo."
+    }
+  },
   "aiConversations": {
     "session": "Sesja",
     "context": "Kontekst",
@@ -820,7 +854,7 @@
     "back": "Wstecz",
     "eyebrow": "Konfiguracja kursu",
     "title": "Utwórz nowy kurs",
-    "subtitle": "Wybierz, czy chcesz zbudować kurs w standardowym edytorze, czy utworzyć go z pakietu SCORM.",
+    "subtitle": "Wybierz edytor standardowy, pakiet SCORM lub pakiet Mentingo.",
     "standard": {
       "title": "Standardowy",
       "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami.",
@@ -839,6 +873,16 @@
         "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
         "structure": "Zachowana struktura importowanego pakietu",
         "future": "Ceny, status i certyfikaty wliczone"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Pakiet Mentingo",
+      "description": "Odtwórz kurs lub ścieżkę z pakietu Mentingo.",
+      "features": {
+        "structure": "Odtwarzanie struktury kursu i tłumaczeń",
+        "settings": "Odtwarzanie ustawień i metadanych",
+        "assets": "Dołączone powiązane pliki",
+        "learningPath": "Obsługa ścieżek i ich kursów"
       }
     }
   },
@@ -1410,6 +1454,9 @@
   },
   "adminLearningPathsView": {
     "title": "Ścieżki Rozwoju",
+    "importPackage": {
+      "title": "Importuj ścieżkę rozwoju"
+    },
     "description": "Zarządzaj metadanymi, ustawieniami sekwencji, kursami, zapisami, eksportem i certyfikatami.",
     "summary": "{{count}} ścieżek rozwoju jest dostępnych w tej organizacji.",
     "breadcrumbs": {

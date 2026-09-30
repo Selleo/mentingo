@@ -797,44 +797,53 @@ export class FileService {
 
     const uploadResult = await this.uploadFile(file, resourceFolder, currentUser?.tenantId);
 
-    const { insertedResource } = await this.db.transaction(async (trx) => {
-      const [insertedResource] = await trx
-        .insert(resources)
-        .values({
-          title: buildJsonbFieldWithMultipleEntries(title || {}),
-          description: buildJsonbFieldWithMultipleEntries(description || {}),
-          reference: uploadResult.fileKey,
-          contentType: uploadResult.contentType,
-          metadata: settingsToJSONBuildObject({
-            originalFilename: file.originalname,
-            size: file.size,
-            checksum,
-            ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
-          }),
-          uploadedBy: currentUser?.userId || null,
-          visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
-        })
-        .returning();
+    const { insertedResource } = await this.db
+      .transaction(async (trx) => {
+        const [insertedResource] = await trx
+          .insert(resources)
+          .values({
+            title: buildJsonbFieldWithMultipleEntries(title || {}),
+            description: buildJsonbFieldWithMultipleEntries(description || {}),
+            reference: uploadResult.fileKey,
+            contentType: uploadResult.contentType,
+            metadata: settingsToJSONBuildObject({
+              originalFilename: file.originalname,
+              size: file.size,
+              checksum,
+              ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
+            }),
+            uploadedBy: currentUser?.userId || null,
+            visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,
+          })
+          .returning();
 
-      if (options?.contextId) {
-        const contextKey = getContextKey(options.contextId);
+        if (options?.contextId) {
+          const contextKey = getContextKey(options.contextId);
 
-        const existingResources = (await this.cache.get(contextKey)) as UUIDType[];
+          const existingResources = (await this.cache.get(contextKey)) as UUIDType[];
 
-        await this.cache.set(contextKey, [...existingResources, insertedResource.id], CONTEXT_TTL);
-      }
+          await this.cache.set(
+            contextKey,
+            [...existingResources, insertedResource.id],
+            CONTEXT_TTL,
+          );
+        }
 
-      if (entityType && entityId) {
-        await trx.insert(resourceEntity).values({
-          resourceId: insertedResource.id,
-          entityId,
-          entityType,
-          relationshipType,
-        });
-      }
+        if (entityType && entityId) {
+          await trx.insert(resourceEntity).values({
+            resourceId: insertedResource.id,
+            entityId,
+            entityType,
+            relationshipType,
+          });
+        }
 
-      return { insertedResource };
-    });
+        return { insertedResource };
+      })
+      .catch(async (error: unknown) => {
+        await this.deleteFile(uploadResult.fileKey).catch(() => undefined);
+        throw error;
+      });
 
     if (!insertedResource) throw new BadRequestException("adminResources.toast.uploadError");
 

@@ -68,6 +68,7 @@ export const routes: (
           route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
           route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
+          route("courses/import-package", "modules/Admin/AddCourse/NativeArchiveImport.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");
           route("email-templates", "modules/Admin/EmailTemplates/EmailTemplates.page.tsx");

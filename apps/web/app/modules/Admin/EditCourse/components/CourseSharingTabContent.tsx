@@ -1,3 +1,5 @@
+import { NativeArchiveExportCard } from "~/modules/Admin/components/NativeArchiveExportCard";
+
 import { ScormExportCard } from "./ScormExportCard";
 import { SharedCourseExportsTabContent } from "./SharedCourseExportsTabContent";
 
@@ -36,6 +38,7 @@ export const CourseSharingTabContent = ({
         language={language}
         unsupportedLessonCount={unsupportedLessonCount}
       />
+      <NativeArchiveExportCard kind="course" id={courseId} />
       {showTenantSharing && (
         <SharedCourseExportsTabContent
           tenants={tenants}

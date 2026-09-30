@@ -13380,6 +13380,283 @@
         }
       }
     },
+    "/api/native-archives/tus/init": {
+      "post": {
+        "operationId": "NativeArchiveController_initTusImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitTusImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "NativeArchiveController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "NativeArchiveController_headTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "NativeArchiveController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}/complete": {
+      "post": {
+        "operationId": "NativeArchiveController_completeTusImport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/live-training/{id}/dismiss-review": {
+      "patch": {
+        "operationId": "NativeArchiveController_dismissLiveTrainingReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/courses/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/learning-paths/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeLearningPath",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeLearningPathResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/import": {
+      "post": {
+        "operationId": "NativeArchiveController_importNativeArchive",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportNativeArchiveResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download": {
+      "get": {
+        "operationId": "NativeArchiveController_downloadNativeArchive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/course-chat/{courseId}/messages": {
       "get": {
         "operationId": "CourseChatController_getMessages",
@@ -120536,6 +120813,219 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "InitTusImportBody": {
+        "type": "object",
+        "properties": {
+          "sizeBytes": {
+            "minimum": 1,
+            "maximum": 524288000,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sizeBytes"
+        ]
+      },
+      "InitTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "uploadId": {
+                "type": "string"
+              },
+              "tusEndpoint": {
+                "type": "string"
+              },
+              "tusHeaders": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              },
+              "expiresAt": {
+                "type": "string"
+              },
+              "partSize": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "uploadId",
+              "tusEndpoint",
+              "tusHeaders",
+              "expiresAt",
+              "partSize"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CompleteTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeLearningPathResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ImportNativeArchiveResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "result": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "const": "course",
+                            "type": "string"
+                          },
+                          {
+                            "const": "learning-path",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rootId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "alreadyExists": {
+                        "type": "boolean"
+                      },
+                      "createdCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "reusedCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "rootId"
+                    ]
+                  }
+                ]
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "jobId",
+              "state",
+              "result",
+              "failedReason"
             ]
           }
         },

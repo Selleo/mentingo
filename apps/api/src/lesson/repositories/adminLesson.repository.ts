@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { SCORM_PACKAGE_ENTITY_TYPE } from "@repo/shared";
 import { and, eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -13,6 +14,7 @@ import {
   lessons,
   resourceEntity,
   resources,
+  scormPackages,
 } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -238,6 +240,15 @@ export class AdminLessonRepository {
   }
 
   async removeLesson(lessonId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .delete(scormPackages)
+      .where(
+        and(
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          eq(scormPackages.entityId, lessonId),
+        ),
+      );
+
     return dbInstance.delete(lessons).where(eq(lessons.id, lessonId)).returning();
   }
 
