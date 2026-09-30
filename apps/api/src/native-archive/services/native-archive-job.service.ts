@@ -34,6 +34,7 @@ import {
 } from "../native-archive.constants";
 
 import { NativeArchiveImportService } from "./native-archive-import.service";
+import { toPublicArchiveFailureCode } from "./native-archive-job-error.utils";
 import { NativeArchiveSnapshotService } from "./native-archive-snapshot.service";
 import { buildNativeArchive } from "./native-archive-zip.service";
 
@@ -157,7 +158,7 @@ export class NativeArchiveJobService implements OnModuleDestroy {
       result: result
         ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== "key"))
         : null,
-      failedReason: job.failedReason ?? null,
+      failedReason: toPublicArchiveFailureCode(job.failedReason),
     };
   }
 

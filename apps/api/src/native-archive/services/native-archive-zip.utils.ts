@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { mkdir, stat } from "node:fs/promises";
+import { mkdir, stat, unlink } from "node:fs/promises";
 import path from "node:path";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -35,28 +35,37 @@ function rejectInvalidArchive(): never {
   throw new BadRequestException("nativeArchive.error.invalidArchive");
 }
 
-/** Copies an asset while hashing its bytes and enforcing the per-entry size limit. */
+type ByteBudget = { remainingBytes: number };
+
+/** Copies an asset while hashing its bytes and enforcing entry and archive limits. */
 async function copyAndHashAsset(
   sourceStream: NodeJS.ReadableStream,
   destinationPath: string,
+  entryLimit: number,
+  budget: ByteBudget,
 ): Promise<NativeArchiveFileHash> {
   const digest = createHash("sha256");
   let byteLength = 0;
   const hashingStream = new Transform({
     transform(chunk: Buffer, _encoding, callback) {
-      byteLength += chunk.length;
-
-      if (byteLength > NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES) {
+      if (chunk.length > entryLimit - byteLength || chunk.length > budget.remainingBytes) {
         callback(new BadRequestException("nativeArchive.error.assetTooLarge"));
         return;
       }
 
+      byteLength += chunk.length;
+      budget.remainingBytes -= chunk.length;
       digest.update(chunk);
       callback(null, chunk);
     },
   });
 
-  await pipeline(sourceStream, hashingStream, createWriteStream(destinationPath));
+  try {
+    await pipeline(sourceStream, hashingStream, createWriteStream(destinationPath));
+  } catch (error) {
+    await unlink(destinationPath).catch(() => undefined);
+    throw error;
+  }
 
   return { sha256: digest.digest("hex"), byteLength };
 }
@@ -70,16 +79,16 @@ export async function stageSourceAssets(
   temporaryDirectory: string,
 ): Promise<NativeArchivePreparedAsset[]> {
   const stagedAssets: NativeArchivePreparedAsset[] = [];
-  let totalAssetBytes = 0;
+  const budget: ByteBudget = { remainingBytes: NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES };
 
   for (const sourceFile of sourceFiles) {
     const stagedFilePath = path.join(temporaryDirectory, randomUUID());
-    const { sha256, byteLength } = await copyAndHashAsset(await sourceFile.open(), stagedFilePath);
-
-    totalAssetBytes += byteLength;
-    if (totalAssetBytes > NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES) {
-      throw new BadRequestException("nativeArchive.error.assetTooLarge");
-    }
+    const { sha256, byteLength } = await copyAndHashAsset(
+      await sourceFile.open(),
+      stagedFilePath,
+      NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES,
+      budget,
+    );
 
     stagedAssets.push({
       path: `assets/${sha256}`,
@@ -406,13 +415,19 @@ export async function extractVerifiedAssets(
   await mkdir(temporaryDirectory, { recursive: true });
 
   const extractedFilesByAssetPath = new Map<string, string>();
+  const budget: ByteBudget = { remainingBytes: NATIVE_ARCHIVE_LIMITS.MAX_UNCOMPRESSED_BYTES };
 
   for (const asset of assets) {
     const assetEntry = entriesByPath.get(asset.path);
     if (!assetEntry) rejectInvalidArchive();
 
     const extractedFilePath = path.join(temporaryDirectory, asset.sha256);
-    const extractedHash = await copyAndHashAsset(assetEntry.stream(), extractedFilePath);
+    const extractedHash = await copyAndHashAsset(
+      assetEntry.stream(),
+      extractedFilePath,
+      assetEntry.uncompressedSize,
+      budget,
+    );
     if (extractedHash.sha256 !== asset.sha256 || extractedHash.byteLength !== asset.byteLength) {
       rejectInvalidArchive();
     }

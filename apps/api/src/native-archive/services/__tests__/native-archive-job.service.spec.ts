@@ -100,6 +100,35 @@ describe("NativeArchiveJobService", () => {
     expect(queueService.enqueue).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ["nativeArchive.error.invalidArchive", "nativeArchive.error.invalidArchive"],
+    ["nativeArchive.error.storageUnavailable", "nativeArchive.error.storageUnavailable"],
+    ["Error: database connection details", "nativeArchive.error.invalidArchive"],
+    ["nativeArchive.error.notAnArchiveError", "nativeArchive.error.invalidArchive"],
+    [null, null],
+  ])("returns a safe failed reason for %s", async (failedReason, expected) => {
+    const job = {
+      data: { actor: ACTOR },
+      returnvalue: null,
+      failedReason,
+      getState: jest.fn().mockResolvedValue("failed"),
+    };
+    const service = new NativeArchiveJobService(
+      {
+        getConnection: jest.fn().mockReturnValue({}),
+        getQueue: jest.fn().mockReturnValue({ getJob: jest.fn().mockResolvedValue(job) }),
+      } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+
+    await expect(service.getArchiveJobStatus("job-id", ACTOR)).resolves.toMatchObject({
+      failedReason: expected,
+    });
+  });
+
   it("downloads only exports belonging to the actor's tenant", async () => {
     const job = {
       data: { actor: ACTOR },

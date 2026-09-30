@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
@@ -7,8 +8,13 @@ import { pipeline } from "node:stream/promises";
 
 import archiver from "archiver";
 
-import { NATIVE_ARCHIVE_FORMAT, NATIVE_ARCHIVE_KIND } from "../../native-archive.constants";
+import {
+  NATIVE_ARCHIVE_FORMAT,
+  NATIVE_ARCHIVE_KIND,
+  NATIVE_ARCHIVE_LIMITS,
+} from "../../native-archive.constants";
 import { buildNativeArchive, readNativeArchive } from "../native-archive-zip.service";
+import { extractVerifiedAssets } from "../native-archive-zip.utils";
 
 import type { UUIDType } from "src/common";
 
@@ -90,6 +96,63 @@ describe("native archive ZIP", () => {
     await expect(readNativeArchive(zipPath)).rejects.toThrow(
       "nativeArchive.error.unsupportedVersion",
     );
+  });
+
+  it("aborts extraction when streamed bytes exceed the ZIP declared entry size", async () => {
+    const digest = "a".repeat(64);
+    const assetPath = `assets/${digest}`;
+    const stream = jest.fn(() => Readable.from([Buffer.from("payload is too large")]));
+    const entriesByPath = new Map([[assetPath, { uncompressedSize: 4, stream } as never]]);
+    const assets = [
+      {
+        path: assetPath,
+        sha256: digest,
+        byteLength: 4,
+        contentType: "application/octet-stream",
+        sourceReference: "course/resource",
+      },
+    ];
+
+    await expect(extractVerifiedAssets(assets, entriesByPath, temporaryDirectory)).rejects.toThrow(
+      "nativeArchive.error.assetTooLarge",
+    );
+    expect(stream).toHaveBeenCalledTimes(1);
+    expect(await readdir(temporaryDirectory)).toEqual([]);
+  });
+
+  it("caps actual bytes extracted across asset entries", async () => {
+    const limit = jest.replaceProperty(NATIVE_ARCHIVE_LIMITS, "MAX_UNCOMPRESSED_BYTES", 12);
+
+    try {
+      const contents = [Buffer.from("first123"), Buffer.from("second45")];
+      const assets = contents.map((content, index) => {
+        const sha256 = createHash("sha256").update(content).digest("hex");
+        return {
+          path: `assets/${sha256}`,
+          sha256,
+          byteLength: content.length,
+          contentType: "application/octet-stream",
+          sourceReference: `course/resource-${index}`,
+        };
+      });
+      const entriesByPath = new Map(
+        assets.map((asset, index) => [
+          asset.path,
+          {
+            uncompressedSize: asset.byteLength,
+            stream: () => Readable.from([contents[index]!]),
+          } as never,
+        ]),
+      );
+
+      await expect(
+        extractVerifiedAssets(assets, entriesByPath, temporaryDirectory),
+      ).rejects.toThrow("nativeArchive.error.assetTooLarge");
+      expect((await stat(path.join(temporaryDirectory, assets[0]!.sha256))).size).toBe(8);
+      expect(await readdir(temporaryDirectory)).toEqual([assets[0]!.sha256]);
+    } finally {
+      limit.restore();
+    }
   });
 
   it.each([

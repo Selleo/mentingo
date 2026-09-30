@@ -122,6 +122,12 @@ describe("NativeArchiveAssetsService", () => {
       }),
     );
     expect(storage.uploadFile).toHaveBeenCalledTimes(1);
+    expect(storage.uploadFile).toHaveBeenCalledWith(
+      Buffer.alloc(0),
+      expect.stringContaining("/content/variants/index.html"),
+      "text/html",
+      0,
+    );
     expect(staged.snapshots[0].course.thumbnailS3Key).toBe(IMAGE_FILE_KEY);
     expect(staged.snapshots[0].scormPackages[0].extractedFilesReference).toMatch(
       new RegExp(`^${TENANT_ID}/native-archive/imports/`),
@@ -293,6 +299,48 @@ describe("NativeArchiveAssetsService", () => {
     expect(storage.deleteFile).toHaveBeenCalledWith(expect.stringContaining("/files/"));
   });
 
+  it("stores only allowlisted passive MIME types for non-image archive assets", async () => {
+    const storage = {
+      isConfigured: jest.fn().mockReturnValue(true),
+      uploadFile: jest.fn().mockResolvedValue(undefined),
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+    };
+    const fileService = {
+      uploadResource: jest.fn(),
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+      archiveResources: jest.fn().mockResolvedValue(undefined),
+    };
+    const assets = [
+      { ...archiveAsset("course/lesson.bin"), contentType: "text/html" },
+      { ...archiveAsset("course/resource.bin"), contentType: "application/xhtml+xml" },
+      { ...archiveAsset("course/handout.pdf"), contentType: "application/pdf" },
+    ];
+    const archive = {
+      manifest: { assets },
+      assetFiles: new Map(assets.map((asset) => [asset.path, "/unused/test-file"])),
+    } as ParsedNativeArchive;
+    const snapshot = {
+      ...courseSnapshot(null),
+      lessons: [{ fileS3Key: assets[0]!.sourceReference }],
+      lessonContentResources: [{ reference: assets[1]!.sourceReference }],
+      courseResources: assets
+        .slice(2)
+        .map((asset) => ({ resource: { reference: asset.sourceReference } })),
+    } as unknown as SourceSnapshot;
+
+    await new NativeArchiveAssetsService(storage as never, fileService as never).stageArchiveAssets(
+      archive,
+      ACTOR,
+      [snapshot],
+    );
+
+    expect(storage.uploadFile.mock.calls.map(([, , contentType]) => contentType)).toEqual([
+      "application/octet-stream",
+      "application/octet-stream",
+      "application/pdf",
+    ]);
+  });
+
   it("stages learning path and live training materials", async () => {
     const storage = {
       isConfigured: jest.fn().mockReturnValue(true),
@@ -354,6 +402,11 @@ describe("NativeArchiveAssetsService", () => {
 
     expect(fileService.uploadResource).toHaveBeenCalledTimes(3);
     expect(storage.uploadFile).toHaveBeenCalledTimes(1);
+    const svgUpload = fileService.uploadResource.mock.calls.find(
+      ([{ file }]) => file.originalname === "icon.svg",
+    )?.[0].file;
+    expect(svgUpload?.mimetype).toBe("image/png");
+    expect(svgUpload?.buffer.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     references.slice(0, 3).forEach((reference) => {
       expect(staged.rewriteReference(reference)).toBe(IMAGE_FILE_KEY);
     });

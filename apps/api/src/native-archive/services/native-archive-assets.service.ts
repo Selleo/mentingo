@@ -24,8 +24,8 @@ import {
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
 import { S3Service } from "src/s3/s3.service";
-import { resolveScormContentTypeFromFilename } from "src/scorm/scorm-content-type";
 
+import { resolveImportedAssetContentType } from "../native-archive-content-type";
 import { getNativeArchiveImportPrefix } from "../native-archive-storage-paths";
 import { NATIVE_ARCHIVE_LIMITS } from "../native-archive.constants";
 import { nativeArchiveImageFilePipe } from "../pipes/native-archive-image-file.pipe";
@@ -171,17 +171,20 @@ export class NativeArchiveAssetsService {
     const filePath = archive.assetFiles.get(asset.path);
     if (!filePath) throw new BadRequestException("nativeArchive.error.missingAsset");
 
-    const buffer = await readFile(filePath);
-    if (buffer.length > MAX_FILE_SIZE) {
+    const sourceBuffer = await readFile(filePath);
+    if (sourceBuffer.length > MAX_FILE_SIZE) {
       throw new BadRequestException("nativeArchive.error.invalidAssetReference");
     }
 
     try {
-      const { format } = await sharp(buffer).metadata();
+      const { format } = await sharp(sourceBuffer).metadata();
       if (!format) throw new Error("Missing image format");
 
-      const mimetype =
-        (await FileGuard.getFileType(buffer))?.mime ?? (format === "svg" ? "image/svg+xml" : "");
+      const isSvg = format === "svg";
+
+      const buffer = isSvg ? await sharp(sourceBuffer).png().toBuffer() : sourceBuffer;
+      const mimetype = isSvg ? "image/png" : (await FileGuard.getFileType(buffer))?.mime;
+      if (!mimetype) throw new Error("Unknown image type");
 
       const file = {
         buffer,
@@ -238,11 +241,12 @@ export class NativeArchiveAssetsService {
       );
       context.uploadedS3Keys.push(targetReference);
 
-      const contentType = scormDirectory
-        ? resolveScormContentTypeFromFilename(asset.sourceReference, asset.contentType)
-        : asset.contentType;
-
-      await this.uploadAsset(context.archive, asset, targetReference, contentType);
+      await this.uploadAsset(
+        context.archive,
+        asset,
+        targetReference,
+        resolveImportedAssetContentType(asset, Boolean(scormDirectory)),
+      );
       context.referenceMap.set(asset.sourceReference, targetReference);
     }
   }
