@@ -30,6 +30,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 import zipfile
 
@@ -290,17 +291,30 @@ def fetch(url):
 
 
 def live_films(base_url):
-    """The films the live site shows (its films.json): {tag: film}; none when there is no site or list yet."""
+    """The films the live site shows (its films.json): {tag: film}; none when there is no site or no list yet (its
+    first rebuild: a 404). Any other failure stops the caller, and nothing is deployed or changed: a timeout, a server
+    error or a list that does not read would otherwise make the next rebuild drop the films only the site keeps."""
     if not base_url:
         return {}
+    kept = 'stopped so that no film only the site keeps is lost'
     try:
-        listed = json.loads(fetch(f'{base_url.rstrip("/")}/{SITE_MANIFEST}').decode('utf-8'))
-    except (OSError, ValueError):
+        data = fetch(f'{base_url.rstrip("/")}/{SITE_MANIFEST}')
+    except urllib.error.HTTPError as failed:
+        check(failed.code == 404, f'the live site answered {failed.code} for its {SITE_MANIFEST}: {kept}')
         return {}
+    except OSError as failed:  # a timeout or a connection that fails
+        check(False, f'the live site did not answer for its {SITE_MANIFEST} ({failed}): {kept}')
+    try:
+        listed = json.loads(data.decode('utf-8'))
+    except ValueError:
+        listed = None
+    check(isinstance(listed, dict) and isinstance(listed.get('films'), list),
+          f"the live site's {SITE_MANIFEST} does not read as a list of films: {kept}")
     films = {}
-    for film in listed.get('films') or [] if isinstance(listed, dict) else []:
-        if isinstance(film, dict) and PLAIN_NAME.fullmatch(str(film.get('tag') or '')) and isinstance(film.get('files'), list):
-            films[film['tag']] = film
+    for film in listed['films']:
+        check(isinstance(film, dict) and PLAIN_NAME.fullmatch(str(film.get('tag') or '')) and isinstance(film.get('files'), list),
+              f"the live site's {SITE_MANIFEST} lists a film it does not describe ({str(film)[:80]}): {kept}")
+        films[film['tag']] = film
     return films
 
 

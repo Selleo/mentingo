@@ -446,6 +446,45 @@ class Site(unittest.TestCase):
             with self.assertRaisesRegex(SystemExit, 'is not the file staged'):
                 release_assets.site(Path(folder) / 'site', repo='o/r', film=film)
 
+    def answering(self, status, body=b''):
+        """A live site whose films.json gets ``status`` (and ``body``); its address."""
+        import http.server
+        import threading
+
+        class Answer(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(status)
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Answer)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        return f'http://127.0.0.1:{server.server_address[1]}/'
+
+    def test_a_films_list_the_live_site_cannot_give_stops_the_rebuild(self):
+        import socket
+        with socket.socket() as probe:  # a port nothing listens on: the site does not answer
+            probe.bind(('127.0.0.1', 0))
+            silent = f'http://127.0.0.1:{probe.getsockname()[1]}/'
+        failures = [(self.answering(500), 'answered 500'), (silent, 'did not answer'),
+                    (self.answering(200, b'<html>not a list</html>'), 'does not read as a list of films'),
+                    (self.answering(200, b'{"films": [{"tag": "../v1", "files": []}]}'), 'lists a film it does not describe')]
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):
+            for base, said in failures:
+                with self.subTest(said), self.assertRaisesRegex(SystemExit, f'{said}.*no film only the site keeps is lost'):
+                    release_assets.site(Path(folder) / 'site', repo='o/r', base_url=base)
+            with mock.patch.object(release_assets, 'release_of', return_value={}), \
+                    self.assertRaisesRegex(SystemExit, 'answered 500'):  # a recording that checks the site stops too
+                release_assets.earlier('v1', repo='o/r', base_url=failures[0][0])
+            empty = Path(folder) / 'empty'
+            empty.mkdir()
+            result = release_assets.site(Path(folder) / 'first', repo='o/r', base_url=self.serving(empty))
+            self.assertEqual(result['films'], [])  # no films.json yet (a 404): the site's first rebuild
+
     def test_a_film_the_live_site_lists_but_does_not_serve_stops_the_rebuild(self):
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):
             base = self.live(Path(folder) / 'live', {'v0': {'index.html': 'page v0'}})

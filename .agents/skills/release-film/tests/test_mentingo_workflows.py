@@ -128,6 +128,11 @@ class Workflows(unittest.TestCase):
             self.assertLess(hide, names.index(later), later)
         self.assertIn('always()', steps["Hide secrets in the run's files"]['if'])
         self.assertIn('ci/redact.py', steps["Hide secrets in the run's files"]['run'])
+        # and nothing of the run's files leaves the runner, not even the job summary, unless that redaction succeeded
+        self.assertEqual(steps["Hide secrets in the run's files"]['id'], 'redact')
+        for name in ('Summarize the film', "Upload the run's report", "Keep the project's knowledge"):
+            self.assertIn("steps.redact.outcome == 'success'", steps[name]['if'], name)
+        self.assertTrue(steps['Upload the film and its page']['if'].startswith('success()'))
         report = steps["Upload the run's report"]['with']['path']
         for private in ('secrets.json', 'keeper.env.json'):
             self.assertIn(f'!${{{{ steps.release.outputs.run }}}}/{private}', report)

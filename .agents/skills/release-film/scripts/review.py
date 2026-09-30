@@ -494,19 +494,25 @@ def record_drops(run, story, found, limit=DROPS):
     """The chapters the check found showing nothing of their change, kept in <run>/drops.json for adopt (which leaves
     them out and lists their pull requests as not shown), beside those an earlier review dropped (finish run again):
     at most ``limit`` in all, never the first or last chapter (the opening and the closing), and at least three
-    chapters stay. Returns the drops this review added."""
+    chapters stay. Returns the drops this review added and the rejected chapters that stay: a film cannot pass its
+    review with them."""
     chapters = story['chapters']
     earlier = core.load(Path(run) / 'drops.json') or []
-    drops = []
+    drops, kept, seen = [], [], set()
     for item in found:
         index = int(item.get('chapter') or 0) - 1
+        if not 0 <= index < len(chapters) or index in seen:  # a chapter the check names twice counts once
+            continue
+        seen.add(index)
+        chapter = chapters[index]
         if 0 < index < len(chapters) - 1 and len(earlier) + len(drops) < limit and len(chapters) - len(drops) > 3:
-            chapter = chapters[index]
             drops.append(dict(chapter.get('source') or {}, prs=chapter.get('prs') or [], title=chapter.get('title'),
                               reason=item.get('drop') or ''))
+        else:
+            kept.append({'chapter': index + 1, 'title': chapter.get('title'), 'why': item.get('drop') or ''})
     if drops:
         core.save(Path(run) / 'drops.json', earlier + drops)
-    return drops
+    return drops, kept
 
 
 def story_files(run):

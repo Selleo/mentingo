@@ -270,27 +270,35 @@ class Claims(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             chapters = [{'title': f'R{i}', 'prs': [i], 'source': {'file': 'story.txt', 'chapter': i - 1}} for i in range(1, 7)]
             found = [{'chapter': n, 'drop': 'blank'} for n in (1, 2, 3, 4, 6)]
-            drops = review.record_drops(folder, {'chapters': chapters}, found)
+            drops, kept = review.record_drops(folder, {'chapters': chapters}, found)
             self.assertEqual([d['title'] for d in drops], ['R2', 'R3'])  # never the first or last; at most two
             self.assertEqual(json.loads((Path(folder) / 'drops.json').read_text())[0]['chapter'], 1)
+            # the rejected chapters that stay: the opening, one past the limit, the closing
+            self.assertEqual([(k['chapter'], k['title'], k['why']) for k in kept],
+                             [(1, 'R1', 'blank'), (4, 'R4', 'blank'), (6, 'R6', 'blank')])
         with tempfile.TemporaryDirectory() as folder:
-            four = review.record_drops(folder, {'chapters': chapters[:4]}, found)
+            four, kept = review.record_drops(folder, {'chapters': chapters[:4]}, found)
             self.assertEqual([d['title'] for d in four], ['R2'])  # three chapters stay
+            self.assertEqual([k['title'] for k in kept], ['R1', 'R3', 'R4'])  # chapter 6 is not in this film
+        with tempfile.TemporaryDirectory() as folder:  # a film of one scene: its only chapter can never leave
+            single, kept = review.record_drops(folder, {'chapters': chapters[:1]}, [{'chapter': 1, 'drop': 'blank'}])
+            self.assertEqual((single, [k['title'] for k in kept]), ([], ['R1']))
 
     def test_a_later_review_keeps_the_chapters_an_earlier_one_dropped(self):
         # finish run again after a failed make: its review must not bring back what the first review dropped
         with tempfile.TemporaryDirectory() as folder:
             chapters = [{'title': f'R{i}', 'prs': [i], 'source': {'file': f'gaps/pr{i}/story.txt', 'chapter': 0}}
                         for i in range(1, 7)]
-            first = review.record_drops(folder, {'chapters': chapters}, [{'chapter': 3, 'drop': 'blank'}])
+            first, _ = review.record_drops(folder, {'chapters': chapters}, [{'chapter': 3, 'drop': 'blank'}])
             self.assertEqual([d['title'] for d in first], ['R3'])
             remaining = [c for c in chapters if c['title'] != 'R3']
-            again = review.record_drops(folder, {'chapters': remaining}, [{'chapter': 2, 'drop': 'blank'},
-                                                                          {'chapter': 4, 'drop': 'blank'}])
+            again, kept = review.record_drops(folder, {'chapters': remaining}, [{'chapter': 2, 'drop': 'blank'},
+                                                                                {'chapter': 4, 'drop': 'blank'}])
             self.assertEqual([d['title'] for d in again], ['R2'])  # two in all, the earlier one counted
+            self.assertEqual([k['title'] for k in kept], ['R5'])  # past the limit: it stays, and the review fails
             kept = json.loads((Path(folder) / 'drops.json').read_text())
             self.assertEqual([d['title'] for d in kept], ['R3', 'R2'])
-            self.assertEqual(review.record_drops(folder, {'chapters': remaining}, []), [])
+            self.assertEqual(review.record_drops(folder, {'chapters': remaining}, []), ([], []))
             self.assertEqual(len(json.loads((Path(folder) / 'drops.json').read_text())), 2)  # a clean review keeps them
 
 

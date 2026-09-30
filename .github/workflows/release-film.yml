@@ -207,6 +207,7 @@ jobs:
       # GitHub masks the secrets in this log, not in the files a run writes (a scene's error, a worker's transcript):
       # they are hidden there before any file leaves the runner (the report, the film's page, the knowledge).
       - name: Hide secrets in the run's files
+        id: redact
         if: always() && env.FILM == 'true' && steps.release.outputs.run
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -223,8 +224,10 @@ jobs:
           python3 .agents/skills/release-film/ci/release_assets.py stage --run "${RUN}" --tag "${TAG}" \
             --commit "${COMMIT}" --out "${RUNNER_TEMP}/release-film"
 
+      # Nothing of the run's files leaves the runner unless their secrets were hidden: a redaction that failed part way
+      # keeps the report, the summary and the knowledge here (a failed recording still keeps them once it succeeded).
       - name: Summarize the film
-        if: always() && env.FILM == 'true' && steps.release.outputs.run
+        if: always() && env.FILM == 'true' && steps.redact.outcome == 'success'
         env:
           RUN: ${{ steps.release.outputs.run }}
         run: python3 .agents/skills/release-film/ci/summary.py "${RUN}" >> "${GITHUB_STEP_SUMMARY}"
@@ -241,7 +244,7 @@ jobs:
 
       # What the run measured and logged, for a failed or a slow run: never the run's own secrets.
       - name: Upload the run's report
-        if: always() && env.FILM == 'true' && steps.release.outputs.run
+        if: always() && env.FILM == 'true' && steps.redact.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-film-report
@@ -262,7 +265,9 @@ jobs:
       # Kept whenever the recording succeeded (a film its staging refused still taught the project something): only the
       # knowledge folders, which the next recording restores.
       - name: Keep the project's knowledge
-        if: always() && env.FILM == 'true' && steps.record.outcome == 'success' && inputs.learn != 'off'
+        if: >-
+          always() && env.FILM == 'true' && steps.redact.outcome == 'success' && steps.record.outcome == 'success'
+          && inputs.learn != 'off'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-film-knowledge

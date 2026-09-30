@@ -289,7 +289,7 @@ def review_sheets(args):
     # the chapters this review checked, and no other (a story not adopted from files has no sources to keep them by)
     reviewed = {editor.source_of(c) for c in story['chapters']} if all(c.get('source') for c in story['chapters']) else None
     applied = review.apply_claims(args.run, story, claims)  # the rewrites say only what the pictures show
-    drops = review.record_drops(args.run, story, [c for c in found if c.get('drop')])
+    drops, rejected = review.record_drops(args.run, story, [c for c in found if c.get('drop')])
     kept = True
     if (applied or drops) and not adopt(args, early=False, reviewed=reviewed)['ok']:
         for path, text in before.items():
@@ -297,18 +297,26 @@ def review_sheets(args):
         core.save(run / 'drops.json', dropped)
         adopt(args, early=False, reviewed=reviewed)  # the story as it was before the review
         kept = False
+        rejected += [{'title': d['title'], 'why': d['reason']} for d in drops]  # back in the film with the story
     core.mark(run, 'review', 'end', f'{len(applied) if kept else 0} rewrites, {len(drops) if kept else 0} drops, '
                                     f'{len(early)} checked early')
     core.save(run / 'review' / 'claims.json', {'applied': applied if kept else [], 'drops': drops if kept else []})
-    return {'sheets': made, 'claims': claims, 'applied': len(applied) if kept else 0,
-            'dropped': [{'title': d['title'], 'prs': d['prs'], 'why': d['reason']} for d in drops] if kept else [],
-            'waits': pauses, **({} if kept else {'note': 'the rewrites broke the story: it stays as adopted before'}),
-            'next': f'film.py make --run {args.run} (nothing to read or fix: the review is done)'}
+    result = {'sheets': made, 'claims': claims, 'applied': len(applied) if kept else 0,
+              'dropped': [{'title': d['title'], 'prs': d['prs'], 'why': d['reason']} for d in drops] if kept else [],
+              'waits': pauses, **({} if kept else {'note': 'the rewrites broke the story: it stays as adopted before'}),
+              'next': f'film.py make --run {args.run} (nothing to read or fix: the review is done)'}
+    if rejected:  # a chapter that shows nothing of its change and cannot leave the film: no reviewed film with it
+        result.update(ok=False, rejected=rejected,
+                      next=('the review found chapters that show nothing of their change and cannot leave the film (the '
+                            'opening or the closing one, one past the limit of drops, or one of the last three): fix '
+                            f'their scene or narration, then film.py finish --run {args.run}'))
+    return result
 
 
 def finish(args):
     """Everything after the narration in one command: wait for the scenes and adopt, the automatic review, the film,
-    the page, and the run's services stopped. Stops early only when adopt finds problems (fix them, finish again).
+    the page, and the run's services stopped. Stops early when adopt finds problems or the review rejects a chapter it
+    cannot drop (fix them, finish again).
     A step that fails stops the run's services on its way out (the checkout stays, to look at)."""
     with stopped_on_failure(args) as cleanup:
         adopted = adopt(args)
@@ -316,6 +324,9 @@ def finish(args):
             cleanup.stop()
             return dict(adopted, next=f'fix these problems in story.txt (or gaps/<id>/story.txt), then film.py finish --run {args.run}')
         reviewed = review_sheets(args)
+        if reviewed.get('ok') is False:
+            cleanup.stop()
+            return reviewed
         labeled = labels(args)
         made = make(args)
         shown = preview(args)

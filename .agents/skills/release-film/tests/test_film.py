@@ -144,6 +144,34 @@ class Finish(unittest.TestCase):
         self.assertFalse(result['ok'])
         self.assertIn('film.py finish', result['next'])
 
+    def test_a_chapter_the_review_rejects_but_cannot_drop_fails_the_review(self):
+        (self.run / 'story.txt').write_text('# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Otwieramy notatki.\n')
+        (self.run / 'story.json').write_text(json.dumps({'chapters': [
+            {'film': 'F1', 'title': 'Notatki', 'prs': [1], 'source': {'file': 'story.txt', 'chapter': 0},
+             'sentences': [{'text': 'Otwieramy notatki.', 'action': 0}]}]}))
+        rejected = {'chapter': 1, 'drop': 'the pictures show an empty list, not the notes'}
+        with mock.patch.object(film.review, 'sheets', return_value=['chapter-1.jpg']), \
+                mock.patch.object(film.review, 'check_claims', side_effect=lambda run, sheets, story: [rejected] if sheets else []), \
+                mock.patch.object(film.review, 'waits', return_value=[]), \
+                mock.patch.object(film, 'meta', return_value={'addon': {}}), \
+                mock.patch.object(film, 'adopt', return_value={'ok': True, 'problems': []}):
+            result = film.review_sheets(self.args)  # a film of one scene: its only chapter cannot leave
+        self.assertIs(result['ok'], False)
+        self.assertEqual(result['rejected'], [{'chapter': 1, 'title': 'Notatki', 'why': rejected['drop']}])
+        self.assertIn('film.py finish', result['next'])
+
+    def test_finish_stops_when_the_review_fails(self):
+        stopped = []
+        failed = {'ok': False, 'rejected': [{'chapter': 1, 'title': 'Notatki', 'why': 'empty'}], 'next': 'fix it'}
+        with mock.patch.object(film, 'adopt', return_value={'ok': True, 'scenes': []}), \
+                mock.patch.object(film, 'review_sheets', return_value=failed), \
+                mock.patch.object(film, 'make', side_effect=AssertionError('no film after a failed review')), \
+                mock.patch.object(film, 'stop', side_effect=lambda a: stopped.append(a.keep_checkout)):
+            result = film.finish(self.args)
+        self.assertIs(result['ok'], False)
+        self.assertEqual(result['rejected'][0]['title'], 'Notatki')
+        self.assertEqual(stopped, [True])  # the services stop, the checkout stays to fix the scene
+
     def test_rewrites_that_break_the_story_are_taken_back(self):
         original = '# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Otwieramy notatki.\n2 | Zapisujemy.\n'
         (self.run / 'story.txt').write_text(original)
