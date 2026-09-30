@@ -252,6 +252,21 @@ class Publish(unittest.TestCase):
             self.assertEqual(len(result['uploaded']), 5)
             self.assertFalse(draft['site_film_replaced'])  # a test draft never reaches the site
 
+    def test_the_release_film_the_site_shows_does_not_stop_its_own_publication(self):
+        # a publication run again (the notes were written anew and lost their section): same assets, same film
+        with tempfile.TemporaryDirectory() as folder:
+            assets = self.staged(folder)
+            release = {'id': 5, 'tag_name': self.TAG, 'draft': False, 'body': 'Notes written anew.', 'assets': [
+                {'id': i, 'name': name, 'digest': f'sha256:{digest}', 'browser_download_url': f'https://x/{name}'}
+                for i, (name, digest) in enumerate(assets.items())]}
+            shown = {self.TAG: {'tag': self.TAG, 'source': 'release', 'files': ['index.html']}}
+            gh, calls = self.fake_gh(release)
+            with mock.patch.object(release_assets, 'gh', gh), mock.patch.object(release_assets, 'live_films', return_value=shown):
+                result = release_assets.publish(folder, 'release', repo='o/r', base_url='https://o.github.io/r/')
+            self.assertEqual((result['uploaded'], result['removed'], result['notes']), ([], [], 'updated'))
+            self.assertIn(release_assets.MARK_START, release['body'])
+            self.assertFalse([c for c in calls if 'DELETE' in c])
+
     def test_earlier_stops_a_recording_whose_tag_already_has_a_film(self):
         names = release_assets.asset_names(self.TAG, 'en')
         with_film = {'assets': [{'name': names['film']}, {'name': 'app.zip'}]}

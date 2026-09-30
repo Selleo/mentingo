@@ -179,13 +179,20 @@ def release_of(repo, tag):
     return json.loads(done.stdout) if done.returncode == 0 else {}
 
 
+def shown_apart(tag, base_url):
+    """Whether the live site shows a film of the tag that no release gives (a recording put on the site alone). A
+    release's own film there is the release's, and the release's assets already say which film that is."""
+    film = live_films(base_url).get(tag)
+    return film is not None and film.get('source') != 'release'
+
+
 def earlier(tag, repo=None, base_url=None):
     """Stops when the tag already has a published film: its assets on the tag's release, or its page on the site at
     ``base_url``. A recording that would publish over it finds out before it spends the seat's limits."""
     repo = repo or os.environ['GITHUB_REPOSITORY']
     release = release_of(repo, tag)
     on_release = sorted(film_assets(tag, {a['name']: a for a in release.get('assets') or []}))
-    on_site = tag in live_films(base_url)
+    on_site = shown_apart(tag, base_url)
     where = ' and '.join(w for w, found in (("its release's assets", on_release), ('the Pages site', on_site)) if found)
     check(not where, f'{tag} already has a film ({where}): record with replace to swap it, or with publish off to watch '
                      'the new film first')
@@ -207,7 +214,7 @@ def publish(folder, target, repo=None, replace=False, base_url=None):
     assets = {a['name']: a for a in release.get('assets') or []}
     stale = [name for name, asset in film_assets(tag, assets).items()
              if asset.get('digest') != f'sha256:{manifest["assets"].get(name)}']
-    on_site = target == 'release' and tag in live_films(base_url)
+    on_site = target == 'release' and shown_apart(tag, base_url)  # a publication of the release's own film resumes
     where = ' and '.join(w for w, found in (('the release: ' + ', '.join(stale), stale), ('the Pages site', on_site)) if found)
     check(replace or not where, f'{tag} already has another film ({where}); nothing was changed: publish with replace '
                                 'to remove it and publish this one')
