@@ -24,8 +24,9 @@ and its page says why each other change is left out.
   what happens (it reads without sound) and the narration as subtitles.
 - A page: the film, its chapters (each one a jump into the film) and every pull request of the release, with the
   chapter that shows it or the reason it is not in the film.
-- In GitHub Actions, the film and its page as the run's artifacts; published on request to the release (its assets
-  and a section of links in its notes) and to the project's GitHub Pages site of films.
+- In GitHub Actions, the film and its page as the run's artifacts, published after a successful recording (unless
+  its `publish` input is off) to the release (its assets and a section of links in its notes) and to the project's
+  GitHub Pages site of films.
 
 ## How it works
 
@@ -63,13 +64,15 @@ python3 .agents/skills/release-film/scripts/film.py run --repo <owner>/<name> --
 A project needs its recipe in `projects/<owner>__<name>.json`: how to install it, which services its tests need and
 which Playwright config runs them. [SKILL.md](SKILL.md) describes it.
 
-In GitHub Actions, both workflows start only by hand:
+In GitHub Actions a person starts every recording, and a recording with `publish` on starts the publication itself:
 
 - `release-film.yml` records the film of a tag on a Claude for Teams token (`CLAUDE_CODE_OAUTH_TOKEN` from
   `claude setup-token`, kept in the `release-film` environment, whose branch rule names the branches that may use
-  it). Its `publish` input is off by default.
+  it). Its `publish` input is on by default. A tag that already has a film (on its release or the Pages site) stops
+  the recording before it starts, unless `replace` (off by default) is on.
 - `release-film-publish.yml` publishes a recording (its run ID) to a test draft release, to the tag's release or to
-  the Pages site alone. It never replaces or deletes an asset, and the site keeps every film it already shows.
+  the Pages site alone. A tag that already has a film stops it unless `replace` is on, which first deletes that
+  film's release assets (never another asset). The site keeps every other film it already shows.
 
 ## Measured
 
@@ -91,7 +94,9 @@ Three recordings in GitHub Actions on two projects, September 2026:
 - In CI the Claude token is set only on the steps that call Claude and on the one that hides it. In a public
   repository the run's artifacts (the film, its report and the project knowledge) and its job summary can be read by
   anyone signed in to GitHub.
-- A person watches the film before it is published: a recording publishes nothing unless asked to.
+- A published film is never removed by accident: a recording or a publication for a tag that already has a film
+  stops, unless it is asked to replace that film. To watch a film before it is published, record it with `publish`
+  off.
 
 ## Limits
 

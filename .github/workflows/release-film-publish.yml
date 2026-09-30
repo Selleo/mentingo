@@ -2,11 +2,13 @@ name: Publish release film
 
 # Attaches a film that release-film.yml recorded (the release-film artifact of the run given) to a release: the film,
 # its page as a ZIP, its captions and poster, with a section of links in the release notes. It records nothing and
-# holds no Claude token. It never replaces or deletes an asset: a re-run adds what is missing and stops at an asset
-# of the same name and other content. The draft target publishes to a test draft release made for the tag (deleted
-# by hand after checking); the release target to the tag's published release, and then rebuilds the public GitHub
-# Pages site of the films from the releases themselves; the pages target only rebuilds that site. release-film.yml
-# calls it after each recording (target release, its own run's film); it can also be started by hand.
+# holds no Claude token. A re-run adds what is missing. A tag that already has another film (on its release or on the
+# Pages site) stops the publication and nothing changes, unless replace is on: then that film's release assets are
+# deleted first (no other asset is touched) and the site shows the new film. The draft target publishes to a test
+# draft release made for the tag (deleted by hand after checking); the release target to the tag's published release,
+# and then rebuilds the public GitHub Pages site of the films from the releases themselves; the pages target only
+# rebuilds that site. release-film.yml calls it after each recording (target release, its own run's film); it can
+# also be started by hand.
 on:
   workflow_dispatch:
     inputs:
@@ -20,6 +22,11 @@ on:
         type: choice
         options: [draft, release, pages]
         default: draft
+      replace:
+        description: If the tag already has a film (release or Pages site), remove it and publish this one
+        required: false
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       run_id:
@@ -30,6 +37,11 @@ on:
         description: draft, release or pages
         required: true
         type: string
+      replace:
+        description: Remove the tag's earlier film first
+        required: false
+        type: boolean
+        default: false
   # Until this workflow is on main: a push of it to the skill branch registers it, so
   # `gh workflow run release-film-publish.yml --ref <branch>` can start it; that run publishes nothing.
   push:
@@ -53,6 +65,7 @@ jobs:
     permissions:
       actions: read # the recording run's artifact
       contents: write # the release's assets and notes
+      pages: read # the films site's address: a film it shows for the tag counts as the tag's earlier film
     env:
       GH_TOKEN: ${{ github.token }}
       PUBLISH: ${{ github.event_name == 'workflow_dispatch' }}
@@ -91,14 +104,20 @@ jobs:
         if: env.PUBLISH == 'true'
         env:
           TARGET: ${{ inputs.target }}
+          REPLACE: ${{ inputs.replace }}
         run: |
-          python3 .agents/skills/release-film/ci/release_assets.py publish --dir "${RUNNER_TEMP}/release-film" \
-            --target "${TARGET}" | tee "${RUNNER_TEMP}/published.json"
+          args=(publish --dir "${RUNNER_TEMP}/release-film" --target "${TARGET}")
+          if [ "${TARGET}" = "release" ]; then
+            args+=(--base-url "$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url 2>/dev/null || true)")
+          fi
+          if [ "${REPLACE}" = "true" ]; then args+=(--replace); fi
+          python3 .agents/skills/release-film/ci/release_assets.py "${args[@]}" | tee "${RUNNER_TEMP}/published.json"
           python3 - "${RUNNER_TEMP}/published.json" >> "${GITHUB_STEP_SUMMARY}" <<'PY'
           import json, sys
           done = json.load(open(sys.argv[1]))
+          removed, uploaded = ', '.join(done['removed']) or 'nothing', ', '.join(done['uploaded']) or 'nothing new'
           print(f"## Release film published ({done['target']})\n\n{done['release']}\n\n"
-                f"Uploaded: {', '.join(done['uploaded']) or 'nothing new'}; notes {done['notes']}.")
+                f"Removed: {removed}; uploaded: {uploaded}; notes {done['notes']}.")
           PY
 
   # The public site of the films (https://<owner>.github.io/<repo>/), rebuilt from every published release's film
@@ -146,9 +165,11 @@ jobs:
         env:
           BASE_URL: ${{ steps.pages.outputs.base_url }}
           RECORDED: ${{ inputs.target == 'pages' && inputs.run_id != '' }}
+          REPLACE: ${{ inputs.replace }}
         run: |
           args=(site --out "${RUNNER_TEMP}/site" --base-url "${BASE_URL}")
           if [ "${RECORDED}" = "true" ]; then args+=(--film "${RUNNER_TEMP}/release-film"); fi
+          if [ "${REPLACE}" = "true" ]; then args+=(--replace); fi
           python3 .agents/skills/release-film/ci/release_assets.py "${args[@]}"
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

@@ -168,6 +168,10 @@ class Publish(unittest.TestCase):
             if args[:3] == ('api', '-X', 'PATCH'):
                 release['body'] = input_text
                 return '{}'
+            if args[:3] == ('api', '-X', 'DELETE'):  # api -X DELETE repos/<repo>/releases/assets/<id>
+                gone = int(args[3].rsplit('/', 1)[1])
+                release['assets'] = [a for a in release['assets'] if a.get('id') != gone]
+                return ''
             if args[:3] == ('api', '-X', 'POST'):
                 name = next(a for a in args if a.startswith('name=')).split('=', 1)[1]
                 # as GitHub does: a draft is listed under a tag of its own, not the one it was made with
@@ -205,9 +209,64 @@ class Publish(unittest.TestCase):
             release = {'id': 5, 'tag_name': self.TAG, 'draft': False, 'body': '', 'assets': [
                 {'name': film, 'digest': 'sha256:other', 'browser_download_url': 'https://x/f'}]}
             gh, calls = self.fake_gh(release)
-            with mock.patch.object(release_assets, 'gh', gh), self.assertRaisesRegex(SystemExit, 'nothing was replaced'):
+            with mock.patch.object(release_assets, 'gh', gh), \
+                    self.assertRaisesRegex(SystemExit, 'v1.2.0 already has another film .*nothing was changed: publish with replace'):
                 release_assets.publish(folder, 'release', repo='o/r')
-            self.assertFalse([c for c in calls if c[:2] == ('release', 'upload')])
+            self.assertFalse([c for c in calls if c[:2] == ('release', 'upload') or 'DELETE' in c])
+
+    def test_replace_removes_the_tags_other_film_and_nothing_else(self):
+        with tempfile.TemporaryDirectory() as folder:
+            staged = self.staged(folder)
+            names = release_assets.asset_names(self.TAG, 'en')
+            earlier = [names['film'], names['poster'], names['page'], f'release-film-{self.TAG}.pl.vtt',
+                       f'release-film-{self.TAG}.pl.srt']  # an earlier film, narrated in Polish
+            others = ['app.zip', 'release-film-v1.2.1.mp4', 'release-film-v1.2.0-notes.txt']
+            release = {'id': 5, 'tag_name': self.TAG, 'draft': False, 'html_url': 'https://example.test/r',
+                       'body': f'Notes.\n\n{release_assets.MARK_START}\nold links\n{release_assets.MARK_END}\n',
+                       'assets': [{'id': i, 'name': name, 'digest': 'sha256:old', 'browser_download_url': f'https://x/{name}'}
+                                  for i, name in enumerate(earlier + others)]}
+            gh, calls = self.fake_gh(release)
+            with mock.patch.object(release_assets, 'gh', gh):
+                result = release_assets.publish(folder, 'release', repo='o/r', replace=True)
+            self.assertEqual(sorted(result['removed']), sorted(earlier))
+            self.assertEqual(sorted(result['uploaded']), sorted(staged))
+            left = sorted(a['name'] for a in release['assets'])
+            self.assertEqual(left, sorted(others + list(staged)))  # no other asset was touched
+            self.assertEqual(release['body'].count(release_assets.MARK_START), 1)
+            self.assertNotIn('old links', release['body'])
+            self.assertTrue(release['body'].startswith('Notes.'))
+
+    def test_a_film_the_site_shows_for_the_tag_stops_the_release_publish_unless_replaced(self):
+        with tempfile.TemporaryDirectory() as folder:
+            self.staged(folder)
+            release = {'id': 5, 'tag_name': self.TAG, 'draft': False, 'body': '', 'assets': []}
+            shown = {self.TAG: {'tag': self.TAG, 'source': 'recording', 'files': ['index.html']}}
+            gh, calls = self.fake_gh(release)
+            with mock.patch.object(release_assets, 'gh', gh), mock.patch.object(release_assets, 'live_films', return_value=shown):
+                with self.assertRaisesRegex(SystemExit, r'\(the Pages site\); nothing was changed'):
+                    release_assets.publish(folder, 'release', repo='o/r', base_url='https://o.github.io/r/')
+                self.assertFalse([c for c in calls if c[:2] == ('release', 'upload')])
+                result = release_assets.publish(folder, 'release', repo='o/r', base_url='https://o.github.io/r/', replace=True)
+                draft = release_assets.publish(folder, 'draft', repo='o/r', base_url='https://o.github.io/r/')
+            self.assertTrue(result['site_film_replaced'])  # the next rebuild shows the release's film instead
+            self.assertEqual(len(result['uploaded']), 5)
+            self.assertFalse(draft['site_film_replaced'])  # a test draft never reaches the site
+
+    def test_earlier_stops_a_recording_whose_tag_already_has_a_film(self):
+        names = release_assets.asset_names(self.TAG, 'en')
+        with_film = {'assets': [{'name': names['film']}, {'name': 'app.zip'}]}
+        cases = [({'assets': [{'name': 'app.zip'}]}, {}, None),
+                 (with_film, {}, "its release's assets"),
+                 ({}, {self.TAG: {}}, 'the Pages site'),
+                 (with_film, {self.TAG: {}}, "its release's assets and the Pages site")]
+        for release, site, where in cases:
+            with mock.patch.object(release_assets, 'release_of', return_value=release), \
+                    mock.patch.object(release_assets, 'live_films', return_value=site):
+                if where is None:
+                    self.assertEqual(release_assets.earlier(self.TAG, repo='o/r'), {'tag': self.TAG, 'release': [], 'site': False})
+                else:
+                    with self.assertRaisesRegex(SystemExit, rf'already has a film \({where}\): record with replace'):
+                        release_assets.earlier(self.TAG, repo='o/r', base_url='https://o.github.io/r/')
 
     def test_a_draft_target_makes_a_test_draft_release_once(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -356,9 +415,30 @@ class Site(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh(releases, members)):
             base = self.live(Path(folder) / 'live', {'v1': {'index.html': 'recorded page'}})
             out = Path(folder) / 'site'
-            release_assets.site(out, repo='Acme/shop', film=self.staged(Path(folder) / 'film', 'v1'), base_url=base)
+            release_assets.site(out, repo='Acme/shop', base_url=base)
             self.assertEqual((out / 'v1' / 'index.html').read_text(), 'release-film-v1/index.html')
             self.assertEqual(json.loads((out / 'films.json').read_text())['films'][0]['source'], 'release')
+
+    def test_a_recording_of_a_tag_whose_release_has_a_film_is_refused(self):
+        releases = [{'name': 'v1', 'tag_name': 'v1', 'draft': False, 'published_at': '2026-08-01T09:00:00Z',
+                     'assets': ['release-film-v1-page.zip']}]
+        members = lambda tag: [f'release-film-{tag}/index.html']
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh(releases, members)):
+            for replace in (False, True):  # the release decides: its film changes only by publishing to it
+                with self.assertRaisesRegex(SystemExit, "v1's release has a film"):
+                    release_assets.site(Path(folder) / 'site', repo='o/r', film=self.staged(Path(folder) / 'film', 'v1'),
+                                        replace=replace)
+
+    def test_a_recording_of_a_tag_the_site_shows_needs_replace(self):
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):
+            base = self.live(Path(folder) / 'live', {'v2': {'index.html': 'the first recording'}})
+            film = self.staged(Path(folder) / 'film', 'v2')
+            with self.assertRaisesRegex(SystemExit, 'already shows a film of v2; nothing was deployed'):
+                release_assets.site(Path(folder) / 'site', repo='o/r', film=film, base_url=base)
+            out = Path(folder) / 'replaced'
+            result = release_assets.site(out, repo='o/r', film=film, base_url=base, replace=True)
+            self.assertEqual(result['films'], ['v2'])
+            self.assertEqual((out / 'v2' / 'index.html').read_text(), 'recorded index.html')
 
     def test_a_recording_whose_page_is_not_the_one_staged_is_refused(self):
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(release_assets, 'gh', self.fake_gh([], list)):

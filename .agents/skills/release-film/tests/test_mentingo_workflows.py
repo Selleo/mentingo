@@ -42,7 +42,8 @@ class Workflows(unittest.TestCase):
             self.assertNotRegex(path.read_text(encoding='utf-8'), r'ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN')
         self.assertNotIn('CLAUDE_CODE_OAUTH_TOKEN', PUBLISH.read_text(encoding='utf-8'))
         self.assertEqual(self.record['permissions'], {})
-        self.assertEqual(self.film['permissions'], {'actions': 'read', 'contents': 'read', 'pull-requests': 'read'})
+        self.assertEqual(self.film['permissions'], {'actions': 'read', 'contents': 'read', 'pages': 'read',
+                                                   'pull-requests': 'read'})
         self.assertEqual(self.film['environment'], 'release-film')
         self.assertNotIn('CLAUDE_CODE_OAUTH_TOKEN', json.dumps(self.film['env']))
         with_token = [s.get('name') for s in self.film['steps'] if 'CLAUDE_CODE_OAUTH_TOKEN' in json.dumps(s)]
@@ -85,8 +86,13 @@ class Workflows(unittest.TestCase):
         self.assertEqual(resolve['env']['BASE'], '${{ inputs.base }}')
         self.assertIn('^[A-Za-z0-9][A-Za-z0-9._-]*$', resolve['run'])
         self.assertIn('refs/tags/${BASE}^{commit}', resolve['run'])
-        # publishing a film is a decision of its own: a recording started without the input publishes nothing
-        self.assertIs(self.record['on']['workflow_dispatch']['inputs']['publish']['default'], False)
+        # a recording publishes its film by default; a tag that already has one stops it here, unless replace is on
+        inputs = self.record['on']['workflow_dispatch']['inputs']
+        self.assertIs(inputs['publish']['default'], True)
+        self.assertIs(inputs['replace']['default'], False)
+        self.assertEqual(resolve['env']['REPLACE'], '${{ inputs.replace }}')
+        self.assertRegex(resolve['run'], r'\[ "\$\{PUBLISH\}" = "true" \] && \[ "\$\{REPLACE\}" != "true" \][\s\S]*'
+                                         r'release_assets\.py earlier --tag')
 
     def test_every_action_is_pinned_to_a_commit(self):  # these jobs hold the seat's token and write releases and Pages
         for path in (RECORD, PUBLISH, WORKFLOWS / 'pr-release-film-ci.yml'):
@@ -146,14 +152,17 @@ class Workflows(unittest.TestCase):
         self.assertEqual(chained['uses'], './.github/workflows/release-film-publish.yml')
         self.assertEqual(chained['needs'], 'film')
         self.assertNotIn('secrets', chained)
-        self.assertEqual(chained['with'], {'run_id': '${{ github.run_id }}', 'target': 'release'})
+        self.assertEqual(chained['with'], {'run_id': '${{ github.run_id }}', 'target': 'release',
+                                           'replace': '${{ inputs.replace }}'})
         self.assertEqual(chained['if'], "${{ github.event_name == 'workflow_dispatch' && inputs.publish }}")
         self.assertEqual(chained['permissions'], {'actions': 'read', 'contents': 'write', 'pages': 'write',
                                                   'id-token': 'write'})
         publish, pages = self.publish['jobs']['publish'], self.publish['jobs']['pages']
         self.assertEqual(self.publish['permissions'], {})
         self.assertNotIn('environment', publish)
-        self.assertEqual(publish['permissions'], {'actions': 'read', 'contents': 'write'})
+        self.assertEqual(publish['permissions'], {'actions': 'read', 'contents': 'write', 'pages': 'read'})
+        self.assertIs(self.publish['on']['workflow_dispatch']['inputs']['replace']['default'], False)
+        self.assertIs(self.publish['on']['workflow_call']['inputs']['replace']['default'], False)
         self.assertEqual(publish['env']['PUBLISH'], "${{ github.event_name == 'workflow_dispatch' }}")
         commands = '\n'.join(s.get('run') or '' for job in self.publish['jobs'].values() for s in job['steps'])
         self.assertNotIn('film.py', commands)
@@ -167,8 +176,10 @@ class Workflows(unittest.TestCase):
         site = '\n'.join(s.get('run') or '' for s in pages['steps'])
         self.assertNotIn('release_assets.py publish', site)
         self.assertIn('--base-url', site)
+        # it deletes only release assets (the tag's earlier film, with replace: see test_ci), never a release
         helper = (SKILL / 'ci' / 'release_assets.py').read_text(encoding='utf-8')
-        self.assertIsNone(re.search(r"'DELETE'|\"DELETE\"|'release', 'delete'|--clobber", helper))
+        self.assertIsNone(re.search(r"\"DELETE\"|'release', 'delete'|--clobber", helper))
+        self.assertEqual(re.findall(r"'DELETE'.*", helper), ["'DELETE', f'repos/{repo}/releases/assets/{assets[name][\"id\"]}')"])
 
 
 if __name__ == '__main__':

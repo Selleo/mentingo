@@ -271,15 +271,19 @@ worker writes.
 After a successful recording (unless its `publish` input is off) the same
 run's second job, without the Claude token, calls
 `.github/workflows/release-film-publish.yml`: it attaches the film to the tag's
-release with a section of links in its notes (`ci/release_assets.py`), never
-replacing or deleting an asset, and rebuilds the public GitHub Pages site of the
-films from every release's page ZIP (`site`: an index and each film at
-`/<tag>/`). Started by hand, the same workflow publishes an earlier recording to
-a test draft release or to the release, or to the Pages site alone
-(`target=pages` with the recording's `run_id`: no release changes), or rebuilds
-only the site. The site keeps every film it already shows (its `films.json`),
-and a release's film replaces a recording's of the same tag. Neither
-workflow starts on its own.
+release with a section of links in its notes (`ci/release_assets.py`) and
+rebuilds the public GitHub Pages site of the films from every release's page ZIP
+(`site`: an index and each film at `/<tag>/`). Started by hand, the same
+workflow publishes an earlier recording to a test draft release or to the
+release, or to the Pages site alone (`target=pages` with the recording's
+`run_id`: no release changes), or rebuilds only the site. The site keeps every
+film it already shows (its `films.json`), and a release's film replaces a
+recording's of the same tag. A tag that already has a film (its assets on the
+release, or its page on the site) stops a publication, and a recording that
+would publish over it before it spends the seat, unless `replace` is on: then
+that film's release assets are deleted first (never another asset or a
+release), its notes section is rewritten and the site shows the new film.
+Neither workflow starts on its own.
 `RELEASE_FILM_CI=1` sizes a run for a 2-core, 8 GB runner: the film renders
 on 2 jobs, at most 3 scenes are checked at once, and the page is only written
 to `public/` (no server outlives the job). `RELEASE_FILM_CI_DEVICE_SCALE`,

@@ -4,8 +4,9 @@ name: Release film
 # seat: CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`, a secret of the release-film environment. Never an API
 # key: `claude -p` would bill it instead of the seat. The film and its page become the run's release-film artifact;
 # after a successful recording a second job (release-film-publish.yml, without the Claude token) attaches them to the
-# release and rebuilds the public Pages site, unless `publish` is off. It starts only by hand, one film at a time: a
-# film uses about a third of the seat's 5-hour limit.
+# release and rebuilds the public Pages site, unless `publish` is off. A tag that already has a film stops such a
+# recording before it starts, unless `replace` is on (the earlier film is removed for the new one). It starts only by
+# hand, one film at a time: a film uses about a third of the seat's 5-hour limit.
 # Mentingo is public: anyone signed in to GitHub can download these artifacts (the film, the run's report and the
 # project's knowledge). The token stays in the steps that need it and the report leaves out the run's secrets.
 on:
@@ -29,7 +30,12 @@ on:
         description: Attach the film to the tag's published release and update the Pages site after recording
         required: false
         type: boolean
-        default: false # publishing a film is a decision of its own
+        default: true
+      replace:
+        description: With publish, if the tag already has a film (release or Pages site), remove it for this one
+        required: false
+        type: boolean
+        default: false
   # Until this workflow is on main: a push of it to the skill branch runs only the checks (tools, token, voice) on
   # a GitHub runner and registers the workflow, so `gh workflow run release-film.yml --ref <branch>` films from there.
   push:
@@ -54,6 +60,7 @@ jobs:
     permissions:
       actions: read # the project's knowledge kept by an earlier recording
       contents: read
+      pages: read # the films site's address: whether it already shows a film of the tag
       pull-requests: read
     env:
       GH_TOKEN: ${{ github.token }}
@@ -110,6 +117,7 @@ jobs:
           TAG: ${{ inputs.tag }}
           BASE: ${{ inputs.base }}
           PUBLISH: ${{ inputs.publish }}
+          REPLACE: ${{ inputs.replace }}
           RUN_ID: ci-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
@@ -131,6 +139,11 @@ jobs:
             echo "::error::${tag} has no published release to attach the film to. Record it with publish off and" \
               "publish the film with release-film-publish.yml once the release is out."
             exit 1
+          fi
+          # A tag that already has a film stops a recording that would publish over it, before it spends the seat.
+          if [ "${PUBLISH}" = "true" ] && [ "${REPLACE}" != "true" ]; then
+            site=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url 2>/dev/null || true)
+            python3 .agents/skills/release-film/ci/release_assets.py earlier --tag "${tag}" --base-url "${site}"
           fi
           key=${GITHUB_REPOSITORY/\//__}
           {
@@ -272,3 +285,4 @@ jobs:
     with:
       run_id: ${{ github.run_id }}
       target: release
+      replace: ${{ inputs.replace }}

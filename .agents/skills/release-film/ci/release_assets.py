@@ -3,17 +3,20 @@
 separately started workflow (release-film-publish.yml).
 
   release_assets.py stage   --run <run dir> --tag <tag> --commit <sha> --out <dir>
-  release_assets.py publish --dir <staged dir> --target draft|release
-  release_assets.py site    --out <dir> [--film <staged dir>] [--base-url <site url>]
+  release_assets.py earlier --tag <tag> [--base-url <site url>]
+  release_assets.py publish --dir <staged dir> --target draft|release [--base-url <site url>] [--replace]
+  release_assets.py site    --out <dir> [--film <staged dir>] [--base-url <site url>] [--replace]
 
 stage checks the film the run made (a plain file of video and audio that decodes to the end, of a plausible length)
 and copies it, its captions, its poster and its page (a ZIP) under release asset names, with release.json naming the
 release and each file's SHA-256. publish checks those files against release.json and attaches them to the tag's
 release (target release) or to a test draft release made for it (target draft), with a section of links in its
-notes. It never replaces or deletes an asset: a re-run adds what is missing and stops at an asset of the same name
-and other content. site builds the GitHub Pages site of the films: each published release's page (its ZIP asset) at
-/<tag>/, a recording's page for the site alone (--film: its staged files, no release touched) and every film the live
-site already shows (--base-url: read back from its films.json), with an index of them, newest first.
+notes. A re-run adds what is missing; a tag that already has another film (on its release, or on the site at
+--base-url) stops the publication, and nothing changes, unless --replace removes that film's assets first (no other
+asset is ever touched). earlier makes the same check before a recording spends the seat's limits. site builds the
+GitHub Pages site of the films: each published release's page (its ZIP asset) at /<tag>/, a recording's page for the
+site alone (--film: its staged files, no release touched; a tag the site already shows needs --replace) and every
+film the live site already shows (--base-url: read back from its films.json), with an index of them, newest first.
 """
 import argparse
 import datetime as dt
@@ -108,6 +111,12 @@ def stage(run, tag, commit, out):
     return manifest
 
 
+def film_assets(tag, assets):
+    """The tag's film among a release's assets {name: asset}: the files stage names, in whichever language."""
+    pattern = re.compile(rf'release-film-{re.escape(tag)}(?:\.mp4|-poster\.jpg|-page\.zip|\.[a-z]{{2}}\.(?:vtt|srt))')
+    return {name: asset for name, asset in assets.items() if pattern.fullmatch(name)}
+
+
 def plan_uploads(staged, existing):
     """Which staged assets to upload given the release's assets ``{name: digest}``: identical ones are kept (a re-run
     resumes), missing ones uploaded, and a different asset of the same name is a conflict."""
@@ -163,7 +172,29 @@ def find_release(repo, tag, target, commit):
                          '-f', 'body=A test of the release film publication: delete this draft after checking it.'))
 
 
-def publish(folder, target, repo=None):
+def release_of(repo, tag):
+    """The tag's published release, or {} when it has none."""
+    done = subprocess.run(['gh', 'api', f'repos/{repo}/releases/tags/{tag}'], capture_output=True, text=True)
+    return json.loads(done.stdout) if done.returncode == 0 else {}
+
+
+def earlier(tag, repo=None, base_url=None):
+    """Stops when the tag already has a published film: its assets on the tag's release, or its page on the site at
+    ``base_url``. A recording that would publish over it finds out before it spends the seat's limits."""
+    repo = repo or os.environ['GITHUB_REPOSITORY']
+    release = release_of(repo, tag)
+    on_release = sorted(film_assets(tag, {a['name']: a for a in release.get('assets') or []}))
+    on_site = tag in live_films(base_url)
+    where = ' and '.join(w for w, found in (("its release's assets", on_release), ('the Pages site', on_site)) if found)
+    check(not where, f'{tag} already has a film ({where}): record with replace to swap it, or with publish off to watch '
+                     'the new film first')
+    return {'tag': tag, 'release': on_release, 'site': on_site}
+
+
+def publish(folder, target, repo=None, replace=False, base_url=None):
+    """The staged film on the release. A tag that already has another film (its assets on this release, in any
+    language, or, for the tag's release, its page on the site at ``base_url``) stops the publication; with ``replace``
+    those assets are deleted first and the notes section rewritten, and the site's next rebuild shows this film."""
     folder = Path(folder)
     repo = repo or os.environ['GITHUB_REPOSITORY']
     manifest = json.loads((folder / 'release.json').read_text(encoding='utf-8'))
@@ -172,7 +203,16 @@ def publish(folder, target, repo=None):
     for name, digest in manifest['assets'].items():
         check(plain_file(folder / name, folder.resolve()) and sha256(folder / name) == digest, f'{name} is not the file staged')
     release = find_release(repo, tag, target, manifest['commit'])
-    existing = {a['name']: a.get('digest') for a in release.get('assets') or []}
+    assets = {a['name']: a for a in release.get('assets') or []}
+    stale = [name for name, asset in film_assets(tag, assets).items()
+             if asset.get('digest') != f'sha256:{manifest["assets"].get(name)}']
+    on_site = target == 'release' and tag in live_films(base_url)
+    where = ' and '.join(w for w, found in (('the release: ' + ', '.join(stale), stale), ('the Pages site', on_site)) if found)
+    check(replace or not where, f'{tag} already has another film ({where}); nothing was changed: publish with replace '
+                                'to remove it and publish this one')
+    for name in stale:
+        gh('api', '-X', 'DELETE', f'repos/{repo}/releases/assets/{assets[name]["id"]}')
+    existing = {name: asset.get('digest') for name, asset in assets.items() if name not in stale}
     uploads, conflicts = plan_uploads(manifest['assets'], existing)
     check(not conflicts, f'the release already has other assets named {conflicts}; nothing was replaced')
     if uploads:
@@ -182,7 +222,8 @@ def publish(folder, target, repo=None):
     body = with_section(release.get('body'), notes_section(tag, code, links))
     if body != (release.get('body') or ''):
         gh('api', '-X', 'PATCH', f'repos/{repo}/releases/{release["id"]}', '-F', 'body=@-', input_text=body)
-    return {'target': target, 'release': release.get('html_url'), 'uploaded': uploads,
+    return {'target': target, 'release': release.get('html_url'), 'removed': stale, 'site_film_replaced': on_site,
+            'uploaded': uploads,
             'kept': [name for name in manifest['assets'] if name not in uploads],
             'notes': 'updated' if body != (release.get('body') or '') else 'unchanged'}
 
@@ -263,13 +304,14 @@ def live_films(base_url):
     return films
 
 
-def site(out, repo=None, film=None, base_url=None):
+def site(out, repo=None, film=None, base_url=None, replace=False):
     """The Pages site: each published release's film page (its ZIP asset) at /<tag>/; ``film``, a recording's staged
     files, for a tag whose release has no film (the site alone: no release changes); and every film the live site at
     ``base_url`` already shows that neither gives now, its files taken from there (the site keeps what it showed). A
-    release's film replaces a recording's of its tag. An index of them, newest first, and films.json, the list the
-    next rebuild reads. A film the live site lists but cannot serve stops the rebuild: nothing is deployed then.
-    Returns the tags shown."""
+    release's film replaces a recording's of its tag. A recording of a tag whose release has a film, or of a tag the
+    live site already shows without ``replace``, stops the rebuild. An index of them, newest first, and films.json,
+    the list the next rebuild reads. A film the live site lists but cannot serve stops the rebuild: nothing is
+    deployed then. Returns the tags shown."""
     repo = repo or os.environ['GITHUB_REPOSITORY']
     out = Path(out)
     shutil.rmtree(out, ignore_errors=True)
@@ -294,11 +336,15 @@ def site(out, repo=None, film=None, base_url=None):
             check(PLAIN_NAME.fullmatch(tag), f'unexpected tag name {tag!r}')
             gh('release', 'download', tag, '--repo', repo, '--pattern', name, '--dir', str(Path(folder) / tag))
             shown(tag, 'release', page_files(Path(folder) / tag / name, tag))
+    live = live_films(base_url)
     if film:
         tag, page = recorded_film(film)
-        if tag not in films:
-            shown(tag, 'recording', page_files(page, tag))
-    for tag, kept in live_films(base_url).items():
+        check(tag not in films, f"{tag}'s release has a film, which the site shows; nothing was deployed: publish this "
+                                'recording to the release, with replace, to change it')
+        check(replace or tag not in live, f'the site already shows a film of {tag}; nothing was deployed: publish with '
+                                          'replace to remove it and show this one')
+        shown(tag, 'recording', page_files(page, tag))
+    for tag, kept in live.items():
         if tag in films:
             continue
         names = [str(name) for name in kept['files']]
@@ -318,7 +364,7 @@ def site(out, repo=None, film=None, base_url=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('command', choices=['stage', 'publish', 'site'])
+    parser.add_argument('command', choices=['stage', 'earlier', 'publish', 'site'])
     parser.add_argument('--run')
     parser.add_argument('--tag')
     parser.add_argument('--commit')
@@ -326,15 +372,20 @@ def main():
     parser.add_argument('--dir')
     parser.add_argument('--target', choices=['draft', 'release'])
     parser.add_argument('--film', help='site: a recording\'s staged files (its release-film artifact)')
-    parser.add_argument('--base-url', help='site: the live site, whose films it keeps')
+    parser.add_argument('--base-url', help='the live films site: site keeps its films, earlier and publish check it')
+    parser.add_argument('--replace', action='store_true',
+                        help="remove the tag's earlier film (its release assets, or its page on the site) for this one")
     args = parser.parse_args()
     if args.command == 'stage':
         result = stage(args.run, args.tag, args.commit, args.out)
+    elif args.command == 'earlier':
+        check(args.tag, 'earlier needs --tag')
+        result = earlier(args.tag, base_url=args.base_url)
     elif args.command == 'site':
-        result = site(args.out, film=args.film, base_url=args.base_url)
+        result = site(args.out, film=args.film, base_url=args.base_url, replace=args.replace)
     else:
         check(args.target, 'publish needs --target draft or release')
-        result = publish(args.dir, args.target)
+        result = publish(args.dir, args.target, replace=args.replace, base_url=args.base_url)
     print(json.dumps(result, ensure_ascii=False, indent=1))
 
 
