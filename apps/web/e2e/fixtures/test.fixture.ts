@@ -214,6 +214,14 @@ const findUserByEmail = async (
   return response.data.data.find((user) => user.email === email) ?? null;
 };
 
+const ensureOpenRegistration = async (apiClient: FixtureApiClient) => {
+  const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
+
+  if (response.data.data.inviteOnlyRegistration) {
+    await apiClient.api.settingsControllerUpdateInviteOnlyRegistration();
+  }
+};
+
 const ensureWorkerUserAccount = async (
   apiClient: ReturnType<typeof createFixtureApiClient>,
   projectName: string,
@@ -430,6 +438,7 @@ export const test = mergedFixture.extend<
                 tenantAdminPassword,
               );
               await apiClient.syncFromContext(tenantAdminContext, workspaceOrigin);
+              await ensureOpenRegistration(apiClient);
               await markAllOnboardingComplete(apiClient);
 
               const tenantFactories = createFixtureFactories(apiClient);
@@ -650,6 +659,7 @@ export const test = mergedFixture.extend<
       await login(tenantPage, tenantAdminEmail, tenantAdminPassword, { origin: workspaceOrigin });
 
       await apiClient.syncFromContext(tenantContext, workspaceOrigin);
+      await ensureOpenRegistration(apiClient);
       await markAllOnboardingComplete(apiClient);
 
       const createTenantUserWithPasswordAndRole = async (input: {
