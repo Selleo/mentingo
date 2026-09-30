@@ -146,6 +146,7 @@
       "copied": "Ein neuer Entwurf wurde erstellt.",
       "saved": "Änderungen gespeichert.",
       "restored": "Vorlage als Entwurf wiederhergestellt.",
+      "languageRemoved": "Sprache aus der Vorlage entfernt.",
       "testQueued": "Test-E-Mail für Ihre Adresse eingereiht.",
       "uploaded": "Bild hochgeladen.",
       "blocks": {
@@ -200,7 +201,9 @@
       "publicationConflict": "Für dieses Ereignis wurde eine andere Vorlage veröffentlicht. Versuchen Sie es erneut.",
       "notFound": "E-Mail-Vorlage nicht gefunden.",
       "createFailed": "Die E-Mail-Vorlage konnte nicht erstellt werden.",
-      "invalidCollection": "Ungültige Sammlungsdaten."
+      "invalidCollection": "Ungültige Sammlungsdaten.",
+      "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden.",
+      "archivedReadOnly": "Stellen Sie die Vorlage wieder her, bevor Sie ihre Sprachen ändern."
     },
     "warnings": {
       "translationFallback": "Unvollständige Übersetzungen verwenden die Basissprache.",
@@ -5077,6 +5080,11 @@
       "start_course": "Gestartet",
       "group_assignment": "Zugewiesen",
       "users_import": "Benutzer importiert",
+      "publish_email_template": "E-Mail-Vorlage veröffentlicht",
+      "archive_email_template": "E-Mail-Vorlage archiviert",
+      "restore_email_template": "E-Mail-Vorlage wiederhergestellt",
+      "add_email_template_language": "Sprache zur E-Mail-Vorlage hinzugefügt",
+      "remove_email_template_language": "Sprache aus E-Mail-Vorlage entfernt",
       "send_password_reset_email": "Passwort-Zurücksetzen-E-Mail gesendet",
       "resend_password_creation_email": "Passwort-Erstellungs-E-Mail erneut gesendet",
       "complete_lesson": "Lektion abgeschlossen",
@@ -5110,6 +5118,7 @@
       "live_training": "Live-Schulung",
       "learning_path": "Lernpfad",
       "scorm": "SCORM",
+      "email_template": "E-Mail-Vorlage",
       "global_settings": "Einstellungen"
     },
     "table": {

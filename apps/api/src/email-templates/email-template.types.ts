@@ -5,6 +5,16 @@ import type { UUIDType } from "src/common";
 import type { emailTemplates } from "src/storage/schema";
 
 export type EmailTemplateRecord = typeof emailTemplates.$inferSelect;
+
+export type EmailTemplateActivityLogSnapshot = {
+  id: UUIDType;
+  event: EmailTemplateEvent;
+  name?: string;
+  status?: string;
+  baseLanguage?: string;
+  availableLocales?: string[];
+  [localizedField: string]: unknown;
+};
 export type EmailTemplateTranslationUpdate = Pick<
   Partial<typeof emailTemplates.$inferInsert>,
   "name" | "subject" | "content" | "availableLocales" | "updatedAt"

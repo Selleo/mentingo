@@ -146,6 +146,7 @@
       "copied": "A new draft has been created.",
       "saved": "Changes saved.",
       "restored": "Template restored as a draft.",
+      "languageRemoved": "Language removed from template.",
       "testQueued": "Test email queued for your email address.",
       "uploaded": "Image uploaded.",
       "blocks": {
@@ -200,7 +201,9 @@
       "publicationConflict": "Another template was published for this event. Try again.",
       "notFound": "Email template not found.",
       "createFailed": "Could not create the email template.",
-      "invalidCollection": "Invalid collection data."
+      "invalidCollection": "Invalid collection data.",
+      "cannotRemoveBaseLanguage": "The base language cannot be removed.",
+      "archivedReadOnly": "Restore this template before changing its languages."
     },
     "warnings": {
       "translationFallback": "Incomplete translations use the base language.",
@@ -5739,6 +5742,11 @@
       "start_course": "Started",
       "group_assignment": "Assigned",
       "users_import": "Users imported",
+      "publish_email_template": "Email template published",
+      "archive_email_template": "Email template archived",
+      "restore_email_template": "Email template restored",
+      "add_email_template_language": "Email template language added",
+      "remove_email_template_language": "Email template language removed",
       "send_password_reset_email": "Password reset email sent",
       "resend_password_creation_email": "Password creation email resent",
       "complete_lesson": "Lesson completed",
@@ -5772,6 +5780,7 @@
       "live_training": "Live Training",
       "learning_path": "Learning Path",
       "scorm": "SCORM",
+      "email_template": "Email template",
       "global_settings": "Settings"
     },
     "table": {

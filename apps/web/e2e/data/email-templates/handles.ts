@@ -19,6 +19,7 @@ export const EMAIL_TEMPLATES_HANDLES = {
   SEND_TEST: "email-template-send-test",
   LANGUAGE: "email-template-language",
   LANGUAGE_OPTION: (language: string) => `email-template-language-${language}`,
+  LANGUAGE_DELETE: "email-template-language-delete",
   BASE_LANGUAGE: "email-template-base-language",
   CONFIRM: "email-template-confirm",
   CANCEL: "email-template-cancel",

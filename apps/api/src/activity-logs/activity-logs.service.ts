@@ -10,6 +10,7 @@ import {
   ilike,
   inArray,
   lte,
+  notInArray,
   or,
   sql,
 } from "drizzle-orm";
@@ -34,6 +35,8 @@ import type {
 import type { ActivityLogMetadata } from "./types";
 import type { SQL } from "drizzle-orm";
 import type { ActorUserType } from "src/common/types/actor-user.type";
+
+const retiredActivityLogActions = ["native_import", "native_export"] as const;
 
 @Injectable()
 export class ActivityLogsService {
@@ -101,7 +104,9 @@ export class ActivityLogsService {
     data: ActivityLogsListResponse;
     pagination: Pagination;
   }> {
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [
+      notInArray(sql<string>`${activityLogs.actionType}`, [...retiredActivityLogActions]),
+    ];
 
     if (email) {
       const pattern = `%${email.replace(/%/g, "\\%").replace(/_/g, "\\_")}%`;

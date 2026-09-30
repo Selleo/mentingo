@@ -146,6 +146,7 @@
       "copied": "Utworzono nowy szkic.",
       "saved": "Zmiany zapisane.",
       "restored": "Przywrócono szablon jako szkic.",
+      "languageRemoved": "Usunięto język z szablonu.",
       "testQueued": "Testowy e-mail dodano do kolejki wysyłki na Twój adres.",
       "uploaded": "Obraz przesłany.",
       "blocks": {
@@ -200,7 +201,9 @@
       "publicationConflict": "Opublikowano inny szablon dla tego zdarzenia. Spróbuj ponownie.",
       "notFound": "Nie znaleziono szablonu e-maila.",
       "createFailed": "Nie udało się utworzyć szablonu e-maila.",
-      "invalidCollection": "Nieprawidłowe dane kolekcji."
+      "invalidCollection": "Nieprawidłowe dane kolekcji.",
+      "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego.",
+      "archivedReadOnly": "Przywróć szablon przed zmianą jego języków."
     },
     "warnings": {
       "translationFallback": "Niekompletne tłumaczenia korzystają z języka bazowego.",
@@ -5776,6 +5779,11 @@
       "start_course": "Rozpoczęto",
       "group_assignment": "Przypisano",
       "users_import": "Zaimportowano użytkowników",
+      "publish_email_template": "Opublikowano szablon e-mail",
+      "archive_email_template": "Zarchiwizowano szablon e-mail",
+      "restore_email_template": "Przywrócono szablon e-mail",
+      "add_email_template_language": "Dodano język szablonu e-mail",
+      "remove_email_template_language": "Usunięto język szablonu e-mail",
       "send_password_reset_email": "Wysłano e-mail resetowania hasła",
       "resend_password_creation_email": "Wysłano ponownie e-mail utworzenia hasła",
       "complete_lesson": "Ukończono lekcję",
@@ -5809,6 +5817,7 @@
       "live_training": "Szkolenie na żywo",
       "learning_path": "Ścieżka nauki",
       "scorm": "SCORM",
+      "email_template": "Szablon e-mail",
       "global_settings": "Ustawienia"
     },
     "table": {

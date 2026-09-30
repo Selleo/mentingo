@@ -8,6 +8,7 @@ import { useCopyDefaultEmailTemplate } from "~/api/mutations/emailTemplates/useC
 import { useDeleteEmailTemplate } from "~/api/mutations/emailTemplates/useDeleteEmailTemplate";
 import { useDuplicateEmailTemplate } from "~/api/mutations/emailTemplates/useDuplicateEmailTemplate";
 import { usePublishEmailTemplate } from "~/api/mutations/emailTemplates/usePublishEmailTemplate";
+import { useRemoveEmailTemplateLanguage } from "~/api/mutations/emailTemplates/useRemoveEmailTemplateLanguage";
 import { useRestoreEmailTemplate } from "~/api/mutations/emailTemplates/useRestoreEmailTemplate";
 import { useSendTestEmailTemplate } from "~/api/mutations/emailTemplates/useSendTestEmailTemplate";
 import { useUpdateEmailTemplate } from "~/api/mutations/emailTemplates/useUpdateEmailTemplate";
@@ -86,6 +87,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
   const { mutateAsync: updateTemplate } = useUpdateEmailTemplate();
   const { mutateAsync: updateTemplateBaseLanguage } = useUpdateEmailTemplateBaseLanguage();
   const { mutateAsync: publishTemplate } = usePublishEmailTemplate();
+  const { mutateAsync: removeTemplateLanguage } = useRemoveEmailTemplateLanguage();
   const { mutateAsync: deleteTemplate } = useDeleteEmailTemplate();
   const { mutateAsync: archiveTemplate } = useArchiveEmailTemplate();
   const { mutateAsync: restoreTemplate } = useRestoreEmailTemplate();
@@ -187,6 +189,21 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
           isActionPending={isActionPending}
           hasUnsavedChanges={hasUnsavedChanges}
           onLanguageChange={setSelectedLanguage}
+          onCreateLanguage={async (language) => {
+            setContent((current) => ({
+              ...current,
+              [language]: createEmptyEmailTemplateDocument(),
+            }));
+          }}
+          onDeleteLanguage={async (language) => {
+            if (!savedTemplate.id) return;
+            setIsActionPending(true);
+            try {
+              applySavedTemplate(await removeTemplateLanguage({ id: savedTemplate.id, language }));
+            } finally {
+              setIsActionPending(false);
+            }
+          }}
           onSetBaseLanguage={() =>
             void runTemplateAction(async () => {
               applySavedTemplate(

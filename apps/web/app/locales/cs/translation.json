@@ -146,6 +146,7 @@
       "copied": "Byl vytvořen nový koncept.",
       "saved": "Změny uloženy.",
       "restored": "Šablona obnovena jako koncept.",
+      "languageRemoved": "Jazyk odebrán ze šablony.",
       "testQueued": "Testovací e-mail zařazen do fronty na vaši adresu.",
       "uploaded": "Obrázek nahrán.",
       "blocks": {
@@ -200,7 +201,9 @@
       "publicationConflict": "Pro tuto událost byla publikována jiná šablona. Zkuste to znovu.",
       "notFound": "Šablona e-mailu nebyla nalezena.",
       "createFailed": "Šablonu e-mailu se nepodařilo vytvořit.",
-      "invalidCollection": "Neplatná data kolekce."
+      "invalidCollection": "Neplatná data kolekce.",
+      "cannotRemoveBaseLanguage": "Základní jazyk nelze odebrat.",
+      "archivedReadOnly": "Před změnou jazyků šablonu obnovte."
     },
     "warnings": {
       "translationFallback": "Neúplné překlady používají základní jazyk.",
@@ -5085,6 +5088,11 @@
       "start_course": "Spuštěno",
       "group_assignment": "Přiřazeno",
       "users_import": "Uživatelé importováni",
+      "publish_email_template": "E-mailová šablona publikována",
+      "archive_email_template": "E-mailová šablona archivována",
+      "restore_email_template": "E-mailová šablona obnovena",
+      "add_email_template_language": "Přidán jazyk e-mailové šablony",
+      "remove_email_template_language": "Odebrán jazyk e-mailové šablony",
       "send_password_reset_email": "E-mail pro reset hesla odeslán",
       "resend_password_creation_email": "E-mail pro vytvoření hesla znovu odeslán",
       "complete_lesson": "Lekce dokončena",
@@ -5118,6 +5126,7 @@
       "live_training": "Živé školení",
       "learning_path": "Vzdělávací cesta",
       "scorm": "SCORM",
+      "email_template": "E-mailová šablona",
       "global_settings": "Nastavení"
     },
     "table": {

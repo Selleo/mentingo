@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -16,15 +17,31 @@ import {
 } from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES, type LocalizedText, type SupportedLanguages } from "@repo/shared";
 
+import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import {
+  AddEmailTemplateLanguageEvent,
+  ArchiveEmailTemplateEvent,
+  CreateEmailTemplateEvent,
+  DeleteEmailTemplateEvent,
+  PublishEmailTemplateEvent,
+  RemoveEmailTemplateLanguageEvent,
+  RestoreEmailTemplateEvent,
+  UpdateEmailTemplateEvent,
+} from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { DB } from "src/storage/db/db.providers";
 
 import { EmailTemplateRepository } from "../repositories/email-template.repository";
 
 import { EmailTemplateAssetService } from "./email-template-asset.service";
 import { EmailTemplateValidationService } from "./email-template-validation.service";
 
-import type { EmailTemplateRecord } from "../email-template.types";
+import type {
+  EmailTemplateActivityLogSnapshot,
+  EmailTemplateRecord,
+} from "../email-template.types";
 import type {
   CreateEmailTemplateBody,
   EmailTemplatePreviewResponse,
@@ -33,7 +50,7 @@ import type {
   UpdateEmailTemplateBaseLanguageBody,
   UpdateEmailTemplateBody,
 } from "../schemas/email-template.schema";
-import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 @Injectable()
 export class EmailTemplateService {
@@ -42,6 +59,8 @@ export class EmailTemplateService {
     private readonly emailTemplateValidationService: EmailTemplateValidationService,
     private readonly emailService: EmailService,
     private readonly emailTemplateAssetService: EmailTemplateAssetService,
+    private readonly outboxPublisher: OutboxPublisher,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async getEmailTemplates(page = 1, perPage = DEFAULT_PAGE_SIZE) {
@@ -65,7 +84,7 @@ export class EmailTemplateService {
     return this.mapDefaultTemplate(this.emailTemplateValidationService.getDefinition(event));
   }
 
-  async copyDefaultEmailTemplate(event: EmailTemplateEvent) {
+  async copyDefaultEmailTemplate(event: EmailTemplateEvent, actor?: ActorUserType) {
     const definition = this.emailTemplateValidationService.getDefinition(event);
     this.emailTemplateValidationService.validateDraft(
       event,
@@ -73,35 +92,45 @@ export class EmailTemplateService {
       definition.defaultDocuments,
     );
 
-    const template = await this.emailTemplateRepository.createEmailTemplate({
-      event,
-      name: definition.name,
-      subject: definition.subjects,
-      content: definition.defaultDocuments,
-      status: EMAIL_TEMPLATE_STATUSES.DRAFT,
-      baseLanguage: definition.defaultLanguage,
-      availableLocales: Object.values(SUPPORTED_LANGUAGES),
-    });
+    return this.db.transaction(async () => {
+      const template = await this.emailTemplateRepository.createEmailTemplate({
+        event,
+        name: definition.name,
+        subject: definition.subjects,
+        content: definition.defaultDocuments,
+        status: EMAIL_TEMPLATE_STATUSES.DRAFT,
+        baseLanguage: definition.defaultLanguage,
+        availableLocales: Object.values(SUPPORTED_LANGUAGES),
+      });
 
-    return this.mapCreatedTemplate(template);
+      await this.publishCreateActivity(actor, template, { source: "default", sourceEvent: event });
+      return this.mapCreatedTemplate(template);
+    });
   }
 
-  async createEmailTemplate(body: CreateEmailTemplateBody, tenantId: UUIDType) {
+  async createEmailTemplate(
+    body: CreateEmailTemplateBody,
+    tenantId: UUIDType,
+    actor?: ActorUserType,
+  ) {
     const baseLanguage = body.baseLanguage ?? SUPPORTED_LANGUAGES.EN;
     this.emailTemplateValidationService.validateDraft(body.event, body.subject, body.content);
     await this.emailTemplateAssetService.validateEmailTemplateAssets(body.content, tenantId);
 
-    const template = await this.emailTemplateRepository.createEmailTemplate({
-      ...body,
-      status: EMAIL_TEMPLATE_STATUSES.DRAFT,
-      baseLanguage,
-      availableLocales: this.getLocalesWithDraftContent(body.subject, body.content),
-    });
+    return this.db.transaction(async () => {
+      const template = await this.emailTemplateRepository.createEmailTemplate({
+        ...body,
+        status: EMAIL_TEMPLATE_STATUSES.DRAFT,
+        baseLanguage,
+        availableLocales: this.getLocalesWithDraftContent(body.subject, body.content),
+      });
 
-    return this.mapCreatedTemplate(template);
+      await this.publishCreateActivity(actor, template, { source: "new" });
+      return this.mapCreatedTemplate(template);
+    });
   }
 
-  async updateEmailTemplate(id: UUIDType, body: UpdateEmailTemplateBody) {
+  async updateEmailTemplate(id: UUIDType, body: UpdateEmailTemplateBody, actor?: ActorUserType) {
     return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       const { name, subject, content } = this.getUpdatedEmailTemplateContent(existing, body);
       await this.emailTemplateAssetService.validateEmailTemplateAssets(content, existing.tenantId);
@@ -124,11 +153,45 @@ export class EmailTemplateService {
         updatedAt: new Date().toISOString(),
       });
 
+      if (actor && template) {
+        const languages = this.getChangedTranslationLanguages(body);
+        const changedFields = Object.keys(body);
+        const previous = this.toActivitySnapshot(existing, body);
+        const resource = this.toActivitySnapshot(template, body);
+        await this.outboxPublisher.publish(
+          new UpdateEmailTemplateEvent({
+            actor,
+            resource,
+            previous,
+            changedFields,
+            context: {
+              name: template.name?.[template.baseLanguage as SupportedLanguages] ?? "",
+              languages: languages.join(", "),
+              changedFields: changedFields.join(", "),
+            },
+          }),
+        );
+        for (const language of this.getAddedTemplateLanguages(existing, template)) {
+          await this.outboxPublisher.publish(
+            new AddEmailTemplateLanguageEvent({
+              actor,
+              resource: this.toActivitySnapshot(template),
+              previous: this.toActivitySnapshot(existing),
+              changedFields: ["language"],
+              context: { language },
+            }),
+          );
+        }
+      }
       return this.mapUpdatedTemplate(template);
     });
   }
 
-  async updateBaseLanguage(id: UUIDType, body: UpdateEmailTemplateBaseLanguageBody) {
+  async updateBaseLanguage(
+    id: UUIDType,
+    body: UpdateEmailTemplateBaseLanguageBody,
+    actor?: ActorUserType,
+  ) {
     return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       this.emailTemplateValidationService.validatePublished(
         existing.event,
@@ -143,11 +206,20 @@ export class EmailTemplateService {
         updatedAt: new Date().toISOString(),
       });
 
+      if (actor && template)
+        await this.outboxPublisher.publish(
+          new UpdateEmailTemplateEvent({
+            actor,
+            resource: this.toActivitySnapshot(template),
+            previous: this.toActivitySnapshot(existing),
+            changedFields: ["baseLanguage"],
+          }),
+        );
       return this.mapUpdatedTemplate(template);
     });
   }
 
-  async publishEmailTemplate(id: UUIDType) {
+  async publishEmailTemplate(id: UUIDType, actor?: ActorUserType) {
     return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       await this.emailTemplateAssetService.validateEmailTemplateAssets(
         existing.content,
@@ -161,45 +233,132 @@ export class EmailTemplateService {
         existing.baseLanguage,
       );
 
+      let publication;
       try {
-        const template = await this.emailTemplateRepository.publishEmailTemplate(
-          id,
-          existing.event,
-        );
-        return this.mapUpdatedTemplate(template);
+        publication = await this.emailTemplateRepository.publishEmailTemplate(id, existing.event);
       } catch (error) {
         if (this.isUniqueConstraintError(error)) {
           throw new ConflictException("emailTemplates.errors.publicationConflict");
         }
         throw error;
       }
+
+      const { template, archivedTemplates } = publication;
+      if (actor && template) {
+        for (const archivedTemplate of archivedTemplates) {
+          const archived = this.toActivitySnapshot(archivedTemplate);
+          await this.outboxPublisher.publish(
+            new ArchiveEmailTemplateEvent({
+              actor,
+              resource: archived,
+              previous: { ...archived, status: EMAIL_TEMPLATE_STATUSES.PUBLISHED },
+              changedFields: ["status"],
+              context: { reason: "replaced_by_publish", replacementTemplateId: id },
+            }),
+          );
+        }
+        await this.outboxPublisher.publish(
+          new PublishEmailTemplateEvent({
+            actor,
+            resource: this.toActivitySnapshot(template),
+            previous: this.toActivitySnapshot(existing),
+            changedFields: ["status"],
+          }),
+        );
+      }
+      return this.mapUpdatedTemplate(template);
     });
   }
 
-  async archiveEmailTemplate(id: UUIDType) {
-    return this.emailTemplateRepository.withLockedEmailTemplate(id, async () => {
+  async archiveEmailTemplate(id: UUIDType, actor?: ActorUserType) {
+    return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
         status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
         archivedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+      if (actor && template)
+        await this.outboxPublisher.publish(
+          new ArchiveEmailTemplateEvent({
+            actor,
+            resource: this.toActivitySnapshot(template),
+            previous: this.toActivitySnapshot(existing),
+            changedFields: ["status"],
+            context: { reason: "manual" },
+          }),
+        );
       return this.mapUpdatedTemplate(template);
     });
   }
 
-  async deleteEmailTemplate(id: UUIDType) {
-    return this.emailTemplateRepository.withLockedEmailTemplate(id, async () => {
+  async deleteEmailTemplate(id: UUIDType, actor?: ActorUserType) {
+    await this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       await this.emailTemplateRepository.deleteEmailTemplate(id);
+      if (actor)
+        await this.outboxPublisher.publish(
+          new DeleteEmailTemplateEvent({ actor, resource: this.toActivitySnapshot(existing) }),
+        );
     });
   }
 
-  async restoreEmailTemplate(id: UUIDType) {
-    return this.emailTemplateRepository.withLockedEmailTemplate(id, async () => {
+  async restoreEmailTemplate(id: UUIDType, actor?: ActorUserType) {
+    return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
         status: EMAIL_TEMPLATE_STATUSES.DRAFT,
         archivedAt: null,
         updatedAt: new Date().toISOString(),
       });
+      if (actor && template)
+        await this.outboxPublisher.publish(
+          new RestoreEmailTemplateEvent({
+            actor,
+            resource: this.toActivitySnapshot(template),
+            previous: this.toActivitySnapshot(existing),
+            changedFields: ["status"],
+          }),
+        );
+      return this.mapUpdatedTemplate(template);
+    });
+  }
+
+  async removeEmailTemplateLanguage(
+    id: UUIDType,
+    language: SupportedLanguages,
+    actor: ActorUserType,
+  ) {
+    return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
+      if (existing.baseLanguage === language) {
+        throw new BadRequestException("emailTemplates.errors.cannotRemoveBaseLanguage");
+      }
+      if (existing.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED) {
+        throw new BadRequestException("emailTemplates.errors.archivedReadOnly");
+      }
+
+      const languageExists =
+        language in existing.name ||
+        language in existing.subject ||
+        language in existing.content ||
+        existing.availableLocales.includes(language);
+
+      if (!languageExists) {
+        return this.mapOverrideTemplate(existing);
+      }
+
+      const template = await this.emailTemplateRepository.removeEmailTemplateLanguage(
+        id,
+        language,
+        existing.availableLocales.filter((locale) => locale !== language) as SupportedLanguages[],
+      );
+      if (template)
+        await this.outboxPublisher.publish(
+          new RemoveEmailTemplateLanguageEvent({
+            actor,
+            resource: this.toActivitySnapshot(template),
+            previous: this.toActivitySnapshot(existing),
+            changedFields: ["language"],
+            context: { language },
+          }),
+        );
       return this.mapUpdatedTemplate(template);
     });
   }
@@ -277,7 +436,7 @@ export class EmailTemplateService {
     };
   }
 
-  async duplicateEmailTemplate(id: UUIDType) {
+  async duplicateEmailTemplate(id: UUIDType, actor?: ActorUserType) {
     return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
       await this.emailTemplateAssetService.validateEmailTemplateAssets(
         existing.content,
@@ -292,8 +451,74 @@ export class EmailTemplateService {
         availableLocales: existing.availableLocales,
         status: EMAIL_TEMPLATE_STATUSES.DRAFT,
       });
+      await this.publishCreateActivity(actor, template, {
+        source: "duplicate",
+        sourceTemplateId: id,
+      });
       return this.mapCreatedTemplate(template);
     });
+  }
+
+  private toActivitySnapshot(
+    template: EmailTemplateRecord,
+    update?: UpdateEmailTemplateBody,
+  ): EmailTemplateActivityLogSnapshot {
+    const localizedValues: Record<string, Record<string, unknown>> = {};
+    if (update) {
+      for (const field of ["name", "subject", "content"] as const) {
+        for (const language of Object.keys(update[field] ?? {})) {
+          localizedValues[language] ??= {};
+          localizedValues[language][field] =
+            template[field]?.[language as SupportedLanguages] ?? null;
+        }
+      }
+    }
+
+    return {
+      id: template.id,
+      event: template.event,
+      ...(!update && {
+        name: template.name?.[template.baseLanguage as SupportedLanguages] ?? undefined,
+      }),
+      status: template.status,
+      baseLanguage: template.baseLanguage,
+      availableLocales: template.availableLocales,
+      ...localizedValues,
+    };
+  }
+
+  private async publishCreateActivity(
+    actor: ActorUserType | undefined,
+    template: EmailTemplateRecord | undefined,
+    context: Record<string, string>,
+  ) {
+    if (!actor || !template) return;
+
+    await this.outboxPublisher.publish(
+      new CreateEmailTemplateEvent({
+        actor,
+        resource: this.toActivitySnapshot(template),
+        context,
+      }),
+    );
+  }
+
+  private getChangedTranslationLanguages(body: UpdateEmailTemplateBody): string[] {
+    return [
+      ...new Set([
+        ...Object.keys(body.name ?? {}),
+        ...Object.keys(body.subject ?? {}),
+        ...Object.keys(body.content ?? {}),
+      ]),
+    ];
+  }
+
+  private getAddedTemplateLanguages(
+    before: EmailTemplateRecord,
+    after: EmailTemplateRecord,
+  ): string[] {
+    const existingLanguages = new Set(before.availableLocales);
+    return after.availableLocales.filter((language) => !existingLanguages.has(language));
   }
 
   private async getSampleEmailBranding(
