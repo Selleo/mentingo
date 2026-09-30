@@ -172,6 +172,18 @@ class Finish(unittest.TestCase):
         self.assertEqual(result['rejected'][0]['title'], 'Notatki')
         self.assertEqual(stopped, [True])  # the services stop, the checkout stays to fix the scene
 
+    def test_a_failed_review_exits_non_zero(self):
+        for result, code in (({'ok': False, 'rejected': [], 'next': 'fix it'}, 1), ({'sheets': [], 'next': 'make'}, None)):
+            with self.subTest(code=code), mock.patch.object(film, 'review_sheets', return_value=result), \
+                    mock.patch.object(sys, 'argv', ['film.py', 'review', '--run', str(self.run)]), \
+                    mock.patch.object(film, 'out'):
+                if code is None:
+                    film.main()  # a passed review carries no ok and ends as before
+                else:
+                    with self.assertRaises(SystemExit) as stopped:
+                        film.main()
+                    self.assertEqual(stopped.exception.code, code)
+
     def test_rewrites_that_break_the_story_are_taken_back(self):
         original = '# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Otwieramy notatki.\n2 | Zapisujemy.\n'
         (self.run / 'story.txt').write_text(original)

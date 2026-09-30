@@ -792,7 +792,7 @@ def main():
     result = handlers[args.command](args)
     out(result)
     if args.command in ('adopt', 'finish', 'run', 'doctor', 'voice-setup', 'voice-check') and not result.get('ok') \
-            or args.command == 'start' and result.get('ok') is False:
+            or args.command in ('start', 'review') and result.get('ok') is False:
         sys.exit(1)
 
 
