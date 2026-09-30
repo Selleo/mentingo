@@ -37,6 +37,14 @@ def score(pr):
     return round(value, 2)
 
 
+def offscreen(pr):
+    """Set aside as technical without asking the model: it changes no screen and no interface text, and its score
+    (no feature title or label) says nothing else. A maintenance title alone never hides a change to the screens: a
+    `chore:` that adds a time input to a form is the model's to judge."""
+    touched = pr['touched']
+    return score(pr) <= 0 and not (touched['frontend'] or touched['texts'])
+
+
 GENERIC = {'index', 'test', 'tests', 'spec', 'page', 'pages', 'component', 'components', 'view', 'views', 'modal', 'list',
            'item', 'items', 'form', 'button', 'utils', 'util', 'hooks', 'hook', 'use', 'widget', 'widgets', 'data', 'src',
            'app', 'types', 'type', 'helpers', 'helper', 'context', 'provider', 'container', 'layout', 'styles', 'constants',
@@ -305,7 +313,7 @@ def left_out(run, sources, claimed, provider):
     it leaves out, grouped with a reason by one quick call (without a model: one line for them all)."""
     numbers = {pr['number'] for pr in sources['prs']}
     said = language.texts(sources)
-    technical = [pr['number'] for pr in sources['prs'] if score(pr) <= 0 and pr['number'] not in claimed]
+    technical = [pr['number'] for pr in sources['prs'] if offscreen(pr) and pr['number'] not in claimed]
     rest = [pr for pr in sources['prs'] if pr['number'] not in claimed and pr['number'] not in technical]
     core.mark(run, 'plan', 'start', 'scenes carry the film')
     lines, usage = [], []

@@ -154,7 +154,7 @@ def choose(sources, checkout, roots, addon, picked, limit=MAX_GAPS, provider=Non
     avoid = [re.compile(p) for p in editor.AVOID + list((addon.get('specs') or {}).get('avoid') or [])]
     usable = sorted(k for k in texts if not any(a.search(k) for a in avoid))
     # every user-facing change: a scene written for a change shows it better than the test that changed with it
-    open_prs = [pr for pr in sources['prs'] if editor.score(pr) > 0 and not backstage(pr)]
+    open_prs = [pr for pr in sources['prs'] if not editor.offscreen(pr) and not backstage(pr)]
     if not open_prs or not usable:
         return []
     usable_texts = {k: texts[k] for k in usable}

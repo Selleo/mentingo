@@ -216,7 +216,9 @@ builds for the runner.
 10 for a serial project, 12 otherwise). Selection includes existing test workflow
 titles and related data sources as feasibility evidence; it does not run base
 tests to explore the app. Technical words in a title do not exclude a change
-with UI files. Scene briefs include bounded excerpts of existing helpers and
+with UI files: only a pull request that changes no screen and no interface text
+(and is no feature) is set aside as technical without the model, and the model
+chooses from, and gives the reasons for, all the others. Scene briefs include bounded excerpts of existing helpers and
 divide a narration budget of about 340 words across the selected scenes. Workers must verify
 incomplete definitions before using them and keep every sentence grounded in
 the captured workflow. PR template comments are removed before shortening the

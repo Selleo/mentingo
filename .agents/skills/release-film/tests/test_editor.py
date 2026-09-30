@@ -48,6 +48,16 @@ class Picking(unittest.TestCase):
         self.assertGreater(editor.score(self.sources['prs'][0]), editor.score(self.sources['prs'][2]))
         self.assertLessEqual(editor.score(self.sources['prs'][2]), 0)
 
+    def test_only_a_change_off_every_screen_is_set_aside_without_the_model(self):
+        cases = {'chore: bump deps': (['package-lock.json'], True),
+                 'fix: retry the mail queue': (['api/src/mail/queue.ts'], True),
+                 'chore: add a native time input to calendar fields': (['frontend/src/TimeInput.tsx'], False),
+                 'chore: reword the invoice labels': (['frontend/locales/en.json'], False),
+                 'feat: invoice export': (['api/src/invoices/export.ts'], False)}
+        for title, (files, offscreen) in cases.items():
+            with self.subTest(title):
+                self.assertIs(editor.offscreen(pr(1, title, files)), offscreen)
+
 
 class Answers(unittest.TestCase):
     def test_the_line_format(self):
@@ -193,6 +203,21 @@ class LeftOut(unittest.TestCase):
             reasons = {n: line['reason'] for line in story['not_shown'] for n in line['prs']}
             self.assertEqual(reasons, {3: 'Drobna poprawka wyglądu.', 4: language.TEXTS['pl']['technical'], 5: language.TEXTS['pl']['rest']})
             self.assertIn('# not shown | 3 |', (Path(folder) / 'story.txt').read_text())
+
+    def test_a_chore_that_changes_screens_is_the_models_to_group(self):
+        with tempfile.TemporaryDirectory() as folder:
+            sources = {'repo': 'Acme/shop', 'tag': 'v2', 'base': 'v1',
+                       'prs': [pr(1, 'feat: a', ['frontend/a.tsx']),
+                               pr(2, 'chore: add a native time input to calendar fields', ['frontend/TimeInput.tsx']),
+                               pr(3, 'chore: bump deps', ['package-lock.json'])]}
+            answer = '# not shown | 2 | Smaller form improvements.\n'
+            with mock.patch.object(editor, 'ask', return_value=(answer, {})) as asked:
+                editor.write(folder, sources, 'cli', claimed={1: 'Scena A'})
+            self.assertIn('#2 chore: add a native time input', asked.call_args[0][0])
+            self.assertNotIn('#3 chore: bump deps', asked.call_args[0][0])
+            story = json.loads((Path(folder) / 'story.json').read_text())
+            reasons = {n: line['reason'] for line in story['not_shown'] for n in line['prs']}
+            self.assertEqual(reasons, {2: 'Smaller form improvements.', 3: language.TEXTS['pl']['technical']})
 
 
 class Labels(unittest.TestCase):

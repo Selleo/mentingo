@@ -404,6 +404,23 @@ class Candidates(unittest.TestCase):
             self.assertIn('#1 feat: video completion', model.call_args.args[0])
             self.assertNotIn('#4 feat: increase', model.call_args.args[0])
 
+    def test_a_chore_that_changes_screens_is_offered_to_the_model(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'e2e').mkdir()
+            (root / 'e2e/calendar.spec.ts').write_text('test("adds an event", () => {});')
+            prs = [pr(1, 'chore: add a native time input to calendar fields', ['frontend/TimeInput.tsx']),
+                   pr(2, 'chore: bump deps', ['package-lock.json'])]
+            data = {'repo': 'Acme/cal', 'tag': 'v2', 'prs': prs}
+            with mock.patch.object(editor, 'related', return_value=['e2e/calendar.spec.ts']), \
+                    mock.patch.object(gaps.llm, 'complete', return_value=('# gap | pr1 | 1 | Time input\n', {})) as model, \
+                    mock.patch.object(gaps.knowledge, 'earlier', return_value=[]), \
+                    mock.patch.object(gaps.knowledge, 'limits', return_value=[]):
+                chosen = gaps.choose(data, root, ['e2e'], {}, [])
+            self.assertIn('#1 chore: add a native time input', model.call_args.args[0])
+            self.assertNotIn('#2 chore: bump deps', model.call_args.args[0])
+            self.assertEqual([g['prs'] for g in chosen], [[1]])
+
     def test_the_model_picks_the_changes_and_the_script_their_bases(self):
         with tempfile.TemporaryDirectory() as folder:
             checkout = Path(folder)
