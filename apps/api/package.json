@@ -53,6 +53,7 @@
     "@langfuse/otel": "5.10.1",
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
+    "@mentingo/phishing-simulation-sdk": "0.1.0",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "@nestjs/common": "10.4.17",
     "@nestjs/config": "3.2.3",
@@ -144,8 +145,7 @@
     "uuid": "10.0.0",
     "write-excel-file": "2.3.10",
     "xml2js": "0.6.2",
-    "yargs": "18.0.0",
-    "@mentingo/phishing-simulation-sdk": "file:../../../mentingo-plugins/packages/phishing"
+    "yargs": "18.0.0"
   },
   "devDependencies": {
     "@aws-sdk/types": "3.696.0",
