@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useSearchParams } from "@remix-run/react";
+import { Link, useLocation, useSearchParams } from "@remix-run/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -45,6 +45,7 @@ const loginSchema = (t: (key: string) => string) =>
 
 export default function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const error = searchParams.get("error");
   const magicLinkToken = searchParams.get("token");
 
@@ -234,7 +235,7 @@ export default function LoginPage() {
             <div className="mt-4 text-center text-sm">
               {t("loginView.other.dontHaveAccount")}{" "}
               <Link
-                to="/auth/register"
+                to={`/auth/register${location.search}`}
                 data-testid={LOGIN_PAGE_HANDLES.REGISTER_LINK}
                 className="underline"
               >

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useLocation, useNavigate } from "@remix-run/react";
 import { format, startOfDay, subYears } from "date-fns";
 import { enUS, pl } from "date-fns/locale";
 import { useEffect, useMemo } from "react";
@@ -48,6 +48,7 @@ export default function RegisterPage() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const selectedLanguage = useLanguageStore((state) => state.language);
   const { data: ssoEnabled } = useSSOEnabled();
   const { data: globalSettings } = useGlobalSettings();
@@ -135,11 +136,11 @@ export default function RegisterPage() {
         description: t("inviteOnlyRegistrationView.toast.registerRedirect"),
         variant: "destructive",
       });
-      return navigate("/auth/login", { replace: true });
+      return navigate(`/auth/login${location.search}`, { replace: true });
     }
     // intentional
     // eslint-disable-next-line
-  }, [inviteOnlyRegistration, navigate, toast]);
+  }, [inviteOnlyRegistration, location.search, navigate, toast]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
@@ -370,7 +371,7 @@ export default function RegisterPage() {
                 <div className="mt-4 text-center text-sm">
                   {t("registerView.other.alreadyHaveAccount")}{" "}
                   <Link
-                    to="/auth/login"
+                    to={`/auth/login${location.search}`}
                     className="underline"
                     data-testid={REGISTER_PAGE_HANDLES.SIGN_IN_LINK}
                   >

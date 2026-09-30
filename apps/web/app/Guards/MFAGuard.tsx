@@ -5,6 +5,7 @@ import { match } from "ts-pattern";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { REQUIRED_PASSWORD_CHANGE_URL } from "~/modules/Auth/constants";
+import { courseReturnPath } from "~/modules/Auth/utils/courseReturnPath";
 import { resolvePostAuthRedirectPath } from "~/modules/Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
@@ -21,11 +22,22 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   const { data: currentUser, isLoading } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const lastEntry = useNavigationHistoryStore((state) => state.navigationHistory[0] ?? null);
+  const addLastUnauthorizedEntry = useNavigationHistoryStore(
+    (state) => state.addLastUnauthorizedEntry,
+  );
 
   const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
   const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
   const requiresPasswordChange = Boolean(currentUser?.requiresPasswordChange);
-  const redirectPath = resolvePostAuthRedirectPath({ pathname: lastEntry?.pathname });
+  const requestedCourse = mode === "auth" ? courseReturnPath(location.search) : null;
+  const redirectPath = resolvePostAuthRedirectPath({
+    pathname: requestedCourse ?? lastEntry?.pathname,
+  });
+
+  useEffect(() => {
+    if (!requestedCourse || lastEntry?.pathname === requestedCourse) return;
+    addLastUnauthorizedEntry({ pathname: requestedCourse, timestamp: Date.now() });
+  }, [addLastUnauthorizedEntry, lastEntry?.pathname, requestedCourse]);
 
   useEffect(() => {
     if (mode !== "auth" || !currentUser || shouldVerifyMFA) return;
