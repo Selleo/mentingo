@@ -1,4 +1,4 @@
-import { createPhishingClient, PhishingApiError } from "@mentingo/phishing";
+import { createPhishingClient, PhishingApiError } from "@mentingo/phishing-simulation-sdk";
 import {
   BadGatewayException,
   ForbiddenException,

@@ -1,4 +1,4 @@
-import { isPhishingRiskyActionEvent } from "@mentingo/phishing";
+import { isPhishingRiskyActionEvent } from "@mentingo/phishing-simulation-sdk";
 import { Body, Controller, Post, Req, UnauthorizedException, RawBodyRequest } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";

@@ -89,7 +89,7 @@ importers:
       '@langfuse/vercel-ai-sdk':
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@3.25.76))(zod@3.25.76)
-      '@mentingo/phishing':
+      '@mentingo/phishing-simulation-sdk':
         specifier: file:../../../mentingo-plugins/packages/phishing
         version: file:../mentingo-plugins/packages/phishing
       '@microsoft/microsoft-graph-client':
@@ -4482,8 +4482,9 @@ packages:
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
 
-  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing':
+  '@mentingo/phishing-simulation-sdk@file:../mentingo-plugins/packages/phishing':
     resolution: {directory: ../mentingo-plugins/packages/phishing, type: directory}
+    engines: {node: '>=22.15.0'}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     resolution: {integrity: sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw==}
@@ -10176,7 +10177,7 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.1, please upgrade
+    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
 
   bcryptjs@2.4.3:
     resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
@@ -21855,7 +21856,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mentingo/phishing@file:../mentingo-plugins/packages/phishing': {}
+  '@mentingo/phishing-simulation-sdk@file:../mentingo-plugins/packages/phishing': {}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     dependencies:

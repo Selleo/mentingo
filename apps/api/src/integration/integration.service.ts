@@ -1,6 +1,6 @@
 import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 
-import { createPhishingClient } from "@mentingo/phishing";
+import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import {
   BadRequestException,
   ForbiddenException,

@@ -145,7 +145,7 @@
     "write-excel-file": "2.3.10",
     "xml2js": "0.6.2",
     "yargs": "18.0.0",
-    "@mentingo/phishing": "file:../../../mentingo-plugins/packages/phishing"
+    "@mentingo/phishing-simulation-sdk": "file:../../../mentingo-plugins/packages/phishing"
   },
   "devDependencies": {
     "@aws-sdk/types": "3.696.0",

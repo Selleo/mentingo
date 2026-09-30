@@ -1,4 +1,4 @@
-import type { RecipientResult } from "@mentingo/phishing";
+import type { RecipientResult } from "@mentingo/phishing-simulation-sdk";
 export function filterPhishingRecipients<T extends RecipientResult>(
   recipients: T[],
   groupIds: string[] | null,
