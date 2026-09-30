@@ -11,6 +11,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
   private static readonly BYPASSED_PATHS = new Set<string>([
     "/api/healthcheck",
     "/api/phishing/webhook",
+    "/api/phishing/webhook/probe",
     "/api/integration/tenants",
     "/api/certificates/share",
     "/api/certificates/share-image",

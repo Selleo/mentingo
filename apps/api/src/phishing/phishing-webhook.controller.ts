@@ -1,13 +1,21 @@
 import { isPhishingRiskyActionEvent } from "@mentingo/phishing";
-import { Controller, Post, Req, UnauthorizedException, RawBodyRequest } from "@nestjs/common";
+import { Body, Controller, Post, Req, UnauthorizedException, RawBodyRequest } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
+import { Value } from "@sinclair/typebox/value";
+import { Validate } from "nestjs-typebox";
 
-import { BaseResponse } from "src/common";
+import { BaseResponse, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { CourseService } from "src/courses/course.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { PhishingClientService } from "./phishing-client.service";
+import {
+  phishingConnectionProbeSchema,
+  phishingConnectionProbeResponseSchema,
+  type PhishingConnectionProbeResponse,
+  type PhishingConnectionProbe,
+} from "./phishing-connection.schema";
 import { verifyPhishingSignature } from "./phishing-webhook.utils";
 import { PhishingRepository } from "./phishing.repository";
 
@@ -20,6 +28,38 @@ export class PhishingWebhookController {
     private readonly repository: PhishingRepository,
     private readonly courses: CourseService,
   ) {}
+  @Public()
+  @Post("webhook/probe")
+  @Validate({
+    request: [{ type: "body", schema: phishingConnectionProbeSchema }],
+    response: baseResponse(phishingConnectionProbeResponseSchema),
+  })
+  async connectionProbe(
+    @Body() probe: PhishingConnectionProbe,
+    @Req() request: RawBodyRequest<Request>,
+  ): Promise<BaseResponse<PhishingConnectionProbeResponse>> {
+    if (
+      !request.rawBody ||
+      request.rawBody.length > 2048 ||
+      !Value.Check(phishingConnectionProbeSchema, request.body)
+    )
+      throw new UnauthorizedException();
+    return this.runner.runWithTenant(probe.tenantId, async () => {
+      const secret = await this.client.secret("PHISHING_WEBHOOK_SECRET");
+      if (
+        !secret ||
+        !verifyPhishingSignature(
+          request.rawBody!,
+          secret,
+          String(request.headers["x-phishing-timestamp"] ?? ""),
+          String(request.headers["x-phishing-signature"] ?? ""),
+        )
+      )
+        throw new UnauthorizedException();
+      return new BaseResponse({ nonce: probe.nonce });
+    });
+  }
+
   @Public()
   @Post("webhook")
   async webhook(@Req() request: RawBodyRequest<Request>) {

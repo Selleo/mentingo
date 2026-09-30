@@ -90,6 +90,17 @@ import {
 import { UserService } from "src/user/user.service";
 import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 
+import {
+  integrationPluginDiscoverySchema,
+  integrationPhishingConnectionSchema,
+  integrationPluginConfiguredSchema,
+  integrationPluginStatusSchema,
+  type IntegrationPluginDiscovery,
+  type IntegrationPhishingConnection,
+  type IntegrationPluginConfigured,
+  type IntegrationPluginStatus,
+} from "./schemas/integration-plugin-connection.schema";
+
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse } from "src/group/group.types";
 
@@ -115,6 +126,72 @@ export class IntegrationController {
     private readonly groupService: GroupService,
     private readonly courseService: CourseService,
   ) {}
+
+  @ApiEndpointDocs({
+    summary: "Discover tenants for plugin setup",
+    description:
+      "Lists accessible tenants and whether the key can configure plugins. Configuration requires a managing tenant key with tenant management permission.",
+  })
+  @Get("plugins/connection")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({ response: baseResponse(integrationPluginDiscoverySchema) })
+  async discoverPluginConnection(
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginDiscovery>> {
+    return new BaseResponse(
+      await this.integrationService.discoverPluginConnection(actor, keyTenant),
+    );
+  }
+
+  @ApiEndpointDocs({
+    summary: "Connect a tenant to the phishing platform",
+    description:
+      "Atomically saves the plugin origin, API key and webhook secret, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.",
+  })
+  @Put("tenants/:tenantId/plugins/phishing")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "body", schema: integrationPhishingConnectionSchema },
+    ],
+    response: baseResponse(integrationPluginConfiguredSchema),
+  })
+  async configurePhishingConnection(
+    @Param("tenantId") tenantId: UUIDType,
+    @Body() body: IntegrationPhishingConnection,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginConfigured>> {
+    return new BaseResponse(
+      await this.integrationService.configurePhishingConnection(tenantId, body, actor, keyTenant),
+    );
+  }
+
+  @ApiEndpointDocs({
+    summary: "Verify tenant phishing connectivity",
+    description:
+      "Checks that Mentingo can authenticate to the configured plugin and reports its enabled state. Requires a managing tenant key with tenant management permission. No credentials are returned.",
+  })
+  @Get("tenants/:tenantId/plugins/phishing")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationPluginStatusSchema),
+  })
+  async phishingConnectionStatus(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginStatus>> {
+    return new BaseResponse(
+      await this.integrationService.phishingConnectionStatus(tenantId, actor, keyTenant),
+    );
+  }
 
   @Get("tenants")
   @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)

@@ -23831,6 +23831,52 @@ export interface FinishScormAttemptResponse {
   };
 }
 
+export interface DiscoverPluginConnectionResponse {
+  data: {
+    tenants: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      host: string;
+    }[];
+    canConfigurePlugins: boolean;
+  };
+}
+
+export interface ConfigurePhishingConnectionBody {
+  /**
+   * @minLength 1
+   * @maxLength 2000
+   */
+  baseUrl: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  apiKey: string;
+  /**
+   * @minLength 32
+   * @maxLength 256
+   */
+  webhookSecret: string;
+}
+
+export interface ConfigurePhishingConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface PhishingConnectionStatusResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+    reachable: boolean;
+    enabled: boolean;
+  };
+}
+
 export interface GetTenantsResponse {
   data: {
     /** @format uuid */
@@ -25117,6 +25163,19 @@ export interface GetPhishingReportResponse {
         riskRate: number;
       };
     }[];
+  };
+}
+
+export interface ConnectionProbeBody {
+  /** @format uuid */
+  tenantId: string;
+  /** @pattern ^[a-f0-9]{32}$ */
+  nonce: string;
+}
+
+export interface ConnectionProbeResponse {
+  data: {
+    nonce: string;
   };
 }
 
@@ -33048,6 +33107,60 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Lists accessible tenants and whether the key can configure plugins. Configuration requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationControllerDiscoverPluginConnection
+     * @summary Discover tenants for plugin setup
+     * @request GET:/api/integration/plugins/connection
+     */
+    integrationControllerDiscoverPluginConnection: (params: RequestParams = {}) =>
+      this.request<DiscoverPluginConnectionResponse, void>({
+        path: `/api/integration/plugins/connection`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Atomically saves the plugin origin, API key and webhook secret, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationControllerConfigurePhishingConnection
+     * @summary Connect a tenant to the phishing platform
+     * @request PUT:/api/integration/tenants/{tenantId}/plugins/phishing
+     */
+    integrationControllerConfigurePhishingConnection: (
+      tenantId: string,
+      data: ConfigurePhishingConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ConfigurePhishingConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/phishing`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Checks that Mentingo can authenticate to the configured plugin and reports its enabled state. Requires a managing tenant key with tenant management permission. No credentials are returned.
+     *
+     * @tags Integration
+     * @name IntegrationControllerPhishingConnectionStatus
+     * @summary Verify tenant phishing connectivity
+     * @request GET:/api/integration/tenants/{tenantId}/plugins/phishing
+     */
+    integrationControllerPhishingConnectionStatus: (tenantId: string, params: RequestParams = {}) =>
+      this.request<PhishingConnectionStatusResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/phishing`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Returns all tenants accessible to the current integration API key. Use this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.
      *
      * @tags Integration
@@ -34570,6 +34683,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/phishing/campaigns/${id}/report`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name PhishingWebhookControllerConnectionProbe
+     * @request POST:/api/phishing/webhook/probe
+     */
+    phishingWebhookControllerConnectionProbe: (
+      data: ConnectionProbeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ConnectionProbeResponse, any>({
+        path: `/api/phishing/webhook/probe`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

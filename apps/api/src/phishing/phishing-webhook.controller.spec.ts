@@ -88,6 +88,36 @@ describe("phishing enrollment webhook", () => {
     expect(client.run).not.toHaveBeenCalled();
     expect(courses.enrollCourse).not.toHaveBeenCalled();
   });
+  it("verifies a signed connection probe without reading reports or enrolling anyone", async () => {
+    const { controller, runner, client, repository, courses } = setup();
+    const body = { tenantId: event.tenantId, nonce: "a".repeat(32) };
+    const rawBody = Buffer.from(JSON.stringify(body));
+    const timestamp = String(Math.floor(Date.now() / 1000));
+    const req = {
+      body,
+      rawBody,
+      headers: {
+        "x-phishing-timestamp": timestamp,
+        "x-phishing-signature": createHmac("sha256", secret)
+          .update(timestamp + ".")
+          .update(rawBody)
+          .digest("hex"),
+      },
+    } as unknown as RawBodyRequest<Request>;
+    await expect(controller.connectionProbe(req.body, req)).resolves.toEqual({
+      data: { nonce: body.nonce },
+    });
+    expect(runner.runWithTenant).toHaveBeenCalledWith(body.tenantId, expect.any(Function));
+    expect(client.run).not.toHaveBeenCalled();
+    expect(repository.lockEnrollment).not.toHaveBeenCalled();
+    expect(courses.enrollCourse).not.toHaveBeenCalled();
+    req.body = { ...body, tenantId: randomUUID() };
+    req.rawBody = Buffer.from(JSON.stringify(req.body));
+    await expect(controller.connectionProbe(req.body, req)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+  });
+
   it("does not enroll users outside the campaign", async () => {
     const { controller, client, courses } = setup();
     client.run.mockResolvedValue({ ...report, recipients: [] });

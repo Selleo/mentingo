@@ -1,6 +1,8 @@
 import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 
+import { createPhishingClient } from "@mentingo/phishing";
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -27,6 +29,12 @@ import type {
   IntegrationTrainingResultsQuery,
   RotateAdminKeyData,
 } from "./integration.types";
+import type {
+  IntegrationPluginDiscovery,
+  IntegrationPhishingConnection,
+  IntegrationPluginConfigured,
+  IntegrationPluginStatus,
+} from "./schemas/integration-plugin-connection.schema";
 import type {
   IntegrationUpdateTenantApiKeysBody,
   IntegrationUpdateTenantApiKeysResponse,
@@ -220,6 +228,92 @@ export class IntegrationService {
     );
 
     return { tenantId, updatedKeys: [input.name] };
+  }
+
+  async discoverPluginConnection(
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginDiscovery> {
+    return {
+      tenants: await this.getTenantsForActor({ ...actor, tenantId: keyTenant.tenantId }),
+      canConfigurePlugins:
+        keyTenant.isManaging && hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE),
+    };
+  }
+
+  async configurePhishingConnection(
+    tenantId: string,
+    input: IntegrationPhishingConnection,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginConfigured> {
+    this.assertCanManageTenants(actor, keyTenant);
+    const tenant = await this.integrationRepository.getTenantById(tenantId);
+    if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
+    let url: URL;
+    try {
+      url = new URL(input.baseUrl);
+    } catch {
+      throw new BadRequestException("Invalid plugin URL");
+    }
+    const local =
+      process.env.NODE_ENV !== "production" &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+    if (
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash ||
+      url.pathname !== "/" ||
+      !(url.protocol === "https:" || (local && url.protocol === "http:"))
+    ) {
+      throw new BadRequestException(
+        "Use an HTTPS plugin origin (HTTP localhost is allowed in development)",
+      );
+    }
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.bulkUpsertEnv(
+        [
+          { name: "PHISHING_BASE_URL", value: url.origin },
+          { name: "PHISHING_API_KEY", value: input.apiKey },
+          { name: "PHISHING_WEBHOOK_SECRET", value: input.webhookSecret },
+        ],
+        { ...actor, tenantId },
+      ),
+    );
+    return { tenantId };
+  }
+
+  async phishingConnectionStatus(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginStatus> {
+    this.assertCanManageTenants(actor, keyTenant);
+    if (!(await this.integrationRepository.getTenantById(tenantId)))
+      throw new NotFoundException("superAdminTenants.error.notFound");
+    return this.tenantDbRunner.runWithTenant(tenantId, async () => {
+      try {
+        const [baseUrl, apiKey, webhookSecret] = await Promise.all(
+          ["PHISHING_BASE_URL", "PHISHING_API_KEY", "PHISHING_WEBHOOK_SECRET"].map((name) =>
+            this.envService.getEnv(name),
+          ),
+        );
+        if (webhookSecret.value.length < 32) return { tenantId, reachable: false, enabled: false };
+        const config = await createPhishingClient({
+          tenantId,
+          baseURL: baseUrl.value,
+          apiKey: apiKey.value,
+        }).configuration.get();
+        return {
+          tenantId,
+          reachable: true,
+          enabled: config.capabilities.phishingSimulation.enabled,
+        };
+      } catch {
+        return { tenantId, reachable: false, enabled: false };
+      }
+    });
   }
 
   async getTrainingResults(

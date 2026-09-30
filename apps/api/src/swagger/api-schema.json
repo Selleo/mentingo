@@ -15425,6 +15425,146 @@
         }
       }
     },
+    "/api/integration/plugins/connection": {
+      "get": {
+        "operationId": "IntegrationController_discoverPluginConnection",
+        "summary": "Discover tenants for plugin setup",
+        "description": "Lists accessible tenants and whether the key can configure plugins. Configuration requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverPluginConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/plugins/phishing": {
+      "put": {
+        "operationId": "IntegrationController_configurePhishingConnection",
+        "summary": "Connect a tenant to the phishing platform",
+        "description": "Atomically saves the plugin origin, API key and webhook secret, encrypted for the path tenant. Retrying with the same values is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurePhishingConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurePhishingConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "get": {
+        "operationId": "IntegrationController_phishingConnectionStatus",
+        "summary": "Verify tenant phishing connectivity",
+        "description": "Checks that Mentingo can authenticate to the configured plugin and reports its enabled state. Requires a managing tenant key with tenant management permission. No credentials are returned.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhishingConnectionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants": {
       "get": {
         "operationId": "IntegrationController_getTenants",
@@ -19370,6 +19510,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetPhishingReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/phishing/webhook/probe": {
+      "post": {
+        "operationId": "PhishingWebhookController_connectionProbe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionProbeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionProbeResponse"
                 }
               }
             }
@@ -125364,6 +125531,125 @@
           "data"
         ]
       },
+      "DiscoverPluginConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "host"
+                  ]
+                }
+              },
+              "canConfigurePlugins": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenants",
+              "canConfigurePlugins"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ConfigurePhishingConnectionBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "apiKey": {
+            "minLength": 32,
+            "maxLength": 256,
+            "writeOnly": true,
+            "type": "string"
+          },
+          "webhookSecret": {
+            "minLength": 32,
+            "maxLength": 256,
+            "writeOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseUrl",
+          "apiKey",
+          "webhookSecret"
+        ]
+      },
+      "ConfigurePhishingConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "PhishingConnectionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reachable": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "tenantId",
+              "reachable",
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetTenantsResponse": {
         "type": "object",
         "properties": {
@@ -131268,6 +131554,43 @@
               "recipients",
               "totals",
               "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ConnectionProbeBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nonce": {
+            "pattern": "^[a-f0-9]{32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenantId",
+          "nonce"
+        ]
+      },
+      "ConnectionProbeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "nonce": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "nonce"
             ]
           }
         },
