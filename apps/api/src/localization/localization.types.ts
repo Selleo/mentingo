@@ -1,3 +1,4 @@
+import type { SupportedLanguages } from "@repo/shared";
 import type {
   courses,
   questionsAndAnswers,
@@ -10,6 +11,7 @@ import type {
   learningPaths,
   calendarEvents,
   announcements,
+  emailTemplates,
 } from "src/storage/schema";
 
 export const ENTITY_TYPE = {
@@ -24,6 +26,12 @@ export const ENTITY_TYPE = {
 } as const;
 
 export type EntityType = (typeof ENTITY_TYPE)[keyof typeof ENTITY_TYPE];
+
+export type EntityLocalization = {
+  baseLanguage: SupportedLanguages;
+  language: SupportedLanguages;
+  availableLocales: SupportedLanguages[];
+};
 
 export type EntityField = "title" | "description";
 
@@ -43,5 +51,6 @@ export type BaseTable =
   | typeof groups
   | typeof learningPaths
   | typeof announcements
+  | typeof emailTemplates
   | typeof learningPaths
   | typeof calendarEvents;

@@ -20,6 +20,7 @@ const resourceNameFields: Partial<Record<ActivityLogResourceType, ResourceNameFi
   [ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE_SECTION]: { snapshot: "title", deletionContext: "title" },
   [ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING]: { snapshot: "title", deletionContext: "title" },
   [ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH]: { snapshot: "title" },
+  [ACTIVITY_LOG_RESOURCE_TYPES.EMAIL_TEMPLATE]: { snapshot: "name", deletionContext: "name" },
 };
 
 const getUserName = (snapshot: Record<string, unknown>) => {

@@ -3,6 +3,7 @@ export const ENTITY_TYPES = {
   CHAPTER: "chapter",
   LESSON: "lesson",
   QUESTION: "question",
+  ASSESSMENT_QUESTION: "assessment_question",
   NEWS: "news",
   ARTICLES: "articles",
   LEARNING_PATH: "learning_path",

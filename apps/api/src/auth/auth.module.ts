@@ -6,6 +6,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
+import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -25,6 +26,7 @@ import { GoogleStrategy } from "./strategy/google.strategy";
 import { JwtStrategy } from "./strategy/jwt.strategy";
 import { LocalStrategy } from "./strategy/local.strategy";
 import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
+import { SlackStrategy } from "./strategy/slack.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
@@ -53,8 +55,10 @@ import { TokenService } from "./token.service";
     BunnyStreamService,
     GoogleStrategy,
     MicrosoftStrategy,
+    SlackStrategy,
     GoogleOAuthGuard,
     MicrosoftOAuthGuard,
+    SlackOAuthGuard,
     SettingsService,
   ],
   exports: [CreatePasswordService],

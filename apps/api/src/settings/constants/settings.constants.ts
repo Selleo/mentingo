@@ -43,7 +43,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   platformSimpleLogoS3Key: null,
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
-  inviteOnlyRegistration: false,
+  inviteOnlyRegistration: true,
   userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
   contrastColor: null,

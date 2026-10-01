@@ -6,12 +6,14 @@ import {
   CheckCircle2,
   CirclePlus,
   KeyRound,
+  Languages,
   LogIn,
   LogOut,
   MailPlus,
   Pencil,
   Play,
   RotateCcw,
+  Send,
   ShieldAlert,
   Tags,
   Trash2,
@@ -19,11 +21,12 @@ import {
   Users2,
 } from "lucide-react";
 
+import type { ActivityLogActionType as SharedActivityLogActionType } from "@repo/shared";
 import type i18next from "i18next";
 import type { GetActivityLogsResponse } from "~/api/generated-api";
 
 export type ActivityLogItem = GetActivityLogsResponse["data"][number];
-export type ActivityLogActionType = ActivityLogItem["actionType"];
+export type ActivityLogActionType = SharedActivityLogActionType;
 
 export type ActivityLogActionConfig = {
   icon: LucideIcon;
@@ -117,6 +120,36 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     badgeClassName: "border-cyan-200 bg-cyan-50 text-cyan-700",
     iconClassName: "text-cyan-700",
     ringClassName: "border-cyan-600",
+  },
+  publish_email_template: {
+    icon: Send,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
+  },
+  archive_email_template: {
+    icon: Archive,
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    iconClassName: "text-slate-700",
+    ringClassName: "border-slate-600",
+  },
+  restore_email_template: {
+    icon: RotateCcw,
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-800",
+    iconClassName: "text-amber-700",
+    ringClassName: "border-amber-600",
+  },
+  add_email_template_language: {
+    icon: Languages,
+    badgeClassName: "border-teal-200 bg-teal-50 text-teal-700",
+    iconClassName: "text-teal-700",
+    ringClassName: "border-teal-600",
+  },
+  remove_email_template_language: {
+    icon: Trash2,
+    badgeClassName: "border-orange-200 bg-orange-50 text-orange-700",
+    iconClassName: "text-orange-700",
+    ringClassName: "border-orange-600",
   },
   send_password_reset_email: {
     icon: KeyRound,

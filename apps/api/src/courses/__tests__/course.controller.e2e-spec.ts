@@ -9,6 +9,9 @@ import {
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+  SCORM_STANDARD,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
@@ -20,6 +23,7 @@ import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CourseDurationService } from "src/courses/course-duration.service";
 import { CourseService } from "src/courses/course.service";
+import { EnvService } from "src/env/services/env.service";
 import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -40,6 +44,7 @@ import {
   lessons,
   resourceEntity,
   resources,
+  scormPackages,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -2801,6 +2806,73 @@ describe("CourseController (e2e)", () => {
         .expect(400);
 
       expect(response.body.message).toBe("adminCoursesView.toast.noCoursesSelected");
+    });
+  });
+
+  describe("deleting a course with a SCORM lesson", () => {
+    it.each(["single", "bulk"])("removes SCORM packages on %s deletion", async (mode) => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: admin.id });
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.SCORM,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "SCORM lesson"),
+          displayOrder: 0,
+        })
+        .returning({ id: lessons.id });
+      const [scormPackage] = await db
+        .insert(scormPackages)
+        .values({
+          entityType: SCORM_PACKAGE_ENTITY_TYPE.LESSON,
+          entityId: lesson.id,
+          language: SUPPORTED_LANGUAGES.EN,
+          standard: SCORM_STANDARD.SCORM_1_2,
+          originalFileReference: "test/scorm/original.zip",
+          extractedFilesReference: "test/scorm/extracted",
+          manifestEntryPoint: "test/scorm/extracted/index.html",
+          status: SCORM_PACKAGE_STATUS.READY,
+        })
+        .returning({ id: scormPackages.id });
+      const cookies = await cookieFor(admin, app);
+      const lumaConfiguration = jest.spyOn(app.get(EnvService), "getLumaConfigured");
+      lumaConfiguration.mockResolvedValue({
+        enabled: false,
+        courseGenerationEnabled: false,
+        voiceMentorEnabled: false,
+        voiceTtsProvider: "cartesia",
+      });
+
+      try {
+        if (mode === "single") {
+          await request(app.getHttpServer())
+            .delete(`/api/course/deleteCourse/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+        } else {
+          await request(app.getHttpServer())
+            .delete("/api/course/deleteManyCourses")
+            .send({ ids: [course.id] })
+            .set("Cookie", cookies)
+            .expect(200);
+        }
+      } finally {
+        lumaConfiguration.mockRestore();
+      }
+
+      expect(
+        await db.select().from(scormPackages).where(eq(scormPackages.id, scormPackage.id)),
+      ).toHaveLength(0);
     });
   });
 

@@ -61,3 +61,43 @@ test("visitor cannot submit invalid registration data", async ({ withReadonlyPag
     await expect(page.getByTestId(REGISTER_PAGE_HANDLES.SUBMIT)).toBeDisabled();
   });
 });
+
+test("visitor sees an explanation and sign-in link when registration is invite-only", async ({
+  apiClient,
+  cleanup,
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const getInviteOnlyRegistration = async () => {
+      const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
+      return response.data.data.inviteOnlyRegistration;
+    };
+    const originalValue = await getInviteOnlyRegistration();
+
+    cleanup.add(async () => {
+      if ((await getInviteOnlyRegistration()) !== originalValue) {
+        await apiClient.api.settingsControllerUpdateInviteOnlyRegistration();
+      }
+    });
+
+    if (!originalValue) {
+      await apiClient.api.settingsControllerUpdateInviteOnlyRegistration();
+    }
+
+    await page.context().clearCookies();
+    await page.addInitScript(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+    await page.goto("/auth/register");
+
+    await expect(page).toHaveURL("/auth/register");
+    await expect(
+      page.getByRole("heading", { name: "Registration is only possible by invitation." }),
+    ).toBeVisible();
+    await expect(page.getByTestId(REGISTER_PAGE_HANDLES.PAGE)).toHaveCount(0);
+
+    await page.getByRole("link", { name: "Sign in" }).click();
+    await expect(page).toHaveURL("/auth/login");
+  });
+});

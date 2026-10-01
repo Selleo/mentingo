@@ -11,5 +11,7 @@ export const resolveScormContentType = async (buffer: Buffer, filename: string) 
   return detectedType?.mime ?? (mimeTypeFromFilename || DEFAULT_CONTENT_TYPE);
 };
 
-export const resolveScormContentTypeFromFilename = (filename: string) =>
-  lookup(filename) || DEFAULT_CONTENT_TYPE;
+export const resolveScormContentTypeFromFilename = (
+  filename: string,
+  fallback = DEFAULT_CONTENT_TYPE,
+) => lookup(filename) || fallback;

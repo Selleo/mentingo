@@ -21,6 +21,7 @@ The feature is not a standalone learner page. It appears inside authoring flows 
 - Search and paginate existing assets for the current authoring language.
 - Keep long asset and usage names within the library layout by truncating them while preserving the full value as native hover text.
 - Upload a supported file into the library from the editor workflow.
+- Make supported images from imported course and learning-path packages available in the library for later reuse.
 - Choose one public or private visibility for every batch dropped directly into a rich-text editor.
 - Keep personal assets private so other creators cannot discover or reuse them, while retaining delivery through the content where they are embedded.
 - Change visibility for one or several eligible assets at once, with warnings when used assets become private.
@@ -42,6 +43,8 @@ If the needed file is not already available, the author can upload it from the d
 
 When files are dragged into a rich-text editor, Mentingo asks the author to choose whether the entire dropped batch is public or private before uploading it. The choice applies consistently to images, documents, presentations, and videos.
 
+When an author imports a native course or learning-path package, Mentingo adds its referenced supported images to the Resource Library as private assets owned by the importing author. The author can then find and reuse them in authoring flows. If the import fails, Mentingo archives those library entries and removes their uploaded files.
+
 Shared-course resource copies use a separate hidden state in the receiving tenant. They keep the shared course working but never appear in that tenant's Asset Library, including for administrators.
 
 When deleting an asset, Mentingo shows where it is used and asks for confirmation. Confirmed deletion archives the asset, removes explicit relations, and cleans up rich-text references so authors are not left with unmanaged links.
@@ -53,7 +56,10 @@ When deleting an asset, Mentingo shows where it is used and asks for confirmatio
 - Supported rich-text entity types are lessons, articles, and news.
 - Access is granted through content-management permissions for courses, articles, and news via `RESOURCE_LIBRARY_PERMISSIONS`. `RESOURCE_LIBRARY_MANAGE` is a separate administrative override for private assets; it is granted to the Admin default role and can be granted to custom roles.
 - Resource utilities scan localized rich-text content for resource IDs, deduplicate usages, replace resource references, and remove references during deletion.
+- Native archive imports route referenced supported images through the file service, which stores image variants where supported and registers private library assets for the importing author in the current tenant.
 
 ## Test Evidence
 
 Existing backend E2E coverage verifies required authentication and permissions, paginated asset search/filtering, usage counts, usage detail deduplication, unknown-asset 404s, linking and unlinking assets, uploading through the file service, and deletion cleanup. The visibility implementation adds API and UI behavior that should receive focused E2E coverage for uploader/admin filtering, bulk updates, and hidden shared-course copies. Unit tests cover resource-ID extraction, deduplication, reference removal and replacement, tenant URL rewriting, and localized rich-text entry collection.
+
+Native archive unit tests cover image reference rewriting and cleanup when staging fails. An end-to-end import-to-library listing test has not been added.

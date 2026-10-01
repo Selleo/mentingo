@@ -25,7 +25,6 @@ import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
-import { SlackStrategy } from "./auth/strategy/slack.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
@@ -49,6 +48,7 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
+import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
@@ -61,10 +61,11 @@ import { LessonVideoProgressModule } from "./lesson-video-progress/lesson-video-
 import { LiveTrainingModule } from "./live-training/live-training.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
+import { NativeArchiveModule } from "./native-archive/native-archive.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
-import { QuestionsModule } from "./questions/question.module";
+import { QuizModule } from "./quiz/quiz.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
@@ -141,17 +142,19 @@ import type { RedisClient } from "src/redis";
     HealthModule,
     UserModule,
     EmailModule,
+    EmailTemplateModule,
     TestConfigModule,
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
+    NativeArchiveModule,
     CourseChatModule,
     LearningPathModule,
     GroupModule,
     GlobalSearchModule,
     LessonModule,
     LessonVideoProgressModule,
-    QuestionsModule,
+    QuizModule,
     StudentLessonProgressModule,
     FileModule,
     S3Module,
@@ -227,7 +230,6 @@ import type { RedisClient } from "src/redis";
     MicrosoftStrategy,
     AppStartupService,
     LangfuseShutdownService,
-    ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })
 export class AppModule {}

@@ -2,6 +2,12 @@ import { RATE_LIMITS, RATE_LIMIT_WINDOW_SEC } from "src/rate-limit/rate-limit.co
 import { isRateLimitingDisabled, resolveRateLimitPolicy } from "src/rate-limit/rate-limit.utils";
 
 describe("resolveRateLimitPolicy", () => {
+  it("limits test email requests to five per minute", () => {
+    expect(resolveRateLimitPolicy("POST", "/api/email-templates/test-send")).toMatchObject({
+      limit: 5,
+      windowSec: 60,
+    });
+  });
   it("returns strict policy for login", () => {
     const policy = resolveRateLimitPolicy("POST", "/api/auth/login");
 

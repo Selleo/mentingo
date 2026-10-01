@@ -3,6 +3,7 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
+  EMAIL_TEMPLATE_TEST: "email-template-test",
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",
@@ -11,6 +12,7 @@ export const QUEUE_NAMES = {
   LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
   SCORM_IMPORT: "scorm-import",
+  NATIVE_ARCHIVE: "native-archive",
   COURSE_DUPLICATION: "course-duplication",
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",

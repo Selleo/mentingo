@@ -31,47 +31,43 @@ services:
     x-ports:
       - ${PREVIEW_MAILHOG_DOMAIN}:8025/https
 
-  minio-preview-pr-${PR_ID}:
-    image: quay.io/minio/minio:latest
-    container_name: minio-preview-pr-${PR_ID}
+  rustfs-preview-pr-${PR_ID}:
+    image: rustfs/rustfs:latest
+    container_name: rustfs-preview-pr-${PR_ID}
     restart: always
     x-ports:
-      - ${PREVIEW_MINIO_DOMAIN}:9000/https
+      - ${PREVIEW_RUSTFS_DOMAIN}:9000/https
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: "${RUSTFS_SECRET_KEY}"
     volumes:
-      - minio-preview-pr-${PR_ID}-data:/data
-    command: server /data --console-address ":9001"
+      - rustfs-preview-pr-${PR_ID}-data:/data
+    command: /data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/health/ready >/dev/null"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  create-minio-bucket-preview-pr-${PR_ID}:
-    image: quay.io/minio/mc:latest
-    container_name: minio-setup-preview-pr-${PR_ID}
+  create-rustfs-bucket-preview-pr-${PR_ID}:
+    image: amazon/aws-cli:latest
+    container_name: rustfs-setup-preview-pr-${PR_ID}
     depends_on:
-      minio-preview-pr-${PR_ID}:
+      rustfs-preview-pr-${PR_ID}:
         condition: service_healthy
     restart: "no"
     environment:
-      S3_BUCKET_NAME: "preview-pr-${PR_ID}"
-      S3_ACCESS_KEY_ID: "minioadmin"
-      S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
-      MINIO_HOST: "minio-preview-pr-${PR_ID}"
+      AWS_ACCESS_KEY_ID: "rustfsadmin"
+      AWS_SECRET_ACCESS_KEY: "${RUSTFS_SECRET_KEY}"
+      AWS_DEFAULT_REGION: "us-east-1"
     entrypoint:
       - /bin/sh
       - -ec
       - |
-        HOST="http://$${MINIO_HOST}:9000"
-        mc alias set local "$${HOST}" "$${S3_ACCESS_KEY_ID}" "$${S3_SECRET_ACCESS_KEY}"
-        if mc ls "local/$${S3_BUCKET_NAME}" > /dev/null 2>&1; then
-          echo "Bucket '$${S3_BUCKET_NAME}' already exists"
+        if aws --endpoint-url "http://rustfs-preview-pr-${PR_ID}:9000" s3api head-bucket --bucket "preview-pr-${PR_ID}" >/dev/null 2>&1; then
+          echo "Bucket already exists"
         else
-          mc mb "local/$${S3_BUCKET_NAME}"
-          echo "Bucket '$${S3_BUCKET_NAME}' created"
+          aws --endpoint-url "http://rustfs-preview-pr-${PR_ID}:9000" s3api create-bucket --bucket "preview-pr-${PR_ID}"
         fi
 
   migrate-preview-pr-${PR_ID}:
@@ -81,9 +77,9 @@ services:
         condition: service_healthy
       redis-preview-pr-${PR_ID}:
         condition: service_healthy
-      minio-preview-pr-${PR_ID}:
+      rustfs-preview-pr-${PR_ID}:
         condition: service_healthy
-      create-minio-bucket-preview-pr-${PR_ID}:
+      create-rustfs-bucket-preview-pr-${PR_ID}:
         condition: service_completed_successfully
     restart: "no"
     entrypoint:
@@ -108,9 +104,9 @@ services:
         condition: service_healthy
       redis-preview-pr-${PR_ID}:
         condition: service_healthy
-      minio-preview-pr-${PR_ID}:
+      rustfs-preview-pr-${PR_ID}:
         condition: service_healthy
-      create-minio-bucket-preview-pr-${PR_ID}:
+      create-rustfs-bucket-preview-pr-${PR_ID}:
         condition: service_completed_successfully
       migrate-preview-pr-${PR_ID}:
         condition: service_completed_successfully
@@ -141,10 +137,10 @@ services:
       AWS_REGION: ""
       AWS_ACCESS_KEY_ID: ""
       AWS_SECRET_ACCESS_KEY: ""
-      S3_ENDPOINT: "https://${PREVIEW_MINIO_DOMAIN}"
-      S3_REGION: "eu-central-1"
-      S3_ACCESS_KEY_ID: "minioadmin"
-      S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+      S3_ENDPOINT: "https://${PREVIEW_RUSTFS_DOMAIN}"
+      S3_REGION: "us-east-1"
+      S3_ACCESS_KEY_ID: "rustfsadmin"
+      S3_SECRET_ACCESS_KEY: "${RUSTFS_SECRET_KEY}"
       S3_BUCKET_NAME: "preview-pr-${PR_ID}"
       SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
       BUNNY_STREAM_API_KEY: ""
@@ -194,7 +190,7 @@ volumes:
     driver: local
   redis-preview-pr-${PR_ID}-data:
     driver: local
-  minio-preview-pr-${PR_ID}-data:
+  rustfs-preview-pr-${PR_ID}-data:
     driver: local
   api-preview-pr-${PR_ID}-uploads:
     driver: local

@@ -1,5 +1,7 @@
 import { load as loadHtml } from "cheerio";
 
+export const BLANK_ANSWER_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
+
 export const rewriteBlankAnswerIds = (content: string, optionMap: Map<string, string>) => {
   const $ = loadHtml(content, null, false);
 

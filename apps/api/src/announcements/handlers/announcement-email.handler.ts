@@ -2,6 +2,7 @@ import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import {
   AnnouncementEmail,
+  EMAIL_TEMPLATE_EVENTS,
   LiveTrainingEndedEmail,
   LiveTrainingReminderEmail,
   LiveTrainingStartedEmail,
@@ -80,7 +81,32 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
             text,
             html,
           },
-          { tenantId: announcement.tenantId },
+          {
+            tenantId: announcement.tenantId,
+            template: {
+              event:
+                announcement.emailTemplate === ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT
+                  ? EMAIL_TEMPLATE_EVENTS.ANNOUNCEMENT
+                  : announcement.emailTemplate,
+              language: isSupportedLanguage(recipient.language)
+                ? recipient.language
+                : emailLanguage,
+              variables: {
+                title,
+                content,
+                button_link: this.getButtonLink(
+                  tenantOrigin,
+                  announcement.emailTemplate,
+                  announcement.sourceId,
+                ),
+                live_training_link: this.getButtonLink(
+                  tenantOrigin,
+                  announcement.emailTemplate,
+                  announcement.sourceId,
+                ),
+              },
+            },
+          },
         );
       },
       {

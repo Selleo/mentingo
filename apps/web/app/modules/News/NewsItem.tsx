@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { formatDate } from "date-fns";
 
 import { NEWS_PAGE_HANDLES } from "../../../e2e/data/news/handles";
+import { AuthorName } from "../../components/AuthorName";
 import { Icon } from "../../components/Icon";
 import { cn } from "../../lib/utils";
 
@@ -15,6 +16,7 @@ type Props = GetNewsListResponse["data"][number] & {
 function NewsItem({
   title,
   authorName,
+  authorDeleted,
   publishedAt,
   summary,
   id,
@@ -66,7 +68,9 @@ function NewsItem({
           )}
           <div className="flex items-center gap-2">
             <Icon name="User" className="size-4 text-white" />
-            <p className="text-sm font-normal leading-5 text-white opacity-80">{authorName}</p>
+            <p className="text-sm font-normal leading-5 text-white opacity-80">
+              <AuthorName name={authorName} deleted={authorDeleted} />
+            </p>
           </div>
         </div>
       </div>

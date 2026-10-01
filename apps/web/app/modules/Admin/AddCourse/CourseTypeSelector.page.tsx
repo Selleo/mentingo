@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { ArrowLeft, FileText, Package } from "lucide-react";
+import { ArrowLeft, FileText, FolderUp, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -19,9 +19,10 @@ import type { MetaFunction } from "@remix-run/react";
 import type { LucideIcon } from "lucide-react";
 
 type CourseTypeOption = {
-  id: "standard" | "scorm";
+  id: "standard" | "scorm" | "mentingoPackage";
   href: string;
   icon: LucideIcon;
+  testId: string;
   featureKeys: string[];
 };
 
@@ -30,6 +31,7 @@ const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
     id: "standard",
     href: "/admin/beta-courses/new/standard",
     icon: FileText,
+    testId: COURSE_TYPE_SELECTOR_HANDLES.STANDARD_CARD,
     featureKeys: [
       "adminCourseTypeSelector.standard.features.authoring",
       "adminCourseTypeSelector.standard.features.curriculum",
@@ -41,11 +43,24 @@ const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
     id: "scorm",
     href: "/admin/courses/new-scorm",
     icon: Package,
+    testId: COURSE_TYPE_SELECTOR_HANDLES.SCORM_CARD,
     featureKeys: [
       "adminCourseTypeSelector.scorm.features.import",
       "adminCourseTypeSelector.scorm.features.tracking",
       "adminCourseTypeSelector.scorm.features.structure",
       "adminCourseTypeSelector.scorm.features.future",
+    ],
+  },
+  {
+    id: "mentingoPackage",
+    href: "/admin/courses/import-package",
+    icon: FolderUp,
+    testId: COURSE_TYPE_SELECTOR_HANDLES.MENTINGO_PACKAGE_CARD,
+    featureKeys: [
+      "adminCourseTypeSelector.mentingoPackage.features.structure",
+      "adminCourseTypeSelector.mentingoPackage.features.settings",
+      "adminCourseTypeSelector.mentingoPackage.features.assets",
+      "adminCourseTypeSelector.mentingoPackage.features.learningPath",
     ],
   },
 ];
@@ -94,7 +109,7 @@ const CourseTypeSelectorPage = () => {
           <p className="body-lg mt-4 text-neutral-700">{t("adminCourseTypeSelector.subtitle")}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {COURSE_TYPE_OPTIONS.map((option) => (
             <CourseTypeCard
               key={option.id}
@@ -104,11 +119,7 @@ const CourseTypeSelectorPage = () => {
               href={option.href}
               icon={option.icon}
               accent={option.id}
-              testId={
-                option.id === "standard"
-                  ? COURSE_TYPE_SELECTOR_HANDLES.STANDARD_CARD
-                  : COURSE_TYPE_SELECTOR_HANDLES.SCORM_CARD
-              }
+              testId={option.testId}
             />
           ))}
         </div>

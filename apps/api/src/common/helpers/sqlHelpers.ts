@@ -81,6 +81,10 @@ export function setJsonbStringArrayField(
 
 export type JsonbFieldUpdate = ReturnType<typeof setJsonbField>;
 
+export function buildJsonbField<T = unknown>(
+  key: SqlExpression<string>,
+  value: SqlExpression<string>,
+): SQL<T>;
 export function buildJsonbField(key: string, value: string, allowEmpty?: boolean): SQL<unknown>;
 export function buildJsonbField(
   key?: string | null,
@@ -88,8 +92,8 @@ export function buildJsonbField(
   allowEmpty?: boolean,
 ): SQL<unknown> | undefined;
 export function buildJsonbField(
-  key?: string | null,
-  value?: string | null,
+  key?: string | SqlExpression<string> | null,
+  value?: string | SqlExpression<string> | null,
   allowEmpty: boolean = false,
 ): SQL<unknown> | undefined {
   if (key == null || value === undefined) return undefined;
@@ -110,15 +114,36 @@ export function deleteJsonbField(field: AnyPgColumn, key: string) {
   return sql`${field} - ${key}::text`;
 }
 
-export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<string, string>>) {
+export function buildJsonbFieldWithMultipleEntries(
+  entries: Partial<Record<string, string | object>>,
+) {
   const keys = Object.keys(entries);
 
   if (!keys.length) return sql`'{}'::jsonb`;
 
-  const pairs = keys.flatMap((key) => [sql`${key}::text`, sql`${entries[key]}::text`]);
+  const pairs = keys.flatMap((key) => {
+    const value = entries[key];
+
+    if (typeof value === "object" && value !== null) {
+      // The text cast keeps postgres.js from encoding the JSON parameter as a JSONB string.
+      return [sql`${key}::text`, sql`${JSON.stringify(value)}::text::jsonb`];
+    }
+
+    return [sql`${key}::text`, sql`${value}::text`];
+  });
 
   return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
+
+export const getFirstJsonbObjectKey = <T = string>(field: SqlExpression) =>
+  sql<T>`(
+    SELECT key FROM JSON_EACH_TEXT(${field}) LIMIT 1
+  )`;
+
+export const getFirstJsonbObjectValue = <T = string>(field: SqlExpression) =>
+  sql<T>`(
+    SELECT value FROM JSON_EACH_TEXT(${field}) LIMIT 1
+  )`;
 
 export function mergeJsonbField(existingField: SqlExpression, incomingField: SqlExpression) {
   return sql`

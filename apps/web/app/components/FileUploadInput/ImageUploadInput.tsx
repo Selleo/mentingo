@@ -4,6 +4,10 @@ import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
 
+import { IMAGE_UPLOAD_SIZES } from "./imageUpload.constants";
+
+import type { ImageUploadSize } from "./imageUpload.types";
+
 interface ImageUploadProps {
   field: { value?: string };
   handleImageUpload: (file: File) => void;
@@ -13,7 +17,7 @@ interface ImageUploadProps {
   fileInputRef?: React.RefObject<HTMLInputElement>;
   inputId?: string;
   variant?: "square" | "video";
-  size?: "default" | "compact";
+  size?: ImageUploadSize;
   accept?: string;
   imageFit?: "cover" | "contain";
   detailsText?: string;
@@ -29,13 +33,14 @@ const ImageUploadInput = ({
   fileInputRef,
   inputId,
   variant = "square",
-  size = "default",
+  size = IMAGE_UPLOAD_SIZES.DEFAULT,
   accept = ".png, .jpg, .jpeg",
   imageFit = "cover",
   detailsText,
   inputTestId,
 }: ImageUploadProps) => {
   const { t } = useTranslation();
+  const isSmall = size === IMAGE_UPLOAD_SIZES.SMALL;
   const fallbackDetails =
     variant === "video"
       ? "PNG, JPG or JPEG (max. 20 MB, recommended 1920x1080 or higher)"
@@ -47,9 +52,9 @@ const ImageUploadInput = ({
         className={cn(
           "relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100",
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
-          { "aspect-video": variant === "video" && size === "default" },
-          { "aspect-square": variant === "square" && size === "default" },
-          { "h-36": size === "compact" },
+          { "aspect-video": variant === "video" && size === IMAGE_UPLOAD_SIZES.DEFAULT },
+          { "aspect-square": variant === "square" && size === IMAGE_UPLOAD_SIZES.DEFAULT },
+          { "h-36": size === IMAGE_UPLOAD_SIZES.COMPACT, "h-20 border": isSmall },
         )}
       >
         {imageUrl && (
@@ -71,22 +76,33 @@ const ImageUploadInput = ({
             },
           )}
         >
-          <Icon name="UploadImageIcon" />
-
-          <div className="mt-2 flex items-center justify-center text-sm font-semibold sm:text-base bg-white text-neutral-900 px-2 py-1 rounded-md border">
-            <span className="text-current">
-              {field.value ? t("uploadFile.replace") : t("uploadFile.header")}
-            </span>
-            <span className="ml-1 text-current">{t("uploadFile.subHeader")}</span>
-          </div>
+          <Icon name="UploadImageIcon" className={cn({ "size-8": isSmall })} />
 
           <div
             className={cn(
-              "mt-2 w-fit rounded-md border px-2 py-1 text-[13px] font-medium leading-5 bg-white text-neutral-900",
+              "mt-2 flex items-center justify-center rounded-md border bg-white px-2 py-1 font-semibold text-neutral-900",
+              {
+                "text-sm sm:text-base": !isSmall,
+                "mt-1 border-0 bg-transparent p-0 text-xs": isSmall,
+                "text-white": isSmall && Boolean(field.value),
+              },
             )}
           >
-            {detailsText ?? fallbackDetails}
+            <span className="text-current">
+              {field.value ? t("uploadFile.replace") : t("uploadFile.header")}
+            </span>
+            {!isSmall && <span className="ml-1 text-current">{t("uploadFile.subHeader")}</span>}
           </div>
+
+          {!isSmall && (
+            <div
+              className={cn(
+                "mt-2 w-fit rounded-md border px-2 py-1 text-[13px] font-medium leading-5 bg-white text-neutral-900",
+              )}
+            >
+              {detailsText ?? fallbackDetails}
+            </div>
+          )}
         </div>
         <input
           id={inputId}

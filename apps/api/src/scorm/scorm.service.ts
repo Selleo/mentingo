@@ -1028,7 +1028,12 @@ export class ScormService {
     );
 
     try {
-      return await this.s3Service.getFileStream(objectReference, params.range);
+      const file = await this.s3Service.getFileStream(objectReference, params.range);
+
+      return {
+        ...file,
+        contentType: resolveScormContentTypeFromFilename(params.relativePath, file.contentType),
+      };
     } catch (error) {
       if (this.isMissingS3ObjectError(error)) {
         throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");

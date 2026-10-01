@@ -12,7 +12,7 @@ type CourseTypeCardProps = {
   features: string[];
   href: string;
   icon: LucideIcon;
-  accent: "standard" | "scorm";
+  accent: "standard" | "scorm" | "mentingoPackage";
   testId?: string;
 };
 
@@ -26,6 +26,11 @@ const accentClassNames = {
     icon: "border-emerald-100 bg-emerald-50 text-emerald-700 group-hover:border-emerald-200",
     card: "hover:border-emerald-300 hover:bg-emerald-50/40",
     arrow: "text-emerald-700",
+  },
+  mentingoPackage: {
+    icon: "border-sky-100 bg-sky-50 text-sky-700 group-hover:border-sky-200",
+    card: "hover:border-sky-300 hover:bg-sky-50/40",
+    arrow: "text-sky-700",
   },
 } as const;
 

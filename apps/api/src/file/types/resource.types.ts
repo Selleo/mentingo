@@ -18,6 +18,7 @@ export type CreateResourceForEntityParams = {
   currentUser?: CurrentUserType;
   contextId?: UUIDType;
   visibility?: ResourceVisibility;
+  reuseExisting?: boolean;
 };
 
 export type UploadResourceParams = {

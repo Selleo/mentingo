@@ -15,6 +15,7 @@ import { AuthActivityHandler } from "./handlers/auth-activity.handler";
 import { CategoryActivityHandler } from "./handlers/category-activity.handler";
 import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
+import { EmailTemplateActivityHandler } from "./handlers/email-template-activity.handler";
 import { EnvActivityHandler } from "./handlers/env-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LearningPathActivityHandler } from "./handlers/learning-path-activity.handler";
@@ -38,6 +39,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     ChapterActivityHandler,
     LessonActivityHandler,
     CourseActivityHandler,
+    EmailTemplateActivityHandler,
     AnnouncementActivityHandler,
     GroupActivityHandler,
     CategoryActivityHandler,

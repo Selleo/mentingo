@@ -2,6 +2,7 @@ import { ArticleFactory } from "./article.factory";
 import { CategoryFactory } from "./category.factory";
 import { CourseFactory } from "./course.factory";
 import { CurriculumFactory } from "./curriculum.factory";
+import { EmailTemplateFactory } from "./email-template.factory";
 import { EnrollmentFactory } from "./enrollment.factory";
 import { GroupFactory } from "./group.factory";
 import { LiveTrainingFactory } from "./live-training.factory";
@@ -14,6 +15,7 @@ import { UserFactory } from "./user.factory";
 import type { FixtureApiClient } from "../utils/api-client";
 
 export type FixtureFactories = {
+  createEmailTemplateFactory: () => EmailTemplateFactory;
   createArticleFactory: () => ArticleFactory;
   createCategoryFactory: () => CategoryFactory;
   createCourseFactory: () => CourseFactory;
@@ -29,6 +31,7 @@ export type FixtureFactories = {
 };
 
 export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFactories => {
+  let emailTemplateFactory: EmailTemplateFactory | undefined;
   let articleFactory: ArticleFactory | undefined;
   let categoryFactory: CategoryFactory | undefined;
   let courseFactory: CourseFactory | undefined;
@@ -43,6 +46,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
   let userFactory: UserFactory | undefined;
 
   return {
+    createEmailTemplateFactory: () => {
+      emailTemplateFactory ??= new EmailTemplateFactory(apiClient);
+      return emailTemplateFactory;
+    },
     createArticleFactory: () => {
       articleFactory ??= new ArticleFactory(apiClient);
       return articleFactory;

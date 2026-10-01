@@ -1,6 +1,10 @@
 import { Logger } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import { CertificateExpiredEmail, CertificateExpirationWarningEmail } from "@repo/email-templates";
+import {
+  EMAIL_TEMPLATE_EVENTS,
+  CertificateExpiredEmail,
+  CertificateExpirationWarningEmail,
+} from "@repo/email-templates";
 
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
@@ -74,7 +78,14 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
           text,
           html,
         },
-        { tenantId: certificate.tenantId },
+        {
+          tenantId: certificate.tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRATION_WARNING,
+            language: defaultEmailSettings.language,
+            variables: { course_name: courseName, course_link: courseLink, expires_at: expiresAt },
+          },
+        },
       );
     });
   }
@@ -107,7 +118,14 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
           text,
           html,
         },
-        { tenantId: certificate.tenantId },
+        {
+          tenantId: certificate.tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRED,
+            language: defaultEmailSettings.language,
+            variables: { course_name: courseName, course_link: courseLink, reason },
+          },
+        },
       );
     });
   }

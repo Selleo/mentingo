@@ -135,6 +135,9 @@ export const routeAccessConfig = createRouteConfig({
   "admin/courses/new-scorm": {
     allOf: [PERMISSIONS.COURSE_CREATE],
   },
+  "admin/courses/import-package": {
+    allOf: [PERMISSIONS.COURSE_CREATE],
+  },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
   "admin/development-paths": LEARNING_PATH_ADMIN_ACCESS,
@@ -143,6 +146,7 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/development-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,
+  "admin/email-templates/*": { allOf: [PERMISSIONS.EMAIL_TEMPLATE_MANAGE] },
   "admin/groups/*": {
     allOf: [PERMISSIONS.GROUP_MANAGE],
   },

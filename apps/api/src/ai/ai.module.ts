@@ -67,6 +67,7 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     AiRuntimeService,
     AiRepository,
     ThreadService,
+    RagService,
   ],
 })
 export class AiModule {}

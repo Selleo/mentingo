@@ -51,12 +51,14 @@ export const RESOURCE_RELATIONSHIP_TYPES = {
   MEDIA: "media",
   LIVE_TRAINING_BEFORE: "live_training_before",
   LIVE_TRAINING_AFTER: "live_training_after",
+  PROMPT_IMAGE: "prompt_image",
 } as const;
 
 export type ResourceRelationshipType =
   (typeof RESOURCE_RELATIONSHIP_TYPES)[keyof typeof RESOURCE_RELATIONSHIP_TYPES];
 
 export const RESOURCE_CATEGORIES = {
+  EMAIL_TEMPLATE: "email-templates",
   NEWS: "news",
   ARTICLES: "articles",
   LESSON: "lesson",

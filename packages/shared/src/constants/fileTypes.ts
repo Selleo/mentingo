@@ -7,6 +7,12 @@ export const ALLOWED_LESSON_IMAGE_FILE_TYPES = [
   "image/tiff",
 ];
 
+export const SUPPORTED_IMAGE_VARIANT_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
 export const ALLOWED_VIDEO_FILE_TYPES = [
   "video/mp4",
   "video/quicktime",

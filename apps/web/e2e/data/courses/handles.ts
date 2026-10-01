@@ -100,6 +100,7 @@ export const COURSE_TYPE_SELECTOR_HANDLES = {
   PAGE: "course-type-selector-page",
   STANDARD_CARD: "course-type-selector-standard-card",
   SCORM_CARD: "course-type-selector-scorm-card",
+  MENTINGO_PACKAGE_CARD: "course-type-selector-mentingo-package-card",
   BACK_BUTTON: "course-type-selector-back-button",
 } as const;
 

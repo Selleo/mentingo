@@ -52,6 +52,7 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 };
 
 const ADMIN_LAYOUT_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
   PERMISSIONS.AI_THREAD_READ,
   PERMISSIONS.USER_MANAGE,
   PERMISSIONS.COURSE_UPDATE_OWN,
@@ -73,6 +74,7 @@ export const shouldHideTopbarAndSidebar = (pathname: string) =>
     .with("/admin/beta-courses/new", () => true)
     .with("/admin/beta-courses/new/standard", () => true)
     .with("/admin/courses/new-scorm", () => true)
+    .with("/admin/courses/import-package", () => true)
     .otherwise(() => false);
 
 const AdminLayout = () => {

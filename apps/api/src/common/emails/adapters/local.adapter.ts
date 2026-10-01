@@ -36,6 +36,30 @@ export class LocalAdapter extends EmailAdapter {
   }
 
   async sendMail(email: Email): Promise<void> {
-    await this.transporter.sendMail(email);
+    await this.transporter.sendMail(this.prepareEmailForPreview(email));
+  }
+
+  private prepareEmailForPreview(email: Email) {
+    // Use data URLs to avoid MailHog's multipart/related rendering issues.
+    const imageUrls = new Map<string, string>();
+
+    const attachments = email.attachments?.map((attachment) => {
+      const { cid, ...downloadAttachment } = attachment;
+      const { content, contentType = "application/octet-stream" } = downloadAttachment;
+      if (!cid || content === undefined) return attachment;
+
+      const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content);
+      const dataUrl = `data:${contentType};base64,${buffer.toString("base64")}`;
+      imageUrls.set(cid, dataUrl);
+
+      return downloadAttachment;
+    });
+
+    const html = email.html?.replace(
+      /cid:([^"'\s<>]+)/g,
+      (reference, cid: string) => imageUrls.get(cid) ?? reference,
+    );
+
+    return { ...email, ...(html ? { html } : {}), attachments };
   }
 }

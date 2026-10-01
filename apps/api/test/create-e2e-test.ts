@@ -1,4 +1,5 @@
 import { Test, type TestingModule } from "@nestjs/testing";
+import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 import cookieParser from "cookie-parser";
 import { drizzle } from "drizzle-orm/postgres-js";
 import * as express from "express";
@@ -156,6 +157,10 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   });
   app.setGlobalPrefix("api");
   app.use(cookieParser());
+  app.use(
+    ["/api/file/videos/tus", "/api/scorm/import/tus", "/api/native-archives/tus"],
+    express.raw({ type: "application/offset+octet-stream", limit: DEFAULT_TUS_CHUNK_SIZE }),
+  );
 
   app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {
     if (!req.headers.referer) {

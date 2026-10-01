@@ -1,6 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler } from "@nestjs/cqrs";
 import {
+  EMAIL_TEMPLATE_EVENTS,
   CreatePasswordReminderEmail,
   WelcomeEmail,
   UserFirstLoginEmail,
@@ -238,7 +239,14 @@ export class NotifyUsersHandler implements IEventHandler {
           text,
           html,
         },
-        { tenantId },
+        {
+          tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.USER_INVITE,
+            language: defaultEmailSettings.language,
+            variables: { invited_by_user_name: invitingUsername, create_password_link: url },
+          },
+        },
       );
     });
   }
@@ -292,7 +300,14 @@ export class NotifyUsersHandler implements IEventHandler {
         text,
         html,
       },
-      { tenantId: user.tenantId },
+      {
+        tenantId: user.tenantId,
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.USER_FIRST_LOGIN,
+          language: defaultEmailSettings.language,
+          variables: { name: user.firstName, courses_url: `${baseOrigin}/courses` },
+        },
+      },
     );
   }
 
@@ -325,7 +340,14 @@ export class NotifyUsersHandler implements IEventHandler {
           text,
           html,
         },
-        { tenantId },
+        {
+          tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
+            language: defaultEmailSettings.language,
+            variables: { create_password_link: createPasswordLink },
+          },
+        },
       );
     });
   }
@@ -335,7 +357,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     await processInBatches(
       emails,
-      ({ to, subject, text, html, tenantId }) =>
+      ({ to, subject, text, html, tenantId, template }) =>
         this.emailService.sendEmailWithLogo(
           {
             to,
@@ -343,7 +365,7 @@ export class NotifyUsersHandler implements IEventHandler {
             text,
             html,
           },
-          { tenantId },
+          { tenantId, template },
         ),
       { batchSize: EMAIL_BATCH_SIZE },
     );
@@ -373,7 +395,14 @@ export class NotifyUsersHandler implements IEventHandler {
           text,
           html,
         },
-        { tenantId },
+        {
+          tenantId,
+          template: {
+            event: EMAIL_TEMPLATE_EVENTS.WELCOME,
+            language: defaultEmailSettings.language,
+            variables: { courses_link: `${baseOrigin}/courses` },
+          },
+        },
       );
     });
   }
@@ -418,7 +447,18 @@ export class NotifyUsersHandler implements IEventHandler {
             text,
             html,
           },
-          { tenantId: student.tenantId },
+          {
+            tenantId: student.tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.USER_ASSIGNED_TO_COURSE,
+              language: defaultEmailSettings.language,
+              variables: {
+                course_name: courseName,
+                course_link: `${baseOrigin}/course/${courseId}`,
+                formatted_course_due_date: dueDatesByStudent[studentId] ?? "",
+              },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
@@ -465,7 +505,14 @@ export class NotifyUsersHandler implements IEventHandler {
             text,
             html,
           },
-          { tenantId: student.tenantId },
+          {
+            tenantId: student.tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.USER_SHORT_INACTIVITY,
+              language: defaultEmailSettings.language,
+              variables: { course_name: courseName ?? "", course_link: courseLink },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE },
@@ -506,7 +553,14 @@ export class NotifyUsersHandler implements IEventHandler {
             text,
             html,
           },
-          { tenantId: student.tenantId },
+          {
+            tenantId: student.tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.USER_LONG_INACTIVITY,
+              language: defaultEmailSettings.language,
+              variables: { course_name: course?.courseName ?? "", course_link: courseLink },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE },
@@ -547,7 +601,18 @@ export class NotifyUsersHandler implements IEventHandler {
         html,
         text,
       },
-      { tenantId: chapterFinishedData.actor.tenantId },
+      {
+        tenantId: chapterFinishedData.actor.tenantId,
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_CHAPTER,
+          language: defaultEmailSettings.language,
+          variables: {
+            course_name: courseName,
+            chapter_name: chapterName,
+            course_link: courseLink,
+          },
+        },
+      },
     );
   }
 
@@ -585,7 +650,18 @@ export class NotifyUsersHandler implements IEventHandler {
         html,
         text,
       },
-      { tenantId: courseFinishedData.actor.tenantId },
+      {
+        tenantId: courseFinishedData.actor.tenantId,
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
+          language: defaultEmailSettings.language,
+          variables: {
+            course_name: courseName,
+            button_link: buttonLink,
+            has_certificate: hasCertificate,
+          },
+        },
+      },
     );
   }
 
