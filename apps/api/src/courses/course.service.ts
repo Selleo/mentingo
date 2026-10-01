@@ -1017,7 +1017,10 @@ export class CourseService {
       query.excludeCourseId,
     );
 
-    const conditions = [eq(courses.status, "published"), eq(courses.isArchived, false)];
+    const conditions = [
+      eq(courses.status, COURSE_STATUSES.PUBLISHED),
+      eq(courses.isArchived, false),
+    ];
     conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
 
     if (availableCourseIds.length > 0) {
@@ -1253,7 +1256,10 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const availableCourseIds = await this.getAvailableCourseIds(trx, currentUserId);
 
-      const conditions = [eq(courses.status, "published"), eq(courses.isArchived, false)];
+      const conditions = [
+        eq(courses.status, COURSE_STATUSES.PUBLISHED),
+        eq(courses.isArchived, false),
+      ];
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));

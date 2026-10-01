@@ -46,14 +46,16 @@ import {
 import type { GetAllCategoriesResponse } from "~/api/generated-api";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
-enum BulkCourseAction {
-  Duplicate = "duplicate",
-  ChangeCategory = "changeCategory",
-  ChangeStatus = "changeStatus",
-  Archive = "archive",
-  Restore = "restore",
-  Delete = "delete",
-}
+const BULK_COURSE_ACTION = {
+  DUPLICATE: "duplicate",
+  CHANGE_CATEGORY: "changeCategory",
+  CHANGE_STATUS: "changeStatus",
+  ARCHIVE: "archive",
+  RESTORE: "restore",
+  DELETE: "delete",
+} as const;
+
+type BulkCourseAction = (typeof BULK_COURSE_ACTION)[keyof typeof BULK_COURSE_ACTION];
 
 type CourseCategory = GetAllCategoriesResponse["data"][number];
 
@@ -109,7 +111,7 @@ export const CourseBulkActions = ({
 
   const handleOpenCategoryAction = () => {
     setSelectedCategoryId(categories[0]?.id ?? "");
-    setSelectedBulkAction(BulkCourseAction.ChangeCategory);
+    setSelectedBulkAction(BULK_COURSE_ACTION.CHANGE_CATEGORY);
   };
 
   const handleDeleteCourses = () => {
@@ -155,23 +157,23 @@ export const CourseBulkActions = ({
   const handleConfirmBulkAction = async () => {
     if (!selectedBulkAction) return;
 
-    if (selectedBulkAction === BulkCourseAction.Delete) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) {
       handleDeleteCourses();
       return;
     }
 
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       await handleBulkCategoryUpdate();
       return;
     }
 
     if (
-      selectedBulkAction === BulkCourseAction.Archive ||
-      selectedBulkAction === BulkCourseAction.Restore
+      selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE ||
+      selectedBulkAction === BULK_COURSE_ACTION.RESTORE
     ) {
       await bulkArchiveCourse({
         ids: selectedCourseIds,
-        isArchived: selectedBulkAction === BulkCourseAction.Archive,
+        isArchived: selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE,
       });
       onBulkActionComplete();
       resetBulkActionState();
@@ -203,7 +205,7 @@ export const CourseBulkActions = ({
     {
       icon: <FilePenLine className="size-4 shrink-0" />,
       translationKey: "adminCoursesView.dropdown.changeStatus",
-      action: () => setSelectedBulkAction(BulkCourseAction.ChangeStatus),
+      action: () => setSelectedBulkAction(BULK_COURSE_ACTION.CHANGE_STATUS),
       destructive: false,
       testId: COURSES_PAGE_HANDLES.BULK_EDIT_STATUS_ACTION,
     },
@@ -212,7 +214,7 @@ export const CourseBulkActions = ({
           {
             icon: <Archive className="size-4 shrink-0" />,
             translationKey: "adminCoursesView.dropdown.archive",
-            action: () => setSelectedBulkAction(BulkCourseAction.Archive),
+            action: () => setSelectedBulkAction(BULK_COURSE_ACTION.ARCHIVE),
             destructive: true,
             testId: COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
           },
@@ -223,7 +225,7 @@ export const CourseBulkActions = ({
           {
             icon: <ArchiveRestore className="size-4 shrink-0" />,
             translationKey: "adminCoursesView.dropdown.restore",
-            action: () => setSelectedBulkAction(BulkCourseAction.Restore),
+            action: () => setSelectedBulkAction(BULK_COURSE_ACTION.RESTORE),
             destructive: false,
             testId: COURSES_PAGE_HANDLES.BULK_EDIT_RESTORE_ACTION,
           },
@@ -232,7 +234,7 @@ export const CourseBulkActions = ({
     {
       icon: <Trash2 className="size-4 shrink-0" />,
       translationKey: "adminCoursesView.dropdown.delete",
-      action: () => setSelectedBulkAction(BulkCourseAction.Delete),
+      action: () => setSelectedBulkAction(BULK_COURSE_ACTION.DELETE),
       destructive: true,
       testId: COURSES_PAGE_HANDLES.BULK_EDIT_DELETE_ACTION,
     },
@@ -257,18 +259,18 @@ export const CourseBulkActions = ({
   const getBulkActionModalTitle = () => {
     if (!selectedBulkAction) return "";
 
-    if (selectedBulkAction === BulkCourseAction.Delete) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) {
       return getDeleteModalTitle();
     }
 
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       return t("adminCoursesView.categoryModal.title");
     }
 
-    if (selectedBulkAction === BulkCourseAction.Archive) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE) {
       return t("adminCoursesView.archiveModal.title");
     }
-    if (selectedBulkAction === BulkCourseAction.Restore) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.RESTORE) {
       return t("adminCoursesView.restoreModal.title");
     }
 
@@ -277,12 +279,12 @@ export const CourseBulkActions = ({
 
   const getDialogTestId = () => {
     if (
-      selectedBulkAction === BulkCourseAction.Archive ||
-      selectedBulkAction === BulkCourseAction.Restore
+      selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE ||
+      selectedBulkAction === BULK_COURSE_ACTION.RESTORE
     )
       return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG;
-    if (selectedBulkAction === BulkCourseAction.Delete) return COURSES_PAGE_HANDLES.DELETE_DIALOG;
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) return COURSES_PAGE_HANDLES.DELETE_DIALOG;
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       return COURSES_PAGE_HANDLES.CATEGORY_DIALOG;
     }
 
@@ -291,14 +293,14 @@ export const CourseBulkActions = ({
 
   const getCancelButtonTestId = () => {
     if (
-      selectedBulkAction === BulkCourseAction.Archive ||
-      selectedBulkAction === BulkCourseAction.Restore
+      selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE ||
+      selectedBulkAction === BULK_COURSE_ACTION.RESTORE
     )
       return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CANCEL_BUTTON;
-    if (selectedBulkAction === BulkCourseAction.Delete) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) {
       return COURSES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON;
     }
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       return COURSES_PAGE_HANDLES.CATEGORY_DIALOG_CANCEL_BUTTON;
     }
 
@@ -307,14 +309,14 @@ export const CourseBulkActions = ({
 
   const getConfirmButtonTestId = () => {
     if (
-      selectedBulkAction === BulkCourseAction.Archive ||
-      selectedBulkAction === BulkCourseAction.Restore
+      selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE ||
+      selectedBulkAction === BULK_COURSE_ACTION.RESTORE
     )
       return COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON;
-    if (selectedBulkAction === BulkCourseAction.Delete) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) {
       return COURSES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON;
     }
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       return COURSES_PAGE_HANDLES.CATEGORY_DIALOG_CONFIRM_BUTTON;
     }
 
@@ -324,20 +326,20 @@ export const CourseBulkActions = ({
   const getBulkActionModalDescription = () => {
     if (!selectedBulkAction) return "";
 
-    if (selectedBulkAction === BulkCourseAction.Delete) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) {
       return getDeleteModalDescription();
     }
 
-    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY) {
       return t("adminCoursesView.categoryModal.description", {
         count: selectedCourseIds.length,
       });
     }
 
-    if (selectedBulkAction === BulkCourseAction.Archive) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE) {
       return t("adminCoursesView.archiveModal.description", { count: selectedCourseIds.length });
     }
-    if (selectedBulkAction === BulkCourseAction.Restore) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.RESTORE) {
       return t("adminCoursesView.restoreModal.description", { count: selectedCourseIds.length });
     }
 
@@ -348,17 +350,17 @@ export const CourseBulkActions = ({
 
   const isConfirmDisabled =
     isBulkActionPending ||
-    (selectedBulkAction === BulkCourseAction.ChangeCategory && !selectedCategoryId);
+    (selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY && !selectedCategoryId);
   const isDestructiveAction =
-    selectedBulkAction === BulkCourseAction.Archive ||
-    selectedBulkAction === BulkCourseAction.Delete;
+    selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE ||
+    selectedBulkAction === BULK_COURSE_ACTION.DELETE;
 
   const getConfirmLabel = () => {
-    if (selectedBulkAction === BulkCourseAction.Delete) return t("common.button.delete");
-    if (selectedBulkAction === BulkCourseAction.Archive) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.DELETE) return t("common.button.delete");
+    if (selectedBulkAction === BULK_COURSE_ACTION.ARCHIVE) {
       return t("adminCoursesView.dropdown.archive");
     }
-    if (selectedBulkAction === BulkCourseAction.Restore) {
+    if (selectedBulkAction === BULK_COURSE_ACTION.RESTORE) {
       return t("adminCoursesView.dropdown.restore");
     }
     return t("common.button.save");
@@ -446,7 +448,7 @@ export const CourseBulkActions = ({
                 {getBulkActionModalDescription()}
               </DialogDescription>
             </div>
-            {selectedBulkAction === BulkCourseAction.ChangeCategory && (
+            {selectedBulkAction === BULK_COURSE_ACTION.CHANGE_CATEGORY && (
               <div className="border-y border-neutral-100 bg-neutral-50/70 px-6 py-5">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
                   <SelectTrigger
@@ -469,7 +471,7 @@ export const CourseBulkActions = ({
                 </Select>
               </div>
             )}
-            {selectedBulkAction === BulkCourseAction.ChangeStatus && (
+            {selectedBulkAction === BULK_COURSE_ACTION.CHANGE_STATUS && (
               <div className="border-y border-neutral-100 bg-neutral-50/70 px-6 py-5">
                 <RadioGroup
                   value={selectedStatus}
