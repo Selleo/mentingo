@@ -174,7 +174,10 @@ export class GlobalSearchService {
     currentUser: CurrentUserType,
   ) {
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ)) return [];
-    return this.globalSearchRepository.getCourseRows(matches, language, { publishedOnly: true });
+    return this.globalSearchRepository.getCourseRows(matches, language, {
+      publishedOnly: true,
+      excludeArchived: true,
+    });
   }
 
   private getLearningPaths(

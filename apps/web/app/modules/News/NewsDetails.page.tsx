@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useDeleteNews } from "~/api/mutations";
 import { useCurrentUser, useNews } from "~/api/queries";
 import { hasPermission } from "~/common/permissions/permission.utils";
+import { AuthorName } from "~/components/AuthorName";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
@@ -191,7 +192,9 @@ export default function NewsDetailsPage() {
               </div>
               <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-neutral-100">
                 <Icon name="User" className="text-neutral-600 size-4" />
-                <p className="text-neutral-800">{news.authorName}</p>
+                <p className="text-neutral-800">
+                  <AuthorName name={news.authorName} deleted={news.authorDeleted} />
+                </p>
               </div>
             </div>
           </div>

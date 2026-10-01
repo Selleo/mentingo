@@ -1,10 +1,13 @@
 import {
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
   CERTIFICATE_ARCHIVE_REASONS,
   CERTIFICATE_STATUSES,
   COURSE_CERTIFICATE_STATUSES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
+  SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
@@ -14,10 +17,11 @@ import request from "supertest";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorStudentLessonProgress,
+  assessmentQuestions,
+  assessments,
   certificates,
   chapters,
   courses,
@@ -30,7 +34,6 @@ import {
   liveTrainingSessionParticipants,
   liveTrainingSessions,
   permissionUserRoles,
-  questions,
   settings,
   studentCourses,
   studentLearningPaths,
@@ -441,12 +444,23 @@ describe("Group Manager authorization outcomes (e2e)", () => {
         completedAt,
       },
     ]);
-    const [unansweredQuestion] = await db
-      .insert(questions)
+    const [assessment] = await db
+      .insert(assessments)
       .values({
         lessonId: quizLesson.id,
-        authorId: fixture.admin.id,
-        type: QUESTION_TYPE.DETAILED_RESPONSE,
+        passingScorePercentage: "0",
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
+      })
+      .returning();
+
+    const [unansweredQuestion] = await db
+      .insert(assessmentQuestions)
+      .values({
+        assessmentId: assessment.id,
+        questionType: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE,
+        gradingMode: ASSESSMENT_GRADING_MODES.MANUAL,
+        prompt: buildJsonbField("en", "Explain your answer"),
         title: buildJsonbField("en", "Explain your answer"),
         displayOrder: 1,
       })
@@ -514,9 +528,9 @@ describe("Group Manager authorization outcomes (e2e)", () => {
       .query({ language: "en", studentId: fixture.assignedLearner.id })
       .set("Cookie", cookie)
       .expect(200);
-    expect(lessonResponse.body.data.quizDetails.questions[0].options[0].id).toBe(
-      unansweredQuestion.id,
-    );
+    expect(lessonResponse.body.data.quizDetails.questions).toEqual([
+      expect.objectContaining({ id: unansweredQuestion.id }),
+    ]);
 
     const aiResponse = await request(app.getHttpServer())
       .get(`/api/course/${fixture.visibleCourse.id}/statistics/students-ai-mentor-results`)

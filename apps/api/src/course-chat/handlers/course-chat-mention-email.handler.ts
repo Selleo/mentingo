@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import { BaseEmailTemplate } from "@repo/email-templates";
+import { EMAIL_TEMPLATE_EVENTS, BaseEmailTemplate } from "@repo/email-templates";
 import {
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_SOURCE_TYPES,
@@ -130,7 +130,18 @@ export class CourseChatMentionEmailHandler
               text,
               html,
             },
-            { tenantId },
+            {
+              tenantId,
+              template: {
+                event: EMAIL_TEMPLATE_EVENTS.COURSE_CHAT_MENTION,
+                language: defaultEmailSettings.language,
+                variables: {
+                  course_name: courseContext.title,
+                  message: message.content,
+                  course_link: `${tenantOrigin}/course/${courseId}?tab=Discussion`,
+                },
+              },
+            },
           );
         },
         { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },

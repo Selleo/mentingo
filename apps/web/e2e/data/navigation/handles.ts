@@ -13,6 +13,7 @@ export const NAVIGATION_HANDLES = {
   MANAGE_TOGGLE: "navigation-manage-toggle",
   ADMIN_LEARNING_PATHS_LINK: "navigation-admin-learning-paths-link",
   USERS_LINK: "navigation-users-link",
+  EMAIL_TEMPLATES_LINK: "navigation-email-templates-link",
   GROUPS_LINK: "navigation-groups-link",
   CATEGORIES_LINK: "navigation-categories-link",
   SUPER_ADMIN_GROUP: "navigation-super-admin-group",

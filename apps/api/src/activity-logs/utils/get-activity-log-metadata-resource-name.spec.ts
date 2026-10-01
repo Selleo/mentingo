@@ -25,6 +25,15 @@ describe("getActivityLogMetadataResourceName", () => {
     ).toBe("Former group");
   });
 
+  it("keeps a deleted email template's event-time name", () => {
+    expect(
+      getActivityLogMetadataResourceName(
+        { context: { name: "Welcome email", event: "user_welcome" } },
+        ACTIVITY_LOG_RESOURCE_TYPES.EMAIL_TEMPLATE,
+      ),
+    ).toBe("Welcome email");
+  });
+
   it.each([
     [ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER, "chapterName", "Removed chapter"],
     [ACTIVITY_LOG_RESOURCE_TYPES.LESSON, "lessonName", "Removed lesson"],

@@ -21,8 +21,10 @@ import { ApiConsumes } from "@nestjs/swagger";
 import {
   ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  COURSE_ARCHIVED_QUERY_VALUES,
   PERMISSIONS,
   SupportedLanguages,
+  type CourseArchivedQueryValue,
   type PermissionKey,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -48,6 +50,12 @@ import { CourseDuplicationService } from "src/courses/course-duplication.service
 import { CourseScormExportService } from "src/courses/course-scorm-export.service";
 import { CourseService } from "src/courses/course.service";
 import { MasterCourseService } from "src/courses/master-course.service";
+import {
+  bulkArchiveCourseResponseSchema,
+  bulkArchiveCourseSchema,
+  type BulkArchiveCourseBody,
+  type BulkArchiveCourseResponse,
+} from "src/courses/schemas/bulkArchiveCourse.schema";
 import {
   allCoursesForContentCreatorSchema,
   allStudentCoursesSchema,
@@ -108,6 +116,7 @@ import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
+import { CourseTranslationService } from "src/courses/services/course-translation.service";
 import {
   allCoursesValidation,
   availableCourseCategoriesValidation,
@@ -184,6 +193,7 @@ import type {
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
+    private readonly courseTranslationService: CourseTranslationService,
     private readonly courseScormExportService: CourseScormExportService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
@@ -200,6 +210,7 @@ export class CourseController {
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
     @Query("status") status: CoursesStatusOptions,
+    @Query("isArchived") isArchived: CourseArchivedQueryValue | undefined,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -213,6 +224,10 @@ export class CourseController {
       category,
       author,
       status,
+      isArchived:
+        isArchived === COURSE_ARCHIVED_QUERY_VALUES.ALL || isArchived === undefined
+          ? undefined
+          : isArchived === COURSE_ARCHIVED_QUERY_VALUES.TRUE,
       creationDateRange:
         creationDateRangeStart && creationDateRangeEnd
           ? [creationDateRangeStart, creationDateRangeEnd]
@@ -227,6 +242,7 @@ export class CourseController {
       currentUserId: currentUser.userId,
       currentUserPermissions: currentUser.permissions,
       currentUser,
+      includeArchived: isArchived === COURSE_ARCHIVED_QUERY_VALUES.ALL,
       language,
     };
 
@@ -551,7 +567,7 @@ export class CourseController {
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
-    const hasMissingTranslations = await this.courseService.hasMissingTranslations(
+    const hasMissingTranslations = await this.courseTranslationService.hasMissingTranslations(
       id,
       language,
       currentUser,
@@ -594,6 +610,20 @@ export class CourseController {
     await this.courseService.bulkUpdateCourseStatus(body, currentUser);
 
     return new BaseResponse({ message: "adminCoursesView.toast.bulkStatusUpdateSuccessfully" });
+  }
+
+  @Patch("bulk/archive")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [{ type: "body", schema: bulkArchiveCourseSchema }],
+    response: bulkArchiveCourseResponseSchema,
+  })
+  async bulkArchiveCourse(
+    @Body() body: BulkArchiveCourseBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkArchiveCourseResponse>> {
+    await this.courseService.bulkArchiveCourse(body, currentUser);
+    return new BaseResponse({ message: "adminCoursesView.toast.bulkArchiveUpdateSuccessfully" });
   }
 
   @Patch("bulk/category")
@@ -1216,7 +1246,7 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    await this.courseService.createLanguage(courseId, language, currentUser);
+    await this.courseTranslationService.createLanguage(courseId, language, currentUser);
   }
 
   @Delete("language/:courseId")
@@ -1252,7 +1282,11 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+    return this.courseTranslationService.generateMissingTranslations(
+      courseId,
+      language,
+      currentUser,
+    );
   }
 
   @Post(":courseId/scorm-export")

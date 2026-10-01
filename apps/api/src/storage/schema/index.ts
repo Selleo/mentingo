@@ -1,4 +1,10 @@
 import {
+  EMAIL_TEMPLATE_STATUSES,
+  type EmailTemplateEvent,
+  type EmailTemplateStatus,
+  type LocalizedEmailTemplateContent,
+} from "@repo/email-templates";
+import {
   COURSE_TYPE,
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
@@ -44,8 +50,8 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
   pgTable,
+  pgEnum,
   text,
   timestamp,
   unique,
@@ -64,6 +70,7 @@ import {
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import { int4multirange, tsvector } from "./custom-types";
+export * from "./quiz.schema";
 import {
   archived,
   availableLocales,
@@ -194,28 +201,6 @@ export const userStatistics = pgTable(
   withTenantIdIndex("user_statistics"),
 );
 
-export const quizAttempts = pgTable(
-  "quiz_attempts",
-  {
-    ...id,
-    ...timestamps,
-    userId: uuid("user_id")
-      .references(() => users.id)
-      .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id)
-      .notNull(),
-    lessonId: uuid("lesson_id")
-      .references(() => lessons.id, { onDelete: "cascade" })
-      .notNull(),
-    correctAnswers: integer("correct_answers").notNull(),
-    wrongAnswers: integer("wrong_answers").notNull(),
-    score: integer("score").notNull(),
-    tenantId,
-  },
-  withTenantIdIndex("quiz_attempts"),
-);
-
 export const credentials = pgTable(
   "credentials",
   {
@@ -331,6 +316,7 @@ export const courses = pgTable(
     authorMetadata: jsonb("author_metadata").$type<CourseAuthorMetadata | null>().default(null),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
     status: coursesStatusEnum("status").$type<CourseStatus>().notNull().default("draft"),
+    isArchived: boolean("is_archived").notNull().default(false),
     thumbnailPositionY: integer("thumbnail_position_y").notNull().default(50),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),
@@ -363,6 +349,7 @@ export const courses = pgTable(
       .default(COURSE_ORIGIN_TYPES.REGULAR),
     sourceCourseId: uuid("source_course_id"),
     sourceTenantId: uuid("source_tenant_id"),
+    originalId: uuid("original_id"),
     settings: coursesSettings.column.notNull(),
     baseLanguage,
     availableLocales,
@@ -370,6 +357,10 @@ export const courses = pgTable(
   },
   withTenantIdIndex("courses", (table) => ({
     shortIdUniqueIdx: uniqueIndex("courses_short_id_unique_idx").on(table.shortId),
+    originalIdUniqueIdx: uniqueIndex("courses_tenant_original_id_unique_idx").on(
+      table.tenantId,
+      table.originalId,
+    ),
   })),
 );
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
@@ -1236,7 +1227,7 @@ export const aiMentorJudgements = pgTable(
       .notNull()
       .unique(),
     configurationId: uuid("configuration_id")
-      .references(() => aiJudgeConfigurations.id, { onDelete: "restrict" })
+      .references(() => aiJudgeConfigurations.id, { onDelete: "cascade" })
       .notNull(),
     language: varchar("language", { length: 20 }).$type<SupportedLanguages>().notNull(),
     earnedPoints: integer("earned_points").notNull(),
@@ -1388,66 +1379,6 @@ export const courseChatMessageReactions = pgTable(
     userMessageReactionUniqueIdx: uniqueIndex(
       "course_chat_message_reactions_user_message_reaction_unique_idx",
     ).on(table.userId, table.messageId, table.reaction),
-  })),
-);
-
-export const questions = pgTable(
-  "questions",
-  {
-    ...id,
-    ...timestamps,
-    lessonId: uuid("lesson_id")
-      .references(() => lessons.id, { onDelete: "cascade" })
-      .notNull(),
-    authorId: uuid("author_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    type: text("type").notNull(),
-    title: jsonb("title").default({}).notNull(),
-    displayOrder: integer("display_order"),
-    photoS3Key: varchar("photo_s3_key", { length: 500 }),
-    description: jsonb("description"),
-    solutionExplanation: jsonb("solution_explanation"),
-    tenantId,
-  },
-  withTenantIdIndex("questions"),
-);
-
-export const questionAnswerOptions = pgTable(
-  "question_answer_options",
-  {
-    ...id,
-    ...timestamps,
-    questionId: uuid("question_id")
-      .references(() => questions.id, { onDelete: "cascade" })
-      .notNull(),
-    optionText: jsonb("option_text").default({}).notNull(),
-    isCorrect: boolean("is_correct").notNull(),
-    displayOrder: integer("display_order"),
-    matchedWord: jsonb("matched_word"),
-    scaleAnswer: integer("scale_answer"),
-    tenantId,
-  },
-  withTenantIdIndex("question_answer_options"),
-);
-
-export const studentQuestionAnswers = pgTable(
-  "student_question_answers",
-  {
-    ...id,
-    ...timestamps,
-    questionId: uuid("question_id")
-      .references(() => questions.id, { onDelete: "cascade" })
-      .notNull(),
-    studentId: uuid("student_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    answer: jsonb("answer").default({}),
-    isCorrect: boolean("is_correct"),
-    tenantId,
-  },
-  withTenantIdIndex("student_question_answers", (table) => ({
-    unq: unique().on(table.questionId, table.studentId),
   })),
 );
 
@@ -2438,6 +2369,13 @@ export const resourceEntity = pgTable(
       table.entityType,
       table.relationshipType,
     ),
+    assessmentQuestionPromptImageUniqueIdx: uniqueIndex(
+      "resource_entity_assessment_question_prompt_image_unique_idx",
+    )
+      .on(table.tenantId, table.entityId)
+      .where(
+        sql`${table.entityType} = 'assessment_question' AND ${table.relationshipType} = 'prompt_image'`,
+      ),
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
   })),
 );
@@ -2794,11 +2732,17 @@ export const learningPaths = pgTable(
       .default(COURSE_ORIGIN_TYPES.REGULAR),
     sourceLearningPathId: uuid("source_learning_path_id"),
     sourceTenantId: uuid("source_tenant_id"),
+    originalId: uuid("original_id"),
     baseLanguage,
     availableLocales,
     tenantId,
   },
-  withTenantIdIndex("learning_paths"),
+  withTenantIdIndex("learning_paths", (table) => ({
+    originalIdUniqueIdx: uniqueIndex("learning_paths_tenant_original_id_unique_idx").on(
+      table.tenantId,
+      table.originalId,
+    ),
+  })),
 );
 
 export const learningPathCourses = pgTable(
@@ -3009,5 +2953,33 @@ export const learningPathEntityMap = pgTable(
       table.entityType,
       table.sourceEntityId,
     ),
+  }),
+);
+
+export const emailTemplates = pgTable(
+  "email_templates",
+  {
+    ...id,
+    ...timestamps,
+    name: jsonb("name").$type<LocalizedText>().notNull(),
+    subject: jsonb("subject").$type<LocalizedText>().notNull(),
+    content: jsonb("content").$type<LocalizedEmailTemplateContent>().notNull(),
+    status: text("status")
+      .$type<EmailTemplateStatus>()
+      .notNull()
+      .default(EMAIL_TEMPLATE_STATUSES.DRAFT),
+    event: text("event").$type<EmailTemplateEvent>().notNull(),
+    baseLanguage,
+    availableLocales,
+    publishedAt: timestampWithTimezone({ name: "published_at" }),
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    deletedAt: timestampWithTimezone({ name: "deleted_at" }),
+    tenantId,
+  },
+  (table) => ({
+    tenantEventIdx: index("email_templates_tenant_event_idx").on(table.tenantId, table.event),
+    publishedEventUniqueIdx: uniqueIndex("email_templates_published_event_unique_idx")
+      .on(table.tenantId, table.event)
+      .where(sql`${table.status} = 'published'`),
   }),
 );

@@ -19,34 +19,79 @@ type CoursePricingProps = {
   priceInCents?: number;
   currency?: string;
   language: SupportedLanguages;
+  className?: string;
+  variant?: "legacy" | "settings";
 };
 
-const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePricingProps) => {
+const CoursePricing = ({
+  courseId,
+  priceInCents,
+  currency,
+  language,
+  className,
+  variant = "legacy",
+}: CoursePricingProps) => {
   const { form, onSubmit } = useCoursePricingForm({ courseId, priceInCents, currency, language });
   const { setValue, watch } = form;
   const { t } = useTranslation();
 
   const isFree = watch("isFree");
+  const isSettingsVariant = variant === "settings";
+  const formId = `course-pricing-form-${courseId}`;
   return (
-    <div className="flex w-full max-w-[744px] flex-col gap-y-6 bg-white p-8">
-      <div className="flex flex-col gap-y-1.5">
-        <h5 className="h5 text-neutral-950">{t("adminCourseView.pricing.header")}</h5>
-        <p className="body-base text-neutral-900">{t("adminCourseView.pricing.subHeader")}</p>
+    <div
+      className={cn(
+        "flex w-full max-w-[744px] flex-col gap-y-6 bg-white p-8",
+        { "gap-y-4": isSettingsVariant },
+        className,
+      )}
+    >
+      <div className={cn({ "flex items-start justify-between gap-4": isSettingsVariant })}>
+        <div className={cn("flex flex-col gap-y-1.5", { "gap-1": isSettingsVariant })}>
+          <h5
+            className={cn("text-neutral-950", {
+              h5: !isSettingsVariant,
+              "text-base font-semibold": isSettingsVariant,
+            })}
+          >
+            {t("adminCourseView.pricing.header")}
+          </h5>
+          <p
+            className={cn("text-neutral-900", {
+              "body-base": !isSettingsVariant,
+              "text-sm": isSettingsVariant,
+            })}
+          >
+            {t("adminCourseView.pricing.subHeader")}
+          </p>
+        </div>
+        {isSettingsVariant && (
+          <Button data-testid={COURSE_PRICING_HANDLES.SAVE_BUTTON} type="submit" form={formId}>
+            {t("common.button.save")}
+          </Button>
+        )}
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-6">
-          <div className="flex flex-col space-y-6">
+        <form
+          id={formId}
+          onSubmit={form.handleSubmit(onSubmit)}
+          className={cn("flex flex-col gap-y-6", { "gap-y-4": isSettingsVariant })}
+        >
+          <div className={cn("flex flex-col space-y-6", { "space-y-3": isSettingsVariant })}>
             <Card
               data-testid={COURSE_PRICING_HANDLES.FREE_CARD}
               className={cn(
                 "flex w-full cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
-                  "border-primary-500 bg-primary-50": isFree === true,
+                  "gap-3 rounded-lg border-neutral-300 bg-white p-4 shadow-none transition-colors hover:border-primary-300":
+                    isSettingsVariant,
+                  "border-primary-500 bg-primary-50/40": isFree === true && isSettingsVariant,
+                  "border-primary-500 bg-primary-50": isFree === true && !isSettingsVariant,
                 },
               )}
               onClick={() => setValue("isFree", true)}
             >
-              <div className="mt-1.5">
+              <div className={cn("mt-1.5", { "mt-1": isSettingsVariant })}>
                 <Input
                   type="radio"
                   name="isFree"
@@ -56,18 +101,30 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
                   id="isFree"
                 />
               </div>
-              <Label htmlFor="isFree" className="body-lg-md cursor-pointer text-neutral-950">
-                <div className="body-lg-md mb-2 text-neutral-950">
+              <Label
+                htmlFor="isFree"
+                className={cn("cursor-pointer text-neutral-950", {
+                  "body-lg-md": !isSettingsVariant,
+                })}
+              >
+                <div
+                  className={cn("text-neutral-950", {
+                    "body-lg-md mb-2": !isSettingsVariant,
+                    "text-base font-semibold": isSettingsVariant,
+                  })}
+                >
                   {t("adminCourseView.pricing.freeCourseHeader")}
                 </div>
                 <div
-                  className={cn("body-base", {
-                    "text-neutral-900": !isFree,
-                    "text-neutral-950": isFree,
+                  className={cn({
+                    "body-base": !isSettingsVariant,
+                    "mt-1 text-sm text-neutral-800": isSettingsVariant,
+                    "text-neutral-900": !isFree && !isSettingsVariant,
+                    "text-neutral-950": isFree && !isSettingsVariant,
                   })}
                 >
                   {t("adminCourseView.pricing.freeCourseBody")}
-                </div>{" "}
+                </div>
               </Label>
             </Card>
 
@@ -76,12 +133,15 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
               className={cn(
                 "flex w-full cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
-                  "border-primary-500 bg-primary-50": isFree === false,
+                  "gap-3 rounded-lg border-neutral-300 bg-white p-4 shadow-none transition-colors hover:border-primary-300":
+                    isSettingsVariant,
+                  "border-primary-500 bg-primary-50/40": isFree === false && isSettingsVariant,
+                  "border-primary-500 bg-primary-50": isFree === false && !isSettingsVariant,
                 },
               )}
               onClick={() => setValue("isFree", false)}
             >
-              <div className="mt-1.5">
+              <div className={cn("mt-1.5", { "mt-1": isSettingsVariant })}>
                 <Input
                   type="radio"
                   name="isPaid"
@@ -91,15 +151,27 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
                   id="isPaid"
                 />
               </div>
-              <div>
-                <Label htmlFor="isPaid" className={"body-lg-md cursor-pointer text-neutral-950"}>
-                  <div className="body-lg-md mb-2 text-neutral-950">
+              <div className={cn({ "min-w-0 flex-1": isSettingsVariant })}>
+                <Label
+                  htmlFor="isPaid"
+                  className={cn("cursor-pointer text-neutral-950", {
+                    "body-lg-md": !isSettingsVariant,
+                  })}
+                >
+                  <div
+                    className={cn("text-neutral-950", {
+                      "body-lg-md mb-2": !isSettingsVariant,
+                      "text-base font-semibold": isSettingsVariant,
+                    })}
+                  >
                     {t("adminCourseView.pricing.paidCourseHeader")}
                   </div>
                   <div
-                    className={cn("body-base", {
-                      "text-neutral-900": isFree,
-                      "text-neutral-950": !isFree,
+                    className={cn({
+                      "body-base": !isSettingsVariant,
+                      "mt-1 text-sm text-neutral-800": isSettingsVariant,
+                      "text-neutral-900": isFree && !isSettingsVariant,
+                      "text-neutral-950": !isFree && !isSettingsVariant,
                     })}
                   >
                     {t("adminCourseView.pricing.paidCourseBody")}
@@ -140,9 +212,11 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
               </div>
             </Card>
           </div>
-          <Button data-testid={COURSE_PRICING_HANDLES.SAVE_BUTTON} className="w-20" type="submit">
-            {t("common.button.save")}
-          </Button>
+          {!isSettingsVariant && (
+            <Button data-testid={COURSE_PRICING_HANDLES.SAVE_BUTTON} className="w-20" type="submit">
+              {t("common.button.save")}
+            </Button>
+          )}
         </form>
       </Form>
     </div>

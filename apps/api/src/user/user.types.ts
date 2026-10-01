@@ -2,6 +2,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { EmailTemplateDeliveryContext } from "src/email-templates/email-template.types";
 import type { DefaultEmailSettings } from "src/events/types";
 import type { users } from "src/storage/schema";
 import type {
@@ -166,6 +167,7 @@ export type UserCreatePasswordTokenInsert = UserPasswordEmailTokenInsert & {
 };
 
 export type PreparedUserPasswordEmail = {
+  template?: EmailTemplateDeliveryContext;
   userId: UUIDType;
   to: string;
   tenantId: UUIDType;

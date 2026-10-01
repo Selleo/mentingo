@@ -68,8 +68,20 @@ export const routes: (
           route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
           route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
+          route("courses/import-package", "modules/Admin/AddCourse/NativeArchiveImport.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");
+          route("email-templates", "modules/Admin/EmailTemplates/EmailTemplates.page.tsx");
+          route(
+            "email-templates/defaults/:event",
+            "modules/Admin/EmailTemplates/EmailTemplateEditor.page.tsx",
+            { id: "email-template-default" },
+          );
+          route(
+            "email-templates/:id",
+            "modules/Admin/EmailTemplates/EmailTemplateEditor.page.tsx",
+            { id: "email-template-editor" },
+          );
           route("users/:id", "modules/Admin/Users/User.page.tsx");
           route("users/new", "modules/Admin/Users/CreateNewUser.page.tsx");
           route("categories", "modules/Admin/Categories/Categories.page.tsx");

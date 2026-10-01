@@ -1,6 +1,7 @@
 import { IMAGE_QUALITY } from "../image-variant.constants";
 import {
   getAllImageVariantKeys,
+  getImageVariantBase,
   getImageVariantKey,
   isImageVariantReference,
   isSupportedImageVariantMimeType,
@@ -29,6 +30,18 @@ describe("image variant utils", () => {
       "tenant/course/variants/image-192w.webp",
       "tenant/course/variants/image-512w.webp",
     ]);
+  });
+
+  it("gets the logical reference from configured image qualities", () => {
+    expect(getImageVariantBase("tenant/course/variants/image-320w.webp")).toBe(
+      "tenant/course/variants/image.webp",
+    );
+    expect(getImageVariantBase("tenant/course/variants/image-192w.webp")).toBe(
+      "tenant/course/variants/image.webp",
+    );
+    expect(getImageVariantBase("tenant/course/variants/image-300w.webp")).toBe(
+      "tenant/course/variants/image-300w.webp",
+    );
   });
 
   it("keeps legacy references unchanged", () => {

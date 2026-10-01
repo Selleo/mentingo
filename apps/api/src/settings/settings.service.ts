@@ -1199,11 +1199,11 @@ export class SettingsService {
   ): Promise<GlobalSettingsJSONContentSchema> {
     if (featuredCourseId) {
       const [course] = await this.db
-        .select({ id: courses.id, status: courses.status })
+        .select({ id: courses.id, status: courses.status, isArchived: courses.isArchived })
         .from(courses)
         .where(eq(courses.id, featuredCourseId));
 
-      if (!course || course.status !== COURSE_STATUSES.PUBLISHED) {
+      if (!course || course.status !== COURSE_STATUSES.PUBLISHED || course.isArchived) {
         throw new BadRequestException("common.toast.somethingWentWrong");
       }
     }

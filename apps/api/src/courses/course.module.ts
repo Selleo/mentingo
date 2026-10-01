@@ -47,6 +47,8 @@ import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
 import { MasterCourseService } from "./master-course.service";
 import { MasterCourseWorker } from "./master-course.worker";
+import { CourseTranslationRepository } from "./repositories/course-translation.repository";
+import { CourseTranslationService } from "./services/course-translation.service";
 
 @Module({
   imports: [
@@ -94,11 +96,20 @@ import { MasterCourseWorker } from "./master-course.worker";
     MasterCourseService,
     MasterCourseSnapshotService,
     MasterCourseRepository,
+    CourseTranslationRepository,
+    CourseTranslationService,
     MasterCourseQueueService,
     MasterCourseWorker,
     MasterCourseSyncHandler,
     ManagingTenantAdminGuard,
   ],
-  exports: [CourseService, CourseFeaturePolicyService, CourseSlugService, MasterCourseService],
+  exports: [
+    CourseService,
+    CourseFeaturePolicyService,
+    CourseSlugService,
+    MasterCourseService,
+    MasterCourseRepository,
+    MasterCourseSnapshotService,
+  ],
 })
 export class CourseModule {}

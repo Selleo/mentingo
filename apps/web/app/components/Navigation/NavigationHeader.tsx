@@ -35,11 +35,14 @@ export function NavigationHeader({
         {isSidebarCollapsed ? (
           <PlatformLogo variant="signet" className="size-10 md:size-12" alt="Go to homepage" />
         ) : (
-          <PlatformLogo
-            variant="full"
-            className="h-10 2xl:h-16 w-auto max-w-full"
-            alt="Go to homepage"
-          />
+          <>
+            <PlatformLogo variant="signet" className="size-10 2xl:hidden" alt="Go to homepage" />
+            <PlatformLogo
+              variant="full"
+              className="hidden 2xl:block 2xl:h-16 w-auto max-w-full"
+              alt="Go to homepage"
+            />
+          </>
         )}
       </Link>
       <div className="flex gap-x-2">

@@ -1,5 +1,10 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
+import {
+  ASSESSMENT_QUESTION_TYPES,
+  ENTITY_TYPES,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+} from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { groupBy } from "lodash";
 
@@ -8,7 +13,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { BLANK_ANSWER_MARKER_REGEX } from "src/questions/fill-in-the-blanks.utils";
 import { extractResourceIdsFromRichText } from "src/resource-library/resource-library.utils";
 import { SettingsService } from "src/settings/settings.service";
 import {
@@ -16,8 +21,13 @@ import {
   chapters,
   courses,
   lessons,
-  questionAnswerOptions,
-  questions,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestionBlanks,
+  assessmentQuestionBlankAnswerSets,
+  assessmentQuestionTrueFalseStatements,
+  assessmentQuestionDragAndDropOptions,
+  assessmentQuestions,
+  assessments,
   resourceEntity,
   resources,
   scormPackages,
@@ -32,6 +42,7 @@ import type {
   CourseScormLessonAssetRow,
   CourseScormLessonRow,
   CourseScormQuizQuestionRow,
+  CourseScormQuizOptionRow,
   CourseScormScoRow,
   CourseScormSnapshotResult,
   CourseScormValidateRequiredAssetsOptions,
@@ -287,51 +298,181 @@ export class CourseScormSnapshotService {
 
     return this.db
       .select({
-        id: questions.id,
-        lessonId: questions.lessonId,
-        type: questions.type,
-        title: this.localizationService.getLocalizedSqlField(questions.title, language),
-        description: this.localizationService.getLocalizedSqlField(questions.description, language),
-        solutionExplanation: this.localizationService.getLocalizedSqlField(
-          questions.solutionExplanation,
+        id: assessmentQuestions.id,
+        lessonId: assessments.lessonId,
+        type: assessmentQuestions.questionType,
+        title: this.localizationService.getLocalizedSqlField(assessmentQuestions.title, language),
+        description: this.localizationService.getLocalizedSqlField(
+          assessmentQuestions.description,
           language,
         ),
-        displayOrder: questions.displayOrder,
-        photoS3Key: questions.photoS3Key,
+        solutionExplanation: sql<string | null>`NULL`,
+        displayOrder: assessmentQuestions.displayOrder,
+        photoS3Key: resources.reference,
       })
-      .from(questions)
-      .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+      .from(assessmentQuestions)
+      .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(inArray(questions.lessonId, lessonIds))
-      .orderBy(questions.displayOrder);
+      .leftJoin(
+        resourceEntity,
+        and(
+          eq(resourceEntity.entityId, assessmentQuestions.id),
+          eq(resourceEntity.entityType, ENTITY_TYPES.ASSESSMENT_QUESTION),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.PROMPT_IMAGE),
+        ),
+      )
+      .leftJoin(
+        resources,
+        and(eq(resources.id, resourceEntity.resourceId), eq(resources.archived, false)),
+      )
+      .where(inArray(assessments.lessonId, lessonIds))
+      .orderBy(assessmentQuestions.displayOrder);
   }
 
   private async getQuizOptions(lessonIds: UUIDType[], language: SupportedLanguages) {
     if (!lessonIds.length) return [];
 
-    return this.db
-      .select({
-        id: questionAnswerOptions.id,
-        questionId: questionAnswerOptions.questionId,
-        title: this.localizationService.getLocalizedSqlField(
-          questionAnswerOptions.optionText,
-          language,
+    const [choiceOptions, trueFalseStatements, blankAnswers, dragOptions] = await Promise.all([
+      this.db
+        .select({
+          id: assessmentQuestionChoiceOptions.id,
+          questionId: assessmentQuestionChoiceOptions.questionId,
+          title: assessmentQuestionChoiceOptions.label,
+          isCorrect: assessmentQuestionChoiceOptions.isCorrect,
+          displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+          matchedWord: sql<string | null>`NULL`,
+          targetBlankId: sql<UUIDType | null>`NULL`,
+        })
+        .from(assessmentQuestionChoiceOptions)
+        .innerJoin(
+          assessmentQuestions,
+          eq(assessmentQuestions.id, assessmentQuestionChoiceOptions.questionId),
+        )
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(
+          and(
+            inArray(assessments.lessonId, lessonIds),
+            eq(assessmentQuestionChoiceOptions.language, language),
+          ),
         ),
-        isCorrect: questionAnswerOptions.isCorrect,
-        displayOrder: questionAnswerOptions.displayOrder,
-        matchedWord: this.localizationService.getLocalizedSqlField(
-          questionAnswerOptions.matchedWord,
-          language,
+      this.db
+        .select({
+          id: assessmentQuestionBlanks.id,
+          questionId: assessmentQuestionBlanks.questionId,
+          title: assessmentQuestionBlankAnswerSets.preferredAnswer,
+          isCorrect: sql<boolean>`TRUE`,
+          displayOrder: sql<number>`0`,
+          matchedWord: assessmentQuestionBlankAnswerSets.preferredAnswer,
+          targetBlankId: assessmentQuestionBlanks.id,
+        })
+        .from(assessmentQuestionBlankAnswerSets)
+        .innerJoin(
+          assessmentQuestionBlanks,
+          eq(assessmentQuestionBlanks.id, assessmentQuestionBlankAnswerSets.blankId),
+        )
+        .innerJoin(
+          assessmentQuestions,
+          eq(assessmentQuestions.id, assessmentQuestionBlanks.questionId),
+        )
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(
+          and(
+            inArray(assessments.lessonId, lessonIds),
+            eq(assessmentQuestionBlankAnswerSets.language, language),
+          ),
         ),
-      })
-      .from(questionAnswerOptions)
-      .innerJoin(questions, eq(questions.id, questionAnswerOptions.questionId))
-      .innerJoin(lessons, eq(lessons.id, questions.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(inArray(questions.lessonId, lessonIds))
-      .orderBy(questionAnswerOptions.displayOrder);
+      this.db
+        .select({
+          id: assessmentQuestionTrueFalseStatements.id,
+          questionId: assessmentQuestionTrueFalseStatements.questionId,
+          title: assessmentQuestionTrueFalseStatements.statement,
+          isCorrect: assessmentQuestionTrueFalseStatements.correctValue,
+          displayOrder: assessmentQuestionTrueFalseStatements.displayOrder,
+          matchedWord: sql<string | null>`NULL`,
+          targetBlankId: sql<UUIDType | null>`NULL`,
+        })
+        .from(assessmentQuestionTrueFalseStatements)
+        .innerJoin(
+          assessmentQuestions,
+          eq(assessmentQuestions.id, assessmentQuestionTrueFalseStatements.questionId),
+        )
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(
+          and(
+            inArray(assessments.lessonId, lessonIds),
+            eq(assessmentQuestionTrueFalseStatements.language, language),
+          ),
+        ),
+      this.db
+        .select({
+          id: assessmentQuestionDragAndDropOptions.id,
+          questionId: assessmentQuestionDragAndDropOptions.questionId,
+          title: assessmentQuestionDragAndDropOptions.label,
+          isCorrect: sql<boolean>`false`,
+          displayOrder: assessmentQuestionDragAndDropOptions.displayOrder,
+          matchedWord: sql<string | null>`NULL`,
+          targetBlankId: assessmentQuestionDragAndDropOptions.targetBlankId,
+        })
+        .from(assessmentQuestionDragAndDropOptions)
+        .innerJoin(
+          assessmentQuestions,
+          eq(assessmentQuestions.id, assessmentQuestionDragAndDropOptions.questionId),
+        )
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(
+          and(
+            inArray(assessments.lessonId, lessonIds),
+            eq(assessmentQuestionDragAndDropOptions.language, language),
+          ),
+        ),
+    ]);
+
+    return [...choiceOptions, ...trueFalseStatements, ...blankAnswers, ...dragOptions].sort(
+      (first, second) => (first.displayOrder ?? 0) - (second.displayOrder ?? 0),
+    );
+  }
+
+  private buildQuizSolutionExplanation(
+    question: CourseScormQuizQuestionRow,
+    options: CourseScormQuizOptionRow[],
+  ) {
+    if (
+      question.type === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT ||
+      question.type === ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_DND
+    ) {
+      if (!question.description) return null;
+
+      const answersByBlankId = new Map(
+        options
+          .filter((option) => option.targetBlankId)
+          .map((option) => [option.targetBlankId, option.title]),
+      );
+
+      let unresolved = false;
+
+      const explanation = question.description.replace(
+        BLANK_ANSWER_MARKER_REGEX,
+        (marker, blankId: string) => {
+          const answer = answersByBlankId.get(blankId);
+
+          if (!answer) {
+            unresolved = true;
+            return marker;
+          }
+
+          return `<strong>${answer}</strong>`;
+        },
+      );
+
+      return unresolved ? null : explanation;
+    }
+
+    const correctAnswers = options
+      .filter((option) => option.isCorrect)
+      .map((option) => option.title);
+    return correctAnswers.length ? `Correct answer: ${correctAnswers.join(", ")}` : null;
   }
 
   private async getScormScoRows(
@@ -403,13 +544,15 @@ export class CourseScormSnapshotService {
           displayOrder: lesson.displayOrder,
           passingScorePercent: lesson.thresholdScore,
           questions: (questionsByLessonId[lesson.id] ?? [])
-            .filter((question) => question.type !== QUESTION_TYPE.SCALE_1_5)
+            .filter((question) => question.type !== ASSESSMENT_QUESTION_TYPES.SCALE_1_5)
             .map((question) => ({
               id: question.id,
               type: question.type,
               title: question.title,
               description: question.description,
-              solutionExplanation: question.solutionExplanation,
+              solutionExplanation:
+                question.solutionExplanation ??
+                this.buildQuizSolutionExplanation(question, optionsByQuestionId[question.id] ?? []),
               displayOrder: question.displayOrder,
               options: (optionsByQuestionId[question.id] ?? []).map((option) => ({
                 id: option.id,

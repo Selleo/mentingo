@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kurzy a vzdělávací cesty s existujícím identifikátorem se přeskočí. Nový obsah se vytvoří jako koncept.",
+    "uploadPrompt": "Vyberte nebo přetáhněte ZIP balíček Mentingo",
+    "dropPrompt": "Přetáhněte balíček Mentingo sem",
+    "fileReady": "Připraveno k importu",
+    "replaceFile": "Nahradit balíček",
+    "removeFile": "Odebrat balíček",
+    "exportTitle": "Balíček Mentingo",
+    "exportDescription": {
+      "course": "Exportujte kurz, jeho strukturu, nastavení a soubory jako balíček pro import do Mentinga.",
+      "learning-path": "Exportujte vzdělávací cestu, její kurzy, nastavení a soubory jako balíček pro import do Mentinga."
+    },
+    "exportButton": "Exportovat balíček Mentingo",
+    "preparing": "Příprava balíčku Mentingo…",
+    "exportReady": "Balíček Mentingo byl stažen",
+    "importTitle": "Importovat balíček Mentingo",
+    "selectFile": "Vybrat ZIP balíček Mentingo",
+    "importButton": "Importovat balíček Mentingo",
+    "uploading": "Nahrávání…",
+    "importing": "Import balíčku Mentingo…",
+    "alreadyExists": "Tato položka již existuje. Nic se nezměnilo.",
+    "importComplete": "Import dokončen: vytvořeno {{count}} kurzů, znovu použito {{reused}}.",
+    "liveTrainingReview": "Před použitím zkontrolujte rozvrh a materiály importovaného živého školení.",
+    "dismissReview": "Označit jako zkontrolované",
+    "error": "Balíček Mentingo se nepodařilo zpracovat.",
+    "errors": {
+      "storageUnavailable": "Úložiště souborů není dostupné.",
+      "liveTrainingUnavailable": "Pro import balíčku Mentingo je nutné zapnout živá školení.",
+      "embeddingUnavailable": "Zpracování dokumentů AI není dostupné.",
+      "unsupportedVersion": "Tato verze balíčku Mentingo není podporována.",
+      "missingAsset": "V balíčku Mentingo chybí požadovaný soubor.",
+      "invalidArchive": "Tento ZIP není platným balíčkem Mentingo."
+    }
+  },
   "aiConversations": {
     "session": "Relace",
     "context": "Kontext",
@@ -45,6 +79,170 @@
       "active": "Probíhá",
       "completed": "Dokončená",
       "archived": "Archivovaná"
+    }
+  },
+  "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Přidá termín povinného kurzu, pokud je stanoven. Bez termínu se nezobrazí.",
+      "inactivity_subject": "Použije předmět oznámení. U krátké neaktivity bez kurzu se předmět týká platformy.",
+      "inactivity_message": "Popisuje neaktivitu v kurzu, nebo na platformě, pokud není k dispozici kurz.",
+      "inactivity_action": "Použije popisek tlačítka oznámení. U krátké neaktivity bez kurzu zobrazí „Otevřít platformu”.",
+      "deadline_message": "Popisuje skutečný čas do termínu: dnes, zítra nebo počet zbývajících dní.",
+      "course_completion_message": "Potvrdí dokončení a zmíní certifikát ke stažení pouze tehdy, je-li dostupný.",
+      "course_completion_action": "Zobrazí „Stáhnout certifikát”, pokud je dostupný, jinak „Pokračovat ve studiu”.",
+      "certificate_archive_heading": "Podle události zobrazí „Certifikát vypršel” nebo „Certifikát resetován”.",
+      "certificate_archive_message": "Vysvětlí, zda certifikát vypršel, nebo jej resetoval administrátor."
+    },
+    "ui": {
+      "dividerHeight": "Výška oddělovače (px)",
+      "tableOfContents": "Obsah",
+      "delete": "Smazat šablonu",
+      "deleted": "Šablona smazána",
+      "deleteHint": "Trvale smazat tuto šablonu? Tuto akci nelze vrátit zpět. Pokud je šablona publikovaná, budoucí e-maily použijí systémovou šablonu.",
+      "blockPalette": "Bloky",
+      "searchVariables": "Hledat proměnné…",
+      "noVariables": "Žádné odpovídající proměnné",
+      "blockSettings": "Nastavení bloku",
+      "dragBlock": "Přetáhnout blok",
+      "editBlock": "Upravit blok",
+      "title": "E-mailové šablony",
+      "description": "Přizpůsobte oznámení organizace. Výchozí šablony jsou jen pro čtení.",
+      "create": "Vytvořit z výchozího",
+      "name": "Název šablony",
+      "event": "Událost oznámení",
+      "status": "Stav",
+      "languages": "Dokončené jazyky",
+      "actions": "Akce",
+      "system": "Systémová",
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "archived": "Archivováno",
+      "copyDefault": "Kopírovat a upravit",
+      "duplicate": "Duplikovat",
+      "archive": "Archivovat",
+      "restore": "Obnovit koncept",
+      "preview": "Náhled",
+      "sendTest": "Odeslat testovací e-mail",
+      "publish": "Publikovat",
+      "save": "Uložit",
+      "saveDraft": "Uložit koncept",
+      "back": "Zpět na šablony",
+      "editor": "Editor e-mailů",
+      "loading": "Načítání šablon…",
+      "retry": "Zkusit znovu",
+      "requestFailed": "Požadavek se nezdařil. Zkuste to znovu.",
+      "emptyList": "Na této stránce nejsou šablony.",
+      "language": "Jazyk úprav",
+      "baseLanguage": "Základní jazyk",
+      "setBaseLanguage": "Použít jako základní jazyk",
+      "subject": "Předmět",
+      "content": "Obsah e-mailu",
+      "translations": "Překlady",
+      "complete": "Dokončeno",
+      "fallback": "Použije základní jazyk",
+      "variables": "Dostupné proměnné",
+      "insertVariable": "Vložit proměnnou",
+      "requiredLink": "Povinný odkaz akce",
+      "collectionSample": "Kolekce — položky najdete v náhledu.",
+      "variablesHint": "Vkládejte proměnné z nabídek polí. Při odeslání se nahradí daty události. * označuje povinné odkazy.",
+      "defaultHint": "Tato šablona je jen pro čtení. Zkopírujte ji do upravitelného konceptu.",
+      "editHint": "Změny ukládejte tlačítkem. Náhled a testy používají neuložený obsah s ukázkovými daty; testy přijdou jen vám.",
+      "publishedHint": "Uložení této šablony ihned změní budoucí e-maily.",
+      "languageHint": "Neúplné překlady použijí základní jazyk. Před změnou základního jazyka uložte úplný překlad.",
+      "publishHint": "Publikovat šablonu? Nahradí aktuálně aktivní šablonu. Neuložené změny se nejprve uloží.",
+      "archiveHint": "Archivovat šablonu? Pokud je aktivní, událost opět použije výchozí šablonu.",
+      "unsavedTitle": "Neuložené změny",
+      "unsavedHint": "Opuštěním stránky ztratíte neuložené změny.",
+      "leave": "Zahodit a odejít",
+      "addBlock": "Přidat blok za vybraný",
+      "emptyContent": "Přidejte blok a začněte překlad.",
+      "moveUp": "Posunout nahoru",
+      "moveDown": "Posunout dolů",
+      "duplicateBlock": "Duplikovat blok",
+      "removeBlock": "Odstranit blok",
+      "brandingHint": "Záhlaví používá logo a název vaší organizace.",
+      "buttonLabel": "Text tlačítka",
+      "url": "URL odkazu (HTTPS nebo proměnná)",
+      "imageSource": "URL obrázku nebo odkaz na soubor",
+      "uploadImage": "Nahrát obrázek",
+      "imageHint": "Použijte veřejnou HTTPS URL nebo nahrajte obrázek (do 5 MiB). Nahrané obrázky se při odeslání vloží.",
+      "altText": "Alternativní text",
+      "width": "Šířka (px, volitelné)",
+      "height": "Výška mezery (px)",
+      "richText": "Formátovaný text",
+      "bold": "Tučné",
+      "italic": "Kurzíva",
+      "link": "Upravit odkaz",
+      "unlink": "Odstranit odkaz",
+      "applyLink": "Použít odkaz",
+      "desktop": "Zobrazení počítače",
+      "mobile": "Mobilní zobrazení",
+      "copied": "Byl vytvořen nový koncept.",
+      "saved": "Změny uloženy.",
+      "restored": "Šablona obnovena jako koncept.",
+      "languageRemoved": "Jazyk odebrán ze šablony.",
+      "testQueued": "Testovací e-mail zařazen do fronty na vaši adresu.",
+      "uploaded": "Obrázek nahrán.",
+      "blocks": {
+        "header": "Záhlaví",
+        "heading": "Nadpis",
+        "text": "Text",
+        "button": "Tlačítko",
+        "image": "Obrázek",
+        "divider": "Oddělovač",
+        "spacer": "Mezera",
+        "footer": "Zápatí"
+      }
+    },
+    "events": {
+      "welcome": "Uvítání",
+      "password_recovery": "Obnovení hesla",
+      "password_reminder": "Připomenutí vytvoření hesla",
+      "user_invite": "Pozvánka uživatele",
+      "user_first_login": "První přihlášení",
+      "user_assigned_to_course": "Přiřazení ke kurzu",
+      "user_short_inactivity": "Připomenutí krátké neaktivity",
+      "user_long_inactivity": "Připomenutí dlouhé neaktivity",
+      "user_finished_chapter": "Dokončení kapitoly",
+      "user_finished_course": "Dokončení kurzu",
+      "certificate_expiration_warning": "Upozornění na vypršení certifikátu",
+      "certificate_expired": "Platnost certifikátu vypršela",
+      "admin_new_user": "Oznámení o novém uživateli",
+      "admin_finished_course": "Oznámení správci o dokončení kurzu",
+      "admin_overdue_courses": "Oznámení o kurzech po termínu",
+      "course_due_date_reminder": "Připomenutí termínu kurzu",
+      "magic_link": "Přihlašovací odkaz",
+      "course_chat_mention": "Zmínka v chatu kurzu",
+      "announcement": "Oznámení",
+      "live_training_started": "Živé školení začalo",
+      "live_training_reminder": "Připomenutí živého školení",
+      "live_training_ended": "Živé školení skončilo"
+    },
+    "errors": {
+      "incompleteButton": "Zadejte popisek tlačítka a URL.",
+      "incompleteBlocks": "Před pokračováním vyplňte povinná pole tlačítek a obrázků.",
+      "emptyBlock": "Tento blok je prázdný.",
+      "incompleteBaseLanguage": "Vyplňte název, předmět a obsah v základním jazyce.",
+      "unsupportedEvent": "Nepodporovaná e-mailová událost.",
+      "restrictedAuthVariables": "Proměnné pro přístup k účtu lze použít pouze jako úplné cíle tlačítek nebo textových odkazů.",
+      "unsupportedVariables": "Šablona obsahuje nepodporované proměnné.",
+      "missingMandatoryVariables": "Každý úplný překlad musí obsahovat požadované odkazy na akce.",
+      "malformedVariables": "Neplatná syntaxe proměnných.",
+      "invalidContent": "Neplatný obsah e-mailu.",
+      "invalidUrl": "Neplatný odkaz v e-mailu.",
+      "httpsRequired": "Odkazy v e-mailech musí používat HTTPS.",
+      "privateImageHost": "Obrázky nesmí používat místní ani soukromé hostitele.",
+      "publicationConflict": "Pro tuto událost byla publikována jiná šablona. Zkuste to znovu.",
+      "notFound": "Šablona e-mailu nebyla nalezena.",
+      "createFailed": "Šablonu e-mailu se nepodařilo vytvořit.",
+      "invalidCollection": "Neplatná data kolekce.",
+      "cannotRemoveBaseLanguage": "Základní jazyk nelze odebrat.",
+      "archivedReadOnly": "Před změnou jazyků šablonu obnovte."
+    },
+    "warnings": {
+      "translationFallback": "Neúplné překlady používají základní jazyk.",
+      "missingHeader": "V překladu chybí záhlaví.",
+      "missingFooter": "V překladu chybí zápatí."
     }
   },
   "dashboardHome": {
@@ -357,6 +555,7 @@
     "send": "Odeslat"
   },
   "common": {
+    "deletedUser": "Smazaný uživatel",
     "button": {
       "previous": "Předchozí",
       "next": "Další",
@@ -665,7 +864,7 @@
     "back": "Zpět",
     "eyebrow": "Nastavení kurzu",
     "title": "Vytvořit nový kurz",
-    "subtitle": "Vyberte, zda chcete kurz vytvořit ve standardním editoru, nebo z balíčku SCORM.",
+    "subtitle": "Vyberte standardní editor, balíček SCORM nebo balíček Mentingo.",
     "standard": {
       "title": "Standardní",
       "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
@@ -684,6 +883,16 @@
         "tracking": "Podpora dokončení SCO a runtime stavu",
         "structure": "Struktura importovaného balíčku zachována",
         "future": "Ceny, stav a certifikáty jsou součástí"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Balíček Mentingo",
+      "description": "Obnovte kurz nebo vzdělávací cestu z balíčku Mentingo.",
+      "features": {
+        "structure": "Obnovení struktury kurzu a překladů",
+        "settings": "Obnovení nastavení a metadat",
+        "assets": "Související soubory součástí",
+        "learningPath": "Podpora vzdělávacích cest a jejich kurzů"
       }
     }
   },
@@ -1692,6 +1901,8 @@
     "dropdown": {
       "changeCategory": "Změnit kategorii",
       "changeStatus": "Změnit stav",
+      "archive": "Archivovat",
+      "restore": "Obnovit",
       "delete": "Smazat"
     },
     "deleteModal": {
@@ -1699,6 +1910,14 @@
       "titleMultiple": "Smazat kurzy",
       "descriptionSingle": "Opravdu chcete tento kurz smazat? Tuto akci nelze vrátit zpět.",
       "descriptionMultiple": "Opravdu chcete smazat {{count}} kurzy? Tuto akci nelze vrátit zpět."
+    },
+    "archiveModal": {
+      "title": "Archivovat kurzy",
+      "description": "Archivovat {{count}} vybraných kurzů? Zapsaní studenti si ponechají přístup."
+    },
+    "restoreModal": {
+      "title": "Obnovit kurzy",
+      "description": "Obnovit {{count}} vybraných kurzů do aktivního katalogu?"
     },
     "statusModal": {
       "title": "Změnit stav kurzu",
@@ -1716,6 +1935,9 @@
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
       "bulkCategoryUpdateCategoryNotFound": "Vybraná kategorie nebyla nalezena.",
+      "bulkArchiveUpdateSuccessfully": "Stav archivace kurzů byl aktualizován",
+      "bulkArchiveUpdateFailed": "Stav archivace kurzů se nepodařilo aktualizovat",
+      "bulkArchiveUpdateForbidden": "Nemáte oprávnění archivovat nebo obnovit jeden či více vybraných kurzů.",
       "bulkStatusUpdateSuccessfully": "Stavy kurzů byly úspěšně aktualizovány",
       "bulkStatusUpdateFailed": "Nepodařilo se aktualizovat stavy kurzů",
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
@@ -1918,6 +2140,7 @@
         "dashboard_read": "Může zobrazit svůj dashboard.",
         "todo_task_manage_self": "Může vytvářet a spravovat vlastní úkoly.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
+        "email_template_manage": "Může spravovat a publikovat e-mailové šablony, nahrávat obrázky a odesílat testovací e-maily.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
         "category_read": "Může zobrazit kategorie kurzů.",
@@ -2365,7 +2588,8 @@
         "lesson": "Lekce nenalezena."
       },
       "forbidden": {
-        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz.",
+        "archivedCourseEnrollment": "Tento kurz byl archivován a již se do něj nelze zapsat."
       },
       "media": {
         "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
@@ -2521,6 +2745,10 @@
         "enableQuizFeedbackDescription": "Po odeslání kvízu student uvidí, které odpovědi byly správné, nesprávné nebo nezodpovězené.",
         "enableVideoCompletionTracking": "Sledování dokončení videa",
         "enableVideoCompletionTrackingDescription": "Účastník musí zhlédnout alespoň 90 % každého videa v lekci, aby byla lekce označena jako dokončená.",
+        "archiveCourseDescription": "Archivace skryje kurz v katalogu a zabrání novým samostatným zápisům. Již zapsaní účastníci si zachovají přístup.",
+        "archiveCourseTitle": "Archivovat kurz",
+        "archivedCourseTitle": "Kurz je archivován",
+        "courseAvailabilityTitle": "Dostupnost kurzu",
         "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
         "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
         "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."
@@ -4923,6 +5151,11 @@
       "start_course": "Spuštěno",
       "group_assignment": "Přiřazeno",
       "users_import": "Uživatelé importováni",
+      "publish_email_template": "E-mailová šablona publikována",
+      "archive_email_template": "E-mailová šablona archivována",
+      "restore_email_template": "E-mailová šablona obnovena",
+      "add_email_template_language": "Přidán jazyk e-mailové šablony",
+      "remove_email_template_language": "Odebrán jazyk e-mailové šablony",
       "send_password_reset_email": "E-mail pro reset hesla odeslán",
       "resend_password_creation_email": "E-mail pro vytvoření hesla znovu odeslán",
       "complete_lesson": "Lekce dokončena",
@@ -4956,6 +5189,7 @@
       "live_training": "Živé školení",
       "learning_path": "Vzdělávací cesta",
       "scorm": "SCORM",
+      "email_template": "E-mailová šablona",
       "global_settings": "Nastavení"
     },
     "table": {
@@ -5083,6 +5317,9 @@
   },
   "adminLearningPathsView": {
     "title": "Rozvojové cesty",
+    "importPackage": {
+      "title": "Importovat rozvojovou cestu"
+    },
     "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
     "summary": "{{count}} rozvojových cest je dostupných v tomto prostoru.",
     "breadcrumbs": {

@@ -67,6 +67,8 @@ export function useAdminLearningPathsPage() {
     useUnenrollGroupsFromLearningPath();
 
   const canCreateLearningPaths = hasPermission(permissions, PERMISSIONS.LEARNING_PATH_CREATE);
+  const canImportLearningPaths =
+    canCreateLearningPaths && hasPermission(permissions, PERMISSIONS.COURSE_CREATE);
   const canDeleteLearningPaths = hasPermission(permissions, PERMISSIONS.LEARNING_PATH_DELETE);
   const canManageLearningPathEnrollment = hasPermission(
     permissions,
@@ -154,6 +156,7 @@ export function useAdminLearningPathsPage() {
     getSelectedLanguage,
     setPathLanguage,
     canCreateLearningPaths,
+    canImportLearningPaths,
     canDeleteLearningPaths,
     canManageLearningPathEnrollment,
     canExportLearningPath,

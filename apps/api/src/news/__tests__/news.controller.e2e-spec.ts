@@ -1,11 +1,11 @@
 import { NEWS_STATUS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { isNull } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { FileGuard } from "src/file/guards/file.guard";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { news, settings } from "src/storage/schema";
+import { news, settings, users } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -92,6 +92,40 @@ describe("NewsController (e2e)", () => {
   });
 
   describe("reading published news", () => {
+    it("identifies a deleted author in news details and list", async () => {
+      const author = await userFactory.create();
+      const item = await newsFactory.create({ authorId: author.id });
+
+      const activeResponse = await request(app.getHttpServer())
+        .get(`/api/news/${item.id}?language=en`)
+        .expect(200);
+      expect(activeResponse.body.data.authorDeleted).toBe(false);
+
+      await db
+        .update(users)
+        .set({
+          firstName: "deleted user",
+          lastName: "deleted user",
+          deletedAt: new Date().toISOString(),
+        })
+        .where(eq(users.id, author.id));
+
+      const detailResponse = await request(app.getHttpServer())
+        .get(`/api/news/${item.id}?language=en`)
+        .expect(200);
+      const listResponse = await request(app.getHttpServer())
+        .get("/api/news?language=en")
+        .expect(200);
+
+      expect(detailResponse.body.data).toMatchObject({
+        authorName: "deleted user deleted user",
+        authorDeleted: true,
+      });
+      expect(listResponse.body.data).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: item.id, authorDeleted: true })]),
+      );
+    });
+
     it("returns only public, published, non-archived news in the requested language to a visitor", async () => {
       const author = await userFactory.create();
       const visible = await newsFactory.create({ authorId: author.id, title: "Visible news" });

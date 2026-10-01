@@ -1,7 +1,16 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 
+import { DatabasePg } from "src/common";
 import { EnvService } from "src/env/services/env.service";
+import { DB } from "src/storage/db/db.providers";
+import { courses } from "src/storage/schema";
 
 import type { CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import type { CreatePromotionCode } from "./schemas/createPromotionCode";
@@ -11,7 +20,21 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class StripeService {
-  constructor(private readonly envService: EnvService) {}
+  constructor(
+    private readonly envService: EnvService,
+    @Inject(DB) private readonly db: DatabasePg,
+  ) {}
+
+  private async assertCourseAcceptsCheckout(courseId: UUIDType) {
+    const [course] = await this.db
+      .select({ isArchived: courses.isArchived })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course || course.isArchived) {
+      throw new BadRequestException("adminCourseView.errors.forbidden.archivedCourseEnrollment");
+    }
+  }
 
   private async getStripeClient() {
     const [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] = await Promise.all([
@@ -39,6 +62,7 @@ export class StripeService {
   }
 
   async payment(amount: number, currency: string, customerId: UUIDType, courseId: UUIDType) {
+    await this.assertCourseAcceptsCheckout(courseId);
     const client = await this.getClient();
 
     const { client_secret } = await client.paymentIntents.create({
@@ -62,6 +86,8 @@ export class StripeService {
       locale,
       priceId,
     } = body;
+
+    await this.assertCourseAcceptsCheckout(courseId);
 
     const client = await this.getClient();
 

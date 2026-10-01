@@ -1,5 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { ApiClient } from "~/api/api-client";
+import { LIVE_TRAINING_QUERY_KEY } from "~/api/queries/live-training/useLiveTraining";
+import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LiveTrainingMaterials } from "~/modules/LiveTraining/components/LiveTrainingMaterials";
 import { LiveTrainingOverview } from "~/modules/LiveTraining/components/LiveTrainingOverview";
@@ -20,57 +24,80 @@ type LiveTrainingWorkspaceProps = {
 
 export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWorkspaceProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const dismissReview = useMutation({
+    mutationFn: () =>
+      ApiClient.api.nativeArchiveControllerDismissLiveTrainingReview(liveTraining.id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: LIVE_TRAINING_QUERY_KEY }),
+  });
 
   return (
-    <Tabs
-      defaultValue={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}
-      className="grid gap-4"
-      data-testid={LIVE_TRAINING_HANDLES.WORKSPACE}
-    >
-      <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-        <TabsTrigger
-          value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}
-          data-testid={LIVE_TRAINING_HANDLES.OVERVIEW_TAB}
-        >
-          {t("liveTrainingView.tabs.overview")}
-        </TabsTrigger>
-        <TabsTrigger
-          value={LIVE_TRAINING_WORKSPACE_TABS.FILES}
-          data-testid={LIVE_TRAINING_HANDLES.FILES_TAB}
-        >
-          {t("liveTrainingView.tabs.files")}
-        </TabsTrigger>
-        {actions.canViewSessionData && (
-          <TabsTrigger
-            value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}
-            data-testid={LIVE_TRAINING_HANDLES.SESSIONS_TAB}
-          >
-            {t("liveTrainingView.tabs.sessions")}
-          </TabsTrigger>
+    <div className="grid gap-4">
+      {actions.canShowEdit &&
+        (liveTraining.metadata as Record<string, unknown> | null)?.nativeArchiveReviewRequired ===
+          true && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm text-amber-950">{t("nativeArchive.liveTrainingReview")}</p>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={dismissReview.isPending}
+              onClick={() => dismissReview.mutate()}
+            >
+              {t("nativeArchive.dismissReview")}
+            </Button>
+          </div>
         )}
-      </TabsList>
+      <Tabs
+        defaultValue={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}
+        className="grid gap-4"
+        data-testid={LIVE_TRAINING_HANDLES.WORKSPACE}
+      >
+        <TabsList className="h-auto w-fit bg-neutral-100 p-1">
+          <TabsTrigger
+            value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}
+            data-testid={LIVE_TRAINING_HANDLES.OVERVIEW_TAB}
+          >
+            {t("liveTrainingView.tabs.overview")}
+          </TabsTrigger>
+          <TabsTrigger
+            value={LIVE_TRAINING_WORKSPACE_TABS.FILES}
+            data-testid={LIVE_TRAINING_HANDLES.FILES_TAB}
+          >
+            {t("liveTrainingView.tabs.files")}
+          </TabsTrigger>
+          {actions.canViewSessionData && (
+            <TabsTrigger
+              value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}
+              data-testid={LIVE_TRAINING_HANDLES.SESSIONS_TAB}
+            >
+              {t("liveTrainingView.tabs.sessions")}
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-      <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
-        <LiveTrainingOverview
-          liveTraining={liveTraining}
-          canEditPeople={actions.canManagePeople}
-          className="lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]"
-        />
-      </TabsContent>
-
-      <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>
-        <LiveTrainingMaterials
-          liveTraining={liveTraining}
-          actions={actions}
-          className="lg:grid-cols-2"
-        />
-      </TabsContent>
-
-      {actions.canViewSessionData && (
-        <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}>
-          <LiveTrainingSessionsPanel liveTrainingId={liveTraining.id} />
+        <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
+          <LiveTrainingOverview
+            liveTraining={liveTraining}
+            canEditPeople={actions.canManagePeople}
+            className="lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]"
+          />
         </TabsContent>
-      )}
-    </Tabs>
+
+        <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>
+          <LiveTrainingMaterials
+            liveTraining={liveTraining}
+            actions={actions}
+            className="lg:grid-cols-2"
+          />
+        </TabsContent>
+
+        {actions.canViewSessionData && (
+          <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}>
+            <LiveTrainingSessionsPanel liveTrainingId={liveTraining.id} />
+          </TabsContent>
+        )}
+      </Tabs>
+    </div>
   );
 }

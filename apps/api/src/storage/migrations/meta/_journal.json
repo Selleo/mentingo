@@ -1408,6 +1408,69 @@
       "when": 1789631517227,
       "tag": "0200_normalize_course_author_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1790012986542,
+      "tag": "0201_add_assessment_quiz_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 202,
+      "version": "7",
+      "when": 1790013000179,
+      "tag": "0202_enable_assessment_quiz_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 203,
+      "version": "7",
+      "when": 1790013002603,
+      "tag": "0203_backfill_assessment_quiz_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 204,
+      "version": "7",
+      "when": 1790013484825,
+      "tag": "0204_drop_legacy_quiz_dependent_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 205,
+      "version": "7",
+      "when": 1790247098294,
+      "tag": "0205_add_email_templates_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1790247103382,
+      "tag": "0206_enable_email_templates_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 207,
+      "version": "7",
+      "when": 1790595478054,
+      "tag": "0207_native_archive_original_ids",
+      "breakpoints": true
+    },
+    {
+      "idx": 208,
+      "version": "7",
+      "when": 1790604530880,
+      "tag": "0208_fix_ai_judge_judgement_delete",
+      "breakpoints": true
+    },
+    {
+      "idx": 209,
+      "version": "7",
+      "when": 1790855868667,
+      "tag": "0209_add_archived_field_to_courses",
+      "breakpoints": true
     }
   ]
 }

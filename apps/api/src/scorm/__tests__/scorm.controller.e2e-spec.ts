@@ -109,6 +109,12 @@ class InMemoryS3Service {
     };
   }
 
+  setContentType(key: string, contentType: string) {
+    const file = this.files.get(key);
+    if (!file) throw new Error(`Missing test S3 object ${key}`);
+    this.files.set(key, { ...file, contentType });
+  }
+
   clear() {
     this.files.clear();
   }
@@ -878,6 +884,29 @@ describe("ScormController (e2e)", () => {
   });
 
   describe("GET /api/scorm/content/:packageId/*", () => {
+    it("serves existing SCORM HTML inline when storage has a generic MIME type", async () => {
+      const admin = await createAdmin();
+      const imported = await importScormCourse(admin);
+      const [pkg] = await db
+        .select()
+        .from(scormPackages)
+        .where(eq(scormPackages.id, imported.packageId));
+      if (!pkg) throw new Error("Imported SCORM package was not persisted");
+
+      s3Service.setContentType(
+        `${pkg.extractedFilesReference}/index.html`,
+        "application/octet-stream",
+      );
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/scorm/content/${imported.packageId}/index.html`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.headers["content-type"]).toContain("text/html");
+      expect(response.text).toContain("SCORM index");
+    });
+
     it("serves extracted content to an authorized learner and admin", async () => {
       const admin = await createAdmin();
       const student = await createStudent();

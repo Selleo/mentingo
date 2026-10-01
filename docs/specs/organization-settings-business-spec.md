@@ -32,7 +32,7 @@ Organization Settings help administrators keep Mentingo aligned with company pol
 
 ## How It Works
 
-An administrator opens Settings and uses the Organization tab to review configuration status and adjust tenant-wide controls. Mentingo shows controls that are relevant to the current tenant setup, such as SSO enforcement only when supported OAuth login is enabled and default currency only when Stripe is configured.
+An administrator opens Settings and uses the Organization tab to review configuration status and adjust tenant-wide controls. New tenants start with invite-only registration enabled, and an administrator can allow self-registration when appropriate. Mentingo shows controls that are relevant to the current tenant setup, such as SSO enforcement only when supported OAuth login is enabled and default currency only when Stripe is configured.
 
 Changes are saved through dedicated settings controls and immediately affect the tenant's platform behavior. Login-page documents can be added with a display name, previewed, and removed; these files are available publicly on the login page so unauthenticated learners or visitors can access the organization's supporting materials.
 

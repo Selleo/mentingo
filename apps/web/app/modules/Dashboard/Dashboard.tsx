@@ -48,7 +48,8 @@ const PublicHeader = ({
   <header className="sticky top-0 z-10 w-full">
     <div className="flex w-full items-center justify-between px-4 py-3">
       <Link to="/courses" aria-label={t("navigationSideBar.ariaLabels.goToAvailableCourses")}>
-        <PlatformLogo variant="full" className="h-10 w-full" alt="Go to homepage" />
+        <PlatformLogo variant="signet" className="size-10 md:hidden" alt="Go to homepage" />
+        <PlatformLogo variant="full" className="hidden h-10 w-auto md:block" alt="Go to homepage" />
       </Link>
       <div className="flex items-center gap-3">
         <MobileNavigationDropdown

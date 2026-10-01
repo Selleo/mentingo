@@ -23,6 +23,7 @@ type LessonCardListProps = {
   setContentTypeToDisplay: (contentType: string) => void;
   setSelectedChapter?: (chapter: Chapter | null) => void;
   chapter?: Chapter;
+  baseLanguageChapter?: Chapter;
   lessons: Sortable<Lesson>[];
   selectedLesson: Lesson | null;
   language: SupportedLanguages;
@@ -35,6 +36,7 @@ export const LessonCardList = ({
   setContentTypeToDisplay,
   setSelectedChapter,
   chapter,
+  baseLanguageChapter,
   selectedLesson,
   language,
   isCourseGenerationLocked,
@@ -126,6 +128,7 @@ export const LessonCardList = ({
           <LessonCard
             key={item.sortableId}
             item={item}
+            baseLanguageLesson={baseLanguageChapter?.lessons.find(({ id }) => id === item.id)}
             onClickLessonCard={onClickLessonCard}
             selectedLesson={selectedLesson}
             isCourseGenerationLocked={isCourseGenerationLocked}

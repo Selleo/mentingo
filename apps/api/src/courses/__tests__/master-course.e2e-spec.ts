@@ -6,6 +6,8 @@ import {
   AI_MENTOR_TYPE,
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
   SYSTEM_ROLE_SLUGS,
   TENANT_STATUSES,
@@ -13,12 +15,12 @@ import {
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -29,13 +31,15 @@ import {
   aiMentorConfigurations,
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
+  aiMentorThreads,
   categories,
   chapters,
   courses,
   lessons,
   masterCourseExports,
-  questionAnswerOptions,
-  questions,
+  assessments,
+  assessmentQuestions,
+  assessmentQuestionChoiceOptions,
   resourceEntity,
   resources,
   tenants,
@@ -107,6 +111,7 @@ describe("Master course export and sync (e2e)", () => {
   let sourceTenantId: string;
   let targetTenantId: string;
   let masterCourseService: MasterCourseService;
+  let aiRepository: AiRepository;
   let mockS3Service: {
     copyFile: jest.Mock;
     getFileExists: jest.Mock;
@@ -192,6 +197,7 @@ describe("Master course export and sync (e2e)", () => {
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     masterCourseService = app.get(MasterCourseService);
+    aiRepository = app.get(AiRepository);
     runAsTenant = e2e.runAsTenant;
     sourceTenantId = e2e.defaultTenantId;
 
@@ -250,8 +256,10 @@ describe("Master course export and sync (e2e)", () => {
       "master_course_exports",
       "resource_entity",
       "resources",
-      "question_answer_options",
-      "questions",
+      "assessment_question_choice_options",
+      "assessment_questions",
+      "assessments",
+      "ai_mentor_threads",
       "ai_judge_score_guidance",
       "ai_judge_blocking_errors",
       "ai_judge_criteria",
@@ -1385,6 +1393,238 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
+  it("injects the duplicated AI Mentor name and AI Judge rubric into the runtime prompt after same-tenant course duplication (#1998)", async () => {
+    const sourceAdmin = await runAsTenant(sourceTenantId, async () =>
+      userFactory
+        .withCredentials({ password: PASSWORD })
+        .withAdminSettings(db)
+        .create({
+          email: `admin+dup-${faker.string.alphanumeric(8)}@example.com`,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
+          tenantId: sourceTenantId,
+        }),
+    );
+    const learner = await runAsTenant(sourceTenantId, async () =>
+      userFactory.create({ tenantId: sourceTenantId }),
+    );
+
+    const { sourceCourseId } = await runAsTenant(sourceTenantId, async () => {
+      const category = await categoryFactory.create({
+        title: `Dup category ${faker.string.nanoid(8)}`,
+      });
+      const sourceCourse = await courseFactory.create({
+        title: "Duplication Source Course",
+        status: "published",
+        authorId: sourceAdmin.id,
+        categoryId: category.id,
+        chapterCount: 1,
+      });
+      const sourceChapter = await chapterFactory.create({
+        title: "Duplication Source Chapter",
+        courseId: sourceCourse.id,
+        authorId: sourceAdmin.id,
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+
+      const [sourceLesson] = await db
+        .insert(lessons)
+        .values({
+          id: faker.string.uuid(),
+          chapterId: sourceChapter.id,
+          type: LESSON_TYPES.AI_MENTOR,
+          title: buildJsonbField("en", "Discovery Conversation"),
+          displayOrder: 1,
+        })
+        .returning({ id: lessons.id });
+
+      const [sourceAiMentor] = await db
+        .insert(aiMentorLessons)
+        .values({
+          lessonId: sourceLesson.id,
+          name: buildJsonbFieldWithMultipleEntries({
+            en: "Professional Conversation Practice",
+            pl: "Praktyka rozmowy zawodowej",
+          }),
+        })
+        .returning({ id: aiMentorLessons.id });
+
+      const [sourceMentorConfiguration] = await db
+        .insert(aiMentorConfigurations)
+        .values({
+          aiMentorLessonId: sourceAiMentor.id,
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+          additionalInstructions: buildJsonbField("en", "Run a discovery conversation"),
+        })
+        .returning({ id: aiMentorConfigurations.id });
+
+      await db.insert(aiMentorRoleplayConfigurations).values({
+        configurationId: sourceMentorConfiguration.id,
+        difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      });
+
+      const [sourceJudgeConfiguration] = await db
+        .insert(aiJudgeConfigurations)
+        .values({
+          aiMentorLessonId: sourceAiMentor.id,
+          taskGoal: buildJsonbField("en", "Discover the client's needs"),
+          passingThresholdPercent: 70,
+        })
+        .returning({ id: aiJudgeConfigurations.id });
+
+      const [sourceCriterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: sourceJudgeConfiguration.id,
+          title: buildJsonbField("en", "Needs discovery"),
+          expectedBehavior: buildJsonbField("en", "Asks relevant open questions"),
+          maxScore: 2,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+
+      await db.insert(aiJudgeScoreGuidance).values({
+        criterionId: sourceCriterion.id,
+        score: 2,
+        description: buildJsonbField("en", "Explores the important needs"),
+      });
+
+      // A second criterion, authored later, guards against duplication collapsing
+      // criteria order: CURRENT_TIMESTAMP is transaction-frozen in Postgres, so if the
+      // duplication code ever stops copying the source rows' createdAt explicitly,
+      // every criterion created in the same duplication transaction would get an
+      // identical timestamp and the runtime rubric's `ORDER BY createdAt` would become
+      // non-deterministic.
+      const [secondSourceCriterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: sourceJudgeConfiguration.id,
+          title: buildJsonbField("en", "Next step"),
+          expectedBehavior: buildJsonbField("en", "Proposes a concrete next step"),
+          maxScore: 1,
+          createdAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
+          updatedAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+
+      await db.insert(aiJudgeScoreGuidance).values({
+        criterionId: secondSourceCriterion.id,
+        score: 1,
+        description: buildJsonbField("en", "Proposes a clear next step"),
+      });
+
+      await db.insert(aiJudgeBlockingErrors).values({
+        configurationId: sourceJudgeConfiguration.id,
+        description: buildJsonbField("en", "Invents unsupported product claims"),
+      });
+
+      return { sourceCourseId: sourceCourse.id };
+    });
+
+    const sourceCookie = ensureCookieArray(await cookieFor(sourceAdmin, app, SOURCE_HOST));
+
+    const duplicateResponse = await withTenantHost(
+      request(app.getHttpServer())
+        .post(`/api/course/${sourceCourseId}/duplicate`)
+        .set("Cookie", sourceCookie),
+      SOURCE_HOST,
+    ).expect(201);
+
+    const { courseId: targetCourseId, jobId } = duplicateResponse.body.data as {
+      courseId: string;
+      jobId: string;
+    };
+    expect(targetCourseId).not.toBe(sourceCourseId);
+
+    await waitFor(
+      async () => {
+        const response = await withTenantHost(
+          request(app.getHttpServer())
+            .get(`/api/course/duplication-jobs/${jobId}`)
+            .set("Cookie", sourceCookie),
+          SOURCE_HOST,
+        ).expect(200);
+
+        return response.body.data as { state: string; failedReason: string | null };
+      },
+      (job) => {
+        if (job.state === "failed") {
+          throw new Error(`Duplication job failed: ${job.failedReason ?? "unknown reason"}`);
+        }
+
+        return job.state === "completed";
+      },
+    );
+
+    const targetAiMentor = await runAsTenant(sourceTenantId, async () => {
+      const [row] = await db
+        .select({
+          aiMentorLessonId: aiMentorLessons.id,
+          name: aiMentorLessons.name,
+        })
+        .from(aiMentorLessons)
+        .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .where(eq(chapters.courseId, targetCourseId))
+        .limit(1);
+
+      return row;
+    });
+
+    // Regression check for the reported "AI mentor name disappears after duplication" symptom.
+    expect(targetAiMentor.name).toEqual({
+      en: "Professional Conversation Practice",
+      pl: "Praktyka rozmowy zawodowej",
+    });
+
+    const threadId = await runAsTenant(sourceTenantId, async () => {
+      const [thread] = await db
+        .insert(aiMentorThreads)
+        .values({
+          userId: learner.id,
+          aiMentorLessonId: targetAiMentor.aiMentorLessonId,
+        })
+        .returning({ id: aiMentorThreads.id });
+
+      return thread.id;
+    });
+
+    const mentorPromptContext = await runAsTenant(sourceTenantId, async () =>
+      aiRepository.findMentorLessonByThreadId(threadId, "en"),
+    );
+
+    // Regression check for "ai mentor didn't get loaded prompt instructions after
+    // duplication" (#1998) - the actual additionalInstructions/subtype fields that feed
+    // buildSystemPrompt(), as opposed to the AI Judge rubric checked below.
+    expect(mentorPromptContext?.name).toBe("Professional Conversation Practice");
+    expect(mentorPromptContext?.additionalInstructions).toBe("Run a discovery conversation");
+    expect(mentorPromptContext?.type).toBe(AI_MENTOR_TYPE.ROLEPLAY);
+
+    const rubricContext = await runAsTenant(sourceTenantId, async () =>
+      aiRepository.findJudgeRubricByThreadId(threadId, "en"),
+    );
+
+    // Regression check for the reported "AI Judge config visible in UI, but not injected into
+    // the runtime system prompt until manually re-saved" symptom (#1998).
+    expect(rubricContext?.rubric).not.toBeNull();
+    expect(rubricContext?.rubric?.taskGoal).toBe("Discover the client's needs");
+    expect(rubricContext?.rubric?.passingThresholdPercent).toBe(70);
+    expect(rubricContext?.rubric?.criteria).toEqual([
+      expect.objectContaining({
+        title: "Needs discovery",
+        expectedBehavior: "Asks relevant open questions",
+        maxScore: 2,
+      }),
+      expect.objectContaining({
+        title: "Next step",
+        expectedBehavior: "Proposes a concrete next step",
+        maxScore: 1,
+      }),
+    ]);
+    expect(rubricContext?.rubric?.blockingErrors).toEqual([
+      expect.objectContaining({ description: "Invents unsupported product claims" }),
+    ]);
+  });
+
   it("copies rich-text S3 resources, rewrites localized content, and reuses target resource rows on sync", async () => {
     const sourceResourceId = faker.string.uuid();
     const sourceReference = `course/${faker.string.uuid()}.png`;
@@ -1534,52 +1774,171 @@ describe("Master course export and sync (e2e)", () => {
     expect(targetResourcesAfterSync).toEqual([expect.objectContaining({ id: targetResource.id })]);
   });
 
+  it("syncs reordered and replaced choice options without changing surviving IDs", async () => {
+    const questionId = faker.string.uuid();
+    const firstId = faker.string.uuid();
+    const secondId = faker.string.uuid();
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceLessonId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .returning();
+          await db.insert(assessmentQuestions).values({
+            id: questionId,
+            assessmentId: assessment.id,
+            questionType: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+            gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+            prompt: { en: "Choose" },
+            title: { en: "Choose" },
+            displayOrder: 1,
+          });
+          await db.insert(assessmentQuestionChoiceOptions).values([
+            {
+              id: firstId,
+              questionId,
+              language: "en",
+              label: "First",
+              isCorrect: true,
+              displayOrder: 1,
+            },
+            {
+              id: secondId,
+              questionId,
+              language: "en",
+              label: "Second",
+              isCorrect: false,
+              displayOrder: 2,
+            },
+          ]);
+        });
+      },
+    });
+    const readOptions = () =>
+      runAsTenant(targetTenantId, () =>
+        db
+          .select({
+            id: assessmentQuestionChoiceOptions.id,
+            label: assessmentQuestionChoiceOptions.label,
+            displayOrder: assessmentQuestionChoiceOptions.displayOrder,
+          })
+          .from(assessmentQuestionChoiceOptions)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionChoiceOptions.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .orderBy(asc(assessmentQuestionChoiceOptions.displayOrder)),
+      );
+    const original = await readOptions();
+    const [exportLink] = await baseDb
+      .select()
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
+    const sync = () =>
+      masterCourseService.processSyncJob({
+        exportId: exportLink.id,
+        sourceCourseId,
+        sourceTenantId,
+        targetTenantId,
+        triggerEventType: "UpdateCourseEvent",
+      });
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: -1 })
+        .where(eq(assessmentQuestionChoiceOptions.id, firstId));
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: 1 })
+        .where(eq(assessmentQuestionChoiceOptions.id, secondId));
+      await db
+        .update(assessmentQuestionChoiceOptions)
+        .set({ displayOrder: 2 })
+        .where(eq(assessmentQuestionChoiceOptions.id, firstId));
+    });
+    await sync();
+    expect(await readOptions()).toEqual([
+      { ...original[1], displayOrder: 1 },
+      { ...original[0], displayOrder: 2 },
+    ]);
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .delete(assessmentQuestionChoiceOptions)
+        .where(eq(assessmentQuestionChoiceOptions.id, secondId));
+      await db.insert(assessmentQuestionChoiceOptions).values({
+        questionId,
+        language: "en",
+        label: "Replacement",
+        isCorrect: false,
+        displayOrder: 1,
+      });
+    });
+    await sync();
+    const replaced = await readOptions();
+    expect(replaced).toEqual([
+      { id: expect.any(String), label: "Replacement", displayOrder: 1 },
+      { ...original[0], displayOrder: 2 },
+    ]);
+    await sync();
+    expect(await readOptions()).toEqual(replaced);
+  });
+
   it("rewrites fill-in-the-blanks option markers for every localized question description", async () => {
     const sourceOptionId = faker.string.uuid();
     const untouchedOptionId = faker.string.uuid();
 
     const { targetCourseId } = await setupAndExport({
-      beforeExport: async ({ sourceAdmin, sourceLessonId }) => {
+      beforeExport: async ({ sourceLessonId }) => {
         await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({
+              lessonId: sourceLessonId,
+              passingScorePercentage: "0",
+              baseLanguage: "en",
+              availableLocales: ["en", "pl"],
+            })
+            .returning({ id: assessments.id });
+
           const [question] = await db
-            .insert(questions)
+            .insert(assessmentQuestions)
             .values({
               id: faker.string.uuid(),
-              lessonId: sourceLessonId,
-              authorId: sourceAdmin.id,
-              type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
-              title: buildJsonbFieldWithMultipleEntries({
-                en: "Fill blank",
-                pl: "Uzupelnij luke",
+              assessmentId: assessment.id,
+              questionType: ASSESSMENT_QUESTION_TYPES.FILL_IN_THE_BLANKS_TEXT,
+              gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+              prompt: buildJsonbFieldWithMultipleEntries({
+                en: `Answer <blank-answer-${sourceOptionId}> now`,
+                pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
+              title: buildJsonbFieldWithMultipleEntries({ en: "Fill blank", pl: "Uzupelnij luke" }),
               description: buildJsonbFieldWithMultipleEntries({
                 en: `Answer <blank-answer-${sourceOptionId}> now`,
                 pl: `Odpowiedz <blank-answer-${sourceOptionId}> teraz`,
               }),
-              solutionExplanation: buildJsonbField("en", "Because it matches"),
               displayOrder: 1,
             })
-            .returning({ id: questions.id });
+            .returning({ id: assessmentQuestions.id });
 
-          await db.insert(questionAnswerOptions).values([
+          await db.insert(assessmentQuestionChoiceOptions).values([
             {
               id: sourceOptionId,
               questionId: question.id,
-              optionText: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
-              matchedWord: buildJsonbFieldWithMultipleEntries({
-                en: "Correct",
-                pl: "Poprawna",
-              }),
+              language: "en",
+              label: "Correct",
               isCorrect: true,
               displayOrder: 1,
             },
             {
               id: untouchedOptionId,
               questionId: question.id,
-              optionText: buildJsonbField("en", "Distractor"),
+              language: "en",
+              label: "Distractor",
               isCorrect: false,
               displayOrder: 2,
             },
@@ -1591,29 +1950,29 @@ describe("Master course export and sync (e2e)", () => {
     const targetQuestionData = await runAsTenant(targetTenantId, async () => {
       const [targetQuestion] = await db
         .select({
-          id: questions.id,
-          description: questions.description,
+          id: assessmentQuestions.id,
+          description: assessmentQuestions.description,
         })
-        .from(questions)
-        .innerJoin(lessons, eq(lessons.id, questions.lessonId))
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
         .where(eq(chapters.courseId, targetCourseId))
         .limit(1);
 
       const targetOptions = await db
         .select({
-          id: questionAnswerOptions.id,
-          optionText: questionAnswerOptions.optionText,
+          id: assessmentQuestionChoiceOptions.id,
+          optionText: assessmentQuestionChoiceOptions.label,
         })
-        .from(questionAnswerOptions)
-        .where(eq(questionAnswerOptions.questionId, targetQuestion.id));
+        .from(assessmentQuestionChoiceOptions)
+        .where(eq(assessmentQuestionChoiceOptions.questionId, targetQuestion.id));
 
       return { targetQuestion, targetOptions };
     });
 
     const targetCorrectOption = targetQuestionData.targetOptions.find((option) => {
-      const optionText = option.optionText as Record<string, string>;
-      return optionText.en === "Correct";
+      return option.optionText === "Correct";
     });
     const targetQuestionDescription = targetQuestionData.targetQuestion.description as Record<
       string,

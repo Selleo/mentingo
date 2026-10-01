@@ -9,7 +9,7 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { OverdueCoursesEmail } from "@repo/email-templates";
+import { EMAIL_TEMPLATE_EVENTS, OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
@@ -19,6 +19,7 @@ import {
   DEFAULT_CERTIFICATE_FONT_COLOR,
   ENTITY_TYPES,
   PERMISSIONS,
+  SCORM_PACKAGE_ENTITY_TYPE,
   type PermissionKey,
   type SupportedLanguages,
   type StudentCourseUrgency,
@@ -48,10 +49,9 @@ import {
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
+import { isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
-import { AiService } from "src/ai/services/ai.service";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
@@ -87,7 +87,6 @@ import { EnvService } from "src/env/services/env.service";
 import {
   BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
-  CourseDurationRefreshRequestedEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
   DeleteCourseEvent,
@@ -102,8 +101,6 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
-import { AiJudgeConfigurationTranslationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-translation.service";
-import { AiMentorLessonTranslationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-lesson-translation.service";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
@@ -135,9 +132,9 @@ import {
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
   lessons,
-  questionAnswerOptions,
-  questions,
-  quizAttempts,
+  assessmentQuestionChoiceOptions,
+  assessmentQuestions,
+  assessments,
   resourceEntity,
   resources,
   settings,
@@ -183,6 +180,7 @@ import {
 import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
 import type { CourseStatisticsExpressionsParams } from "./course.types";
+import type { BulkArchiveCourseBody } from "./schemas/bulkArchiveCourse.schema";
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
@@ -234,10 +232,6 @@ import type {
   CourseDueDateReminderDays,
   CourseDueDateReminderRecipient,
 } from "src/courses/types/course-due-date-reminder.types";
-import type {
-  ContextualCourseTranslationType,
-  CourseTranslationType,
-} from "src/courses/types/course.types";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type { LocalizedGroup } from "src/group/group.types";
 import type {
@@ -302,10 +296,7 @@ export class CourseService {
     private readonly envService: EnvService,
     private readonly localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
-    private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
-    private readonly aiMentorLessonTranslationService: AiMentorLessonTranslationService,
-    private readonly aiJudgeConfigurationTranslationService: AiJudgeConfigurationTranslationService,
     private readonly learningTimeRepository: LearningTimeRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
@@ -336,7 +327,11 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const conditions = this.getFiltersConditions(filters, false, language);
+    const conditions = this.getFiltersConditions(
+      { ...filters, isArchived: query.includeArchived ? undefined : (filters.isArchived ?? false) },
+      false,
+      language,
+    );
 
     const accessCondition = this.getCourseListAccessCondition({
       currentUser,
@@ -364,6 +359,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         status: courses.status,
+        isArchived: courses.isArchived,
         createdAt: courses.createdAt,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
@@ -1011,7 +1007,10 @@ export class CourseService {
       query.excludeCourseId,
     );
 
-    const conditions = [eq(courses.status, "published")];
+    const conditions = [
+      eq(courses.status, COURSE_STATUSES.PUBLISHED),
+      eq(courses.isArchived, false),
+    ];
     conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
 
     if (availableCourseIds.length > 0) {
@@ -1247,7 +1246,10 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const availableCourseIds = await this.getAvailableCourseIds(trx, currentUserId);
 
-      const conditions = [eq(courses.status, "published")];
+      const conditions = [
+        eq(courses.status, COURSE_STATUSES.PUBLISHED),
+        eq(courses.isArchived, false),
+      ];
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
@@ -1387,7 +1389,10 @@ export class CourseService {
 
     return this.db.transaction(async (trx) => {
       const localizedTitle = this.localizationService.getLocalizedSqlField(courses.title, language);
-      const conditions = [eq(courses.status, COURSE_STATUSES.PUBLISHED)];
+      const conditions = [
+        eq(courses.status, COURSE_STATUSES.PUBLISHED),
+        eq(courses.isArchived, false),
+      ];
 
       if (title?.trim()) {
         conditions.push(
@@ -1549,6 +1554,7 @@ export class CourseService {
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
         courseType: courses.courseType,
+        isArchived: courses.isArchived,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
@@ -1593,7 +1599,7 @@ export class CourseService {
     if (
       !isAdmin &&
       userId !== course.authorId &&
-      NON_PUBLIC_STATUSES.includes(course.status) &&
+      (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) &&
       !isEnrolled
     )
       throw new ForbiddenException("You have no access to this course");
@@ -1663,7 +1669,7 @@ export class CourseService {
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
-                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${questions.id})
+                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${assessmentQuestions.id})
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
@@ -1671,7 +1677,8 @@ export class CourseService {
                   studentLessonProgress.lessonId
                 }
                   AND ${studentLessonProgress.studentId} = ${userId}
-                LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
+                LEFT JOIN ${assessments} ON ${assessments.lessonId} = ${lessons.id}
+                LEFT JOIN ${assessmentQuestions} ON ${assessments.id} = ${assessmentQuestions.assessmentId}
                 LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
                 GROUP BY
@@ -1776,6 +1783,7 @@ export class CourseService {
       .select({
         id: courses.id,
         status: courses.status,
+        isArchived: courses.isArchived,
         authorId: courses.authorId,
         enrolled:
           userId !== undefined
@@ -1804,13 +1812,13 @@ export class CourseService {
       if (
         !isAdmin &&
         userId !== course.authorId &&
-        NON_PUBLIC_STATUSES.includes(course.status) &&
+        (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) &&
         !isEnrolled
       ) {
         throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     } else {
-      if (NON_PUBLIC_STATUSES.includes(course.status)) {
+      if (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) {
         throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     }
@@ -1912,7 +1920,24 @@ export class CourseService {
         const lessons: AdminLessonWithContentSchema[] =
           await this.adminChapterRepository.getBetaChapterLessons(chapter.id, language);
 
-        const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
+        const lessonsWithQuizAuthoringContent = await Promise.all(
+          lessons.map(async (lesson) => {
+            if (lesson.type !== LESSON_TYPES.QUIZ) return lesson;
+
+            const quizLesson = await this.adminLessonService.getQuizLessonForAuthoring(
+              lesson.id,
+              language,
+            );
+
+            if (!quizLesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+
+            return quizLesson;
+          }),
+        );
+
+        const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(
+          lessonsWithQuizAuthoringContent,
+        );
 
         return {
           ...chapter,
@@ -1927,47 +1952,6 @@ export class CourseService {
       trailerUrl,
       chapters: updatedCourseLessonList ?? [],
     };
-  }
-
-  async hasMissingTranslations(
-    id: UUIDType,
-    language: SupportedLanguages,
-    currentUser: CurrentUserType,
-  ): Promise<boolean> {
-    const courseInRequestedLanguage = await this.getBetaCourseById(id, language, currentUser);
-
-    if (language === courseInRequestedLanguage.baseLanguage) return false;
-
-    const courseInBaseLanguage = await this.getBetaCourseById(
-      id,
-      courseInRequestedLanguage.baseLanguage,
-      currentUser,
-    );
-
-    const hasMissingCourseFields =
-      this.collectMissingTranslationFields(
-        id,
-        courseInRequestedLanguage,
-        courseInBaseLanguage,
-        true,
-      ).length > 0;
-
-    if (hasMissingCourseFields) return true;
-
-    const [missingMentorFields, missingJudgeFields] = await Promise.all([
-      this.aiMentorLessonTranslationService.getMissingTranslations(
-        id,
-        language,
-        courseInRequestedLanguage.baseLanguage,
-      ),
-      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
-        id,
-        language,
-        courseInRequestedLanguage.baseLanguage,
-      ),
-    ]);
-
-    return missingMentorFields.length > 0 || missingJudgeFields.length > 0;
   }
 
   async getContentCreatorCourses({
@@ -1988,6 +1972,13 @@ export class CourseService {
     language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
+    if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
+      conditions.push(eq(courses.isArchived, false));
+    } else {
+      conditions.push(
+        or(eq(courses.isArchived, false), eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED))!,
+      );
+    }
 
     if (excludeCourseId) {
       conditions.push(ne(courses.id, excludeCourseId));
@@ -2825,6 +2816,66 @@ export class CourseService {
     });
   }
 
+  async bulkArchiveCourse(body: BulkArchiveCourseBody, currentUser: CurrentUserType) {
+    const ids = [...new Set(body.ids)];
+    if (!ids.length) throw new BadRequestException("adminCoursesView.toast.noCoursesSelected");
+
+    const canUpdateAnyCourse = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const selectedCourses = await this.db
+      .select({ id: courses.id, isArchived: courses.isArchived })
+      .from(courses)
+      .where(
+        and(
+          inArray(courses.id, ids),
+          canUpdateAnyCourse ? undefined : eq(courses.authorId, currentUser.userId),
+        ),
+      );
+
+    if (selectedCourses.length !== ids.length) {
+      throw new ForbiddenException("adminCoursesView.toast.bulkArchiveUpdateForbidden");
+    }
+
+    const idsToUpdate = selectedCourses
+      .filter((course) => course.isArchived !== body.isArchived)
+      .map((course) => course.id);
+    if (!idsToUpdate.length) return;
+
+    await this.db.transaction(async (trx) => {
+      const previousSnapshots = await processInBatches(
+        idsToUpdate,
+        (courseId) => this.buildCourseActivitySnapshot(courseId, undefined, trx),
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      await trx
+        .update(courses)
+        .set({ isArchived: body.isArchived })
+        .where(inArray(courses.id, idsToUpdate));
+
+      if (body.isArchived) {
+        await this.settingsService.clearFeaturedCoursesIfMatches(idsToUpdate, trx);
+      }
+
+      for (const previousCourseData of previousSnapshots) {
+        const updatedCourseData = await this.buildCourseActivitySnapshot(
+          previousCourseData.id,
+          undefined,
+          trx,
+        );
+
+        await this.outboxPublisher.publish(
+          new UpdateCourseEvent({
+            courseId: previousCourseData.id,
+            actor: currentUser,
+            previousCourseData,
+            updatedCourseData,
+          }),
+          trx,
+        );
+      }
+    });
+  }
+
   async bulkUpdateCourseCategory(
     body: BulkUpdateCourseCategoryBody,
     currentUser: CurrentUserType,
@@ -2985,6 +3036,7 @@ export class CourseService {
         id: courses.id,
         authorId: courses.authorId,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
+        isArchived: courses.isArchived,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
       })
@@ -3011,6 +3063,9 @@ export class CourseService {
     }
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
+    if (course.isArchived && !paymentId) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.archivedCourseEnrollment");
+    }
 
     await this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId, paymentId, null);
@@ -3741,18 +3796,8 @@ export class CourseService {
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
 
-    const scormPackageToDelete =
-      course.courseType === COURSE_TYPE.SCORM
-        ? await this.db
-            .select({ id: scormPackages.id })
-            .from(scormPackages)
-            .where(eq(scormPackages.entityId, id))
-            .limit(1)
-            .then(([row]) => row ?? null)
-        : null;
-
     await this.db.transaction(async (trx) => {
-      await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
+      const scormPackageIds = await this.removeScormPackagesForCourses([id], trx);
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
@@ -3777,10 +3822,10 @@ export class CourseService {
         db: trx,
       });
 
-      if (scormPackageToDelete) {
+      if (scormPackageIds.length) {
         await this.outboxPublisher.publish(
           new DeleteScormEvent({
-            scormIds: [{ scormId: scormPackageToDelete.id }],
+            scormIds: scormPackageIds.map((scormId) => ({ scormId })),
             actor: currentUser,
           }),
           trx,
@@ -3822,20 +3867,8 @@ export class CourseService {
       throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
 
-    const scormCourseIds = selectedCourses
-      .filter((course) => course.courseType === COURSE_TYPE.SCORM)
-      .map((course) => course.id);
-
-    const scormPackagesToDelete =
-      scormCourseIds.length > 0
-        ? await this.db
-            .select({ id: scormPackages.id })
-            .from(scormPackages)
-            .where(inArray(scormPackages.entityId, scormCourseIds))
-        : [];
-
     return this.db.transaction(async (trx) => {
-      await trx.delete(quizAttempts).where(inArray(quizAttempts.courseId, ids));
+      const scormPackageIds = await this.removeScormPackagesForCourses(ids, trx);
       await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
       await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
       await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
@@ -3855,10 +3888,10 @@ export class CourseService {
         });
       }
 
-      if (scormPackagesToDelete.length > 0) {
+      if (scormPackageIds.length > 0) {
         await this.outboxPublisher.publish(
           new DeleteScormEvent({
-            scormIds: scormPackagesToDelete.map((scormPkg) => ({ scormId: scormPkg.id })),
+            scormIds: scormPackageIds.map((scormId) => ({ scormId })),
             actor: currentUser,
           }),
           trx,
@@ -3882,6 +3915,35 @@ export class CourseService {
 
       return null;
     });
+  }
+
+  private async removeScormPackagesForCourses(
+    courseIds: UUIDType[],
+    trx: DatabasePg,
+  ): Promise<UUIDType[]> {
+    const courseLessonIds = trx
+      .select({ id: lessons.id })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(inArray(chapters.courseId, courseIds));
+
+    const deleted = await trx
+      .delete(scormPackages)
+      .where(
+        or(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
+            inArray(scormPackages.entityId, courseIds),
+          ),
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+            inArray(scormPackages.entityId, courseLessonIds),
+          ),
+        ),
+      )
+      .returning({ id: scormPackages.id });
+
+    return deleted.map(({ id }) => id);
   }
 
   async unenrollCourse(courseId: UUIDType, userIds: UUIDType[]) {
@@ -4225,6 +4287,9 @@ export class CourseService {
     }
     if (filters.status) {
       conditions.push(eq(courses.status, filters.status));
+    }
+    if (filters.isArchived !== undefined) {
+      conditions.push(eq(courses.isArchived, filters.isArchived));
     }
 
     if (publishedOnly) {
@@ -5094,6 +5159,7 @@ export class CourseService {
           resolvedLanguage,
         ),
         status: courses.status,
+        isArchived: courses.isArchived,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         hasCertificate: courses.hasCertificate,
@@ -5152,38 +5218,6 @@ export class CourseService {
       );
   }
 
-  async createLanguage(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    currentUser: CurrentUserType,
-  ) {
-    await this.masterCourseService.assertCourseContentEditable(courseId);
-
-    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
-
-    const [{ availableLocales }] = await this.db
-      .select()
-      .from(courses)
-      .where(eq(courses.id, courseId));
-
-    if (availableLocales.includes(language)) {
-      throw new BadRequestException("adminCourseView.createLanguage.alreadyExists");
-    }
-
-    const newLanguages = [...availableLocales, language];
-
-    await this.db.transaction(async (trx) => {
-      await trx
-        .update(courses)
-        .set({ availableLocales: newLanguages })
-        .where(eq(courses.id, courseId));
-
-      await this.searchIndexService.refreshCourse(courseId, trx);
-    });
-
-    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
-  }
-
   async deleteLanguage(
     courseId: UUIDType,
     language: SupportedLanguages,
@@ -5219,9 +5253,10 @@ export class CourseService {
 
       const questionRows = lessonIds.length
         ? await trx
-            .select({ id: questions.id })
-            .from(questions)
-            .where(inArray(questions.lessonId, lessonIds))
+            .select({ id: assessmentQuestions.id })
+            .from(assessmentQuestions)
+            .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+            .where(inArray(assessments.lessonId, lessonIds))
         : [];
       const questionIds = questionRows.map(({ id }) => id);
 
@@ -5347,21 +5382,21 @@ export class CourseService {
 
       if (questionIds.length) {
         await trx
-          .update(questions)
+          .update(assessmentQuestions)
           .set({
-            title: deleteJsonbField(questions.title, language),
-            description: deleteJsonbField(questions.description, language),
-            solutionExplanation: deleteJsonbField(questions.solutionExplanation, language),
+            title: deleteJsonbField(assessmentQuestions.title, language),
+            description: deleteJsonbField(assessmentQuestions.description, language),
           })
-          .where(inArray(questions.id, questionIds));
+          .where(inArray(assessmentQuestions.id, questionIds));
 
         await trx
-          .update(questionAnswerOptions)
-          .set({
-            optionText: deleteJsonbField(questionAnswerOptions.optionText, language),
-            matchedWord: deleteJsonbField(questionAnswerOptions.matchedWord, language),
-          })
-          .where(inArray(questionAnswerOptions.questionId, questionIds));
+          .delete(assessmentQuestionChoiceOptions)
+          .where(
+            and(
+              inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
+              eq(assessmentQuestionChoiceOptions.language, language),
+            ),
+          );
       }
 
       await trx
@@ -5450,7 +5485,17 @@ export class CourseService {
             text,
             html,
           },
-          { tenantId },
+          {
+            tenantId,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.ADMIN_OVERDUE_COURSES,
+              language: defaultEmailSettings.language,
+              variables: {
+                courses: coursesForLanguage,
+                courses_link: this.buildAdminCoursesUrl(tenantHost),
+              },
+            },
+          },
         );
       },
       { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
@@ -5686,97 +5731,6 @@ export class CourseService {
     return `${tenantHost.replace(/\/$/, "")}/admin/courses`;
   }
 
-  async generateMissingTranslations(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    currentUser: CurrentUserType,
-  ) {
-    await this.masterCourseService.assertCourseContentEditable(courseId);
-
-    const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
-      ENTITY_TYPE.COURSE,
-      courseId,
-    );
-
-    if (!availableLocales.includes(language) || baseLanguage === language) {
-      throw new BadRequestException({ message: "adminCourseView.toast.languageNotSupported" });
-    }
-
-    const courseInRequestedLanguage = await this.getBetaCourseById(courseId, language, currentUser);
-
-    const courseInBaseLanguage = await this.getBetaCourseById(courseId, baseLanguage, currentUser);
-
-    const courseTranslations = this.collectMissingTranslationFieldsWithContext(
-      courseId,
-      courseInRequestedLanguage,
-      courseInBaseLanguage,
-    );
-    const [mentorTranslations, judgeTranslations] = await Promise.all([
-      this.aiMentorLessonTranslationService.getMissingTranslations(
-        courseId,
-        language,
-        baseLanguage,
-      ),
-      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
-        courseId,
-        language,
-        baseLanguage,
-      ),
-    ]);
-    const generatedTranslations = [...mentorTranslations, ...judgeTranslations];
-    const missingData = [
-      ...courseTranslations.flat,
-      ...generatedTranslations.map(({ data }) => data),
-    ];
-    const withContext = [...courseTranslations.withContext, ...generatedTranslations];
-
-    if (!missingData.length) {
-      throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
-    }
-
-    this.logger.debug(
-      `Generating missing course translations courseId=${courseId} language=${language} count=${missingData.length}`,
-    );
-    const translations = await this.aiService.generateMissingTranslations(
-      withContext,
-      language,
-      courseId,
-    );
-    this.logger.debug(
-      `Generated missing course translations courseId=${courseId} language=${language} chunks=${translations.length}`,
-    );
-
-    const flat = translations.flat(1);
-
-    if (missingData.length !== flat.length) {
-      throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
-    }
-
-    await this.db.transaction(async (trx) => {
-      for (let i = 0; i < flat.length; i++) {
-        const translatedValue = flat[i];
-        const currData = missingData[i];
-
-        await trx
-          .update(currData.field.table)
-          .set({
-            [camelCase(currData.field.name)]: setJsonbField(
-              currData.field,
-              language,
-              translatedValue,
-            ),
-          })
-          .where(eq(currData.idColumn, currData.id));
-      }
-    });
-
-    await this.outboxPublisher.publish(new CourseDurationRefreshRequestedEvent({ courseId }));
-
-    this.logger.debug(
-      `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,
-    );
-  }
-
   async getCourseOwnership(courseId: UUIDType) {
     await this.getCourseExists(courseId);
 
@@ -5920,500 +5874,6 @@ export class CourseService {
         this.masterCourseService.queueSyncForSourceCourse(course.id, "course.author.updated"),
       { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
     );
-  }
-
-  private *translationCandidates(
-    courseId: UUIDType,
-    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-  ): Generator<{
-    id: string | undefined;
-    hasValue: boolean;
-    baseValue: string | null | undefined;
-    field: AnyPgColumn;
-    idColumn: AnyPgColumn;
-  }> {
-    yield {
-      id: courseId,
-      hasValue: Boolean(course.title?.length),
-      baseValue: baseCourse?.title,
-      field: courses.title,
-      idColumn: courses.id,
-    };
-
-    yield {
-      id: courseId,
-      hasValue: Boolean(course.description?.length),
-      baseValue: baseCourse?.description,
-      field: courses.description,
-      idColumn: courses.id,
-    };
-
-    const baseChapterMap = new Map((baseCourse?.chapters ?? []).map((ch) => [ch.id, ch]));
-
-    for (const chapter of course.chapters) {
-      const baseChapter = baseChapterMap.get(chapter.id);
-
-      yield {
-        id: chapter.id,
-        hasValue: Boolean(chapter.title?.length),
-        baseValue: baseChapter?.title,
-        field: chapters.title,
-        idColumn: chapters.id,
-      };
-
-      const baseLessonMap = new Map(
-        (baseChapter?.lessons ?? []).map((lesson) => [lesson.id, lesson]),
-      );
-
-      for (const lesson of chapter.lessons ?? []) {
-        const baseLesson = baseLessonMap.get(lesson.id);
-
-        yield {
-          id: lesson.id,
-          hasValue: Boolean(lesson.title?.length),
-          baseValue: baseLesson?.title,
-          field: lessons.title,
-          idColumn: lessons.id,
-        };
-
-        yield {
-          id: lesson.id,
-          hasValue: Boolean(lesson.description?.length),
-          baseValue: baseLesson?.description,
-          field: lessons.description,
-          idColumn: lessons.id,
-        };
-
-        if (lesson.type === LESSON_TYPES.AI_MENTOR) {
-          yield {
-            id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.name?.length),
-            baseValue: baseLesson?.aiMentor?.name,
-            field: aiMentorLessons.name,
-            idColumn: aiMentorLessons.lessonId,
-          };
-        }
-
-        if (lesson.type !== LESSON_TYPES.QUIZ || !lesson.questions?.length) continue;
-
-        const baseQuestionMap = new Map(
-          (baseLesson?.questions ?? []).map((question) => [question.id, question]),
-        );
-
-        for (const question of lesson.questions) {
-          const baseQuestion = baseQuestionMap.get(question.id);
-
-          yield {
-            id: question.id,
-            hasValue: Boolean(question.title?.length),
-            baseValue: baseQuestion?.title,
-            field: questions.title,
-            idColumn: questions.id,
-          };
-
-          yield {
-            id: question.id,
-            hasValue: Boolean(question.description?.length),
-            baseValue: baseQuestion?.description,
-            field: questions.description,
-            idColumn: questions.id,
-          };
-
-          yield {
-            id: question.id,
-            hasValue: Boolean(question.solutionExplanation?.length),
-            baseValue: baseQuestion?.solutionExplanation,
-            field: questions.solutionExplanation,
-            idColumn: questions.id,
-          };
-
-          const baseOptionMap = new Map(
-            (baseQuestion?.options ?? []).map((option) => [option.id, option]),
-          );
-
-          for (const option of question.options ?? []) {
-            const baseOption = baseOptionMap.get(option.id);
-
-            yield {
-              id: option.id,
-              hasValue: Boolean(option.optionText?.length),
-              baseValue: baseOption?.optionText,
-              field: questionAnswerOptions.optionText,
-              idColumn: questionAnswerOptions.id,
-            };
-
-            yield {
-              id: option.id,
-              hasValue: Boolean(option.matchedWord?.length),
-              baseValue: baseOption?.matchedWord,
-              field: questionAnswerOptions.matchedWord,
-              idColumn: questionAnswerOptions.id,
-            };
-          }
-        }
-      }
-    }
-  }
-
-  private collectMissingTranslationFields(
-    courseId: UUIDType,
-    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-    earlyReturn = false,
-  ): CourseTranslationType[] {
-    const dataToUpdate: CourseTranslationType[] = [];
-    type Candidate =
-      ReturnType<typeof this.translationCandidates> extends Generator<infer T> ? T : never;
-
-    const pushMissing = ({ id, hasValue, baseValue, field, idColumn }: Candidate) => {
-      if (hasValue || !id) return false;
-      const base = typeof baseValue === "string" ? baseValue : undefined;
-      if (!base?.length) return false;
-
-      dataToUpdate.push({ id, base, field, idColumn });
-      return true;
-    };
-
-    for (const candidate of this.translationCandidates(courseId, course, baseCourse)) {
-      const added = pushMissing(candidate);
-      if (earlyReturn && added) break;
-    }
-
-    return dataToUpdate;
-  }
-
-  private collectMissingTranslationFieldsWithContext(
-    courseId: UUIDType,
-    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-  ): {
-    flat: CourseTranslationType[];
-    grouped: {
-      course: CourseTranslationType[];
-      chapters: Array<{
-        chapterId: UUIDType;
-        chapterTitle?: string;
-        fields: CourseTranslationType[];
-        lessons: Array<{
-          lessonId: UUIDType;
-          lessonTitle?: string;
-          lessonDescription?: string;
-          fields: CourseTranslationType[];
-          questions: Array<{
-            questionId: UUIDType;
-            questionTitle?: string;
-            questionDescription?: string;
-            fields: CourseTranslationType[];
-            options: Array<{
-              optionId: UUIDType;
-              optionText?: string;
-              fields: CourseTranslationType[];
-            }>;
-          }>;
-        }>;
-      }>;
-    };
-    withContext: ContextualCourseTranslationType[];
-  } {
-    const flat = this.collectMissingTranslationFields(courseId, course, baseCourse);
-    const grouped = {
-      course: [] as CourseTranslationType[],
-      chapters: [] as Array<{
-        chapterId: UUIDType;
-        chapterTitle?: string;
-        fields: CourseTranslationType[];
-        lessons: Array<{
-          lessonId: UUIDType;
-          lessonTitle?: string;
-          lessonDescription?: string;
-          fields: CourseTranslationType[];
-          questions: Array<{
-            questionId: UUIDType;
-            questionTitle?: string;
-            questionDescription?: string;
-            fields: CourseTranslationType[];
-            options: Array<{
-              optionId: UUIDType;
-              optionText?: string;
-              fields: CourseTranslationType[];
-            }>;
-          }>;
-        }>;
-      }>,
-    };
-
-    const courseTitle = baseCourse?.title;
-
-    const chapterById = new Map<UUIDType, { chapterId: UUIDType; chapterTitle?: string }>();
-    const lessonById = new Map<
-      UUIDType,
-      {
-        chapterId: UUIDType;
-        lessonId: UUIDType;
-        lessonTitle?: string;
-        lessonDescription?: string;
-      }
-    >();
-    const questionById = new Map<
-      UUIDType,
-      {
-        chapterId: UUIDType;
-        lessonId: UUIDType;
-        questionId: UUIDType;
-        questionTitle?: string;
-        questionDescription?: string;
-        questionOptions?: string;
-      }
-    >();
-    const optionsByQuestionId = new Map<
-      UUIDType,
-      Array<{ optionText?: string; matchedWord?: string | null }>
-    >();
-    const optionById = new Map<
-      UUIDType,
-      {
-        chapterId: UUIDType;
-        lessonId: UUIDType;
-        questionId: UUIDType;
-        optionId: UUIDType;
-        optionText?: string;
-      }
-    >();
-
-    for (const chapter of baseCourse?.chapters ?? []) {
-      chapterById.set(chapter.id, { chapterId: chapter.id, chapterTitle: chapter.title });
-      for (const lesson of chapter.lessons ?? []) {
-        lessonById.set(lesson.id, {
-          chapterId: chapter.id,
-          lessonId: lesson.id,
-          lessonTitle: lesson.title,
-          lessonDescription: lesson.description ?? undefined,
-        });
-
-        for (const question of lesson.questions ?? []) {
-          if (!question.id) continue;
-          const opts = question.options ?? [];
-          optionsByQuestionId.set(
-            question.id,
-            opts.map((o) => ({
-              optionText: o.optionText ?? undefined,
-              matchedWord: o.matchedWord ?? undefined,
-            })),
-          );
-          const questionOptions = opts
-            .map((o) => {
-              const text = o.optionText ?? "";
-              const matched = o.matchedWord ?? "";
-              if (text && matched) return `- ${text} (matchedWord: ${matched})`;
-              if (text) return `- ${text}`;
-              if (matched) return `- (matchedWord: ${matched})`;
-              return "";
-            })
-            .filter(Boolean)
-            .join("\n");
-          questionById.set(question.id, {
-            chapterId: chapter.id,
-            lessonId: lesson.id,
-            questionId: question.id,
-            questionTitle: question.title,
-            questionDescription: question.description ?? undefined,
-            questionOptions: questionOptions || undefined,
-          });
-
-          for (const option of question.options ?? []) {
-            if (!option.id) continue;
-            optionById.set(option.id, {
-              chapterId: chapter.id,
-              lessonId: lesson.id,
-              questionId: question.id,
-              optionId: option.id,
-              optionText: option.optionText ?? undefined,
-            });
-          }
-        }
-      }
-    }
-
-    const getOrCreateChapterGroup = (chapterId: UUIDType) => {
-      let ch = grouped.chapters.find((c) => c.chapterId === chapterId);
-      if (!ch) {
-        const base = chapterById.get(chapterId);
-        ch = {
-          chapterId,
-          chapterTitle: base?.chapterTitle,
-          fields: [],
-          lessons: [],
-        };
-        grouped.chapters.push(ch);
-      }
-      return ch;
-    };
-
-    const getOrCreateLessonGroup = (chapterId: UUIDType, lessonId: UUIDType) => {
-      const ch = getOrCreateChapterGroup(chapterId);
-      let ls = ch.lessons.find((l) => l.lessonId === lessonId);
-      if (!ls) {
-        const base = lessonById.get(lessonId);
-        ls = {
-          lessonId,
-          lessonTitle: base?.lessonTitle,
-          lessonDescription: base?.lessonDescription,
-          fields: [],
-          questions: [],
-        };
-        ch.lessons.push(ls);
-      }
-      return ls;
-    };
-
-    const getOrCreateQuestionGroup = (
-      chapterId: UUIDType,
-      lessonId: UUIDType,
-      questionId: UUIDType,
-    ) => {
-      const ls = getOrCreateLessonGroup(chapterId, lessonId);
-      let qg = ls.questions.find((q) => q.questionId === questionId);
-      if (!qg) {
-        const base = questionById.get(questionId);
-        qg = {
-          questionId,
-          questionTitle: base?.questionTitle,
-          questionDescription: base?.questionDescription,
-          fields: [],
-          options: [],
-        };
-        ls.questions.push(qg);
-      }
-      return qg;
-    };
-
-    const getOrCreateOptionGroup = (
-      chapterId: UUIDType,
-      lessonId: UUIDType,
-      questionId: UUIDType,
-      optionId: UUIDType,
-    ) => {
-      const qg = getOrCreateQuestionGroup(chapterId, lessonId, questionId);
-      let og = qg.options.find((o) => o.optionId === optionId);
-      if (!og) {
-        const base = optionById.get(optionId);
-        og = { optionId, optionText: base?.optionText, fields: [] };
-        qg.options.push(og);
-      }
-      return og;
-    };
-
-    const withContext = flat.map((entry) => {
-      const metadata = `${entry.field.name}`;
-
-      if (entry.field.table === courses) {
-        grouped.course.push(entry);
-        return {
-          data: entry,
-          metadata,
-          context: { courseTitle },
-        };
-      }
-
-      if (entry.field.table === chapters) {
-        const base = chapterById.get(entry.id as UUIDType);
-        if (base) getOrCreateChapterGroup(base.chapterId).fields.push(entry);
-        return {
-          data: entry,
-          metadata,
-          context: {
-            courseTitle,
-            chapterTitle: base?.chapterTitle,
-          },
-        };
-      }
-
-      if (entry.field.table === lessons) {
-        const base = lessonById.get(entry.id as UUIDType);
-        if (base) getOrCreateLessonGroup(base.chapterId, base.lessonId).fields.push(entry);
-        return {
-          data: entry,
-          metadata,
-          context: {
-            courseTitle,
-            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
-            lessonTitle: base?.lessonTitle,
-            lessonDescription: base?.lessonDescription,
-          },
-        };
-      }
-
-      if (entry.field.table === questions) {
-        const base = questionById.get(entry.id as UUIDType);
-        if (base)
-          getOrCreateQuestionGroup(base.chapterId, base.lessonId, base.questionId).fields.push(
-            entry,
-          );
-        return {
-          data: entry,
-          metadata,
-          context: {
-            courseTitle,
-            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
-            lessonTitle: base ? lessonById.get(base.lessonId)?.lessonTitle : undefined,
-            lessonDescription: base ? lessonById.get(base.lessonId)?.lessonDescription : undefined,
-            questionTitle: base?.questionTitle,
-            questionDescription: base?.questionDescription,
-            questionOptions: base?.questionOptions,
-          },
-        };
-      }
-
-      if (entry.field.table === aiMentorLessons) {
-        const base = lessonById.get(entry.id as UUIDType);
-        if (base) getOrCreateLessonGroup(base.chapterId, base.lessonId).fields.push(entry);
-        return {
-          data: entry,
-          metadata,
-          context: {
-            courseTitle,
-            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
-            lessonTitle: base?.lessonTitle,
-            lessonDescription: base?.lessonDescription,
-          },
-        };
-      }
-
-      if (entry.field.table === questionAnswerOptions) {
-        const base = optionById.get(entry.id as UUIDType);
-        if (base)
-          getOrCreateOptionGroup(
-            base.chapterId,
-            base.lessonId,
-            base.questionId,
-            base.optionId,
-          ).fields.push(entry);
-        const questionBase = base ? questionById.get(base.questionId) : undefined;
-        const lessonBase = base ? lessonById.get(base.lessonId) : undefined;
-        return {
-          data: entry,
-          metadata,
-          context: {
-            courseTitle,
-            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
-            lessonTitle: lessonBase?.lessonTitle,
-            lessonDescription: lessonBase?.lessonDescription,
-            questionTitle: questionBase?.questionTitle,
-            questionDescription: questionBase?.questionDescription,
-            optionText: base?.optionText,
-          },
-        };
-      }
-
-      return {
-        data: entry,
-        metadata,
-        context: { courseTitle },
-      };
-    });
-
-    return { flat, grouped, withContext };
   }
 
   private getSearchQueryConditions(searchQuery: string, language?: SupportedLanguages) {

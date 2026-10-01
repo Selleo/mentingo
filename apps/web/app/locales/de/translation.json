@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kurse und Lernpfade mit bereits vorhandener Kennung werden übersprungen. Neue Inhalte werden als Entwurf erstellt.",
+    "uploadPrompt": "Mentingo-Paket-ZIP auswählen oder ablegen",
+    "dropPrompt": "Mentingo-Paket hier ablegen",
+    "fileReady": "Bereit zum Import",
+    "replaceFile": "Paket ersetzen",
+    "removeFile": "Paket entfernen",
+    "exportTitle": "Mentingo-Paket",
+    "exportDescription": {
+      "course": "Exportieren Sie diesen Kurs mit Struktur, Einstellungen und Dateien als Paket für den Import in Mentingo.",
+      "learning-path": "Exportieren Sie diesen Lernpfad mit Kursen, Einstellungen und Dateien als Paket für den Import in Mentingo."
+    },
+    "exportButton": "Mentingo-Paket exportieren",
+    "preparing": "Mentingo-Paket wird vorbereitet…",
+    "exportReady": "Mentingo-Paket heruntergeladen",
+    "importTitle": "Mentingo-Paket importieren",
+    "selectFile": "Mentingo-Paket-ZIP auswählen",
+    "importButton": "Mentingo-Paket importieren",
+    "uploading": "Wird hochgeladen…",
+    "importing": "Mentingo-Paket wird importiert…",
+    "alreadyExists": "Dieses Element existiert bereits. Es wurde nichts geändert.",
+    "importComplete": "Import abgeschlossen: {{count}} Kurse erstellt, {{reused}} wiederverwendet.",
+    "liveTrainingReview": "Prüfen Sie den Zeitplan und die Materialien dieser importierten Live-Schulung vor der Nutzung.",
+    "dismissReview": "Als geprüft markieren",
+    "error": "Das Mentingo-Paket konnte nicht verarbeitet werden.",
+    "errors": {
+      "storageUnavailable": "Der Dateispeicher ist nicht verfügbar.",
+      "liveTrainingUnavailable": "Live-Schulungen müssen für den Import des Mentingo-Pakets aktiviert sein.",
+      "embeddingUnavailable": "Die Verarbeitung von KI-Dokumenten ist nicht verfügbar.",
+      "unsupportedVersion": "Diese Mentingo-Paketversion wird nicht unterstützt.",
+      "missingAsset": "Im Mentingo-Paket fehlt eine erforderliche Datei.",
+      "invalidArchive": "Diese ZIP-Datei ist kein gültiges Mentingo-Paket."
+    }
+  },
   "aiConversations": {
     "session": "Sitzung",
     "context": "Kontext",
@@ -45,6 +79,170 @@
       "active": "In Bearbeitung",
       "completed": "Abgeschlossen",
       "archived": "Archiviert"
+    }
+  },
+  "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Fügt die Frist des Pflichtkurses ein, sofern vorhanden. Ohne Frist wird der Text ausgeblendet.",
+      "inactivity_subject": "Verwendet den Betreff der Benachrichtigung. Bei kurzer Inaktivität ohne Kurs bezieht er sich auf die Plattform.",
+      "inactivity_message": "Beschreibt die Inaktivität im Kurs oder auf der Plattform, wenn kein Kurs vorhanden ist.",
+      "inactivity_action": "Verwendet die Schaltflächenbeschriftung der Benachrichtigung. Bei kurzer Inaktivität ohne Kurs erscheint „Plattform öffnen“.",
+      "deadline_message": "Beschreibt die tatsächliche Restzeit: heute, morgen oder die Anzahl der Tage bis zur Frist.",
+      "course_completion_message": "Bestätigt den Abschluss und erwähnt ein Zertifikat zum Herunterladen nur, wenn eines verfügbar ist.",
+      "course_completion_action": "Zeigt „Zertifikat herunterladen“, wenn verfügbar, andernfalls „Weiterlernen“.",
+      "certificate_archive_heading": "Zeigt je nach Ereignis „Zertifikat abgelaufen“ oder „Zertifikat zurückgesetzt“.",
+      "certificate_archive_message": "Erklärt, ob das Zertifikat abgelaufen ist oder von einem Administrator zurückgesetzt wurde."
+    },
+    "ui": {
+      "dividerHeight": "Trennlinienhöhe (px)",
+      "tableOfContents": "Inhaltsverzeichnis",
+      "delete": "Vorlage löschen",
+      "deleted": "Vorlage gelöscht",
+      "deleteHint": "Diese Vorlage dauerhaft löschen? Dies kann nicht rückgängig gemacht werden. Ist sie veröffentlicht, verwenden zukünftige E-Mails die Systemvorlage.",
+      "blockPalette": "Blöcke",
+      "searchVariables": "Variablen suchen…",
+      "noVariables": "Keine passenden Variablen",
+      "blockSettings": "Blockeinstellungen",
+      "dragBlock": "Block ziehen",
+      "editBlock": "Block bearbeiten",
+      "title": "E-Mail-Vorlagen",
+      "description": "Passen Sie die Benachrichtigungen Ihrer Organisation an. Standardvorlagen sind schreibgeschützt.",
+      "create": "Aus Standard erstellen",
+      "name": "Vorlagenname",
+      "event": "Benachrichtigungsereignis",
+      "status": "Status",
+      "languages": "Vollständige Sprachen",
+      "actions": "Aktionen",
+      "system": "System",
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "archived": "Archiviert",
+      "copyDefault": "Kopieren und anpassen",
+      "duplicate": "Duplizieren",
+      "archive": "Archivieren",
+      "restore": "Entwurf wiederherstellen",
+      "preview": "Vorschau",
+      "sendTest": "Test-E-Mail senden",
+      "publish": "Veröffentlichen",
+      "save": "Speichern",
+      "saveDraft": "Entwurf speichern",
+      "back": "Zurück zu Vorlagen",
+      "editor": "E-Mail-Editor",
+      "loading": "Vorlagen werden geladen…",
+      "retry": "Erneut versuchen",
+      "requestFailed": "Die Anfrage konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+      "emptyList": "Keine Vorlagen auf dieser Seite.",
+      "language": "Bearbeitungssprache",
+      "baseLanguage": "Basissprache",
+      "setBaseLanguage": "Als Basissprache verwenden",
+      "subject": "Betreff",
+      "content": "E-Mail-Inhalt",
+      "translations": "Übersetzungen",
+      "complete": "Vollständig",
+      "fallback": "Verwendet Basissprache",
+      "variables": "Verfügbare Variablen",
+      "insertVariable": "Variable einfügen",
+      "requiredLink": "Erforderlicher Aktionslink",
+      "collectionSample": "Sammlung — alle Einträge in der Vorschau.",
+      "variablesHint": "Variablen über die Feldmenüs einfügen. Beim Senden werden sie durch Ereignisdaten ersetzt. * kennzeichnet Pflichtlinks.",
+      "defaultHint": "Diese Standardvorlage ist schreibgeschützt. Kopieren Sie sie für einen bearbeitbaren Entwurf.",
+      "editHint": "Änderungen ausdrücklich speichern. Vorschau und Tests nutzen ungespeicherte Inhalte mit Beispieldaten; Tests gehen nur an Ihre Adresse.",
+      "publishedHint": "Das Speichern dieser Vorlage ändert zukünftige E-Mails sofort.",
+      "languageHint": "Unvollständige Übersetzungen verwenden die Basissprache. Speichern Sie eine vollständige Übersetzung, bevor Sie sie zur Basis machen.",
+      "publishHint": "Vorlage veröffentlichen? Sie ersetzt die aktuell aktive Vorlage. Ungespeicherte Änderungen werden zuerst gespeichert.",
+      "archiveHint": "Vorlage archivieren? Wenn sie aktiv ist, wird wieder die Standardvorlage verwendet.",
+      "unsavedTitle": "Ungespeicherte Änderungen",
+      "unsavedHint": "Beim Verlassen gehen ungespeicherte Änderungen verloren.",
+      "leave": "Verwerfen und verlassen",
+      "addBlock": "Block nach Auswahl einfügen",
+      "emptyContent": "Fügen Sie einen Block für diese Übersetzung hinzu.",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "duplicateBlock": "Block duplizieren",
+      "removeBlock": "Block entfernen",
+      "brandingHint": "Der Kopfbereich verwendet Logo und Namen Ihrer Organisation.",
+      "buttonLabel": "Schaltflächentext",
+      "url": "Link-URL (HTTPS oder Variable)",
+      "imageSource": "Bild-URL oder Dateiverweis",
+      "uploadImage": "Bild hochladen",
+      "imageHint": "Öffentliche HTTPS-Bild-URL verwenden oder ein Bild hochladen (bis 5 MiB). Uploads werden beim Senden eingebettet.",
+      "altText": "Alternativtext",
+      "width": "Breite (px, optional)",
+      "height": "Abstandshöhe (px)",
+      "richText": "Formatierter Text",
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "link": "Link bearbeiten",
+      "unlink": "Link entfernen",
+      "applyLink": "Link anwenden",
+      "desktop": "Desktop-Ansicht",
+      "mobile": "Mobile Ansicht",
+      "copied": "Ein neuer Entwurf wurde erstellt.",
+      "saved": "Änderungen gespeichert.",
+      "restored": "Vorlage als Entwurf wiederhergestellt.",
+      "languageRemoved": "Sprache aus der Vorlage entfernt.",
+      "testQueued": "Test-E-Mail für Ihre Adresse eingereiht.",
+      "uploaded": "Bild hochgeladen.",
+      "blocks": {
+        "header": "Kopfbereich",
+        "heading": "Überschrift",
+        "text": "Text",
+        "button": "Schaltfläche",
+        "image": "Bild",
+        "divider": "Trennlinie",
+        "spacer": "Abstand",
+        "footer": "Fußbereich"
+      }
+    },
+    "events": {
+      "welcome": "Willkommen",
+      "password_recovery": "Passwortwiederherstellung",
+      "password_reminder": "Erinnerung zur Passworterstellung",
+      "user_invite": "Benutzereinladung",
+      "user_first_login": "Erste Anmeldung",
+      "user_assigned_to_course": "Kurszuweisung",
+      "user_short_inactivity": "Erinnerung bei kurzer Inaktivität",
+      "user_long_inactivity": "Erinnerung bei längerer Inaktivität",
+      "user_finished_chapter": "Kapitelabschluss",
+      "user_finished_course": "Kursabschluss",
+      "certificate_expiration_warning": "Warnung vor Zertifikatsablauf",
+      "certificate_expired": "Zertifikat abgelaufen",
+      "admin_new_user": "Benachrichtigung über neuen Benutzer",
+      "admin_finished_course": "Administratorbenachrichtigung zum Kursabschluss",
+      "admin_overdue_courses": "Benachrichtigung über überfällige Kurse",
+      "course_due_date_reminder": "Erinnerung an den Kurstermin",
+      "magic_link": "Anmeldelink",
+      "course_chat_mention": "Erwähnung im Kurschat",
+      "announcement": "Ankündigung",
+      "live_training_started": "Live-Schulung gestartet",
+      "live_training_reminder": "Erinnerung an die Live-Schulung",
+      "live_training_ended": "Live-Schulung beendet"
+    },
+    "errors": {
+      "incompleteButton": "Geben Sie eine Schaltflächenbeschriftung und URL ein.",
+      "incompleteBlocks": "Füllen Sie die erforderlichen Schaltflächen- und Bildfelder aus, um fortzufahren.",
+      "emptyBlock": "Dieser Block ist leer.",
+      "incompleteBaseLanguage": "Vervollständigen Sie Name, Betreff und Inhalt in der Basissprache.",
+      "unsupportedEvent": "Nicht unterstütztes E-Mail-Ereignis.",
+      "restrictedAuthVariables": "Variablen für den Kontozugang dürfen nur als vollständige Ziele von Schaltflächen oder Textlinks verwendet werden.",
+      "unsupportedVariables": "Die Vorlage enthält nicht unterstützte Variablen.",
+      "missingMandatoryVariables": "Jede vollständige Übersetzung muss die erforderlichen Aktionslinks enthalten.",
+      "malformedVariables": "Ungültige Variablensyntax.",
+      "invalidContent": "Ungültiger E-Mail-Inhalt.",
+      "invalidUrl": "Ungültiger E-Mail-Link.",
+      "httpsRequired": "E-Mail-Links müssen HTTPS verwenden.",
+      "privateImageHost": "Bilder dürfen keine lokalen oder privaten Hosts verwenden.",
+      "publicationConflict": "Für dieses Ereignis wurde eine andere Vorlage veröffentlicht. Versuchen Sie es erneut.",
+      "notFound": "E-Mail-Vorlage nicht gefunden.",
+      "createFailed": "Die E-Mail-Vorlage konnte nicht erstellt werden.",
+      "invalidCollection": "Ungültige Sammlungsdaten.",
+      "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden.",
+      "archivedReadOnly": "Stellen Sie die Vorlage wieder her, bevor Sie ihre Sprachen ändern."
+    },
+    "warnings": {
+      "translationFallback": "Unvollständige Übersetzungen verwenden die Basissprache.",
+      "missingHeader": "Einer Übersetzung fehlt die Kopfzeile.",
+      "missingFooter": "Einer Übersetzung fehlt die Fußzeile."
     }
   },
   "dashboardHome": {
@@ -351,6 +549,7 @@
     "send": "Senden"
   },
   "common": {
+    "deletedUser": "Gelöschter Benutzer",
     "button": {
       "previous": "Zurück",
       "next": "Weiter",
@@ -659,7 +858,7 @@
     "back": "Zurück",
     "eyebrow": "Kurseinrichtung",
     "title": "Neuen Kurs erstellen",
-    "subtitle": "Wählen Sie, ob der Kurs mit dem Standardeditor oder aus einem SCORM-Paket erstellt werden soll.",
+    "subtitle": "Wählen Sie den Standardeditor, ein SCORM-Paket oder ein Mentingo-Paket.",
     "standard": {
       "title": "Standard",
       "description": "Erstellen Sie einen Kurs mit integriertem Curriculum, Lektionen, Quizzen und Einstellungen.",
@@ -678,6 +877,16 @@
         "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
         "structure": "Importierte Paketstruktur bleibt erhalten",
         "future": "Preise, Status und Zertifikate enthalten"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Mentingo-Paket",
+      "description": "Stellen Sie einen Kurs oder Lernpfad aus einem Mentingo-Paket wieder her.",
+      "features": {
+        "structure": "Kursstruktur und Übersetzungen wiederherstellen",
+        "settings": "Einstellungen und Metadaten wiederherstellen",
+        "assets": "Zugehörige Dateien enthalten",
+        "learningPath": "Lernpfade und ihre Kurse unterstützt"
       }
     }
   },
@@ -1687,6 +1896,8 @@
     "dropdown": {
       "changeCategory": "Kategorie ändern",
       "changeStatus": "Status ändern",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
       "delete": "Löschen"
     },
     "deleteModal": {
@@ -1694,6 +1905,14 @@
       "titleMultiple": "Kurse löschen",
       "descriptionSingle": "Möchten Sie diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kurse löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "archiveModal": {
+      "title": "Kurse archivieren",
+      "description": "{{count}} ausgewählte Kurse archivieren? Eingeschriebene Lernende behalten Zugriff."
+    },
+    "restoreModal": {
+      "title": "Kurse wiederherstellen",
+      "description": "{{count}} ausgewählte Kurse in den aktiven Katalog zurückholen?"
     },
     "statusModal": {
       "title": "Kursstatus ändern",
@@ -1711,6 +1930,9 @@
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
       "bulkCategoryUpdateCategoryNotFound": "Die ausgewählte Kategorie wurde nicht gefunden.",
+      "bulkArchiveUpdateSuccessfully": "Archivstatus der Kurse aktualisiert",
+      "bulkArchiveUpdateFailed": "Archivstatus der Kurse konnte nicht aktualisiert werden",
+      "bulkArchiveUpdateForbidden": "Sie dürfen einen oder mehrere ausgewählte Kurse nicht archivieren oder wiederherstellen.",
       "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
       "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -1913,6 +2135,7 @@
         "dashboard_read": "Das eigene Dashboard anzeigen.",
         "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
+        "email_template_manage": "E-Mail-Vorlagen verwalten und veröffentlichen, Bilder hochladen und Test-E-Mails senden.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
         "category_read": "Kurskategorien anzeigen.",
@@ -2360,7 +2583,8 @@
         "lesson": "Lektion nicht gefunden."
       },
       "forbidden": {
-        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren."
+        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren.",
+        "archivedCourseEnrollment": "Dieser Kurs wurde archiviert und ist nicht mehr für die Anmeldung verfügbar."
       },
       "media": {
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
@@ -2516,6 +2740,10 @@
         "enableQuizFeedbackDescription": "Nach dem Absenden des Quiz sieht der Schüler, welche Antworten richtig, falsch oder unbeantwortet waren.",
         "enableVideoCompletionTracking": "Video-Abschlussverfolgung",
         "enableVideoCompletionTrackingDescription": "Lernende müssen mindestens 90% jedes Videos in einer Lektion ansehen, bevor sie als abgeschlossen markiert wird.",
+        "archiveCourseDescription": "Durch die Archivierung wird der Kurs aus dem Katalog ausgeblendet und neue Selbstanmeldungen werden verhindert. Bereits eingeschriebene Lernende behalten Zugriff.",
+        "archiveCourseTitle": "Kurs archivieren",
+        "archivedCourseTitle": "Kurs archiviert",
+        "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
         "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
@@ -4915,6 +5143,11 @@
       "start_course": "Gestartet",
       "group_assignment": "Zugewiesen",
       "users_import": "Benutzer importiert",
+      "publish_email_template": "E-Mail-Vorlage veröffentlicht",
+      "archive_email_template": "E-Mail-Vorlage archiviert",
+      "restore_email_template": "E-Mail-Vorlage wiederhergestellt",
+      "add_email_template_language": "Sprache zur E-Mail-Vorlage hinzugefügt",
+      "remove_email_template_language": "Sprache aus E-Mail-Vorlage entfernt",
       "send_password_reset_email": "Passwort-Zurücksetzen-E-Mail gesendet",
       "resend_password_creation_email": "Passwort-Erstellungs-E-Mail erneut gesendet",
       "complete_lesson": "Lektion abgeschlossen",
@@ -4948,6 +5181,7 @@
       "live_training": "Live-Schulung",
       "learning_path": "Lernpfad",
       "scorm": "SCORM",
+      "email_template": "E-Mail-Vorlage",
       "global_settings": "Einstellungen"
     },
     "table": {
@@ -5075,6 +5309,9 @@
   },
   "adminLearningPathsView": {
     "title": "Entwicklungspfade",
+    "importPackage": {
+      "title": "Entwicklungspfad importieren"
+    },
     "description": "Verwalten Sie Metadaten, Sequenzeinstellungen, Kurse, Einschreibungen, Exporte und Zertifikate.",
     "summary": "{{count}} Entwicklungspfade sind in diesem Arbeitsbereich verfügbar.",
     "breadcrumbs": {

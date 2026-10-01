@@ -2,6 +2,7 @@ import { Logger } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import {
   CourseDueDateReminderEmail,
+  EMAIL_TEMPLATE_EVENTS,
   getCourseDueDateReminderEmailTranslations,
 } from "@repo/email-templates";
 import {
@@ -79,7 +80,19 @@ export class CourseDueDateReminderEmailHandler
         text,
         html,
       },
-      { tenantId: recipient.tenantId },
+      {
+        tenantId: recipient.tenantId,
+        template: {
+          event: EMAIL_TEMPLATE_EVENTS.COURSE_DUE_DATE_REMINDER,
+          language: recipient.defaultEmailSettings.language,
+          variables: {
+            course_name: recipient.courseName,
+            course_link: `${recipient.tenantHost.replace(/\/$/, "")}/course/${recipient.courseId}`,
+            due_date: formattedDueDate,
+            days_before_due_date: recipient.daysBeforeDueDate,
+          },
+        },
+      },
     );
   }
 

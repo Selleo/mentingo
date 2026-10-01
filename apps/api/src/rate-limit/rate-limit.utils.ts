@@ -1,4 +1,6 @@
 import {
+  EMAIL_TEMPLATE_TEST_PATH,
+  EMAIL_TEMPLATE_TEST_POLICY,
   AUTH_PATHS_LIMIT_10_PER_MINUTE,
   AUTH_PATHS_LIMIT_5_PER_MINUTE,
   AUTH_POLICY_LIMIT_10_PER_MINUTE,
@@ -36,6 +38,9 @@ export const resolveRateLimitPolicy = (
   const normalizedPath = normalizePath(path);
 
   if (isTechnicalPath(normalizedPath)) return null;
+
+  if (normalizedMethod === "POST" && normalizedPath === EMAIL_TEMPLATE_TEST_PATH)
+    return EMAIL_TEMPLATE_TEST_POLICY;
 
   if (AUTH_PATHS_LIMIT_5_PER_MINUTE.has(normalizedPath)) return AUTH_POLICY_LIMIT_5_PER_MINUTE;
 

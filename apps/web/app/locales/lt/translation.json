@@ -1,4 +1,38 @@
 {
+  "nativeArchive": {
+    "importNotice": "Kursai ir mokymosi keliai su jau esančiu identifikatoriumi bus praleisti. Naujas turinys bus sukurtas kaip juodraštis.",
+    "uploadPrompt": "Pasirinkite arba nutempkite Mentingo paketo ZIP",
+    "dropPrompt": "Nutempkite Mentingo paketą čia",
+    "fileReady": "Paruošta importuoti",
+    "replaceFile": "Pakeisti paketą",
+    "removeFile": "Pašalinti paketą",
+    "exportTitle": "Mentingo paketas",
+    "exportDescription": {
+      "course": "Eksportuokite šį kursą, jo struktūrą, nustatymus ir failus kaip paketą, kurį galima importuoti į Mentingo.",
+      "learning-path": "Eksportuokite mokymosi kelią, jo kursus, nustatymus ir failus kaip paketą, kurį galima importuoti į Mentingo."
+    },
+    "exportButton": "Eksportuoti Mentingo paketą",
+    "preparing": "Ruošiamas Mentingo paketas…",
+    "exportReady": "Mentingo paketas atsisiųstas",
+    "importTitle": "Importuoti Mentingo paketą",
+    "selectFile": "Pasirinkti Mentingo paketo ZIP",
+    "importButton": "Importuoti Mentingo paketą",
+    "uploading": "Įkeliama…",
+    "importing": "Importuojamas Mentingo paketas…",
+    "alreadyExists": "Šis elementas jau yra. Niekas nebuvo pakeista.",
+    "importComplete": "Importas baigtas: sukurta {{count}} kursų, panaudota esamų {{reused}}.",
+    "liveTrainingReview": "Prieš naudodami patikrinkite importuotų tiesioginių mokymų tvarkaraštį ir medžiagą.",
+    "dismissReview": "Pažymėti kaip patikrintą",
+    "error": "Nepavyko apdoroti Mentingo paketo.",
+    "errors": {
+      "storageUnavailable": "Failų saugykla nepasiekiama.",
+      "liveTrainingUnavailable": "Norint importuoti Mentingo paketą, reikia įjungti tiesioginius mokymus.",
+      "embeddingUnavailable": "AI dokumentų apdorojimas nepasiekiamas.",
+      "unsupportedVersion": "Ši Mentingo paketo versija nepalaikoma.",
+      "missingAsset": "Mentingo pakete trūksta būtino failo.",
+      "invalidArchive": "Šis ZIP nėra galiojantis Mentingo paketas."
+    }
+  },
   "aiConversations": {
     "session": "Sesija",
     "context": "Kontekstas",
@@ -45,6 +79,170 @@
       "active": "Vyksta",
       "completed": "Baigtas",
       "archived": "Archyvuotas"
+    }
+  },
+  "emailTemplates": {
+    "variableDescriptions": {
+      "assignment_deadline_message": "Prideda privalomo kurso terminą, jei jis nustatytas. Jei termino nėra, tekstas nerodomas.",
+      "inactivity_subject": "Naudoja pranešimo temą. Trumpo neaktyvumo priminimuose be kurso tema nurodo platformą.",
+      "inactivity_message": "Aprašo neaktyvumą kurse arba platformoje, jei kurso nėra.",
+      "inactivity_action": "Naudoja pranešimo mygtuko tekstą. Trumpo neaktyvumo priminimuose be kurso rodoma „Atidaryti platformą“.",
+      "deadline_message": "Aprašo tikrąjį likusį laiką: šiandien, rytoj arba dienų skaičių iki termino.",
+      "course_completion_message": "Patvirtina kurso baigimą ir pamini atsisiunčiamą pažymėjimą tik tada, kai jis prieinamas.",
+      "course_completion_action": "Rodo „Atsiųsti pažymėjimą“, jei jis prieinamas, kitu atveju – „Tęsti mokymąsi“.",
+      "certificate_archive_heading": "Pagal įvykį rodo „Pažymėjimas nebegalioja“ arba „Pažymėjimas nustatytas iš naujo“.",
+      "certificate_archive_message": "Paaiškina, ar pažymėjimo galiojimas baigėsi, ar administratorius jį nustatė iš naujo."
+    },
+    "ui": {
+      "dividerHeight": "Skirtuko aukštis (px)",
+      "tableOfContents": "Turinys",
+      "delete": "Ištrinti šabloną",
+      "deleted": "Šablonas ištrintas",
+      "deleteHint": "Visam laikui ištrinti šį šabloną? Šio veiksmo atšaukti negalima. Jei šablonas paskelbtas, būsimi el. laiškai naudos sistemos numatytąjį šabloną.",
+      "blockPalette": "Blokai",
+      "searchVariables": "Ieškoti kintamųjų…",
+      "noVariables": "Atitinkančių kintamųjų nėra",
+      "blockSettings": "Bloko nustatymai",
+      "dragBlock": "Vilkite bloką",
+      "editBlock": "Redaguoti bloką",
+      "title": "El. laiškų šablonai",
+      "description": "Tinkinkite organizacijos pranešimus. Numatytieji šablonai skirti tik skaityti.",
+      "create": "Kurti iš numatytojo",
+      "name": "Šablono pavadinimas",
+      "event": "Pranešimo įvykis",
+      "status": "Būsena",
+      "languages": "Užbaigtos kalbos",
+      "actions": "Veiksmai",
+      "system": "Sistemos",
+      "draft": "Juodraštis",
+      "published": "Paskelbtas",
+      "archived": "Archyvuotas",
+      "copyDefault": "Kopijuoti ir tinkinti",
+      "duplicate": "Dubliuoti",
+      "archive": "Archyvuoti",
+      "restore": "Atkurti juodraštį",
+      "preview": "Peržiūra",
+      "sendTest": "Siųsti bandomąjį laišką",
+      "publish": "Paskelbti",
+      "save": "Išsaugoti",
+      "saveDraft": "Išsaugoti juodraštį",
+      "back": "Grįžti į šablonus",
+      "editor": "Laiškų redaktorius",
+      "loading": "Įkeliami šablonai…",
+      "retry": "Bandyti dar kartą",
+      "requestFailed": "Nepavyko atlikti užklausos. Bandykite dar kartą.",
+      "emptyList": "Šiame puslapyje šablonų nėra.",
+      "language": "Redaguojama kalba",
+      "baseLanguage": "Pagrindinė kalba",
+      "setBaseLanguage": "Naudoti kaip pagrindinę kalbą",
+      "subject": "Tema",
+      "content": "Laiško turinys",
+      "translations": "Vertimai",
+      "complete": "Užbaigta",
+      "fallback": "Naudoja pagrindinę kalbą",
+      "variables": "Galimi kintamieji",
+      "insertVariable": "Įterpti kintamąjį",
+      "requiredLink": "Privaloma veiksmo nuoroda",
+      "collectionSample": "Rinkinys — įrašai matomi peržiūroje.",
+      "variablesHint": "Įterpkite kintamuosius iš laukų meniu. Siunčiant jie pakeičiami įvykio duomenimis. * žymi privalomas nuorodas.",
+      "defaultHint": "Šis šablonas skirtas tik skaityti. Nukopijuokite jį, kad galėtumėte redaguoti.",
+      "editHint": "Pakeitimus išsaugokite mygtuku. Peržiūrai ir testams naudojamas neišsaugotas turinys su pavyzdiniais duomenimis; testai siunčiami tik jums.",
+      "publishedHint": "Išsaugojus šį šabloną būsimi laiškai pasikeis iškart.",
+      "languageHint": "Neužbaigtam vertimui naudojama pagrindinė kalba. Prieš keisdami pagrindinę kalbą išsaugokite visą vertimą.",
+      "publishHint": "Paskelbti šabloną? Jis pakeis aktyvų šabloną. Neišsaugoti pakeitimai pirmiausia bus išsaugoti.",
+      "archiveHint": "Archyvuoti šabloną? Jei jis aktyvus, vėl bus naudojamas numatytasis šablonas.",
+      "unsavedTitle": "Neišsaugoti pakeitimai",
+      "unsavedHint": "Išėjus neišsaugoti pakeitimai bus prarasti.",
+      "leave": "Atmesti ir išeiti",
+      "addBlock": "Pridėti bloką po pasirinkto",
+      "emptyContent": "Pridėkite bloką šiam vertimui pradėti.",
+      "moveUp": "Perkelti aukštyn",
+      "moveDown": "Perkelti žemyn",
+      "duplicateBlock": "Dubliuoti bloką",
+      "removeBlock": "Pašalinti bloką",
+      "brandingHint": "Antraštėje naudojamas organizacijos logotipas ir pavadinimas.",
+      "buttonLabel": "Mygtuko tekstas",
+      "url": "Nuoroda (HTTPS arba kintamasis)",
+      "imageSource": "Paveikslėlio URL arba failo nuoroda",
+      "uploadImage": "Įkelti paveikslėlį",
+      "imageHint": "Naudokite viešą HTTPS URL arba įkelkite paveikslėlį (iki 5 MiB). Įkelti vaizdai įterpiami siunčiant.",
+      "altText": "Alternatyvus tekstas",
+      "width": "Plotis (px, nebūtina)",
+      "height": "Tarpo aukštis (px)",
+      "richText": "Formatuotas tekstas",
+      "bold": "Pusjuodis",
+      "italic": "Kursyvas",
+      "link": "Redaguoti nuorodą",
+      "unlink": "Pašalinti nuorodą",
+      "applyLink": "Taikyti nuorodą",
+      "desktop": "Kompiuterio rodinys",
+      "mobile": "Mobilusis rodinys",
+      "copied": "Sukurtas naujas juodraštis.",
+      "saved": "Pakeitimai išsaugoti.",
+      "restored": "Šablonas atkurtas kaip juodraštis.",
+      "languageRemoved": "Kalba pašalinta iš šablono.",
+      "testQueued": "Bandomasis laiškas įtrauktas į eilę jūsų adresu.",
+      "uploaded": "Paveikslėlis įkeltas.",
+      "blocks": {
+        "header": "Antraštė",
+        "heading": "Pavadinimas",
+        "text": "Tekstas",
+        "button": "Mygtukas",
+        "image": "Paveikslėlis",
+        "divider": "Skirtukas",
+        "spacer": "Tarpas",
+        "footer": "Poraštė"
+      }
+    },
+    "events": {
+      "welcome": "Sveiki atvykę",
+      "password_recovery": "Slaptažodžio atkūrimas",
+      "password_reminder": "Priminimas sukurti slaptažodį",
+      "user_invite": "Naudotojo kvietimas",
+      "user_first_login": "Pirmasis prisijungimas",
+      "user_assigned_to_course": "Priskyrimas kursui",
+      "user_short_inactivity": "Trumpo neaktyvumo priminimas",
+      "user_long_inactivity": "Ilgo neaktyvumo priminimas",
+      "user_finished_chapter": "Skyriaus užbaigimas",
+      "user_finished_course": "Kurso užbaigimas",
+      "certificate_expiration_warning": "Įspėjimas apie sertifikato galiojimo pabaigą",
+      "certificate_expired": "Sertifikato galiojimas baigėsi",
+      "admin_new_user": "Pranešimas apie naują naudotoją",
+      "admin_finished_course": "Pranešimas administratoriui apie kurso užbaigimą",
+      "admin_overdue_courses": "Pranešimas apie vėluojančius kursus",
+      "course_due_date_reminder": "Kurso termino priminimas",
+      "magic_link": "Prisijungimo nuoroda",
+      "course_chat_mention": "Paminėjimas kurso pokalbyje",
+      "announcement": "Pranešimas",
+      "live_training_started": "Tiesioginiai mokymai prasidėjo",
+      "live_training_reminder": "Tiesioginių mokymų priminimas",
+      "live_training_ended": "Tiesioginiai mokymai baigėsi"
+    },
+    "errors": {
+      "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
+      "incompleteBlocks": "Prieš tęsdami užpildykite privalomus mygtukų ir vaizdų laukus.",
+      "emptyBlock": "Šis blokas tuščias.",
+      "incompleteBaseLanguage": "Užpildykite pavadinimą, temą ir turinį pagrindine kalba.",
+      "unsupportedEvent": "Nepalaikomas el. pašto įvykis.",
+      "restrictedAuthVariables": "Paskyros prieigos kintamuosius galima naudoti tik kaip pilnus mygtukų arba tekstinių nuorodų adresus.",
+      "unsupportedVariables": "Šablone yra nepalaikomų kintamųjų.",
+      "missingMandatoryVariables": "Kiekviename užbaigtame vertime turi būti reikiamos veiksmų nuorodos.",
+      "malformedVariables": "Neteisinga kintamųjų sintaksė.",
+      "invalidContent": "Netinkamas el. laiško turinys.",
+      "invalidUrl": "Netinkama el. laiško nuoroda.",
+      "httpsRequired": "El. laiškų nuorodos turi naudoti HTTPS.",
+      "privateImageHost": "Vaizdai negali naudoti vietinių ar privačių serverių.",
+      "publicationConflict": "Šiam įvykiui paskelbtas kitas šablonas. Bandykite dar kartą.",
+      "notFound": "El. laiško šablonas nerastas.",
+      "createFailed": "Nepavyko sukurti el. laiško šablono.",
+      "invalidCollection": "Netinkami rinkinio duomenys.",
+      "cannotRemoveBaseLanguage": "Pagrindinės kalbos pašalinti negalima.",
+      "archivedReadOnly": "Prieš keisdami kalbas atkurkite šabloną."
+    },
+    "warnings": {
+      "translationFallback": "Neužbaigti vertimai naudoja pagrindinę kalbą.",
+      "missingHeader": "Vertime nėra antraštės.",
+      "missingFooter": "Vertime nėra poraštės."
     }
   },
   "dashboardHome": {
@@ -351,6 +549,7 @@
     "send": "Siųsti"
   },
   "common": {
+    "deletedUser": "Ištrintas naudotojas",
     "button": {
       "previous": "Ankstesnis",
       "next": "Kitas",
@@ -659,7 +858,7 @@
     "back": "Atgal",
     "eyebrow": "Kurso nustatymas",
     "title": "Sukurti naują kursą",
-    "subtitle": "Pasirinkite, ar kursą kurti standartiniame redaktoriuje, ar iš SCORM paketo.",
+    "subtitle": "Pasirinkite standartinį redaktorių, SCORM paketą arba Mentingo paketą.",
     "standard": {
       "title": "Standartinis",
       "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
@@ -678,6 +877,16 @@
         "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
         "structure": "Importuoto paketo struktūra išsaugoma",
         "future": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
+    },
+    "mentingoPackage": {
+      "title": "Mentingo paketas",
+      "description": "Atkurkite kursą arba mokymosi kelią iš Mentingo paketo.",
+      "features": {
+        "structure": "Atkuriama kurso struktūra ir vertimai",
+        "settings": "Atkuriami nustatymai ir metaduomenys",
+        "assets": "Pridedami susiję failai",
+        "learningPath": "Palaikomi mokymosi keliai ir jų kursai"
       }
     }
   },
@@ -1686,6 +1895,8 @@
     "dropdown": {
       "changeCategory": "Keisti kategoriją",
       "changeStatus": "Keisti būseną",
+      "archive": "Archyvuoti",
+      "restore": "Atkurti",
       "delete": "Ištrinti"
     },
     "deleteModal": {
@@ -1693,6 +1904,14 @@
       "titleMultiple": "Ištrinti kursus",
       "descriptionSingle": "Ar tikrai norite ištrinti šį kursą? Šio veiksmo anuliuoti negalima.",
       "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kursus? Šio veiksmo anuliuoti negalima."
+    },
+    "archiveModal": {
+      "title": "Archyvuoti kursus",
+      "description": "Archyvuoti {{count}} pasirinktų kursų? Užsiregistravę mokiniai išsaugos prieigą."
+    },
+    "restoreModal": {
+      "title": "Atkurti kursus",
+      "description": "Atkurti {{count}} pasirinktų kursų į aktyvų katalogą?"
     },
     "statusModal": {
       "title": "Keisti kurso būseną",
@@ -1710,6 +1929,9 @@
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
       "bulkCategoryUpdateCategoryNotFound": "Pasirinkta kategorija nerasta.",
+      "bulkArchiveUpdateSuccessfully": "Kursų archyvavimo būsena atnaujinta",
+      "bulkArchiveUpdateFailed": "Nepavyko atnaujinti kursų archyvavimo būsenos",
+      "bulkArchiveUpdateForbidden": "Neturite teisės archyvuoti arba atkurti vieno ar daugiau pasirinktų kursų.",
       "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
       "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -1912,6 +2134,7 @@
         "dashboard_read": "Gali peržiūrėti savo prietaisų skydelį.",
         "todo_task_manage_self": "Gali kurti ir tvarkyti savo užduotis.",
         "settings_manage": "Gali valdyti bendruosius platformos nustatymus.",
+        "email_template_manage": "Gali valdyti ir skelbti el. laiškų šablonus, įkelti vaizdus ir siųsti bandomuosius el. laiškus.",
         "env_read_public": "Gali peržiūrėti viešas aplinkos konfigūracijos reikšmes.",
         "env_manage": "Gali valdyti aplinkos konfigūracijos reikšmes.",
         "category_read": "Gali peržiūrėti kursų kategorijas.",
@@ -2359,7 +2582,8 @@
         "lesson": "Pamoka nerasta."
       },
       "forbidden": {
-        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso.",
+        "archivedCourseEnrollment": "Šis kursas buvo archyvuotas ir į jį nebegalima užsiregistruoti."
       },
       "media": {
         "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
@@ -2515,6 +2739,10 @@
         "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
         "enableVideoCompletionTracking": "Vaizdo įrašo užbaigimo sekimas",
         "enableVideoCompletionTrackingDescription": "Besimokantysis turi peržiūrėti bent 90 % kiekvieno pamokos vaizdo įrašo, kad pamoka būtų pažymėta kaip baigta.",
+        "archiveCourseDescription": "Archyvavus kursas paslepiamas kataloge ir neleidžiama naujai užsiregistruoti savarankiškai. Jau užsiregistravę dalyviai išsaugo prieigą.",
+        "archiveCourseTitle": "Archyvuoti kursą",
+        "archivedCourseTitle": "Kursas archyvuotas",
+        "courseAvailabilityTitle": "Kurso prieinamumas",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
         "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
@@ -4919,6 +5147,11 @@
       "start_course": "Pradėta",
       "group_assignment": "Priskirta",
       "users_import": "Naudotojai importuoti",
+      "publish_email_template": "El. laiško šablonas paskelbtas",
+      "archive_email_template": "El. laiško šablonas archyvuotas",
+      "restore_email_template": "El. laiško šablonas atkurtas",
+      "add_email_template_language": "Pridėta el. laiško šablono kalba",
+      "remove_email_template_language": "Pašalinta el. laiško šablono kalba",
       "send_password_reset_email": "Slaptažodžio atkūrimo el. laiškas išsiųstas",
       "resend_password_creation_email": "Slaptažodžio sukūrimo el. laiškas išsiųstas pakartotinai",
       "complete_lesson": "Pamoka užbaigta",
@@ -4952,6 +5185,7 @@
       "live_training": "Tiesioginiai mokymai",
       "learning_path": "Mokymosi kelias",
       "scorm": "SCORM",
+      "email_template": "El. laiško šablonas",
       "global_settings": "Nustatymai"
     },
     "table": {
@@ -5079,6 +5313,9 @@
   },
   "adminLearningPathsView": {
     "title": "Tobulėjimo keliai",
+    "importPackage": {
+      "title": "Importuoti tobulėjimo kelią"
+    },
     "description": "Tvarkykite metaduomenis, sekos nustatymus, kursus, registracijas, eksportą ir sertifikatus.",
     "summary": "{{count}} tobulėjimo keliai yra pasiekiami šioje darbo srityje.",
     "breadcrumbs": {

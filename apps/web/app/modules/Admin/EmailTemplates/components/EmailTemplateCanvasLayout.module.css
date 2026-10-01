@@ -1,0 +1,13 @@
+.container {
+  container-type: inline-size;
+}
+
+.card {
+  width: 500px;
+}
+
+@container (max-width: 555px) {
+  .card {
+    width: 90%;
+  }
+}

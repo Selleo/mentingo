@@ -17,6 +17,7 @@ import {
   categories,
   chapters,
   courses,
+  emailTemplates,
   groups,
   learningPaths,
   lessons,
@@ -230,6 +231,18 @@ export class ActivityLogResourceNameService {
           })
           .from(learningPaths)
           .where(inArray(learningPaths.id, ids));
+      case ACTIVITY_LOG_RESOURCE_TYPES.EMAIL_TEMPLATE:
+        return this.db
+          .select({
+            id: emailTemplates.id,
+            name: this.localizationService.getLocalizedSqlField(
+              emailTemplates.name,
+              undefined,
+              emailTemplates,
+            ),
+          })
+          .from(emailTemplates)
+          .where(inArray(emailTemplates.id, ids));
       case ACTIVITY_LOG_RESOURCE_TYPES.SCORM:
         return this.fetchScormResourceNames(ids);
       default:

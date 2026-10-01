@@ -271,7 +271,7 @@ export default function LoginPage() {
               data-testid={LOGIN_PAGE_HANDLES.VERSION_CHANGELOG_LINK}
               className="underline-offset-2 hover:underline"
             >
-              {t("common.other.appVersion", { version })}
+              {version}
             </a>
           </p>
         </CardContent>

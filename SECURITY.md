@@ -4,11 +4,11 @@ Mentingo is used to run mandatory and compliance training inside organisations, 
 
 ## Supported versions
 
-| Version | Supported |
-|---|---|
-| 4.x (latest minor) | ✅ Security fixes |
+| Version            | Supported                    |
+| ------------------ | ---------------------------- |
+| 4.x (latest minor) | ✅ Security fixes            |
 | 4.x (older minors) | ⚠️ Upgrade to the latest 4.x |
-| < 4.0 | ❌ Not supported |
+| < 4.0              | ❌ Not supported             |
 
 We ship fixes on the latest released minor. If you are self-hosting, subscribe to [Releases](https://github.com/Selleo/mentingo/releases) to be notified.
 
@@ -30,12 +30,12 @@ Please include, as far as you can:
 
 ## What happens next
 
-| Stage | Target |
-|---|---|
-| Acknowledgement of your report | 3 business days |
-| Initial assessment and severity rating | 10 business days |
-| Fix or documented mitigation for critical issues | 30 days |
-| Coordinated public disclosure | after a fix is released, or 90 days from the report, whichever comes first |
+| Stage                                            | Target                                                                     |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| Acknowledgement of your report                   | 3 business days                                                            |
+| Initial assessment and severity rating           | 10 business days                                                           |
+| Fix or documented mitigation for critical issues | 30 days                                                                    |
+| Coordinated public disclosure                    | after a fix is released, or 90 days from the report, whichever comes first |
 
 We will keep you updated during the process and, unless you prefer otherwise, credit you in the advisory and the release notes.
 

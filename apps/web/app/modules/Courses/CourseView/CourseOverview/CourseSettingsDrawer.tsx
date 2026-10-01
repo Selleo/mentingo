@@ -19,6 +19,7 @@ import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCours
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { CourseOverviewTabButton } from "../TableOfContent/CourseOverviewTabs";
 
+import CourseArchiveSetting from "./CourseArchiveSetting";
 import CourseSettingsSharingTab from "./CourseSettingsSharingTab";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -42,6 +43,7 @@ type CourseSettingsDrawerProps = {
   open: boolean;
   priceInCents?: number;
   status: CourseStatusValue;
+  isArchived: boolean;
   isSharedCourse: boolean;
   title: string;
   unsupportedLessonCount: number;
@@ -55,6 +57,7 @@ export default function CourseSettingsDrawer({
   open,
   priceInCents,
   status,
+  isArchived,
   isSharedCourse,
   title,
   unsupportedLessonCount,
@@ -131,7 +134,16 @@ export default function CourseSettingsDrawer({
                 <CourseSettingsSwitches courseId={courseId} />
               )}
               {activeTab === SETTINGS_TABS.STATUS && (
-                <CourseStatus courseId={courseId} status={status} language={language} />
+                <div className="flex flex-col gap-6">
+                  <CourseStatus
+                    courseId={courseId}
+                    status={status}
+                    language={language}
+                    className="max-w-none p-0"
+                    variant="settings"
+                  />
+                  <CourseArchiveSetting courseId={courseId} isArchived={isArchived} />
+                </div>
               )}
               {activeTab === SETTINGS_TABS.PRICING && (
                 <CoursePricing
@@ -139,6 +151,8 @@ export default function CourseSettingsDrawer({
                   currency={currency}
                   priceInCents={priceInCents}
                   language={language}
+                  className="max-w-none p-0"
+                  variant="settings"
                 />
               )}
               {activeTab === SETTINGS_TABS.ENROLLED && (

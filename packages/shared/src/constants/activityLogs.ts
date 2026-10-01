@@ -12,6 +12,11 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   START_COURSE: "start_course",
   GROUP_ASSIGNMENT: "group_assignment",
   USERS_IMPORT: "users_import",
+  PUBLISH_EMAIL_TEMPLATE: "publish_email_template",
+  ARCHIVE_EMAIL_TEMPLATE: "archive_email_template",
+  RESTORE_EMAIL_TEMPLATE: "restore_email_template",
+  ADD_EMAIL_TEMPLATE_LANGUAGE: "add_email_template_language",
+  REMOVE_EMAIL_TEMPLATE_LANGUAGE: "remove_email_template_language",
   SEND_PASSWORD_RESET_EMAIL: "send_password_reset_email",
   RESEND_PASSWORD_CREATION_EMAIL: "resend_password_creation_email",
   COMPLETE_LESSON: "complete_lesson",
@@ -47,6 +52,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   LIVE_TRAINING: "live_training",
   LEARNING_PATH: "learning_path",
   SCORM: "scorm",
+  EMAIL_TEMPLATE: "email_template",
 } as const;
 
 export type ActivityLogResourceType =
@@ -145,5 +151,15 @@ export const ACTIVITY_LOG_RESOURCE_ACTION_TYPES = {
     ACTIVITY_LOG_ACTION_TYPES.DELETE,
     ACTIVITY_LOG_ACTION_TYPES.PLAY_SCORM,
     ACTIVITY_LOG_ACTION_TYPES.COMPLETE_SCORM,
+  ],
+  [ACTIVITY_LOG_RESOURCE_TYPES.EMAIL_TEMPLATE]: [
+    ACTIVITY_LOG_ACTION_TYPES.CREATE,
+    ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+    ACTIVITY_LOG_ACTION_TYPES.PUBLISH_EMAIL_TEMPLATE,
+    ACTIVITY_LOG_ACTION_TYPES.ARCHIVE_EMAIL_TEMPLATE,
+    ACTIVITY_LOG_ACTION_TYPES.RESTORE_EMAIL_TEMPLATE,
+    ACTIVITY_LOG_ACTION_TYPES.ADD_EMAIL_TEMPLATE_LANGUAGE,
+    ACTIVITY_LOG_ACTION_TYPES.REMOVE_EMAIL_TEMPLATE_LANGUAGE,
+    ACTIVITY_LOG_ACTION_TYPES.DELETE,
   ],
 } as const satisfies Record<ActivityLogResourceType, readonly ActivityLogActionType[]>;

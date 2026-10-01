@@ -91,17 +91,36 @@ export const getCompletedAnswers = (
 ) => {
   if (!options?.length) return [];
 
-  const blankOptions =
-    blankAnswerIds.length > 0
-      ? blankAnswerIds
-          .map((answerId) => options.find((option) => option.id === answerId))
-          .filter((option): option is QuizQuestionOption => Boolean(option))
-      : options
-          .filter((option) => Boolean(option.isCorrect))
-          .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
-          .slice(0, maxAnswersAmount);
+  const submittedOptions = options.filter((option) => option.isStudentAnswer);
+  const placedOptionIds = new Set<string>();
+  const blankOptions = blankAnswerIds.length
+    ? blankAnswerIds
+        .map((answerId, index) => {
+          const markerOption = options.find((option) => option.id === answerId);
+          const submittedOption = submittedOptions[index];
 
-  const blankOptionIds = new Set(blankOptions.map(({ id }) => id));
+          if (markerOption?.isStudentAnswer || markerOption?.studentAnswer != null) {
+            placedOptionIds.add(markerOption.id);
+            return markerOption;
+          }
+
+          if (submittedOption) {
+            placedOptionIds.add(submittedOption.id);
+            return { ...submittedOption, id: answerId };
+          }
+
+          if (markerOption?.isCorrect) {
+            placedOptionIds.add(markerOption.id);
+            return markerOption;
+          }
+
+          return undefined;
+        })
+        .filter((option): option is QuizQuestionOption => Boolean(option))
+    : options
+        .filter((option) => Boolean(option.isCorrect))
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+        .slice(0, maxAnswersAmount);
 
   const blankWords = blankOptions.map(
     ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }, index) => {
@@ -120,7 +139,7 @@ export const getCompletedAnswers = (
   );
 
   const wordBankWords = options
-    .filter((option) => !blankOptionIds.has(option.id))
+    .filter((option) => !placedOptionIds.has(option.id))
     .map(({ id, optionText, displayOrder, isStudentAnswer, isCorrect }) => ({
       id: id ?? `word-bank-${displayOrder ?? optionText}`,
       index: displayOrder ?? null,

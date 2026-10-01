@@ -1,3 +1,5 @@
+import { PgDialect, pgTable, text } from "drizzle-orm/pg-core";
+
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "../sqlHelpers";
 
 describe("sqlHelpers", () => {
@@ -50,6 +52,22 @@ describe("sqlHelpers", () => {
   });
 
   describe("buildJsonbField", () => {
+    it("supports column expressions without treating them as string parameters", () => {
+      const options = pgTable("options", { language: text("language"), label: text("label") });
+      const query = new PgDialect().sqlToQuery(buildJsonbField(options.language, options.label));
+      expect(query.sql).toBe(
+        'json_build_object("options"."language"::text, "options"."label"::text)',
+      );
+      expect(query.params).toEqual([]);
+    });
+
+    it("keeps literal content parameterized", () => {
+      const content = "answer'); DROP TABLE options; --";
+      const query = new PgDialect().sqlToQuery(buildJsonbField("en", content));
+      expect(query.sql).toBe("json_build_object($1::text, $2::text)");
+      expect(query.params).toEqual(["en", content]);
+    });
+
     it("returns undefined when key is null", () => {
       expect(buildJsonbField(null, "value")).toBeUndefined();
     });

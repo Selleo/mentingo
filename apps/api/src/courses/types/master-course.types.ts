@@ -1,5 +1,12 @@
 import type { CoursesSettings } from "./settings";
-import type { EntityType } from "@repo/shared";
+import type {
+  AssessmentGradingMode,
+  AssessmentQuestionType,
+  AssessmentTextComparisonMode,
+  EntityType,
+  LocalizedText,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { InferInsertModel, InferSelectModel, SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { ResourceRelationshipType } from "src/file/file.constants";
@@ -12,6 +19,13 @@ import type {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentQuestionBlankAnswerSets,
+  assessmentQuestionBlanks,
+  assessmentQuestionDragAndDropOptions,
+  assessmentQuestionOpenTextSettings,
+  assessmentQuestionScaleOptions,
+  assessmentQuestionTrueFalseStatements,
+  assessments,
   categories,
   chapters,
   courses,
@@ -20,8 +34,6 @@ import type {
   documentToAiMentorLesson,
   lessons,
   masterCourseExports,
-  questionAnswerOptions,
-  questions,
   resourceEntity,
   resources,
   scormPackages,
@@ -36,9 +48,12 @@ type ResourceWithRelation = {
 export type MasterCourseResourceGroupKey = "courses" | "chapters" | "lessons" | "questions";
 export type MasterCourseResourceEntityType = Extract<
   EntityType,
-  "course" | "chapter" | "lesson" | "question"
+  "course" | "chapter" | "lesson" | "question" | "assessment_question"
 >;
-export type MasterCourseExternalResourceEntityType = Extract<EntityType, "course" | "lesson">;
+export type MasterCourseExternalResourceEntityType = Extract<
+  EntityType,
+  "course" | "lesson" | "assessment_question"
+>;
 export type MasterCourseInternalResourceEntityType = Extract<
   EntityType,
   "course" | "lesson" | "question"
@@ -155,26 +170,186 @@ export type LessonJsonbUpdate = Partial<Omit<LessonInsert, "title" | "descriptio
   description?: SQL<unknown> | null;
 };
 
-export type QuestionSelect = InferSelectModel<typeof questions>;
-export type QuestionInsert = InferInsertModel<typeof questions>;
+export type QuestionSelect = {
+  id: UUIDType;
+  lessonId: UUIDType;
+  type: AssessmentQuestionType;
+  title: LocalizedText | null;
+  description: LocalizedText | null;
+  prompt: LocalizedText;
+  solutionExplanation: LocalizedText | null;
+  displayOrder: number;
+  photoS3Key: string | null;
+  gradingMode: AssessmentGradingMode;
+  authorId: UUIDType | null;
+  createdAt: string;
+  updatedAt: string;
+  tenantId: UUIDType;
+};
+export type QuestionInsert = Omit<QuestionSelect, "id" | "createdAt" | "updatedAt" | "tenantId">;
 export type QuestionJsonbInsert = Omit<
   QuestionInsert,
-  "title" | "description" | "solutionExplanation"
+  "prompt" | "title" | "description" | "solutionExplanation"
 > & {
+  prompt: SQL<unknown>;
   title: SQL<unknown>;
   description?: SQL<unknown> | null;
   solutionExplanation?: SQL<unknown> | null;
 };
 export type QuestionJsonbUpdate = Partial<
-  Omit<QuestionInsert, "title" | "description" | "solutionExplanation">
+  Omit<QuestionInsert, "prompt" | "title" | "description" | "solutionExplanation">
 > & {
+  prompt?: SQL<unknown>;
   title?: SQL<unknown>;
   description?: SQL<unknown> | null;
   solutionExplanation?: SQL<unknown> | null;
 };
 
-export type QuestionAnswerOptionSelect = InferSelectModel<typeof questionAnswerOptions>;
-export type QuestionAnswerOptionInsert = InferInsertModel<typeof questionAnswerOptions>;
+export type QuestionAnswerOptionSelect = {
+  id: UUIDType;
+  questionId: UUIDType;
+  optionText: LocalizedText | null;
+  matchedWord: LocalizedText | null;
+  isCorrect: boolean;
+  displayOrder: number;
+  scaleAnswer: number | null;
+  createdAt: string;
+  updatedAt: string;
+  tenantId: UUIDType;
+};
+export type QuestionAnswerOptionInsert = Omit<
+  QuestionAnswerOptionSelect,
+  "id" | "createdAt" | "updatedAt" | "tenantId"
+>;
+
+export type AssessmentQuestionBlankSelect = InferSelectModel<typeof assessmentQuestionBlanks>;
+export type AssessmentQuestionBlankAnswerSetSelect = InferSelectModel<
+  typeof assessmentQuestionBlankAnswerSets
+>;
+export type AssessmentQuestionDragAndDropOptionSelect = InferSelectModel<
+  typeof assessmentQuestionDragAndDropOptions
+>;
+export type AssessmentQuestionScaleOptionSelect = InferSelectModel<
+  typeof assessmentQuestionScaleOptions
+>;
+export type AssessmentQuestionTrueFalseStatementSelect = InferSelectModel<
+  typeof assessmentQuestionTrueFalseStatements
+>;
+export type AssessmentQuestionOpenTextSettingsSelect = InferSelectModel<
+  typeof assessmentQuestionOpenTextSettings
+>;
+export type AssessmentQuestionOpenTextSettingsValues = {
+  questionId: UUIDType;
+  minimumCharacters: number | null;
+  maximumCharacters: number | null;
+  reviewerInstructions: string | null;
+};
+export type AssessmentUpsertValues = Pick<
+  AssessmentSelect,
+  | "lessonId"
+  | "passingScorePercentage"
+  | "attemptLimitMode"
+  | "maximumAttempts"
+  | "attemptCooldown"
+  | "feedbackMode"
+  | "baseLanguage"
+  | "availableLocales"
+>;
+export type AssessmentSelect = InferSelectModel<typeof assessments>;
+
+export type UpsertTargetBlankValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  textComparisonMode: AssessmentTextComparisonMode;
+};
+
+export type UpsertTargetBlankAnswerSetValues = {
+  blankId: UUIDType;
+  language: SupportedLanguages;
+  preferredAnswer: string;
+  acceptedAnswers: string[];
+};
+
+export type UpsertTargetDragAndDropOptionValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  language: SupportedLanguages;
+  label: string;
+  targetBlankId: UUIDType | null;
+  displayOrder: number;
+};
+
+export type UpsertTargetScaleOptionValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  scaleValue: number;
+  displayOrder: number;
+  label: LocalizedText;
+};
+
+export type UpsertTargetTrueFalseStatementValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  language: SupportedLanguages;
+  displayOrder: number;
+  correctValue: boolean;
+  statement: string;
+};
+
+export type DeleteStaleTargetQuestionDetailsValues = {
+  questionIds: UUIDType[];
+  scaleOptionIds: UUIDType[];
+  trueFalseStatementIds: UUIDType[];
+  blankIds: UUIDType[];
+  dragAndDropOptionIds: UUIDType[];
+};
+
+export type DuplicateCourseIntoExistingCourseParams = {
+  sourceCourseId: UUIDType;
+  targetCourseId: UUIDType;
+  actorId: UUIDType;
+  tenantId: UUIDType;
+  sourceSnapshot?: SourceSnapshot;
+  targetCategoryId?: UUIDType;
+  targetCurrency?: string;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
+};
+
+export type DuplicateChaptersParams = {
+  sourceSnapshot: SourceSnapshot;
+  targetCourseId: UUIDType;
+  targetAuthorId: UUIDType;
+};
+
+export type DuplicateLessonsParams = {
+  sourceSnapshot: SourceSnapshot;
+  chapterMap: Map<UUIDType, UUIDType>;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type DuplicateQuestionsParams = {
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetAuthorId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type DuplicateOptionsParams = {
+  sourceSnapshot: SourceSnapshot;
+  questionMap: Map<UUIDType, UUIDType>;
+};
+
+export type SyncAssessmentQuestionDetailsParams = {
+  sourceSnapshot: SourceSnapshot;
+  questionMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+};
+
+export type RemoveScormPackagesForMappedTargetsParams = {
+  targetCourseId: UUIDType;
+  targetLessonIds: UUIDType[];
+  targetPackageIds?: UUIDType[];
+};
 export type QuestionAnswerOptionJsonbInsert = Omit<
   QuestionAnswerOptionInsert,
   "optionText" | "matchedWord"
@@ -191,20 +366,58 @@ export type QuestionAnswerOptionJsonbUpdate = Partial<
 
 export type AiMentorLessonSelect = InferSelectModel<typeof aiMentorLessons>;
 export type AiMentorLessonInsert = InferInsertModel<typeof aiMentorLessons>;
+export type AiMentorLessonJsonbInsert = Omit<AiMentorLessonInsert, "name"> & {
+  name: SQL<unknown>;
+};
+export type AiMentorLessonJsonbUpdate = Partial<Omit<AiMentorLessonInsert, "name">> & {
+  name?: SQL<unknown>;
+};
 export type AiMentorConfigurationSelect = InferSelectModel<typeof aiMentorConfigurations>;
 export type AiMentorConfigurationInsert = InferInsertModel<typeof aiMentorConfigurations>;
+export type AiMentorConfigurationJsonbInsert = Omit<
+  AiMentorConfigurationInsert,
+  "openingInstruction" | "additionalInstructions"
+> & {
+  openingInstruction?: SQL<unknown> | null;
+  additionalInstructions?: SQL<unknown> | null;
+};
+export type AiMentorConfigurationJsonbUpdate = Partial<
+  Omit<AiMentorConfigurationInsert, "openingInstruction" | "additionalInstructions">
+> & {
+  openingInstruction?: SQL<unknown> | null;
+  additionalInstructions?: SQL<unknown> | null;
+};
 export type AiMentorTeacherConfigurationSelect = InferSelectModel<
   typeof aiMentorTeacherConfigurations
 >;
 export type AiMentorTeacherConfigurationInsert = InferInsertModel<
   typeof aiMentorTeacherConfigurations
 >;
+export type AiMentorTeacherConfigurationJsonbInsert = Omit<
+  AiMentorTeacherConfigurationInsert,
+  "taskGoal" | "expertise" | "contentScope" | "feedbackGuidance"
+> & {
+  taskGoal: SQL<unknown>;
+  expertise: SQL<unknown>;
+  contentScope: SQL<unknown>;
+  feedbackGuidance?: SQL<unknown> | null;
+};
 export type AiMentorRoleplayConfigurationSelect = InferSelectModel<
   typeof aiMentorRoleplayConfigurations
 >;
 export type AiMentorRoleplayConfigurationInsert = InferInsertModel<
   typeof aiMentorRoleplayConfigurations
 >;
+export type AiMentorRoleplayConfigurationJsonbInsert = Omit<
+  AiMentorRoleplayConfigurationInsert,
+  "scenario" | "aiRole" | "learnerRole" | "characterGoal" | "factsAndConstraints"
+> & {
+  scenario: SQL<unknown>;
+  aiRole: SQL<unknown>;
+  learnerRole: SQL<unknown>;
+  characterGoal: SQL<unknown>;
+  factsAndConstraints?: SQL<unknown> | null;
+};
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationJsonbInsert = Omit<AiJudgeConfigurationInsert, "taskGoal"> & {
@@ -273,6 +486,14 @@ export type SourceSnapshot = {
   lessons: Array<LessonSelect>;
   questions: Array<QuestionSelect>;
   options: Array<QuestionAnswerOptionSelect>;
+  assessmentQuestionBlanks: Array<AssessmentQuestionBlankSelect>;
+  assessmentQuestionBlankAnswerSets: Array<AssessmentQuestionBlankAnswerSetSelect>;
+  assessmentQuestionDragAndDropOptions: Array<AssessmentQuestionDragAndDropOptionSelect>;
+  assessmentQuestionScaleOptions: Array<AssessmentQuestionScaleOptionSelect>;
+  assessmentQuestionTrueFalseStatements: Array<AssessmentQuestionTrueFalseStatementSelect>;
+  questionResources: Array<ResourceWithRelation>;
+  assessmentQuestionOpenTextSettings: Array<AssessmentQuestionOpenTextSettingsSelect>;
+  assessments: Array<AssessmentSelect>;
   aiMentors: Array<AiMentorLessonSelect>;
   aiMentorConfigurations: Array<AiMentorConfigurationSelect>;
   aiMentorTeacherConfigurations: Array<AiMentorTeacherConfigurationSelect>;
@@ -388,6 +609,7 @@ export type SyncFillInTheBlanksQuestionReferencesParams = {
   sourceSnapshot: SourceSnapshot;
   questionMap: Map<UUIDType, UUIDType>;
   optionMap: Map<UUIDType, UUIDType>;
+  blankMap: Map<UUIDType, UUIDType>;
 };
 
 export type AddExternalResourceReferenceParams = {
@@ -415,6 +637,7 @@ export type CopySourceResourceReferencesParams = {
   sourceTenantId: UUIDType;
   sourceTenantOrigin: string;
   targetTenantId: UUIDType;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type ResolveTargetResourceReferenceParams = CopySourceResourceReferencesParams & {
@@ -436,12 +659,14 @@ export type BuildCopiedResourceReferenceParams = {
 
 export type GetTargetResourceEntityIdParams = {
   lessonMap: Map<UUIDType, UUIDType>;
+  questionMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
 };
 
 export type SyncResourcesParams = {
   exportId: UUIDType;
   lessonMap: Map<UUIDType, UUIDType>;
+  questionMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
   targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
@@ -450,10 +675,12 @@ export type SyncResourcesParams = {
 
 export type DuplicateResourcesParams = {
   lessonMap: Map<UUIDType, UUIDType>;
+  questionMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
   targetTenantId: UUIDType;
   targetAuthorId: UUIDType;
   resourceCollection: MasterCourseResourceCollection;
+  uploadedResourceIdsByFileKey?: ReadonlyMap<string, UUIDType>;
 };
 
 export type CreateOrQueueExportForTargetParams = {
