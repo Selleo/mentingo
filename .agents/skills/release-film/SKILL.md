@@ -190,10 +190,14 @@ Intermediate setup waits for the previous sentence to finish, and its caption
 ends before the pointer approaches the next action. Long setup chains are cut.
 Changes to review or framing code invalidate cached early reviews. A chapter of
 more than five sentences is checked in two parts at once (one sentence shared);
-only both parts together can drop it. A dropped chapter leaves the film (at most
-two, never the opening or the closing one, and three chapters stay); a rejected
-chapter that cannot leave stops the run: fix its scene or narration, then
-finish again.
+only both parts together can drop it, and parts that disagree are checked again
+as one. A dropped chapter leaves the film (at most two, and three chapters stay;
+the film's opening and closing lines move to the chapters first and last then).
+A rewrite that cannot stand (empty, too long, another script) cuts its sentence
+instead. A rejected chapter that cannot leave, a sentence that neither its
+rewrite nor a cut fixes, or changes that would break the story stop the run with
+the story as adopted before the review: fix the scene or narration, then finish
+again.
 Review can remove empty setup at the start of a chapter when three pinned
 sentences still show and name the change. The film's added introduction and
 closing remain protected.

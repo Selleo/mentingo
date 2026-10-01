@@ -151,6 +151,11 @@ class Workflows(unittest.TestCase):
         self.assertIn('/knowledge/*/knowledge', restore)  # never a recipe (commands) from an artifact
         self.assertIn('[ ! -L "${folder}" ]', restore)
         self.assertNotIn('uses', steps["Restore the project's knowledge"])
+        # the listing is read before the loop: inside a for list a failed request would not stop the step, and a
+        # recording would start from nothing and keep that as the project's knowledge
+        self.assertIn('candidates=$(gh api', restore)
+        self.assertIn('for candidate in ${candidates}; do', restore)
+        self.assertNotIn('for candidate in $(', restore)
 
     def test_publishing_is_a_separate_job_without_the_token_that_never_records(self):
         chained = self.record['jobs']['publish']
@@ -181,6 +186,24 @@ class Workflows(unittest.TestCase):
         site = '\n'.join(s.get('run') or '' for s in pages['steps'])
         self.assertNotIn('release_assets.py publish', site)
         self.assertIn('--base-url', site)
+        # a cancelled run deploys nothing (always() would carry the job past a cancel)
+        self.assertTrue(pages['if'].startswith('${{ !cancelled() && '))
+        # only a recording of release-film.yml in this repository, started by hand, is ever published: any run (a
+        # fork's pull request among them) may upload an artifact named release-film
+        for job in (publish, pages):
+            names = [s.get('name') for s in job['steps']]
+            for download in (s for s in job['steps'] if uses(s, 'actions/download-artifact') and 'run-id' in s['with']):
+                check = job['steps'][names.index(download['name']) - 1]
+                self.assertEqual(check['name'], 'Check the run is a recording')
+                self.assertIn("inputs.run_id != github.run_id", check['if'])
+                self.assertEqual(check['env'], {'RUN_ID': '${{ inputs.run_id }}'})
+                self.assertEqual(check['run'],
+                                 'python3 .agents/skills/release-film/ci/release_assets.py recording --run-id "${RUN_ID}"')
+        # the films site's address: read by the helper, where only a 404 means "no site"
+        for workflow in (self.record, self.publish):
+            scripts = '\n'.join(s.get('run') or '' for job in workflow['jobs'].values() for s in job.get('steps') or [])
+            self.assertNotIn('/pages', scripts)
+            self.assertNotIn('|| true', scripts)
         # it deletes only release assets (the tag's earlier film, with replace: see test_ci), never a release
         helper = (SKILL / 'ci' / 'release_assets.py').read_text(encoding='utf-8')
         self.assertIsNone(re.search(r"\"DELETE\"|'release', 'delete'|--clobber", helper))

@@ -131,10 +131,19 @@ class Claims(unittest.TestCase):
             with mock.patch('llm.cli', return_value=('drop | nothing of it shows', {})):
                 self.assertEqual(review.check_chapter(chapter, 2, str(sheet)), [{'chapter': 2, 'drop': 'nothing of it shows'}])
 
+            asked = []
+
             def one_drop(prompt, system, effort, read=(), timeout=None):
+                asked.append(prompt)
+                if 'These images are sentences' not in prompt:  # the whole chapter, checked again as one
+                    return '2.3 | a claim | Zdanie trzy.', {}
                 return ('drop | not in these pictures', {}) if '07.jpg' in prompt else ('ok', {})
             with mock.patch('llm.cli', one_drop):
-                self.assertEqual(review.check_chapter(chapter, 2, str(sheet)), [])  # half a chapter is no drop
+                found = review.check_chapter(chapter, 2, str(sheet))
+            # half a chapter is no drop, and the half that answered "drop" checked none of its sentences
+            self.assertEqual([(f['sentence'], f['fix']) for f in found], [('2.3', 'Zdanie trzy.')])
+            self.assertEqual(len(asked), 3)
+            self.assertTrue(all(f'{n:02d}.jpg' in asked[-1] for n in range(1, 8)))
 
     def test_failed_review_propagates_from_parallel_checks(self):
         with mock.patch('llm.cli', side_effect=RuntimeError('limit reached')):
@@ -224,6 +233,31 @@ class Claims(unittest.TestCase):
             self.assertIn('2 | Trzy.', text)
             self.assertEqual(applied[0]['before'], 'Czwarte nad pustą listą.')
 
+    def test_a_rewrite_that_cannot_stand_cuts_its_sentence_or_is_left_unfixed(self):
+        english = language.TEXTS['en']
+        self.assertIsNone(review.unusable('We save the note.', english))
+        self.assertEqual(review.unusable(' '.join(['word'] * 31), english), 'has more than 30 words')
+        self.assertEqual(review.unusable('Мы сохраняем заметку.', english), 'is not in English')
+        with tempfile.TemporaryDirectory() as folder:
+            run = Path(folder)
+            (run / 'story.txt').write_text('# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Pierwsze.\n1 | Drugie.\n'
+                                           '2 | Trzecie.\n3 | Czwarte nad listą.\n'
+                                           '# chapter F2 | 2 | Raport | proof: "PDF"\n0 | Jeden.\n1 | Dwa.\n2 | Trzy.\n')
+            story = {'chapters': [{'film': 'F1', 'source': {'file': 'story.txt', 'chapter': 0}, 'sentences': [{}] * 4},
+                                  {'film': 'F2', 'source': {'file': 'story.txt', 'chapter': 1}, 'sentences': [{}] * 3}]}
+            claims = [{'sentence': '1.4', 'problem': 'no such list', 'fix': ' '.join(['słowo'] * 31)},
+                      {'sentence': '2.2', 'problem': 'no such value', 'fix': ''}]
+            applied = review.apply_claims(run, story, claims)
+            # four pinned sentences: the one whose rewrite is too long may go instead
+            self.assertEqual([(c['sentence'], c['fix']) for c in applied], [('1.4', '(cut)')])
+            text = (run / 'story.txt').read_text()
+            self.assertNotIn('Czwarte', text)
+            self.assertNotIn('słowo', text)
+            self.assertNotIn('unfixed', claims[0])
+            # three pinned sentences: none may go, so the sentence the pictures do not support stays unfixed
+            self.assertIn('1 | Dwa.', text)
+            self.assertEqual(claims[1]['unfixed'], 'its rewrite is empty, and cutting it would leave fewer than 3 pinned sentences')
+
     def test_empty_opening_setup_can_leave_three_sentences_showing_the_change(self):
         with tempfile.TemporaryDirectory() as folder:
             run = Path(folder)
@@ -266,20 +300,24 @@ class Claims(unittest.TestCase):
             self.assertIn({'chapter': 2, 'drop': 'the page is still loading'}, found)
             self.assertTrue(any('The texts on screen that prove it: "PDF"' in p for p in prompts))
 
-    def test_drops_spare_the_opening_and_the_closing_and_keep_three_chapters(self):
+    def test_drops_take_any_chapter_at_most_two_and_keep_three_chapters(self):
         with tempfile.TemporaryDirectory() as folder:
             chapters = [{'title': f'R{i}', 'prs': [i], 'source': {'file': 'story.txt', 'chapter': i - 1}} for i in range(1, 7)]
             found = [{'chapter': n, 'drop': 'blank'} for n in (1, 2, 3, 4, 6)]
             drops, kept = review.record_drops(folder, {'chapters': chapters}, found)
-            self.assertEqual([d['title'] for d in drops], ['R2', 'R3'])  # never the first or last; at most two
-            self.assertEqual(json.loads((Path(folder) / 'drops.json').read_text())[0]['chapter'], 1)
-            # the rejected chapters that stay: the opening, one past the limit, the closing
+            # the first chapter may go too: adopt gives the film's opening line to the chapter first then
+            self.assertEqual([d['title'] for d in drops], ['R1', 'R2'])
+            self.assertEqual(json.loads((Path(folder) / 'drops.json').read_text())[0]['chapter'], 0)
+            # the rejected chapters that stay: past the limit of two
             self.assertEqual([(k['chapter'], k['title'], k['why']) for k in kept],
-                             [(1, 'R1', 'blank'), (4, 'R4', 'blank'), (6, 'R6', 'blank')])
+                             [(3, 'R3', 'blank'), (4, 'R4', 'blank'), (6, 'R6', 'blank')])
         with tempfile.TemporaryDirectory() as folder:
             four, kept = review.record_drops(folder, {'chapters': chapters[:4]}, found)
-            self.assertEqual([d['title'] for d in four], ['R2'])  # three chapters stay
-            self.assertEqual([k['title'] for k in kept], ['R1', 'R3', 'R4'])  # chapter 6 is not in this film
+            self.assertEqual([d['title'] for d in four], ['R1'])  # three chapters stay
+            self.assertEqual([k['title'] for k in kept], ['R2', 'R3', 'R4'])  # chapter 6 is not in this film
+        with tempfile.TemporaryDirectory() as folder:  # the last chapter may go: the closing line moves to the one before
+            last, kept = review.record_drops(folder, {'chapters': chapters}, [{'chapter': 6, 'drop': 'blank'}])
+            self.assertEqual(([d['title'] for d in last], kept), (['R6'], []))
         with tempfile.TemporaryDirectory() as folder:  # a film of one scene: its only chapter can never leave
             single, kept = review.record_drops(folder, {'chapters': chapters[:1]}, [{'chapter': 1, 'drop': 'blank'}])
             self.assertEqual((single, [k['title'] for k in kept]), ([], ['R1']))
@@ -333,15 +371,17 @@ class AddedLines(unittest.TestCase):
             run = Path(folder)
             (run / 'gaps' / 'pr1').mkdir(parents=True)
             scene = run / 'gaps' / 'pr1' / 'story.txt'
-            scene.write_text('# chapter F1 | 1 | Scena | proof: "x"\n0 | A.\n- | B.\n2 | C.\n- | D.\n6 | E.\n')
+            scene.write_text('# chapter F1 | 1 | Scena | proof: "x"\n0 | A.\n- | B.\n2 | C.\n- | D.\n- | D2.\n6 | E.\n')
             chapter = editor.parse(scene.read_text())['chapters'][0]
             chapter['source'] = {'file': 'gaps/pr1/story.txt', 'chapter': 0}
             chapter['sentences'].insert(0, {'text': 'W tym wydaniu…', 'action': None, 'added': True})
-            story = editor.tidy({'chapters': [chapter]})  # the opening line makes D the third line without an action
-            self.assertEqual([s['text'] for s in story['chapters'][0]['sentences']], ['W tym wydaniu…', 'A.', 'B.', 'C.', 'E.'])
-            applied = review.apply_claims(run, story, [{'sentence': '1.5', 'problem': 'p', 'fix': 'E poprawione.'}])
+            story = editor.tidy({'chapters': [chapter]})  # D2 is the third written line without an action
+            self.assertEqual([s['text'] for s in story['chapters'][0]['sentences']],
+                             ['W tym wydaniu…', 'A.', 'B.', 'C.', 'D.', 'E.'])  # the opening line adopt added is not counted
+            applied = review.apply_claims(run, story, [{'sentence': '1.6', 'problem': 'p', 'fix': 'E poprawione.'}])
             self.assertEqual(len(applied), 1)
-            self.assertEqual(scene.read_text().splitlines()[1:], ['0 | A.', '- | B.', '2 | C.', '- | D.', '6 | E poprawione.'])
+            self.assertEqual(scene.read_text().splitlines()[1:],
+                             ['0 | A.', '- | B.', '2 | C.', '- | D.', '- | D2.', '6 | E poprawione.'])
 
 if __name__ == '__main__':
     unittest.main()

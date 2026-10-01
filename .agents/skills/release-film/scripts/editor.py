@@ -19,6 +19,7 @@ MAX_SPECS = 14
 AVOID = [r'audit', r'(^|[./_-])smoke([./_-]|$)', r'\.setup\.']  # specs that check, not show (the add-on adds more)
 FOREIGN = re.compile(r'[\u0370-\u03ff\u0400-\u04ff\u0590-\u06ff\u3040-\u30ff\u4e00-\u9fff]+')  # Greek, Cyrillic, Hebrew, Arabic, CJK
 WORDS = (360, 570)  # the film's narration: 3–5 minutes with the chapter cards (643 words made 5:33)
+SENTENCE_WORDS = 30  # words one sentence may have
 MOST_CHAPTERS = 10  # chapters a film holds: the scenes chosen last go when more passed
 # the "not shown" reasons the script writes itself are in the film's language (language.TEXTS): technical changes
 # ('technical'), pull requests the plan named nowhere ('rest'), a chapter the review dropped ('unreadable'), a scene
@@ -621,8 +622,9 @@ def parse(text):
 
 
 def tidy(story, numbers=None, quotes=('„', '”')):
-    """Fixes that need no second answer: a chapter's surplus sentences without an action (after its first two) are
-    dropped, and the "not shown" lines keep only this release's pull requests that no chapter shows."""
+    """Fixes that need no second answer: a chapter's surplus sentences without an action (after its first two; the
+    film's opening and closing lines adopt adds are not counted) are dropped, and the "not shown" lines keep only this
+    release's pull requests that no chapter shows."""
     dropped = []
     opening, closing = quotes
     for chapter in story.get('chapters') or []:
@@ -630,7 +632,7 @@ def tidy(story, numbers=None, quotes=('„', '”')):
             text = re.sub(r'[„“]([^”"\n]+)"', opening + r'\1' + closing, sentence.get('text') or '')
             sentence['text'] = re.sub(r'"([^"\n]+)"', opening + r'\1' + closing, text)
         sentences = chapter.get('sentences') or []
-        surplus = [i for i, s in enumerate(sentences) if s.get('action') is None][2:]
+        surplus = [i for i, s in enumerate(sentences) if s.get('action') is None and not s.get('added')][2:]
         dropped += [sentences[i].get('text') for i in surplus]
         chapter['sentences'] = [s for i, s in enumerate(sentences) if i not in surplus]
     if dropped:
@@ -713,14 +715,16 @@ def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=Non
     if unknown or not chapter.get('prs'):
         problems.append(f'{where}: pull requests {unknown or "missing"} are not in this release')
     sentences = chapter.get('sentences') or []
+    written = [s for s in sentences if not s.get('added')]  # the film's opening and closing lines adopt adds count apart
     pinned = [s.get('action') for s in sentences if s.get('action') is not None]
     if sentences_too:
-        if not 2 <= len(sentences) <= 10:
-            problems.append(f'{where}: {len(sentences)} sentences (2–10)')
+        if len(sentences) < 2 or len(written) > 10:
+            problems.append(f'{where}: {len(written)} sentences (2–10)')
         if len(pinned) < min(3, len(capture['steps'])):
             problems.append(f'{where}: pin at least 3 sentences to actions (pick a test with more actions if this one has too few)')
-        if len(sentences) - len(pinned) > 2:
-            problems.append(f'{where}: {len(sentences) - len(pinned)} sentences without an action (at most 2): the screen would stand still')
+        unpinned = sum(1 for s in written if s.get('action') is None)
+        if unpinned > 2:
+            problems.append(f'{where}: {unpinned} sentences without an action (at most 2): the screen would stand still')
         foreign = sorted({m for s in sentences + [{'text': title}] for m in FOREIGN.findall(s.get('text') or '')})
         if foreign:
             problems.append(f'{where}: write {said["name"]} only (found {", ".join(foreign[:3])})')
@@ -739,9 +743,9 @@ def chapter_problems(chapter, index, keys, numbers, sentences_too=True, said=Non
             problems.append(f'{where}: pin a sentence to action {min(seen.values())} or later, where the proof is on '
                             f'screen (the chapter ends with its last pinned action)')
     if sentences_too:
-        long = [i for i, s in enumerate(sentences, 1) if len((s.get('text') or '').split()) > 30]
+        long = [i for i, s in enumerate(sentences, 1) if len((s.get('text') or '').split()) > SENTENCE_WORDS]
         if long:
-            problems.append(f'{where}: sentences {long} are longer than 30 words')
+            problems.append(f'{where}: sentences {long} are longer than {SENTENCE_WORDS} words')
         last = -1
         for s_index, sentence in enumerate(sentences, 1):
             action = sentence.get('action')

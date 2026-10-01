@@ -129,6 +129,17 @@ class Colors(unittest.TestCase):
 
 
 class Fonts(unittest.TestCase):
+    def test_the_glyphs_checked_are_the_ones_the_film_draws(self):
+        # the cards' titles, the bar under the picture, the labels and keys over the footage: a brand font lacking
+        # one of their letters would draw it as a box (the narration is spoken and captioned, never drawn)
+        chapters = [{'title': 'Raporty', 'steps': [[2, 'Ustawienia → Użytkownicy'], [5, 'Kolumna first_name']],
+                     'clips': [{'footage': {'labels': [[1, 2, 'Odświeżona strona']], 'keys': [[3, 4, 'Enter']]}},
+                               {'image': 'page.png', 'duration': 2, 'evidence': 'Page 1'}]}]
+        text = cut.drawn_text(chapters)
+        for drawn in ('Raporty', '→', 'first_name', 'Odświeżona strona', 'Enter'):
+            self.assertIn(drawn, text)
+        self.assertNotIn('Page 1', text)
+
     def test_without_fontconfig_the_font_comes_from_known_places(self):  # macOS without Homebrew's fontconfig
         with tempfile.TemporaryDirectory() as folder:
             font = Path(folder) / 'Arial.ttf'

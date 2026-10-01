@@ -165,6 +165,21 @@ class Checks(unittest.TestCase):
         self.assertEqual([s['action'] for s in story['chapters'][0]['sentences']], [0, None, 1, None, 2])
         self.assertEqual(len(story['dropped']), 2)
 
+    def test_the_films_own_opening_and_closing_lines_count_apart(self):
+        # a writer's two lines without an action and the closing line adopt adds: all three stay, and pass
+        story = self.story([0, None, 2, 4, None], chapters=1)
+        story['chapters'][0]['sentences'].append({'text': 'To wszystko.', 'action': None, 'added': True})
+        story = editor.tidy(story)
+        self.assertEqual([s['action'] for s in story['chapters'][0]['sentences']], [0, None, 2, 4, None, None])
+        self.assertNotIn('dropped', story)
+        self.assertEqual(editor.check(story, self.keys, self.sources, {}), [])
+        # ten written sentences and the opening line: within the limit; a third written one without an action is not
+        story = self.story([0, 1, 2, 3, 4, 5, 5, 5, 5, 5], chapters=1, words=3)
+        story['chapters'][0]['sentences'].insert(0, {'text': 'W tym wydaniu.', 'action': None, 'added': True})
+        self.assertEqual(editor.check(story, self.keys, self.sources, {}), [])
+        story = self.story([0, None, 2, None, 4, None], chapters=1)
+        self.assertIn('3 sentences without an action', ' '.join(editor.check(story, self.keys, self.sources, {})))
+
     def test_problems_name_what_to_fix(self):
         problems = editor.check(self.story([0, 4, 2, 9, None, None, None], 'x' * 90), self.keys, self.sources, {})
         text = ' '.join(problems)

@@ -2,10 +2,11 @@
 """A recorded film's release assets: staged after the recording (release-film.yml), published by another,
 separately started workflow (release-film-publish.yml).
 
-  release_assets.py stage   --run <run dir> --tag <tag> --commit <sha> --out <dir>
-  release_assets.py earlier --tag <tag> [--base-url <site url>]
-  release_assets.py publish --dir <staged dir> --target draft|release [--base-url <site url>] [--replace]
-  release_assets.py site    --out <dir> [--film <staged dir>] [--base-url <site url>] [--replace]
+  release_assets.py stage     --run <run dir> --tag <tag> --commit <sha> --out <dir>
+  release_assets.py earlier   --tag <tag> [--base-url <site url>]
+  release_assets.py publish   --dir <staged dir> --target draft|release [--base-url <site url>] [--replace]
+  release_assets.py site      --out <dir> [--film <staged dir>] [--base-url <site url>] [--replace]
+  release_assets.py recording --run-id <run id>
 
 stage checks the film the run made (a plain file of video and audio that decodes to the end, of a plausible length)
 and copies it, its captions, its poster and its page (a ZIP) under release asset names, with release.json naming the
@@ -17,6 +18,9 @@ asset is ever touched). earlier makes the same check before a recording spends t
 GitHub Pages site of the films: each published release's page (its ZIP asset) at /<tag>/, a recording's page for the
 site alone (--film: its staged files, no release touched; a tag the site already shows needs --replace) and every
 film the live site already shows (--base-url: read back from its films.json), with an index of them, newest first.
+Without --base-url, earlier and publish look the site's address up (GitHub Pages: a 404 means no site, any other
+failure stops). recording checks that a run whose film is to be published is a recording of release-film.yml in
+this repository, started by hand: an artifact of that name from any other run is never published.
 """
 import argparse
 import datetime as dt
@@ -42,7 +46,8 @@ FILM_SECONDS = (10, 600)  # a film outside this is broken, not merely long or sh
 MARK_START, MARK_END = '<!-- release-film -->', '<!-- /release-film -->'
 PAGE_FILES = ('index.html', 'demo.mp4', 'poster.jpg')  # with the captions: the page's own files
 SITE_MANIFEST = 'films.json'  # the site's own list of its films: the next rebuild keeps the ones nothing else gives
-PLAIN_NAME = re.compile(r'[A-Za-z0-9._-]+')  # a tag or a file name that stays in its own folder
+PLAIN_NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]*')  # a tag or a file name that stays in its own folder
+RECORDING = '.github/workflows/release-film.yml'  # the workflow whose runs' films may be published
 
 
 def asset_names(tag, code):
@@ -173,6 +178,29 @@ def find_release(repo, tag, target, commit):
                          '-f', 'body=A test of the release film publication: delete this draft after checking it.'))
 
 
+def site_address(repo):
+    """The films site's address (the repository's GitHub Pages site), or None when it has none (a 404). Any other
+    failure stops: read as "no site", it would let a publication pass over a film only the site keeps."""
+    done = subprocess.run(['gh', 'api', f'repos/{repo}/pages', '--jq', '.html_url'], capture_output=True, text=True)
+    if done.returncode == 0:
+        return done.stdout.strip() or None
+    check('(HTTP 404)' in done.stderr, f"the Pages site's address could not be read ({done.stderr.strip()[:300]}): "
+                                       'stopped so that no film only the site keeps is lost')
+    return None
+
+
+def recording(run_id, repo=None):
+    """Stops unless ``run_id`` is a recording of this repository's release-film.yml started by hand: any other run
+    (another workflow, a pull request from a fork) may upload an artifact of the same name."""
+    repo = repo or os.environ['GITHUB_REPOSITORY']
+    check(re.fullmatch(r'[0-9]+', str(run_id or '')), f'unexpected run ID {run_id!r}')
+    run = json.loads(gh('api', f'repos/{repo}/actions/runs/{run_id}'))
+    check(run.get('path') == RECORDING and run.get('event') == 'workflow_dispatch'
+          and (run.get('head_repository') or {}).get('id') == (run.get('repository') or {}).get('id'),
+          f'run {run_id} is not a recording of {RECORDING} started by hand in {repo}: nothing was published')
+    return {'run': int(run_id), 'recording': RECORDING}
+
+
 def release_of(repo, tag):
     """The tag's published release, or {} when it has none."""
     done = subprocess.run(['gh', 'api', f'repos/{repo}/releases/tags/{tag}'], capture_output=True, text=True)
@@ -207,6 +235,7 @@ def publish(folder, target, repo=None, replace=False, base_url=None):
     repo = repo or os.environ['GITHUB_REPOSITORY']
     manifest = json.loads((folder / 'release.json').read_text(encoding='utf-8'))
     tag, code = manifest['tag'], manifest['language']
+    check(PLAIN_NAME.fullmatch(str(tag)), f'unexpected tag name {tag!r}')
     check(set(manifest['assets']) == set(asset_names(tag, code).values()), 'release.json names other assets')
     for name, digest in manifest['assets'].items():
         check(plain_file(folder / name, folder.resolve()) and sha256(folder / name) == digest, f'{name} is not the file staged')
@@ -385,7 +414,7 @@ def site(out, repo=None, film=None, base_url=None, replace=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('command', choices=['stage', 'earlier', 'publish', 'site'])
+    parser.add_argument('command', choices=['stage', 'earlier', 'publish', 'site', 'recording'])
     parser.add_argument('--run')
     parser.add_argument('--tag')
     parser.add_argument('--commit')
@@ -393,20 +422,28 @@ def main():
     parser.add_argument('--dir')
     parser.add_argument('--target', choices=['draft', 'release'])
     parser.add_argument('--film', help='site: a recording\'s staged files (its release-film artifact)')
-    parser.add_argument('--base-url', help='the live films site: site keeps its films, earlier and publish check it')
+    parser.add_argument('--base-url', help='the live films site: site keeps its films, earlier and publish check it '
+                                           '(default for those two: the repository\'s GitHub Pages site)')
+    parser.add_argument('--run-id', help='recording: the run whose film is to be published')
     parser.add_argument('--replace', action='store_true',
                         help="remove the tag's earlier film (its release assets, or its page on the site) for this one")
     args = parser.parse_args()
+
+    def address():  # the site to check: the one given, else the repository's own
+        return args.base_url if args.base_url is not None else site_address(os.environ['GITHUB_REPOSITORY'])
     if args.command == 'stage':
         result = stage(args.run, args.tag, args.commit, args.out)
     elif args.command == 'earlier':
         check(args.tag, 'earlier needs --tag')
-        result = earlier(args.tag, base_url=args.base_url)
+        result = earlier(args.tag, base_url=address())
     elif args.command == 'site':
         result = site(args.out, film=args.film, base_url=args.base_url, replace=args.replace)
+    elif args.command == 'recording':
+        result = recording(args.run_id)
     else:
         check(args.target, 'publish needs --target draft or release')
-        result = publish(args.dir, args.target, replace=args.replace, base_url=args.base_url)
+        result = publish(args.dir, args.target, replace=args.replace,
+                         base_url=address() if args.target == 'release' else None)
     print(json.dumps(result, ensure_ascii=False, indent=1))
 
 

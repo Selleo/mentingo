@@ -140,10 +140,10 @@ jobs:
               "publish the film with release-film-publish.yml once the release is out."
             exit 1
           fi
-          # A tag that already has a film stops a recording that would publish over it, before it spends the seat.
+          # A tag that already has a film stops a recording that would publish over it, before it spends the seat
+          # (the helper reads the films site's address itself: only a repository without one has no site to check).
           if [ "${PUBLISH}" = "true" ] && [ "${REPLACE}" != "true" ]; then
-            site=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url 2>/dev/null || true)
-            python3 .agents/skills/release-film/ci/release_assets.py earlier --tag "${tag}" --base-url "${site}"
+            python3 .agents/skills/release-film/ci/release_assets.py earlier --tag "${tag}"
           fi
           key=${GITHUB_REPOSITORY/\//__}
           {
@@ -166,10 +166,13 @@ jobs:
           set -euo pipefail
           workflow=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/release-film.yml" --jq .id)
           run=""
-          for candidate in $(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=release-film-knowledge&per_page=50" \
+          # read first: a failed listing stops here (set -e does not see a command failing inside a for list), so a
+          # recording never starts from nothing and then keeps that as the project's only knowledge
+          candidates=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=release-film-knowledge&per_page=50" \
             --jq '.artifacts[] | select((.expired | not) and .workflow_run.head_repository_id == .workflow_run.repository_id
               and (.workflow_run.head_branch == env.GITHUB_REF_NAME or .workflow_run.head_branch == env.DEFAULT_BRANCH))
-              | .workflow_run.id'); do
+              | .workflow_run.id')
+          for candidate in ${candidates}; do
             made=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate}" --jq '"\(.workflow_id) \(.event)"')
             if [ "${made}" = "${workflow} workflow_dispatch" ]; then
               run=${candidate}

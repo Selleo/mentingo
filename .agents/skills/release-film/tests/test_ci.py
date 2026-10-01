@@ -2,6 +2,7 @@
 they leave the runner, and a film's release assets are staged from a checked film and published without replacing
 anything."""
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -300,6 +301,18 @@ class Publish(unittest.TestCase):
                 release_assets.publish(folder, 'draft', repo='o/r')
             self.assertFalse([c for c in calls if c[:3] == ('api', '-X', 'POST')])
 
+    def test_a_tag_that_is_no_plain_name_is_never_published(self):
+        for tag in ('.', '..', '.hidden', '-x'):
+            self.assertIsNone(release_assets.PLAIN_NAME.fullmatch(tag), tag)
+        self.assertTrue(release_assets.PLAIN_NAME.fullmatch('v4.15.0-rc.1'))
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / 'release.json').write_text(json.dumps({'tag': '.', 'language': 'en', 'assets': {}}))
+            for publish in (lambda: release_assets.publish(folder, 'release', repo='o/r'),
+                            lambda: release_assets.recorded_film(folder)):
+                with mock.patch.object(release_assets, 'gh') as gh, self.assertRaisesRegex(SystemExit, 'unexpected tag'):
+                    publish()
+                gh.assert_not_called()
+
     def test_a_file_changed_after_staging_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             self.staged(folder)
@@ -308,6 +321,56 @@ class Publish(unittest.TestCase):
                 release_assets.publish(folder, 'release', repo='o/r')
             gh.assert_not_called()
 
+
+
+class Provenance(unittest.TestCase):
+    RUN = {'path': '.github/workflows/release-film.yml', 'event': 'workflow_dispatch',
+           'head_repository': {'id': 7}, 'repository': {'id': 7}}
+
+    def test_only_a_recording_of_this_repository_started_by_hand_is_published(self):
+        with mock.patch.object(release_assets, 'gh', return_value=json.dumps(self.RUN)) as gh:
+            self.assertEqual(release_assets.recording('123', repo='o/r')['run'], 123)
+        gh.assert_called_once_with('api', 'repos/o/r/actions/runs/123')
+        # another workflow, a pull request's run, a fork's: any of them may upload an artifact named release-film
+        for change in ({'path': '.github/workflows/pr-check.yml'}, {'event': 'pull_request'},
+                       {'head_repository': {'id': 8}}):
+            with self.subTest(change), mock.patch.object(release_assets, 'gh', return_value=json.dumps(dict(self.RUN, **change))), \
+                    self.assertRaisesRegex(SystemExit, 'is not a recording of .* started by hand'):
+                release_assets.recording('123', repo='o/r')
+        with mock.patch.object(release_assets, 'gh') as gh, self.assertRaisesRegex(SystemExit, 'unexpected run ID'):
+            release_assets.recording('123 --paginate', repo='o/r')
+        gh.assert_not_called()
+
+
+class SiteAddress(unittest.TestCase):
+    def answer(self, code, out='', err=''):
+        return subprocess.CompletedProcess(['gh'], code, out, err)
+
+    def test_only_a_404_means_the_repository_has_no_films_site(self):
+        for answer, address in ((self.answer(0, 'https://o.github.io/r/\n'), 'https://o.github.io/r/'),
+                                (self.answer(1, '{"message":"Not Found"}', 'gh: Not Found (HTTP 404)'), None)):
+            with mock.patch.object(release_assets.subprocess, 'run', return_value=answer):
+                self.assertEqual(release_assets.site_address('o/r'), address)
+        # gh prints a failed request's body as its output: never taken for an address, nor for "no site"
+        for answer in (self.answer(1, '{"message":"Server Error"}', 'gh: Server Error (HTTP 500)'),
+                       self.answer(1, '', 'error connecting to api.github.com')):
+            with self.subTest(answer.stderr), mock.patch.object(release_assets.subprocess, 'run', return_value=answer), \
+                    self.assertRaisesRegex(SystemExit, 'could not be read.*no film only the site keeps is lost'):
+                release_assets.site_address('o/r')
+
+    def test_earlier_and_a_release_publication_look_the_site_up_unless_it_is_given(self):
+        asked = []
+        with mock.patch.dict(os.environ, {'GITHUB_REPOSITORY': 'o/r'}), \
+                mock.patch.object(release_assets, 'site_address', lambda repo: asked.append(repo) or 'https://o.github.io/r/'), \
+                mock.patch.object(release_assets, 'earlier', return_value={}) as earlier, \
+                mock.patch.object(release_assets, 'publish', return_value={}) as publish, mock.patch('builtins.print'):
+            for argv in (['earlier', '--tag', 'v1'], ['earlier', '--tag', 'v1', '--base-url', ''],
+                         ['publish', '--dir', 'd', '--target', 'release'], ['publish', '--dir', 'd', '--target', 'draft']):
+                with mock.patch.object(sys, 'argv', ['release_assets.py', *argv]):
+                    release_assets.main()
+        self.assertEqual(asked, ['o/r', 'o/r'])  # a given address is used as it is; a draft checks no site
+        self.assertEqual([c.kwargs['base_url'] for c in earlier.call_args_list], ['https://o.github.io/r/', ''])
+        self.assertEqual([c.kwargs['base_url'] for c in publish.call_args_list], ['https://o.github.io/r/', None])
 
 
 class Site(unittest.TestCase):

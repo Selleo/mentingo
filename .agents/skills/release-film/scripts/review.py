@@ -1,7 +1,7 @@
 """Review sheets before the film is made: per chapter, for each sentence the still as it starts (before its pinned
 action; a sentence without an action keeps the previous one) and the still after that action (its result), with the
 sentence under them. Opus 5.5 checks every sentence against its pictures: a sentence that says more than they show is
-rewritten, a chapter whose pictures never show its change is dropped (at most two, never the opening or the closing)."""
+rewritten, a chapter whose pictures never show its change is dropped (at most two, and three chapters stay)."""
 import hashlib
 import json
 from pathlib import Path
@@ -261,7 +261,7 @@ class ReviewUnavailable(RuntimeError):
 def check_chapter(chapter, number, sheet, said=None):
     """What Opus 5.5 finds on one chapter's sheet (its tiles next to it): the sentences whose claims the pictures do not
     show, or the chapter to drop. A long chapter is checked in two parts at once (SPLIT_AT); only both parts together
-    drop it. ``said``: the film's language (language.texts)."""
+    drop it, and parts that disagree are checked again as one. ``said``: the film's language (language.texts)."""
     tiles = sorted((Path(sheet).parent / f'c{number}').glob('*.jpg'))  # one sentence each, sharper than the sheet
     if len(tiles) <= SPLIT_AT:
         return check_part(chapter, number, sheet, tiles, said=said)
@@ -276,8 +276,11 @@ def check_chapter(chapter, number, sheet, said=None):
     from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=2) as pool:
         answers = list(pool.map(lambda part: check_part(chapter, number, sheet, *part, said=said), parts))
-    if all(a and a[0].get('drop') for a in answers):
+    dropping = [a for a in answers if a and a[0].get('drop')]
+    if len(dropping) == len(answers):
         return answers[0]
+    if dropping:  # a part that saw nothing of the chapter checked none of its sentences: the whole chapter, at once
+        return check_part(chapter, number, sheet, tiles, said=said)
     found, seen = [], set()
     for finding in (f for a in answers for f in a if not f.get('drop')):
         if finding['sentence'] not in seen:  # the shared sentence: the first part's finding
@@ -437,12 +440,26 @@ def early_findings(run, story):
     return found
 
 
+def unusable(rewrite, said):
+    """Why a rewrite cannot stand in the film (adopt would refuse it), or None."""
+    import editor
+    if not rewrite:
+        return 'is empty'
+    if len(rewrite.split()) > editor.SENTENCE_WORDS:
+        return f'has more than {editor.SENTENCE_WORDS} words'
+    if editor.FOREIGN.search(rewrite):
+        return f'is not in {said["name"]}'
+    return None
+
+
 def apply_claims(run, story, claims):
     """Put each claim's rewrite in place of its sentence, in the file the chapter came from (story.txt or a scene's
     story.txt; the action it is pinned to stays); a sentence to cut leaves its chapter when CUT_KEEP pinned sentences
-    stay. Returns the claims applied."""
+    stay. A rewrite adopt would refuse (unusable) cuts its sentence instead, and one that cannot be cut either is marked
+    ``unfixed``: its sentence still says what the pictures do not show. Returns the claims applied."""
     import editor
     run = Path(run)
+    said = language.texts(core.load(run / 'sources.json') or {})
     applied, files, cuts = [], {}, []
     for claim in claims:
         if not claim.get('sentence'):
@@ -473,7 +490,11 @@ def apply_claims(run, story, claims):
             cuts.append((index, block, claim))
             continue
         rewrite = (claim.get('fix') or '').strip()
-        if rewrite and rewrite != sentence['text']:
+        problem = unusable(rewrite, said)
+        if problem:  # the sentence the rewrite was to fix leaves the film instead
+            claim['unusable'] = f'its rewrite {problem}'
+            cuts.append((index, block, claim))
+        elif rewrite != sentence['text']:
             claim['before'] = sentence['text']
             sentence['text'] = rewrite
             applied.append(claim)
@@ -481,6 +502,8 @@ def apply_claims(run, story, claims):
         sentence = block['sentences'][index]
         pinned = sum(1 for s in block['sentences'] if s.get('action') is not None)
         if pinned - (sentence.get('action') is not None) < CUT_KEEP:
+            if claim.get('unusable'):  # a sentence the pictures do not support, which neither its rewrite nor a cut fixes
+                claim['unfixed'] = f'{claim["unusable"]}, and cutting it would leave fewer than {CUT_KEEP} pinned sentences'
             continue  # the model may cut empty setup at the start; a chapter still keeps its story
         claim.update(before=sentence['text'], fix='(cut)')
         block['sentences'].pop(index)
@@ -493,9 +516,9 @@ def apply_claims(run, story, claims):
 def record_drops(run, story, found, limit=DROPS):
     """The chapters the check found showing nothing of their change, kept in <run>/drops.json for adopt (which leaves
     them out and lists their pull requests as not shown), beside those an earlier review dropped (finish run again):
-    at most ``limit`` in all, never the first or last chapter (the opening and the closing), and at least three
-    chapters stay. Returns the drops this review added and the rejected chapters that stay: a film cannot pass its
-    review with them."""
+    at most ``limit`` in all, and at least three chapters stay (adopt gives the film's opening and closing lines to the
+    chapters first and last then). Returns the drops this review added and the rejected chapters that stay: a film
+    cannot pass its review with them."""
     chapters = story['chapters']
     earlier = core.load(Path(run) / 'drops.json') or []
     drops, kept, seen = [], [], set()
@@ -505,7 +528,7 @@ def record_drops(run, story, found, limit=DROPS):
             continue
         seen.add(index)
         chapter = chapters[index]
-        if 0 < index < len(chapters) - 1 and len(earlier) + len(drops) < limit and len(chapters) - len(drops) > 3:
+        if len(earlier) + len(drops) < limit and len(chapters) - len(drops) > 3:
             drops.append(dict(chapter.get('source') or {}, prs=chapter.get('prs') or [], title=chapter.get('title'),
                               reason=item.get('drop') or ''))
         else:

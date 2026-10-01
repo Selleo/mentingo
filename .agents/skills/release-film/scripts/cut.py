@@ -501,6 +501,18 @@ def recut_inputs(run, story, out):
     return out
 
 
+def drawn_text(chapters):
+    """Every text the film draws in its font: the chapter cards' titles, the bar under the picture and the labels and
+    key names over the footage (the narration is spoken and captioned, never drawn)."""
+    texts = []
+    for chapter in chapters:
+        texts += [chapter['title'], *(text for _, text in chapter.get('steps') or [])]
+        for clip in chapter.get('clips') or []:
+            footage = clip.get('footage') or {}
+            texts += [item[2] for item in (footage.get('labels') or []) + (footage.get('keys') or [])]
+    return ' '.join(texts)
+
+
 def make(run, story, sources, addon, jobs=8, out=None):
     """Narration, cuts and the rendered film in <out>/film/ (``out``: default the run; another folder for a recut:
     a recut requires cached narration and converted takes, and never writes into the source run)."""
@@ -513,8 +525,6 @@ def make(run, story, sources, addon, jobs=8, out=None):
     ffmpeg = core.tool('ffmpeg')
     render_demo.FFMPEG = ffmpeg
     render_demo.FFPROBE = core.tool('ffprobe') or 'ffprobe'
-    text = ' '.join([c['title'] for c in story['chapters']] + [s['text'] for c in story['chapters'] for s in c['sentences']])
-    font, family, warning = film_font(addon, text)
     colors, colors_warning = film_colors(addon)
     from concurrent.futures import ThreadPoolExecutor
     folders = sorted({story['keys'][c['film']] for c in story['chapters']})
@@ -536,6 +546,7 @@ def make(run, story, sources, addon, jobs=8, out=None):
                                    last=index == len(story['chapters']), cached_only=recutting)
         chapters.append(entry)
         notes[f'{index}. {chapter["title"]}'] = stats
+    font, family, warning = film_font(addon, drawn_text(chapters).translate(render_demo.LOOKALIKES))
     authored = out / 'film-plan' / 'authored.json'
     core.save(authored, dict({'font': font, 'chapters': chapters, 'language': language.texts(sources)['code']},
                              **({'colors': colors} if colors else {})))

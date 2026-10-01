@@ -184,7 +184,7 @@ class Finish(unittest.TestCase):
                         film.main()
                     self.assertEqual(stopped.exception.code, code)
 
-    def test_rewrites_that_break_the_story_are_taken_back(self):
+    def test_changes_that_break_the_story_are_taken_back_and_fail_the_review(self):
         original = '# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Otwieramy notatki.\n2 | Zapisujemy.\n'
         (self.run / 'story.txt').write_text(original)
         (self.run / 'story.json').write_text(json.dumps({'chapters': [
@@ -201,6 +201,52 @@ class Finish(unittest.TestCase):
         self.assertEqual((self.run / 'story.txt').read_text(), original)
         self.assertEqual(result['applied'], 0)
         self.assertIn('note', result)
+        # never a film with the sentences the pictures do not support: the review fails and says why
+        self.assertIs(result['ok'], False)
+        self.assertEqual(result['problems'], ['too few words'])
+        self.assertIn('film.py finish', result['next'])
+
+    def test_a_drop_stays_when_a_rewrite_cannot_stand(self):
+        words = ('Jeden', 'Dwa', 'Trzy', 'Cztery')
+        (self.run / 'story.txt').write_text(''.join(
+            f'# chapter F{n} | {n} | Rozdział {n} | proof: "P{n}"\n' + ''.join(f'{a} | {w} {n}.\n' for a, w in enumerate(words))
+            for n in range(1, 5)))
+        (self.run / 'story.json').write_text(json.dumps({'chapters': [
+            {'film': f'F{n}', 'title': f'Rozdział {n}', 'prs': [n], 'source': {'file': 'story.txt', 'chapter': n - 1},
+             'sentences': [{'text': f'{w} {n}.', 'action': a} for a, w in enumerate(words)]} for n in range(1, 5)]}))
+        found = [{'chapter': 2, 'drop': 'the pictures show an empty list'},
+                 {'sentence': '3.4', 'problem': 'no such total', 'fix': ' '.join(['słowo'] * 31)}]
+        with mock.patch.object(film.review, 'sheets', return_value=['chapter-1.jpg']), \
+                mock.patch.object(film.review, 'check_claims', side_effect=lambda run, sheets, story: found if sheets else []), \
+                mock.patch.object(film.review, 'waits', return_value=[]), \
+                mock.patch.object(film, 'meta', return_value={'addon': {}}), \
+                mock.patch.object(film, 'adopt', return_value={'ok': True, 'problems': []}) as adopted:
+            result = film.review_sheets(self.args)
+        self.assertNotIn('ok', result)  # a reviewed film: the drop and the cut both stay
+        self.assertEqual([d['title'] for d in result['dropped']], ['Rozdział 2'])
+        self.assertEqual(result['applied'], 1)
+        self.assertNotIn('Cztery 3.', (self.run / 'story.txt').read_text())  # its rewrite was too long: it went
+        adopted.assert_called_once()
+
+    def test_a_sentence_neither_its_rewrite_nor_a_cut_fixes_fails_the_review(self):
+        original = '# chapter F1 | 1 | Notatki | proof: "Saved"\n0 | Otwieramy notatki.\n1 | Piszemy.\n2 | Zapisujemy.\n'
+        (self.run / 'story.txt').write_text(original)
+        (self.run / 'story.json').write_text(json.dumps({'chapters': [
+            {'film': 'F1', 'title': 'Notatki', 'prs': [1], 'source': {'file': 'story.txt', 'chapter': 0},
+             'sentences': [{'text': 'Otwieramy notatki.', 'action': 0}, {'text': 'Piszemy.', 'action': 1},
+                           {'text': 'Zapisujemy.', 'action': 2}]}]}))
+        claim = {'sentence': '1.3', 'problem': 'no saved note', 'fix': ' '.join(['słowo'] * 31)}
+        with mock.patch.object(film.review, 'sheets', return_value=['chapter-1.jpg']), \
+                mock.patch.object(film.review, 'check_claims', side_effect=lambda run, sheets, story: [claim] if sheets else []), \
+                mock.patch.object(film.review, 'waits', return_value=[]), \
+                mock.patch.object(film, 'meta', return_value={'addon': {}}), \
+                mock.patch.object(film, 'adopt', side_effect=AssertionError('nothing to adopt: the review failed')):
+            result = film.review_sheets(self.args)
+        self.assertIs(result['ok'], False)
+        self.assertEqual(result['unfixed'], [{'sentence': '1.3', 'problem': 'no saved note', 'why': (
+            'its rewrite has more than 30 words, and cutting it would leave fewer than 3 pinned sentences')}])
+        self.assertEqual((self.run / 'story.txt').read_text(), original)
+        self.assertIn('rewrite them in their story.txt', result['next'])
 
 
 class StartFails(unittest.TestCase):

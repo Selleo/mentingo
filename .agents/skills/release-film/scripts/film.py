@@ -256,8 +256,9 @@ def labels(args):
 
 def review_sheets(args):
     """The review, in one automatic pass: sheets, the claim check (Opus 5.5 looking at every sentence's pictures) and
-    the voice's pauses at once; rewrites and drops go into the story files and are adopted. When they would break the
-    story (adopt finds problems), the story stays as it was."""
+    the voice's pauses at once; rewrites and drops go into the story files and are adopted. A review that leaves a
+    chapter or a sentence the pictures do not support, or whose changes would break the story (adopt finds problems),
+    fails (ok False), and the story stays as it was adopted before it."""
     run = Path(args.run)
     story = core.load(run / 'story.json')
     if not story:
@@ -289,27 +290,35 @@ def review_sheets(args):
     # the chapters this review checked, and no other (a story not adopted from files has no sources to keep them by)
     reviewed = {editor.source_of(c) for c in story['chapters']} if all(c.get('source') for c in story['chapters']) else None
     applied = review.apply_claims(args.run, story, claims)  # the rewrites say only what the pictures show
+    unfixed = [c for c in claims if c.get('unfixed')]
     drops, rejected = review.record_drops(args.run, story, [c for c in found if c.get('drop')])
-    kept = True
-    if (applied or drops) and not adopt(args, early=False, reviewed=reviewed)['ok']:
+    attempted = bool(applied or drops) and not unfixed and not rejected
+    problems = adopt(args, early=False, reviewed=reviewed)['problems'] if attempted else []
+    kept = not (unfixed or rejected or problems)
+    if not kept:  # no reviewed film: the story as it was adopted before the review
         for path, text in before.items():
             path.write_text(text, encoding='utf-8')
         core.save(run / 'drops.json', dropped)
-        adopt(args, early=False, reviewed=reviewed)  # the story as it was before the review
-        kept = False
-        rejected += [{'title': d['title'], 'why': d['reason']} for d in drops]  # back in the film with the story
+        if attempted:
+            adopt(args, early=False, reviewed=reviewed)
     core.mark(run, 'review', 'end', f'{len(applied) if kept else 0} rewrites, {len(drops) if kept else 0} drops, '
                                     f'{len(early)} checked early')
     core.save(run / 'review' / 'claims.json', {'applied': applied if kept else [], 'drops': drops if kept else []})
     result = {'sheets': made, 'claims': claims, 'applied': len(applied) if kept else 0,
               'dropped': [{'title': d['title'], 'prs': d['prs'], 'why': d['reason']} for d in drops] if kept else [],
-              'waits': pauses, **({} if kept else {'note': 'the rewrites broke the story: it stays as adopted before'}),
-              'next': f'film.py make --run {args.run} (nothing to read or fix: the review is done)'}
-    if rejected:  # a chapter that shows nothing of its change and cannot leave the film: no reviewed film with it
-        result.update(ok=False, rejected=rejected,
-                      next=('the review found chapters that show nothing of their change and cannot leave the film (the '
-                            'opening or the closing one, one past the limit of drops, or one of the last three): fix '
-                            f'their scene or narration, then film.py finish --run {args.run}'))
+              'waits': pauses, 'next': f'film.py make --run {args.run} (nothing to read or fix: the review is done)'}
+    if not kept:  # a chapter or a sentence the pictures do not support stays in the film: no reviewed film with it
+        found_here = (['chapters that show nothing of their change and cannot leave the film (one past the limit of '
+                       'drops, or one of the last three): fix their scene or narration'] if rejected else []) \
+            + (['sentences the pictures do not support whose rewrite cannot stand and which cannot be cut: rewrite them '
+                'in their story.txt'] if unfixed else []) \
+            + (['changes that would break the story: fix what adopt found'] if problems else [])
+        result.update(ok=False, note='the story stays as adopted before the review',
+                      **({'rejected': rejected} if rejected else {}),
+                      **({'unfixed': [{'sentence': c['sentence'], 'problem': c.get('problem'), 'why': c['unfixed']}
+                                      for c in unfixed]} if unfixed else {}),
+                      **({'problems': problems} if problems else {}),
+                      next=f'the review found {"; ".join(found_here)}; then film.py finish --run {args.run}')
     return result
 
 
