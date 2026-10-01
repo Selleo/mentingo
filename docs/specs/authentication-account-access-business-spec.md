@@ -37,7 +37,7 @@ Because current-user responses include permissions and onboarding state, Menting
 
 A user chooses the appropriate auth path from the login area. For email/password login, Mentingo validates credentials, checks archived status, applies login rate limiting, and decides whether MFA is still required. If MFA is required, the user receives temporary auth cookies and must complete the MFA page before entering the app.
 
-For registration, Mentingo checks tenant settings first. If SSO is enforced or registration is invite-only, self-registration is blocked. Otherwise, the registration flow validates identity fields, password rules, language, and tenant registration-form answers before creating the account and signing the user in.
+For registration, Mentingo checks tenant settings first. If registration is invite-only, the registration page explains that an invitation is required and offers a link to sign in. If SSO is enforced or registration is invite-only, the API blocks self-registration. Otherwise, the registration flow validates identity fields, password rules, language, and tenant registration-form answers before creating the account and signing the user in.
 
 For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.
 
@@ -55,7 +55,7 @@ When an organization provides an account with a temporary password, Mentingo tak
 
 ## Test Evidence
 
-Web E2E tests cover sign-in/sign-out, auth-page navigation, invalid credentials, public registration validation, invite password creation, password recovery, magic-link login, and MFA setup/verification.
+Web E2E tests cover sign-in/sign-out, auth-page navigation, invalid credentials, public registration validation, the invite-only registration explanation and login link, invite password creation, password recovery, magic-link login, and MFA setup/verification.
 
 Backend E2E tests cover registration validation, duplicate accounts, language behavior, registration checkbox answers, login cookies, invalid credentials, login rate limiting, logout cookie clearing, refresh tokens, current-user data, password reset, create-password flows, magic-link token hashing and consumption, and MFA issuer behavior.
 
