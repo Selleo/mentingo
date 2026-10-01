@@ -48,6 +48,7 @@ import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { NewsService } from "src/news/news.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { QAService } from "src/qa/services/qa.service";
+import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { REDIS_CLIENT, RedisClient } from "src/redis";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { contentReferencesResource } from "src/resource-library/resource-library.utils";
@@ -112,6 +113,7 @@ export class McpHttpService {
     private readonly aiJudgeConfigurationService: AiJudgeConfigurationService,
     private readonly aiMentorConfigurationService: AiMentorConfigurationService,
     private readonly qaService: QAService,
+    private readonly quizAuthoringService: QuizAuthoringService,
     private readonly articlesService: ArticlesService,
     private readonly newsService: NewsService,
     private readonly learningPathService: LearningPathService,
@@ -1407,6 +1409,15 @@ export class McpHttpService {
               await this.chapterRepository.getBetaChapterLessons(chapterId, language)
             ).find((item) => item.id === lessonId);
             if (!details) throw new NotFoundException("Lesson not found");
+            const questions =
+              lesson.type === LESSON_TYPES.QUIZ
+                ? (
+                    await this.quizAuthoringService.getLegacyQuizLessonForAuthoring(
+                      lessonId,
+                      language,
+                    )
+                  )?.questions
+                : details.questions;
             return {
               id: lesson.id,
               courseId,
@@ -1419,7 +1430,7 @@ export class McpHttpService {
               thresholdScore: details.thresholdScore,
               attemptsLimit: details.attemptsLimit,
               quizCooldownInHours: details.quizCooldownInHours,
-              questions: details.questions,
+              questions,
               aiMentor: details.aiMentor
                 ? {
                     name: details.aiMentor.name,
@@ -3185,10 +3196,7 @@ export class McpHttpService {
                 : status === 409
                   ? "CONFLICT"
                   : "INTERNAL";
-      const rawMessage = error instanceof HttpException ? error.message : "Operation failed";
-      const message = /^[\w-]+(?:\.[\w-]+)+$/.test(rawMessage)
-        ? "Operation failed; check the supplied data and permissions"
-        : rawMessage;
+      const message = error instanceof HttpException ? error.message : "Operation failed";
       const failure = { code, status, message, requestId: call?.requestId };
       return {
         content: [{ type: "text" as const, text: JSON.stringify(failure) }],

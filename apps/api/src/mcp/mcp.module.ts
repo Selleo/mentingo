@@ -10,6 +10,7 @@ import { LessonModule } from "src/lesson/lesson.module";
 import { NewsModule } from "src/news/news.module";
 import { PermissionsModule } from "src/permissions/permissions.module";
 import { QAModule } from "src/qa/qa.module";
+import { QuizModule } from "src/quiz/quiz.module";
 import { RedisClientsModule } from "src/redis";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { ScormModule } from "src/scorm/scorm.module";
@@ -36,6 +37,7 @@ import { McpController } from "./mcp.controller";
     ArticlesModule,
     NewsModule,
     QAModule,
+    QuizModule,
     ResourceLibraryModule,
     ScormModule,
     PermissionsModule,

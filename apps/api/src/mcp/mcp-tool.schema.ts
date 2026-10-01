@@ -70,7 +70,7 @@ const parameterHelp: Record<string, string> = {
   thresholdScore: "Minimum passing score as a percentage.",
   attemptsLimit: "Maximum quiz attempts: a positive integer, or null for no limit.",
   quizCooldownInHours:
-    "Hours between quiz attempts: a nonnegative integer, or null to disable the cooldown.",
+    "Hours between quiz attempts: a positive integer, or null to disable the cooldown.",
   questions: "Complete set of quiz questions and answer options.",
   resources: "Embed resources; each fileUrl must use HTTPS.",
   displayMode:
