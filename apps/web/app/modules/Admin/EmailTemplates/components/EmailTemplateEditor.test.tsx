@@ -14,6 +14,7 @@ const api = vi.hoisted(() => ({
   preview: vi.fn(),
   save: vi.fn(),
   delete: vi.fn(),
+  removeLanguage: vi.fn(),
   navigate: vi.fn(),
 }));
 vi.mock("~/api/api-client", () => ({
@@ -22,6 +23,7 @@ vi.mock("~/api/api-client", () => ({
       emailTemplateControllerPreviewEmailTemplate: api.preview,
       emailTemplateControllerUpdateEmailTemplate: api.save,
       emailTemplateControllerDeleteEmailTemplate: api.delete,
+      emailTemplateControllerRemoveEmailTemplateLanguage: api.removeLanguage,
       emailTemplateControllerUploadEmailTemplateImage: api.upload,
     },
   },
@@ -99,6 +101,59 @@ describe("EmailTemplateEditor", () => {
       "Updated description",
     );
     expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+  });
+
+  it("removes a saved non-base language after confirmation", async () => {
+    api.removeLanguage.mockResolvedValue({
+      data: {
+        data: {
+          ...template,
+          name: { en: template.name.en },
+          subject: { en: template.subject.en },
+          availableLocales: ["en"],
+        },
+      },
+    });
+    const user = userEvent.setup();
+    renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
+
+    await user.click(screen.getByTestId("email-template-language"));
+    await user.click(screen.getByTestId("email-template-language-pl"));
+    await user.click(screen.getByTestId("email-template-language-delete"));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Proceed" }));
+
+    await waitFor(() => expect(api.removeLanguage).toHaveBeenCalledWith(template.id, "pl"));
+  });
+
+  it("lets an administrator add a language and save its first translation", async () => {
+    api.save.mockResolvedValue({
+      data: {
+        data: {
+          ...template,
+          content: {
+            ...template.content,
+            de: { type: "doc", version: 1, content: [] },
+          },
+          availableLocales: ["en", "pl", "de"],
+        },
+      },
+    });
+    const user = userEvent.setup();
+    renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
+
+    await user.click(screen.getByTestId("email-template-language"));
+    await user.click(screen.getByTestId("email-template-language-de"));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    await waitFor(() =>
+      expect(api.save).toHaveBeenCalledWith(
+        template.id,
+        expect.objectContaining({
+          content: { de: { type: "doc", version: 1, content: [] } },
+        }),
+      ),
+    );
   });
 
   it("keeps image settings selected during and after upload", async () => {

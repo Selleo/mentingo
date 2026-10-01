@@ -13,7 +13,11 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { EmailTemplateEvent } from "@repo/email-templates";
-import { PERMISSIONS, SUPPORTED_IMAGE_VARIANT_MIME_TYPES } from "@repo/shared";
+import {
+  PERMISSIONS,
+  SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -22,6 +26,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { parsePagination } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
@@ -122,8 +127,11 @@ export class EmailTemplateController {
   })
   async duplicateEmailTemplate(
     @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.duplicateEmailTemplate(id));
+    return new BaseResponse(
+      await this.emailTemplateService.duplicateEmailTemplate(id, currentUser),
+    );
   }
 
   @Get()
@@ -166,8 +174,11 @@ export class EmailTemplateController {
   })
   async copyDefaultEmailTemplate(
     @Param("event") event: EmailTemplateEvent,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.copyDefaultEmailTemplate(event));
+    return new BaseResponse(
+      await this.emailTemplateService.copyDefaultEmailTemplate(event, currentUser),
+    );
   }
 
   @Get(":id")
@@ -189,7 +200,7 @@ export class EmailTemplateController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
     return new BaseResponse(
-      await this.emailTemplateService.createEmailTemplate(body, currentUser.tenantId),
+      await this.emailTemplateService.createEmailTemplate(body, currentUser.tenantId, currentUser),
     );
   }
 
@@ -204,8 +215,11 @@ export class EmailTemplateController {
   async updateEmailTemplate(
     @Param("id") id: UUIDType,
     @Body() body: UpdateEmailTemplateBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.updateEmailTemplate(id, body));
+    return new BaseResponse(
+      await this.emailTemplateService.updateEmailTemplate(id, body, currentUser),
+    );
   }
 
   @Patch(":id/base-language")
@@ -219,8 +233,11 @@ export class EmailTemplateController {
   async updateBaseLanguage(
     @Param("id") id: UUIDType,
     @Body() body: UpdateEmailTemplateBaseLanguageBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.updateBaseLanguage(id, body));
+    return new BaseResponse(
+      await this.emailTemplateService.updateBaseLanguage(id, body, currentUser),
+    );
   }
 
   @Post(":id/publish")
@@ -230,8 +247,9 @@ export class EmailTemplateController {
   })
   async publishEmailTemplate(
     @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.publishEmailTemplate(id));
+    return new BaseResponse(await this.emailTemplateService.publishEmailTemplate(id, currentUser));
   }
 
   @Post(":id/archive")
@@ -241,8 +259,9 @@ export class EmailTemplateController {
   })
   async archiveEmailTemplate(
     @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.archiveEmailTemplate(id));
+    return new BaseResponse(await this.emailTemplateService.archiveEmailTemplate(id, currentUser));
   }
 
   @Delete(":id")
@@ -250,9 +269,30 @@ export class EmailTemplateController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Boolean()),
   })
-  async deleteEmailTemplate(@Param("id") id: UUIDType): Promise<BaseResponse<boolean>> {
-    await this.emailTemplateService.deleteEmailTemplate(id);
+  async deleteEmailTemplate(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<boolean>> {
+    await this.emailTemplateService.deleteEmailTemplate(id, currentUser);
     return new BaseResponse(true);
+  }
+
+  @Delete(":id/languages/:language")
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "param", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(emailTemplateSchema),
+  })
+  async removeEmailTemplateLanguage(
+    @Param("id") id: UUIDType,
+    @Param("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<EmailTemplateResponse>> {
+    return new BaseResponse(
+      await this.emailTemplateService.removeEmailTemplateLanguage(id, language, currentUser),
+    );
   }
 
   @Post(":id/restore")
@@ -262,8 +302,9 @@ export class EmailTemplateController {
   })
   async restoreEmailTemplate(
     @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
-    return new BaseResponse(await this.emailTemplateService.restoreEmailTemplate(id));
+    return new BaseResponse(await this.emailTemplateService.restoreEmailTemplate(id, currentUser));
   }
 
   @Post("preview")

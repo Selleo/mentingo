@@ -180,6 +180,7 @@
       "copied": "Un nouveau brouillon a été créé.",
       "saved": "Modifications enregistrées.",
       "restored": "Modèle restauré comme brouillon.",
+      "languageRemoved": "Langue supprimée du modèle.",
       "testQueued": "E-mail de test mis en file pour votre adresse.",
       "uploaded": "Image importée.",
       "blocks": {
@@ -234,7 +235,9 @@
       "publicationConflict": "Un autre modèle a été publié pour cet événement. Réessayez.",
       "notFound": "Modèle de courriel introuvable.",
       "createFailed": "Impossible de créer le modèle de courriel.",
-      "invalidCollection": "Données de collection incorrectes."
+      "invalidCollection": "Données de collection incorrectes.",
+      "cannotRemoveBaseLanguage": "La langue de base ne peut pas être supprimée.",
+      "archivedReadOnly": "Restaurez le modèle avant de modifier ses langues."
     },
     "warnings": {
       "translationFallback": "Les traductions incomplètes utilisent la langue de base.",
@@ -5508,6 +5511,11 @@
       "start_course": "Commencé",
       "group_assignment": "Attribué",
       "users_import": "Utilisateurs importés",
+      "publish_email_template": "Modèle d’e-mail publié",
+      "archive_email_template": "Modèle d’e-mail archivé",
+      "restore_email_template": "Modèle d’e-mail restauré",
+      "add_email_template_language": "Langue ajoutée au modèle d’e-mail",
+      "remove_email_template_language": "Langue supprimée du modèle d’e-mail",
       "send_password_reset_email": "E-mail de réinitialisation du mot de passe envoyé",
       "resend_password_creation_email": "E-mail de création de mot de passe renvoyé",
       "complete_lesson": "Leçon terminée",
@@ -5541,6 +5549,7 @@
       "live_training": "Formation en direct",
       "learning_path": "Parcours d'apprentissage",
       "scorm": "SCORM",
+      "email_template": "Modèle d’e-mail",
       "global_settings": "Paramètres"
     },
     "table": {

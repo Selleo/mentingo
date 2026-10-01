@@ -180,6 +180,7 @@
       "copied": "Se ha creado un borrador.",
       "saved": "Cambios guardados.",
       "restored": "Plantilla restaurada como borrador.",
+      "languageRemoved": "Idioma eliminado de la plantilla.",
       "testQueued": "Correo de prueba en cola para tu dirección.",
       "uploaded": "Imagen subida.",
       "blocks": {
@@ -234,7 +235,9 @@
       "publicationConflict": "Se publicó otra plantilla para este evento. Inténtalo de nuevo.",
       "notFound": "Plantilla de correo no encontrada.",
       "createFailed": "No se pudo crear la plantilla de correo.",
-      "invalidCollection": "Datos de colección no válidos."
+      "invalidCollection": "Datos de colección no válidos.",
+      "cannotRemoveBaseLanguage": "No se puede eliminar el idioma base.",
+      "archivedReadOnly": "Restaura la plantilla antes de cambiar sus idiomas."
     },
     "warnings": {
       "translationFallback": "Las traducciones incompletas usan el idioma base.",
@@ -5718,6 +5721,11 @@
       "start_course": "Iniciado",
       "group_assignment": "Asignado",
       "users_import": "Usuarios importados",
+      "publish_email_template": "Plantilla de correo publicada",
+      "archive_email_template": "Plantilla de correo archivada",
+      "restore_email_template": "Plantilla de correo restaurada",
+      "add_email_template_language": "Idioma añadido a la plantilla de correo",
+      "remove_email_template_language": "Idioma eliminado de la plantilla de correo",
       "send_password_reset_email": "Correo electrónico de restablecimiento de contraseña enviado",
       "resend_password_creation_email": "Correo electrónico de creación de contraseña reenviado",
       "complete_lesson": "Lección completada",
@@ -5751,6 +5759,7 @@
       "live_training": "Formación en vivo",
       "learning_path": "Ruta de aprendizaje",
       "scorm": "SCORM",
+      "email_template": "Plantilla de correo",
       "global_settings": "Configuración"
     },
     "table": {

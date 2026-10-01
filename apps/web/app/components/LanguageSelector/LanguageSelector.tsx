@@ -207,6 +207,7 @@ export const LanguageSelector = ({
       {canDisplayDeleteButton && (
         <Button
           data-testid={testIds?.deleteButton}
+          aria-label={t(labelKeys.deleteTitle)}
           size="icon"
           type="button"
           variant="outline"
