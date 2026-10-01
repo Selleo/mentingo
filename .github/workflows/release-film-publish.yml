@@ -42,13 +42,6 @@ on:
         required: false
         type: boolean
         default: false
-  # Until this workflow is on main: a push of it to the skill branch registers it, so
-  # `gh workflow run release-film-publish.yml --ref <branch>` can start it; that run publishes nothing.
-  push:
-    branches: [gz_chore_release_film_skill]
-    paths:
-      - .github/workflows/release-film-publish.yml
-      - .agents/skills/release-film/ci/release_assets.py
 
 permissions: {}
 

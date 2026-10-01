@@ -36,20 +36,13 @@ on:
         required: false
         type: boolean
         default: false
-  # Until this workflow is on main: a push of it to the skill branch runs only the checks (tools, token, voice) on
-  # a GitHub runner and registers the workflow, so `gh workflow run release-film.yml --ref <branch>` films from there.
-  push:
-    branches: [gz_chore_release_film_skill]
-    paths:
-      - .github/workflows/release-film.yml
-      - .agents/skills/release-film/ci/**
 
 permissions: {}
 
 concurrency:
   group: release-film
   cancel-in-progress: false
-  queue: max # a recording waiting for the one filming is never cancelled by the next dispatch or push
+  queue: max # a recording waiting for the one filming is never cancelled by the next dispatch
 
 jobs:
   film:
@@ -189,7 +182,6 @@ jobs:
               cp -R "${folder}" "${RELEASE_FILM_HOME}/projects/${project}/"
             done
             echo "The project's knowledge comes from run ${run}."
-            echo "found=true" >> "${GITHUB_OUTPUT}"
           fi
 
       - name: Record the film

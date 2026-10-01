@@ -62,11 +62,9 @@ class Workflows(unittest.TestCase):
                         self.assertIs(step['with']['persist-credentials'], False, 'a checkout keeps no GitHub token')
 
     def test_films_start_only_by_hand_one_at_a_time(self):
-        for workflow, expected in ((self.record, ['push', 'workflow_dispatch']),
-                                   (self.publish, ['push', 'workflow_call', 'workflow_dispatch'])):
-            on = workflow['on']
-            self.assertEqual(sorted(on), expected)  # no tag, release, schedule or pull request trigger
-            self.assertTrue(on['push'].get('branches') and not on['push'].get('tags'))
+        for workflow, expected in ((self.record, ['workflow_dispatch']),
+                                   (self.publish, ['workflow_call', 'workflow_dispatch'])):
+            self.assertEqual(sorted(workflow['on']), expected)  # no push, tag, release, schedule or pull request trigger
         self.assertEqual(self.film['env']['FILM'], "${{ github.event_name == 'workflow_dispatch' }}")
         # a recording or a publication waiting for its turn is queued, never cancelled by the next one
         self.assertEqual(self.record['concurrency'],
