@@ -163,18 +163,17 @@ def choose(sources, checkout, roots, addon, picked, limit=MAX_GAPS, provider=Non
     for pr in open_prs:
         body = re.sub(r'<!--.*?-->|!\[[^\]]*\]\([^)]*\)|\s+', ' ', pr.get('body') or '', flags=re.S).strip()[:200]
         ui = '; '.join(f'"{t}"' for t in proofs(pr.get('ui') or [])[:4])
-        before = '; '.join(f"#{f['pr']} \"{f['chapter']}\"" for f in knowledge.earlier(sources['repo'], pr))
-        lines.append(f"#{pr['number']} {pr['title']}" + (f' | new UI texts: {ui}' if ui else '')
-                     + (f' | shown in an earlier film: {before}' if before else '') + f' | {body}'
+        lines.append(f"#{pr['number']} {pr['title']}" + (f' | new UI texts: {ui}' if ui else '') + f' | {body}'
                      + workflow_evidence(pr, usable_texts)
                      + ' | related data sources: ' + ', '.join(data_sources(data, {'prs': [pr['number']],
                          'title': pr['title'], 'base': ''}, {pr['number']: pr})[:3]))
     # only which changes, grouped: a quick call (asked also for bases, proofs and flows, the choice thought for up to six
     # minutes on the critical path); the script gives each scene its base, its writer the flow and the proofs
     notes = sources.get('release') or {}
-    # what the project's test stack cannot show (earlier runs' scene writers gave up on it, or the project says so)
+    # what the project's recipe says its test stack cannot show; never what earlier runs met (the briefs carry that,
+    # to check): what a film shows comes from its release alone
     cannot = list(dict.fromkeys(list((addon.get('harness') or {}).get('unavailable') or [])
-                               + list(addon.get('unavailable') or []) + knowledge.limits(sources['repo'])))
+                               + list(addon.get('unavailable') or [])))
     prompt = CHOOSE.format(repo=sources['repo'], tag=sources['tag'], limit=limit, brief=editor.BRIEF, prs='\n'.join(lines),
                            language=language.texts(sources)['name'],
                            notes=(f"\nThe release's own notes (\"{notes['name']}\"):\n{notes['body'][:1800]}\n") if notes.get('body') else '',
@@ -1250,8 +1249,9 @@ HINTS = [(re.compile(r'\b422\b|Unprocessable', re.I), 'the app refused the data 
           'a user who has it, as the project\'s tests do'),
          (re.compile(r'strict mode violation', re.I), 'a locator matched several elements: narrow it (a role with its '
           'name, inside its row, card or dialog)'),
-         (re.compile(r'"Disabled"|\bnot configured\b|no (AI )?provider', re.I), 'the feature is off in the test stack: '
-          'stop and reply `failed: <why>`'),
+         # a panel's own "Disabled" label, never Playwright's `unexpected value "disabled"` (a button not enabled yet)
+         (re.compile(r'(?-i:"Disabled")|\bnot configured\b|no (AI )?provider', re.I), 'the feature is off in the test '
+          'stack: stop and reply `failed: <why>`'),
          (re.compile(r'Timeout \d+ms exceeded|waiting for (locator|getBy)', re.I), 'an element never showed: take the '
           'real roles and names from `page` below, or check the step before it did what you expect')]
 

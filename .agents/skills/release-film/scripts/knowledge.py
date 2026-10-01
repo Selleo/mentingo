@@ -1,18 +1,20 @@
 """What the skill learns about a project, run after run, without anyone writing it down.
 
 After a run (`film.py learn`, started in the background by `finish`), <HOME>/projects/<owner>__<name>/knowledge/ keeps:
-- scenes/ and scenes.json: every scene that passed its try, with its change, base test and tag: the next scene on the
-  same screen starts from a test whose login, data and locators already worked;
+- scenes/ and scenes.json: every scene that passed its try, with the change its chapter showed, base test and tag: the
+  next scene on the same screen starts from a test whose login, data and locators already worked;
+- recipes.json: how a passed scene made an entity with full data through the project's own helpers;
 - lessons.md: what a scene writer should know to pass on the first try (logins, data, helpers, locators, traps), written
   by Opus 5.5 from the tries' errors and the tests that passed, merged with the lessons of earlier runs;
+- limits.json: what earlier scene writers found the test stack lacks (a service it does not run);
 - narration.md (narration-<language>.md for a language other than Polish): what the narration of this project's films
   should avoid or keep, from what the review had to rewrite
   (claims the pictures did not show, chapters dropped), merged with earlier runs;
-- features.json: which change each chapter showed, with a test or a scene on which base test, and its proofs: a later
-  change on the same screen gets a hint for its scene;
-- history.jsonl: one line per run (tag, minutes, chapters, scenes filmed and tries).
-Later runs read it: the scene briefs carry the lessons and the nearest earlier scene, the scene writers the narration
-lessons.
+- history.jsonl: one line per run (tag, minutes, chapters, scenes filmed and tries), read by no step.
+Later runs read it: the scene briefs carry the lessons, the nearest earlier scene, its data recipes and the limits met
+before (each to check on the brief's own checkout), the scene writers the narration lessons. It makes scenes faster and
+better to film and never decides what a film shows: the scene choice reads none of it (only what the project's recipe
+says its test stack cannot show), so a film recorded again for its tag chooses from its release alone.
 """
 import json
 from pathlib import Path
@@ -23,7 +25,7 @@ import core
 
 LIBRARY = 40  # scenes kept (the oldest go first)
 LESSONS = 15  # bullets kept in lessons.md
-LIMITS = 8  # things the test stack cannot show, kept in limits.json (for the scene choice)
+LIMITS = 8  # what the test stack lacked for earlier scene writers, kept in limits.json (for the scene briefs)
 RECIPES = 30  # data recipes kept in recipes.json (how a passed scene made an entity with full data)
 # a scene writer's "failed: …" names a limit of the test stack when it names a service it lacks, not its own mistake
 LIMIT = re.compile(r'\b(AI|LLM|model|OpenAI|provider|e-?mail|SMTP|mail|payment|Stripe|S3|storage|upload|video|camera|'
@@ -180,19 +182,25 @@ def recall(repo, gap, lines=200):
     lessons = '\n'.join(line for line in lessons.splitlines() if allowed_data_note(line))
     near = related(repo, gap)
     recipes = recipes_for(repo, gap)
-    if not lessons and not near and not recipes:
+    met = limits(repo)
+    if not lessons and not near and not recipes and not met:
         return ''
-    out = ['## What earlier runs on this project learned']
+    out = ['## What earlier runs on this project learned',
+           'How to film, from earlier runs: check each point on this checkout. None of it says whether this change can '
+           'be shown: only your own tries here do.']
     if lessons:
         out += ['Lessons from earlier scenes (logins, data, helpers, locators, traps):', lessons]
     if recipes:
         out += ['Data recipes from scenes that passed (full data through the project\'s own helpers; use one that fits):']
         out += [f'- {r}' for r in recipes]
+    if met:
+        out += ['What earlier scene writers found the test stack lacks (check it here before you stop for it):']
+        out += [f'- {m}' for m in met]
     if near:
         best, others = near[0], near[1:]
         source = (home / 'scenes' / best['file']).read_text(encoding='utf-8', errors='ignore').splitlines()
-        out += [f"A scene that passed in an earlier run ({best.get('tag')}, #{', #'.join(map(str, best.get('prs') or []))}: "
-                f"{best.get('title')}; base `{best.get('base')}`): its login, data and locators worked, reuse what fits.",
+        out += [f"A scene that passed in an earlier run ({best.get('tag')}: {best.get('title')}; base "
+                f"`{best.get('base')}`): its login, data and locators worked, reuse what fits.",
                 '```ts', '\n'.join(source[:lines]) + ('\n// … (shortened)' if len(source) > lines else ''), '```']
         out += [f"Another earlier scene: `{home / 'scenes' / s['file']}` ({s.get('tag')}: {s.get('title')})." for s in others]
     return '\n'.join(out) + '\n'
@@ -203,7 +211,9 @@ scene's tries (the error of every failed try), how it ended, and the test that p
 scene for this project should know to pass on the first try: how to log in or pick a user with the right permissions,
 how to create data through the project's existing helpers/factories, which fixtures or page objects to use, locators and waits that work
 on these screens, and the traps the failed tries hit. Only facts these tries or tests show, stated generally (not tied
-to this release's changes). Never write a password, token or key: say where the test gets it (a fixture, a seed file). Merge them with the lessons from earlier runs below: keep what still holds, drop what these
+to this release's changes). A lesson says how to do something or what to check (where the project sets a flag, which
+helper makes the data); it never says that a change or a screen cannot be shown: whether a chosen change can be shown
+is for its own writer to find on its checkout. Never write a password, token or key: say where the test gets it (a fixture, a seed file). Merge them with the lessons from earlier runs below: keep what still holds, drop what these
 tries contradict, keep the list short. Never teach custom SQL, direct database clients, or mocking the application's own API.
 Use existing project helpers/factories; mock external services only through the project's existing test patterns.
 Drop earlier lessons that recommend custom SQL, direct database clients, or mocking the application's own API.
@@ -292,8 +302,9 @@ def found_recipes(run, known):
 
 
 def limits(repo):
-    """What earlier runs found the project's test stack cannot show (a service it does not run, such as an AI
-    provider): one line each, for the scene choice."""
+    """What earlier scene writers found the project's test stack lacks (a service it does not run, such as an AI
+    provider): one line each, for the scene briefs to check. The scene choice never reads them: what a film shows
+    comes from its release and the project's recipe alone."""
     return [item['text'] for item in core.load(folder(repo) / 'limits.json', []) or []]
 
 
@@ -307,34 +318,6 @@ def found_limits(run, known):
             text = ' '.join(match.group(1).split())[:160]
             known = [k for k in known if k['text'] != text] + [{'text': text, 'tag': tag, 'scene': log.parent.name}]
     return known[-LIMITS:]
-
-
-def earlier(repo, pr, limit=2):
-    """Earlier chapters of the project nearest to a pull request (shared words of their titles): which base test showed
-    them, for the scene choice."""
-    wanted = words(pr.get('title'))
-    ranked = []
-    for feature in core.load(folder(repo) / 'features.json', []) or []:
-        shared = len(wanted & words(feature.get('title'), feature.get('chapter')))
-        if shared >= 2:
-            ranked.append((shared, feature.get('tag') or '', feature))
-    ranked.sort(key=lambda r: (r[0], r[1]), reverse=True)
-    return [r[2] for r in ranked[:limit]]
-
-
-def features(run, story, index, tag):
-    """The chapters of a finished run as features: the change, how it was filmed (a test, or a scene on a base test)."""
-    films = {f.get('key'): f for f in index.get('films') or []}
-    found = []
-    titles = {pr['number']: pr['title'] for pr in (core.load(Path(run) / 'sources.json', {}) or {}).get('prs') or []}
-    for chapter in story.get('chapters') or []:
-        film = films.get(chapter.get('film')) or {}
-        gap = core.load(Path(run) / 'gaps' / str(film.get('gap')) / 'gap.json') if film.get('gap') else None
-        for number in chapter.get('prs') or []:
-            found.append({'pr': number, 'title': titles.get(number, ''), 'chapter': chapter.get('title'), 'tag': tag,
-                          'by': 'scene' if gap else 'test', 'spec': (gap or {}).get('base') or film.get('spec'),
-                          'test': film.get('title'), 'proofs': chapter.get('proofs') or []})
-    return found
 
 
 NARRATION = """The narration of a demo film of the release {repo} {tag} was checked against the film's pictures. Below:
@@ -420,6 +403,10 @@ def _learn(run, provider=None):
     story = core.load(run / 'story.json', {}) or {}
 
     tries = scene_tries(index)
+    import review
+    # the chapter each scene became: what it showed (a writer may leave out a change it could not show)
+    chapters = story.get('chapters') or []  # none when the run stopped before its story
+    shown = {gap_id: chapters[number - 1] for number, gap_id in review.scene_ids({'chapters': chapters}).items()}
     # Check legacy recipe provenance before a same-tag scene is replaced or aged out.
     # Otherwise replacing an SQL-written scene could make its old recipe look safe.
     recipes = [r for r in core.load(home / 'recipes.json', []) or [] if allowed_recipe(repo, r)]
@@ -433,8 +420,10 @@ def _learn(run, provider=None):
         name = f"{gap_folder.name}--{re.sub(r'[^A-Za-z0-9.-]+', '-', tag)}.spec.ts"
         shutil.copy2(spec, home / 'scenes' / name)
         library = [s for s in library if s['file'] != name]
-        library.append({'file': name, 'id': gap.get('id'), 'prs': gap.get('prs'), 'title': gap.get('title'),
-                        'show': gap.get('show'), 'base': gap.get('base'), 'proofs': gap.get('proofs'), 'tag': tag,
+        chapter = shown.get(gap_folder.name) or {}
+        library.append({'file': name, 'id': gap.get('id'), 'prs': chapter.get('prs') or gap.get('prs'),
+                        'title': chapter.get('title') or gap.get('title'), 'show': gap.get('show'), 'base': gap.get('base'),
+                        'proofs': chapter.get('proofs') or gap.get('proofs'), 'tag': tag,
                         'run': run.name, 'actions': result.get('actions'), 'tries': len(tries.get(gap_folder.name) or [])})
         kept.append(name)
     for old in library[:-LIBRARY]:
@@ -443,8 +432,7 @@ def _learn(run, provider=None):
 
     core.save(home / 'limits.json', found_limits(run, core.load(home / 'limits.json', []) or []))
     core.save(home / 'recipes.json', found_recipes(run, recipes))
-    mapped = [f for f in core.load(home / 'features.json', []) or [] if f.get('tag') != tag] + features(run, story, index, tag)
-    core.save(home / 'features.json', mapped[-400:])
+    (home / 'features.json').unlink(missing_ok=True)  # what earlier films showed (an older knowledge kept it): never kept
     lessons = distill(run, repo, tag, tries, provider)
     told = distill_narration(run, repo, tag, provider)
     stages = core.timings(run)
@@ -453,5 +441,4 @@ def _learn(run, provider=None):
             'tries': {k: len(v) for k, v in tries.items()}, 'lessons': len(lessons), 'narration': len(told)}
     with (home / 'history.jsonl').open('a', encoding='utf-8') as stream:
         stream.write(json.dumps(line, ensure_ascii=False) + '\n')
-    return {'knowledge': str(home), 'scenes_kept': kept, 'lessons': len(lessons), 'narration_lessons': len(told),
-            'features': len(mapped)}
+    return {'knowledge': str(home), 'scenes_kept': kept, 'lessons': len(lessons), 'narration_lessons': len(told)}

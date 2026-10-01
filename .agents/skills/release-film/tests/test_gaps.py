@@ -79,23 +79,33 @@ class Plan(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / 'e2e').mkdir()
             (Path(folder) / 'e2e' / 'a.spec.ts').write_text('test("a", async () => {});')
+            # what an earlier recording of the tag knew: a chapter on the same screen, a limit its writer met
+            known = Path(folder) / 'home' / 'projects' / 'acme__shop' / 'knowledge'
+            core.save(known / 'features.json', [{'pr': 1, 'title': 'feat: live trainings', 'tag': 'v2',
+                                                  'chapter': 'Live Trainings planned in the calendar'}])
+            core.save(known / 'limits.json', [{'text': 'the calendar never loaded the trainings', 'tag': 'v2'}])
             release = {'name': 'v2 - Live Training', 'body': 'Highlights: Live Trainings in the calendar.'}
-            with mock.patch.object(gaps.llm, 'complete', complete), mock.patch.object(gaps.knowledge, 'earlier', return_value=[]):
+            with mock.patch.object(gaps.llm, 'complete', complete), mock.patch.object(core, 'HOME', Path(folder) / 'home'):
                 gaps.choose({'repo': 'Acme/shop', 'tag': 'v2', 'prs': prs, 'release': release}, Path(folder), ['e2e'], {}, [])
         self.assertIn('Highlights: Live Trainings in the calendar.', seen['prompt'])
+        # the release alone decides what its film shows: none of what earlier recordings knew reaches the choice
+        self.assertNotIn('earlier film', seen['prompt'])
+        self.assertNotIn('planned in the calendar', seen['prompt'])
+        self.assertNotIn('never loaded the trainings', seen['prompt'])
         self.assertIn('"v2 - Live Training"', seen['prompt'])
         self.assertIn('existing test workflows: e2e/a.spec.ts: a', seen['prompt'])
         self.assertNotIn('cannot show', seen['prompt'])
-        with tempfile.TemporaryDirectory() as folder:  # what the test stack cannot show, learned or given
+        with tempfile.TemporaryDirectory() as folder:  # what the project's recipe says its test stack cannot show
             (Path(folder) / 'e2e').mkdir()
             (Path(folder) / 'e2e' / 'a.spec.ts').write_text('test("a", async () => {});')
-            with mock.patch.object(gaps.llm, 'complete', complete), mock.patch.object(gaps.knowledge, 'earlier', return_value=[]), \
+            with mock.patch.object(gaps.llm, 'complete', complete), \
                     mock.patch.object(gaps.knowledge, 'limits', return_value=['the stack has no AI provider']):
                 gaps.choose({'repo': 'Acme/shop', 'tag': 'v2', 'prs': prs}, Path(folder), ['e2e'],
                             {'harness': {'unavailable': ['video transcoding']},
                              'unavailable': ['payments (no Stripe keys)', 'video transcoding']}, [])
-        self.assertIn('cannot show these (never pick a change that needs one):\n- video transcoding\n- payments (no Stripe keys)\n'
-                      '- the stack has no AI provider', seen['prompt'])
+        self.assertIn('cannot show these (never pick a change that needs one):\n- video transcoding\n- payments (no Stripe keys)\n',
+                      seen['prompt'])
+        self.assertNotIn('the stack has no AI provider', seen['prompt'])  # a limit an earlier writer met: briefs only
         self.assertEqual(seen['prompt'].count('- video transcoding'), 1)
 
     def test_features_without_a_test_are_suggested_first(self):
@@ -395,7 +405,6 @@ class Candidates(unittest.TestCase):
             answers = '\n'.join(f'# gap | pr{n} | {n} | Feature {n}' for n in range(1, 5))
             with mock.patch.object(editor, 'related', return_value=['e2e/video.spec.ts']), \
                     mock.patch.object(gaps.llm, 'complete', return_value=(answers, {})) as model, \
-                    mock.patch.object(gaps.knowledge, 'earlier', return_value=[]), \
                     mock.patch.object(gaps.knowledge, 'limits', return_value=[]):
                 chosen = gaps.choose(data, root, ['e2e'], {}, [])
                 fallback = gaps.candidates(data, root, ['e2e'], {}, picked=[], per_scene=3)
@@ -414,7 +423,6 @@ class Candidates(unittest.TestCase):
             data = {'repo': 'Acme/cal', 'tag': 'v2', 'prs': prs}
             with mock.patch.object(editor, 'related', return_value=['e2e/calendar.spec.ts']), \
                     mock.patch.object(gaps.llm, 'complete', return_value=('# gap | pr1 | 1 | Time input\n', {})) as model, \
-                    mock.patch.object(gaps.knowledge, 'earlier', return_value=[]), \
                     mock.patch.object(gaps.knowledge, 'limits', return_value=[]):
                 chosen = gaps.choose(data, root, ['e2e'], {}, [])
             self.assertIn('#1 chore: add a native time input', model.call_args.args[0])
@@ -431,8 +439,7 @@ class Candidates(unittest.TestCase):
                     'touched': {'specs': ['e2e/kudos.spec.ts'] if n == 1 else [], 'frontend': [f'src/x{n}.tsx'], 'texts': []}}
                    for n in (1, 2)]
             answer = '# gap | pr1 | 1, 2 | Kudos page\n# gap | pr9 | 9 | Not in the release\n'
-            with mock.patch.object(gaps.llm, 'complete', return_value=(answer, {})), \
-                    mock.patch.object(gaps.knowledge, 'earlier', return_value=[]):
+            with mock.patch.object(gaps.llm, 'complete', return_value=(answer, {})):
                 chosen = gaps.choose({'repo': 'Acme/shop', 'tag': 'v2', 'prs': prs}, checkout, ['e2e'], {}, [], limit=8)
             self.assertEqual([(g['id'], g['prs'], g['base'], g['proofs'], g['show']) for g in chosen],
                              [('pr1', [1, 2], 'e2e/kudos.spec.ts', ['Give kudos'], '')])  # its own test is its base; a
@@ -1107,6 +1114,13 @@ class Failures(unittest.TestCase):
             self.assertIn('ends on an empty state ("No courses yet")', failed['warning'])
             passed = gaps.outcome([{'capture': str(capture), 'status': 'passed', 'key': 'F1'}])
             self.assertNotIn('hint', passed)
+            # a panel's own "Disabled" label means the feature is off; a button not enabled yet is the scene's to fix
+            off = gaps.outcome([{'capture': str(capture), 'status': 'failed', 'key': 'F1',
+                                 'error': 'Error: expect(locator).toHaveText(expected)\nReceived: "Disabled"'}])
+            self.assertIn('the feature is off', off['hint'])
+            waiting = gaps.outcome([{'capture': str(capture), 'status': 'failed', 'key': 'F1', 'error': (
+                'Error: expect(locator).toBeEnabled() failed\nCall log:\n  - unexpected value "disabled"')}])
+            self.assertNotIn('the feature is off', waiting.get('hint') or '')
 
     def test_a_screen_the_scene_only_passes_through_is_no_warning(self):
         with tempfile.TemporaryDirectory() as folder:

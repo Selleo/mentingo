@@ -31,13 +31,10 @@ class Run(unittest.TestCase):
             'base': 'e2e/specs/booking.spec.ts', 'proofs': ['Selected: 2']}))
         (self.run / 'gaps' / 'pr7' / 'result.json').write_text(json.dumps({'ok': True, 'actions': 12}))
         (self.run / 'gaps' / 'pr7' / 'scene.spec.ts').write_text('import { test } from "../fixtures/test";\ntest("picks", async () => {});\n')
-        self.index = {'films': [
-            {'spec': 'e2e/specs/ai.spec.ts', 'title': 'chats with the mentor', 'status': 'failed', 'error': 'no AI'},
-            {'spec': 'e2e/specs/news.spec.ts', 'title': 'adds news', 'status': 'passed'},
-            {'spec': 'e2e/specs/rf-pr7.spec.ts', 'title': 'picks', 'status': 'passed', 'gap': 'pr7'}],
-            'batches': {'g01': {'results': [{'file': 'specs/demo--rf-pr7.spec.ts', 'status': 'failed', 'error': 'locator timeout'}]},
-                        'g02': {'results': [{'file': 'specs/demo--rf-pr7.spec.ts', 'status': 'passed', 'error': ''}]}}}
-        (self.run / 'captures.json').write_text(json.dumps(self.index))
+        index = {'batches': {'g01': {'results': [{'file': 'specs/demo--rf-pr7.spec.ts', 'status': 'failed',
+                                                  'error': 'locator timeout'}]},
+                             'g02': {'results': [{'file': 'specs/demo--rf-pr7.spec.ts', 'status': 'passed', 'error': ''}]}}}
+        (self.run / 'captures.json').write_text(json.dumps(index))
 
 
 class ScenePolicy(unittest.TestCase):
@@ -184,9 +181,14 @@ class Learning(Run):
         def complete(prompt, system, provider=None, effort=None):
             answers.append(prompt)
             return '- Log in with the admin fixture.\n- Wait for the dialog before filling it.\nnot a bullet\n', {}
+        home = knowledge.folder('Acme/shop')
+        home.mkdir(parents=True, exist_ok=True)
+        (home / 'features.json').write_text('[{"pr": 7, "chapter": "Notatki", "tag": "v1.0.0"}]')  # an older knowledge's
         with mock.patch('llm.complete', complete):
             first = knowledge.learn(self.run)
-        home = knowledge.folder('Acme/shop')
+        # what a film shows comes from its release alone: what earlier films showed is never kept
+        self.assertFalse((home / 'features.json').exists())
+        self.assertNotIn('features', first)
         self.assertEqual(first['scenes_kept'], ['pr7--v2.0.0.spec.ts'])
         self.assertTrue((home / 'scenes' / 'pr7--v2.0.0.spec.ts').is_file())
         self.assertEqual(json.loads((home / 'scenes.json').read_text())[0]['tries'], 2)
@@ -210,9 +212,25 @@ class Learning(Run):
         self.assertNotIn('test("picks"', knowledge.recall('Acme/shop', far))
         self.assertEqual(knowledge.recall('Other/project', near), '')  # nothing known yet
 
+    def test_a_kept_scene_carries_what_its_chapter_showed(self):
+        # the plan named #7 and #70; the writer could show only #7, and its chapter says so
+        (self.run / 'gaps' / 'pr7' / 'gap.json').write_text(json.dumps({
+            'id': 'pr7', 'prs': [7, 70], 'title': 'Booking day picker and booking limits', 'show': 'pick days',
+            'base': 'e2e/specs/booking.spec.ts', 'proofs': ['Selected: 2', 'Limit: 3']}))
+        (self.run / 'story.json').write_text(json.dumps({'chapters': [
+            {'title': 'Booking day picker', 'prs': [7], 'proofs': ['Selected: 2'],
+             'source': {'file': 'gaps/pr7/story.txt', 'chapter': 0}}]}))
+        with mock.patch('llm.complete', return_value=('', {'provider': 'agent'})):
+            knowledge.learn(self.run)
+        [kept] = json.loads((knowledge.folder('Acme/shop') / 'scenes.json').read_text())
+        self.assertEqual((kept['prs'], kept['title'], kept['proofs']), ([7], 'Booking day picker', ['Selected: 2']))
+        brief = knowledge.recall('Acme/shop', {'id': 'pr9', 'title': 'feat: booking limit', 'base': 'e2e/specs/booking.spec.ts'})
+        self.assertIn('(v2.0.0: Booking day picker; base `e2e/specs/booking.spec.ts`)', brief)
+        self.assertNotIn('#70', brief)  # never a change the earlier film did not show
+
 
 class Limits(Run):
-    def test_a_services_absence_and_a_data_recipe_are_learned_for_the_next_choice_and_brief(self):
+    def test_a_services_absence_and_a_data_recipe_are_learned_for_the_next_brief(self):
         (self.run / 'gaps' / 'pr8').mkdir()
         (self.run / 'gaps' / 'pr8' / 'gap.json').write_text(json.dumps({'id': 'pr8', 'prs': [8], 'title': 'AI mentor'}))
         (self.run / 'gaps' / 'pr8' / 'worker.log').write_text(
@@ -226,7 +244,11 @@ class Limits(Run):
         self.assertEqual(knowledge.limits('Acme/shop'), ['the stack has no AI provider configured'])  # not its own mistake
         self.assertEqual(json.loads((knowledge.folder('Acme/shop') / 'scenes.json').read_text()), [])  # pr7 gave up: not kept
         near = {'id': 'pr9', 'title': 'feat: booking limit', 'show': 'a limit in the booking modal', 'base': 'e2e/specs/booking.spec.ts'}
-        self.assertIn('createBooking(api, {days: 3})', knowledge.recall('Acme/shop', near))
+        brief = knowledge.recall('Acme/shop', near)
+        self.assertIn('createBooking(api, {days: 3})', brief)
+        # the limit goes to the briefs, to check on their own checkout: never to the scene choice (test_gaps)
+        self.assertIn('check it here before you stop for it):\n- the stack has no AI provider configured', brief)
+        self.assertIn('None of it says whether this change can be shown', brief)
         far = {'id': 'pr10', 'title': 'feat: invoices export', 'show': 'export invoices', 'base': 'e2e/specs/invoices.spec.ts'}
         self.assertEqual(knowledge.recipes_for('Acme/shop', far), [])
 
@@ -272,16 +294,6 @@ class Narration(unittest.TestCase):
                                        {'title': 'T', 'prs': [], 'proofs': ['x'], 'film': 'F1'}, 'lines', ['T', 'U'], 2, 3, {})
         self.assertIn('the chapter still names its change plainly', prompt)
         self.assertIn('Name only the fields actually typed in.', prompt)
-
-    def test_an_earlier_chapter_hints_the_base_test_for_a_related_change(self):
-        home = knowledge.folder('Acme/shop')
-        home.mkdir(parents=True)
-        (home / 'features.json').write_text(json.dumps([
-            {'pr': 7, 'title': 'feat: budget notes on dashboard tiles', 'chapter': 'Notatki na kafelkach budżetu',
-             'tag': 'v1.0.0', 'by': 'scene', 'spec': 'e2e/specs/dashboard-widgets.spec.ts'}]))
-        hint = knowledge.earlier('Acme/shop', {'title': 'feat: whole hours on dashboard budget tiles'})
-        self.assertEqual([f['spec'] for f in hint], ['e2e/specs/dashboard-widgets.spec.ts'])
-        self.assertEqual(knowledge.earlier('Acme/shop', {'title': 'feat: invoices export'}), [])
 
 
 class Notes(unittest.TestCase):
