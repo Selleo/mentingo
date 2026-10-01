@@ -90,8 +90,8 @@ importers:
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.16(zod@3.25.76))(zod@3.25.76)
       '@mentingo/phishing-simulation-sdk':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.1.1
+        version: 0.1.1
       '@microsoft/microsoft-graph-client':
         specifier: 3.0.7
         version: 3.0.7
@@ -4482,8 +4482,8 @@ packages:
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
 
-  '@mentingo/phishing-simulation-sdk@0.1.0':
-    resolution: {integrity: sha512-nWbR2QGClt6J0xv9SLPDLth8u66UuDJyygbmcIU59ge5iXbJ1M3tX8XQ6YBVT3Kx068Quq1u6zXL73ldxmwXfg==}
+  '@mentingo/phishing-simulation-sdk@0.1.1':
+    resolution: {integrity: sha512-WVhGVcA3iVEHXJwGYEXZs0ex3W6FhZlroAh6wnXY8Xp40on5se6ZqHQItgWLGz++rl9JDqMZiIWPvOH87NPI6Q==}
     engines: {node: '>=22.15.0'}
 
   '@microsoft/microsoft-graph-client@3.0.7':
@@ -21856,7 +21856,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mentingo/phishing-simulation-sdk@0.1.0': {}
+  '@mentingo/phishing-simulation-sdk@0.1.1': {}
 
   '@microsoft/microsoft-graph-client@3.0.7':
     dependencies:
