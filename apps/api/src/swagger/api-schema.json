@@ -19312,6 +19312,35 @@
         }
       }
     },
+    "/api/oauth/consent/{consent}": {
+      "get": {
+        "operationId": "McpConsentController_getConsent",
+        "parameters": [
+          {
+            "name": "consent",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "minLength": 43,
+              "maxLength": 43,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConsentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/calendar/events": {
       "get": {
         "operationId": "CalendarController_getEvents",
@@ -134661,6 +134690,37 @@
             },
             "required": [
               "parsedContent"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetConsentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientName": {
+                "type": "string"
+              },
+              "clientId": {
+                "type": "string"
+              },
+              "redirectUri": {
+                "type": "string"
+              },
+              "accountEmail": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientName",
+              "clientId",
+              "redirectUri",
+              "accountEmail"
             ]
           }
         },

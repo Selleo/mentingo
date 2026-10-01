@@ -25955,6 +25955,15 @@ export interface GenerateArticlePreviewResponse {
   };
 }
 
+export interface GetConsentResponse {
+  data: {
+    clientName: string;
+    clientId: string;
+    redirectUri: string;
+    accountEmail: string;
+  };
+}
+
 export interface GetEventsResponse {
   data: {
     events: {
@@ -35336,6 +35345,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/analytics/active-users`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name McpConsentControllerGetConsent
+     * @request GET:/api/oauth/consent/{consent}
+     */
+    mcpConsentControllerGetConsent: (consent: string, params: RequestParams = {}) =>
+      this.request<GetConsentResponse, any>({
+        path: `/api/oauth/consent/${consent}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logo platformy",
+    "title": "Připojit {{clientName}} k Mentingo?",
+    "description": "Tento asistent může používat Mentingo podle vašich aktuálních oprávnění.",
+    "signedInAs": "Přihlášeni jako {{email}}",
+    "redirectUri": "Přístup bude odeslán na: {{redirectUri}}",
+    "allow": "Povolit",
+    "deny": "Odmítnout",
+    "loading": "Načítání připojení…",
+    "unavailableTitle": "Připojení není dostupné",
+    "unavailable": "Vraťte se k asistentovi a začněte připojení znovu.",
+    "signInRequired": "Přihlaste se do Mentingo a začněte připojení znovu.",
+    "signIn": "Přihlásit se"
+  },
   "nativeArchive": {
     "importNotice": "Kurzy a vzdělávací cesty s existujícím identifikátorem se přeskočí. Nový obsah se vytvoří jako koncept.",
     "uploadPrompt": "Vyberte nebo přetáhněte ZIP balíček Mentingo",
@@ -676,6 +690,9 @@
       "videoReady": "Video je připraveno k použití",
       "videoUploading": "Nahráváme vaše video. Záložku prosím nezavírejte.",
       "videoUploadedProcessing": "Vaše nahrávání bylo dokončeno. Nyní se vaše video zpracovává. Neváhejte a zavřete kartu."
+    },
+    "errors": {
+      "uploadForbidden": "Toto nahrání nepatří aktuálnímu uživateli."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG nebo SVG",

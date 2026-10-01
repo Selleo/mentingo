@@ -763,6 +763,11 @@ video library for the tenant before starting the API container.
 
     ```caddy
     <client-domain.com> {
+        @oauthDiscovery path /.well-known/oauth-*
+        handle @oauthDiscovery {
+            reverse_proxy http://localhost:3000
+        }
+
         # API traffic
         @api path /api/*
         handle @api {

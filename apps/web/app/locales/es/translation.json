@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logotipo de la plataforma",
+    "title": "¿Conectar {{clientName}} con Mentingo?",
+    "description": "Este asistente puede usar Mentingo según tus permisos actuales.",
+    "signedInAs": "Sesión iniciada como {{email}}",
+    "redirectUri": "Se enviará acceso a: {{redirectUri}}",
+    "allow": "Permitir",
+    "deny": "Denegar",
+    "loading": "Cargando conexión…",
+    "unavailableTitle": "Conexión no disponible",
+    "unavailable": "Vuelve a tu asistente e inicia la conexión de nuevo.",
+    "signInRequired": "Inicia sesión en Mentingo e inicia la conexión de nuevo.",
+    "signIn": "Iniciar sesión"
+  },
   "nativeArchive": {
     "importNotice": "Se omiten los cursos y rutas cuyo identificador ya existe. El contenido nuevo se crea como borrador.",
     "uploadPrompt": "Seleccionar o soltar un ZIP de paquete de Mentingo",
@@ -673,6 +687,9 @@
       "videoReady": "El vídeo está listo para usarse",
       "videoUploading": "Estamos subiendo tu vídeo. Por favor, no cierres la pestaña.",
       "videoUploadedProcessing": "La subida ha finalizado. Ahora el vídeo se está procesando. Puedes cerrar la pestaña."
+    },
+    "errors": {
+      "uploadForbidden": "Esta subida no pertenece al usuario actual."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG o SVG",

@@ -107,6 +107,7 @@ import { CourseTranslationService } from "./services/course-translation.service"
     CourseService,
     CourseFeaturePolicyService,
     CourseSlugService,
+    CourseTranslationService,
     MasterCourseService,
     MasterCourseRepository,
     MasterCourseSnapshotService,

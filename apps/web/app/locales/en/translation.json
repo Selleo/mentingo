@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Platform logo",
+    "title": "Connect {{clientName}} to Mentingo?",
+    "description": "This assistant can use Mentingo with your current permissions.",
+    "signedInAs": "Signed in as {{email}}",
+    "redirectUri": "It will send access to: {{redirectUri}}",
+    "allow": "Allow",
+    "deny": "Deny",
+    "loading": "Loading connection…",
+    "unavailableTitle": "Connection unavailable",
+    "unavailable": "Return to your assistant and start the connection again.",
+    "signInRequired": "Sign in to Mentingo and start the connection again.",
+    "signIn": "Sign in"
+  },
   "nativeArchive": {
     "importNotice": "Courses and learning paths with an existing identifier are skipped. New content is created as a draft.",
     "uploadPrompt": "Choose or drop a Mentingo package ZIP",
@@ -670,6 +684,9 @@
       "videoReady": "Video is ready to use",
       "videoUploading": "We're uploading your video. Please don't close the tab.",
       "videoUploadedProcessing": "Your upload has been finished. Now your video is getting processed. Feel free to close the tab."
+    },
+    "errors": {
+      "uploadForbidden": "This upload does not belong to the current user."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG or SVG",
