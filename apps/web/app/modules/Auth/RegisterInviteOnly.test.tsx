@@ -43,4 +43,18 @@ describe("Register page with invite-only registration", () => {
     expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/auth/login");
     expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
   });
+
+  it("preserves the course return URL in the login link", async () => {
+    await i18next.changeLanguage("en");
+    const RemixStub = createRemixStub([{ path: "/auth/register", Component: RegisterPage }]);
+
+    renderWith().render(
+      <RemixStub initialEntries={["/auth/register?returnTo=%2Fcourses%2Fcourse-1"]} />,
+    );
+
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
+      "href",
+      "/auth/login?returnTo=%2Fcourses%2Fcourse-1",
+    );
+  });
 });

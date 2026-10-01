@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import { format, startOfDay, subYears } from "date-fns";
 import { enUS, pl } from "date-fns/locale";
 import { useEffect, useMemo } from "react";
@@ -46,6 +46,7 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const selectedLanguage = useLanguageStore((state) => state.language);
   const { data: ssoEnabled } = useSSOEnabled();
   const { data: globalSettings } = useGlobalSettings();
@@ -153,7 +154,7 @@ export default function RegisterPage() {
         title={t("inviteOnlyRegistrationView.toast.registerRedirect")}
         actionLabel={t("registerView.button.signIn")}
         actionIcon="ArrowRight"
-        to="/auth/login"
+        to={`/auth/login${location.search}`}
       />
     );
   }
@@ -367,7 +368,7 @@ export default function RegisterPage() {
                 <div className="mt-4 text-center text-sm">
                   {t("registerView.other.alreadyHaveAccount")}{" "}
                   <Link
-                    to="/auth/login"
+                    to={`/auth/login${location.search}`}
                     className="underline"
                     data-testid={REGISTER_PAGE_HANDLES.SIGN_IN_LINK}
                   >
