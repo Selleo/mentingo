@@ -194,6 +194,9 @@ importers:
       ai:
         specifier: 7.0.16
         version: 7.0.16(zod@3.25.76)
+      archiver:
+        specifier: 7.0.1
+        version: 7.0.1
       axios:
         specifier: 1.7.2
         version: 1.7.2
@@ -450,9 +453,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: 6.0.0
         version: 6.0.0(eslint@8.42.0)(typescript@5.4.5)
-      archiver:
-        specifier: 7.0.1
-        version: 7.0.1
       domhandler:
         specifier: 5.0.3
         version: 5.0.3
