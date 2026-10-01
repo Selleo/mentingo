@@ -10,6 +10,6 @@ import { CategoryService } from "./category.service";
   imports: [LocalizationModule],
   controllers: [CategoryController],
   providers: [CategoryService, LocalizationService],
-  exports: [],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

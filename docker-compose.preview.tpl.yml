@@ -176,6 +176,10 @@ services:
         condition: service_started
     x-caddy: |
       ${PREVIEW_WEB_DOMAIN} {
+        handle /.well-known/oauth-* {
+          reverse_proxy {{upstreams "api-preview-pr-${PR_ID}" 3000}}
+        }
+
         handle /api/* {
           reverse_proxy {{upstreams "api-preview-pr-${PR_ID}" 3000}}
         }

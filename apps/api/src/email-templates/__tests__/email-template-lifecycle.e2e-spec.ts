@@ -5,6 +5,9 @@ import {
 } from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { RemoveEmailTemplateLanguageEvent } from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
+
 import { draftBody, setupEmailTemplateTest, textDocument } from "./email-template-test.helpers";
 
 import type { EmailTemplateTestContext } from "./email-template-test.helpers";
@@ -16,6 +19,9 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
   });
   beforeEach(async () => {
     await t.reset();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
   afterAll(async () => {
     await t?.app.close();
@@ -53,6 +59,43 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
     expect(cleared.content).toEqual(stored.content);
     expect(cleared.completeLocales).not.toContain(SUPPORTED_LANGUAGES.EN);
     expect(cleared.availableLocales).toContain(SUPPORTED_LANGUAGES.EN);
+  });
+
+  it("removes a non-base translation and protects the base language", async () => {
+    const template = await t.create();
+    const publishSpy = jest.spyOn(t.app.get(OutboxPublisher), "publish");
+
+    await t.http("delete", `/${template.id}/languages/pl`, t.studentCookie).expect(403);
+    await t.http("delete", `/${template.id}/languages/en`).expect(400);
+    const response = await t.http("delete", `/${template.id}/languages/pl`).expect(200);
+    expect(response.body.data.name).not.toHaveProperty("pl");
+    expect(response.body.data.subject).not.toHaveProperty("pl");
+    expect(response.body.data.content).not.toHaveProperty("pl");
+    expect(response.body.data.availableLocales).not.toContain(SUPPORTED_LANGUAGES.PL);
+    expect((await t.get(template.id!)).content).not.toHaveProperty("pl");
+    expect(
+      publishSpy.mock.calls.some(
+        ([event]) =>
+          event instanceof RemoveEmailTemplateLanguageEvent &&
+          event.data.context?.language === "pl",
+      ),
+    ).toBe(true);
+
+    await t.http("post", `/${template.id}/archive`).expect(201);
+    await t.http("delete", `/${template.id}/languages/de`).expect(400);
+  });
+
+  it("rolls back a template edit if its outbox event cannot be stored", async () => {
+    const template = await t.create();
+    const publishSpy = jest.spyOn(t.app.get(OutboxPublisher), "publish");
+    publishSpy.mockRejectedValueOnce(new Error("Outbox unavailable"));
+
+    await t
+      .http("patch", `/${template.id}`)
+      .send({ name: { en: "Changed name" } })
+      .expect(500);
+
+    expect(await t.get(template.id!)).toEqual(template);
   });
 
   it.each(["name", "subject", "content"] as const)(

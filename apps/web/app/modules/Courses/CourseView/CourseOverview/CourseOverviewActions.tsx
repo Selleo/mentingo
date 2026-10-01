@@ -1,4 +1,4 @@
-import { Link, useParams } from "@remix-run/react";
+import { Link, useLocation, useParams } from "@remix-run/react";
 import { PERMISSIONS, COURSE_STATUSES } from "@repo/shared";
 import { GraduationCap, Info, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -38,6 +38,7 @@ export default function CourseOverviewActions({
 }: CourseOverviewActionsProps) {
   const { t } = useTranslation();
   const { id = "" } = useParams();
+  const location = useLocation();
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
@@ -112,7 +113,10 @@ export default function CourseOverviewActions({
           : "/auth/register";
 
         return (
-          <Link data-testid={COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK} to={registerPath}>
+          <Link
+            data-testid={COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK}
+            to={`${registerPath}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`}
+          >
             <Button className="flex items-center gap-2 shadow-2xl">
               <GraduationCap className="size-4" />
               <span className="text-sm font-semibold">

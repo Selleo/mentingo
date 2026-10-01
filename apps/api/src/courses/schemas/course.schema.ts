@@ -27,6 +27,7 @@ export const courseSchema = Type.Object({
   priceInCents: Type.Number(),
   currency: Type.String(),
   status: Type.Optional(coursesStatusOptions),
+  isArchived: Type.Optional(Type.Boolean()),
   courseType: Type.Optional(Type.Enum(COURSE_TYPE)),
   createdAt: Type.Optional(Type.String()),
   hasFreeChapters: Type.Optional(Type.Boolean()),

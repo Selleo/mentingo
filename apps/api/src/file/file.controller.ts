@@ -2,8 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Head,
+  Inject,
   Options,
   Param,
   Patch,
@@ -19,7 +21,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { PERMISSIONS, VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Request, Response } from "express";
+import { Response, type Request } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
@@ -35,6 +37,13 @@ import {
   TUS_VERSION,
 } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
+import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
+import {
+  assertGenericFileUploadGrant,
+  assertVideoTusGrant,
+} from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
+import { REDIS_CLIENT, type RedisClient } from "src/redis";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
@@ -58,6 +67,7 @@ export class FileController {
   constructor(
     private readonly fileService: FileService,
     private readonly tusUploadService: TusUploadService,
+    @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
   ) {}
 
   @RequirePermission(PERMISSIONS.FILE_UPLOAD)
@@ -93,7 +103,10 @@ export class FileController {
     file: Express.Multer.File,
     @Body("resource") resource: string = "file",
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: McpRequest,
   ): Promise<FileUploadResponse> {
+    if (request.mcpUploadGrant)
+      assertGenericFileUploadGrant(request.mcpUploadGrant, resource, file);
     await FileGuard.validateFile(file, {
       allowedTypes: ALLOWED_MIME_TYPES,
       maxSize: MAX_FILE_SIZE,
@@ -142,9 +155,20 @@ export class FileController {
     return res.status(204).send();
   }
 
-  @Public()
   @Post("videos/tus")
-  async createTusUpload(@Req() req: Request, @Res() res: Response) {
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
+  async createTusUpload(
+    @Req() req: McpRequest,
+    @Res() res: Response,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
     this.ensureTusVersion(req);
 
     const uploadLength = Number(req.headers["upload-length"]);
@@ -155,7 +179,8 @@ export class FileController {
       throw new BadRequestException("Missing uploadId");
     }
 
-    const currentUserId = (req as Request & { user?: { userId?: string } }).user?.userId;
+    if (req.mcpUploadGrant)
+      assertVideoTusGrant(req.mcpUploadGrant, uploadId, uploadLength, metadata);
     await this.tusUploadService.createSession(uploadId, uploadLength, currentUserId);
 
     const location = `/api/file/videos/tus/${uploadId}`;
@@ -165,15 +190,30 @@ export class FileController {
     return res.status(201).send();
   }
 
-  @Public()
   @Head("videos/tus/:id")
-  async getTusUpload(@Param("id") uploadId: string, @Req() req: Request, @Res() res: Response) {
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
+  async getTusUpload(
+    @Param("id") uploadId: string,
+    @Req() req: McpRequest,
+    @Res() res: Response,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ) {
     this.ensureTusVersion(req);
 
     const session = await this.tusUploadService.getSession(uploadId);
     if (!session) {
       throw new BadRequestException("Upload session not found");
     }
+    if (session.userId !== currentUserId)
+      throw new ForbiddenException("uploadFile.errors.uploadForbidden");
+    if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, uploadId);
 
     this.setTusHeaders(res, {
       "Upload-Offset": String(session.offset),
@@ -183,15 +223,23 @@ export class FileController {
     return res.status(200).send();
   }
 
-  @Public()
   @Patch("videos/tus/:id")
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
   async patchTusUpload(
     @Param("id") uploadId: string,
-    @Req() req: Request,
+    @Req() req: McpRequest,
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
     this.ensureTusVersion(req);
+    if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, uploadId);
 
     const uploadOffset = Number(req.headers["upload-offset"]);
     const chunk = req.body;
@@ -217,6 +265,10 @@ export class FileController {
       return res.status(409).send();
     }
 
+    if (result.completed && req.mcpUploadGrant && req.mcpUploadGrantToken) {
+      await revokeMcpUploadGrant(this.redis, req.mcpUploadGrantToken);
+    }
+
     return res.status(204).send();
   }
 
@@ -233,7 +285,11 @@ export class FileController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: videoUploadStatusResponseSchema,
   })
-  async getVideoUploadStatus(@Param("id") id: UUIDType): Promise<VideoUploadStatusResponse> {
+  async getVideoUploadStatus(
+    @Param("id") id: UUIDType,
+    @Req() req: McpRequest,
+  ): Promise<VideoUploadStatusResponse> {
+    if (req.mcpUploadGrant) assertVideoTusGrant(req.mcpUploadGrant, id);
     return this.fileService.getVideoUploadStatus(id);
   }
 

@@ -12,5 +12,6 @@ import { QAController } from "./qa.controller";
   imports: [LocalizationModule, SettingsModule, SearchIndexModule],
   controllers: [QAController],
   providers: [QAService, QARepository],
+  exports: [QAService],
 })
 export class QAModule {}

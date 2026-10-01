@@ -1464,6 +1464,13 @@
       "when": 1790604530880,
       "tag": "0208_fix_ai_judge_judgement_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 209,
+      "version": "7",
+      "when": 1790855868667,
+      "tag": "0209_add_archived_field_to_courses",
+      "breakpoints": true
     }
   ]
 }

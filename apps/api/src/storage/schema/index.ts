@@ -316,6 +316,7 @@ export const courses = pgTable(
     authorMetadata: jsonb("author_metadata").$type<CourseAuthorMetadata | null>().default(null),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
     status: coursesStatusEnum("status").$type<CourseStatus>().notNull().default("draft"),
+    isArchived: boolean("is_archived").notNull().default(false),
     thumbnailPositionY: integer("thumbnail_position_y").notNull().default(50),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),

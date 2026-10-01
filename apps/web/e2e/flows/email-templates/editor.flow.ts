@@ -22,6 +22,14 @@ export const selectEmailLanguageFlow = async (page: Page, language: SupportedLan
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION(language)).click();
 };
 
+export const createEmailLanguageFlow = async (page: Page, language: SupportedLanguages) => {
+  await selectEmailLanguageFlow(page, language);
+  const dialog = page.getByTestId(EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_DIALOG);
+  await dialog.waitFor();
+  await dialog.getByTestId(EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_CONFIRM).click();
+  await dialog.waitFor({ state: "hidden" });
+};
+
 export const confirmEmailActionFlow = async (page: Page, action: string) => {
   await page.getByTestId(action).click();
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();

@@ -1,4 +1,3 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Archive, Check, Copy, RotateCcw, Save, Send, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +22,8 @@ export type EmailTemplateEditorToolbarProps = {
   isActionPending: boolean;
   hasUnsavedChanges: boolean;
   onLanguageChange: (language: SupportedLanguages) => void;
+  onCreateLanguage: (language: SupportedLanguages) => Promise<void>;
+  onDeleteLanguage: (language: SupportedLanguages) => Promise<void>;
   onSetBaseLanguage: () => void;
   onSendTest: () => void;
   onCopyDefault: () => void;
@@ -41,6 +42,8 @@ export function EmailTemplateEditorToolbar({
   isActionPending,
   hasUnsavedChanges,
   onLanguageChange,
+  onCreateLanguage,
+  onDeleteLanguage,
   onSetBaseLanguage,
   onSendTest,
   onCopyDefault,
@@ -86,16 +89,21 @@ export function EmailTemplateEditorToolbar({
                 testIds={{
                   select: EMAIL_TEMPLATES_HANDLES.LANGUAGE,
                   option: EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION,
+                  createDialog: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_DIALOG,
+                  createConfirmButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_CONFIRM,
+                  deleteButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_DELETE,
                 }}
                 formKey={template.id ?? template.event}
                 value={language}
                 baseLanguage={template.baseLanguage}
-                availableLocales={Object.values(SUPPORTED_LANGUAGES)}
+                availableLocales={template.availableLocales}
                 onChange={(nextLanguage) => {
                   if (!isActionPending) onLanguageChange(nextLanguage);
                 }}
-                canCreateLanguage={false}
-                canDeleteLanguage={false}
+                onCreateLanguage={onCreateLanguage}
+                onDeleteLanguage={onDeleteLanguage}
+                canCreateLanguage={!isReadonly}
+                canDeleteLanguage={!isReadonly && !hasUnsavedChanges}
                 canSetBaseLanguage={false}
               />
             </fieldset>

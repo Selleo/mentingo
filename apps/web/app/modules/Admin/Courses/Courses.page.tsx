@@ -68,7 +68,7 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 const Courses = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useState<CourseParams>({});
+  const [searchParams, setSearchParams] = useState<CourseParams>({ isArchived: false });
   const { language } = useLanguageStore();
 
   const { data: categories } = useCategoriesSuspense({ language });
@@ -125,8 +125,9 @@ const Courses = () => {
       ],
     },
     {
-      name: "archived",
+      name: "isArchived",
       type: "status",
+      default: false,
       testId: COURSES_PAGE_HANDLES.ARCHIVED_FILTER,
       optionTestId: (option) =>
         COURSES_PAGE_HANDLES.archivedFilterOption(option.value as "all" | "active" | "archived"),
@@ -135,9 +136,11 @@ const Courses = () => {
 
   const handleFilterChange = (name: string, value: FilterValue) => {
     startTransition(() => {
+      setRowSelection({});
       setSearchParams((prev) => ({
         ...prev,
         [name]: value,
+        ...(name === "isArchived" && { includeArchived: value === undefined }),
       }));
     });
   };
@@ -246,16 +249,31 @@ const Courses = () => {
     {
       accessorKey: "status",
       header: t("adminCoursesView.field.state"),
-      cell: ({ row }) => (
-        <Badge
-          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
-          icon={getCourseBadgeIcon(row.original.status as CourseStatus)}
-          iconClasses={getCourseBadgeIconClasses(row.original.status as CourseStatus)}
-          className="w-max"
-        >
-          {getCourseStatus(row.original.status as CourseStatus, t)}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        if (row.original.isArchived) {
+          return (
+            <Badge
+              variant="secondaryWithOutline"
+              icon="Archive"
+              iconClasses="size-4"
+              className="w-max"
+            >
+              {t("common.other.archived")}
+            </Badge>
+          );
+        }
+
+        return (
+          <Badge
+            variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+            icon={getCourseBadgeIcon(row.original.status as CourseStatus)}
+            iconClasses={getCourseBadgeIconClasses(row.original.status as CourseStatus)}
+            className="w-max"
+          >
+            {getCourseStatus(row.original.status as CourseStatus, t)}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "originType",
@@ -280,6 +298,7 @@ const Courses = () => {
       cell: ({ row }) => (
         <CourseBulkActions
           selectedCourseIds={[row.original.id]}
+          selectedArchivedStates={[row.original.isArchived ?? false]}
           categories={categories ?? []}
           onBulkActionComplete={() => undefined}
           onDuplicateCourse={(courseId) => void handleDuplicateCourse(courseId)}
@@ -306,6 +325,9 @@ const Courses = () => {
   });
 
   const selectedCourses = table.getSelectedRowModel().rows.map((row) => row.original.id);
+  const selectedArchivedStates = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original.isArchived ?? false);
 
   const handleBulkActionComplete = () => {
     setRowSelection({});
@@ -366,6 +388,7 @@ const Courses = () => {
           {canManageCourses && (
             <CourseBulkActions
               selectedCourseIds={selectedCourses}
+              selectedArchivedStates={selectedArchivedStates}
               categories={categories ?? []}
               onBulkActionComplete={handleBulkActionComplete}
             />

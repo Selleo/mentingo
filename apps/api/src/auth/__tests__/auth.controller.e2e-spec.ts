@@ -7,6 +7,7 @@ import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
+import { EnvService } from "src/env/services/env.service";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -63,6 +64,29 @@ describe("AuthController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+  });
+
+  it("starts Slack OAuth when enabled after app startup", async () => {
+    const envService = app.get(EnvService);
+    const getEnv = envService.getEnv.bind(envService);
+    const slackEnv: Record<string, string> = {
+      SLACK_OAUTH_ENABLED: "true",
+      SLACK_CLIENT_ID: "test-slack-client-id",
+      SLACK_CLIENT_SECRET: "test-slack-client-secret",
+    };
+
+    jest.spyOn(envService, "getEnv").mockImplementation(async (name) => {
+      const value = slackEnv[name];
+      return value ? { name, value } : getEnv(name);
+    });
+
+    const response = await request(app.getHttpServer()).get("/api/auth/slack").expect(302);
+    const redirect = new URL(response.headers.location);
+
+    expect(redirect.origin).toBe("https://slack.com");
+    expect(redirect.pathname).toBe("/openid/connect/authorize");
+    expect(redirect.searchParams.get("client_id")).toBe(slackEnv.SLACK_CLIENT_ID);
+    expect(redirect.searchParams.get("state")).toBeTruthy();
   });
 
   describe("POST /api/auth/register", () => {

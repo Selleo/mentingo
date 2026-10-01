@@ -97,7 +97,7 @@ describe("CourseOverviewActions", () => {
 
     expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK)).toHaveAttribute(
       "href",
-      "/auth/register",
+      "/auth/register?returnTo=%2Fcourse%2Fcourse-1",
     );
   });
 
@@ -108,7 +108,7 @@ describe("CourseOverviewActions", () => {
 
     expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK)).toHaveAttribute(
       "href",
-      "/auth/login",
+      "/auth/login?returnTo=%2Fcourse%2Fcourse-1",
     );
   });
 

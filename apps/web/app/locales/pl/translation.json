@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logo platformy",
+    "title": "Połączyć {{clientName}} z Mentingo?",
+    "description": "Ten asystent może korzystać z Mentingo zgodnie z Twoimi uprawnieniami.",
+    "signedInAs": "Zalogowano jako {{email}}",
+    "redirectUri": "Dostęp zostanie przesłany do: {{redirectUri}}",
+    "allow": "Zezwól",
+    "deny": "Odrzuć",
+    "loading": "Wczytywanie połączenia…",
+    "unavailableTitle": "Połączenie niedostępne",
+    "unavailable": "Wróć do asystenta i rozpocznij łączenie ponownie.",
+    "signInRequired": "Zaloguj się do Mentingo i rozpocznij łączenie ponownie.",
+    "signIn": "Zaloguj się"
+  },
   "nativeArchive": {
     "importNotice": "Kursy i ścieżki o istniejącym identyfikatorze zostaną pominięte. Nowa zawartość powstanie jako szkic.",
     "uploadPrompt": "Wybierz lub upuść ZIP pakietu Mentingo",
@@ -180,6 +194,7 @@
       "copied": "Utworzono nowy szkic.",
       "saved": "Zmiany zapisane.",
       "restored": "Przywrócono szablon jako szkic.",
+      "languageRemoved": "Usunięto język z szablonu.",
       "testQueued": "Testowy e-mail dodano do kolejki wysyłki na Twój adres.",
       "uploaded": "Obraz przesłany.",
       "blocks": {
@@ -234,7 +249,9 @@
       "publicationConflict": "Opublikowano inny szablon dla tego zdarzenia. Spróbuj ponownie.",
       "notFound": "Nie znaleziono szablonu e-maila.",
       "createFailed": "Nie udało się utworzyć szablonu e-maila.",
-      "invalidCollection": "Nieprawidłowe dane kolekcji."
+      "invalidCollection": "Nieprawidłowe dane kolekcji.",
+      "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego.",
+      "archivedReadOnly": "Przywróć szablon przed zmianą jego języków."
     },
     "warnings": {
       "translationFallback": "Niekompletne tłumaczenia korzystają z języka bazowego.",
@@ -545,6 +562,7 @@
     "send": "Wyślij"
   },
   "common": {
+    "deletedUser": "Usunięty użytkownik",
     "button": {
       "previous": "Poprzednia",
       "next": "Następna",
@@ -666,6 +684,9 @@
       "videoReady": "Wideo jest gotowe do użycia",
       "videoUploading": "Przesyłamy Twoje wideo. Proszę nie zamykaj karty.",
       "videoUploadedProcessing": "Przesyłanie zakończone. Twoje wideo jest teraz przetwarzane. Możesz zamknąć kartę."
+    },
+    "errors": {
+      "uploadForbidden": "To przesyłanie nie należy do bieżącego użytkownika."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",
@@ -2116,6 +2137,8 @@
     "dropdown": {
       "changeCategory": "Zmień kategorię",
       "changeStatus": "Zmień status",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć",
       "delete": "Usuń"
     },
     "deleteModal": {
@@ -2123,6 +2146,14 @@
       "titleMultiple": "Usuń kursy",
       "descriptionSingle": "Czy na pewno chcesz usunąć ten kurs? Ta operacja nie może zostać cofnięta.",
       "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} kursów? Ta operacja nie może zostać cofnięta."
+    },
+    "archiveModal": {
+      "title": "Archiwizuj kursy",
+      "description": "Zarchiwizować {{count}} wybranych kursów? Zapisani uczestnicy zachowają dostęp."
+    },
+    "restoreModal": {
+      "title": "Przywróć kursy",
+      "description": "Przywrócić {{count}} wybranych kursów do aktywnego katalogu?"
     },
     "statusModal": {
       "title": "Zmień status kursu",
@@ -2140,6 +2171,9 @@
       "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
       "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
       "bulkCategoryUpdateCategoryNotFound": "Nie znaleziono wybranej kategorii.",
+      "bulkArchiveUpdateSuccessfully": "Stan archiwizacji kursów został zaktualizowany",
+      "bulkArchiveUpdateFailed": "Nie udało się zmienić stanu archiwizacji kursów",
+      "bulkArchiveUpdateForbidden": "Nie masz uprawnień do archiwizacji lub przywrócenia co najmniej jednego z wybranych kursów.",
       "bulkStatusUpdateSuccessfully": "Statusy kursów zostały zaktualizowane",
       "bulkStatusUpdateFailed": "Nie udało się zaktualizować statusów kursów",
       "bulkStatusUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
@@ -2795,7 +2829,8 @@
         "lesson": "Nie znaleziono lekcji."
       },
       "forbidden": {
-        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
+        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu.",
+        "archivedCourseEnrollment": "Ten kurs został zarchiwizowany i nie można się już na niego zapisać."
       },
       "media": {
         "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
@@ -2952,6 +2987,10 @@
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
         "enableVideoCompletionTracking": "Śledzenie ukończenia wideo",
         "enableVideoCompletionTrackingDescription": "Uczestnik musi obejrzeć co najmniej 90% każdego filmu w lekcji, aby lekcja została oznaczona jako ukończona.",
+        "archiveCourseDescription": "Archiwizacja ukrywa kurs w katalogu i blokuje nowe samodzielne zapisy. Zapisani uczestnicy zachowują dostęp.",
+        "archiveCourseTitle": "Zarchiwizuj kurs",
+        "archivedCourseTitle": "Kurs zarchiwizowany",
+        "courseAvailabilityTitle": "Dostępność kursu",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
@@ -5828,6 +5867,11 @@
       "start_course": "Rozpoczęto",
       "group_assignment": "Przypisano",
       "users_import": "Zaimportowano użytkowników",
+      "publish_email_template": "Opublikowano szablon e-mail",
+      "archive_email_template": "Zarchiwizowano szablon e-mail",
+      "restore_email_template": "Przywrócono szablon e-mail",
+      "add_email_template_language": "Dodano język szablonu e-mail",
+      "remove_email_template_language": "Usunięto język szablonu e-mail",
       "send_password_reset_email": "Wysłano e-mail resetowania hasła",
       "resend_password_creation_email": "Wysłano ponownie e-mail utworzenia hasła",
       "complete_lesson": "Ukończono lekcję",
@@ -5861,6 +5905,7 @@
       "live_training": "Szkolenie na żywo",
       "learning_path": "Ścieżka nauki",
       "scorm": "SCORM",
+      "email_template": "Szablon e-mail",
       "global_settings": "Ustawienia"
     },
     "table": {

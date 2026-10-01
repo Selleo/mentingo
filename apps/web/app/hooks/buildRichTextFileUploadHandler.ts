@@ -5,10 +5,10 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  classifyRichTextResourceType,
   type EntityType,
   type EditableResourceVisibility,
 } from "@repo/shared";
-import { match } from "ts-pattern";
 
 import {
   VIDEO_UPLOAD_NODE_STATUS,
@@ -17,10 +17,7 @@ import {
 } from "~/components/RichText/extensions/utils/videoUploadNode";
 import { buildEntityResourceUrl } from "~/components/RichText/utils/buildEntityResourceUrl";
 import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
-import {
-  RICH_TEXT_RESOURCE_DISPLAY_MODE,
-  RICH_TEXT_RESOURCE_TYPE,
-} from "~/components/RichText/utils/richTextResource.types";
+import { RICH_TEXT_RESOURCE_DISPLAY_MODE } from "~/components/RichText/utils/richTextResource.types";
 import { UPLOAD_STATUS } from "~/hooks/useRichTextUploadQueue";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
@@ -315,19 +312,7 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     isPresentation,
     isPdf,
     isDocument,
-    resourceType: match({
-      isImage,
-      isVideo,
-      isPresentation,
-      isPdf,
-      isDocument,
-    })
-      .with({ isImage: true }, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
-      .with({ isVideo: true }, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
-      .with({ isPresentation: true }, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
-      .with({ isPdf: true }, () => RICH_TEXT_RESOURCE_TYPE.PDF)
-      .with({ isDocument: true }, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
-      .otherwise(() => RICH_TEXT_RESOURCE_TYPE.OTHER),
+    resourceType: classifyRichTextResourceType(file.type),
   };
 };
 

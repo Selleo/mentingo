@@ -530,6 +530,7 @@ export default function CourseOverview({
       <CourseSettingsDrawer
         currency={course.currency}
         courseId={course.id}
+        isArchived={course.isArchived ?? false}
         language={language}
         isSharedCourse={isSharedCourse}
         onOpenChange={setShowSettingsDrawer}

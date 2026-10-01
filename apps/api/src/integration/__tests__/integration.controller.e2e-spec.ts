@@ -20,6 +20,7 @@ import {
   courses,
   integrationApiKeys,
   lessons,
+  settings,
   studentCourses,
   studentLessonProgress,
   tenants,
@@ -459,6 +460,17 @@ describe("IntegrationController (e2e)", () => {
           status: TENANT_STATUSES.ACTIVE,
           isManaging: false,
         }),
+      );
+
+      const [createdSettings] = await dbAdmin
+        .select({ settings: settings.settings })
+        .from(settings)
+        .where(
+          and(eq(settings.tenantId, response.body.data.id as string), isNull(settings.userId)),
+        );
+
+      expect(createdSettings.settings).toEqual(
+        expect.objectContaining({ inviteOnlyRegistration: true }),
       );
 
       const [createdAdmin] = await dbAdmin

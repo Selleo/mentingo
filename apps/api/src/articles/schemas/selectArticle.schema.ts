@@ -61,6 +61,7 @@ export const getArticleResponseSchema = Type.Object({
   availableLocales: Type.Array(supportedLanguagesSchema),
   publishedAt: Type.Union([Type.String(), Type.Null()]),
   authorName: Type.String(),
+  authorDeleted: Type.Boolean(),
   authorId: UUIDSchema,
   resources: Type.Optional(articleResourcesSchema),
   createdAt: Type.String(),

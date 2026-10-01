@@ -1,4 +1,4 @@
-import { Link, useParams } from "@remix-run/react";
+import { Link, useLocation, useParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +31,7 @@ type CourseOptionsProps = {
 export const CourseOptions = ({ course }: CourseOptionsProps) => {
   const { t } = useTranslation();
   const { id = "" } = useParams();
+  const location = useLocation();
   const { language } = useLanguageStore();
 
   const { mutateAsync: enrollCourse } = useEnrollCourse();
@@ -59,7 +60,10 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
         : "/auth/register";
 
       return (
-        <Link data-testid={COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK} to={registerPath}>
+        <Link
+          data-testid={COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK}
+          to={`${registerPath}?returnTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`}
+        >
           <Button className="w-full gap-x-2" variant="primary">
             <Enroll />
             <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>

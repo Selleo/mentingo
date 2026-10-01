@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Plattformlogo",
+    "title": "{{clientName}} mit Mentingo verbinden?",
+    "description": "Dieser Assistent kann Mentingo mit Ihren aktuellen Berechtigungen nutzen.",
+    "signedInAs": "Angemeldet als {{email}}",
+    "redirectUri": "Der Zugriff wird gesendet an: {{redirectUri}}",
+    "allow": "Zulassen",
+    "deny": "Ablehnen",
+    "loading": "Verbindung wird geladen…",
+    "unavailableTitle": "Verbindung nicht verfügbar",
+    "unavailable": "Kehren Sie zum Assistenten zurück und starten Sie die Verbindung erneut.",
+    "signInRequired": "Melden Sie sich bei Mentingo an und starten Sie die Verbindung erneut.",
+    "signIn": "Anmelden"
+  },
   "nativeArchive": {
     "importNotice": "Kurse und Lernpfade mit bereits vorhandener Kennung werden übersprungen. Neue Inhalte werden als Entwurf erstellt.",
     "uploadPrompt": "Mentingo-Paket-ZIP auswählen oder ablegen",
@@ -180,6 +194,7 @@
       "copied": "Ein neuer Entwurf wurde erstellt.",
       "saved": "Änderungen gespeichert.",
       "restored": "Vorlage als Entwurf wiederhergestellt.",
+      "languageRemoved": "Sprache aus der Vorlage entfernt.",
       "testQueued": "Test-E-Mail für Ihre Adresse eingereiht.",
       "uploaded": "Bild hochgeladen.",
       "blocks": {
@@ -234,7 +249,9 @@
       "publicationConflict": "Für dieses Ereignis wurde eine andere Vorlage veröffentlicht. Versuchen Sie es erneut.",
       "notFound": "E-Mail-Vorlage nicht gefunden.",
       "createFailed": "Die E-Mail-Vorlage konnte nicht erstellt werden.",
-      "invalidCollection": "Ungültige Sammlungsdaten."
+      "invalidCollection": "Ungültige Sammlungsdaten.",
+      "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden.",
+      "archivedReadOnly": "Stellen Sie die Vorlage wieder her, bevor Sie ihre Sprachen ändern."
     },
     "warnings": {
       "translationFallback": "Unvollständige Übersetzungen verwenden die Basissprache.",
@@ -546,6 +563,7 @@
     "send": "Senden"
   },
   "common": {
+    "deletedUser": "Gelöschter Benutzer",
     "button": {
       "previous": "Zurück",
       "next": "Weiter",
@@ -666,6 +684,9 @@
       "videoReady": "Das Video ist einsatzbereit",
       "videoUploading": "Wir laden Ihr Video hoch. Bitte schließen Sie den Tab nicht.",
       "videoUploadedProcessing": "Ihr Upload ist abgeschlossen. Jetzt wird Ihr Video verarbeitet. Schließen Sie den Tab gerne."
+    },
+    "errors": {
+      "uploadForbidden": "Dieser Upload gehört nicht zum aktuellen Benutzer."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG oder SVG",
@@ -1895,6 +1916,8 @@
     "dropdown": {
       "changeCategory": "Kategorie ändern",
       "changeStatus": "Status ändern",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
       "delete": "Löschen"
     },
     "deleteModal": {
@@ -1902,6 +1925,14 @@
       "titleMultiple": "Kurse löschen",
       "descriptionSingle": "Möchten Sie diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kurse löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "archiveModal": {
+      "title": "Kurse archivieren",
+      "description": "{{count}} ausgewählte Kurse archivieren? Eingeschriebene Lernende behalten Zugriff."
+    },
+    "restoreModal": {
+      "title": "Kurse wiederherstellen",
+      "description": "{{count}} ausgewählte Kurse in den aktiven Katalog zurückholen?"
     },
     "statusModal": {
       "title": "Kursstatus ändern",
@@ -1919,6 +1950,9 @@
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
       "bulkCategoryUpdateCategoryNotFound": "Die ausgewählte Kategorie wurde nicht gefunden.",
+      "bulkArchiveUpdateSuccessfully": "Archivstatus der Kurse aktualisiert",
+      "bulkArchiveUpdateFailed": "Archivstatus der Kurse konnte nicht aktualisiert werden",
+      "bulkArchiveUpdateForbidden": "Sie dürfen einen oder mehrere ausgewählte Kurse nicht archivieren oder wiederherstellen.",
       "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
       "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -2571,7 +2605,8 @@
         "lesson": "Lektion nicht gefunden."
       },
       "forbidden": {
-        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren."
+        "updateCourse": "Sie haben keine Berechtigung, diesen Kurs zu aktualisieren.",
+        "archivedCourseEnrollment": "Dieser Kurs wurde archiviert und ist nicht mehr für die Anmeldung verfügbar."
       },
       "media": {
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
@@ -2727,6 +2762,10 @@
         "enableQuizFeedbackDescription": "Nach dem Absenden des Quiz sieht der Schüler, welche Antworten richtig, falsch oder unbeantwortet waren.",
         "enableVideoCompletionTracking": "Video-Abschlussverfolgung",
         "enableVideoCompletionTrackingDescription": "Lernende müssen mindestens 90% jedes Videos in einer Lektion ansehen, bevor sie als abgeschlossen markiert wird.",
+        "archiveCourseDescription": "Durch die Archivierung wird der Kurs aus dem Katalog ausgeblendet und neue Selbstanmeldungen werden verhindert. Bereits eingeschriebene Lernende behalten Zugriff.",
+        "archiveCourseTitle": "Kurs archivieren",
+        "archivedCourseTitle": "Kurs archiviert",
+        "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
         "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
@@ -5126,6 +5165,11 @@
       "start_course": "Gestartet",
       "group_assignment": "Zugewiesen",
       "users_import": "Benutzer importiert",
+      "publish_email_template": "E-Mail-Vorlage veröffentlicht",
+      "archive_email_template": "E-Mail-Vorlage archiviert",
+      "restore_email_template": "E-Mail-Vorlage wiederhergestellt",
+      "add_email_template_language": "Sprache zur E-Mail-Vorlage hinzugefügt",
+      "remove_email_template_language": "Sprache aus E-Mail-Vorlage entfernt",
       "send_password_reset_email": "Passwort-Zurücksetzen-E-Mail gesendet",
       "resend_password_creation_email": "Passwort-Erstellungs-E-Mail erneut gesendet",
       "complete_lesson": "Lektion abgeschlossen",
@@ -5159,6 +5203,7 @@
       "live_training": "Live-Schulung",
       "learning_path": "Lernpfad",
       "scorm": "SCORM",
+      "email_template": "E-Mail-Vorlage",
       "global_settings": "Einstellungen"
     },
     "table": {

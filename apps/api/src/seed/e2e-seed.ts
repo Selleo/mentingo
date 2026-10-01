@@ -1,5 +1,9 @@
+import { isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js/driver";
 import postgres from "postgres";
+
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { settings } from "src/storage/schema";
 
 import { seedUserRoleGrantSql } from "./seed-helpers";
 import seedProduction from "./seed-prod";
@@ -13,7 +17,12 @@ const db = drizzle(sql) as DatabasePg;
 export async function seedE2E() {
   await seedUserRoleGrantSql(db);
 
-  return seedProduction({ shouldRequirePasswordChange: false });
+  await seedProduction({ shouldRequirePasswordChange: false });
+
+  await db
+    .update(settings)
+    .set({ settings: setJsonbField(settings.settings, "inviteOnlyRegistration", false) })
+    .where(isNull(settings.userId));
 }
 
 if (require.main === module) {

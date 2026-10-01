@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Logo de la plateforme",
+    "title": "Connecter {{clientName}} à Mentingo ?",
+    "description": "Cet assistant peut utiliser Mentingo selon vos autorisations actuelles.",
+    "signedInAs": "Connecté en tant que {{email}}",
+    "redirectUri": "L'accès sera envoyé à : {{redirectUri}}",
+    "allow": "Autoriser",
+    "deny": "Refuser",
+    "loading": "Chargement de la connexion…",
+    "unavailableTitle": "Connexion indisponible",
+    "unavailable": "Retournez à votre assistant et recommencez la connexion.",
+    "signInRequired": "Connectez-vous à Mentingo et recommencez la connexion.",
+    "signIn": "Se connecter"
+  },
   "nativeArchive": {
     "importNotice": "Les cours et parcours dont l’identifiant existe déjà sont ignorés. Le nouveau contenu est créé comme brouillon.",
     "uploadPrompt": "Choisir ou déposer un ZIP de package Mentingo",
@@ -180,6 +194,7 @@
       "copied": "Un nouveau brouillon a été créé.",
       "saved": "Modifications enregistrées.",
       "restored": "Modèle restauré comme brouillon.",
+      "languageRemoved": "Langue supprimée du modèle.",
       "testQueued": "E-mail de test mis en file pour votre adresse.",
       "uploaded": "Image importée.",
       "blocks": {
@@ -234,7 +249,9 @@
       "publicationConflict": "Un autre modèle a été publié pour cet événement. Réessayez.",
       "notFound": "Modèle de courriel introuvable.",
       "createFailed": "Impossible de créer le modèle de courriel.",
-      "invalidCollection": "Données de collection incorrectes."
+      "invalidCollection": "Données de collection incorrectes.",
+      "cannotRemoveBaseLanguage": "La langue de base ne peut pas être supprimée.",
+      "archivedReadOnly": "Restaurez le modèle avant de modifier ses langues."
     },
     "warnings": {
       "translationFallback": "Les traductions incomplètes utilisent la langue de base.",
@@ -669,6 +686,9 @@
       "videoReady": "La vidéo est prête à être utilisée",
       "videoUploading": "Importation de votre vidéo en cours. Ne fermez pas cet onglet.",
       "videoUploadedProcessing": "Votre vidéo a bien été importée et son traitement est en cours. Vous pouvez fermer cet onglet."
+    },
+    "errors": {
+      "uploadForbidden": "Cet import n'appartient pas à l'utilisateur actuel."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG ou SVG",
@@ -1895,6 +1915,8 @@
     "dropdown": {
       "changeCategory": "Changer de catégorie",
       "changeStatus": "Changer de statut",
+      "archive": "Archiver",
+      "restore": "Restaurer",
       "delete": "Supprimer"
     },
     "deleteModal": {
@@ -1902,6 +1924,14 @@
       "titleMultiple": "Supprimer des cours",
       "descriptionSingle": "Êtes-vous sûr de vouloir supprimer ce cours ? Cette action ne peut pas être annulée.",
       "descriptionMultiple": "Êtes-vous sûr de vouloir supprimer {{count}} cours ? Cette action ne peut pas être annulée."
+    },
+    "archiveModal": {
+      "title": "Archiver les cours",
+      "description": "Archiver {{count}} cours sélectionnés ? Les apprenants inscrits conserveront l’accès."
+    },
+    "restoreModal": {
+      "title": "Restaurer les cours",
+      "description": "Restaurer {{count}} cours sélectionnés dans le catalogue actif ?"
     },
     "statusModal": {
       "title": "Changer le statut du cours",
@@ -1919,6 +1949,9 @@
       "bulkCategoryUpdateFailed": "Échec de la mise à jour des catégories de cours",
       "bulkCategoryUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
       "bulkCategoryUpdateCategoryNotFound": "La catégorie sélectionnée n'a pas été trouvée.",
+      "bulkArchiveUpdateSuccessfully": "Statut d’archivage des cours mis à jour",
+      "bulkArchiveUpdateFailed": "Échec de la mise à jour du statut d’archivage des cours",
+      "bulkArchiveUpdateForbidden": "Vous ne pouvez pas archiver ou restaurer un ou plusieurs cours sélectionnés.",
       "bulkStatusUpdateSuccessfully": "Statuts des cours mis à jour avec succès",
       "bulkStatusUpdateFailed": "Échec de la mise à jour des statuts des cours",
       "bulkStatusUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
@@ -2569,6 +2602,9 @@
         "chapter": "Chapitre introuvable.",
         "lesson": "Leçon introuvable."
       },
+      "forbidden": {
+        "archivedCourseEnrollment": "Ce cours a été archivé et les inscriptions ne sont plus possibles."
+      },
       "statisticsAccessForbidden": "Vous n'êtes pas autorisé à afficher les statistiques de ce cours.",
       "create": {
         "courseFailed": "Échec de la création du cours.",
@@ -2719,6 +2755,10 @@
         "enableQuizFeedbackDescription": "Après avoir soumis le quiz, l'apprenant verra quelles réponses étaient correctes, incorrectes ou sans réponse.",
         "enableVideoCompletionTracking": "Suivi de l'achèvement de la vidéo",
         "enableVideoCompletionTrackingDescription": "Exigez des apprenants qu'ils regardent au moins 90 % de chaque vidéo d'une leçon avant qu'elle ne soit marquée comme terminée.",
+        "archiveCourseDescription": "L'archivage masque le cours dans le catalogue et empêche les nouvelles auto-inscriptions. Les apprenants déjà inscrits conservent leur accès.",
+        "archiveCourseTitle": "Archiver le cours",
+        "archivedCourseTitle": "Cours archivé",
+        "courseAvailabilityTitle": "Disponibilité du cours",
         "fallbackLanguageWarningTitle": "Attention : traductions manquantes",
         "fallbackLanguageWarningDescription": "Certains champs de cette version linguistique sont vides. À ces endroits, les apprenants verront le contenu de la langue par défaut jusqu'à ce que vous ajoutiez des traductions.",
         "baseLanguageTooltip": "Vous ne pouvez pas modifier ou supprimer cette langue. C'est la valeur par défaut et fera toujours partie du cours."
@@ -5513,6 +5553,11 @@
       "start_course": "Commencé",
       "group_assignment": "Attribué",
       "users_import": "Utilisateurs importés",
+      "publish_email_template": "Modèle d’e-mail publié",
+      "archive_email_template": "Modèle d’e-mail archivé",
+      "restore_email_template": "Modèle d’e-mail restauré",
+      "add_email_template_language": "Langue ajoutée au modèle d’e-mail",
+      "remove_email_template_language": "Langue supprimée du modèle d’e-mail",
       "send_password_reset_email": "E-mail de réinitialisation du mot de passe envoyé",
       "resend_password_creation_email": "E-mail de création de mot de passe renvoyé",
       "complete_lesson": "Leçon terminée",
@@ -5546,6 +5591,7 @@
       "live_training": "Formation en direct",
       "learning_path": "Parcours d'apprentissage",
       "scorm": "SCORM",
+      "email_template": "Modèle d’e-mail",
       "global_settings": "Paramètres"
     },
     "table": {

@@ -65,6 +65,7 @@ export const coursesFilterSchema = Type.Object({
   title: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
   status: Type.Optional(coursesStatusOptions),
+  isArchived: Type.Optional(Type.Boolean()),
   creationDateRange: Type.Optional(
     Type.Tuple([Type.String({ format: "date-time" }), Type.String({ format: "date-time" })]),
   ),
@@ -83,6 +84,7 @@ export type CoursesQuery = {
   currentUserId?: UUIDType;
   currentUserPermissions?: PermissionKey[];
   currentUser?: CurrentUserType;
+  includeArchived?: boolean;
   excludeCourseId?: UUIDType;
   language: SupportedLanguages;
 };

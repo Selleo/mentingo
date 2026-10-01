@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { version } from "~/../version.json";
 import { mockedUseNavigate, mockRemixReact } from "~/utils/mocks/remix-run-mock";
 import { renderWith } from "~/utils/testUtils";
 
@@ -34,6 +35,16 @@ describe("Login page", () => {
     renderWith({ withQuery: true }).render(<RemixStub />);
 
     expect(screen.getByRole("heading", { name: "Login" })).toBeInTheDocument();
+  });
+
+  it("shows only the current version as a changelog link", () => {
+    renderWith({ withQuery: true }).render(<RemixStub />);
+
+    expect(screen.getByRole("link", { name: version })).toHaveAttribute(
+      "href",
+      `https://github.com/Selleo/mentingo/blob/main/CHANGELOG.md#${version}`,
+    );
+    expect(screen.queryByText(/App Version|Wersja aplikacji/i)).not.toBeInTheDocument();
   });
 
   it.skip("submits the form with valid data", async () => {

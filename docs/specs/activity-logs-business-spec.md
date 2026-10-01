@@ -25,6 +25,7 @@ The main workflow is investigation: an admin opens Activity Logs, identifies the
 - Identify affected courses, lessons, users, groups, and other named resources without interpreting internal IDs, including activity such as enrollments that has no additional metadata.
 - Track key platform events across authentication, users, groups, courses, lessons, chapters, announcements, settings, categories, Q&A, news, articles, live training, certificates, and integrations.
 - Record successful single-course and bulk-course deletions, including enough course context to investigate hard-deleted courses later.
+- Track who created, edited, published, archived, restored, or deleted an email template, and when a translation language was added or removed.
 - Preserve actor identity, actor role, timestamp, action type, resource type, and resource reference where the source event provides it.
 
 ## End-User Value
@@ -43,6 +44,8 @@ The general search is intentionally broader than the older email-only filter: it
 
 When supported domain events happen elsewhere in Mentingo, the activity-log handlers translate those events into audit entries. Course deletion is recorded only after the deletion succeeds: a single deletion keeps the course reference and title, while a bulk deletion keeps one aggregate entry with the deleted course IDs, titles, and count. In normal runtime those entries are queued for persistence so user workflows are not blocked by log writing. In test mode they can be written directly so behavior is deterministic.
 
+Email-template changes appear with the administrator, template name, and action. Editing details show before and after values for changed localized names, subjects, and content, alongside the affected fields and languages. Publishing one template also records the automatic archive of the previously active template. Administrators can add translations in supported languages and remove a saved non-base translation; removal clears that language's name, subject, and content after confirmation.
+
 ## Key Technical Context
 
 - Frontend UI lives in `apps/web/app/modules/ActivityLogs/ActivityLogs.page.tsx`.
@@ -52,9 +55,12 @@ When supported domain events happen elsewhere in Mentingo, the activity-log hand
 - Activity-log responses include a nullable `resourceName`, resolved in batches from event metadata first and current tenant-scoped resources second; settings, integrations, and unresolved resources have no name.
 - Activity-log action, resource, and resource-to-action mapping values are exposed from `packages/shared` so API validation and web filter options use the same contract.
 - Activity handlers under `apps/api/src/activity-logs/handlers` convert domain events into user-readable audit metadata, including the course deletion event emitted by the course service.
+- Email-template actions each publish a distinct domain event through the outbox within the template mutation transaction. The activity handler records those events when dispatched.
 
 ## Test Evidence
 
 API E2E coverage verifies paginated retrieval, readable resource-name resolution for metadata-free course enrollment activity, event-time name precedence, date filtering including logs created on the selected `to` date, multi-action/resource filtering, broad keyword matching across actor email, resource ID, and metadata, and pagination totals with active filters. Broader activity-log E2E coverage verifies records for many source events such as course creation/update/deletion, lesson, chapter, enrollment, announcement, group, category, settings, environment, login, refresh, and logout activity.
 
 Frontend component coverage verifies that metadata-free activity displays its resolved resource name and ID and that unresolved names use the translated fallback. No dedicated frontend Activity Logs E2E spec was found.
+
+Focused handler tests cover email-template actions. Email-template service and handler tests verify distinct events inside successful mutations and before/after edit values; lifecycle API E2E verifies a failed outbox publication rolls back the edit. No authenticated browser E2E check of these new rows was run.

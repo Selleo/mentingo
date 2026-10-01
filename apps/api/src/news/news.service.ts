@@ -6,6 +6,7 @@ import {
   RESOURCE_VISIBILITY,
   isSupportedLanguage,
   type EditableResourceVisibility,
+  type NewsStatus,
   type SupportedLanguages,
 } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, or, sql } from "drizzle-orm";
@@ -215,6 +216,7 @@ export class NewsService {
           ? this.localizationService.getLocalizedSqlField(news.summary, requestedLanguage, news)
           : this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
       })
@@ -251,6 +253,15 @@ export class NewsService {
     page = 1,
     currentUser?: CurrentUserType,
   ) {
+    return this.getManageableNewsList(requestedLanguage, page, currentUser, NEWS_STATUS.DRAFT);
+  }
+
+  async getManageableNewsList(
+    requestedLanguage: SupportedLanguages,
+    page: number,
+    currentUser: CurrentUserType | undefined,
+    status: NewsStatus,
+  ) {
     await this.checkAccess(currentUser?.userId);
 
     const pagination = this.getPaginationForNews(page);
@@ -270,11 +281,14 @@ export class NewsService {
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
-      .where(and(...this.getDraftNewsConditions(currentUser)))
-      .orderBy(sql`${news.createdAt} DESC`)
+      .where(and(...this.getManageableNewsConditions(currentUser, status)))
+      .orderBy(
+        status === NEWS_STATUS.DRAFT ? sql`${news.createdAt} DESC` : sql`${news.publishedAt} DESC`,
+      )
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
@@ -287,7 +301,7 @@ export class NewsService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(news)
-      .where(and(...this.getDraftNewsConditions(currentUser)));
+      .where(and(...this.getManageableNewsConditions(currentUser, status)));
 
     return {
       data: newsListWithCoverImage,
@@ -418,6 +432,7 @@ export class NewsService {
       .select({
         ...getTableColumns(news),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
         title: isAdminLike
           ? this.localizationService.getLocalizedSqlField(news.title, requestedLanguage, news)
           : this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
@@ -1051,8 +1066,15 @@ export class NewsService {
     );
   }
 
-  private getDraftNewsConditions(currentUser?: CurrentUserType) {
-    const conditions = [ne(news.archived, true), sql`${news.publishedAt} IS NULL`];
+  private getManageableNewsConditions(
+    currentUser: CurrentUserType | undefined,
+    status: NewsStatus,
+  ) {
+    const publicationCondition =
+      status === NEWS_STATUS.DRAFT
+        ? sql`${news.publishedAt} IS NULL`
+        : sql`${news.publishedAt} IS NOT NULL`;
+    const conditions = [ne(news.archived, true), publicationCondition];
 
     if (!hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE)) {
       conditions.push(eq(news.authorId, currentUser!.userId));

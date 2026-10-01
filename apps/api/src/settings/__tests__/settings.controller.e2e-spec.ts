@@ -975,6 +975,20 @@ describe("SettingsController (e2e)", () => {
           .expect(400);
       });
 
+      it("should reject an archived published course", async () => {
+        const course = await courseFactory.create({
+          authorId: adminUser.id,
+          status: "published",
+          isArchived: true,
+        });
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/featured-course")
+          .set("Cookie", adminCookies)
+          .send({ featuredCourseId: course.id })
+          .expect(400);
+      });
+
       it("should restrict the setting to admins", async () => {
         const nonAdminUser = await userFactory
           .withCredentials({ password: testPassword })

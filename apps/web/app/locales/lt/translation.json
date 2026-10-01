@@ -1,4 +1,18 @@
 {
+  "mcpConnection": {
+    "platformLogo": "Platformos logotipas",
+    "title": "Prijungti {{clientName}} prie Mentingo?",
+    "description": "Šis asistentas gali naudotis Mentingo pagal jūsų dabartinius leidimus.",
+    "signedInAs": "Prisijungta kaip {{email}}",
+    "redirectUri": "Prieiga bus siunčiama į: {{redirectUri}}",
+    "allow": "Leisti",
+    "deny": "Atmesti",
+    "loading": "Įkeliamas prisijungimas…",
+    "unavailableTitle": "Prisijungimas negalimas",
+    "unavailable": "Grįžkite į asistentą ir pradėkite jungimą iš naujo.",
+    "signInRequired": "Prisijunkite prie Mentingo ir pradėkite jungimą iš naujo.",
+    "signIn": "Prisijungti"
+  },
   "nativeArchive": {
     "importNotice": "Kursai ir mokymosi keliai su jau esančiu identifikatoriumi bus praleisti. Naujas turinys bus sukurtas kaip juodraštis.",
     "uploadPrompt": "Pasirinkite arba nutempkite Mentingo paketo ZIP",
@@ -180,6 +194,7 @@
       "copied": "Sukurtas naujas juodraštis.",
       "saved": "Pakeitimai išsaugoti.",
       "restored": "Šablonas atkurtas kaip juodraštis.",
+      "languageRemoved": "Kalba pašalinta iš šablono.",
       "testQueued": "Bandomasis laiškas įtrauktas į eilę jūsų adresu.",
       "uploaded": "Paveikslėlis įkeltas.",
       "blocks": {
@@ -234,7 +249,9 @@
       "publicationConflict": "Šiam įvykiui paskelbtas kitas šablonas. Bandykite dar kartą.",
       "notFound": "El. laiško šablonas nerastas.",
       "createFailed": "Nepavyko sukurti el. laiško šablono.",
-      "invalidCollection": "Netinkami rinkinio duomenys."
+      "invalidCollection": "Netinkami rinkinio duomenys.",
+      "cannotRemoveBaseLanguage": "Pagrindinės kalbos pašalinti negalima.",
+      "archivedReadOnly": "Prieš keisdami kalbas atkurkite šabloną."
     },
     "warnings": {
       "translationFallback": "Neužbaigti vertimai naudoja pagrindinę kalbą.",
@@ -546,6 +563,7 @@
     "send": "Siųsti"
   },
   "common": {
+    "deletedUser": "Ištrintas naudotojas",
     "button": {
       "previous": "Ankstesnis",
       "next": "Kitas",
@@ -666,6 +684,9 @@
       "videoReady": "Vaizdo įrašas paruoštas naudoti",
       "videoUploading": "Įkeliame jūsų vaizdo įrašą. Neuždarykite skirtuko.",
       "videoUploadedProcessing": "Jūsų įkėlimas baigtas. Dabar jūsų vaizdo įrašas apdorojamas. Nedvejodami uždarykite skirtuką."
+    },
+    "errors": {
+      "uploadForbidden": "Šis įkėlimas nepriklauso dabartiniam vartotojui."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG arba SVG",
@@ -1894,6 +1915,8 @@
     "dropdown": {
       "changeCategory": "Keisti kategoriją",
       "changeStatus": "Keisti būseną",
+      "archive": "Archyvuoti",
+      "restore": "Atkurti",
       "delete": "Ištrinti"
     },
     "deleteModal": {
@@ -1901,6 +1924,14 @@
       "titleMultiple": "Ištrinti kursus",
       "descriptionSingle": "Ar tikrai norite ištrinti šį kursą? Šio veiksmo anuliuoti negalima.",
       "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kursus? Šio veiksmo anuliuoti negalima."
+    },
+    "archiveModal": {
+      "title": "Archyvuoti kursus",
+      "description": "Archyvuoti {{count}} pasirinktų kursų? Užsiregistravę mokiniai išsaugos prieigą."
+    },
+    "restoreModal": {
+      "title": "Atkurti kursus",
+      "description": "Atkurti {{count}} pasirinktų kursų į aktyvų katalogą?"
     },
     "statusModal": {
       "title": "Keisti kurso būseną",
@@ -1918,6 +1949,9 @@
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
       "bulkCategoryUpdateCategoryNotFound": "Pasirinkta kategorija nerasta.",
+      "bulkArchiveUpdateSuccessfully": "Kursų archyvavimo būsena atnaujinta",
+      "bulkArchiveUpdateFailed": "Nepavyko atnaujinti kursų archyvavimo būsenos",
+      "bulkArchiveUpdateForbidden": "Neturite teisės archyvuoti arba atkurti vieno ar daugiau pasirinktų kursų.",
       "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
       "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -2570,7 +2604,8 @@
         "lesson": "Pamoka nerasta."
       },
       "forbidden": {
-        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso.",
+        "archivedCourseEnrollment": "Šis kursas buvo archyvuotas ir į jį nebegalima užsiregistruoti."
       },
       "media": {
         "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
@@ -2726,6 +2761,10 @@
         "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
         "enableVideoCompletionTracking": "Vaizdo įrašo užbaigimo sekimas",
         "enableVideoCompletionTrackingDescription": "Besimokantysis turi peržiūrėti bent 90 % kiekvieno pamokos vaizdo įrašo, kad pamoka būtų pažymėta kaip baigta.",
+        "archiveCourseDescription": "Archyvavus kursas paslepiamas kataloge ir neleidžiama naujai užsiregistruoti savarankiškai. Jau užsiregistravę dalyviai išsaugo prieigą.",
+        "archiveCourseTitle": "Archyvuoti kursą",
+        "archivedCourseTitle": "Kursas archyvuotas",
+        "courseAvailabilityTitle": "Kurso prieinamumas",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
         "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
@@ -5130,6 +5169,11 @@
       "start_course": "Pradėta",
       "group_assignment": "Priskirta",
       "users_import": "Naudotojai importuoti",
+      "publish_email_template": "El. laiško šablonas paskelbtas",
+      "archive_email_template": "El. laiško šablonas archyvuotas",
+      "restore_email_template": "El. laiško šablonas atkurtas",
+      "add_email_template_language": "Pridėta el. laiško šablono kalba",
+      "remove_email_template_language": "Pašalinta el. laiško šablono kalba",
       "send_password_reset_email": "Slaptažodžio atkūrimo el. laiškas išsiųstas",
       "resend_password_creation_email": "Slaptažodžio sukūrimo el. laiškas išsiųstas pakartotinai",
       "complete_lesson": "Pamoka užbaigta",
@@ -5163,6 +5207,7 @@
       "live_training": "Tiesioginiai mokymai",
       "learning_path": "Mokymosi kelias",
       "scorm": "SCORM",
+      "email_template": "El. laiško šablonas",
       "global_settings": "Nustatymai"
     },
     "table": {

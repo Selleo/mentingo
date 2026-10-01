@@ -12,6 +12,7 @@ import { DB } from "src/storage/db/db.providers";
 import { emailTemplates } from "src/storage/schema";
 
 import type { EmailTemplateRecord, EmailTemplateTranslationUpdate } from "../email-template.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 @Injectable()
 export class EmailTemplateRepository {
@@ -115,6 +116,25 @@ export class EmailTemplateRepository {
     return template;
   }
 
+  async removeEmailTemplateLanguage(
+    id: UUIDType,
+    language: SupportedLanguages,
+    availableLocales: SupportedLanguages[],
+  ) {
+    const [template] = await this.db
+      .update(emailTemplates)
+      .set({
+        name: sql`${emailTemplates.name} - ${language}`,
+        subject: sql`${emailTemplates.subject} - ${language}`,
+        content: sql`${emailTemplates.content} - ${language}`,
+        availableLocales,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
+      .returning();
+    return template;
+  }
+
   async updateEmailTemplateTranslations(id: UUIDType, values: EmailTemplateTranslationUpdate) {
     const { name, subject, content, ...metadata } = values;
 
@@ -150,7 +170,7 @@ export class EmailTemplateRepository {
       await this.lockEmailTemplatePublication(transaction, event);
 
       const now = new Date().toISOString();
-      await transaction
+      const archivedTemplates = await transaction
         .update(emailTemplates)
         .set({
           status: EMAIL_TEMPLATE_STATUSES.ARCHIVED,
@@ -164,7 +184,8 @@ export class EmailTemplateRepository {
             eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
             ne(emailTemplates.id, id),
           ),
-        );
+        )
+        .returning();
 
       const [template] = await transaction
         .update(emailTemplates)
@@ -177,7 +198,7 @@ export class EmailTemplateRepository {
         .where(and(eq(emailTemplates.id, id), isNull(emailTemplates.deletedAt)))
         .returning();
 
-      return template;
+      return { template, archivedTemplates };
     });
   }
 

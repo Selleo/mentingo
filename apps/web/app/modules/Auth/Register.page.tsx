@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import { format, startOfDay, subYears } from "date-fns";
 import { enUS, pl } from "date-fns/locale";
 import { useEffect, useMemo } from "react";
@@ -10,6 +10,7 @@ import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { useGlobalSettings, useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import { useRegistrationForm } from "~/api/queries/useRegistrationForm";
 import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
+import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { Icon } from "~/components/Icon";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { PlatformLogo } from "~/components/PlatformLogo";
@@ -22,7 +23,6 @@ import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -46,8 +46,7 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t, i18n } = useTranslation();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const location = useLocation();
   const selectedLanguage = useLanguageStore((state) => state.language);
   const { data: ssoEnabled } = useSSOEnabled();
   const { data: globalSettings } = useGlobalSettings();
@@ -129,18 +128,6 @@ export default function RegisterPage() {
     [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
   );
 
-  useEffect(() => {
-    if (inviteOnlyRegistration) {
-      toast({
-        description: t("inviteOnlyRegistrationView.toast.registerRedirect"),
-        variant: "destructive",
-      });
-      return navigate("/auth/login", { replace: true });
-    }
-    // intentional
-    // eslint-disable-next-line
-  }, [inviteOnlyRegistration, navigate, toast]);
-
   const onSubmit = async (data: RegisterFormValues) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
 
@@ -160,6 +147,17 @@ export default function RegisterPage() {
   }, [globalSettings?.ageLimit]);
 
   const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+
+  if (inviteOnlyRegistration) {
+    return (
+      <ErrorPage
+        title={t("inviteOnlyRegistrationView.toast.registerRedirect")}
+        actionLabel={t("registerView.button.signIn")}
+        actionIcon="ArrowRight"
+        to={`/auth/login${location.search}`}
+      />
+    );
+  }
 
   return (
     <>
@@ -370,7 +368,7 @@ export default function RegisterPage() {
                 <div className="mt-4 text-center text-sm">
                   {t("registerView.other.alreadyHaveAccount")}{" "}
                   <Link
-                    to="/auth/login"
+                    to={`/auth/login${location.search}`}
                     className="underline"
                     data-testid={REGISTER_PAGE_HANDLES.SIGN_IN_LINK}
                   >

@@ -8,8 +8,11 @@ import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 
+import { MCP_UPLOAD_TOKEN_PREFIX, McpUploadGrantService } from "src/mcp/mcp-upload-grant.service";
 import { SessionRevocationService } from "src/redis";
 import { extractToken } from "src/utils/extract-token";
+
+import type { McpRequest } from "src/mcp/mcp.types";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -18,6 +21,7 @@ export class JwtAuthGuard implements CanActivate {
     private reflector: Reflector,
     private configService: ConfigService,
     private readonly sessionRevocationService: SessionRevocationService,
+    private readonly mcpUploadGrants: McpUploadGrantService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -27,6 +31,10 @@ export class JwtAuthGuard implements CanActivate {
     ]);
 
     const request = context.switchToHttp().getRequest();
+    if (this.isMcpUploadGrantRequest(request)) {
+      return this.authenticateUploadGrant(request);
+    }
+
     const token = extractToken(request, "access_token");
 
     if (isPublic) {
@@ -80,5 +88,17 @@ export class JwtAuthGuard implements CanActivate {
 
       throw new UnauthorizedException("Invalid access token");
     }
+  }
+
+  private isMcpUploadGrantRequest(request: McpRequest): boolean {
+    return request.headers.authorization?.startsWith(`Bearer ${MCP_UPLOAD_TOKEN_PREFIX}`) ?? false;
+  }
+
+  private async authenticateUploadGrant(request: McpRequest): Promise<boolean> {
+    const { user, grant, token } = await this.mcpUploadGrants.authenticate(request);
+    request.user = user;
+    request.mcpUploadGrant = grant;
+    request.mcpUploadGrantToken = token;
+    return true;
   }
 }

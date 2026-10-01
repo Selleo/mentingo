@@ -28,6 +28,7 @@ import {
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
   type EditableResourceVisibility,
+  ENTITY_TYPES,
   FEATURES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -44,6 +45,11 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import {
+  assertEditorialCoverUploadGrant,
+  assertEditorialUploadGrant,
+} from "src/mcp/mcp-upload-grant.assertions";
+import { McpRequest } from "src/mcp/mcp.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { NewsService } from "./news.service";
@@ -66,7 +72,6 @@ import {
 } from "./schemas/updateNews.schema";
 
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
-
 @Controller("news")
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
@@ -208,7 +213,16 @@ export class NewsController {
     )
     coverFiles: Express.Multer.File[] = [],
     @CurrentUser() currentUser?: CurrentUserType,
+    @Req() request?: McpRequest,
   ) {
+    if (request?.mcpUploadGrant)
+      assertEditorialCoverUploadGrant(
+        request.mcpUploadGrant,
+        ENTITY_TYPES.NEWS,
+        id,
+        coverFiles,
+        updateNewsBody,
+      );
     const updatedNews = await this.newsService.updateNews(
       id,
       updateNewsBody,
@@ -331,8 +345,21 @@ export class NewsController {
     @Body("title") title: string,
     @Body("description") description: string,
     @Body("visibility") visibility: EditableResourceVisibility = RESOURCE_VISIBILITY.PUBLIC,
-    @CurrentUser() currentUser?: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | undefined,
+    @Req() request: McpRequest,
   ) {
+    if (request.mcpUploadGrant) {
+      assertEditorialUploadGrant(
+        request.mcpUploadGrant,
+        ENTITY_TYPES.NEWS,
+        id,
+        file,
+        language,
+        title,
+        description,
+        visibility,
+      );
+    }
     const fileData = await this.newsService.uploadFileToNews(
       id,
       file,

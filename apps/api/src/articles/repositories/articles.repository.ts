@@ -113,6 +113,8 @@ export class ArticlesRepository {
       .insert(articles)
       .values({
         title: titleJsonb,
+        summary: {},
+        content: {},
         baseLanguage: language,
         availableLocales: [language],
         authorId,
@@ -148,6 +150,7 @@ export class ArticlesRepository {
         ...getTableColumns(articles),
         title: this.localizationService.getFieldByLanguage(articles.title, requestedLanguage),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
       })
       .from(articles)
       .innerJoin(articleSections, eq(articleSections.id, articles.articleSectionId))
@@ -166,6 +169,7 @@ export class ArticlesRepository {
         ...getTableColumns(articles),
         title: this.localizationService.getFieldByLanguage(articles.title, requestedLanguage),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
       })
       .from(articles)
       .leftJoin(users, eq(users.id, articles.authorId))
@@ -225,6 +229,7 @@ export class ArticlesRepository {
       .select({
         ...getTableColumns(articles),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
         title: localizedTitle,
         content: localizedContent,
         summary: localizedSummary,

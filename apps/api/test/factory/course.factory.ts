@@ -102,6 +102,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       durationEstimates: {},
       showAuthorSection: true,
       status: "published",
+      isArchived: false,
       hasCertificate: false,
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
       currency: "usd",
