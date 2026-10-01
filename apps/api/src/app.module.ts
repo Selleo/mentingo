@@ -25,7 +25,6 @@ import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
-import { SlackStrategy } from "./auth/strategy/slack.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
@@ -229,7 +228,6 @@ import type { RedisClient } from "src/redis";
     MicrosoftStrategy,
     AppStartupService,
     LangfuseShutdownService,
-    ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })
 export class AppModule {}

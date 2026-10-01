@@ -89,6 +89,8 @@ export function EmailTemplateEditorToolbar({
                 testIds={{
                   select: EMAIL_TEMPLATES_HANDLES.LANGUAGE,
                   option: EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION,
+                  createDialog: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_DIALOG,
+                  createConfirmButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_CONFIRM,
                   deleteButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_DELETE,
                 }}
                 formKey={template.id ?? template.event}

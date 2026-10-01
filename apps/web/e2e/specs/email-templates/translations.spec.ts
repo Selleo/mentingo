@@ -8,6 +8,7 @@ import {
 import { appendEmailTextFlow } from "../../flows/email-templates/canvas.flow";
 import { editEmailTemplateFlow } from "../../flows/email-templates/edit-email-template.flow";
 import {
+  createEmailLanguageFlow,
   openEmailTemplateFlow,
   selectEmailLanguageFlow,
 } from "../../flows/email-templates/editor.flow";
@@ -26,7 +27,7 @@ test("translations persist independently and a complete saved translation can be
       subject: "English subject",
       text: { index: 0, value: "English body" },
     });
-    await selectEmailLanguageFlow(page, EMAIL_TEMPLATE_DATA.polish);
+    await createEmailLanguageFlow(page, EMAIL_TEMPLATE_DATA.polish);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE)).toBeDisabled();
     await editEmailTemplateFlow(page, { name: "Polish name", subject: "Polish subject" });
     await appendEmailTextFlow(page, { index: 0, text: "Polish body" });
