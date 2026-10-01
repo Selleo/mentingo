@@ -15,7 +15,19 @@ export const filterCoursesFlow = async (
   { title, categoryTitle, state, archivedStatus }: FilterCoursesFlowInput,
 ) => {
   if (title !== undefined) {
+    const filteredCoursesResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+
+      return (
+        response.request().method() === "GET" &&
+        url.pathname === "/api/course/all" &&
+        (url.searchParams.get("title") ?? "") === title
+      );
+    });
+
     await page.getByTestId(COURSES_PAGE_HANDLES.TITLE_FILTER).fill(title);
+    const response = await filteredCoursesResponse;
+    await response.finished();
   }
 
   if (categoryTitle !== undefined) {

@@ -1,138 +1,59 @@
-# Course Authoring And Management Business Spec
+# Course Authoring and Management Business Spec
 
 ## Business Overview
 
-Course authoring and management is the administrative lifecycle for Mentingo courses. It lets L&D teams create courses, maintain metadata, prepare content privately, publish training when ready, localize it for supported languages, manage operational settings, and retire draft material safely.
+Mentingo lets HR and L&D teams build courses, prepare them privately, publish them when ready, and maintain them throughout their life in the learning catalog. Editors can keep the curriculum, media, translations, enrollment, and ownership together while reviewing how learners progress.
 
-For HR and L&D teams, this is the control center for the learning catalog. It keeps course ownership, status, settings, pricing, certificates, enrollment, language variants, and export actions inside one governed workflow.
+An administrator can create a course, add chapters and lessons, assign learners, and release it to the right audience. Content creators can maintain courses they authored; administrators with broader access can manage the catalog across authors. Courses can also be packaged for reuse or shared with managed tenants.
 
 ## Who Uses It
 
-- Content creators creating and maintaining courses they own.
-- L&D administrators managing the broader course catalog and publication flow.
-- Course administrators configuring settings, certificates, pricing, language variants, enrollment, and ownership.
-- Managing-tenant administrators exporting eligible master courses to other tenants.
+- Content creators build and update their own training courses, then review learner outcomes for those courses when they have statistics access.
+- L&D administrators manage the wider catalog, including publication, assignments, ownership, and reporting.
+- Managing-tenant administrators share eligible master courses with other tenants so teams can reuse approved training.
+- Learners see the published course description, outcomes, and curriculum, then access lessons according to enrollment and course rules.
 
 ## Feature Functions
 
-- Create standard courses from the admin create workflow.
-- Choose supported course types where the tenant configuration allows them.
-- Browse, filter, and open manageable courses from the admin course list.
-- Update course title, description, category, thumbnail, and related metadata.
-- Open category management directly from the course category selector when permitted.
-- Add up to five concise learning outcomes so learners can quickly understand what the course delivers.
-- Keep unavailable lessons visible in the Table of Contents without letting learners open content blocked by enrollment, freemium, or lesson-sequence rules.
-- Review and edit localized course metadata in the selected course language from the modern overview, including the title, description, category, learning outcomes, and curriculum titles.
-- See a compact warning when any supported course content is still missing in the selected translation.
-- Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
-- Change course category and status individually or in bulk, including draft, private, and published states.
-- Configure course settings such as certificate behavior and lesson sequencing options.
-- Manage course pricing when Stripe pricing is configured.
-- Add, switch, delete, and generate course language variants directly from the modern course overview while editing media and metadata.
-- Manage course enrollment for users and groups from the course edit area.
-- Manage group assignment deadlines only when the user can manage course enrollments and view groups.
-- Create, reorder, edit, and remove chapters while maintaining the course curriculum.
-- Transfer course ownership to another eligible user.
-- Delete draft courses individually or in bulk while protecting private and published courses.
-- Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
-- Export supported courses as SCORM packages when permissions and configuration allow it.
-- Download an editable Mentingo package and import one from a ZIP file to recreate the course as a draft.
-- Review learner progress, learning time, quiz outcomes, and AI Mentor results for courses the user manages.
+- Create available course types, organize chapters and lessons, and maintain titles, descriptions, categories, images, trailers, and up to five learning outcomes.
+- Prepare language versions of course content, switch between them while editing, and spot missing translations.
+- Publish, move to private or draft, archive, restore, or delete eligible draft courses; apply supported category and status changes to multiple courses.
+- Configure course settings, certificates, sequencing, pricing when available, learner and group enrollment, and group assignment deadlines.
+- Transfer course ownership and review completion, learning time, quiz, and available AI Mentor results for courses the user manages.
+- Share eligible master courses with managed tenants and synchronize later source changes to their read-only copies.
+- Export supported courses as SCORM packages or download an editable Mentingo package; import a Mentingo package to create a draft in the destination tenant.
+- Let learners inspect the course structure while keeping lessons they cannot yet access visible but unavailable to open.
 
 ## End-User Value
 
-The feature gives L&D teams governance over the training library. Teams can prepare courses before learners see them, publish only when content is ready, keep accountability through ownership, and maintain multilingual versions for different learner populations.
+L&D teams can prepare training before release, keep responsibility clear through ownership, and deliver localized courses to different learner groups. Bulk actions and reusable packages reduce repetitive catalog work. Enrollment and progress views help administrators coordinate assignments and assess whether training is working.
 
-Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, private and published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
-
-Course reporting follows the same ownership model. Content creators can review outcomes for their own courses, while users with broader course-management responsibility can review the courses they oversee. This keeps learner reporting useful without exposing another creator's operational data.
+Learners get a clear course summary and curriculum, while enrolled learners keep their progress when a course is archived. Tenant sharing and course packages help organizations reuse authored material without rebuilding it from scratch.
 
 ## How It Works
 
-An editor who can manage a course can download a Mentingo package ZIP from the sharing area, next to the SCORM export option. To restore one, a course creator selects the Mentingo package card in the new-course experience, then chooses or drops the ZIP on a dedicated upload page. Mentingo uploads it in resumable chunks and shows progress over the file picker. When import creates a course, the course overview opens; an existing course identifier produces a notice without changing it. The imported course keeps its original UUID and author display attribution, belongs to the importer, starts as a free draft, and uses the destination's category when its base-language title matches. Learner progress and enrollments do not move with it.
+An administrator starts from the course list, creates a course, and opens its editing experience. The curriculum area supports chapter and lesson changes. The modern Course Overview holds the course title, description, category, learning outcomes, media, and settings; the edit area exposes status, enrollment, pricing when available, and sharing. The course list supports filtering and bulk category, status, archive, and eligible draft-deletion actions.
 
-Imported live training keeps its authored schedule and materials and displays a review reminder that an editor can dismiss. The reminder does not prevent publication. Mentingo package export is separate from SCORM packages and live tenant sharing.
+Editors can select a course language from the overview. Title and description editing shows the selected language's actual values so translation gaps remain visible. Category titles and learning outcomes can fall back to the base language, and a warning identifies incomplete translations. Editors can add up to five learning outcomes and upload or reposition a cover image or add a trailer. Learners see the curriculum, but enrollment, freemium access, and lesson order determine which lessons they can open.
 
-Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose curriculum, pricing when available, status, enrollment, and export areas. Course metadata and operational settings are managed from the modern course overview instead of a duplicate Settings tab in the legacy edit screen.
+An editor can archive a course from the list or its settings and later restore it. Archived courses leave discovery and self-enrollment, but existing learners retain access and progress. Administrators can still assign learners. Private and published courses must return to draft before deletion. Removing a chapter also removes progress tied only to that chapter.
 
-While maintaining a course curriculum, authorized administrators can create, reorder, update, and remove chapters. Removing a chapter also removes the learner progress that belongs only to that chapter, so obsolete curriculum does not leave broken learner records behind.
+Administrators can assign users or groups to a course. Group deadlines can be changed without changing whether each assignment is mandatory or optional. Eligible editors can open Statistics to review completion, progress, learning time, quiz results, and available AI Mentor outcomes. The statistics view is hidden in Learning Mode and cannot be opened for another author's course solely through a direct link.
 
-The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
+For reuse, an editor can download a Mentingo package ZIP from the course sharing area. A creator selects the package option in the new-course flow, uploads the ZIP, and sees the imported course when processing finishes. The destination course receives its own tenant-specific ID while retaining the source identity for repeat-import detection. It belongs to the importer, starts as a free draft, and reuses a destination category when its base-language title matches. Learner enrollments and progress are not imported. Reimporting an existing course leaves it unchanged and shows a notice. Imported live training keeps its authored schedule and materials and prompts an editor to review them; the reminder does not block publication.
 
-When a managing-tenant administrator shares a master course, Mentingo creates a read-only copy for each selected target tenant and copies tenant-owned media into that tenant's storage. Course covers retain every generated size, including the highest-quality version, and an incomplete earlier copy is repaired by transferring only the missing variants. Learning outcomes, author-section visibility, and cover-image positioning are preserved when the copy is created and when later source changes synchronize to linked target courses.
-
-Course mutations are permission-gated. Users with organization-wide course update access can edit any course, while content creators with own-course update access can edit only courses they authored. The Course Overview exposes its editor controls according to the same rule, preventing authorized users from losing access and preventing unrelated permissions from exposing actions that the API would reject. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Private and published courses must be moved back to draft before deletion is allowed. Language operations respect supported-language and base-language rules.
-
-When a course editor lacks update access or a course image/media update fails, Mentingo returns a translatable error identifier so the interface can explain the failure in the user's active language instead of exposing a fixed English backend message.
-
-The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, related author courses, curriculum labels, lesson statuses, and summary statistics. The author modal shows all other published courses by the same author, including courses in which the viewer is already enrolled, while always excluding the currently open course. Cards provide practical catalog context such as enrolled learner count and estimated course duration. Selecting a related course closes the modal and opens that course directly.
-
-Course administrators can switch the active course language from the modern overview next to the media editor. Selecting an existing language reloads the overview in that translation and preserves the selection while Mentingo resolves the language-specific course address. Selecting a new language starts the language-creation flow and can offer AI-assisted translation generation, while deleting the active translation returns the overview to the base language.
-
-On small screens, the overview keeps the administrator settings, media, and language controls in one compact row. The language selector shows only the active language flag until the small-screen breakpoint, then restores the language name, while keeping its information and delete actions accessible. The hero keeps this toolbar, the course title, and the primary actions within both its horizontal and vertical boundaries, while reserving separate space for the course category, duration, title, and actions even when a title wraps onto multiple lines. Primary course actions remain fully inside the hero below the course title and may wrap when space is limited, so learners can still enroll, start or continue learning, and open course details, while course editors can enter or exit Learning Mode. The larger learning-outcomes summary stays hidden on smaller screens to keep the hero readable.
-
-While editing, the course title and description use the selected course language exactly, so administrators can identify and complete those translation gaps. Learning outcomes remain useful in the Course Overview by falling back to the base-language list when the selected translation is missing or empty, including in the administrator experience.
-
-The course title keeps its edit affordance directly beside the displayed text, making the action easy to associate with the title regardless of its length. Once editing starts, the pencil is removed so the focused title field becomes the single active control.
-
-The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language. Administrators with category-management access can also open the tenant's category administration page directly from the bottom of the selector.
-
-If supported course content is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. The same established translation check used by the full course editor covers course metadata, curriculum, quiz, AI Mentor, and AI Judge content, keeping translation gaps discoverable without adding a second definition of completeness.
-
-The Table of Contents shows the full curriculum so learners can understand the course structure, but only lessons available to the current user are interactive. Enrollment, freemium chapter access, and enforced lesson order determine learner access, while authorized course editors can use Learning Mode or preview access to review the curriculum without weakening learner-facing restrictions. Its heading remains visible on small screens whenever no tab bar is present. On mobile, the collapsed learner view starts with the in-progress chapter and the following chapter; when no chapter is in progress, it shows the first two remaining chapters and reports the exact number still hidden.
-
-Course statistics are available only to users with the dedicated statistics permission and are hidden while the user is in Learning Mode. If Learning Mode is enabled while Statistics is active, the overview returns to the table of contents. Course description, deadline, and media editors use accessible dialogs with keyboard dismissal and managed focus. Deadline management additionally requires both course-enrollment and group-view access, so default content creators with own-course editing access do not see the deadline card in the administrator experience or trigger its protected group query. Learners and public visitors with an assigned deadline still see its read-only countdown. Changing or removing group deadlines from the Course Overview preserves whether each group assignment is mandatory or optional.
-
-Course administrators can select a trailer video in the same media editor used for the hero image. Mentingo uploads the video through the resumable video-upload flow, associates it with the course as its trailer, and refreshes course and catalog data after the media update completes.
-
-Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. The learner-facing heading presents these outcomes as “What you'll master” in every supported interface language. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
-
-From a course view, an eligible administrator opens the Statistics tab to review course-level completion, learner progress, learning time, quiz results, and—when available—AI Mentor outcomes. Published courses may still be viewed by users who do not manage them, but the Statistics tab and its data are limited to the course owner or users with any-course management responsibility. The API rechecks this boundary for every statistics request so direct links cannot bypass the UI.
+Managing-tenant administrators can instead share a master course with selected tenants. Those tenants receive read-only copies, including course media; later source changes can synchronize to the copies. SCORM export is a separate delivery format from both Mentingo packages and tenant sharing. Available course types and editing options depend on course type, tenant settings, connected services, and the user's access.
 
 ## Key Technical Context
 
-- Mentingo package handling lives in `apps/api/src/native-archive`; ZIP processing runs through a tenant-scoped queue, and the format includes a versioned manifest and checksums for packaged files.
-- Course archive export requires course management access. Import requires course creation access and skips a course whose UUID already exists in the destination tenant.
-
-- Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
-- Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
-- Chapter editing is provided by the curriculum area and `apps/api/src/chapter`; chapter deletion removes its related learner chapter-progress data in the same database operation.
-- Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
-- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; course update snapshots detect learning outcomes, author-section visibility, and cover-image positioning, while both the create and update mappings copy those values to the target course. Copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
-- Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`. Course Overview editor visibility follows the API update rule: `COURSE_UPDATE` applies to any course, while `COURSE_UPDATE_OWN` additionally requires matching the course author.
-- The category-management shortcut is shown only with `PERMISSIONS.CATEGORY_MANAGE` and uses the tenant-relative `/admin/categories` route.
-- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
-- Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_STATISTICS`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
-- Course statistics require both the statistics capability and resource-level manageability: `COURSE_UPDATE` allows any course, while `COURSE_UPDATE_OWN` requires the requester to match `courses.authorId`.
-- Deadline management requires `PERMISSIONS.COURSE_ENROLLMENT` for saving assignments and deadlines plus `PERMISSIONS.GROUP_READ` for loading the enrolled groups. The UI requires both before showing the administrator card or enabling its query.
-- The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
-- Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
-- The modern overview stores the selected course language in the URL so course content, media edits, and metadata updates stay aligned with the active translation.
-- The course-details service keeps editable title and description values exact to the selected language. Category names and learning outcomes retain base-language fallback behavior in both learner and administrator Course Overview experiences; missing or empty translated learning-outcome lists fall back to the course base language.
-- The modern overview reuses the existing protected missing-translations query used by the full course editor. It runs only for authorized course editors and does not change the Table of Contents fallback behavior.
-- The modern Table of Contents reuses the established course-wide lesson-sequence calculation and course access context, keeping enrollment, freemium, preview, and Learning Mode behavior consistent with lesson delivery.
-- The shared `MAX_COURSE_LEARNING_OUTCOMES` constant keeps the five-item UI and API validation rules aligned.
-- Trailer videos use the existing resumable video-upload integration and the course `trailer` relationship rather than a separate upload path.
+- Admin course management lives in `apps/web/app/modules/Admin/Courses`, `AddCourse`, and `EditCourse`; the modern Course Overview supplies language-aware metadata and media editing. Core course operations live in `apps/api/src/courses/course.controller.ts`.
+- Course creation, own-course editing, any-course editing, enrollment, statistics, deletion, export, and category management have separate permission checks. Statistics additionally requires access to the specific course. Group deadline editing requires course-enrollment and group-read access.
+- Archive state is separate from draft, private, and published status. Catalog and direct-course access enforce archive visibility while retaining access for enrolled learners.
+- Mentingo package export and import live in `apps/api/src/native-archive`. ZIPs contain a versioned manifest and checked assets; tenant-scoped background jobs process them. Import maps source identities to destination IDs and checks for an existing course before creating one.
+- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied media belongs to the target tenant. Course language selection stays in the overview URL, and shared language and learning-outcome rules keep the UI and API aligned.
 
 ## Test Evidence
 
-- Focused API tests cover ZIP round-trip parsing, preservation of distinct asset references with identical bytes, rejection of unsupported versions, resumable upload offset handling, and the no-op when a course UUID already exists. A web component test covers the ZIP-only import control. Full course import/export E2E coverage remains to be added.
-
-- Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
-- API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
-- API E2E coverage verifies that content creators can access their own course statistics, cannot access another author's statistics, and that any-course administrators retain access.
-- Curriculum web E2E coverage verifies an administrator can create, update, reorder, and delete a chapter; chapter API E2E coverage verifies deletion also clears the chapter's learner progress.
-- Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
-- Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
-- Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, hides administrator deadline management unless both enrollment and group-view access are present, preserves the read-only deadline for unauthenticated visitors, verifies accessible keyboard dismissal for the description, deadline, and media dialogs, preserves each group's mandatory/optional assignment status when deadlines change, loads all published related-author courses with modal-closing navigation, links expanded lessons to course lesson routes, and allows trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.
-- Focused component coverage verifies that deleting the active course translation returns the language selector to the base language.
-- Focused frontend and API schema tests verify that only five learning outcomes can be displayed or submitted and that the add action is disabled at the limit.
-- Course API E2E coverage verifies exact-language title and description for editors, category and learning-outcome fallback in the administrator Course Overview, and base-language fallback for learner-facing metadata.
-- Focused component coverage verifies that the modern overview requests the established missing-translations check for the selected course language and shows the administrator-only warning tooltip from its result. API E2E coverage verifies that the shared check detects a missing AI Mentor translation and clears after that translation is completed.
-- Focused frontend coverage verifies that redirects to language-specific course addresses preserve the selected course language instead of falling back to the default language.
-- Focused component coverage verifies that the category selector renders the localized and default-language fallback titles returned by the API.
-- Focused component coverage verifies that permitted users receive the category-management shortcut and other course editors do not.
-- Focused component coverage verifies that the course-title pencil follows the displayed title and is hidden while the title field is being edited.
-- Focused component coverage verifies that the course language selector uses an accessible flag-only value on small screens, restores the language name at the small-screen breakpoint, and preserves its deletion behavior.
-- Focused responsive E2E coverage verifies that the language selector, course title, and primary actions remain fully inside the hero on a small screen, the larger learning-outcomes summary remains hidden, and the administrator toolbar does not overlap the course metadata, title, or actions.
-- Focused component coverage verifies that accessible lessons link to their lesson pages, while lessons blocked by enrollment, freemium content type, or lesson sequence remain visible but non-interactive; Learning Mode retains authorized access. It also verifies that the Table of Contents heading remains visible on mobile and that the collapsed mobile chapter list shows two remaining chapters when none is in progress with the correct hidden count.
+- Web end-to-end tests cover course creation, list and bulk actions, settings, status, pricing, language variants, SCORM, chapter editing, and responsive Course Overview behavior. Focused component tests cover editing controls, translation warnings, learning outcomes, media selection, statistics visibility, and access-limited lessons.
+- Course API end-to-end tests cover draft deletion, archive and restore visibility, enrolled access, statistics access for own versus other authors' courses, localized metadata, and chapter-progress cleanup. Master-course tests cover tenant sharing, synchronization, and media copying.
+- Mentingo package API end-to-end tests cover course export, tenant-scoped import, chapter and lesson content, live training, SCORM assets, repeat import, permission rejection, and background job processing. ZIP and upload tests cover format validation and resumable transfer. A web component test covers selecting a ZIP for import; a browser end-to-end import and export journey is not yet covered.

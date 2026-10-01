@@ -183,6 +183,42 @@ describe("GlobalSearchController (e2e)", () => {
     ]);
   });
 
+  it("excludes archived courses from available results while keeping them in enrolled results", async () => {
+    const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+    const author = await userFactory.create();
+    const archivedCourse = await courseFactory.create({
+      authorId: author.id,
+      title: "Archive search course",
+      status: "published",
+      isArchived: true,
+    });
+    const activeCourse = await courseFactory.create({
+      authorId: author.id,
+      title: "Archive search course active",
+      status: "published",
+    });
+
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: archivedCourse.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      tenantId: student.tenantId,
+    });
+    await Promise.all([
+      searchIndexService.refreshCourse(archivedCourse.id),
+      searchIndexService.refreshCourse(activeCourse.id),
+    ]);
+
+    const results = await search(
+      await cookieFor(student, app),
+      "Archive search course",
+      SUPPORTED_LANGUAGES.EN,
+    );
+
+    expect(results.availableCourses).toEqual([expect.objectContaining({ id: activeCourse.id })]);
+    expect(results.myCourses).toEqual([expect.objectContaining({ id: archivedCourse.id })]);
+  });
+
   it("uses requested-language search documents when they exist and match", async () => {
     const cookie = await createAdminCookie();
     const qa = await qaFactory.create({

@@ -80,6 +80,7 @@ export class GlobalSearchRepository {
       authorId?: UUIDType;
       enrolledStudentId?: UUIDType;
       publishedOnly?: boolean;
+      excludeArchived?: boolean;
     } = {},
   ) {
     const ids = this.matchIds(matches);
@@ -113,6 +114,7 @@ export class GlobalSearchRepository {
         inArray(courses.id, ids),
         options.authorId ? eq(courses.authorId, options.authorId) : undefined,
         options.publishedOnly ? eq(courses.status, "published") : undefined,
+        options.excludeArchived ? eq(courses.isArchived, false) : undefined,
         options.enrolledStudentId
           ? and(
               eq(studentCourses.studentId, options.enrolledStudentId),

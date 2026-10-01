@@ -2131,6 +2131,7 @@ export interface GetAllCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    isArchived?: boolean;
     courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
@@ -2184,6 +2185,7 @@ export interface GetStudentCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    isArchived?: boolean;
     courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
@@ -2290,6 +2292,7 @@ export interface GetAvailableCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    isArchived?: boolean;
     courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
@@ -2350,6 +2353,7 @@ export interface GetTopCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    isArchived?: boolean;
     courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
@@ -2387,6 +2391,7 @@ export interface GetContentCreatorCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    isArchived?: boolean;
     courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
@@ -2403,7 +2408,7 @@ export interface GetContentCreatorCoursesResponse {
 
 export interface GetCourseResponse {
   data: {
-    archived?: boolean;
+    isArchived?: boolean;
     /** @format uuid */
     authorId?: string;
     author?: {
@@ -2496,7 +2501,7 @@ export interface LookupCourseResponse {
 
 export interface GetBetaCourseByIdResponse {
   data: {
-    archived?: boolean;
+    isArchived?: boolean;
     /** @format uuid */
     authorId?: string;
     category: string;
@@ -2654,6 +2659,18 @@ export interface BulkUpdateCourseStatusResponse {
   };
 }
 
+export interface BulkArchiveCourseBody {
+  /** @minItems 1 */
+  ids: string[];
+  isArchived: boolean;
+}
+
+export interface BulkArchiveCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface BulkUpdateCourseCategoryBody {
   ids: string[];
   /** @format uuid */
@@ -2723,7 +2740,6 @@ export interface UpdateCourseBody {
   /** @format uuid */
   categoryId?: string;
   chapters?: string[];
-  archived?: boolean;
   /** @default "en" */
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
 }
@@ -28503,6 +28519,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         perPage?: number;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        isArchived?: "true" | "false" | "all";
       },
       params: RequestParams = {},
     ) =>
@@ -28913,6 +28930,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<BulkUpdateCourseStatusResponse, any>({
         path: `/api/course/bulk/status`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerBulkArchiveCourse
+     * @request PATCH:/api/course/bulk/archive
+     */
+    courseControllerBulkArchiveCourse: (data: BulkArchiveCourseBody, params: RequestParams = {}) =>
+      this.request<BulkArchiveCourseResponse, any>({
+        path: `/api/course/bulk/archive`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,

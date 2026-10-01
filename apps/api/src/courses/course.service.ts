@@ -180,6 +180,7 @@ import {
 import { courseAuthorAvatarReferenceSql, courseAuthorNameSql } from "./utils/course-author-sql";
 
 import type { CourseStatisticsExpressionsParams } from "./course.types";
+import type { BulkArchiveCourseBody } from "./schemas/bulkArchiveCourse.schema";
 import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
@@ -326,7 +327,11 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const conditions = this.getFiltersConditions(filters, false, language);
+    const conditions = this.getFiltersConditions(
+      { ...filters, isArchived: query.includeArchived ? undefined : (filters.isArchived ?? false) },
+      false,
+      language,
+    );
 
     const accessCondition = this.getCourseListAccessCondition({
       currentUser,
@@ -354,6 +359,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         status: courses.status,
+        isArchived: courses.isArchived,
         createdAt: courses.createdAt,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
@@ -1001,7 +1007,10 @@ export class CourseService {
       query.excludeCourseId,
     );
 
-    const conditions = [eq(courses.status, "published")];
+    const conditions = [
+      eq(courses.status, COURSE_STATUSES.PUBLISHED),
+      eq(courses.isArchived, false),
+    ];
     conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
 
     if (availableCourseIds.length > 0) {
@@ -1237,7 +1246,10 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const availableCourseIds = await this.getAvailableCourseIds(trx, currentUserId);
 
-      const conditions = [eq(courses.status, "published")];
+      const conditions = [
+        eq(courses.status, COURSE_STATUSES.PUBLISHED),
+        eq(courses.isArchived, false),
+      ];
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
@@ -1377,7 +1389,10 @@ export class CourseService {
 
     return this.db.transaction(async (trx) => {
       const localizedTitle = this.localizationService.getLocalizedSqlField(courses.title, language);
-      const conditions = [eq(courses.status, COURSE_STATUSES.PUBLISHED)];
+      const conditions = [
+        eq(courses.status, COURSE_STATUSES.PUBLISHED),
+        eq(courses.isArchived, false),
+      ];
 
       if (title?.trim()) {
         conditions.push(
@@ -1539,6 +1554,7 @@ export class CourseService {
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
         courseType: courses.courseType,
+        isArchived: courses.isArchived,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
@@ -1583,7 +1599,7 @@ export class CourseService {
     if (
       !isAdmin &&
       userId !== course.authorId &&
-      NON_PUBLIC_STATUSES.includes(course.status) &&
+      (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) &&
       !isEnrolled
     )
       throw new ForbiddenException("You have no access to this course");
@@ -1767,6 +1783,7 @@ export class CourseService {
       .select({
         id: courses.id,
         status: courses.status,
+        isArchived: courses.isArchived,
         authorId: courses.authorId,
         enrolled:
           userId !== undefined
@@ -1795,13 +1812,13 @@ export class CourseService {
       if (
         !isAdmin &&
         userId !== course.authorId &&
-        NON_PUBLIC_STATUSES.includes(course.status) &&
+        (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) &&
         !isEnrolled
       ) {
         throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     } else {
-      if (NON_PUBLIC_STATUSES.includes(course.status)) {
+      if (NON_PUBLIC_STATUSES.includes(course.status) || course.isArchived) {
         throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     }
@@ -1955,6 +1972,13 @@ export class CourseService {
     language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
+    if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
+      conditions.push(eq(courses.isArchived, false));
+    } else {
+      conditions.push(
+        or(eq(courses.isArchived, false), eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED))!,
+      );
+    }
 
     if (excludeCourseId) {
       conditions.push(ne(courses.id, excludeCourseId));
@@ -2792,6 +2816,66 @@ export class CourseService {
     });
   }
 
+  async bulkArchiveCourse(body: BulkArchiveCourseBody, currentUser: CurrentUserType) {
+    const ids = [...new Set(body.ids)];
+    if (!ids.length) throw new BadRequestException("adminCoursesView.toast.noCoursesSelected");
+
+    const canUpdateAnyCourse = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const selectedCourses = await this.db
+      .select({ id: courses.id, isArchived: courses.isArchived })
+      .from(courses)
+      .where(
+        and(
+          inArray(courses.id, ids),
+          canUpdateAnyCourse ? undefined : eq(courses.authorId, currentUser.userId),
+        ),
+      );
+
+    if (selectedCourses.length !== ids.length) {
+      throw new ForbiddenException("adminCoursesView.toast.bulkArchiveUpdateForbidden");
+    }
+
+    const idsToUpdate = selectedCourses
+      .filter((course) => course.isArchived !== body.isArchived)
+      .map((course) => course.id);
+    if (!idsToUpdate.length) return;
+
+    await this.db.transaction(async (trx) => {
+      const previousSnapshots = await processInBatches(
+        idsToUpdate,
+        (courseId) => this.buildCourseActivitySnapshot(courseId, undefined, trx),
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      await trx
+        .update(courses)
+        .set({ isArchived: body.isArchived })
+        .where(inArray(courses.id, idsToUpdate));
+
+      if (body.isArchived) {
+        await this.settingsService.clearFeaturedCoursesIfMatches(idsToUpdate, trx);
+      }
+
+      for (const previousCourseData of previousSnapshots) {
+        const updatedCourseData = await this.buildCourseActivitySnapshot(
+          previousCourseData.id,
+          undefined,
+          trx,
+        );
+
+        await this.outboxPublisher.publish(
+          new UpdateCourseEvent({
+            courseId: previousCourseData.id,
+            actor: currentUser,
+            previousCourseData,
+            updatedCourseData,
+          }),
+          trx,
+        );
+      }
+    });
+  }
+
   async bulkUpdateCourseCategory(
     body: BulkUpdateCourseCategoryBody,
     currentUser: CurrentUserType,
@@ -2952,6 +3036,7 @@ export class CourseService {
         id: courses.id,
         authorId: courses.authorId,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
+        isArchived: courses.isArchived,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
       })
@@ -2978,6 +3063,9 @@ export class CourseService {
     }
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
+    if (course.isArchived && !paymentId) {
+      throw new ForbiddenException("adminCourseView.errors.forbidden.archivedCourseEnrollment");
+    }
 
     await this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId, paymentId, null);
@@ -4200,6 +4288,9 @@ export class CourseService {
     if (filters.status) {
       conditions.push(eq(courses.status, filters.status));
     }
+    if (filters.isArchived !== undefined) {
+      conditions.push(eq(courses.isArchived, filters.isArchived));
+    }
 
     if (publishedOnly) {
       conditions.push(eq(courses.status, "published"));
@@ -5068,6 +5159,7 @@ export class CourseService {
           resolvedLanguage,
         ),
         status: courses.status,
+        isArchived: courses.isArchived,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         hasCertificate: courses.hasCertificate,

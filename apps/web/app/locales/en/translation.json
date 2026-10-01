@@ -1898,6 +1898,8 @@
     "dropdown": {
       "changeCategory": "Change category",
       "changeStatus": "Change status",
+      "archive": "Archive",
+      "restore": "Restore",
       "delete": "Delete"
     },
     "deleteModal": {
@@ -1905,6 +1907,14 @@
       "titleMultiple": "Delete courses",
       "descriptionSingle": "Are you sure you want to delete this course? This action cannot be undone.",
       "descriptionMultiple": "Are you sure you want to delete {{count}} courses? This action cannot be undone."
+    },
+    "archiveModal": {
+      "title": "Archive courses",
+      "description": "Archive {{count}} selected courses? Enrolled learners will keep access."
+    },
+    "restoreModal": {
+      "title": "Restore courses",
+      "description": "Restore {{count}} selected courses to the active catalog?"
     },
     "statusModal": {
       "title": "Change course status",
@@ -1922,6 +1932,9 @@
       "bulkCategoryUpdateFailed": "Failed to update course categories",
       "bulkCategoryUpdateForbidden": "You do not have permission to update one or more selected courses.",
       "bulkCategoryUpdateCategoryNotFound": "Selected category was not found.",
+      "bulkArchiveUpdateSuccessfully": "Course archive state updated successfully",
+      "bulkArchiveUpdateFailed": "Failed to update course archive state",
+      "bulkArchiveUpdateForbidden": "You do not have permission to archive or restore one or more selected courses.",
       "bulkStatusUpdateSuccessfully": "Course statuses updated successfully",
       "bulkStatusUpdateFailed": "Failed to update course statuses",
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
@@ -2572,7 +2585,8 @@
         "lesson": "Lesson not found."
       },
       "forbidden": {
-        "updateCourse": "You do not have permission to update this course."
+        "updateCourse": "You do not have permission to update this course.",
+        "archivedCourseEnrollment": "This course has been archived and is no longer available for enrollment."
       },
       "media": {
         "imageUploadFailed": "Failed to upload the course image.",
@@ -2728,6 +2742,10 @@
         "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
         "enableVideoCompletionTracking": "Video completion tracking",
         "enableVideoCompletionTrackingDescription": "Require learners to watch at least 90% of each video in a lesson before it is marked as completed.",
+        "archiveCourseDescription": "Archiving hides the course from the catalog and blocks new self-enrollments. Enrolled learners keep access.",
+        "archiveCourseTitle": "Archive course",
+        "archivedCourseTitle": "Course archived",
+        "courseAvailabilityTitle": "Course availability",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
