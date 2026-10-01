@@ -546,6 +546,7 @@
     "send": "Senden"
   },
   "common": {
+    "deletedUser": "Gelöschter Benutzer",
     "button": {
       "previous": "Zurück",
       "next": "Weiter",

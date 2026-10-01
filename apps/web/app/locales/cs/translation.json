@@ -552,6 +552,7 @@
     "send": "Odeslat"
   },
   "common": {
+    "deletedUser": "Smazaný uživatel",
     "button": {
       "previous": "Předchozí",
       "next": "Další",

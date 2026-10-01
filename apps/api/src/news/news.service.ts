@@ -215,6 +215,7 @@ export class NewsService {
           ? this.localizationService.getLocalizedSqlField(news.summary, requestedLanguage, news)
           : this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
       })
@@ -270,6 +271,7 @@ export class NewsService {
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
@@ -418,6 +420,7 @@ export class NewsService {
       .select({
         ...getTableColumns(news),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        authorDeleted: sql<boolean>`${users.deletedAt} IS NOT NULL`,
         title: isAdminLike
           ? this.localizationService.getLocalizedSqlField(news.title, requestedLanguage, news)
           : this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
