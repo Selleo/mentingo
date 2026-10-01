@@ -6,11 +6,17 @@ import { renderWith } from "~/utils/testUtils";
 
 import CourseDescriptionModal from "./CourseDescriptionModal";
 
+vi.mock("~/components/RichText/Viever", () => ({
+  default: ({ content }: { content: string }) => (
+    <output data-testid="course-description-html">{content}</output>
+  ),
+}));
+
 vi.mock("../../context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
     course: {
       category: "Analytics",
-      description: "Course description",
+      description: '<p>Course description</p><iframe src="https://attacker.example"></iframe>',
       estimatedDurationSeconds: 3_600,
       chapters: [],
       learningOutcomes: [],
@@ -21,6 +27,23 @@ vi.mock("../../context/CourseAccessProvider", () => ({
 }));
 
 describe("CourseDescriptionModal", () => {
+  it("sanitizes the read-only course description before passing it to the viewer", () => {
+    renderWith().render(
+      <CourseDescriptionModal
+        canEdit={false}
+        courseDescription=""
+        onChangeDescription={vi.fn()}
+        onClose={vi.fn()}
+        onSaveDescription={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("course-description-html")).toHaveTextContent(
+      "<p>Course description</p>",
+    );
+    expect(screen.getByTestId("course-description-html").textContent).not.toContain("iframe");
+  });
+
   it("has dialog semantics and closes with Escape", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();

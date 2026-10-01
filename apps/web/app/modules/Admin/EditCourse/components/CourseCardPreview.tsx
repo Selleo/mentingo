@@ -4,6 +4,7 @@ import DefaultCoursePhoto from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { UserProfile } from "~/components/UserProfile/UserProfile";
+import { sanitizeCourseDescription } from "~/utils/sanitizeCourseDescription";
 
 type CourseCardPreviewProps = {
   imageUrl?: string;
@@ -58,8 +59,9 @@ const CourseCardPreview = ({
               <div
                 className="description line-clamp-3 break-words text-left text-gray-500"
                 dangerouslySetInnerHTML={{
-                  __html:
+                  __html: sanitizeCourseDescription(
                     description || t("adminCourseView.settings.sideSection.other.noDescription"),
+                  ),
                 }}
               />
               <div className="mt-5 flex w-full justify-center">

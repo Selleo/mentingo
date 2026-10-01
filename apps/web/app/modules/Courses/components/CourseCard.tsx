@@ -11,6 +11,7 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import CourseCardButton from "~/modules/Dashboard/Courses/CourseCardButton";
+import { sanitizeCourseDescription } from "~/utils/sanitizeCourseDescription";
 
 import { CourseCardTitle } from "./CourseCardTitle";
 
@@ -110,7 +111,7 @@ const CourseCard = ({
           )}
           <div className="flex-grow body-sm text-neutral-500">
             <span className="line-clamp-3">
-              <div dangerouslySetInnerHTML={{ __html: description }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeCourseDescription(description) }} />
             </span>
           </div>
         </div>

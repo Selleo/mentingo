@@ -6,6 +6,7 @@ import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { formatDuration, sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
+import { sanitizeCourseDescription } from "~/utils/sanitizeCourseDescription";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -93,7 +94,11 @@ export default function CourseDescriptionModal({
                 />
               </div>
             ) : (
-              <Viewer content={course.description} style="prose" className="text-neutral-800" />
+              <Viewer
+                content={sanitizeCourseDescription(course.description)}
+                style="prose"
+                className="text-neutral-800"
+              />
             )}
           </div>
 
