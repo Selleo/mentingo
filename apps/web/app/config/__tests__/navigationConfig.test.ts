@@ -185,6 +185,24 @@ describe("mapNavigationItems", () => {
 describe("getNavigationConfig", () => {
   const t = ((key: string) => key) as TFunction;
 
+  it("should hide phishing until the tenant capability is enabled", () => {
+    const groups = getNavigationConfig(t);
+
+    expect(groups.flatMap((group) => group.items).some((item) => item.path === "phishing")).toBe(
+      false,
+    );
+  });
+
+  it("should show enabled phishing with its permission requirements", () => {
+    const groups = getNavigationConfig(t, false, false, false, false, false, false, true);
+    const phishing = groups.find((group) => group.items.some((item) => item.path === "phishing"));
+
+    expect(phishing?.restrictedAccessRequirement).toEqual({
+      anyOf: [PERMISSIONS.PHISHING_MANAGE, PERMISSIONS.PHISHING_REPORT_READ],
+    });
+    expect(phishing?.items[0].accessRequirement).toEqual(phishing?.restrictedAccessRequirement);
+  });
+
   const getCourseItems = (isLearningPathsEnabled: boolean, shouldShowLearningPaths: boolean) =>
     getNavigationConfig(
       t,
