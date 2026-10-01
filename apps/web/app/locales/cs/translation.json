@@ -2117,6 +2117,8 @@
         "other": "funkce platformy"
       },
       "descriptions": {
+        "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
+        "phishing_report_read": "Může zobrazit přehledy phishingových simulací.",
         "account_read_self": "Může zobrazit údaje vlastního účtu.",
         "account_update_self": "Může upravit údaje vlastního účtu.",
         "user_read_self": "Může zobrazit vlastní uživatelský profil.",

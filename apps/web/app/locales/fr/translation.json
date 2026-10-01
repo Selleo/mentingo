@@ -2112,6 +2112,8 @@
         "other": "capacités de la plateforme"
       },
       "descriptions": {
+        "phishing_manage": "Créer et gérer des simulations de phishing.",
+        "phishing_report_read": "Consulter les rapports des simulations de phishing.",
         "account_read_self": "Afficher les détails de leur propre compte.",
         "account_update_self": "Modifiez les détails de leur propre compte.",
         "user_read_self": "Afficher leur propre profil utilisateur.",

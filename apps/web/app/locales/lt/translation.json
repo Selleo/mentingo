@@ -2111,6 +2111,8 @@
         "other": "platformos funkcijas"
       },
       "descriptions": {
+        "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
+        "phishing_report_read": "Gali peržiūrėti sukčiavimo el. paštu simuliacijų ataskaitas.",
         "account_read_self": "Gali peržiūrėti savo paskyros duomenis.",
         "account_update_self": "Gali redaguoti savo paskyros duomenis.",
         "user_read_self": "Gali peržiūrėti savo naudotojo profilį.",

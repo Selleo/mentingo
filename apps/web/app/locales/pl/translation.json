@@ -2333,6 +2333,8 @@
         "other": "funkcje platformy"
       },
       "descriptions": {
+        "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
+        "phishing_report_read": "Może przeglądać raporty z symulacji phishingu.",
         "account_read_self": "Może przeglądać własne dane konta.",
         "account_update_self": "Może edytować własne dane konta.",
         "user_read_self": "Może przeglądać własny profil użytkownika.",

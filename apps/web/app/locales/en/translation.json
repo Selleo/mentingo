@@ -2114,6 +2114,8 @@
         "other": "platform capabilities"
       },
       "descriptions": {
+        "phishing_manage": "Create and manage phishing simulations.",
+        "phishing_report_read": "View phishing simulation reports.",
         "account_read_self": "View their own account details.",
         "account_update_self": "Edit their own account details.",
         "user_read_self": "View their own user profile.",

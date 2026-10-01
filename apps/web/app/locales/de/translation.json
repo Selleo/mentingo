@@ -2112,6 +2112,8 @@
         "other": "Plattformfunktionen"
       },
       "descriptions": {
+        "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
+        "phishing_report_read": "Berichte zu Phishing-Simulationen anzeigen.",
         "account_read_self": "Eigene Kontodaten anzeigen.",
         "account_update_self": "Eigene Kontodaten bearbeiten.",
         "user_read_self": "Eigenes Benutzerprofil anzeigen.",
