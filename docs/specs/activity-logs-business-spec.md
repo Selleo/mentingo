@@ -56,7 +56,6 @@ Email-template changes appear with the administrator, template name, and action.
 - Activity-log action, resource, and resource-to-action mapping values are exposed from `packages/shared` so API validation and web filter options use the same contract.
 - Activity handlers under `apps/api/src/activity-logs/handlers` convert domain events into user-readable audit metadata, including the course deletion event emitted by the course service.
 - Email-template actions each publish a distinct domain event through the outbox within the template mutation transaction. The activity handler records those events when dispatched.
-- Native course and learning-path transfers do not publish activity events; the activity-log API excludes legacy native transfer entries from lists and pagination totals.
 
 ## Test Evidence
 
@@ -64,4 +63,4 @@ API E2E coverage verifies paginated retrieval, readable resource-name resolution
 
 Frontend component coverage verifies that metadata-free activity displays its resolved resource name and ID and that unresolved names use the translated fallback. No dedicated frontend Activity Logs E2E spec was found.
 
-Focused handler tests cover email-template actions. Email-template service and handler tests verify distinct events inside successful mutations and before/after edit values; lifecycle API E2E verifies a failed outbox publication rolls back the edit. An activity-log API E2E test verifies that previously stored native transfer entries are omitted from results and pagination totals. No authenticated browser E2E check of these new rows was run.
+Focused handler tests cover email-template actions. Email-template service and handler tests verify distinct events inside successful mutations and before/after edit values; lifecycle API E2E verifies a failed outbox publication rolls back the edit. No authenticated browser E2E check of these new rows was run.

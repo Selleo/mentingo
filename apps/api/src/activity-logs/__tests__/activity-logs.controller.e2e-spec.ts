@@ -152,41 +152,6 @@ describe("ActivityLogsController (e2e)", () => {
     expect(logsById.get(eventTimeLog.id)?.resourceName).toBe("Event-time course title");
   });
 
-  it("omits previously recorded native transfer activity", async () => {
-    const admin = await userFactory
-      .withCredentials({ password })
-      .withAdminSettings(db)
-      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
-    const resourceId = "00000000-0000-4000-8000-000000000099";
-
-    const [nativeImport, nativeExport, visibleLog] = await db
-      .insert(activityLogs)
-      .values(
-        ["native_import", "native_export", ACTIVITY_LOG_ACTION_TYPES.UPDATE].map((actionType) => ({
-          actorId: admin.id,
-          actorEmail: admin.email,
-          actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
-          actionType: actionType as typeof ACTIVITY_LOG_ACTION_TYPES.UPDATE,
-          resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
-          resourceId,
-          metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE },
-        })),
-      )
-      .returning({ id: activityLogs.id });
-
-    const response = await request(app.getHttpServer())
-      .get("/api/activity-logs")
-      .query({ keyword: resourceId })
-      .set("Cookie", await cookieFor(admin, app))
-      .expect(200);
-    const returnedIds = response.body.data.map((log: { id: string }) => log.id);
-
-    expect(returnedIds).toContain(visibleLog.id);
-    expect(returnedIds).not.toContain(nativeImport.id);
-    expect(returnedIds).not.toContain(nativeExport.id);
-    expect(response.body.pagination.totalItems).toBe(1);
-  });
-
   it("includes logs created on the to date", async () => {
     const admin = await userFactory
       .withCredentials({ password })

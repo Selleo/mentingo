@@ -235,7 +235,11 @@ export class ActivityLogResourceNameService {
         return this.db
           .select({
             id: emailTemplates.id,
-            name: sql<string>`COALESCE(${emailTemplates.name} ->> ${emailTemplates.baseLanguage}, '')`,
+            name: this.localizationService.getLocalizedSqlField(
+              emailTemplates.name,
+              undefined,
+              emailTemplates,
+            ),
           })
           .from(emailTemplates)
           .where(inArray(emailTemplates.id, ids));
