@@ -1,6 +1,4 @@
 import { randomUUID } from "crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { Readable } from "stream";
 
@@ -65,10 +63,10 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
+import { PresentationPreviewService } from "./presentation-preview/presentation-preview.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
 import { ThumbnailService } from "./thumbnail.service";
-import { convertPresentationToPdf } from "./utils/convertPresentationToPdf";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
@@ -119,6 +117,7 @@ export class FileService {
     private readonly notificationGateway: VideoUploadNotificationGateway,
     private readonly videoMetadataQueueService: VideoMetadataQueueService,
     private readonly tenantRunner: TenantDbRunnerService,
+    private readonly presentationPreview: PresentationPreviewService,
   ) {}
 
   async getFileUrl(fileKey: string, options: { quality?: ImageQuality } = {}): Promise<string> {
@@ -618,7 +617,7 @@ export class FileService {
       throw new BadRequestException("files.toast.invalidFileType");
     }
 
-    const pdfPreviewKey = await this.getOrCreatePresentationPdfPreview(fileKey);
+    const pdfPreviewKey = await this.presentationPreview.getOrCreate(fileKey);
     const stream = await this.getFileStream(pdfPreviewKey, range);
 
     return {
@@ -626,53 +625,6 @@ export class FileService {
       ...stream,
       contentType: PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
     };
-  }
-
-  private async getOrCreatePresentationPdfPreview(fileKey: string) {
-    if (
-      fileKey.startsWith("http://") ||
-      fileKey.startsWith("https://") ||
-      fileKey.startsWith("bunny-")
-    ) {
-      throw new BadRequestException("files.toast.previewGenerationFailed");
-    }
-
-    const pdfPreviewKey = `${fileKey}.preview.pdf`;
-
-    if (await this.s3Service.getFileExists(pdfPreviewKey)) return pdfPreviewKey;
-
-    const tempDirectory = await mkdtemp(path.join(tmpdir(), "mentingo-presentation-"));
-    const inputExtension = path.extname(fileKey) || ".pptx";
-
-    const inputPath = path.join(tempDirectory, `presentation${inputExtension}`);
-    const outputPath = path.join(tempDirectory, "presentation.pdf");
-
-    try {
-      const fileBuffer = await this.s3Service.getFileBuffer(fileKey);
-
-      await writeFile(inputPath, fileBuffer);
-      await convertPresentationToPdf(inputPath, tempDirectory);
-
-      const pdfBuffer = await readFile(outputPath);
-      await this.s3Service.uploadFile(
-        pdfBuffer,
-        pdfPreviewKey,
-        PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
-      );
-
-      return pdfPreviewKey;
-    } catch (error) {
-      this.logger.error(
-        `Failed to generate presentation PDF preview for "${fileKey}": ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        error instanceof Error ? error.stack : undefined,
-      );
-
-      throw new InternalServerErrorException("files.toast.previewGenerationFailed");
-    } finally {
-      await rm(tempDirectory, { recursive: true, force: true });
-    }
   }
 
   async parseExcelFile<T extends TSchema>(

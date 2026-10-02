@@ -1,4 +1,11 @@
 services:
+  presentation-converter:
+    extends:
+      file: docker-compose.presentation.yml
+      service: presentation-converter
+    ports:
+      - "127.0.0.1:8090:3000"
+
   project-db:
     image: pgvector/pgvector:pg16
     restart: always

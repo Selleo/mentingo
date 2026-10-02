@@ -8,6 +8,7 @@ import { RESOURCE_CATEGORIES } from "../file.constants";
 import { FileService } from "../file.service";
 import { IMAGE_QUALITY, PWA_ICON_IMAGE_QUALITY } from "../image-variants/image-variant.constants";
 import { ImageVariantService } from "../image-variants/image-variant.service";
+import { PresentationPreviewService } from "../presentation-preview/presentation-preview.service";
 import { BunnyVideoProvider } from "../providers/bunny-video.provider";
 import { S3VideoProvider } from "../providers/s3-video.provider";
 import { ThumbnailService } from "../thumbnail.service";
@@ -58,6 +59,7 @@ describe("FileService image variant references", () => {
         { provide: VideoUploadNotificationGateway, useValue: {} },
         { provide: VideoMetadataQueueService, useValue: {} },
         { provide: TenantDbRunnerService, useValue: {} },
+        { provide: PresentationPreviewService, useValue: {} },
       ],
     }).compile();
 

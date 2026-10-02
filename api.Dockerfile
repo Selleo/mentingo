@@ -28,7 +28,6 @@ RUN apk add --no-cache \
     xvfb \
     libc6-compat \
     ffmpeg \
-    libreoffice \
     && rm -rf /var/cache/apk/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
