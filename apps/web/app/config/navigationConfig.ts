@@ -47,6 +47,7 @@ export const getNavigationConfig = (
   isStripeConfigured = false,
   isLearningPathsEnabled = false,
   shouldShowLearningPaths = false,
+  isPhishingEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -244,6 +245,23 @@ export const getNavigationConfig = (
         },
       ],
     },
+    ...(isPhishingEnabled
+      ? ([
+          {
+            title: t("phishing.title"),
+            isExpandable: false,
+            restrictedAccessRequirement: routeAccessConfig.phishing,
+            items: [
+              {
+                label: t("phishing.title"),
+                path: "phishing",
+                iconName: "Email",
+                accessRequirement: routeAccessConfig.phishing,
+              },
+            ],
+          },
+        ] as NavigationGroups[])
+      : []),
   ];
 };
 

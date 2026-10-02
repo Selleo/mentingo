@@ -287,9 +287,7 @@ export class NewsService {
       .leftJoin(users, eq(users.id, news.authorId))
       .where(and(...this.getManageableNewsConditions(currentUser, status)))
       .orderBy(
-        status === NEWS_STATUS.DRAFT
-          ? sql`${news.createdAt} DESC`
-          : sql`${news.publishedAt} DESC`,
+        status === NEWS_STATUS.DRAFT ? sql`${news.createdAt} DESC` : sql`${news.publishedAt} DESC`,
       )
       .limit(pagination.perPage)
       .offset(pagination.offset);

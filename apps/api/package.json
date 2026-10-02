@@ -53,6 +53,7 @@
     "@langfuse/otel": "5.10.1",
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
+    "@mentingo/phishing-simulation-sdk": "0.1.1",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "@modelcontextprotocol/node": "2.1.0",
     "@modelcontextprotocol/server": "2.1.0",
