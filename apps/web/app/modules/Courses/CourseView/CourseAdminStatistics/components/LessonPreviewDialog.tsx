@@ -271,7 +271,6 @@ export default function LessonPreviewDialog({
                   displayName: studentName,
                   profilePictureUrl: studentAvatarUrl,
                 }}
-                lessonsAmount={currentChapter?.lessons.length ?? 0}
                 handleNext={() => {}}
                 handlePrevious={() => {}}
                 isLastLesson={true}

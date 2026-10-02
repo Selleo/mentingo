@@ -38,9 +38,12 @@ test("student can start learning and continue to the next content lesson", async
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(firstLesson.title);
-      await expect(page.getByTestId(LEARNING_HANDLES.CURRENT_LESSON_NUMBER)).toHaveText("1");
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSONS_COUNT)).toHaveText("2");
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TYPE)).toBeVisible();
+      const firstLessonItem = page.getByTestId(
+        LEARNING_HANDLES.lessonSidebarLessonItem(firstLesson.id),
+      );
+      await expect(firstLessonItem).toHaveText(firstLesson.title);
+      await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(firstLesson.id)).hover();
+      await expect(page.getByRole("tooltip")).toHaveText("Content");
 
       await assertCourseLessonProgressFlow(apiClient, courseId, {
         completedLessonCount: 1,
