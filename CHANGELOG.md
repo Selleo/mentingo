@@ -1,3 +1,53 @@
+<a name="v4.21.0"></a>
+
+## [v4.21.0] - 02.10.2026
+
+### Features:
+
+- add simulations and Mission Control integration
+
+- add Mentingo MCP server ([#1994](https://github.com/Selleo/mentingo/issues/1994))
+
+- allow admins to archive courses ([#2000](https://github.com/Selleo/mentingo/issues/2000))
+
+- implement native Mentingo package export and import ([#1997](https://github.com/Selleo/mentingo/issues/1997))
+
+- enable admins to create and customize email templates ([#1977](https://github.com/Selleo/mentingo/issues/1977))
+
+### Bug Fixes:
+
+- align production Docker toolchain with workspace
+
+- return learners to their intended course after registration ([#2006](https://github.com/Selleo/mentingo/issues/2006))
+
+- simplify the login changelog link to display only the version number ([#2009](https://github.com/Selleo/mentingo/issues/2009))
+
+- restore application deployments ([#2008](https://github.com/Selleo/mentingo/issues/2008))
+
+- return users to their intended route after provider login ([#1995](https://github.com/Selleo/mentingo/issues/1995))
+
+- preserve localized AI Mentor content correctly when duplicating courses ([#2002](https://github.com/Selleo/mentingo/issues/2002))
+
+- restore reliable master course sharing after the quiz updates ([#1987](https://github.com/Selleo/mentingo/issues/1987))
+
+### Chores:
+
+- add automated release video recording for local and CI workflows ([#2003](https://github.com/Selleo/mentingo/issues/2003))
+
+- add activity logs to track changes made to email templates ([#2004](https://github.com/Selleo/mentingo/issues/2004))
+
+- display the platform signet in mobile navigation ([#2007](https://github.com/Selleo/mentingo/issues/2007))
+
+- disable user sign-ups by default for newly created tenants ([#2005](https://github.com/Selleo/mentingo/issues/2005))
+
+- improve how deleted users are displayed ([#2001](https://github.com/Selleo/mentingo/issues/2001))
+
+- improve enrolled tab layout ([#1985](https://github.com/Selleo/mentingo/issues/1985))
+
+### Code Refactoring:
+
+- improve quiz reliability and maintainability for a smoother learner experience ([#1946](https://github.com/Selleo/mentingo/issues/1946))
+
 <a name="v4.20.1"></a>
 
 ## [v4.20.1] - 21.09.2026
@@ -7,6 +57,10 @@
 - preserve transparency in PNG platform logos ([#1983](https://github.com/Selleo/mentingo/issues/1983))
 
 - ensure courses can be shared correctly and display the right author ([#1968](https://github.com/Selleo/mentingo/issues/1968))
+
+### Documentation:
+
+- update changelog for version v4.20.1
 
 <a name="v4.20.0"></a>
 
@@ -3346,7 +3400,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.20.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.21.0...HEAD
+[v4.21.0]: https://github.com/Selleo/mentingo/compare/v4.20.1...v4.21.0
 [v4.20.1]: https://github.com/Selleo/mentingo/compare/v4.20.0...v4.20.1
 [v4.20.0]: https://github.com/Selleo/mentingo/compare/v4.19.1...v4.20.0
 [v4.19.1]: https://github.com/Selleo/mentingo/compare/v4.19.0...v4.19.1
