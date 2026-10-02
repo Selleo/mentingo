@@ -2,34 +2,40 @@
 
 ## Business Overview
 
-Mentingo MCP lets an authorized content editor connect an AI assistant such as Codex or Claude to Mentingo and ask it to make focused authoring changes. The assistant works with the editor's current Mentingo access, so it can help prepare training content without a separate AI authoring session inside the product.
+Mentingo MCP lets content creators maintain training from a conversation with their connected AI assistant. An editor can ask for a new onboarding course, a lesson update, or a change to internal knowledge content, and inspect the saved result in Mentingo.
 
-For HR and L&D teams, this makes routine course maintenance and editorial updates possible from a conversation while Mentingo remains the source of truth for ownership, permissions, languages, and published content.
+MCP (Model Context Protocol) is the connection that lets an external assistant discover and use Mentingo's authoring tools. Mentingo provides the content operations; the connected assistant interprets the editor's request and supplies the content. The editor uses their existing account and access.
+
+For HR and L&D teams, this can reduce the manual steps between preparing material and maintaining it in the learning platform. It also lets teams keep using their preferred compatible assistant while Mentingo holds the courses, resources, and publication state.
+
+For connection instructions, example prompts, and a suggested demonstration, see the [MCP authoring guide](../mcp.md).
 
 ## Who Uses It
 
-- Course creators maintain courses, chapters, and content lessons they are allowed to edit.
-- Category managers create and translate course categories so authors can classify training consistently.
-- Content administrators work with knowledge articles, news, Q&A, and development paths according to their current Mentingo permissions.
-- Platform administrators configure the public MCP URL and review the connection before enabling it for a tenant.
+- Course creators build an onboarding draft with chapters and lessons, then review it in Mentingo before publication.
+- Editors maintain lessons and supporting files in courses they can edit, so training can reflect updated procedures.
+- Category managers organise courses and maintain category translations so authors can classify training consistently.
+- Content administrators update knowledge articles, news, Q&A, and development paths within their existing access.
 
 ## Feature Functions
 
-- Connect an MCP client through a Mentingo OAuth authorization code flow with PKCE and explicit consent.
-- Discover only the MCP tools allowed by the editor's current permissions and enabled tenant features, then call direct authoring operations on existing Mentingo domain services.
-- Find courses, categories, chapters, lessons, article sections, articles, Q&A entries, draft or published news, and development paths by IDs returned from Mentingo.
-- Create or update a course with the same fields accepted by Mentingo's course API, then manage categories and their translations, behavior settings, publication, pricing, certificates, chapters, lessons, Q&A entries, published articles, news drafts, and development paths through the existing authoring services.
-- Review group assignments for a course and set or clear each assigned group's deadline while keeping its mandatory setting and calendar events in sync.
-- Reorder and delete chapters or lessons with an exact revision and affected-content confirmation. List and detach authorized lesson resources.
-- Request scoped multipart grants for lesson/article/news attachments, localized article/news covers, course and development path images or signatures, AI Mentor avatars, and course or quiz images before their entity exists; place uploaded lesson files as previews or downloads without writing editor markup by hand.
-- Initialize native resumable video uploads for course trailers or authoring attachments and poll their processing status.
-- Prepare a SCORM course or lesson import using either the native multipart route or the resumable TUS route; attach another locale's package through the same choice.
+- Build and update courses, chapters, content lessons, quizzes, AI Mentor lessons, embedded lessons, and live training lessons.
+- Find existing training and inspect its structure before making targeted changes.
+- Maintain knowledge articles, news, Q&A, categories, and development paths from a connected assistant.
+- Attach supporting files, place lesson resources as previews or downloads, upload video, and import SCORM packages through Mentingo's upload flows.
+- Manage course publication, pricing, certificates, and assigned-group deadlines when the editor has the required access.
+- Maintain content in the languages available for the target course or editorial resource.
+- Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
 ## End-User Value
 
-An editor can ask an assistant to make a group of small, precise content changes and then inspect the results in Mentingo. The same permissions and tenant boundaries still apply when an assistant acts for the user. Consent identifies the connecting client before a token is issued.
+Editors can move from an instruction to a saved training change with fewer manual editing steps. They can review results in the same platform that delivers the training, reuse their existing assistant workflow, and maintain courses alongside knowledge content and supporting resources.
 
 ## How It Works
+
+The editor connects their assistant, asks it to inspect the available content, and gives a focused authoring instruction. The assistant calls Mentingo's tools and reports the saved result. The editor opens Mentingo to review the course or editorial content and decides when to publish it.
+
+MCP writes take effect directly; this connection does not create a separate proposal awaiting approval inside Mentingo. To prepare training for review, explicitly request a draft course. Publication behaviour differs across content types: article creation publishes immediately, while news creation defaults to a draft.
 
 The editor adds the remote `https://<tenant-host>/api/mcp` endpoint in a supported MCP client. The client discovers Mentingo's OAuth metadata, registers as a public client, and opens Mentingo's connection page in the web app. The editor signs in with the existing Mentingo browser session and chooses Allow or Deny. The client can omit an explicit scope request; Mentingo assigns the internal `authoring` scope after consent. The client exchanges the one-use authorization code using PKCE. Mentingo stores the resulting opaque access and refresh grants in Redis, bound to the user, tenant, client, resource URL, scope, and expiry.
 
@@ -60,6 +66,10 @@ The implemented tool set has 101 named tools. It covers course discovery, catego
 - The adapter calls existing domain services inside tenant RLS context and uses permissions from `@repo/shared`. It does not use the integration admin API key.
 - Changes are persisted through existing domain services and their outbox, search, and resource behavior where those services provide it.
 
-## Validation Boundary
+## Test Evidence
 
-This implementation has been typechecked and linted locally. Focused tests cover generic and SCORM multipart grant matching and upload input validation. OAuth discovery and dynamic client registration have been exercised against the local tenant API through Caddy. Browser consent, authenticated MCP tool calls, Claude OAuth, and real uploads have not yet been exercised. Revision checks are in place for the newer status, pricing, media, ordering, deletion, and resource detachment tools; older metadata and editorial mutations do not yet all require a revision. The Redis idempotency reservation prevents automatic duplicate execution on a pending key, but a process failure after a domain commit and before result caching requires manual reconciliation.
+Repository unit tests cover OAuth tenant/client matching, consent details and preservation of consent when a browser session is invalid; selected MCP/REST permission parity; scoped upload metadata and one-use grant consumption; and lesson-resource rendering and supported preview/download modes.
+
+These are focused unit tests, not proof of a complete external-client workflow. No MCP-specific browser E2E spec was found during this documentation review. The review did not run browser consent, authenticated tool calls, real uploads, or client compatibility checks. The demo in the guide is a proposed walkthrough, not a recorded successful run.
+
+Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.
