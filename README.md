@@ -126,6 +126,10 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 - **Grade open-ended answers without an L&D queue.** Behavioural and problem-solving tasks are analysed automatically and returned with actionable feedback.
 - **Keep the AI accountable.** Every model call is traced with Langfuse, so you can inspect cost, latency and what the mentor actually said.
 
+### Author training from your AI assistant
+
+Connect a compatible remote MCP client to Mentingo and ask it to create an onboarding draft, update a lesson, or maintain knowledge content. Changes are saved in Mentingo using your account's current access, so you can review the result in the platform. See the [MCP authoring guide](docs/mcp.md) for connection steps, example prompts, and current validation limits.
+
 ### Enterprise and white-label readiness
 
 - **Ship it as your own product.** Custom domains, logos, colours and styles - no Mentingo branding required anywhere in the learner experience.
