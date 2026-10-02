@@ -1,19 +1,19 @@
-FROM node:20.15.0-alpine AS base
+FROM node:22.15.0-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@9.15.2
+RUN npm install -g pnpm@10.22.0
 
 WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm -w packages:build
 RUN pnpm build --filter=api
 # TODO: Move pnpm deploy to turbo prune workflow
-RUN pnpm deploy --filter=api pnpm-deploy-output --prod
+RUN pnpm deploy --filter=api pnpm-deploy-output --prod --legacy
 
-FROM node:20.15.0-alpine
+FROM node:22.15.0-alpine
 WORKDIR /app
 COPY --from=base /app/pnpm-deploy-output /app
 
