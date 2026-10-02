@@ -1,7 +1,7 @@
 import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 
-import { MAX_TOKENS } from "src/ai/ai.constants";
+import { AI_MENTOR_REASONING_EFFORT, MAX_TOKENS } from "src/ai/ai.constants";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import {
@@ -35,6 +35,13 @@ export class ChatService {
             system: systemPrompt,
             prompt: prompt,
             maxOutputTokens: MAX_TOKENS,
+            ...(model === OPENAI_MODELS.MENTOR
+              ? {
+                  providerOptions: {
+                    openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
+                  },
+                }
+              : {}),
             telemetry: buildAiTelemetry(functionId),
           });
 

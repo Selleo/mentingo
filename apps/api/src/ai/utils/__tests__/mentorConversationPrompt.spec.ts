@@ -32,6 +32,12 @@ describe("AI Mentor conversation prompts", () => {
     expect(prompt).toContain("natural, idiomatic grammar");
     expect(prompt).toContain("Do not quote them, summarize them, convert them into a checklist");
     expect(prompt).toContain("Make one meaningful conversational move per turn");
+    expect(prompt).toContain("Opening turn only");
+    expect(prompt).toContain("Answer the learner's immediate question first");
+    expect(prompt).toContain("private motivation, not a script or evaluation checklist");
+    expect(prompt).toContain("Do not repeat the full scenario or character goal");
+    expect(prompt).toContain("Do not invent personal history");
+    expect(prompt).toContain("Never speak template alternatives");
     expect(prompt).toContain("Ask at most one focused question per turn");
     expect(prompt).toContain("Do not automatically solve the learner's task");
     expect(prompt).toContain("Never swap roles");
@@ -69,6 +75,9 @@ describe("AI Mentor conversation prompts", () => {
       "GitHub-flavored Markdown only when it materially improves readability",
     );
     expect(prompt).toContain("Do not format every sentence");
+    expect(prompt).toContain("Opening turn only");
+    expect(prompt).toContain("Let the conversation progress");
+    expect(prompt).toContain("Avoid a fixed praise, recap, explanation, question pattern");
     expect(prompt).not.toMatch(/100[–-]200 words/);
   });
 });
