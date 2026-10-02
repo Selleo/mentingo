@@ -5,3 +5,6 @@
 **/terraform
 **/tf
 .local
+**/.env
+**/.env.*
+!**/.env.example

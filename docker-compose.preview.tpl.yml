@@ -123,6 +123,9 @@ services:
         npm run db:migrate
 
   api-preview-pr-${PR_ID}:
+    init: true
+    security_opt:
+      - seccomp=./deploy/security/chromium-seccomp.json
     build:
       context: .
       dockerfile: api.Dockerfile

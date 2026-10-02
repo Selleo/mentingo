@@ -31,8 +31,13 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    XDG_CONFIG_HOME=/tmp/chromium-config \
+    XDG_CACHE_HOME=/tmp/chromium-cache
 
-RUN chmod +x /app/entrypoint.sh
+RUN mkdir -p /app/apps/api/uploads /app/apps/api/src/swagger /app/src/swagger /app/uploads /tmp/chromium-config /tmp/chromium-cache \
+    && chown -R node:node /app/apps/api/uploads /app/apps/api/src/swagger /app/src/swagger /app/uploads /tmp/chromium-config /tmp/chromium-cache \
+    && chmod +x /app/entrypoint.sh
+USER node
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
