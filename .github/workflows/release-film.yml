@@ -1,0 +1,288 @@
+name: Release film
+
+# Records the narrated demo film of a release (.agents/skills/release-film) on the company's Claude for Teams
+# seat: CLAUDE_CODE_OAUTH_TOKEN from `claude setup-token`, a secret of the release-film environment. Never an API
+# key: `claude -p` would bill it instead of the seat. The film and its page become the run's release-film artifact;
+# after a successful recording a second job (release-film-publish.yml, without the Claude token) attaches them to the
+# release and rebuilds the public Pages site, unless `publish` is off. A tag that already has a film stops such a
+# recording before it starts, unless `replace` is on (the earlier film is removed for the new one). It starts only by
+# hand, one film at a time: a film uses about a third of the seat's 5-hour limit.
+# Mentingo is public: anyone signed in to GitHub can download these artifacts (the film, the run's report and the
+# project's knowledge). The token stays in the steps that need it and the report leaves out the run's secrets.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to film, such as v4.15.0 (default the latest published release)
+        required: false
+        type: string
+      base:
+        description: Previous release tag (default the published release before it)
+        required: false
+        type: string
+      learn:
+        description: Fold the run into the project's knowledge, kept as an artifact for the next recording
+        required: false
+        type: choice
+        options: [sync, "off"]
+        default: sync
+      publish:
+        description: Attach the film to the tag's published release and update the Pages site after recording
+        required: false
+        type: boolean
+        default: true
+      replace:
+        description: With publish, if the tag already has a film (release or Pages site), remove it for this one
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: release-film
+  cancel-in-progress: false
+  queue: max # a recording waiting for the one filming is never cancelled by the next dispatch
+
+jobs:
+  film:
+    name: Record the release film
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    environment: release-film
+    permissions:
+      actions: read # the project's knowledge kept by an earlier recording
+      contents: read
+      pages: read # the films site's address: whether it already shows a film of the tag
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # The skill's CI mode: sized for a 2-core, 8 GB runner (this one is larger), the page written but not served.
+      RELEASE_FILM_CI: "1"
+      # Two Playwright workers, as the project's films were rehearsed (its config asks for four)
+      RELEASE_FILM_CI_WORKERS: "2"
+      RELEASE_FILM_HOME: /mnt/release-film
+      FILM: ${{ github.event_name == 'workflow_dispatch' }}
+      S: .agents/skills/release-film/scripts
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The Node of the project's recipe (projects/selleo__mentingo.json): its install runs on it (the tests run in
+      # the Playwright image's container).
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+
+      - name: Install the release film tools
+        run: bash .agents/skills/release-film/ci/install-tools.sh
+
+      - name: Prepare the film home
+        run: sudo install -d -o "$(id -u)" -g "$(id -g)" "${RELEASE_FILM_HOME}"
+
+      - name: Check the machine
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: python3 "$S/film.py" doctor --repo "${GITHUB_REPOSITORY}"
+
+      - name: Check Claude Opus on the seat
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        # From an empty folder, as the skill calls it: no project settings or CLAUDE.md of this repository apply.
+        working-directory: ${{ runner.temp }}
+        run: |
+          answer=$(claude -p --model claude-opus-5-5 --effort low --tools '' --no-session-persistence \
+            'Answer with the single word ready.' </dev/null)
+          echo "Claude Opus answered: ${answer}"
+          grep -qi ready <<<"${answer}"
+
+      # edge-tts, Microsoft's free service, may refuse a cloud machine: found out before a film spends anything.
+      - name: Check the narrator's voice from this runner
+        run: python3 "$S/film.py" voice-check --language en
+
+      - name: Resolve the release
+        id: release
+        if: env.FILM == 'true'
+        env:
+          TAG: ${{ inputs.tag }}
+          BASE: ${{ inputs.base }}
+          PUBLISH: ${{ inputs.publish }}
+          REPLACE: ${{ inputs.replace }}
+          RUN_ID: ci-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          tag=${TAG:-$(gh release view --json tagName --jq .tagName)}
+          # Mentingo's release tags, as .chglog/config.yml filters them: v4.20.1, v4.21.0-rc.1
+          if ! [[ "${tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]] \
+            || ! commit=$(git rev-parse --verify --quiet "refs/tags/${tag}^{commit}"); then
+            echo "::error::${tag:-(none)} is not a release tag of this repository."
+            exit 1
+          fi
+          # the base goes to git as a revision: a tag name, never an option
+          if [ -n "${BASE}" ] && { ! [[ "${BASE}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+            || ! git rev-parse --verify --quiet "refs/tags/${BASE}^{commit}" >/dev/null; }; then
+            echo "::error::${BASE} is not a release tag of this repository."
+            exit 1
+          fi
+          # Not every tag here gets a GitHub release: found out before the film spends the seat's limits.
+          if [ "${PUBLISH}" = "true" ] && ! gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" --silent; then
+            echo "::error::${tag} has no published release to attach the film to. Record it with publish off and" \
+              "publish the film with release-film-publish.yml once the release is out."
+            exit 1
+          fi
+          # A tag that already has a film stops a recording that would publish over it, before it spends the seat
+          # (the helper reads the films site's address itself: only a repository without one has no site to check).
+          if [ "${PUBLISH}" = "true" ] && [ "${REPLACE}" != "true" ]; then
+            python3 .agents/skills/release-film/ci/release_assets.py earlier --tag "${tag}"
+          fi
+          key=${GITHUB_REPOSITORY/\//__}
+          {
+            echo "tag=${tag}"
+            echo "commit=${commit}"
+            echo "run=${RELEASE_FILM_HOME}/runs/${key,,}/${tag}/${RUN_ID}"
+            echo "run_id=${RUN_ID}"
+          } >> "${GITHUB_OUTPUT}"
+
+      # The project's knowledge from the latest recording that kept it: an artifact kept 90 days (the Actions cache
+      # drops an entry unused for 7 days, less than the time between releases). Only this workflow's own recordings
+      # on this branch or the default branch count (any other workflow could upload an artifact of that name), and
+      # only their knowledge folders are taken: the film home's projects folder also holds the trusted local recipes.
+      - name: Restore the project's knowledge
+        id: knowledge
+        if: env.FILM == 'true'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          workflow=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/release-film.yml" --jq .id)
+          run=""
+          # read first: a failed listing stops here (set -e does not see a command failing inside a for list), so a
+          # recording never starts from nothing and then keeps that as the project's only knowledge
+          candidates=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=release-film-knowledge&per_page=50" \
+            --jq '.artifacts[] | select((.expired | not) and .workflow_run.head_repository_id == .workflow_run.repository_id
+              and (.workflow_run.head_branch == env.GITHUB_REF_NAME or .workflow_run.head_branch == env.DEFAULT_BRANCH))
+              | .workflow_run.id')
+          for candidate in ${candidates}; do
+            made=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate}" --jq '"\(.workflow_id) \(.event)"')
+            if [ "${made}" = "${workflow} workflow_dispatch" ]; then
+              run=${candidate}
+              break
+            fi
+          done
+          if [ -n "${run}" ]; then
+            gh run download "${run}" --repo "${GITHUB_REPOSITORY}" --name release-film-knowledge \
+              --dir "${RUNNER_TEMP}/knowledge"
+            for folder in "${RUNNER_TEMP}"/knowledge/*/knowledge; do
+              [ -d "${folder}" ] && [ ! -L "${folder}" ] || continue
+              project=$(basename "$(dirname "${folder}")")
+              mkdir -p "${RELEASE_FILM_HOME}/projects/${project}"
+              cp -R "${folder}" "${RELEASE_FILM_HOME}/projects/${project}/"
+            done
+            echo "The project's knowledge comes from run ${run}."
+          fi
+
+      - name: Record the film
+        id: record
+        if: env.FILM == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+          BASE: ${{ inputs.base }}
+          LEARN: ${{ inputs.learn }}
+          RUN_ID: ${{ steps.release.outputs.run_id }}
+        run: |
+          # the Actions runtime, should a step ever expose it (no step here does): nothing the film runs gets it
+          unset ACTIONS_RUNTIME_TOKEN ACTIONS_RUNTIME_URL ACTIONS_CACHE_URL ACTIONS_RESULTS_URL ACTIONS_CACHE_SERVICE_V2
+          python3 "$S/film.py" run --repo "${GITHUB_REPOSITORY}" --tag "${TAG}" ${BASE:+--base "${BASE}"} \
+            --learn "${LEARN:-sync}" --run-id "${RUN_ID}"
+
+      # GitHub masks the secrets in this log, not in the files a run writes (a scene's error, a worker's transcript):
+      # they are hidden there before any file leaves the runner (the report, the film's page, the knowledge).
+      - name: Hide secrets in the run's files
+        id: redact
+        if: always() && env.FILM == 'true' && steps.release.outputs.run
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          RUN: ${{ steps.release.outputs.run }}
+        run: python3 .agents/skills/release-film/ci/redact.py "${RUN}" "${RELEASE_FILM_HOME}/projects"
+
+      - name: Stage the film for its release
+        if: env.FILM == 'true'
+        env:
+          RUN: ${{ steps.release.outputs.run }}
+          TAG: ${{ steps.release.outputs.tag }}
+          COMMIT: ${{ steps.release.outputs.commit }}
+        run: |
+          python3 .agents/skills/release-film/ci/release_assets.py stage --run "${RUN}" --tag "${TAG}" \
+            --commit "${COMMIT}" --out "${RUNNER_TEMP}/release-film"
+
+      # Nothing of the run's files leaves the runner unless their secrets were hidden: a redaction that failed part way
+      # keeps the report, the summary and the knowledge here (a failed recording still keeps them once it succeeded).
+      - name: Summarize the film
+        if: always() && env.FILM == 'true' && steps.redact.outcome == 'success'
+        env:
+          RUN: ${{ steps.release.outputs.run }}
+        run: python3 .agents/skills/release-film/ci/summary.py "${RUN}" >> "${GITHUB_STEP_SUMMARY}"
+
+      # What release-film-publish.yml attaches to a release: the film, its captions, poster and page, and release.json.
+      - name: Upload the film and its page
+        if: success() && env.FILM == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-film
+          path: ${{ runner.temp }}/release-film
+          if-no-files-found: error
+          retention-days: 14
+
+      # What the run measured and logged, for a failed or a slow run: never the run's own secrets.
+      - name: Upload the run's report
+        if: always() && env.FILM == 'true' && steps.redact.outcome == 'success'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-film-report
+          path: |
+            ${{ steps.release.outputs.run }}/*.json
+            ${{ steps.release.outputs.run }}/*.jsonl
+            ${{ steps.release.outputs.run }}/*.log
+            ${{ steps.release.outputs.run }}/*.txt
+            ${{ steps.release.outputs.run }}/gaps/*/*.log
+            ${{ steps.release.outputs.run }}/gaps/*/*.json
+            ${{ steps.release.outputs.run }}/gaps/*/*.ts
+            ${{ steps.release.outputs.run }}/gaps/*/*.txt
+            !${{ steps.release.outputs.run }}/keeper.env.json
+            !${{ steps.release.outputs.run }}/secrets.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Kept whenever the recording succeeded (a film its staging refused still taught the project something): only the
+      # knowledge folders, which the next recording restores.
+      - name: Keep the project's knowledge
+        if: >-
+          always() && env.FILM == 'true' && steps.redact.outcome == 'success' && steps.record.outcome == 'success'
+          && inputs.learn != 'off'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-film-knowledge
+          path: ${{ env.RELEASE_FILM_HOME }}/projects/*/knowledge
+          if-no-files-found: warn
+          retention-days: 90
+
+  # After a successful recording: its film to the release and the public Pages site. A separate job without the
+  # Claude token; the only one of the two that may write (release assets, Pages).
+  publish:
+    name: Publish the film
+    needs: film
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    permissions:
+      actions: read
+      contents: write
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/release-film-publish.yml
+    with:
+      run_id: ${{ github.run_id }}
+      target: release
+      replace: ${{ inputs.replace }}

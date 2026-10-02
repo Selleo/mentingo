@@ -1,0 +1,188 @@
+name: Publish release film
+
+# Attaches a film that release-film.yml recorded (the release-film artifact of the run given) to a release: the film,
+# its page as a ZIP, its captions and poster, with a section of links in the release notes. It records nothing and
+# holds no Claude token. A re-run adds what is missing. A tag that already has another film (on its release or on the
+# Pages site) stops the publication and nothing changes, unless replace is on: then that film's release assets are
+# deleted first (no other asset is touched) and the site shows the new film. The draft target publishes to a test
+# draft release made for the tag (deleted by hand after checking); the release target to the tag's published release,
+# and then rebuilds the public GitHub Pages site of the films from the releases themselves; the pages target only
+# rebuilds that site. release-film.yml calls it after each recording (target release, its own run's film); it can
+# also be started by hand.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: ID of the Release film run whose film to publish (from its URL); with pages, that film goes on the site alone
+        required: false
+        type: string
+      target:
+        description: A test draft release made for the tag, the tag's release (and the Pages site), or the Pages site alone
+        required: true
+        type: choice
+        options: [draft, release, pages]
+        default: draft
+      replace:
+        description: If the tag already has a film (release or Pages site), remove it and publish this one
+        required: false
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      run_id:
+        description: ID of the run whose film to publish (the caller's own run)
+        required: true
+        type: string
+      target:
+        description: draft, release or pages
+        required: true
+        type: string
+      replace:
+        description: Remove the tag's earlier film first
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish the release film
+    if: ${{ inputs.target != 'pages' }}
+    runs-on: ubuntu-24.04
+    concurrency: # on the job: this workflow also runs inside a recording's run
+      group: release-film-publish
+      cancel-in-progress: false
+      queue: max # a second film waiting to be published is never cancelled
+    timeout-minutes: 20
+    permissions:
+      actions: read # the recording run's artifact
+      contents: write # the release's assets and notes
+      pages: read # the films site's address: a film it shows for the tag counts as the tag's earlier film
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PUBLISH: ${{ github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the publishing helper
+        run: python3 .agents/skills/release-film/ci/release_assets.py --help >/dev/null
+
+      - name: Check the recording run was given
+        if: env.PUBLISH == 'true' && inputs.run_id == ''
+        run: |
+          echo "::error::run_id (the Release film run whose film to publish) is required for draft and release"
+          exit 1
+
+      # Any run may upload an artifact named release-film (another workflow, a pull request from a fork): only a
+      # recording of release-film.yml in this repository, started by hand, is published.
+      - name: Check the run is a recording
+        if: env.PUBLISH == 'true' && inputs.run_id != '' && inputs.run_id != github.run_id
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+        run: python3 .agents/skills/release-film/ci/release_assets.py recording --run-id "${RUN_ID}"
+
+      - name: Download the recorded film
+        if: env.PUBLISH == 'true' && inputs.run_id != github.run_id
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-film
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/release-film
+
+      - name: Download the film this run recorded
+        if: env.PUBLISH == 'true' && inputs.run_id == github.run_id
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-film
+          path: ${{ runner.temp }}/release-film
+
+      - name: Publish the film
+        if: env.PUBLISH == 'true'
+        env:
+          TARGET: ${{ inputs.target }}
+          REPLACE: ${{ inputs.replace }}
+        run: |
+          # for the tag's release the helper reads the films site's address itself (only a 404 means no site)
+          args=(publish --dir "${RUNNER_TEMP}/release-film" --target "${TARGET}")
+          if [ "${REPLACE}" = "true" ]; then args+=(--replace); fi
+          python3 .agents/skills/release-film/ci/release_assets.py "${args[@]}" | tee "${RUNNER_TEMP}/published.json"
+          python3 - "${RUNNER_TEMP}/published.json" >> "${GITHUB_STEP_SUMMARY}" <<'PY'
+          import json, sys
+          done = json.load(open(sys.argv[1]))
+          removed, uploaded = ', '.join(done['removed']) or 'nothing', ', '.join(done['uploaded']) or 'nothing new'
+          print(f"## Release film published ({done['target']})\n\n{done['release']}\n\n"
+                f"Removed: {removed}; uploaded: {uploaded}; notes {done['notes']}.")
+          PY
+
+  # The public site of the films (https://<owner>.github.io/<repo>/), rebuilt from every published release's film
+  # page ZIP, a recording's film for the site alone (target pages with run_id: no release changes) and the films the
+  # live site already shows (its films.json): GitHub Pages keeps one site, so each deployment carries all films.
+  pages:
+    name: Update the release films site
+    needs: publish
+    # !cancelled(): past a publish job skipped for the site alone, yet a cancelled run deploys nothing
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && (inputs.target == 'pages' || inputs.target == 'release' && needs.publish.result == 'success') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    concurrency:
+      group: release-film-pages
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      actions: read # a recording's film for the site alone (pages with run_id)
+      contents: read # the releases' page ZIPs
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # Any run may upload an artifact named release-film (another workflow, a pull request from a fork): only a
+      # recording of release-film.yml in this repository, started by hand, is published.
+      - name: Check the run is a recording
+        if: inputs.target == 'pages' && inputs.run_id != '' && inputs.run_id != github.run_id
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+        run: python3 .agents/skills/release-film/ci/release_assets.py recording --run-id "${RUN_ID}"
+
+      - name: Download the recorded film for the site
+        if: inputs.target == 'pages' && inputs.run_id != ''
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-film
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/release-film
+
+      - name: Build the site from its films, the releases' and the recording's
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+          RECORDED: ${{ inputs.target == 'pages' && inputs.run_id != '' }}
+          REPLACE: ${{ inputs.replace }}
+        run: |
+          args=(site --out "${RUNNER_TEMP}/site" --base-url "${BASE_URL}")
+          if [ "${RECORDED}" = "true" ]; then args+=(--film "${RUNNER_TEMP}/release-film"); fi
+          if [ "${REPLACE}" = "true" ]; then args+=(--replace); fi
+          python3 .agents/skills/release-film/ci/release_assets.py "${args[@]}"
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ${{ runner.temp }}/site
+
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

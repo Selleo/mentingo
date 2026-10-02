@@ -61,3 +61,7 @@ apps/web/app/components/ui
 # Test files
 **/test-results
 **/playwright-report
+
+# Release film skill: its generic files are kept identical to the skill's source copy, so they are synced, not
+# reformatted
+.agents/skills/release-film
