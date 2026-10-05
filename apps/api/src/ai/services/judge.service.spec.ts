@@ -262,6 +262,57 @@ describe("JudgeService blocking-error verification", () => {
     );
   });
 
+  it("starts independent checks concurrently when several blocking errors are proposed", async () => {
+    const twoRules = {
+      ...rubric,
+      blockingErrors: [
+        ...rubric.blockingErrors,
+        { id: "second-blocking-id", description: "Learner deletes client logs." },
+      ],
+    };
+    const { service, runtime, persist } = setup([
+      {
+        ...firstResult,
+        triggeredBlockingErrors: [
+          { blockingErrorRef: "B1", learnerSafeFeedback: "First candidate." },
+          { blockingErrorRef: "B2", learnerSafeFeedback: "Second candidate." },
+        ],
+      },
+    ]);
+    const repository = service["aiRepository"] as unknown as {
+      findJudgeRubricByThreadId: jest.Mock;
+    };
+    repository.findJudgeRubricByThreadId.mockResolvedValue({
+      lessonTitle: "Incident",
+      rubric: twoRules,
+    });
+    let releaseFirst!: (value: { criterionResults: []; triggeredBlockingErrors: [] }) => void;
+    runtime.judgeMentor.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseFirst = resolve;
+        }),
+    );
+    runtime.judgeMentor.mockResolvedValueOnce({
+      criterionResults: [],
+      triggeredBlockingErrors: [],
+    });
+
+    const evaluation = run(service);
+    await new Promise((resolve) => setImmediate(resolve));
+    const callsBeforeRelease = runtime.judgeMentor.mock.calls.length;
+    releaseFirst({ criterionResults: [], triggeredBlockingErrors: [] });
+    await evaluation;
+
+    expect(callsBeforeRelease).toBe(3);
+    expect(persist).toHaveBeenCalledWith(
+      "thread-id",
+      "en",
+      twoRules,
+      expect.objectContaining({ passed: true, blockingErrors: [] }),
+    );
+  });
+
   it("does not turn a Polish denial of investigating client logs into an automatic failure", async () => {
     const { service, runtime, persist } = setup([
       firstResult,

@@ -7,7 +7,7 @@ template: |
 
   Trusted blocking-error rule: {{{blockingError}}}
 
-  Read the learner's statements in context, including negation, quoted examples, hypothetical actions, other people's actions, and reported alerts. A learner describing a suspicious login on their account, looking at their own account or MFA alert, or saying they have no permission to investigate the client's system is NOT evidence that they themselves logged into or investigated the client's system. Never reverse the meaning of a denial. A statement of intention to perform an explicitly prohibited action can trigger the rule when the rule covers attempts or intent.
+  Read the learner's statements in context, including negation, quotations, hypothetical actions, other people's actions, and reported events. Reporting that something happened to or was observed by the learner is not necessarily evidence that the learner performed the action. Never reverse the meaning of a denial. Consider the full context before deciding whether a stated intention meets the rule.
 
   Trigger B1 only if the learner's own stated action or explicit intent clearly meets this rule. Do not infer conduct from an ambiguous phrase, a third party's actions, the AI Mentor's words, or the rule itself. If evidence is absent, ambiguous, contradicted, or only describes refraining from the prohibited act, return no triggered errors. Do not grade criteria.
 

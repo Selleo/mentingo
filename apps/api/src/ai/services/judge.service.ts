@@ -87,40 +87,40 @@ export class JudgeService {
       },
       () => this.chatService.judge(system, content),
     );
-    // Validate references before using model-proposed blocking errors as verification targets.
     evaluateAiJudgeResult(judged, rubric);
-    const confirmedBlockingErrors = [] as typeof judged.triggeredBlockingErrors;
-    for (const candidate of judged.triggeredBlockingErrors) {
-      const index = Number(candidate.blockingErrorRef.slice(1)) - 1;
-      const blockingError = rubric.blockingErrors[index];
-      const verificationSystem = await this.promptService.loadPrompt(
-        "judgeBlockingErrorVerificationPrompt",
-        { language: messages.userLanguage, blockingError: blockingError.description },
-      );
-      // The verification receives only the rule and the original learner messages, not the
-      // first model's conclusion or explanation, so it can independently reject an inference.
-      const verification = await this.aiRuntimeService.judgeMentor(
-        {
-          messages: [
-            { role: "system", content: verificationSystem },
-            { role: "user", content },
-          ],
-          temperature: 0.2,
-        },
-        () => this.chatService.judge(verificationSystem, content),
-      );
-      const checked = evaluateAiJudgeResult(verification, {
-        ...rubric,
-        criteria: [],
-        blockingErrors: [blockingError],
-      });
-      if (checked.blockingErrors.length) {
-        confirmedBlockingErrors.push({
+    const verified = await Promise.all(
+      judged.triggeredBlockingErrors.map(async (candidate) => {
+        const index = Number(candidate.blockingErrorRef.slice(1)) - 1;
+        const blockingError = rubric.blockingErrors[index];
+        const verificationSystem = await this.promptService.loadPrompt(
+          "judgeBlockingErrorVerificationPrompt",
+          { language: messages.userLanguage, blockingError: blockingError.description },
+        );
+        const verification = await this.aiRuntimeService.judgeMentor(
+          {
+            messages: [
+              { role: "system", content: verificationSystem },
+              { role: "user", content },
+            ],
+            temperature: 0.2,
+          },
+          () => this.chatService.judge(verificationSystem, content),
+        );
+        const checked = evaluateAiJudgeResult(verification, {
+          ...rubric,
+          criteria: [],
+          blockingErrors: [blockingError],
+        });
+        if (!checked.blockingErrors.length) return null;
+        return {
           blockingErrorRef: candidate.blockingErrorRef,
           learnerSafeFeedback: checked.blockingErrors[0].learnerSafeFeedback,
-        });
-      }
-    }
+        };
+      }),
+    );
+    const confirmedBlockingErrors = verified.filter(
+      (error): error is NonNullable<typeof error> => error !== null,
+    );
     const response = evaluateAiJudgeResult(
       { ...judged, triggeredBlockingErrors: confirmedBlockingErrors },
       rubric,
