@@ -8,12 +8,11 @@ export function getBaseFileTypePipe(
   maxSize: number = MAX_FILE_SIZE,
   fallbackToMimetype: boolean = false,
 ) {
-  return new ParseFilePipeBuilder()
-    .addValidator(
-      new MagicFileTypeValidator({
-        fileType,
-        fallbackToMimetype,
-      }),
-    )
-    .addMaxSizeValidator({ maxSize });
+  return new ParseFilePipeBuilder().addValidator(
+    new MagicFileTypeValidator({
+      fileType,
+      maxSize,
+      fallbackToMimetype,
+    }),
+  );
 }

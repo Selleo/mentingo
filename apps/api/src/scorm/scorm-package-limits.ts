@@ -1,7 +1,7 @@
 // Prevents pathological ZIPs from creating excessive S3 writes and manifest processing work.
 export const MAX_SCORM_EXTRACTED_FILE_COUNT = 10_000;
 
-export const MAX_SCORM_PACKAGE_SIZE_BYTES = 500 * 1024 * 1024;
+export { MAX_SCORM_PACKAGE_SIZE_BYTES } from "@repo/shared";
 
 export const SCORM_PACKAGE_MIME_TYPES = {
   ZIP: "application/zip",

@@ -245,6 +245,18 @@ export class SettingsService {
     };
   }
 
+  /** Public certificate rendering must select raw assets by the certificate's tenant. */
+  public async getImageS3KeysByTenantId(tenantId: UUIDType): Promise<SettingsImageS3Keys> {
+    const parsed = await this.getRawGlobalSettingsByTenantId(tenantId);
+    return {
+      platformLogoS3Key: parsed.platformLogoS3Key ?? null,
+      platformSimpleLogoS3Key: parsed.platformSimpleLogoS3Key ?? null,
+      certificateBackgroundImage: parsed.certificateBackgroundImage ?? null,
+      primaryColor: parsed.primaryColor ?? null,
+      contrastColor: parsed.contrastColor ?? null,
+    };
+  }
+
   public async getPublicGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
       .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
@@ -290,6 +302,17 @@ export class SettingsService {
         certificateBackgroundImage,
       ),
     };
+  }
+
+  public async getRawGlobalSettingsByTenantId(
+    tenantId: UUIDType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
+    return this.parseGlobalSettings(globalSettings.settings);
   }
 
   public async getGlobalSettingsByTenantId(

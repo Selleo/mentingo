@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
@@ -20,6 +21,8 @@ import {
   ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_BYTES,
   ALLOWED_PDF_FILE_TYPES,
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
@@ -41,9 +44,9 @@ import { RequireFeature } from "src/common/decorators/require-feature.decorator"
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -91,6 +94,7 @@ import type {
   LessonShow,
 } from "./lesson.schema";
 @Controller("lesson")
+@UsePipes(SanitizeRichTextPipe)
 export class LessonController {
   constructor(
     private readonly adminLessonsService: AdminLessonService,
@@ -486,7 +490,7 @@ export class LessonController {
           ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
           ...ALLOWED_PRESENTATION_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,
@@ -633,7 +637,10 @@ export class LessonController {
     @CurrentUser() currentUser: CurrentUserType,
     @Body("lessonId") lessonId: UUIDType,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES),
+        MAX_AVATAR_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),

@@ -358,6 +358,18 @@ export class ScormRepository {
     return attempt;
   }
 
+  async lockAttemptContext(attemptId: string) {
+    const [attempt] = await this.db
+      .select({ ...getTableColumns(scormAttempts), scoLessonId: scormScos.lessonId })
+      .from(scormAttempts)
+      .innerJoin(scormPackages, eq(scormPackages.id, scormAttempts.packageId))
+      .innerJoin(scormScos, eq(scormScos.id, scormAttempts.scoId))
+      .where(eq(scormAttempts.id, attemptId))
+      .for("update", { of: scormAttempts })
+      .limit(1);
+    return attempt;
+  }
+
   async upsertRuntimeState(params: UpsertScormRuntimeState) {
     const [runtimeState] = await this.db
       .insert(scormRuntimeState)
@@ -378,7 +390,7 @@ export class ScormRepository {
     await this.db
       .update(scormAttempts)
       .set({ completedAt: sql`now()` })
-      .where(eq(scormAttempts.id, attemptId));
+      .where(and(eq(scormAttempts.id, attemptId), isNull(scormAttempts.completedAt)));
   }
 
   async areAllLessonScosCompleted(params: {

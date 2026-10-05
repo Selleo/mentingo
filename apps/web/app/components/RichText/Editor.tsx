@@ -1,6 +1,7 @@
 import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   RESOURCE_VISIBILITY,
+  sanitizeRichText,
   detectVideoProviderFromUrl,
   type EditableResourceVisibility,
 } from "@repo/shared";
@@ -200,7 +201,7 @@ const Editor = ({
 
   const editor = useEditor({
     extensions,
-    content: content,
+    content: sanitizeRichText(content ?? ""),
     onUpdate: ({ editor }) => {
       const nextContent = editor.getHTML();
       lastEmittedContentRef.current = nextContent;
@@ -209,6 +210,7 @@ const Editor = ({
     onBlur: ({ editor }) => onBlur?.(editor),
     onDrop: handleDrop,
     editorProps: {
+      transformPastedHTML: sanitizeRichText,
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
@@ -235,7 +237,7 @@ const Editor = ({
       content !== editor.getHTML() &&
       content !== lastEmittedContentRef.current
     ) {
-      editor.commands.setContent(content || "");
+      editor.commands.setContent(sanitizeRichText(content || ""));
       lastEmittedContentRef.current = content || "";
     }
   }, [content, editor]);

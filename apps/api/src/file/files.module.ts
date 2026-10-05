@@ -6,6 +6,8 @@ import { S3Module } from "src/s3/s3.module";
 import { FileController } from "./file.controller";
 import { FileService } from "./file.service";
 import { ImageVariantService } from "./image-variants/image-variant.service";
+import { PresentationConverterClient } from "./presentation-preview/presentation-converter.client";
+import { PresentationPreviewService } from "./presentation-preview/presentation-preview.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
 import { ThumbnailService } from "./thumbnail.service";
@@ -22,6 +24,8 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
   controllers: [FileController],
   providers: [
     FileService,
+    PresentationPreviewService,
+    PresentationConverterClient,
     ImageVariantService,
     ThumbnailService,
     BunnyVideoProvider,

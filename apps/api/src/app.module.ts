@@ -5,6 +5,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
@@ -124,7 +125,7 @@ import type { RedisClient } from "src/redis";
     }),
     MulterModule.register({
       limits: {
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
+        fileSize: MAX_FILE_SIZE_BYTES, // Buffered uploads; large videos use TUS.
       },
     }),
     ThrottlerModule.forRootAsync({

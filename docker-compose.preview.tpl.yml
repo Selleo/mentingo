@@ -1,4 +1,37 @@
 services:
+  presentation-converter-preview-pr-${PR_ID}:
+    image: gotenberg/gotenberg:8.34.0-libreoffice
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --api-timeout=120s
+      - --api-body-limit=106MB
+      - --api-disable-download-from=true
+      - --webhook-disable=true
+      - --pdfengines-disable-routes=true
+      - --libreoffice-deny-list=.*
+      - --libreoffice-restart-after=1
+      - --libreoffice-max-queue-size=4
+    read_only: true
+    user: "1001:1001"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=512m,mode=1777
+      - /home/gotenberg:rw,noexec,nosuid,nodev,size=64m,uid=1001,gid=1001,mode=700
+    mem_limit: 1g
+    memswap_limit: 1g
+    cpus: 1
+    pids_limit: 128
+    ulimits:
+      core: 0
+      nofile: 1024
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   db-preview-pr-${PR_ID}:
     image: pgvector/pgvector:pg16
     restart: always
@@ -90,6 +123,9 @@ services:
         npm run db:migrate
 
   api-preview-pr-${PR_ID}:
+    init: true
+    security_opt:
+      - seccomp=./deploy/security/chromium-seccomp.json
     build:
       context: .
       dockerfile: api.Dockerfile
@@ -100,6 +136,8 @@ services:
     image: api-preview-pr-${PR_ID}:${VERSION_TAG}
     restart: always
     depends_on:
+      presentation-converter-preview-pr-${PR_ID}:
+        condition: service_healthy
       db-preview-pr-${PR_ID}:
         condition: service_healthy
       redis-preview-pr-${PR_ID}:
@@ -112,6 +150,7 @@ services:
         condition: service_completed_successfully
     command: server
     environment:
+      PRESENTATION_CONVERTER_URL: "http://presentation-converter-preview-pr-${PR_ID}:3000"
       CORS_ORIGIN: "https://${PREVIEW_WEB_DOMAIN}"
       EMAIL_ADAPTER: "mailhog"
       TEST_KEY: ""

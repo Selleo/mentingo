@@ -24789,6 +24789,17 @@ export interface LaunchScormAttemptResponse {
   };
 }
 
+export interface RenewContentBody {
+  /** @pattern ^[a-f0-9]{64}$ */
+  token: string;
+}
+
+export interface RenewContentResponse {
+  data: {
+    renewed: boolean;
+  };
+}
+
 export interface CommitScormAttemptBody {
   /** @format uuid */
   attemptId: string;
@@ -34132,6 +34143,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ScormControllerRenewContent
+     * @request POST:/api/scorm/runtime/content/renew
+     */
+    scormControllerRenewContent: (data: RenewContentBody, params: RequestParams = {}) =>
+      this.request<RenewContentResponse, any>({
+        path: `/api/scorm/runtime/content/renew`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerCommitScormAttempt
      * @request POST:/api/scorm/runtime/commit
      */
@@ -34164,12 +34191,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name ScormControllerStreamScormContent
+     * @name ScormControllerOldContent
      * @request GET:/api/scorm/content/{packageId}/*
      */
-    scormControllerStreamScormContent: (packageId: string, params: RequestParams = {}) =>
+    scormControllerOldContent: (packageId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/scorm/content/${packageId}/*`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerDelivery
+     * @request GET:/api/scorm/delivery/{token}/*
+     */
+    scormControllerDelivery: (token: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/delivery/${token}/*`,
         method: "GET",
         ...params,
       }),

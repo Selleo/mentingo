@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
+import { MAX_INGESTION_FILE_COUNT, MAX_INGESTION_FILE_SIZE_BYTES, PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
@@ -22,7 +22,7 @@ import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { ALLOWED_FILE_TYPES_MAP, MAX_MB_PER_FILE } from "src/ingestion/ingestion.config";
+import { ALLOWED_FILE_TYPES_MAP } from "src/ingestion/ingestion.config";
 import { getAllAssignedDocumentsSchema } from "src/ingestion/ingestion.schema";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 
@@ -39,7 +39,7 @@ export class IngestionController {
   constructor(private readonly ingestionService: IngestionService) {}
 
   @Post("ingest")
-  @UseInterceptors(FilesInterceptor("files"))
+  @UseInterceptors(FilesInterceptor("files", MAX_INGESTION_FILE_COUNT))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -59,7 +59,7 @@ export class IngestionController {
     @UploadedFiles(
       getBaseFileTypePipe(
         buildFileTypeRegex(Object.values(ALLOWED_FILE_TYPES_MAP)),
-        MAX_MB_PER_FILE * 1024 * 1024,
+        MAX_INGESTION_FILE_SIZE_BYTES,
         true,
       ).build({
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,

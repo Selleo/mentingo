@@ -1,3 +1,4 @@
+import { sanitizeRichText } from "@repo/shared";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -102,7 +103,10 @@ const Viewer = ({
     );
   }, [handleVideoEnded, variant, videoCoverageTracking]);
 
-  const normalizedContent = useMemo(() => normalizeMarkdownCode(content), [content]);
+  const normalizedContent = useMemo(
+    () => sanitizeRichText(normalizeMarkdownCode(content)),
+    [content],
+  );
 
   const editor = useEditor(
     {

@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES } from "@repo/shared";
 
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -10,8 +10,8 @@ import type { PipeTransform } from "@nestjs/common";
 
 export const SCORM_PACKAGE_FIELD = "scormPackage";
 export const SCORM_THUMBNAIL_FIELD = "thumbnail";
+export const MAX_SCORM_THUMBNAIL_SIZE = MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES;
 
-export const MAX_SCORM_THUMBNAIL_SIZE = 20 * 1024 * 1024;
 const ALLOWED_SCORM_PACKAGE_MIME_TYPES = Object.values(SCORM_PACKAGE_MIME_TYPES);
 
 export type CreateScormCourseFiles = {
@@ -32,7 +32,7 @@ export class ValidateScormCourseFilesPipe implements PipeTransform {
 
   private readonly thumbnailPipe = getBaseFileTypePipe(
     buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
-    MAX_SCORM_THUMBNAIL_SIZE,
+    MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
   ).build({
     fileIsRequired: false,
     errorHttpStatusCode: HttpStatus.BAD_REQUEST,

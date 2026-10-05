@@ -10,12 +10,19 @@ import {
   SUPPORTED_LANGUAGES,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  normalizeCertificateColor,
+  CERTIFICATE_STATIC_CSS,
   isSupportedLanguage,
 } from "@repo/shared";
 import { format } from "date-fns";
 import { escape } from "lodash";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 
+import {
+  imageDataUri,
+  isSafeCertificateAssetKey,
+  prepareCertificatePage,
+} from "src/common/utils/certificate-renderer";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { S3Service } from "src/s3/s3.service";
@@ -191,7 +198,7 @@ export class LearningPathCertificateService {
     }
 
     const context = await this.buildShareRenderContext(certificateId, shareLanguage);
-    const imageBuffer = await this.renderPngFromHtml(this.buildShareImageDocument(context));
+    const imageBuffer = await this.renderPngFromHtml(await this.buildShareImageDocument(context));
 
     await this.s3Service.uploadFile(imageBuffer, imageKey, "image/png").catch((error) => {
       this.logger.warn(`Learning path certificate share image upload failed: ${error}`);
@@ -217,7 +224,7 @@ export class LearningPathCertificateService {
       throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
-    const imageSettings = await this.settingsService.getImageS3Keys();
+    const imageSettings = await this.settingsService.getImageS3KeysByTenantId(certificate.tenantId);
     const [platformLogoImageUrl, backgroundImageUrl, certificateSignatureImageUrl] =
       await Promise.all([
         this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
@@ -279,7 +286,9 @@ export class LearningPathCertificateService {
   private async buildShareRenderContext(certificateId: UUIDType, language?: SupportedLanguages) {
     const shareLanguage = this.normalizeLanguage(language);
     const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
-    const settings = await this.settingsService.getGlobalSettingsByTenantId(certificate.tenantId);
+    const settings = await this.settingsService.getRawGlobalSettingsByTenantId(
+      certificate.tenantId,
+    );
 
     const shareUrl = this.buildTenantUrl(
       certificate.tenantHost,
@@ -437,25 +446,30 @@ export class LearningPathCertificateService {
       shareUrl: escape(context.shareUrl),
       shareImageUrl: escape(context.shareImageUrl),
       embeddedImage: escape(embeddedImageSrc),
-      primaryColor: escape(context.settings.primaryColor || "#3f58b6"),
+      primaryColor: escape(normalizeCertificateColor(context.settings.primaryColor, "#3f58b6")),
     };
   }
 
-  private buildShareImageDocument(context: any) {
-    return this.buildShareImageHtmlDocument(this.buildShareImageMarkup(context));
+  private async buildShareImageDocument(context: any) {
+    return this.buildShareImageHtmlDocument(await this.buildShareImageMarkup(context));
   }
 
-  private buildShareImageMarkup(context: any) {
+  private async buildShareImageMarkup(context: any) {
     const accentColor =
       context.certificate.certificateFontColor || context.settings.primaryColor || "#1f2937";
 
+    const [logo, signature, background] = await Promise.all([
+      this.getImageDataUriFromS3Key(context.settings.platformLogoS3Key),
+      this.getImageDataUriFromS3Key(context.certificate.certificateSignature),
+      this.getImageDataUriFromS3Key(context.settings.certificateBackgroundImage),
+    ]);
     return buildCertificateMarkup({
       studentName: context.certificate.fullName || "",
       courseName: context.certificate.pathTitle ?? "",
       completionDate: context.formattedDate,
-      platformLogoUrl: null,
-      signatureImageUrl: context.certificateSignatureUrl,
-      backgroundImageUrl: null,
+      platformLogoUrl: logo,
+      signatureImageUrl: signature,
+      backgroundImageUrl: background,
       lang: context.language,
       certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
       colorTheme: {
@@ -490,8 +504,9 @@ export class LearningPathCertificateService {
             height: ${SHARE_IMAGE_HEIGHT}px;
           }
         </style>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data: blob:; frame-src 'none'; base-uri 'none'; form-action 'none'" />
         <title>Certificate</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <style>${CERTIFICATE_STATIC_CSS}</style>
       </head>
       <body>
         ${html}
@@ -506,13 +521,7 @@ export class LearningPathCertificateService {
       const browser = await this.getBrowser();
       page = await browser.newPage();
 
-      await page.setContent(completeHtml, { waitUntil: "domcontentloaded", timeout: 30_000 });
-      await page.waitForSelector("body > *", { timeout: 5_000 });
-      await page
-        .waitForFunction(() => {
-          return !("fonts" in document) || document.fonts.status === "loaded";
-        })
-        .catch(() => {});
+      await prepareCertificatePage(page, completeHtml);
 
       const pdfBuffer = await page.pdf({
         format: "A4",
@@ -549,8 +558,7 @@ export class LearningPathCertificateService {
         height: SHARE_IMAGE_HEIGHT,
         deviceScaleFactor: 1,
       });
-      await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 30_000 });
-      await page.waitForSelector("body > *", { timeout: 5_000 });
+      await prepareCertificatePage(page, html);
 
       const screenshot = await page.screenshot({
         type: "png",
@@ -582,12 +590,7 @@ export class LearningPathCertificateService {
       const browser = await puppeteer.launch({
         headless: true,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-        ],
+        args: ["--disable-dev-shm-usage", "--disable-gpu"],
       });
 
       this.browser = browser;
@@ -648,7 +651,7 @@ export class LearningPathCertificateService {
   }
 
   private async getImageDataUriFromS3Key(s3Key?: string | null): Promise<string | null> {
-    if (!s3Key) return null;
+    if (!isSafeCertificateAssetKey(s3Key)) return null;
 
     try {
       const [fileBuffer, contentType] = await Promise.all([
@@ -658,7 +661,7 @@ export class LearningPathCertificateService {
 
       if (!fileBuffer?.length || !contentType) return null;
 
-      return this.toDataUri(fileBuffer, contentType);
+      return imageDataUri(fileBuffer, contentType);
     } catch {
       return null;
     }
@@ -669,6 +672,6 @@ export class LearningPathCertificateService {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ) {
-    return `${tenantId}/learning-path-certificate-share/${certificateId}/${language}.png`;
+    return `${tenantId}/learning-path-certificate-share/v3/${certificateId}/${language}.png`;
   }
 }

@@ -1,11 +1,13 @@
 import { Maximize2, Minimize2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useRenewScormContent } from "~/api/mutations/useRenewScormContent";
 import { Button } from "~/components/ui/button";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 
+import { parseScormLaunch } from "./scormBridge";
 import { useScormRuntime } from "./useScormRuntime";
 
 import type { ScormLaunchData } from "./ScormLesson.types";
@@ -20,9 +22,47 @@ type ScormPlayerProps = {
 export function ScormPlayer({ launch, language, onSavingChange }: ScormPlayerProps) {
   const { t } = useTranslation();
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [accessible, setAccessible] = useState(false);
+  const { mutateAsync: renew } = useRenewScormContent();
+  const bridge = useMemo(
+    () =>
+      typeof window !== "undefined"
+        ? parseScormLaunch(launch.launchUrl, window.location.origin)
+        : null,
+    [launch.launchUrl],
+  );
 
-  useScormRuntime({ launch, language, onSavingChange });
+  useScormRuntime({ launch, frame: frameRef, language, onSavingChange });
+
+  useEffect(() => {
+    setAccessible(false);
+    if (!bridge) return;
+    let active = true;
+    const check = async () => {
+      try {
+        await renew(bridge.channel);
+        if (active) setAccessible(true);
+      } catch {
+        if (active) setAccessible(false);
+      }
+    };
+    void check();
+    const timer = window.setInterval(() => void check(), 5 * 60 * 1000);
+    const onOnline = () => void check();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [bridge, renew]);
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) {
@@ -67,12 +107,14 @@ export function ScormPlayer({ launch, language, onSavingChange }: ScormPlayerPro
       </div>
       <section className="flex min-h-[70vh] w-full flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white">
         <iframe
+          ref={frameRef}
           data-testid={LEARNING_HANDLES.SCORM_IFRAME}
           key={launch.scoId}
-          src={launch.launchUrl}
+          src={accessible && bridge ? launch.launchUrl : "about:blank"}
           title={launch.scoTitle}
           className="min-h-[70vh] w-full flex-1 bg-white"
-          allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
+          allow="camera 'none'; microphone 'none'; geolocation 'none'; payment 'none'"
         />
       </section>
     </div>

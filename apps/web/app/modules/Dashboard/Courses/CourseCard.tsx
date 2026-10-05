@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, sanitizeRichText } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -114,7 +114,7 @@ const CourseCard = ({
           )}
           <div className="flex-grow text-sm text-neutral-500">
             <span className="line-clamp-3">
-              <div dangerouslySetInnerHTML={{ __html: description }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeRichText(description ?? "") }} />
             </span>
           </div>
         </div>

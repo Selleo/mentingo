@@ -20,6 +20,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  MAX_FILE_SIZE_BYTES,
   type SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -37,7 +38,6 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
@@ -222,7 +222,7 @@ export class ResourceLibraryController {
           ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
           ...ALLOWED_PRESENTATION_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,

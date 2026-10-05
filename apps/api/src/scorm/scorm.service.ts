@@ -48,6 +48,7 @@ import {
   MAX_SCORM_PACKAGE_SIZE_BYTES,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
+import { isScormRetake, mergeScormProgress } from "./scorm-progress";
 import { ScormQueueService } from "./scorm-queue.service";
 import {
   SCORM_1_2_CMI_KEYS,
@@ -901,111 +902,112 @@ export class ScormService {
   async commitRuntime(params: ScormRuntimeCommitParams | ScormRuntimeFinishParams) {
     const { body, currentUser, finish } = params;
 
-    const attemptContext = await this.scormRepository.findAttemptContext(body.attemptId);
+    return this.db.transaction(async () => {
+      const attemptContext = await this.scormRepository.lockAttemptContext(body.attemptId);
 
-    if (
-      !attemptContext ||
-      attemptContext.studentId !== currentUser.userId ||
-      attemptContext.packageId !== body.packageId ||
-      attemptContext.scoId !== body.scoId ||
-      attemptContext.lessonId !== body.lessonId ||
-      attemptContext.courseId !== body.courseId ||
-      attemptContext.scoLessonId !== body.lessonId
-    ) {
-      throw new BadRequestException("adminScorm.errors.runtime.invalidAttempt");
-    }
+      if (
+        !attemptContext ||
+        attemptContext.studentId !== currentUser.userId ||
+        attemptContext.packageId !== body.packageId ||
+        attemptContext.scoId !== body.scoId ||
+        attemptContext.lessonId !== body.lessonId ||
+        attemptContext.courseId !== body.courseId ||
+        attemptContext.scoLessonId !== body.lessonId
+      ) {
+        throw new BadRequestException("adminScorm.errors.runtime.invalidAttempt");
+      }
 
-    this.assertRuntimeValues(body.values);
+      this.assertRuntimeValues(body.values);
 
-    const existingRuntimeState = await this.scormRepository.findRuntimeState(body.attemptId);
-    const mergedCmiJson = {
-      ...this.asRuntimeJson(existingRuntimeState?.rawCmiJson),
-      ...body.values,
-    };
-    const shouldRollupSessionTime = finish && !attemptContext.completedAt;
-
-    if (shouldRollupSessionTime) {
-      mergedCmiJson[SCORM_1_2_CMI_KEYS.TOTAL_TIME] = addScorm12Times(
-        existingRuntimeState?.totalTime,
-        mergedCmiJson[SCORM_1_2_CMI_KEYS.SESSION_TIME],
+      const existingRuntimeState = await this.scormRepository.findRuntimeState(body.attemptId);
+      const mergedCmiJson = mergeScormProgress(
+        this.asRuntimeJson(existingRuntimeState?.rawCmiJson),
+        body.values,
       );
-    }
+      const shouldRollupSessionTime = finish && !attemptContext.completedAt;
 
-    const normalizedRuntimeState = this.normalizeRuntimeState(mergedCmiJson);
+      if (shouldRollupSessionTime) {
+        mergedCmiJson[SCORM_1_2_CMI_KEYS.TOTAL_TIME] = addScorm12Times(
+          existingRuntimeState?.totalTime,
+          mergedCmiJson[SCORM_1_2_CMI_KEYS.SESSION_TIME],
+        );
+      }
 
-    await this.scormRepository.upsertRuntimeState({
-      attemptId: body.attemptId,
-      rawCmiJson: mergedCmiJson,
-      ...normalizedRuntimeState,
-    });
+      const normalizedRuntimeState = this.normalizeRuntimeState(mergedCmiJson);
 
-    const previouslyCompleted =
-      existingRuntimeState?.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
+      await this.scormRepository.upsertRuntimeState({
+        attemptId: body.attemptId,
+        rawCmiJson: mergedCmiJson,
+        ...normalizedRuntimeState,
+      });
 
-    const scoCompleted =
-      normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
+      const previouslyCompleted =
+        existingRuntimeState?.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
 
-    if (finish || scoCompleted) {
-      await this.scormRepository.markAttemptCompleted(body.attemptId);
-    }
+      const scoCompleted =
+        normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
 
-    const lessonCompleted = await this.scormRepository.areAllLessonScosCompleted({
-      studentId: currentUser.userId,
-      packageId: body.packageId,
-      lessonId: body.lessonId,
-      completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
-      excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
-    });
+      if (finish || scoCompleted) {
+        await this.scormRepository.markAttemptCompleted(body.attemptId);
+      }
 
-    if (scoCompleted && !previouslyCompleted && lessonCompleted) {
-      const packageCompleted = await this.scormRepository.areAllPackageScosCompleted({
+      const lessonCompleted = await this.scormRepository.areAllLessonScosCompleted({
         studentId: currentUser.userId,
         packageId: body.packageId,
+        lessonId: body.lessonId,
         completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
         excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
       });
 
-      if (packageCompleted) {
-        await this.outboxPublisher.publish(
-          new CompleteScormEvent({
-            scormId: body.packageId,
-            actor: currentUser,
-            userId: currentUser.userId,
-          }),
-          this.db,
-        );
-      }
-    }
-
-    const progressResult = lessonCompleted
-      ? await this.studentLessonProgressService.markLessonAsCompleted({
-          id: body.lessonId,
+      if (scoCompleted && !previouslyCompleted && lessonCompleted) {
+        const packageCompleted = await this.scormRepository.areAllPackageScosCompleted({
           studentId: currentUser.userId,
-          userPermissions: currentUser.permissions,
-          actor: currentUser,
-          language: body.language ?? SUPPORTED_LANGUAGES.EN,
-        })
-      : await this.studentLessonProgressService.markLessonAsIncomplete({
-          id: body.lessonId,
-          studentId: currentUser.userId,
-          userPermissions: currentUser.permissions,
-          actor: currentUser,
-          resetStarted:
-            normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.NOT_ATTEMPTED,
+          packageId: body.packageId,
+          completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
+          excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
         });
 
-    const navigation = await this.scormRepository.findScoNavigation({
-      packageId: body.packageId,
-      lessonId: body.lessonId,
-      scoId: body.scoId,
-    });
+        if (packageCompleted) {
+          await this.outboxPublisher.publish(
+            new CompleteScormEvent({
+              scormId: body.packageId,
+              actor: currentUser,
+              userId: currentUser.userId,
+            }),
+            this.db,
+          );
+        }
+      }
 
-    return {
-      lessonCompleted,
-      messageKey: progressResult.messageKey,
-      scormStatus: mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] ?? null,
-      nextScoId: navigation.nextScoId,
-    };
+      const progressResult = lessonCompleted
+        ? await this.studentLessonProgressService.markLessonAsCompleted({
+            id: body.lessonId,
+            studentId: currentUser.userId,
+            userPermissions: currentUser.permissions,
+            actor: currentUser,
+            language: body.language ?? SUPPORTED_LANGUAGES.EN,
+          })
+        : await this.studentLessonProgressService.markLessonAsIncomplete({
+            id: body.lessonId,
+            studentId: currentUser.userId,
+            userPermissions: currentUser.permissions,
+            actor: currentUser,
+            resetStarted: isScormRetake(body.values),
+          });
+
+      const navigation = await this.scormRepository.findScoNavigation({
+        packageId: body.packageId,
+        lessonId: body.lessonId,
+        scoId: body.scoId,
+      });
+
+      return {
+        lessonCompleted,
+        messageKey: progressResult.messageKey,
+        scormStatus: mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] ?? null,
+        nextScoId: navigation.nextScoId,
+      };
+    });
   }
 
   async getContentFile(params: {
@@ -1990,6 +1992,10 @@ export class ScormService {
       default:
         return SCORM_SUCCESS_STATUS.UNKNOWN;
     }
+  }
+
+  async assertDeliveryAccess(packageId: UUIDType, currentUser: CurrentUserType) {
+    return this.assertPackageContentAccess(packageId, currentUser);
   }
 
   private async assertPackageContentAccess(packageId: UUIDType, currentUser: CurrentUserType) {

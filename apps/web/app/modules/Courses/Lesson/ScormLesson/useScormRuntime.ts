@@ -1,43 +1,43 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { validateScormCall, SCORM_SESSION_PATTERN } from "@repo/shared";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCommitScormRuntime, useFinishScormRuntime } from "~/api/mutations";
+import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
+import { parseScormLaunch } from "./scormBridge";
 import {
-  createScorm12Api,
-  exposeScormApi,
   filterWritableRuntimeValues,
   hasRuntimeValues,
-  readRenderedRuntimeValues,
-  removeScormApi,
-  SCORM_COMMIT_EVENT,
-  SCORM_FINISH_EVENT,
-  SCORM_SET_VALUE_EVENT,
   asRuntimeValues,
 } from "./scormRuntime.helpers";
 
 import type { ScormLaunchData, ScormRuntimeValues } from "./ScormLesson.types";
 import type { SupportedLanguages } from "@repo/shared";
-import type { Scorm12API } from "scorm-again";
 import type { LaunchScormAttemptResponse } from "~/api/generated-api";
 
 type UseScormRuntimeParams = {
   launch: ScormLaunchData;
+  frame: React.RefObject<HTMLIFrameElement>;
   language: SupportedLanguages;
   onSavingChange?: (isSaving: boolean) => void;
 };
 
-export function useScormRuntime({ launch, language, onSavingChange }: UseScormRuntimeParams) {
+export function useScormRuntime({
+  launch,
+  frame,
+  language,
+  onSavingChange,
+}: UseScormRuntimeParams) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
+
   const { mutateAsync: commitRuntime } = useCommitScormRuntime();
   const { mutateAsync: finishRuntime } = useFinishScormRuntime();
   const commitRuntimeRef = useRef(commitRuntime);
   const finishRuntimeRef = useRef(finishRuntime);
   const dirtyValuesRef = useRef<ScormRuntimeValues>({});
-  const apiRef = useRef<Scorm12API | null>(null);
+
   const pendingSavesRef = useRef(0);
   const onSavingChangeRef = useRef(onSavingChange);
   const tRef = useRef(t);
@@ -61,8 +61,14 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   }, [commitRuntime, finishRuntime, onSavingChange, t]);
 
   useEffect(() => {
-    const api = createScorm12Api();
+    const bridge = parseScormLaunch(launch.launchUrl, window.location.origin);
+    if (!bridge) return;
     const runtimeValues = asRuntimeValues(launchRuntimeRef.current.runtime);
+    const state = { channel: bridge.channel, session: "", sequence: 0 };
+    let initialized = false;
+    let runtimeStarted = false;
+    let finished = false;
+    const currentValues = { ...runtimeValues };
 
     const buildRuntimePayload = (values: ScormRuntimeValues) => ({
       attemptId: launch.attemptId,
@@ -146,9 +152,8 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     };
 
     const finishRuntimeSession = async ({ showToast }: { showToast: boolean }) => {
-      const renderedValues = readRenderedRuntimeValues(api);
       const values = filterWritableRuntimeValues({
-        ...renderedValues,
+        ...currentValues,
         ...dirtyValuesRef.current,
       });
 
@@ -173,26 +178,56 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
       }
     };
 
-    api.loadFromFlattenedJSON(runtimeValues);
-    api.on(SCORM_SET_VALUE_EVENT, (element: string, value: unknown) => {
-      dirtyValuesRef.current[element] = String(value ?? "");
-    });
-    api.on(SCORM_COMMIT_EVENT, () => {
-      void commitDirtyValues();
-    });
-    api.on(SCORM_FINISH_EVENT, () => {
-      void finishRuntimeSession({ showToast: true });
-    });
-
-    apiRef.current = api;
-    exposeScormApi(api);
+    const onMessage = (event: MessageEvent) => {
+      if (event.source !== frame.current?.contentWindow || event.origin !== bridge.origin) return;
+      const msg = event.data;
+      if (!msg || typeof msg !== "object" || msg.channel !== bridge.channel) return;
+      if (msg.type === "mentingo:scorm:ready") {
+        if (typeof msg.session !== "string" || !SCORM_SESSION_PATTERN.test(msg.session)) return;
+        if (!initialized) {
+          state.session = msg.session;
+          state.sequence = 0;
+          initialized = true;
+        }
+        if (state.session === msg.session)
+          frame.current?.contentWindow?.postMessage(
+            {
+              type: "mentingo:scorm:initialize",
+              channel: bridge.channel,
+              session: state.session,
+              runtime: runtimeValues,
+            },
+            bridge.origin,
+          );
+        return;
+      }
+      if (!initialized || finished) return;
+      const call = validateScormCall(msg, state);
+      if (!call) return;
+      switch (call.method) {
+        case "LMSInitialize":
+          runtimeStarted = true;
+          break;
+        case "LMSSetValue":
+          currentValues[call.params[0]] = call.params[1];
+          dirtyValuesRef.current[call.params[0]] = call.params[1];
+          break;
+        case "LMSCommit":
+          void commitDirtyValues();
+          break;
+        case "LMSFinish":
+          finished = true;
+          void finishRuntimeSession({ showToast: true });
+          break;
+      }
+    };
+    window.addEventListener("message", onMessage);
 
     return () => {
-      if (api.isInitialized()) {
+      window.removeEventListener("message", onMessage);
+      if (runtimeStarted && !finished) {
         void finishRuntimeSession({ showToast: false });
       }
-      removeScormApi(api);
-      apiRef.current = null;
       dirtyValuesRef.current = {};
     };
   }, [
@@ -202,6 +237,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     launch.lessonId,
     launch.packageId,
     launch.scoId,
-    queryClient,
+    launch.launchUrl,
+    frame,
   ]);
 }

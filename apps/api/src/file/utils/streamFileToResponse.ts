@@ -1,5 +1,7 @@
 import { Logger } from "@nestjs/common";
 
+import { uploadContentDisposition } from "src/file/utils/uploadContentDisposition";
+
 import type { Response } from "express";
 import type { FileStreamPayload } from "src/file/types/file-stream.type";
 
@@ -65,6 +67,8 @@ export const streamFileToResponse = (res: Response, file: FileStreamPayload) => 
   req?.once("aborted", handleRequestAborted);
 
   res.setHeader("Accept-Ranges", file.acceptRanges ?? "bytes");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Content-Disposition", uploadContentDisposition(file.contentType));
 
   if (file.contentType) {
     res.setHeader("Content-Type", file.contentType);

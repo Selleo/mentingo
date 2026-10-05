@@ -32,7 +32,8 @@ type WithWorkerPage = (
   options?: { root?: boolean },
 ) => Promise<void>;
 
-const scormFrame = (page: Page) => page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME).contentFrame();
+const scormFrame = (page: Page) =>
+  page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME).contentFrame().locator("#sco").contentFrame();
 
 async function createScormCourseForLearning({
   cleanup,
@@ -194,6 +195,13 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
       await startLearningFlow(page);
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${lesson.id}$`));
+      await expect(page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME)).toHaveAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-forms allow-modals",
+      );
+      const playerUrl = await page.getByTestId(LEARNING_HANDLES.SCORM_IFRAME).getAttribute("src");
+      expect(new URL(playerUrl!).origin).not.toBe(new URL(page.url()).origin);
+      expect(playerUrl).toMatch(/\/api\/scorm\/delivery\/[a-f0-9]{64}\/player$/u);
       await expect(scormFrame(page).getByTestId(SCORM_PACKAGE_HANDLES.SINGLE_TITLE)).toBeVisible();
       await expect(scormFrame(page).getByTestId(SCORM_PACKAGE_HANDLES.ENTRY)).toHaveText(
         "ab-initio",

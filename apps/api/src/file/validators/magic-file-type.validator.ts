@@ -1,34 +1,34 @@
 import { FileValidator } from "@nestjs/common";
 
-import { FileGuard } from "src/file/guards/file.guard";
+import { normalizeUploadedFile } from "src/file/validation/normalizeUploadedFile";
 
 import type { IFile } from "@nestjs/common/pipes/file/interfaces";
 
 export type MagicFileTypeValidatorOptions = {
   fileType: string | RegExp;
+  maxSize: number;
   fallbackToMimetype?: boolean;
 };
 
 export class MagicFileTypeValidator extends FileValidator<MagicFileTypeValidatorOptions> {
-  private errorMessage = "files.toast.invalidFileType";
-
   async isValid<TFile extends IFile = any>(file?: TFile): Promise<boolean> {
     if (!file) return true;
-
-    const { fileType, fallbackToMimetype = true } = this.validationOptions;
-    const resolvedType = await FileGuard.getFileType(file as unknown as Express.Multer.File);
-    const resolvedMime = resolvedType?.mime ?? (fallbackToMimetype ? file.mimetype : undefined);
-
-    if (!resolvedMime) return false;
-
-    if (typeof fileType === "string") {
-      return resolvedMime === fileType;
+    const { fileType, maxSize } = this.validationOptions;
+    const upload = file as unknown as Express.Multer.File;
+    if (!Buffer.isBuffer(upload.buffer) || !upload.buffer.length || upload.buffer.length > maxSize)
+      return false;
+    try {
+      const { sourceMime } = await normalizeUploadedFile(upload);
+      if (upload.buffer.length > maxSize) return false;
+      return typeof fileType === "string"
+        ? sourceMime === fileType
+        : new RegExp(fileType.source, fileType.flags.replace(/[gy]/g, "")).test(sourceMime);
+    } catch {
+      return false;
     }
-
-    return fileType.test(resolvedMime);
   }
 
   buildErrorMessage(): string {
-    return this.errorMessage;
+    return "files.toast.invalidFileType";
   }
 }

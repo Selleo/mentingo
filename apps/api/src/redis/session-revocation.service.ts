@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { Inject, Injectable } from "@nestjs/common";
 
 import { REDIS_CLIENT } from "src/redis/redis.tokens";
@@ -22,6 +24,14 @@ export class SessionRevocationService {
 
   async clearUserRevocation(userId: UUIDType | string): Promise<void> {
     await this.redisClient.del(this.getKey(userId));
+  }
+
+  async revokeScormCredential(credential: string, expiresAt: number) {
+    const ttl = expiresAt - Date.now();
+    if (credential && ttl > 0) {
+      const digest = createHash("sha256").update(credential).digest("hex");
+      await this.redisClient.set(`scorm:credential-revoked:${digest}`, "1", { PX: ttl });
+    }
   }
 
   private getKey(userId: UUIDType | string): string {
