@@ -35,6 +35,7 @@ import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
 import { AI_TELEMETRY_FUNCTION_IDS, buildAiTelemetry } from "src/ai/utils/ai-telemetry";
 import { aiJudgeJudgementSchema, generateTranslationSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { buildOpenAIProvider } from "src/ai/utils/openai-provider";
 import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
 
@@ -67,11 +68,12 @@ export class AiRuntimeService {
   async getAISdkOpenAI(): Promise<OpenAIProvider> {
     const { createOpenAI } = await loadOpenAiSdk();
 
-    return createOpenAI({
+    return buildOpenAIProvider(createOpenAI, {
       apiKey: await this.envService
         .getEnv("OPENAI_API_KEY")
         .then((r) => r.value)
         .catch(() => process.env.OPENAI_API_KEY),
+      baseURL: process.env.OPENAI_BASE_URL,
     });
   }
 

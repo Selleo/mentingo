@@ -34,9 +34,12 @@ Each provider is enabled independently, and the corresponding flag must be set i
 
 ## AI
 
-| Variable         | Purpose                                                                                  |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY` | Your own provider key. Prompts and learner content go to this provider and nowhere else. |
+| Variable                                                     | Purpose                                                                                                                                        |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`                                             | Your own provider key. Prompts and learner content go to this provider and nowhere else.                                                       |
+| `OPENAI_BASE_URL`                                            | Optional. An OpenAI-compatible gateway such as OpenRouter (`https://openrouter.ai/api/v1`). Text models then use the Chat Completions API.     |
+| `OPENAI_MODEL_BASIC`, `OPENAI_MODEL_TRANSLATION`             | Optional. Model ids for chat, generation and translation, e.g. `openai/gpt-5.4-mini` on OpenRouter. Default: `gpt-5.4-mini`.                    |
+| `OPENAI_MODEL_EMBEDDING`                                     | Optional. Embedding model for the AI mentor's knowledge base. It must produce 1536-dimension vectors. Default: `text-embedding-3-small`.        |
 
 Model choice and provider configuration are also exposed in the admin interface, so you do not need a redeploy to change them.
 
