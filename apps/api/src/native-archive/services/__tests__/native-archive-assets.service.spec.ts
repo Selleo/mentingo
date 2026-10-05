@@ -403,7 +403,7 @@ describe("NativeArchiveAssetsService", () => {
     expect(fileService.uploadResource).toHaveBeenCalledTimes(3);
     expect(storage.uploadFile).toHaveBeenCalledTimes(1);
     const svgUpload = fileService.uploadResource.mock.calls.find(
-      ([{ file }]) => file.originalname === "icon.svg",
+      ([{ file }]) => file.originalname === "icon.png",
     )?.[0].file;
     expect(svgUpload?.mimetype).toBe("image/png");
     expect(svgUpload?.buffer.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
