@@ -84,9 +84,13 @@ describe("JudgeService blocking-error verification", () => {
       language: "en",
       blockingError: rubric.blockingErrors[0].description,
     });
-    expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(
-      learnerMessages[1].content,
+    const verifierInput = runtime.judgeMentor.mock.calls[1][0].messages;
+    expect(verifierInput[0].content).toBe("judgeBlockingErrorVerificationPrompt");
+    expect(verifierInput[1].content).toContain(learnerMessages[1].content);
+    expect(JSON.stringify(verifierInput)).not.toContain(
+      firstResult.triggeredBlockingErrors[0].learnerSafeFeedback,
     );
+    expect(JSON.stringify(verifierInput)).not.toContain(rubric.criteria[0].expectedBehavior);
     expect(result.data).toMatchObject({
       passed: true,
       blockingErrors: [],
@@ -161,6 +165,101 @@ describe("JudgeService blocking-error verification", () => {
 
     await expect(run(service)).rejects.toThrow("verification unavailable");
     expect(persist).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "Ktoś zalogował się na moje konto po zakończeniu pracy; odrzuciłem MFA.",
+    "Nie mam uprawnień do badania systemu klienta i nie sprawdzałem logów.",
+    "Tomasz polecił nie logować się ponownie; zastosowałem się.",
+    "Gdybym miał uprawnienia, mógłbym sprawdzić logi, ale ich nie mam.",
+  ])(
+    "does not block on reported, denied, mentor-directed or hypothetical behavior: %s",
+    async (statement) => {
+      const { service, runtime, persist } = setup([
+        firstResult,
+        { criterionResults: [], triggeredBlockingErrors: [] },
+      ]);
+      const messageService = service["messageService"] as unknown as {
+        findMessageHistory: jest.Mock;
+      };
+      messageService.findMessageHistory.mockResolvedValue({
+        history: [{ content: statement }],
+        userLanguage: "pl",
+      });
+
+      const result = await run(service);
+
+      expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(statement);
+      expect(result.data).toMatchObject({ passed: true, blockingErrors: [] });
+      expect(persist).toHaveBeenCalledWith(
+        "thread-id",
+        "en",
+        rubric,
+        expect.objectContaining({ passed: true, blockingErrors: [] }),
+      );
+    },
+  );
+
+  it("verifies each proposed error separately and keeps only the corroborated one", async () => {
+    const secondRule = { id: "second-blocking-id", description: "Learner deletes client logs." };
+    const twoRules = { ...rubric, blockingErrors: [...rubric.blockingErrors, secondRule] };
+    const { service, runtime, prompt, persist } = setup([
+      {
+        ...firstResult,
+        triggeredBlockingErrors: [
+          { blockingErrorRef: "B1", learnerSafeFeedback: "Unverified login." },
+          { blockingErrorRef: "B2", learnerSafeFeedback: "Unverified deletion." },
+        ],
+      },
+      { criterionResults: [], triggeredBlockingErrors: [] },
+      {
+        criterionResults: [],
+        triggeredBlockingErrors: [
+          { blockingErrorRef: "B1", learnerSafeFeedback: "You deleted the client logs." },
+        ],
+      },
+    ]);
+    const repository = service["aiRepository"] as unknown as {
+      findJudgeRubricByThreadId: jest.Mock;
+    };
+    repository.findJudgeRubricByThreadId.mockResolvedValue({
+      lessonTitle: "Incident",
+      rubric: twoRules,
+    });
+    const messageService = service["messageService"] as unknown as {
+      findMessageHistory: jest.Mock;
+    };
+    messageService.findMessageHistory.mockResolvedValue({
+      history: [{ content: "I did not log back in, but I deleted the client's logs." }],
+      userLanguage: "en",
+    });
+
+    const result = await run(service);
+
+    expect(runtime.judgeMentor).toHaveBeenCalledTimes(3);
+    expect(prompt.loadPrompt).toHaveBeenNthCalledWith(2, "judgeBlockingErrorVerificationPrompt", {
+      language: "en",
+      blockingError: rubric.blockingErrors[0].description,
+    });
+    expect(prompt.loadPrompt).toHaveBeenNthCalledWith(3, "judgeBlockingErrorVerificationPrompt", {
+      language: "en",
+      blockingError: secondRule.description,
+    });
+    expect(result.data).toMatchObject({
+      score: 1,
+      passed: false,
+      blockingErrors: [
+        { blockingErrorId: secondRule.id, learnerSafeFeedback: "You deleted the client logs." },
+      ],
+    });
+    expect(persist).toHaveBeenCalledWith(
+      "thread-id",
+      "en",
+      twoRules,
+      expect.objectContaining({
+        blockingErrors: [expect.objectContaining({ blockingErrorId: secondRule.id })],
+      }),
+    );
   });
 
   it("does not turn a Polish denial of investigating client logs into an automatic failure", async () => {
