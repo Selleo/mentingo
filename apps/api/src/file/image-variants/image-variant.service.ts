@@ -58,13 +58,7 @@ export class ImageVariantService {
         await Promise.all(
           variantDefinitions.map(async (definition) => [
             definition.quality,
-            await this.createVariant(
-              params.buffer,
-              referenceKey,
-              sourceMetadata,
-              definition,
-              resizeMode,
-            ),
+            await this.createVariant(params.buffer, referenceKey, definition, resizeMode),
           ]),
         ),
       ) as Partial<Record<ImageQuality, ImageVariantBufferDetails>>;
@@ -115,13 +109,7 @@ export class ImageVariantService {
         await Promise.all(
           variantDefinitions.map(async (definition) => [
             definition.quality,
-            await this.createVariant(
-              params.buffer,
-              params.referenceKey,
-              sourceMetadata,
-              definition,
-              resizeMode,
-            ),
+            await this.createVariant(params.buffer, params.referenceKey, definition, resizeMode),
           ]),
         ),
       ) as Partial<Record<ImageQuality, ImageVariantBufferDetails>>;
@@ -152,20 +140,22 @@ export class ImageVariantService {
     if (resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE) {
       return sharp(buffer)
         .rotate()
-        .resize({ width, height: width, fit: "cover", position: "center" })
+        .resize({
+          width,
+          height: width,
+          fit: "cover",
+          position: "center",
+          withoutEnlargement: true,
+        })
         .webp({ quality: 82 })
-        .toBuffer();
+        .toBuffer({ resolveWithObject: true });
     }
 
-    return sharp(buffer).rotate().resize({ width }).webp({ quality: 82 }).toBuffer();
-  }
-
-  private calculateHeight(
-    sourceWidth: number,
-    sourceHeight: number,
-    targetWidth: ImageVariantWidth,
-  ) {
-    return Math.round((sourceHeight / sourceWidth) * targetWidth);
+    return sharp(buffer)
+      .rotate()
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer({ resolveWithObject: true });
   }
 
   private removeBuffersFromVariants(
@@ -194,22 +184,17 @@ export class ImageVariantService {
   private async createVariant(
     buffer: Buffer,
     referenceKey: string,
-    sourceMetadata: { width: number; height: number },
     definition: ImageVariantDefinition,
     resizeMode: ImageResizeMode,
   ): Promise<ImageVariantBufferDetails> {
     const { quality, width } = definition;
-    const height =
-      resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE
-        ? width
-        : this.calculateHeight(sourceMetadata.width, sourceMetadata.height, width);
-
+    const variant = await this.resizeToWebp(buffer, width, resizeMode);
     return {
       key: getImageVariantKey(referenceKey, quality),
-      width,
-      height,
+      width: variant.info.width,
+      height: variant.info.height,
       contentType: IMAGE_VARIANT_CONTENT_TYPE,
-      buffer: await this.resizeToWebp(buffer, width, resizeMode),
+      buffer: variant.data,
     };
   }
 }

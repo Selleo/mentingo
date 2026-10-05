@@ -1,4 +1,5 @@
-export const BLANK_ANSWER_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
+export { BLANK_ANSWER_MARKER_REGEX } from "@repo/shared";
+import { BLANK_ANSWER_MARKER_REGEX } from "@repo/shared";
 
 export const createBlankAnswerMarker = (answerId: string) => `<blank-answer-${answerId}>`;
 

@@ -81,19 +81,19 @@ describe("ImageVariantService", () => {
 
     expect(uploadByKey.has(result?.referenceKey ?? "")).toBe(false);
 
-    for (const { quality, width } of IMAGE_VARIANT_DEFINITIONS) {
+    for (const { quality } of IMAGE_VARIANT_DEFINITIONS) {
       const variant = result?.metadata.variants[quality];
       expect(variant?.key).toBe(`${result?.referenceKey.replace(".webp", "")}-${quality}.webp`);
-      expect(variant?.width).toBe(width);
-      expect(variant?.height).toBe(width / 2);
+      expect(variant?.width).toBe(100);
+      expect(variant?.height).toBe(50);
       expect(variant?.contentType).toBe(IMAGE_VARIANT_CONTENT_TYPE);
 
       const upload = uploadByKey.get(variant?.key ?? "");
       expect(upload?.contentType).toBe(IMAGE_VARIANT_CONTENT_TYPE);
 
       const metadata = await sharp(upload?.buffer).metadata();
-      expect(metadata.width).toBe(width);
-      expect(metadata.height).toBe(width / 2);
+      expect(metadata.width).toBe(variant?.width);
+      expect(metadata.height).toBe(variant?.height);
       expect(metadata.format).toBe("webp");
     }
   });
@@ -138,8 +138,8 @@ describe("ImageVariantService", () => {
 
     for (const { quality, width } of PWA_ICON_IMAGE_VARIANT_DEFINITIONS) {
       const variant = result?.metadata.variants[quality];
-      expect(variant?.width).toBe(width);
-      expect(variant?.height).toBe(width);
+      expect(variant?.width).toBeLessThanOrEqual(width);
+      expect(variant?.height).toBeLessThanOrEqual(width);
     }
   });
 

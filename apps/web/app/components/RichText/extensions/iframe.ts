@@ -1,3 +1,4 @@
+import { isAllowedIframeUrl } from "@repo/shared";
 import { Node, mergeAttributes } from "@tiptap/core";
 
 /**
@@ -14,6 +15,8 @@ export const Iframe = Node.create({
     return [
       {
         tag: "iframe",
+        getAttrs: (element) =>
+          isAllowedIframeUrl((element as HTMLElement).getAttribute("src") ?? "") ? {} : false,
       },
     ];
   },
@@ -47,6 +50,11 @@ export const Iframe = Node.create({
       referrerpolicy: {
         default: null,
       },
+      sandbox: {
+        default: "allow-scripts allow-presentation",
+        parseHTML: () => "allow-scripts allow-presentation",
+        renderHTML: () => ({ sandbox: "allow-scripts allow-presentation" }),
+      },
     };
   },
 
@@ -57,7 +65,7 @@ export const Iframe = Node.create({
         {
           class: "w-full aspect-video",
         },
-        HTMLAttributes,
+        { ...HTMLAttributes, sandbox: "allow-scripts allow-presentation" },
       ),
     ];
   },

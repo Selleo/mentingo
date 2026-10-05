@@ -1,3 +1,4 @@
+import { sanitizeRichText } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import DefaultCoursePhoto from "~/assets/svgs/default-photo-course.svg";
@@ -58,8 +59,9 @@ const CourseCardPreview = ({
               <div
                 className="description line-clamp-3 break-words text-left text-gray-500"
                 dangerouslySetInnerHTML={{
-                  __html:
+                  __html: sanitizeRichText(
                     description || t("adminCourseView.settings.sideSection.other.noDescription"),
+                  ),
                 }}
               />
               <div className="mt-5 flex w-full justify-center">

@@ -52,10 +52,10 @@ import {
 } from "../learning-path.schema";
 import { LearningPathService } from "../services/learning-path.service";
 
-type LearningPathUploadFiles = {
-  thumbnail?: Express.Multer.File[];
-  certificateSignature?: Express.Multer.File[];
-};
+import {
+  ValidateLearningPathFilesPipe,
+  type LearningPathUploadFiles,
+} from "./validate-learning-path-files.pipe";
 
 const learningPathFileFields = FileFieldsInterceptor([
   { name: "thumbnail", maxCount: 1 },
@@ -134,7 +134,7 @@ export class LearningPathController {
   })
   async createLearningPath(
     @Body() body: CreateLearningPathBody,
-    @UploadedFiles()
+    @UploadedFiles(new ValidateLearningPathFilesPipe())
     files: LearningPathUploadFiles,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<LearningPathSchema>> {
@@ -166,7 +166,7 @@ export class LearningPathController {
   async updateLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: UpdateLearningPathBody,
-    @UploadedFiles()
+    @UploadedFiles(new ValidateLearningPathFilesPipe())
     files: LearningPathUploadFiles,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() request: McpRequest,

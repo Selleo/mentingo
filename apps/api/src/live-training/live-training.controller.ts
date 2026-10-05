@@ -22,6 +22,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  MAX_FILE_SIZE_BYTES,
   FEATURES,
   LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
   PERMISSIONS,
@@ -44,7 +45,6 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
@@ -287,7 +287,7 @@ export class LiveTrainingController {
           ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
           ...ALLOWED_PRESENTATION_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,

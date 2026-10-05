@@ -2,6 +2,8 @@ import { BadRequestException } from "@nestjs/common";
 import { Jimp } from "jimp";
 import { loadEsm } from "load-esm";
 
+import { normalizeUploadedFile } from "src/file/validation/normalizeUploadedFile";
+
 export type FileValidationOptions = {
   allowedTypes: readonly string[];
   maxSize: number;
@@ -15,29 +17,20 @@ export type FileValidationOptions = {
 
 export class FileGuard {
   static async validateFile(file: Express.Multer.File, options: FileValidationOptions) {
-    const resolvedType = await this.getFileType(file);
-    const resolvedMime = this.normalizeMime(resolvedType?.mime ?? file.mimetype);
-    const fileMime = this.normalizeMime(file.mimetype);
-
-    if (!file.originalname || !file.buffer || file.buffer.length === 0) {
-      throw new BadRequestException("files.toast.invalidData");
+    if (!file?.originalname || !Buffer.isBuffer(file.buffer) || !file.buffer.length) {
+      throw new BadRequestException("files.toast.invalidFileType");
     }
-
-    if (resolvedType?.mime && fileMime && resolvedMime !== fileMime) {
-      throw new BadRequestException("files.toast.contentTypeMismatch");
+    if (file.buffer.length > options.maxSize)
+      throw new BadRequestException("files.toast.invalidFileType");
+    const { sourceMime, mime, extension } = await normalizeUploadedFile(file);
+    const resolvedType = { mime, ext: extension };
+    if (!options.allowedTypes.includes(sourceMime)) {
+      throw new BadRequestException("files.toast.invalidFileType");
     }
-
-    if (!resolvedMime || !options.allowedTypes.includes(resolvedMime)) {
-      throw new BadRequestException(
-        `File type ${
-          resolvedMime || "unknown"
-        } is not allowed. Allowed types are: ${options.allowedTypes.join(", ")}`,
-      );
-    }
-
-    const isVideo = resolvedType?.mime.startsWith("video/");
+    const isVideo = sourceMime.startsWith("video/");
     const maxSize = isVideo && options.maxVideoSize ? options.maxVideoSize : options.maxSize;
-    const size = this.validateSize(file, maxSize);
+    if (file.buffer.length > maxSize) throw new BadRequestException("files.toast.invalidFileType");
+    const size = file.size;
 
     let resolution = null;
     let aspectRatio = null;
@@ -62,12 +55,6 @@ export class FileGuard {
     const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>("file-type");
 
     return fileTypeFromBuffer(file instanceof Buffer ? file : file.buffer);
-  }
-
-  private static normalizeMime(mime?: string) {
-    if (!mime) return undefined;
-    if (mime === "image/jpg") return "image/jpeg";
-    return mime;
   }
 
   static validateSize(file: Express.Multer.File, maxSize: number) {

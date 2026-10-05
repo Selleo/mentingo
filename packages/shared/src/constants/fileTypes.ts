@@ -3,6 +3,7 @@ export const ALLOWED_LESSON_IMAGE_FILE_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
+  "image/svg+xml",
   "image/bmp",
   "image/tiff",
 ];
@@ -44,6 +45,7 @@ export const ALLOWED_PDF_FILE_TYPES = ["application/pdf"];
 
 export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = [
   "image/png",
+  "image/webp",
   "image/svg+xml",
   "application/xml",
 ] as const;

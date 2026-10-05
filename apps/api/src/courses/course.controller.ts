@@ -15,6 +15,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes } from "@nestjs/swagger";
@@ -22,6 +23,7 @@ import {
   ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   COURSE_ARCHIVED_QUERY_VALUES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
   PERMISSIONS,
   SupportedLanguages,
   type CourseArchivedQueryValue,
@@ -45,6 +47,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { CourseDuplicationService } from "src/courses/course-duplication.service";
 import { CourseScormExportService } from "src/courses/course-scorm-export.service";
@@ -124,7 +127,6 @@ import {
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { GroupsFilterSchema } from "src/group/group.types";
@@ -192,6 +194,7 @@ import type {
 } from "src/courses/schemas/showCourseCommon.schema";
 
 @Controller("course")
+@UsePipes(SanitizeRichTextPipe)
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
@@ -691,7 +694,10 @@ export class CourseController {
     @Param("id") id: UUIDType,
     @Body() updateCourseMediaBody: UpdateCourseMediaBody,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_IMAGE_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
@@ -789,7 +795,7 @@ export class CourseController {
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex([...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES]),
-        MAX_FILE_SIZE,
+        MAX_IMAGE_FILE_SIZE_BYTES,
         true,
       ).build({
         fileIsRequired: false,

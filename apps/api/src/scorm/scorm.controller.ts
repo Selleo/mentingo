@@ -20,8 +20,9 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
   DEFAULT_TUS_CHUNK_SIZE,
-  PERMISSIONS,
   SCORM_IMPORT_ACTION,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
+  PERMISSIONS,
   type SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -264,10 +265,13 @@ export class ScormController {
   @Post("course")
   @RequirePermission(PERMISSIONS.COURSE_CREATE)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -337,7 +341,11 @@ export class ScormController {
 
   @Post("lesson")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
-  @UseInterceptors(FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }]))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: SCORM_PACKAGE_FIELD, maxCount: 1 }], {
+      limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES },
+    }),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -383,10 +391,13 @@ export class ScormController {
 
   @Patch("lesson/:lessonId/package")
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
-      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+        { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+      ],
+      { limits: { fileSize: MAX_SCORM_PACKAGE_SIZE_BYTES } },
+    ),
   )
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @ApiConsumes("multipart/form-data")

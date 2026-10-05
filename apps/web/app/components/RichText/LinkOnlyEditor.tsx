@@ -1,3 +1,4 @@
+import { sanitizeRichText } from "@repo/shared";
 import { Document } from "@tiptap/extension-document";
 import { Link } from "@tiptap/extension-link";
 import { Paragraph } from "@tiptap/extension-paragraph";
@@ -50,11 +51,12 @@ export function LinkOnlyEditor({
         placeholder: placeholder ?? t("registrationFormBuilder.field.labelPlaceholder"),
       }),
     ],
-    content,
+    content: sanitizeRichText(content ?? ""),
     onUpdate: ({ editor: currentEditor }) => {
       onChange(currentEditor.getHTML());
     },
     editorProps: {
+      transformPastedHTML: sanitizeRichText,
       attributes: {
         "data-testid": editorTestId ?? "",
         class:
@@ -65,7 +67,7 @@ export function LinkOnlyEditor({
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content || "");
+      editor.commands.setContent(sanitizeRichText(content || ""));
     }
   }, [content, editor]);
 
