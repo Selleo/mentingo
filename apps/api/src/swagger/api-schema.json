@@ -15463,6 +15463,33 @@
         }
       }
     },
+    "/api/scorm/runtime/content/renew": {
+      "post": {
+        "operationId": "ScormController_renewContent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewContentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/runtime/commit": {
       "post": {
         "operationId": "ScormController_commitScormAttempt",
@@ -15519,14 +15546,24 @@
     },
     "/api/scorm/content/{packageId}/*": {
       "get": {
-        "operationId": "ScormController_streamScormContent",
+        "operationId": "ScormController_oldContent",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/scorm/delivery/{token}/*": {
+      "get": {
+        "operationId": "ScormController_delivery",
         "parameters": [
           {
-            "name": "packageId",
+            "name": "token",
             "required": true,
             "in": "path",
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -129577,6 +129614,38 @@
               "scoTitle",
               "navigation",
               "runtime"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RenewContentBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "token": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "RenewContentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "renewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "renewed"
             ]
           }
         },

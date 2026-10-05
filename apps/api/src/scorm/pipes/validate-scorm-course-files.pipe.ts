@@ -10,6 +10,7 @@ import type { PipeTransform } from "@nestjs/common";
 
 export const SCORM_PACKAGE_FIELD = "scormPackage";
 export const SCORM_THUMBNAIL_FIELD = "thumbnail";
+export const MAX_SCORM_THUMBNAIL_SIZE = MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES;
 
 const ALLOWED_SCORM_PACKAGE_MIME_TYPES = Object.values(SCORM_PACKAGE_MIME_TYPES);
 
