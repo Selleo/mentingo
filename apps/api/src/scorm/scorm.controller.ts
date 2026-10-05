@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Head,
-  Headers,
   Inject,
   Options,
   Param,
@@ -30,17 +29,23 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { revokeMcpUploadGrant } from "src/mcp/mcp-upload-grant-key";
 import { assertScormTusGrant, assertScormUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
 import { McpRequest } from "src/mcp/mcp.types";
 import { REDIS_CLIENT, type RedisClient } from "src/redis";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
+import {
+  scormRenewSchema,
+  scormRenewResponseSchema,
+  type ScormRenewBody,
+} from "./content/scorm-content.schema";
+import { ScormContentService } from "./content/scorm-content.service";
 import {
   CreateScormCourseFiles,
   SCORM_PACKAGE_FIELD,
@@ -89,6 +94,7 @@ export class ScormController {
     private readonly scormService: ScormService,
     private readonly scormTusUploadService: ScormTusUploadService,
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
+    private readonly content: ScormContentService,
   ) {}
 
   @Post("import/init")
@@ -462,10 +468,30 @@ export class ScormController {
     @Query("scoId") scoId: UUIDType | undefined,
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() req: Request,
   ): Promise<BaseResponse<ScormLaunchResponse>> {
-    return new BaseResponse(
-      await this.scormService.launchRuntime({ lessonId, scoId, language, currentUser }),
-    );
+    const launch = await this.scormService.launchRuntime({
+      lessonId,
+      scoId,
+      language,
+      currentUser,
+    });
+    return new BaseResponse(await this.content.launch(launch, currentUser, req));
+  }
+
+  @Post("runtime/content/renew")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Validate({
+    request: [{ type: "body", schema: scormRenewSchema }],
+    response: baseResponse(scormRenewResponseSchema),
+  })
+  async renewContent(
+    @Body() body: ScormRenewBody,
+    @CurrentUser() actor: CurrentUserType,
+    @Req() req: Request,
+  ): Promise<BaseResponse<{ renewed: boolean }>> {
+    await this.content.renew(body.token, actor, req);
+    return new BaseResponse({ renewed: true });
   }
 
   @Post("runtime/commit")
@@ -505,25 +531,14 @@ export class ScormController {
   }
 
   @Get("content/:packageId/*")
-  @RequirePermission(PERMISSIONS.COURSE_READ)
-  @Validate({
-    request: [{ type: "param", name: "packageId", schema: UUIDSchema }],
-  })
-  async streamScormContent(
-    @Param("packageId") packageId: UUIDType,
-    @Req() request: Request,
-    @Res() response: Response,
-    @Headers("range") range: string | undefined,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    const relativePath = request.params[0];
-    const file = await this.scormService.getContentFile({
-      packageId,
-      relativePath,
-      range,
-      currentUser,
-    });
+  @Public()
+  async oldContent(@Res() response: Response) {
+    return response.status(404).end();
+  }
 
-    streamFileToResponse(response, file);
+  @Get("delivery/:token/*")
+  @Public()
+  async delivery(@Param("token") token: string, @Req() req: Request, @Res() res: Response) {
+    return this.content.deliver(token, req.params[0], req, res);
   }
 }

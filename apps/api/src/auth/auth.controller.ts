@@ -34,10 +34,12 @@ import { CurrentUserType, type SupportModeCurrentUser } from "src/common/types/c
 import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
 import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { SessionRevocationService } from "src/redis";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { currentUserResponseSchema } from "src/user/schemas/user.schema";
+import { extractToken } from "src/utils/extract-token";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
@@ -76,6 +78,7 @@ export class AuthController {
     private readonly settingsService: SettingsService,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly tenantResolver: TenantResolverService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
   }
@@ -153,7 +156,14 @@ export class AuthController {
   async logout(
     @Res({ passthrough: true }) response: Response,
     @CurrentUser() currentUser: CurrentUserType,
+    @Req() request?: Request,
   ): Promise<null> {
+    const credential = request ? extractToken(request, "access_token") : undefined;
+    if (credential)
+      await this.sessionRevocationService.revokeScormCredential(
+        credential,
+        (currentUser.exp || 0) * 1000,
+      );
     if (isSupportModeSession(currentUser)) {
       await this.authService.revokeSupportSession(currentUser.supportSessionId);
       this.tokenService.clearTokenCookies(response);

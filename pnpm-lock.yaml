@@ -349,6 +349,9 @@ importers:
       rxjs:
         specifier: 7.8.1
         version: 7.8.1
+      scorm-again:
+        specifier: 3.0.4
+        version: 3.0.4
       sharp:
         specifier: 0.34.5
         version: 0.34.5

@@ -23,6 +23,7 @@ import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
 import { McpOAuthService } from "./mcp/mcp-oauth.service";
 import { REDIS_PUBLISHER_CLIENT, REDIS_SUBSCRIBER_CLIENT, type RedisClient } from "./redis";
+import { scormContentBoundary } from "./scorm/content/scorm-content-boundary";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
 import { Environment, environmentValidation } from "./utils/environment-validation";
@@ -58,6 +59,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   app.getHttpAdapter().getInstance().set("trust proxy", 1);
+  app.use(scormContentBoundary(process.env));
 
   setupValidation();
 

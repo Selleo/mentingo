@@ -7,6 +7,8 @@ import { S3Module } from "src/s3/s3.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 import { WebSocketModule } from "src/websocket";
 
+import { ScormContentGrantService } from "./content/scorm-content-grant.service";
+import { ScormContentService } from "./content/scorm-content.service";
 import { ScormRepository } from "./repositories/scorm.repository";
 import { ScormImportWorker } from "./scorm-import.worker";
 import { ScormQueueService } from "./scorm-queue.service";
@@ -30,6 +32,8 @@ import { ScormService } from "./scorm.service";
     ScormTusUploadService,
     ScormImportWorker,
     ScormRepository,
+    ScormContentGrantService,
+    ScormContentService,
   ],
   exports: [ScormService, ScormRepository, ScormTusUploadService],
 })

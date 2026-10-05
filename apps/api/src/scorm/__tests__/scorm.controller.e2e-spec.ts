@@ -883,64 +883,48 @@ describe("ScormController (e2e)", () => {
     });
   });
 
-  describe("GET /api/scorm/content/:packageId/*", () => {
-    it("serves existing SCORM HTML inline when storage has a generic MIME type", async () => {
+  describe("isolated SCORM delivery", () => {
+    it("does not serve uploaded content on the LMS host", async () => {
       const admin = await createAdmin();
       const imported = await importScormCourse(admin);
-      const [pkg] = await db
-        .select()
-        .from(scormPackages)
-        .where(eq(scormPackages.id, imported.packageId));
-      if (!pkg) throw new Error("Imported SCORM package was not persisted");
-
-      s3Service.setContentType(
-        `${pkg.extractedFilesReference}/index.html`,
-        "application/octet-stream",
-      );
-
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get(`/api/scorm/content/${imported.packageId}/index.html`)
         .set("Cookie", await cookieFor(admin, app))
-        .expect(200);
-
-      expect(response.headers["content-type"]).toContain("text/html");
-      expect(response.text).toContain("SCORM index");
+        .expect(404);
     });
 
-    it("serves extracted content to an authorized learner and admin", async () => {
+    it("delivers assets only via an authorized grant on the content host", async () => {
       const admin = await createAdmin();
       const student = await createStudent();
       const imported = await importScormCourse(admin);
       await enrollStudent(student.id, imported.courseId);
-
-      const learnerResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/scripts/runtime.js`)
-        .set("Cookie", await cookieFor(student, app))
+      const cookie = await cookieFor(student, app);
+      const launch = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", cookie)
         .expect(200);
-
-      expect(learnerResponse.headers["content-type"]).toContain("javascript");
-      expect(learnerResponse.text).toContain("window.__SCORM_FIXTURE__ = true");
-
-      const adminResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/index.html`)
-        .set("Cookie", await cookieFor(admin, app))
+      const player = new URL(launch.body.data.launchUrl);
+      expect(player.origin).toBe("https://scorm.lms.localhost");
+      const token = player.pathname.split("/")[4];
+      expect(token).toMatch(/^[a-f0-9]{64}$/u);
+      const asset = await request(app.getHttpServer())
+        .get(`/api/scorm/delivery/${token}/assets/scripts/runtime.js`)
+        .set("Host", "scorm.lms.localhost")
         .expect(200);
-
-      expect(adminResponse.text).toContain("SCORM index");
-      expect(adminResponse.text).not.toContain("mentingo:scorm-dialog");
-    });
-
-    it("denies content access for an unenrolled learner", async () => {
-      const admin = await createAdmin();
-      const student = await createStudent();
-      const imported = await importScormCourse(admin);
-
-      const response = await request(app.getHttpServer())
-        .get(`/api/scorm/content/${imported.packageId}/index.html`)
-        .set("Cookie", await cookieFor(student, app))
-        .expect(403);
-
-      expect(response.body.message).toBe("adminScorm.errors.runtime.contentForbidden");
+      expect(asset.text).toContain("window.__SCORM_FIXTURE__ = true");
+      expect(asset.headers["content-security-policy"]).toContain("form-action 'none'");
+      await request(app.getHttpServer())
+        .get(`/api/scorm/delivery/${token}/assets/scripts/runtime.js`)
+        .expect(404);
+      await request(app.getHttpServer())
+        .get(`/api/scorm/delivery/${"a".repeat(64)}/assets/scripts/runtime.js`)
+        .set("Host", "scorm.lms.localhost")
+        .expect(404);
+      await request(app.getHttpServer())
+        .post("/api/scorm/runtime/content/renew")
+        .set("Cookie", cookie)
+        .send({ token })
+        .expect(200);
     });
   });
 });

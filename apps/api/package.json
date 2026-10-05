@@ -139,6 +139,7 @@
     "redis": "4.7.0",
     "reflect-metadata": "0.2.0",
     "rxjs": "7.8.1",
+    "scorm-again": "3.0.4",
     "sharp": "0.34.5",
     "slugify": "1.6.6",
     "socket.io": "4.8.1",

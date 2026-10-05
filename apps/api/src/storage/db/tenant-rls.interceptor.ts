@@ -42,6 +42,8 @@ export class TenantRlsInterceptor implements NestInterceptor {
     if (path && this.shouldBypassTenantResolution(path)) {
       return next.handle();
     }
+    // Delivery has no LMS cookie: the grant selects a tenant only after validation.
+    if (path?.startsWith("/api/scorm/delivery/")) return next.handle();
 
     return defer(() =>
       from(

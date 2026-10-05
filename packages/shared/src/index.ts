@@ -59,6 +59,7 @@ export * from "./types/voiceSocketEvents";
 export * from "./utils/certificate";
 export * from "./utils/permissions";
 export * from "./utils/sanitizeRichText";
+export * from "./utils/scorm-bridge";
 export * from "./utils/uiMessage";
 export * from "./utils/videoCoverage";
 export * from "./utils/videoUrls";

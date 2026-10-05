@@ -1,3 +1,20 @@
+scorm.lms.localhost {
+    @content {
+        path /api/scorm/delivery/*
+        method GET HEAD
+    }
+    handle @content {
+        reverse_proxy localhost:3000 {
+            header_up -Cookie
+            header_up -Authorization
+            header_down -Set-Cookie
+        }
+    }
+    handle {
+        respond 404
+    }
+}
+
 app.lms.localhost {
     handle /.well-known/oauth-* {
         reverse_proxy localhost:3000
