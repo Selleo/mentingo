@@ -1,0 +1,201 @@
+import { JudgeService } from "src/ai/services/judge.service";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
+
+import type { AiJudgeRubric } from "src/ai/judge-configuration/judge-configuration.types";
+
+const rubric: AiJudgeRubric = {
+  configurationId: "configuration-id",
+  taskGoal: "Report suspicious access without investigating customer systems.",
+  passingThresholdPercent: 75,
+  criteria: [
+    {
+      id: "criterion-id",
+      title: "Report",
+      expectedBehavior: "Report facts",
+      maxScore: 1,
+      scoreGuidance: [],
+    },
+  ],
+  blockingErrors: [
+    { id: "blocking-id", description: "Learner logs into the customer's system to investigate." },
+  ],
+};
+
+const learnerMessages = [
+  { content: "I saw a sign-in attempt on my own account after my work ended." },
+  { content: "I did not log back into the customer's system or investigate its logs." },
+];
+
+const firstResult = {
+  criterionResults: [
+    { criterionRef: "C1", awardedScore: 1, learnerSafeFeedback: "You reported the event." },
+  ],
+  triggeredBlockingErrors: [
+    { blockingErrorRef: "B1", learnerSafeFeedback: "You inspected your account." },
+  ],
+};
+
+const setup = (
+  results: Array<typeof firstResult | { criterionResults: []; triggeredBlockingErrors: [] }>,
+) => {
+  const runtime = { judgeMentor: jest.fn().mockResolvedValueOnce(results[0]) };
+  for (const result of results.slice(1)) runtime.judgeMentor.mockResolvedValueOnce(result);
+  const prompt = { loadPrompt: jest.fn().mockImplementation(async (id: string) => id) };
+  const messages = {
+    findMessageHistory: jest
+      .fn()
+      .mockResolvedValue({ history: learnerMessages, userLanguage: "en" }),
+  };
+  const service = new JudgeService(
+    {} as never,
+    {
+      findJudgeRubricByThreadId: jest.fn().mockResolvedValue({ lessonTitle: "Incident", rubric }),
+    } as never,
+    runtime as never,
+    { judge: jest.fn() } as never,
+    {
+      findThread: jest
+        .fn()
+        .mockResolvedValue({ data: { status: THREAD_STATUS.ACTIVE, userLanguage: "en" } }),
+    } as never,
+    messages as never,
+    prompt as never,
+  );
+  const persist = jest
+    .spyOn(service as never, "persistJudgement" as never)
+    .mockResolvedValue(undefined as never);
+  return { service, runtime, prompt, persist };
+};
+
+const run = (service: JudgeService) =>
+  service.runJudge({ threadId: "thread-id" } as never, { userId: "user-id", permissions: [] });
+
+describe("JudgeService blocking-error verification", () => {
+  it("does not fail a learner when an independent check finds only a denied or reported action", async () => {
+    const { service, runtime, prompt, persist } = setup([
+      firstResult,
+      { criterionResults: [], triggeredBlockingErrors: [] },
+    ]);
+
+    const result = await run(service);
+
+    expect(runtime.judgeMentor).toHaveBeenCalledTimes(2);
+    expect(prompt.loadPrompt).toHaveBeenNthCalledWith(2, "judgeBlockingErrorVerificationPrompt", {
+      language: "en",
+      blockingError: rubric.blockingErrors[0].description,
+    });
+    expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(
+      learnerMessages[1].content,
+    );
+    expect(result.data).toMatchObject({
+      passed: true,
+      blockingErrors: [],
+      status: THREAD_STATUS.COMPLETED,
+    });
+    expect(persist).toHaveBeenCalledWith(
+      "thread-id",
+      "en",
+      rubric,
+      expect.objectContaining({ passed: true, blockingErrors: [] }),
+    );
+  });
+
+  it("keeps a clearly corroborated blocking error and its learner-facing explanation", async () => {
+    const { service, runtime } = setup([
+      firstResult,
+      {
+        criterionResults: [],
+        triggeredBlockingErrors: [
+          {
+            blockingErrorRef: "B1",
+            learnerSafeFeedback: "You said you logged back into the customer system.",
+          },
+        ],
+      },
+    ]);
+    const messageService = service["messageService"] as unknown as {
+      findMessageHistory: jest.Mock;
+    };
+    messageService.findMessageHistory.mockResolvedValue({
+      history: [{ content: "I logged back into the customer system and checked its logs." }],
+      userLanguage: "en",
+    });
+
+    const result = await run(service);
+
+    expect(runtime.judgeMentor).toHaveBeenCalledTimes(2);
+    expect(result.data).toMatchObject({
+      passed: false,
+      blockingErrors: [
+        {
+          blockingErrorId: "blocking-id",
+          learnerSafeFeedback: "You said you logged back into the customer system.",
+        },
+      ],
+    });
+  });
+
+  it("does not make another model call when no blocking error was proposed", async () => {
+    const { service, runtime } = setup([{ ...firstResult, triggeredBlockingErrors: [] }]);
+
+    expect((await run(service)).data.passed).toBe(true);
+    expect(runtime.judgeMentor).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not complete the attempt when the verifier produces an invalid reference", async () => {
+    const { service, persist } = setup([
+      firstResult,
+      {
+        criterionResults: [],
+        triggeredBlockingErrors: [{ blockingErrorRef: "B2", learnerSafeFeedback: "Unrelated." }],
+      },
+    ]);
+
+    await expect(run(service)).rejects.toThrow("blocking-error reference");
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it("does not persist an unverified failure if the independent check is unavailable", async () => {
+    const { service, runtime, persist } = setup([firstResult]);
+    runtime.judgeMentor.mockRejectedValueOnce(new Error("verification unavailable"));
+
+    await expect(run(service)).rejects.toThrow("verification unavailable");
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it("does not turn a Polish denial of investigating client logs into an automatic failure", async () => {
+    const { service, runtime, persist } = setup([
+      firstResult,
+      { criterionResults: [], triggeredBlockingErrors: [] },
+    ]);
+    const history = [
+      {
+        content: "O 16:32 moje konto połączyło się z systemem klienta, po zakończeniu moich prac.",
+      },
+      { content: "Odrzuciłem prośbę MFA. Od 16:10 nie używam konta." },
+      {
+        content:
+          "Tylko widzę próbę zalogowania. Nie mam uprawnień do samodzielnego badania systemu klienta ani usuwania śladów.",
+      },
+    ];
+    const messageService = service["messageService"] as unknown as {
+      findMessageHistory: jest.Mock;
+    };
+    messageService.findMessageHistory.mockResolvedValue({ history, userLanguage: "pl" });
+    const threadService = service["threadService"] as unknown as { findThread: jest.Mock };
+    threadService.findThread.mockResolvedValue({
+      data: { status: THREAD_STATUS.ACTIVE, userLanguage: "pl" },
+    });
+
+    const result = await run(service);
+
+    expect(runtime.judgeMentor.mock.calls[1][0].messages[1].content).toContain(history[2].content);
+    expect(result.data).toMatchObject({ passed: true, blockingErrors: [] });
+    expect(persist).toHaveBeenCalledWith(
+      "thread-id",
+      "pl",
+      rubric,
+      expect.objectContaining({ passed: true }),
+    );
+  });
+});

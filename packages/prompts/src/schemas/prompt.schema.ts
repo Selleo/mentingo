@@ -9,6 +9,11 @@ export const judgePromptSchema = Type.Object({
   assessmentConfiguration: Type.String(),
 });
 
+export const judgeBlockingErrorVerificationPromptSchema = Type.Object({
+  language: Type.String(),
+  blockingError: Type.String(),
+});
+
 const commonAiMentorPromptProperties = {
   lessonTitle: Type.String(),
   language: Type.String(),
@@ -123,6 +128,7 @@ export const aiMentorConfigurationValidatorSchema = Type.Object(
 
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
+  judgeBlockingErrorVerificationPrompt: judgeBlockingErrorVerificationPromptSchema,
   roleplayPrompt: roleplayPromptSchema,
   teacherPrompt: teacherPromptSchema,
   summaryPrompt: summaryPromptSchema,
