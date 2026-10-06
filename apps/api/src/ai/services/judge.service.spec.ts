@@ -80,6 +80,9 @@ describe("JudgeService blocking-error verification", () => {
     const result = await run(service);
 
     expect(runtime.judgeMentor).toHaveBeenCalledTimes(2);
+    for (const [input] of runtime.judgeMentor.mock.calls) {
+      expect(input).not.toHaveProperty("temperature");
+    }
     expect(prompt.loadPrompt).toHaveBeenNthCalledWith(2, "judgeBlockingErrorVerificationPrompt", {
       language: "en",
       blockingError: rubric.blockingErrors[0].description,

@@ -83,7 +83,6 @@ export class JudgeService {
           { role: "system", content: system },
           { role: "user", content },
         ],
-        temperature: 0.2,
       },
       () => this.chatService.judge(system, content),
     );
@@ -102,7 +101,6 @@ export class JudgeService {
               { role: "system", content: verificationSystem },
               { role: "user", content },
             ],
-            temperature: 0.2,
           },
           () => this.chatService.judge(verificationSystem, content),
         );
