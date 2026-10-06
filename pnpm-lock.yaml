@@ -562,6 +562,9 @@ importers:
       '@livekit/components-styles':
         specifier: 1.2.0
         version: 1.2.0
+      '@mentingo/voice':
+        specifier: file:vendor/mentingo-voice-0.1.0.tgz
+        version: file:apps/web/vendor/mentingo-voice-0.1.0.tgz(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@popperjs/core':
         specifier: 2.11.8
         version: 2.11.8
@@ -4502,6 +4505,13 @@ packages:
   '@mentingo/phishing-simulation-sdk@0.1.1':
     resolution: {integrity: sha512-WVhGVcA3iVEHXJwGYEXZs0ex3W6FhZlroAh6wnXY8Xp40on5se6ZqHQItgWLGz++rl9JDqMZiIWPvOH87NPI6Q==}
     engines: {node: '>=22.15.0'}
+
+  '@mentingo/voice@file:apps/web/vendor/mentingo-voice-0.1.0.tgz':
+    resolution: {integrity: sha512-Mk0raAKp16RKHWQdOzHIEhGlU7Y1DuSvBKStTp/JgQz9U8O32CS3ztWMd/qeQ/85XPj1oCWqs7ynuZVAIJZfIw==, tarball: file:apps/web/vendor/mentingo-voice-0.1.0.tgz}
+    version: 0.1.0
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
 
   '@microsoft/microsoft-graph-client@3.0.7':
     resolution: {integrity: sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw==}
@@ -21926,6 +21936,21 @@ snapshots:
       - supports-color
 
   '@mentingo/phishing-simulation-sdk@0.1.1': {}
+
+  '@mentingo/voice@file:apps/web/vendor/mentingo-voice-0.1.0.tgz(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@radix-ui/react-slot': 1.1.0(@types/react@18.3.12)(react@18.3.1)
+      '@ricky0123/vad-web': 0.0.30
+      class-variance-authority: 0.7.0
+      clsx: 2.1.1
+      lucide-react: 1.16.0(react@18.3.1)
+      motion: 12.23.22(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      tailwind-merge: 2.4.0
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - '@types/react'
 
   '@microsoft/microsoft-graph-client@3.0.7':
     dependencies:
