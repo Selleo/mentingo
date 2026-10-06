@@ -563,8 +563,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       '@mentingo/voice':
-        specifier: file:vendor/mentingo-voice-0.1.0.tgz
-        version: file:apps/web/vendor/mentingo-voice-0.1.0.tgz(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.1.0
+        version: 0.1.0(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@popperjs/core':
         specifier: 2.11.8
         version: 2.11.8
@@ -4506,9 +4506,8 @@ packages:
     resolution: {integrity: sha512-WVhGVcA3iVEHXJwGYEXZs0ex3W6FhZlroAh6wnXY8Xp40on5se6ZqHQItgWLGz++rl9JDqMZiIWPvOH87NPI6Q==}
     engines: {node: '>=22.15.0'}
 
-  '@mentingo/voice@file:apps/web/vendor/mentingo-voice-0.1.0.tgz':
-    resolution: {integrity: sha512-Mk0raAKp16RKHWQdOzHIEhGlU7Y1DuSvBKStTp/JgQz9U8O32CS3ztWMd/qeQ/85XPj1oCWqs7ynuZVAIJZfIw==, tarball: file:apps/web/vendor/mentingo-voice-0.1.0.tgz}
-    version: 0.1.0
+  '@mentingo/voice@0.1.0':
+    resolution: {integrity: sha512-Mk0raAKp16RKHWQdOzHIEhGlU7Y1DuSvBKStTp/JgQz9U8O32CS3ztWMd/qeQ/85XPj1oCWqs7ynuZVAIJZfIw==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -21937,7 +21936,7 @@ snapshots:
 
   '@mentingo/phishing-simulation-sdk@0.1.1': {}
 
-  '@mentingo/voice@file:apps/web/vendor/mentingo-voice-0.1.0.tgz(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@mentingo/voice@0.1.0(@emotion/is-prop-valid@1.2.2)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-slot': 1.1.0(@types/react@18.3.12)(react@18.3.1)
       '@ricky0123/vad-web': 0.0.30
