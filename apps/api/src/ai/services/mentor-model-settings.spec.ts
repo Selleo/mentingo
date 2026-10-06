@@ -12,14 +12,27 @@ const promptService = {
 
 describe("Core Mentor model settings", () => {
   const generateText = jest.fn().mockResolvedValue({ text: "Hello" });
+  const generateObject = jest.fn().mockResolvedValue({ object: { score: 1 } });
   const streamText = jest.fn().mockReturnValue({ textStream: {} });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(loadAiSdk).mockResolvedValue({ generateText, streamText } as never);
+    jest.mocked(loadAiSdk).mockResolvedValue({
+      generateText,
+      generateObject,
+      jsonSchema: jest.fn(),
+      streamText,
+    } as never);
   });
 
-  it("uses low reasoning for Mentor welcomes while preserving summary defaults", async () => {
+  it("defaults every text generation role to Luna", () => {
+    expect(OPENAI_MODELS.BASIC).toBe("gpt-6-luna");
+    expect(OPENAI_MODELS.TRANSLATION).toBe("gpt-6-luna");
+    expect(OPENAI_MODELS.MENTOR).toBe("gpt-6-luna");
+    expect(OPENAI_MODELS.VOICE).toBe("gpt-6-luna");
+  });
+
+  it("uses low reasoning for Mentor welcomes and summaries", async () => {
     const service = new ChatService(promptService as never);
     await service.generatePrompt("Welcome", OPENAI_MODELS.MENTOR, "Stay in character");
     const mentorRequest = generateText.mock.calls[0][0];
@@ -29,8 +42,23 @@ describe("Core Mentor model settings", () => {
     });
     expect(mentorRequest).not.toHaveProperty("temperature");
     await service.generatePrompt("Summarize");
-    expect(generateText.mock.calls[1][0].model).toBe("gpt-5.4-mini");
-    expect(generateText.mock.calls[1][0]).not.toHaveProperty("providerOptions");
+    expect(generateText.mock.calls[1][0].model).toBe("gpt-6-luna");
+    expect(generateText.mock.calls[1][0].providerOptions).toEqual({
+      openai: { reasoningEffort: "low", forceReasoning: true },
+    });
+  });
+
+  it("judges with Luna reasoning and no incompatible sampling controls", async () => {
+    const service = new ChatService(promptService as never);
+    await service.judge("Rubric", "Answer");
+    const request = generateObject.mock.calls[0][0];
+    expect(request.model).toBe("gpt-6-luna");
+    expect(request.providerOptions).toEqual({
+      openai: { reasoningEffort: "low", forceReasoning: true },
+    });
+    for (const key of ["temperature", "topP", "topK"]) {
+      expect(request).not.toHaveProperty(key);
+    }
   });
 
   it.each([

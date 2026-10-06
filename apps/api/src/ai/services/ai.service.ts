@@ -685,9 +685,12 @@ export class AiService {
                       model: openai(OPENAI_MODELS.TRANSLATION),
                       schema,
                       system: prompt,
-                      temperature: 0,
-                      topP: 0.9,
-                      topK: 10,
+                      providerOptions: {
+                        openai: {
+                          reasoningEffort: AI_MENTOR_REASONING_EFFORT,
+                          forceReasoning: true,
+                        },
+                      },
                       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.COURSE_TRANSLATION),
                       messages: [
                         {

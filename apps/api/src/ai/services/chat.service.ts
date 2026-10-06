@@ -35,13 +35,9 @@ export class ChatService {
             system: systemPrompt,
             prompt: prompt,
             maxOutputTokens: MAX_TOKENS,
-            ...(model === OPENAI_MODELS.MENTOR
-              ? {
-                  providerOptions: {
-                    openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
-                  },
-                }
-              : {}),
+            providerOptions: {
+              openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
+            },
             telemetry: buildAiTelemetry(functionId),
           });
 
@@ -68,9 +64,9 @@ export class ChatService {
           const result = await generateObject({
             model: provider(OPENAI_MODELS.BASIC),
             schema: jsonSchema(() => aiJudgeJudgementSchema),
-            temperature: 0.2,
-            topK: 10,
-            topP: 0.9,
+            providerOptions: {
+              openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
+            },
             system,
             prompt,
             telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_JUDGE),
