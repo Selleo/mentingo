@@ -128,7 +128,7 @@ export class AiController {
   ) {
     const stream = await this.aiService.createChatMessageUiStream(
       data,
-      OPENAI_MODELS.BASIC,
+      OPENAI_MODELS.MENTOR,
       currentUser,
     );
     const { pipeUIMessageStreamToResponse } = await loadAiSdk();

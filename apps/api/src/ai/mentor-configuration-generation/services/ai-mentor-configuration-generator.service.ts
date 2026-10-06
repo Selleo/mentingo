@@ -149,9 +149,11 @@ export class AiMentorConfigurationGeneratorService {
       model: provider(OPENAI_MODELS.BASIC),
       output: Output.object({ schema }),
       providerOptions: {
-        openai: { reasoningEffort: AI_MENTOR_CONFIGURATION_GENERATOR_REASONING_EFFORT },
+        openai: {
+          reasoningEffort: AI_MENTOR_CONFIGURATION_GENERATOR_REASONING_EFFORT,
+          forceReasoning: true,
+        },
       },
-      temperature: 0,
       system,
       prompt,
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CONFIGURATION_GENERATION),
@@ -181,9 +183,11 @@ export class AiMentorConfigurationGeneratorService {
       model: provider(OPENAI_MODELS.BASIC),
       output: Output.object({ schema }),
       providerOptions: {
-        openai: { reasoningEffort: AI_MENTOR_CONFIGURATION_GENERATOR_REASONING_EFFORT },
+        openai: {
+          reasoningEffort: AI_MENTOR_CONFIGURATION_GENERATOR_REASONING_EFFORT,
+          forceReasoning: true,
+        },
       },
-      temperature: 0,
       system,
       prompt,
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CONFIGURATION_GENERATION),
