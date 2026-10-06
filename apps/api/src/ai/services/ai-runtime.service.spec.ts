@@ -13,7 +13,6 @@ describe("AiRuntimeService", () => {
       { role: "system" as const, content: "Judge using C1 and B1." },
       { role: "user" as const, content: "Learner response" },
     ],
-    temperature: 0.2,
   };
   const authoringInput = {
     messages: [

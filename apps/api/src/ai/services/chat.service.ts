@@ -1,7 +1,11 @@
 import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 
-import { AI_MENTOR_REASONING_EFFORT, MAX_TOKENS } from "src/ai/ai.constants";
+import {
+  AI_JUDGE_REASONING_EFFORT,
+  AI_MENTOR_REASONING_EFFORT,
+  MAX_TOKENS,
+} from "src/ai/ai.constants";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import {
@@ -65,7 +69,7 @@ export class ChatService {
             model: provider(OPENAI_MODELS.BASIC),
             schema: jsonSchema(() => aiJudgeJudgementSchema),
             providerOptions: {
-              openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
+              openai: { reasoningEffort: AI_JUDGE_REASONING_EFFORT, forceReasoning: true },
             },
             system,
             prompt,

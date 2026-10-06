@@ -48,13 +48,13 @@ describe("Core Mentor model settings", () => {
     });
   });
 
-  it("judges with Luna reasoning and no incompatible sampling controls", async () => {
+  it("judges with Luna medium reasoning and no incompatible sampling controls", async () => {
     const service = new ChatService(promptService as never);
     await service.judge("Rubric", "Answer");
     const request = generateObject.mock.calls[0][0];
     expect(request.model).toBe("gpt-6-luna");
     expect(request.providerOptions).toEqual({
-      openai: { reasoningEffort: "low", forceReasoning: true },
+      openai: { reasoningEffort: "medium", forceReasoning: true },
     });
     for (const key of ["temperature", "topP", "topK"]) {
       expect(request).not.toHaveProperty(key);
