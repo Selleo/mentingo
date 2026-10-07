@@ -57,6 +57,14 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - Keep component prop types in the component file they belong to. Use separate `*.types.ts` files for shared/reused domain, API, hook, reducer, or cross-component types, not for a single component's props.
 - For Zustand stores, subscribe with selectors in components, e.g. `useLanguageStore((state) => state.language)`. Avoid `useLanguageStore.getState()` during render because it is not reactive and can miss or over-broaden updates; reserve `getState()` for loaders, event handlers, or non-render code.
 
+## Design Variants
+
+- The design variant is a build-time setting: `VITE_DESIGN_VARIANT` (`default` when unset, or `mono`), so every tenant served by one build shares the same design.
+- Read it only through `DESIGN_VARIANT` from `~/config/designVariant`; do not read `import.meta.env.VITE_DESIGN_VARIANT` elsewhere.
+- The `default` variant is the current UI and must keep working unchanged.
+- Keep variant-specific components in a `<variant>/` folder next to the default component (e.g. `components/mono/`), with the same props and `data-testid` values so E2E handles work for both.
+- Do not use client or customer names in variant names, code, comments, or docs.
+
 ## Important Flows
 
 ### API Request Flow
