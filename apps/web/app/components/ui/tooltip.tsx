@@ -2,6 +2,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
@@ -38,7 +39,12 @@ const TooltipContent = React.forwardRef<
         ref={ref}
         sideOffset={sideOffset}
         data-state="instant-open"
-        className={cn(tooltipContentVariants({ variant }), className)}
+        className={cn(
+          tooltipContentVariants({ variant }),
+          IS_MONO_DESIGN &&
+            "rounded border-0 bg-neutral-950 px-2 py-1 text-xs text-white shadow-none",
+          className,
+        )}
         {...props}
       />
     </TooltipPrimitive.Portal>
@@ -54,6 +60,7 @@ const TooltipArrow = React.forwardRef<
     ref={ref}
     className={cn(
       "fill-popover data-[side=bottom]:rotate-45 data-[side=left]:rotate-45 data-[side=right]:rotate-45 data-[side=top]:rotate-45",
+      IS_MONO_DESIGN && "fill-neutral-950",
       className,
     )}
     {...props}

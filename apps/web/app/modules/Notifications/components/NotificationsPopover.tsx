@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import { PopoverClose } from "~/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -232,9 +233,14 @@ export function NotificationsPopover({
           onValueChange={(value) => setActiveFeed(value as AnnouncementFeed)}
           className="space-y-4"
         >
-          <TabsList className="flex h-auto w-full rounded-lg bg-neutral-100 p-1">
+          <TabsList
+            className={cn("flex h-auto w-full", !IS_MONO_DESIGN && "rounded-lg bg-neutral-100 p-1")}
+          >
             <TabsTrigger
-              className="w-fit shrink-0 gap-1 whitespace-nowrap rounded-md px-8 py-2 text-xs leading-tight"
+              className={cn(
+                "w-fit shrink-0 gap-1 whitespace-nowrap px-8 py-2 text-xs leading-tight",
+                !IS_MONO_DESIGN && "rounded-md",
+              )}
               value={ANNOUNCEMENT_FEEDS.ALL}
               data-testid={NOTIFICATIONS_HANDLES.TAB_ALL}
             >
@@ -244,7 +250,10 @@ export function NotificationsPopover({
               </span>
             </TabsTrigger>
             <TabsTrigger
-              className="min-w-0 flex-1 gap-1 overflow-hidden whitespace-normal rounded-md px-1.5 py-2 text-xs leading-tight"
+              className={cn(
+                "min-w-0 flex-1 gap-1 overflow-hidden whitespace-normal px-1.5 py-2 text-xs leading-tight",
+                !IS_MONO_DESIGN && "rounded-md",
+              )}
               value={ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS}
               data-testid={NOTIFICATIONS_HANDLES.TAB_ADMIN_ANNOUNCEMENTS}
             >
@@ -256,7 +265,10 @@ export function NotificationsPopover({
               </span>
             </TabsTrigger>
             <TabsTrigger
-              className="w-fit shrink-0 gap-1 whitespace-nowrap rounded-md px-8 py-2 text-xs leading-tight"
+              className={cn(
+                "w-fit shrink-0 gap-1 whitespace-nowrap px-8 py-2 text-xs leading-tight",
+                !IS_MONO_DESIGN && "rounded-md",
+              )}
               value={ANNOUNCEMENT_FEEDS.SYSTEM}
               data-testid={NOTIFICATIONS_HANDLES.TAB_SYSTEM}
             >

@@ -197,6 +197,10 @@ const config = {
           foreground: "var(--card-foreground)",
         },
       },
+      fontFamily: {
+        // Button and label text in the mono design variant
+        control: ["Roboto", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

@@ -3,6 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -40,6 +41,24 @@ const toastVariants = cva(
   },
 );
 
+// Mono: white surface with a colored left edge per variant
+const monoToastVariants = cva(
+  "rounded-lg border border-l-2 border-border bg-background p-4 pr-8 text-foreground",
+  {
+    variants: {
+      variant: {
+        default: "border-l-primary-700",
+        success: "border-l-success-500",
+        loading: "border-l-primary-500",
+        destructive: "border-l-error-500",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
@@ -47,7 +66,11 @@ const Toast = React.forwardRef<
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={cn(
+        toastVariants({ variant }),
+        IS_MONO_DESIGN && monoToastVariants({ variant }),
+        className,
+      )}
       {...props}
     />
   );
@@ -77,6 +100,8 @@ const ToastClose = React.forwardRef<
     ref={ref}
     className={cn(
       "text-foreground/50 absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      IS_MONO_DESIGN &&
+        "group-[.destructive]:text-foreground/50 group-[.destructive]:hover:text-foreground",
       className,
     )}
     toast-close=""

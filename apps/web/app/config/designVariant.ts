@@ -13,3 +13,5 @@ export const DESIGN_VARIANT: DesignVariant = Object.values(DESIGN_VARIANTS).incl
 )
   ? configuredDesignVariant
   : DESIGN_VARIANTS.DEFAULT;
+
+export const IS_MONO_DESIGN = DESIGN_VARIANT === DESIGN_VARIANTS.MONO;

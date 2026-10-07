@@ -12,6 +12,7 @@ import { version } from "~/../version.json";
 
 import { PlatformFavicon } from "./components/PlatformFavicon";
 import { Toaster } from "./components/ui/toaster";
+import { DESIGN_VARIANT } from "./config/designVariant";
 import { useNavigationTracker } from "./hooks/useNavigationTracker";
 import css from "./index.css?url";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
@@ -32,7 +33,7 @@ export const links: LinksFunction = () => {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" data-design-variant={DESIGN_VARIANT}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
