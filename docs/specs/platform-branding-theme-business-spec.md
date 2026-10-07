@@ -8,6 +8,8 @@ This is especially useful for HR and L&D rollouts where learner trust and recogn
 
 The customization workflow is managed from Settings by authorized administrators. They can upload or remove supported branding assets and adjust the primary and contrast colors used across the interface.
 
+Tenant branding works the same way in every interface design a deployment can run. A deployment can be built with the alternative "mono" design instead of the default one. Tenants keep their own logos and brand color in it; the design only changes which colors apply when a tenant has not chosen its own.
+
 ## Who Uses It
 
 - Tenant administrators configure platform logos, login imagery, certificate imagery, and color settings for the organization.
@@ -23,6 +25,7 @@ The customization workflow is managed from Settings by authorized administrators
 - Change the platform primary color and contrast color.
 - Preview color changes in the interface before saving.
 - Cancel unsaved color changes and restore the last saved theme.
+- Keep tenant logos and brand colors in every interface design of the deployment.
 - Serve configured branding assets through public, cache-aware image URLs.
 
 ## End-User Value
@@ -35,6 +38,8 @@ An administrator opens Settings and switches to the platform customization area.
 
 Theme color controls let the administrator adjust the primary and contrast colors. Mentingo applies color changes live while editing, then saves them only when the administrator confirms. Canceling restores the last saved colors so draft changes do not accidentally alter the platform.
 
+When no brand color is saved, Mentingo uses the interface design's own default palette: Mentingo's default colors, or a blue palette in the mono design. A saved brand color replaces that palette in both designs.
+
 Public pages can request the configured assets through versioned image URLs. This lets unauthenticated experiences such as the login page show the tenant's branding while still keeping asset updates cache-friendly.
 
 ## Key Technical Context
@@ -44,7 +49,8 @@ Public pages can request the configured assets through versioned image URLs. Thi
 - Branding asset and color updates are handled by the Settings API in `apps/api/src/settings/settings.controller.ts`.
 - Administrative updates require `PERMISSIONS.SETTINGS_MANAGE`; asset read endpoints are public where unauthenticated pages need branding.
 - File uploads reuse existing image validation and settings-image streaming, including versioned/cached URLs for configured assets.
+- The interface design is chosen per deployment at build time (`VITE_DESIGN_VARIANT`); the mono design's default palette lives in `apps/web/app/index.css`, and a saved brand color overrides it in the same way as in the default design.
 
 ## Test Evidence
 
-Frontend Playwright coverage verifies that admins can upload and remove platform logo, simple logo, login background, and certificate background assets; it also verifies saving theme colors across reloads and canceling draft color changes. Backend E2E coverage verifies versioned settings image URLs, color-schema validation and permission checks, and cache-aware login-background image responses including 304 behavior.
+Frontend Playwright coverage verifies that admins can upload and remove platform logo, simple logo, login background, and certificate background assets; it also verifies saving theme colors across reloads and canceling draft color changes. Backend E2E coverage verifies versioned settings image URLs, color-schema validation and permission checks, and cache-aware login-background image responses including 304 behavior. The mono design is covered only by unit tests of the design setting; no E2E run checks branding in a mono build.
