@@ -6,12 +6,14 @@ export type ImageEmbedAttrs = {
   src: string | null;
   alt: string | null;
   resourceId: string | null;
+  assetId?: string | null;
 };
 
 type ImageEmbedAttrsInput = {
   src?: string | null;
   alt?: string | null;
   resourceId?: string | null;
+  assetId?: string | null;
 };
 
 export const normalizeImageEmbedAttributes = (attrs: ImageEmbedAttrsInput): ImageEmbedAttrs => {
@@ -26,6 +28,7 @@ export const normalizeImageEmbedAttributes = (attrs: ImageEmbedAttrsInput): Imag
     src: src || null,
     alt,
     resourceId,
+    ...(attrs.assetId ? { assetId: attrs.assetId } : {}),
   };
 };
 
@@ -36,10 +39,12 @@ export const getImageEmbedAttrsFromElement = (element: HTMLElement): ImageEmbedA
 
   const src = element.getAttribute("data-src");
 
-  if (!src) return false;
+  const assetId = element.getAttribute("data-authoring-asset-id");
+  if (!src && !assetId) return false;
 
   return normalizeImageEmbedAttributes({
     src,
+    assetId,
     alt: element.getAttribute("data-alt") ?? null,
     resourceId: element.getAttribute("data-resource-id") ?? null,
   });

@@ -1,7 +1,6 @@
 import { Link, type MetaFunction, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import {
   COURSE_FEATURE,
-  COURSE_GENERATION_SYNC_STATUS,
   COURSE_ORIGIN_TYPES,
   COURSE_STATUSES,
   COURSE_TYPE,
@@ -13,14 +12,11 @@ import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useDismissGeneratedCourseSync } from "~/api/mutations/admin/useDismissGeneratedCourseSync";
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
-import { useSyncGeneratedCourse } from "~/api/mutations/admin/useSyncGeneratedCourse";
 import { useCurrentUserSuspense } from "~/api/queries";
 import { COURSE_QUERY_KEY, useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { useCourseDuplicationJobStatus } from "~/api/queries/admin/useCourseDuplicationJobStatus";
-import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
@@ -32,16 +28,6 @@ import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -75,7 +61,6 @@ import {
   getCourseTypeLabel,
 } from "../Courses/utils";
 
-import { useCourseGenerationSyncSocket } from "./components/course-generation/hooks/useCourseGenerationSyncSocket";
 import { CourseSharingTabContent } from "./components/CourseSharingTabContent";
 import { SharedCourseReadonlyNotice } from "./components/SharedCourseReadonlyNotice";
 import CourseLessons from "./CourseLessons/CourseLessons";
@@ -114,10 +99,6 @@ const EditCourse = () => {
   const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
-  const { mutateAsync: syncGeneratedCourse, isPending: isSyncGeneratedCoursePending } =
-    useSyncGeneratedCourse();
-  const { mutateAsync: dismissGeneratedCourseSync, isPending: isDismissSyncPending } =
-    useDismissGeneratedCourseSync();
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -154,39 +135,6 @@ const EditCourse = () => {
     () => !!isLumaConfigured?.courseGenerationEnabled,
     [isLumaConfigured?.courseGenerationEnabled],
   );
-
-  const isCourseGenerationDisabled = useMemo(
-    () => (course?.chapters.length ?? 0) > 0,
-    [course?.chapters.length],
-  );
-
-  const isCourseGenerationDraftEnabled =
-    !!course?.id && !isCourseGenerationDisabled && showCourseGenerationButton;
-
-  const { data: draft } = useCourseGenerationDraft(
-    course?.id ?? "",
-    course?.title ?? "",
-    courseLanguage,
-    isCourseGenerationDraftEnabled,
-  );
-  const [isCourseGeneratedOverride, setIsCourseGeneratedOverride] = useState(false);
-  const coreSyncStatus = draft?.coreSync.status;
-  const isCourseGenerated =
-    coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.PROCESSED || isCourseGeneratedOverride;
-  const shouldClearCourseGenerationRuntime =
-    isCourseGenerated ||
-    coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.FAILED ||
-    coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.DISMISSED;
-  const isGeneratedCourseSyncProcessing =
-    coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.PROCESSING ||
-    isSyncGeneratedCoursePending ||
-    isDismissSyncPending;
-  const shouldShowGeneratedCourseSyncDialog =
-    Boolean(draft?.isCourseGenerated) &&
-    coreSyncStatus !== COURSE_GENERATION_SYNC_STATUS.PROCESSED &&
-    coreSyncStatus !== COURSE_GENERATION_SYNC_STATUS.DISMISSED;
-  const isCourseGenerationLocked =
-    shouldShowGeneratedCourseSyncDialog || isSyncGeneratedCoursePending || isDismissSyncPending;
 
   const { data: hasMissingTranslations } = useMissingTranslations(
     id,
@@ -262,28 +210,6 @@ const EditCourse = () => {
       return [...prev, tenantId];
     });
   }, []);
-
-  const handleRetryGeneratedCourseSync = useCallback(async () => {
-    if (!course?.id) return;
-    await syncGeneratedCourse({ integrationId: course.id });
-  }, [course?.id, syncGeneratedCourse]);
-
-  const handleDismissGeneratedCourseSync = useCallback(async () => {
-    if (!course?.id) return;
-    await dismissGeneratedCourseSync({ integrationId: course.id });
-  }, [course?.id, dismissGeneratedCourseSync]);
-
-  useCourseGenerationSyncSocket({
-    courseId: course?.id ?? "",
-    enabled: Boolean(course?.id && showCourseGenerationButton),
-    onProcessed: () => setIsCourseGeneratedOverride(true),
-  });
-
-  useEffect(() => {
-    if (!draft?.isCourseGenerated) return;
-    if (draft.coreSync.status !== COURSE_GENERATION_SYNC_STATUS.NOT_STARTED) return;
-    void syncGeneratedCourse({ integrationId: draft.integrationId });
-  }, [draft?.coreSync.status, draft?.integrationId, draft?.isCourseGenerated, syncGeneratedCourse]);
 
   const canRefetchChapterList =
     previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
@@ -565,11 +491,6 @@ const EditCourse = () => {
               <LeaveModalProvider>
                 <CourseLessons
                   showCourseGenerationButton={showCourseGenerationButton}
-                  isCourseGenerationDisabled={isCourseGenerationDisabled}
-                  isCourseGenerationLocked={isCourseGenerationLocked || isDuplicationLocked}
-                  draft={draft}
-                  isCourseGenerated={isCourseGenerated}
-                  shouldClearCourseGenerationRuntime={shouldClearCourseGenerationRuntime}
                   chapters={course?.chapters as Chapter[]}
                   baseLanguageChapters={baseLanguageChapters}
                   canRefetchChapterList={!!canRefetchChapterList}
@@ -619,50 +540,6 @@ const EditCourse = () => {
           />
         </TabsContent>
       </Tabs>
-      <AlertDialog open={shouldShowGeneratedCourseSyncDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.FAILED
-                ? t("adminCourseView.generation.syncFailedTitle")
-                : t("adminCourseView.generation.syncProcessingTitle")}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.FAILED
-                ? t("adminCourseView.generation.syncFailedDescription")
-                : t("adminCourseView.generation.syncProcessingDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            {coreSyncStatus === COURSE_GENERATION_SYNC_STATUS.FAILED ? (
-              <>
-                <AlertDialogCancel
-                  disabled={isGeneratedCourseSyncProcessing}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void handleDismissGeneratedCourseSync();
-                  }}
-                >
-                  {t("adminCourseView.generation.syncDismiss")}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  disabled={isGeneratedCourseSyncProcessing}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void handleRetryGeneratedCourseSync();
-                  }}
-                >
-                  {t("adminCourseView.generation.syncRetry")}
-                </AlertDialogAction>
-              </>
-            ) : (
-              <Button type="button" disabled>
-                {t("adminCourseView.generation.syncProcessingAction")}
-              </Button>
-            )}
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </PageWrapper>
   );
 };

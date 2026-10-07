@@ -41,6 +41,7 @@ type ContentLessonProps = {
   baseLanguageLesson: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
+  readOnly?: boolean;
 };
 
 const ContentLessonForm = ({
@@ -50,6 +51,7 @@ const ContentLessonForm = ({
   baseLanguageLesson,
   setSelectedLesson,
   language,
+  readOnly = false,
 }: ContentLessonProps) => {
   const [contextId, setContextId] = useState<string | undefined>(undefined);
 
@@ -213,6 +215,7 @@ const ContentLessonForm = ({
                 <FormControl>
                   <div data-testid={CONTENT_LESSON_FORM_HANDLES.DESCRIPTION_EDITOR}>
                     <ContentEditor
+                      editable={!readOnly}
                       id="description"
                       content={field.value}
                       placeholder={getBaseLanguageTextPlaceholder(baseLanguageLesson?.description)}

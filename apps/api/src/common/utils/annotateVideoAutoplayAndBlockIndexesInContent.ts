@@ -6,6 +6,12 @@ import type { AnyNode } from "domhandler";
 
 const normalizeTextContent = (value: string) => value.replace(/\u00A0/g, " ").trim();
 
+const NON_MEANINGFUL_ATTRIBUTES = new Set([
+  "data-authoring-block-id",
+  "data-autoplay",
+  "data-block-index",
+]);
+
 const isMeaningfulElement = (html: CheerioAPI, element: AnyNode): boolean => {
   const stack: AnyNode[] = [element];
 
@@ -19,7 +25,9 @@ const isMeaningfulElement = (html: CheerioAPI, element: AnyNode): boolean => {
     }
 
     const attributes = "attribs" in current ? (current.attribs ?? {}) : {};
-    if (Object.keys(attributes).length > 0) return true;
+    if (Object.keys(attributes).some((attribute) => !NON_MEANINGFUL_ATTRIBUTES.has(attribute))) {
+      return true;
+    }
 
     const children = html(current).contents().toArray();
     for (let i = children.length - 1; i >= 0; i -= 1) {

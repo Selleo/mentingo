@@ -118,4 +118,18 @@ describe("AiJudgeConfigurationCard", () => {
     );
     expect(tooltipCopies.some((element) => element.getAttribute("role") !== "tooltip")).toBe(true);
   });
+
+  it("offers only a view action for a read-only assessment", async () => {
+    const user = userEvent.setup();
+    renderCard({ value: configuredAssessment, readOnly: true, isPersisted: false });
+
+    expect(screen.queryByRole("button", { name: "Create with AI" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "View assessment" }));
+
+    const dialog = await screen.findByTestId("curriculum-ai-mentor-judge-dialog");
+    expect(dialog).toContainElement(screen.getByTestId("curriculum-ai-mentor-judge-read-only"));
+    expect(screen.queryByTestId("curriculum-ai-mentor-judge-apply-button")).toBeNull();
+    await user.click(screen.getAllByRole("button", { name: "Close" }).at(-1)!);
+    expect(screen.queryByTestId("curriculum-ai-mentor-judge-dialog")).toBeNull();
+  });
 });

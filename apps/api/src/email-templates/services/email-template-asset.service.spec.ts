@@ -45,6 +45,12 @@ describe("EmailTemplateAssetService", () => {
     jest.restoreAllMocks();
   });
 
+  it("validates populated locales and skips absent translations", async () => {
+    await service.validateEmailTemplateAssets({ en: document, pl: undefined }, tenantId);
+    expect(findEmailTemplateAsset).toHaveBeenCalledTimes(1);
+    expect(findEmailTemplateAsset).toHaveBeenCalledWith(id, tenantId);
+  });
+
   it("returns an authorized storage URL without rendering or downloading the image", async () => {
     getFileUrl.mockResolvedValue("https://storage.example/signed-image");
     expect(await service.getEmailTemplateImage(id, tenantId)).toEqual({

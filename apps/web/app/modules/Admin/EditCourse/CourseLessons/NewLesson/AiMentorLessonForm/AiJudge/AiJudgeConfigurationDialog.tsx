@@ -4,14 +4,17 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
+import { ReadOnlyFrame } from "~/modules/Admin/EditCourse/CourseLessons/components/ReadOnlyFrame";
 
 import { AiJudgeBlockingErrorsSection } from "./AiJudgeBlockingErrorsSection";
 import {
@@ -52,6 +55,7 @@ type AiJudgeConfigurationDialogProps = {
     validation?: AiJudgeValidationResult,
   ) => void;
   isValidating?: boolean;
+  readOnly?: boolean;
 };
 
 export const AiJudgeConfigurationDialog = ({
@@ -67,11 +71,12 @@ export const AiJudgeConfigurationDialog = ({
   onValidateConfiguration,
   onImproveWithAi,
   isValidating = false,
+  readOnly = false,
 }: AiJudgeConfigurationDialogProps) => {
   const { t } = useTranslation();
   const [openCriterionIds, setOpenCriterionIds] = useState<string[]>([]);
   const blockingErrorsRef = useRef<HTMLDetailsElement>(null);
-  const canEditStructure = language === baseLanguage;
+  const canEditStructure = !readOnly && language === baseLanguage;
   const form = useForm<AiJudgeConfigurationDraft>({
     resolver: zodResolver(aiJudgeConfigurationSchema(t)),
     defaultValues: value ?? createEmptyAiJudgeConfiguration(),
@@ -177,6 +182,32 @@ export const AiJudgeConfigurationDialog = ({
     );
   };
 
+  const judgeFields = (
+    <>
+      <AiJudgeTaskGoalField />
+      <AiJudgeCriteriaSection
+        criteria={criteria.fields}
+        openCriterionIds={openCriterionIds}
+        canEditStructure={canEditStructure}
+        onOpenCriterionIdsChange={setOpenCriterionIds}
+        onAddCriterion={addCriterion}
+        onRemoveCriterion={removeCriterion}
+      />
+      <AiJudgeScoringSection
+        totalScore={totalScore}
+        requiredScore={requiredScore}
+        canEditStructure={canEditStructure}
+      />
+      <AiJudgeBlockingErrorsSection
+        blockingErrors={blockingErrors.fields}
+        detailsRef={blockingErrorsRef}
+        canEditStructure={canEditStructure}
+        onAddBlockingError={() => blockingErrors.append({ description: "" })}
+        onRemoveBlockingError={blockingErrors.remove}
+      />
+    </>
+  );
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -203,40 +234,37 @@ export const AiJudgeConfigurationDialog = ({
               className="flex min-h-0 flex-1 flex-col"
             >
               <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 [-webkit-overflow-scrolling:touch] sm:px-6">
-                <AiJudgeTaskGoalField />
-                <AiJudgeCriteriaSection
-                  criteria={criteria.fields}
-                  openCriterionIds={openCriterionIds}
-                  canEditStructure={canEditStructure}
-                  onOpenCriterionIdsChange={setOpenCriterionIds}
-                  onAddCriterion={addCriterion}
-                  onRemoveCriterion={removeCriterion}
-                />
-                <AiJudgeScoringSection
-                  totalScore={totalScore}
-                  requiredScore={requiredScore}
-                  canEditStructure={canEditStructure}
-                />
-                <AiJudgeBlockingErrorsSection
-                  blockingErrors={blockingErrors.fields}
-                  detailsRef={blockingErrorsRef}
-                  canEditStructure={canEditStructure}
-                  onAddBlockingError={() => blockingErrors.append({ description: "" })}
-                  onRemoveBlockingError={blockingErrors.remove}
-                />
+                {readOnly ? (
+                  <ReadOnlyFrame
+                    testId="curriculum-ai-mentor-judge-read-only"
+                    className="[&_[data-testid^='curriculum-ai-mentor-judge-add-']]:hidden [&_[data-testid^='curriculum-ai-mentor-judge-remove-']]:hidden"
+                  >
+                    {judgeFields}
+                  </ReadOnlyFrame>
+                ) : (
+                  judgeFields
+                )}
               </div>
 
-              <AiJudgeConfigurationDialogFooter
-                canEditStructure={canEditStructure}
-                canImprove={Boolean(onImproveWithAi)}
-                canValidate={Boolean(onValidateConfiguration)}
-                isAiBusy={isValidating || isCheckingQuality}
-                isSaving={isSaving}
-                submitLabelKey={submitLabelKey}
-                onCancel={() => onOpenChange(false)}
-                onImprove={handleImprove}
-                onValidate={() => void handleValidate()}
-              />
+              {readOnly ? (
+                <DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:py-4">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    {t("common.button.close")}
+                  </Button>
+                </DialogFooter>
+              ) : (
+                <AiJudgeConfigurationDialogFooter
+                  canEditStructure={canEditStructure}
+                  canImprove={Boolean(onImproveWithAi)}
+                  canValidate={Boolean(onValidateConfiguration)}
+                  isAiBusy={isValidating || isCheckingQuality}
+                  isSaving={isSaving}
+                  submitLabelKey={submitLabelKey}
+                  onCancel={() => onOpenChange(false)}
+                  onImprove={handleImprove}
+                  onValidate={() => void handleValidate()}
+                />
+              )}
             </form>
           </Form>
         </DialogContent>

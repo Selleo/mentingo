@@ -45,6 +45,7 @@ type RichTextEditorVariant =
 type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
+  onTextChange?: (value: string) => void;
   onBlur?: (editor: TiptapEditor | null) => void;
   onUpload?: (
     file?: File,
@@ -62,6 +63,7 @@ type EditorProps = {
   editorClassName?: string;
   lessonId?: string;
   allowFiles?: boolean;
+  editable?: boolean;
   acceptedFileTypes?: readonly string[];
   assetLibrary?: AssetLibraryConfig;
   variant?: RichTextEditorVariant;
@@ -85,6 +87,7 @@ const Editor = ({
   placeholder,
   ariaLabel,
   onChange,
+  onTextChange,
   onBlur,
   onUpload,
   onCtrlSave,
@@ -93,6 +96,7 @@ const Editor = ({
   contentClassName,
   editorClassName,
   allowFiles = false,
+  editable = true,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
   assetLibrary,
   variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
@@ -201,10 +205,13 @@ const Editor = ({
   const editor = useEditor({
     extensions,
     content: content,
+    editable,
     onUpdate: ({ editor }) => {
+      if (!editor.isEditable) return;
       const nextContent = editor.getHTML();
       lastEmittedContentRef.current = nextContent;
       onChange(nextContent);
+      onTextChange?.(editor.getText({ blockSeparator: "\n\n" }));
     },
     onBlur: ({ editor }) => onBlur?.(editor),
     onDrop: handleDrop,
@@ -213,6 +220,7 @@ const Editor = ({
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
         ...(ariaLabel ? { "aria-label": ariaLabel } : {}),
+        ...(!editable ? { "aria-readonly": "true" } : {}),
         role: "textbox",
         "aria-multiline": "true",
         class: cn(
@@ -227,6 +235,10 @@ const Editor = ({
   useEffect(() => {
     editorRef.current = editor;
   }, [editor]);
+
+  useEffect(() => {
+    editor?.setEditable(editable, false);
+  }, [editable, editor]);
 
   useEffect(() => {
     if (
@@ -255,17 +267,19 @@ const Editor = ({
     <div
       data-testid={RICH_TEXT_HANDLES.ROOT}
       className={cn(
-        "prose relative min-w-0 w-full max-w-none overflow-hidden rounded-lg bg-background after:pointer-events-none after:absolute after:inset-0 after:z-[2] after:rounded-lg after:ring-1 after:ring-inset after:ring-neutral-300 after:content-[''] dark:prose-invert [&_.ProseMirror]:leading-tight",
+        "prose relative min-w-0 w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background focus-within:border-primary-500 dark:prose-invert [&_.ProseMirror]:leading-tight",
         parentClassName,
       )}
     >
-      <EditorToolbar
-        editor={editor}
-        acceptedFileTypes={acceptedFileTypes}
-        assetLibrary={assetLibrary}
-        showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
-        limitedFormatting={variant === RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET}
-      />
+      {editable && (
+        <EditorToolbar
+          editor={editor}
+          acceptedFileTypes={acceptedFileTypes}
+          assetLibrary={assetLibrary}
+          showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
+          limitedFormatting={variant === RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET}
+        />
+      )}
       <EditorContent
         data-testid={RICH_TEXT_HANDLES.CONTENT}
         id={id}

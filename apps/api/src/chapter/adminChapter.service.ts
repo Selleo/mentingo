@@ -74,6 +74,8 @@ export class AdminChapterService {
 
       if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
+      await this.adminChapterRepository.updateChapterDisplayOrder(body.courseId, trx);
+
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
 
       return chapter;
@@ -141,9 +143,7 @@ export class AdminChapterService {
       language,
     );
 
-    const oldDisplayOrder = chapterToUpdate.displayOrder;
-
-    if (!chapterToUpdate || oldDisplayOrder === null) {
+    if (!chapterToUpdate || chapterToUpdate.displayOrder === null) {
       throw new NotFoundException("adminCourseView.errors.notFound.chapter");
     }
 
@@ -157,7 +157,6 @@ export class AdminChapterService {
     await this.adminChapterRepository.changeChapterDisplayOrder(
       chapterToUpdate.courseId,
       chapterToUpdate.id,
-      oldDisplayOrder,
       newDisplayOrder,
       language,
     );

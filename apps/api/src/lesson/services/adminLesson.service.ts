@@ -69,6 +69,7 @@ import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CourseContentEntityType } from "src/common/types/course-content-entity.type";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { QuizAuthoringInput } from "src/quiz/types/quiz-authoring.types";
 
 type LiveTrainingLessonAssignmentInput = Pick<
   CreateLiveTrainingLessonBody,
@@ -540,6 +541,63 @@ export class AdminLessonService {
       }),
     );
 
+    return lesson.id;
+  }
+
+  async saveQuizFromAuthoring(
+    input: QuizAuthoringInput,
+    currentUser: CurrentUserType,
+    lessonId?: UUIDType,
+  ) {
+    if (lessonId) {
+      await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+      await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+        lessonId,
+        COURSE_FEATURE.CURRICULUM_EDITING,
+      );
+      await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
+      const current = await this.lessonRepository.getLesson(lessonId, input.language);
+      if (!current || current.type !== LESSON_TYPES.QUIZ) {
+        throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+      }
+      const previousLessonData = await this.buildLessonActivitySnapshot(lessonId, input.language);
+      await this.quizAuthoringService.saveCanonicalLesson(input, lessonId);
+      const updatedLessonData = await this.buildLessonActivitySnapshot(lessonId, input.language);
+      await this.outboxPublisher.publish(
+        new UpdateLessonEvent({
+          lessonId,
+          actor: currentUser,
+          previousLessonData,
+          updatedLessonData,
+        }),
+      );
+      return lessonId;
+    }
+    if (!input.chapterId)
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    await this.masterCourseService.assertCourseContentEditableByChapterId(input.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      input.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, input.chapterId);
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      input.chapterId,
+    );
+    if (input.language !== language)
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+    const maxOrder = await this.adminLessonRepository.getMaxDisplayOrder(input.chapterId);
+    const lesson = await this.quizAuthoringService.saveCanonicalLesson({
+      ...input,
+      displayOrder: maxOrder + 1,
+    });
+    if (!lesson) throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    await this.adminLessonRepository.updateLessonCountForChapter(input.chapterId);
+    const createdLesson = await this.buildLessonActivitySnapshot(lesson.id, input.language);
+    await this.outboxPublisher.publish(
+      new CreateLessonEvent({ lessonId: lesson.id, actor: currentUser, createdLesson }),
+    );
     return lesson.id;
   }
   async updateAiMentorLesson(

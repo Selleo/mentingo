@@ -1,0 +1,19 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": ".*\\.e2e-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "setupFiles": ["<rootDir>/test/jest-console-setup.ts"],
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
+  "globalSetup": "<rootDir>/test/authoring-http-global-setup.ts",
+  "setupFilesAfterEnv": ["<rootDir>/test/jest-e2e-setup.ts"],
+  "verbose": true,
+  "testTimeout": 30000,
+  "maxWorkers": 1,
+  "forceExit": true
+}

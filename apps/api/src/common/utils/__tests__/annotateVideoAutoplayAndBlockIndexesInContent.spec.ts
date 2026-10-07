@@ -67,6 +67,26 @@ describe("annotateVideoAutoplayAndBlockIndexesInContent", () => {
     ]);
   });
 
+  it("keeps empty identity-only blocks out of playback decisions across annotation rounds", () => {
+    const content = [
+      '<div data-node-type="video" data-src="https://example.com/1" data-authoring-block-id="11111111-1111-4111-8111-111111111111"></div>',
+      '<p data-authoring-block-id="22222222-2222-4222-8222-222222222222"></p>',
+      '<div data-node-type="video" data-src="https://example.com/2" data-authoring-block-id="33333333-3333-4333-8333-333333333333"></div>',
+    ].join("");
+
+    const annotated = annotateVideoAutoplayAndBlockIndexesInContent(content);
+    const annotatedAgain = annotateVideoAutoplayAndBlockIndexesInContent(annotated);
+
+    expect(getVideoAutoplayActions(annotated!)).toEqual([
+      VIDEO_AUTOPLAY.AUTOPLAY_WITH_PLAY_NEXT,
+      VIDEO_AUTOPLAY.PLAY_NEXT,
+    ]);
+    expect(getVideoAutoplayActions(annotatedAgain!)).toEqual([
+      VIDEO_AUTOPLAY.AUTOPLAY_WITH_PLAY_NEXT,
+      VIDEO_AUTOPLAY.PLAY_NEXT,
+    ]);
+  });
+
   it("adds data-block-index to top-level blocks only", () => {
     const content = ["<h1>hi</h1>", "<h2>cool</h2>", "<div><p>nested</p></div>"].join("");
 

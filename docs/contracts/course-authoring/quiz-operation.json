@@ -1,0 +1,322 @@
+{
+  "operationId": "2911ac5f-9499-56d9-a84c-e9b8fc560e7d",
+  "targetId": "31cced89-75e9-537f-8d21-875f7a4b2508",
+  "language": "en",
+  "baselineHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dependencies": [],
+  "type": "lesson.update",
+  "chapterId": "f2766289-160c-58dd-8407-4321dba4b613",
+  "payload": {
+    "lessonType": "quiz",
+    "title": "Safe handling assessment",
+    "description": "",
+    "thresholdScore": 70,
+    "attemptsLimit": null,
+    "quizCooldownInHours": null,
+    "questions": [
+      {
+        "id": "119c831d-c8dc-5af6-9fab-304dd6b5acaa",
+        "questionType": "single_choice",
+        "displayOrder": 0,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [
+          {
+            "id": "1aaaa3fc-4d6b-532e-bfce-3f444cfe4032",
+            "displayOrder": 0,
+            "isCorrect": true,
+            "label": "Verify the destination"
+          },
+          {
+            "id": "9a98e90d-87f9-5c5b-8b53-c6c0303b56aa",
+            "displayOrder": 1,
+            "isCorrect": false,
+            "label": "Open immediately"
+          }
+        ],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "ab59e671-394a-532f-b9cd-6836c15ca4d5",
+        "questionType": "multiple_choice",
+        "displayOrder": 1,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [
+          {
+            "id": "3f473fe6-e9e2-58e8-9a71-61ad88d246e9",
+            "displayOrder": 0,
+            "isCorrect": true,
+            "label": "Verify the destination"
+          },
+          {
+            "id": "a99c7aa4-46fd-5037-b359-f3a736711148",
+            "displayOrder": 1,
+            "isCorrect": false,
+            "label": "Open immediately"
+          }
+        ],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "c8e2d76c-6902-54c3-b545-b40fee5da00c",
+        "questionType": "true_or_false",
+        "displayOrder": 2,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [
+          {
+            "id": "dc7b2a93-76a2-5781-9cbe-ee3b8f448c2b",
+            "displayOrder": 0,
+            "correctValue": true,
+            "statement": "Verify unexpected requests."
+          }
+        ],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "21727915-121b-5966-b10f-68cecca2e015",
+        "questionType": "photo_question_single_choice",
+        "displayOrder": 3,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": "fixture/phishing-example.png",
+        "options": [
+          {
+            "id": "f374afda-076d-5c22-aefd-c1fb5dfb9a1c",
+            "displayOrder": 0,
+            "isCorrect": true,
+            "label": "Verify the destination"
+          },
+          {
+            "id": "12dadac2-ad03-507b-be9b-5e166f9b6ca6",
+            "displayOrder": 1,
+            "isCorrect": false,
+            "label": "Open immediately"
+          }
+        ],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "b0548e18-7bbd-5378-8e37-78461bc804ca",
+        "questionType": "photo_question_multiple_choice",
+        "displayOrder": 4,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": "fixture/phishing-example.png",
+        "options": [
+          {
+            "id": "c31a938f-6430-5511-8819-1e919f2b5bc0",
+            "displayOrder": 0,
+            "isCorrect": true,
+            "label": "Verify the destination"
+          },
+          {
+            "id": "25255eca-de4c-539e-8691-3f3f3249b9a1",
+            "displayOrder": 1,
+            "isCorrect": false,
+            "label": "Open immediately"
+          }
+        ],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "1e0eed04-8ae3-520d-9298-905cfcbb1aa7",
+        "questionType": "fill_in_the_blanks_text",
+        "displayOrder": 5,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Always <blank-answer-73997c39-6af4-58f6-826a-19bdf39a1def></blank-answer-73997c39-6af4-58f6-826a-19bdf39a1def> the destination.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [
+          {
+            "id": "73997c39-6af4-58f6-826a-19bdf39a1def",
+            "textComparisonMode": "normalized",
+            "answerSets": [
+              {
+                "preferredAnswer": "verify",
+                "acceptedAnswers": [
+                  "verify",
+                  "check"
+                ]
+              }
+            ]
+          }
+        ],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "c4ebf203-415d-5580-b583-ae94ca7b3350",
+        "questionType": "fill_in_the_blanks_dnd",
+        "displayOrder": 6,
+        "maximumPoints": "1",
+        "gradingMode": "automatic",
+        "prompt": "Always <blank-answer-c09e6fad-58c3-547d-a306-0d2f092712e2></blank-answer-c09e6fad-58c3-547d-a306-0d2f092712e2> the destination.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": null,
+        "blanks": [
+          {
+            "id": "c09e6fad-58c3-547d-a306-0d2f092712e2",
+            "textComparisonMode": "normalized",
+            "answerSets": [
+              {
+                "preferredAnswer": "verify",
+                "acceptedAnswers": [
+                  "verify",
+                  "check"
+                ]
+              }
+            ]
+          }
+        ],
+        "dragAndDropOptions": [
+          {
+            "id": "aeaced62-1735-513a-9009-764fcf720657",
+            "label": "verify",
+            "targetBlankId": "c09e6fad-58c3-547d-a306-0d2f092712e2",
+            "displayOrder": 0
+          }
+        ]
+      },
+      {
+        "id": "0d46ab02-e7c1-55ed-bce6-58e254ad94c7",
+        "questionType": "brief_response",
+        "displayOrder": 7,
+        "maximumPoints": "1",
+        "gradingMode": "manual",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": {
+          "minimumCharacters": 1,
+          "maximumCharacters": 1000,
+          "reviewerInstructions": "Check for verification before action."
+        },
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "81683d6a-1a6d-5f06-accf-dd6bdbfc1c34",
+        "questionType": "detailed_response",
+        "displayOrder": 8,
+        "maximumPoints": "1",
+        "gradingMode": "manual",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [],
+        "scaleOptions": [],
+        "openTextSettings": {
+          "minimumCharacters": 1,
+          "maximumCharacters": 1000,
+          "reviewerInstructions": "Check for verification before action."
+        },
+        "blanks": [],
+        "dragAndDropOptions": []
+      },
+      {
+        "id": "6d4a3deb-12e3-52f4-b666-845a26a56acc",
+        "questionType": "scale_1_5",
+        "displayOrder": 9,
+        "maximumPoints": "1",
+        "gradingMode": "participation",
+        "prompt": "Choose the safe response.",
+        "title": "Safe handling",
+        "description": null,
+        "photoS3Key": null,
+        "options": [],
+        "trueFalseStatements": [],
+        "scaleOptions": [
+          {
+            "id": "2b476056-d863-56a7-aaa1-97c87ed42bf5",
+            "displayOrder": 0,
+            "scaleValue": 1,
+            "label": "1"
+          },
+          {
+            "id": "01a4bbd2-62c7-5cce-a806-6076e9074203",
+            "displayOrder": 1,
+            "scaleValue": 2,
+            "label": "2"
+          },
+          {
+            "id": "d54cabd6-f45a-578a-9ec0-323fe93ff4b2",
+            "displayOrder": 2,
+            "scaleValue": 3,
+            "label": "3"
+          },
+          {
+            "id": "233fd510-938f-50b5-afe9-d61d0f9e12cf",
+            "displayOrder": 3,
+            "scaleValue": 4,
+            "label": "4"
+          },
+          {
+            "id": "91553dc0-5f8a-56d3-b52c-33899e159413",
+            "displayOrder": 4,
+            "scaleValue": 5,
+            "label": "5"
+          }
+        ],
+        "openTextSettings": null,
+        "blanks": [],
+        "dragAndDropOptions": []
+      }
+    ]
+  }
+}
