@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
@@ -105,7 +106,11 @@ export const NavigationGlobalSearchWrapper = ({
           item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
           onClick={() => setIsGlobalSearchDialogOpen(true)}
           wrapperClassName="list-none hidden 2xl:block"
-          className="justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white"
+          className={cn(
+            "justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white",
+            IS_MONO_DESIGN &&
+              "rounded border border-input text-neutral-800 hover:bg-primary-50 hover:text-neutral-800",
+          )}
           labelClassName="sr-only"
           hideLabel
           showTooltip
@@ -117,6 +122,7 @@ export const NavigationGlobalSearchWrapper = ({
           className={cn(
             "flex size-10 items-center justify-center rounded-lg bg-neutral-50 p-2 text-neutral-800 transition-colors hover:text-primary-500",
             "2xl:h-[42px] 2xl:w-full 2xl:justify-start 2xl:border 2xl:border-neutral-300 2xl:bg-white 2xl:py-2 2xl:pl-8 2xl:pr-8 2xl:hover:border-primary-500",
+            IS_MONO_DESIGN && "relative rounded 2xl:border-input",
           )}
         >
           <Search className="size-6 transition-colors 2xl:absolute 2xl:left-2 2xl:top-1/2 2xl:size-5 2xl:-translate-y-1/2 2xl:transform" />
