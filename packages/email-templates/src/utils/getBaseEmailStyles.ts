@@ -1,7 +1,14 @@
 import type { CSSProperties } from "react";
 
+const textWrapping: CSSProperties = {
+  overflowWrap: "anywhere",
+  wordWrap: "break-word",
+  wordBreak: "break-word",
+};
+
 export const getBaseEmailStyles = (primaryColor: string) => ({
   body: {
+    ...textWrapping,
     margin: 0,
     backgroundColor: "#fafafa",
     WebkitTextSizeAdjust: "100%",
@@ -14,6 +21,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   headerContainer: {
+    tableLayout: "fixed",
     backgroundColor: "#ffffff",
     margin: "0 auto",
     paddingTop: "2rem",
@@ -30,11 +38,14 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   contentSection: {
+    width: "80%",
+    tableLayout: "fixed",
     margin: "0 auto",
     maxWidth: "80%",
   } as CSSProperties,
 
   heading: {
+    ...textWrapping,
     fontSize: "1.5rem",
     fontWeight: "400",
     margin: "0 0 2rem 0",
@@ -43,6 +54,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   paragraph: {
+    ...textWrapping,
     fontSize: "0.8rem",
     margin: "0 0 1rem 0",
     lineHeight: "150%",
@@ -53,6 +65,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   buttonContainer: {
+    tableLayout: "fixed",
     backgroundColor: "#ffffff",
     margin: "0 auto",
     borderRadius: "0 0 1.5rem 1.5rem",
@@ -78,6 +91,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   buttonText: {
+    ...textWrapping,
     fontSize: "1rem",
     color: "#ffffff",
     textDecoration: "none",
@@ -86,11 +100,13 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   footerSection: {
+    tableLayout: "fixed",
     color: "white",
     textAlign: "center",
   } as CSSProperties,
 
   footerText: {
+    ...textWrapping,
     fontSize: "0.75rem",
     color: "#949494",
     marginBottom: "3.5rem",

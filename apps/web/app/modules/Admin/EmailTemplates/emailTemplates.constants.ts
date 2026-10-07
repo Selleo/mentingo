@@ -1,3 +1,4 @@
+import { BUILT_IN_EMAIL_TEMPLATE_KEYS } from "@repo/shared";
 import {
   AlignVerticalSpaceAround,
   Image,
@@ -55,30 +56,9 @@ export const EMAIL_TEMPLATE_STATUS_BADGE_VARIANTS = {
 export const EMAIL_TEMPLATE_BLOCK_OPTIONS = Object.values(
   EMAIL_TEMPLATE_BLOCK_TYPES,
 ) satisfies EmailTemplateBlock["type"][];
-export const EMAIL_TEMPLATE_EVENT_OPTIONS = [
-  "welcome",
-  "password_recovery",
-  "password_reminder",
-  "user_invite",
-  "user_first_login",
-  "user_assigned_to_course",
-  "user_short_inactivity",
-  "user_long_inactivity",
-  "user_finished_chapter",
-  "user_finished_course",
-  "certificate_expiration_warning",
-  "certificate_expired",
-  "admin_new_user",
-  "admin_finished_course",
-  "admin_overdue_courses",
-  "course_due_date_reminder",
-  "magic_link",
-  "course_chat_mention",
-  "announcement",
-  "live_training_started",
-  "live_training_reminder",
-  "live_training_ended",
-] as const satisfies readonly EmailTemplateEvent[];
+export const EMAIL_TEMPLATE_BUILT_IN_KEYS = Object.values(
+  BUILT_IN_EMAIL_TEMPLATE_KEYS,
+) satisfies readonly EmailTemplateEvent[];
 export const EMAIL_TEMPLATE_VARIABLE_DRAG_TYPE = "application/x-mentingo-email-variable";
 
 export const EMAIL_TEMPLATE_ACTIONS = {

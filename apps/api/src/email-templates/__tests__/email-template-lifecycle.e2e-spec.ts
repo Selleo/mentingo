@@ -8,6 +8,8 @@ import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { RemoveEmailTemplateLanguageEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
+import { EmailTemplateRenderingService } from "../services/email-template-rendering.service";
+
 import { draftBody, setupEmailTemplateTest, textDocument } from "./email-template-test.helpers";
 
 import type { EmailTemplateTestContext } from "./email-template-test.helpers";
@@ -99,18 +101,29 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
   });
 
   it.each(["name", "subject", "content"] as const)(
-    "rejects incomplete published %s edits atomically",
+    "saves incomplete %s drafts without changing publication",
     async (field) => {
       const template = await t.create();
       await t.http("post", `/${template.id}/publish`).expect(201);
-      const before = await t.get(template.id!);
+      const publication = await t.runAsTenant(t.defaultTenantId, () =>
+        t.app
+          .get(EmailTemplateRenderingService)
+          .getPublishedEmailTemplate({ type: "custom", id: template.id! }),
+      );
       const value = field === "content" ? { type: "doc", version: 1, content: [] } : "";
       const response = await t
         .http("patch", `/${template.id}`)
         .send({ [field]: { en: value } })
-        .expect(400);
-      expect(response.body.message).toBe("emailTemplates.errors.incompleteBaseLanguage");
-      expect(await t.get(template.id!)).toEqual(before);
+        .expect(200);
+      expect(response.body.data.hasUnpublishedChanges).toBe(true);
+      expect(
+        await t.runAsTenant(t.defaultTenantId, () =>
+          t.app
+            .get(EmailTemplateRenderingService)
+            .getPublishedEmailTemplate({ type: "custom", id: template.id! }),
+        ),
+      ).toEqual(publication);
+      await t.http("post", `/${template.id}/publish`).expect(400);
     },
   );
 
@@ -195,24 +208,16 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
     expect(await t.get(template.id!)).toEqual(template);
   });
 
-  it("requires actionable authentication links for publish and base-language changes", async () => {
+  it("publishes generic content without deriving restrictions from placeholder names", async () => {
     const body = draftBody(
       EMAIL_TEMPLATE_DEFINITIONS.find(
         ({ event }) => event === EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY,
       )!,
     );
-    body.content = { en: textDocument("No authentication action") };
+    body.content = { en: textDocument("Generic content") };
     const template = await t.create(body);
-    for (const operation of ["publish", "base-language"] as const) {
-      const req = t.http(
-        operation === "publish" ? "post" : "patch",
-        `/${template.id}/${operation}`,
-      );
-      if (operation === "base-language") req.send({ baseLanguage: SUPPORTED_LANGUAGES.EN });
-      const response = await req.expect(400);
-      expect(response.body.message).toBe("emailTemplates.errors.missingMandatoryVariables");
-      expect(await t.get(template.id!)).toEqual(template);
-    }
+    await t.http("post", `/${template.id}/publish`).expect(201);
+    await t.http("patch", `/${template.id}/base-language`).send({ baseLanguage: "en" }).expect(200);
   });
 
   it("rejects incomplete publication without archiving the active override", async () => {
@@ -225,7 +230,7 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
     expect(await t.get(invalid.id!)).toEqual(invalid);
   });
 
-  it("serializes competing publications and isolates other tenants and events", async () => {
+  it("publishes multiple resources independently and isolates other tenants", async () => {
     const first = await t.create();
     const second = await t.create();
     const other = (
@@ -233,7 +238,11 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
     ).body.data;
     await t.http("post", `/${other.id}/publish`, t.otherCookie, t.otherTenant.host).expect(201);
     const different = await t.create(
-      draftBody(EMAIL_TEMPLATE_DEFINITIONS.find(({ event }) => event !== first.event)!),
+      draftBody(
+        EMAIL_TEMPLATE_DEFINITIONS.find(
+          ({ event }) => event === EMAIL_TEMPLATE_EVENTS.PASSWORD_RECOVERY,
+        )!,
+      ),
     );
     await t.http("post", `/${different.id}/publish`).expect(201);
     const differentBefore = await t.get(different.id!);
@@ -241,15 +250,12 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
       [first, second].map(({ id }) => t.http("post", `/${id}/publish`).expect(201)),
     );
     const records = await Promise.all([t.get(first.id!), t.get(second.id!)]);
-    expect(records.filter(({ status }) => status === "published")).toHaveLength(1);
-    expect(records.filter(({ status }) => status === "archived")).toHaveLength(1);
+    expect(records.filter(({ status }) => status === "published")).toHaveLength(2);
+    expect(records.filter(({ status }) => status === "archived")).toHaveLength(0);
     expect(records.find(({ status }) => status === "published")).toMatchObject({
       publishedAt: expect.any(String),
       archivedAt: null,
     });
-    expect(records.find(({ status }) => status === "archived")?.archivedAt).toEqual(
-      expect.any(String),
-    );
     expect(await t.get(different.id!)).toEqual(differentBefore);
     expect(
       (await t.http("get", `/${other.id}`, t.otherCookie, t.otherTenant.host).expect(200)).body.data

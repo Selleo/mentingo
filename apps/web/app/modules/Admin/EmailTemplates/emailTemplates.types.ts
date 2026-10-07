@@ -9,7 +9,7 @@ export type UpdateEmailTemplateVariables = { id: string; body: UpdateEmailTempla
 export type UpdateEmailTemplateBaseLanguageVariables = { id: string; body: UpdateBaseLanguageBody };
 
 export type EmailTemplate = GetEmailTemplateResponse["data"];
-export type EmailTemplateEvent = EmailTemplate["event"];
+export type EmailTemplateEvent = NonNullable<EmailTemplate["event"]>;
 export type EmailTemplateDocument = NonNullable<EmailTemplate["content"]["en"]>;
 export type EmailTemplateBlock = EmailTemplateDocument["content"][number];
 export type EmailTemplateParagraph = Extract<

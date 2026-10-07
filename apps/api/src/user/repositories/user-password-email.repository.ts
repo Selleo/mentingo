@@ -43,6 +43,7 @@ export class UserPasswordEmailRepository {
         id: users.id,
         email: users.email,
         firstName: users.firstName,
+        lastName: users.lastName,
         tenantId: users.tenantId,
         hasCredentials: sql<boolean>`${credentials.userId} IS NOT NULL`,
         defaultEmailSettings: sql<UserPasswordEmailRecipient["defaultEmailSettings"]>`
@@ -96,6 +97,7 @@ export class UserPasswordEmailRepository {
         id: users.id,
         email: users.email,
         firstName: users.firstName,
+        lastName: users.lastName,
         tenantId: users.tenantId,
         hasCredentials: sql<boolean>`${credentials.userId} IS NOT NULL`,
         defaultEmailSettings: sql<UserPasswordEmailRecipient["defaultEmailSettings"]>`

@@ -14,7 +14,7 @@ test("admin opens the system catalog from Manage and cannot edit defaults", asyn
     await openEmailCatalogFromNavigationFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await page
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(EMAIL_TEMPLATE_DATA.event))
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(EMAIL_TEMPLATE_DATA.builtInTemplateKey))
       .getByRole("link")
       .click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toBeDisabled();
@@ -36,7 +36,7 @@ for (const role of [USER_ROLE.student, USER_ROLE.contentCreator]) {
     await withReadonlyPage(role, async ({ page }) => {
       for (const route of [
         EMAIL_TEMPLATE_DATA.listPath,
-        `${EMAIL_TEMPLATE_DATA.listPath}/defaults/${EMAIL_TEMPLATE_DATA.event}`,
+        `${EMAIL_TEMPLATE_DATA.listPath}/defaults/${EMAIL_TEMPLATE_DATA.builtInTemplateKey}`,
       ]) {
         await page.goto(route);
         await expect(page).not.toHaveURL(new RegExp(`${route}$`));

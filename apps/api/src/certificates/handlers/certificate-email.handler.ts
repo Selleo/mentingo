@@ -1,19 +1,16 @@
-import { Logger } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import {
-  EMAIL_TEMPLATE_EVENTS,
-  CertificateExpiredEmail,
-  CertificateExpirationWarningEmail,
-} from "@repo/email-templates";
+import { Injectable, Logger } from "@nestjs/common";
+import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
 
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
+import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
+import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
 
 import type { CertificateActivityReason } from "../certificates.types";
+import type { IEventHandler } from "@nestjs/cqrs";
 import type { CertificateEmailRecipient } from "src/events/certificate/certificate-email-recipient";
 import type { CertificateExpirationWarningEmailRecipient } from "src/events/certificate/certificate-expiration-warning-email.event";
 
@@ -21,16 +18,30 @@ type CertificateEmailEventType =
   | CertificateExpirationWarningEmailEvent
   | CertificateArchivedEmailEvent;
 
-const CertificateEmailEvents = [
-  CertificateExpirationWarningEmailEvent,
-  CertificateArchivedEmailEvent,
-] as const;
-
-@EventsHandler(...CertificateEmailEvents)
+@Injectable()
 export class CertificateEmailHandler implements IEventHandler<CertificateEmailEventType> {
   private readonly logger = new Logger(CertificateEmailHandler.name);
 
-  constructor(private readonly emailService: EmailService) {}
+  constructor(
+    private readonly emailService: EmailService,
+    private readonly notificationCollectorService: NotificationCollectorService,
+    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
+  ) {}
+
+  onModuleInit() {
+    this.outboxNotificationPreparationService.register(async (event) => {
+      if (
+        !(
+          event instanceof CertificateExpirationWarningEmailEvent ||
+          event instanceof CertificateArchivedEmailEvent
+        )
+      ) {
+        return [];
+      }
+
+      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
+    });
+  }
 
   async handle(event: CertificateEmailEventType) {
     if (event instanceof CertificateExpirationWarningEmailEvent) {
@@ -60,30 +71,21 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
 
       const { courseName, courseLink, expiresAt } = certificate;
 
-      const { text, html } = new CertificateExpirationWarningEmail({
-        courseName,
-        courseLink,
-        expiresAt,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: certificate.userEmail,
-          subject: getEmailSubject(
-            "certificateExpirationWarningEmail",
-            defaultEmailSettings.language,
-            { courseName },
-          ),
-          text,
-          html,
-        },
+      await this.notificationCollectorService.captureNotificationRecipient(
+        { to: certificate.userEmail },
         {
           tenantId: certificate.tenantId,
           template: {
             event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRATION_WARNING,
             language: defaultEmailSettings.language,
-            variables: { course_name: courseName, course_link: courseLink, expires_at: expiresAt },
+            variables: {
+              userEmail: certificate.userEmail,
+              userFirstName: certificate.userFirstName,
+              userLastName: certificate.userLastName,
+              course_name: courseName,
+              course_link: courseLink,
+              expires_at: expiresAt,
+            },
           },
         },
       );
@@ -102,28 +104,21 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
 
       const { courseName, courseLink } = certificate;
 
-      const { text, html } = new CertificateExpiredEmail({
-        courseName,
-        courseLink,
-        reason,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: certificate.userEmail,
-          subject: getEmailSubject("certificateExpiredEmail", defaultEmailSettings.language, {
-            courseName,
-          }),
-          text,
-          html,
-        },
+      await this.notificationCollectorService.captureNotificationRecipient(
+        { to: certificate.userEmail },
         {
           tenantId: certificate.tenantId,
           template: {
             event: EMAIL_TEMPLATE_EVENTS.CERTIFICATE_EXPIRED,
             language: defaultEmailSettings.language,
-            variables: { course_name: courseName, course_link: courseLink, reason },
+            variables: {
+              userEmail: certificate.userEmail,
+              userFirstName: certificate.userFirstName,
+              userLastName: certificate.userLastName,
+              course_name: courseName,
+              course_link: courseLink,
+              reason,
+            },
           },
         },
       );
@@ -136,7 +131,7 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
   ) {
     await processInBatches(items, processItem, {
       batchSize: EMAIL_BATCH_SIZE,
-      throwOnError: false,
+      throwOnError: true,
       onItemError: (error, _item, itemIndex) => {
         const reason = error instanceof Error ? error.stack : String(error);
 

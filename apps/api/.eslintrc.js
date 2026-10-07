@@ -57,6 +57,32 @@ module.exports = {
   overrides: [
     {
       files: [
+        "src/automations/**/*.ts",
+        "src/automation-execution/**/*.ts",
+        "src/email-templates/**/*.ts",
+        "src/notifications/services/**/*.ts",
+      ],
+      excludedFiles: ["**/*.spec.ts", "**/*.e2e-spec.ts"],
+      rules: {
+        curly: ["error", "all"],
+        "lines-between-class-members": ["error", "always"],
+        "padding-line-between-statements": [
+          "error",
+          { blankLine: "always", prev: "*", next: "return" },
+          { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+          { blankLine: "always", prev: "*", next: ["const", "let", "var"] },
+          { blankLine: "always", prev: "*", next: "block-like" },
+          { blankLine: "always", prev: "block-like", next: "*" },
+          {
+            blankLine: "any",
+            prev: ["singleline-const", "singleline-let", "singleline-var"],
+            next: ["singleline-const", "singleline-let", "singleline-var"],
+          },
+        ],
+      },
+    },
+    {
+      files: [
         "src/seed/**/*.ts",
         "src/stripe/stripe.controller.ts",
         "src/stripe/stripeWebhook.handler.ts",

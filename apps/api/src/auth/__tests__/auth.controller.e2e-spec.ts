@@ -6,17 +6,23 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { EnvService } from "src/env/services/env.service";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, formFieldAnswers, magicLinkTokens, resetTokens } from "src/storage/schema";
+import {
+  createTokens,
+  formFieldAnswers,
+  magicLinkTokens,
+  notificationAccountActionIntents,
+  resetTokens,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
-import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
@@ -968,7 +974,7 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/magic-link/create", () => {
-    it("should create a magic link token as a hash and send the token in email", async () => {
+    it("stores an opaque magic-link intent without issuing a token before delivery", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
@@ -981,31 +987,23 @@ describe("AuthController (e2e)", () => {
         .send({ email: user.email })
         .expect(201);
 
-      const emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
-      const email = emailAdapter.getLastEmail();
-
-      expect(email).toBeDefined();
-      expect(email?.to).toBe(user.email);
-      expect(email?.subject).toBeDefined();
-      expect(email?.html || email?.text).toContain("/auth/login?token=");
-      expect(email?.html || email?.text).toContain(`${DEFAULT_TEST_TENANT_HOST}/auth/login?token=`);
-
-      const tokenMatch = (email?.html ?? email?.text ?? "").match(
-        /\/auth\/login\?token=([^"&\s]+)/,
-      );
-      expect(tokenMatch).not.toBeNull();
-
-      const token = tokenMatch?.[1];
-      expect(token).toBeDefined();
-
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+      const [intent] = await db
+        .select()
+        .from(notificationAccountActionIntents)
+        .where(eq(notificationAccountActionIntents.userId, user.id));
+      expect(intent).toMatchObject({
+        kind: "sign_in",
+        tokenTtlMs: 15 * 60 * 1000,
+        encryptedToken: null,
+        authTokenId: null,
+        tokenCreatedAt: null,
+      });
       const [storedToken] = await db
         .select()
         .from(magicLinkTokens)
         .where(eq(magicLinkTokens.userId, user.id));
-
-      expect(storedToken).toBeDefined();
-      expect(storedToken?.tokenHash).toBe(hashToken(token!));
-      expect(storedToken?.expiryDate).toBeDefined();
+      expect(storedToken).toBeUndefined();
     });
 
     it("should return success for archived users without sending a magic link", async () => {
@@ -1032,7 +1030,7 @@ describe("AuthController (e2e)", () => {
       expect(storedToken).toBeUndefined();
     });
 
-    it("should return success when magic link token creation fails", async () => {
+    it("returns success when magic-link intent creation fails", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
@@ -1040,7 +1038,9 @@ describe("AuthController (e2e)", () => {
           email: `magiclink-token-failure-${nanoid(8)}@example.com`,
         });
 
-      jest.spyOn(authService, "createMagicLinkToken").mockRejectedValueOnce(new Error("boom"));
+      jest
+        .spyOn(app.get(NotificationAccountActionService), "createNotificationAccountActionIntent")
+        .mockRejectedValueOnce(new Error("boom"));
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/magic-link/create")

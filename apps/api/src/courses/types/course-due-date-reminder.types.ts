@@ -7,6 +7,8 @@ export type CourseDueDateReminderDays = (typeof COURSE_DUE_DATE_REMINDER_DAYS)[n
 export type CourseDueDateReminderRecipient = {
   studentId: UUIDType;
   studentEmail: string;
+  studentFirstName: string;
+  studentLastName: string;
   tenantId: UUIDType;
   tenantHost: string;
   courseId: UUIDType;

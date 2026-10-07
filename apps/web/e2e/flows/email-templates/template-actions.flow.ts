@@ -10,10 +10,10 @@ export const openEmailCatalogFromNavigationFlow = async (page: Page) => {
   await page.getByTestId(NAVIGATION_HANDLES.EMAIL_TEMPLATES_LINK).click();
 };
 
-export const copyEmailTemplateFlow = async (page: Page, input: { event: string }) => {
+export const copyEmailTemplateFlow = async (page: Page, input: { templateKey: string }) => {
   const created = page.waitForResponse(
     (response) =>
-      response.url().endsWith(`/defaults/${input.event}/copy`) &&
+      response.url().endsWith(`/defaults/${input.templateKey}/copy`) &&
       response.request().method() === "POST",
   );
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.COPY).click();

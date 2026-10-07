@@ -1,5 +1,6 @@
 import { AppStartupService } from "./app-startup.service";
 
+import type { DefaultAutomationSetupService } from "./automation-execution/services/default-automation-setup.service";
 import type { PermissionsBackfillService } from "./permissions/permissions-backfill.service";
 import type { DatabaseMigrationService } from "./storage/db/database-migration.service";
 
@@ -15,7 +16,14 @@ describe("AppStartupService", () => {
     backfillMissingPermissionsForAllTenants: jest.fn(),
   } as unknown as jest.Mocked<PermissionsBackfillService>;
 
-  const service = new AppStartupService(databaseMigrationService, permissionsBackfillService);
+  const automations = {
+    ensureDefaultAutomationsForAllTenants: jest.fn(),
+  } as unknown as jest.Mocked<DefaultAutomationSetupService>;
+  const service = new AppStartupService(
+    databaseMigrationService,
+    permissionsBackfillService,
+    automations,
+  );
 
   beforeEach(() => {
     delete process.env.JEST_WORKER_ID;
@@ -56,6 +64,9 @@ describe("AppStartupService", () => {
     databaseMigrationService.runMigrations.mockImplementation(async () => {
       calls.push("migrations");
     });
+    automations.ensureDefaultAutomationsForAllTenants.mockImplementation(async () => {
+      calls.push("automations");
+    });
     permissionsBackfillService.backfillMissingPermissionsForAllTenants.mockImplementation(
       async () => {
         calls.push("backfill");
@@ -65,7 +76,7 @@ describe("AppStartupService", () => {
 
     await service.onModuleInit();
 
-    expect(calls).toEqual(["migrations", "backfill"]);
+    expect(calls).toEqual(["migrations", "automations", "backfill"]);
   });
 
   it("does not run permission backfill when migrations fail", async () => {

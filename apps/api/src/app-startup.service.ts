@@ -1,5 +1,6 @@
 import { Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 
+import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { PermissionsBackfillService } from "src/permissions/permissions-backfill.service";
 import { DatabaseMigrationService } from "src/storage/db/database-migration.service";
 
@@ -10,6 +11,7 @@ export class AppStartupService implements OnModuleInit {
   constructor(
     private readonly databaseMigrationService: DatabaseMigrationService,
     private readonly permissionsBackfillService: PermissionsBackfillService,
+    private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
   ) {}
 
   async onModuleInit() {
@@ -19,6 +21,7 @@ export class AppStartupService implements OnModuleInit {
     }
 
     await this.databaseMigrationService.runMigrations();
+    await this.defaultAutomationSetupService.ensureDefaultAutomationsForAllTenants();
 
     const { insertedCount, tenantCount } =
       await this.permissionsBackfillService.backfillMissingPermissionsForAllTenants();

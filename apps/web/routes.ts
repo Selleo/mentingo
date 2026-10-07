@@ -72,7 +72,21 @@ export const routes: (
           route("courses/import-package", "modules/Admin/AddCourse/NativeArchiveImport.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");
-          route("email-templates", "modules/Admin/EmailTemplates/EmailTemplates.page.tsx");
+          route("automations", "modules/Admin/Automations/AutomationsWorkspace.page.tsx");
+          route("automations/new", "modules/Admin/Automations/AutomationEditor.page.tsx", {
+            id: "automation-new",
+          });
+          route("automations/:id", "modules/Admin/Automations/AutomationEditor.page.tsx", {
+            id: "automation-editor",
+          });
+          route(
+            "automation-logs",
+            "modules/Admin/Automations/Workspace/LegacyAutomationLogs.page.tsx",
+          );
+          route(
+            "email-templates",
+            "modules/Admin/Automations/Workspace/LegacyEmailTemplates.page.tsx",
+          );
           route(
             "email-templates/defaults/:event",
             "modules/Admin/EmailTemplates/EmailTemplateEditor.page.tsx",

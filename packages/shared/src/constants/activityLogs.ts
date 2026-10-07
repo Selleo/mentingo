@@ -13,6 +13,11 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   GROUP_ASSIGNMENT: "group_assignment",
   USERS_IMPORT: "users_import",
   PUBLISH_EMAIL_TEMPLATE: "publish_email_template",
+  APPLY_AUTOMATION: "apply_automation",
+  ENABLE_AUTOMATION: "enable_automation",
+  DISABLE_AUTOMATION: "disable_automation",
+  DUPLICATE_AUTOMATION: "duplicate_automation",
+  ARCHIVE_AUTOMATION: "archive_automation",
   ARCHIVE_EMAIL_TEMPLATE: "archive_email_template",
   RESTORE_EMAIL_TEMPLATE: "restore_email_template",
   ADD_EMAIL_TEMPLATE_LANGUAGE: "add_email_template_language",
@@ -53,6 +58,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   LEARNING_PATH: "learning_path",
   SCORM: "scorm",
   EMAIL_TEMPLATE: "email_template",
+  AUTOMATION: "automation",
 } as const;
 
 export type ActivityLogResourceType =
@@ -161,5 +167,14 @@ export const ACTIVITY_LOG_RESOURCE_ACTION_TYPES = {
     ACTIVITY_LOG_ACTION_TYPES.ADD_EMAIL_TEMPLATE_LANGUAGE,
     ACTIVITY_LOG_ACTION_TYPES.REMOVE_EMAIL_TEMPLATE_LANGUAGE,
     ACTIVITY_LOG_ACTION_TYPES.DELETE,
+  ],
+  [ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION]: [
+    ACTIVITY_LOG_ACTION_TYPES.CREATE,
+    ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+    ACTIVITY_LOG_ACTION_TYPES.APPLY_AUTOMATION,
+    ACTIVITY_LOG_ACTION_TYPES.ENABLE_AUTOMATION,
+    ACTIVITY_LOG_ACTION_TYPES.DISABLE_AUTOMATION,
+    ACTIVITY_LOG_ACTION_TYPES.DUPLICATE_AUTOMATION,
+    ACTIVITY_LOG_ACTION_TYPES.ARCHIVE_AUTOMATION,
   ],
 } as const satisfies Record<ActivityLogResourceType, readonly ActivityLogActionType[]>;

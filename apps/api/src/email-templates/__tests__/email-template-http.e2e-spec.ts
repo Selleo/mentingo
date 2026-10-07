@@ -110,8 +110,8 @@ describe("Email template HTTP contracts (e2e)", () => {
         source: "default",
         editable: false,
         status: null,
-        subject: definition.subjects,
-        content: definition.defaultDocuments,
+        subject: draftBody(definition).subject,
+        content: draftBody(definition).content,
       });
       const first = (await t.http("post", `${path}/copy`).expect(201)).body.data;
       const second = (await t.http("post", `${path}/copy`).expect(201)).body.data;
@@ -186,7 +186,7 @@ describe("Email template HTTP contracts (e2e)", () => {
   });
 
   it("creates incomplete drafts with default or explicit base languages", async () => {
-    const body = { event: welcome.event, name: {}, subject: {}, content: {} };
+    const body = { placeholders: [], name: {}, subject: {}, content: {} };
     const implicit = await t.create(body);
     expect(implicit).toMatchObject({
       baseLanguage: SUPPORTED_LANGUAGES.EN,

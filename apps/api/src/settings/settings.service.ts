@@ -87,7 +87,6 @@ import type {
   GlobalSettingsJSONContentSchema,
   AdminSettingsJSONContentSchema,
   UserSettingsJSONContentSchema,
-  UserEmailTriggersSchema,
   UploadFilesToLoginPageBody,
   LoginPageResourceResponseBody,
   DashboardSettingsResponseSchema,
@@ -169,7 +168,9 @@ export class SettingsService {
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .select({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      })
       .from(settings)
       .where(isNull(settings.userId));
 
@@ -186,11 +187,8 @@ export class SettingsService {
       platformLogoS3Key,
       platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
-      userEmailTriggers,
       ...restOfSettings
     } = parsedSettings;
-
-    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage, {
@@ -216,7 +214,6 @@ export class SettingsService {
 
     return {
       ...restOfSettings,
-      userEmailTriggers: reorderedEmailTriggers,
       platformLogoS3Key: platformLogoUrl,
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
@@ -226,7 +223,9 @@ export class SettingsService {
 
   public async getImageS3Keys(): Promise<SettingsImageS3Keys> {
     const [globalSettings] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .select({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      })
       .from(settings)
       .where(isNull(settings.userId));
 
@@ -247,7 +246,9 @@ export class SettingsService {
 
   public async getPublicGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .select({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      })
       .from(settings)
       .where(isNull(settings.userId));
 
@@ -264,15 +265,11 @@ export class SettingsService {
       platformLogoS3Key,
       platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
-      userEmailTriggers,
       ...restOfSettings
     } = parsedSettings;
 
-    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
-
     return {
       ...restOfSettings,
-      userEmailTriggers: reorderedEmailTriggers,
       platformLogoS3Key: this.buildSettingsImageUrl(
         SETTINGS_IMAGE_ASSET.PLATFORM_LOGO,
         platformLogoS3Key,
@@ -296,7 +293,9 @@ export class SettingsService {
     tenantId: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.dbAdmin
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .select({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      })
       .from(settings)
       .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
 
@@ -315,11 +314,8 @@ export class SettingsService {
       platformLogoS3Key,
       platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
-      userEmailTriggers,
       ...restOfSettings
     } = parsedSettings;
-
-    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage, {
@@ -345,7 +341,6 @@ export class SettingsService {
 
     return {
       ...restOfSettings,
-      userEmailTriggers: reorderedEmailTriggers,
       platformLogoS3Key: platformLogoUrl,
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
@@ -355,7 +350,9 @@ export class SettingsService {
 
   public async isLiveTrainingEnabledForTenant(tenantId: UUIDType): Promise<boolean> {
     const [globalSettings] = await this.dbAdmin
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .select({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      })
       .from(settings)
       .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
 
@@ -1039,7 +1036,9 @@ export class SettingsService {
       `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     if (current) {
       await this.db
@@ -1112,7 +1111,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1145,7 +1146,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1180,7 +1183,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1218,7 +1223,9 @@ export class SettingsService {
           : deleteJsonbField(settings.settings, "featuredCourseId"),
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1265,7 +1272,9 @@ export class SettingsService {
         settings: setJsonbField(settings.settings, "courseDiscussionsEnabled", !current),
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1296,7 +1305,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1336,7 +1347,9 @@ export class SettingsService {
         settings: setJsonbField(liveTrainingEnabledUpdate, "calendarEnabled", true),
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1366,7 +1379,9 @@ export class SettingsService {
         ),
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1400,7 +1415,9 @@ export class SettingsService {
         settings: setJsonbField(settings.settings, "learningPathsEnabled", !current),
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1737,7 +1754,9 @@ export class SettingsService {
         )`,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1784,7 +1803,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1878,7 +1899,9 @@ export class SettingsService {
         )`,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -1909,46 +1932,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
-
-    const updatedRecord = await this.getGlobalSettingsRecord();
-
-    await this.recordSettingsUpdate({
-      actor,
-      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
-      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
-    });
-
-    return updatedGlobalSettings;
-  }
-
-  async updateUserEmailTriggers(triggerKey: string, actor?: CurrentUserType) {
-    if (!Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers).includes(triggerKey)) {
-      throw new BadRequestException("Invalid trigger key");
-    }
-
-    const previousRecord = await this.getGlobalSettingsRecord();
-
-    const previousTriggers =
-      (previousRecord.settings as GlobalSettingsJSONContentSchema).userEmailTriggers ||
-      DEFAULT_GLOBAL_SETTINGS.userEmailTriggers;
-
-    const triggerToUpdate = previousTriggers[triggerKey as keyof typeof previousTriggers];
-
-    const [{ settings: updatedGlobalSettings }] = await this.db
-      .update(settings)
-      .set({
-        settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{userEmailTriggers,${sql.raw(triggerKey)}}',
-            to_jsonb(${!triggerToUpdate}::boolean),
-            true
-          )
-        `,
-      })
-      .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -2049,7 +2035,9 @@ export class SettingsService {
         )`,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 
@@ -2069,7 +2057,7 @@ export class SettingsService {
     const [record] = await this.db
       .select({
         id: settings.id,
-        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}`,
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
@@ -2140,7 +2128,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     return updatedGlobalSettings;
   }
@@ -2172,7 +2162,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     return updatedGlobalSettings;
   }
@@ -2204,7 +2196,9 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
 
     return updatedGlobalSettings;
   }
@@ -2367,8 +2361,10 @@ export class SettingsService {
   private parseGlobalSettings(
     settings: GlobalSettingsJSONContentSchema,
   ): GlobalSettingsJSONContentSchema {
+    const publicSettings = { ...settings };
+    Reflect.deleteProperty(publicSettings, "userEmailTriggers");
     return {
-      ...settings,
+      ...publicSettings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:
@@ -2387,7 +2383,6 @@ export class SettingsService {
       loginPageFiles: Array.isArray(settings.loginPageFiles)
         ? settings.loginPageFiles
         : JSON.parse(settings.loginPageFiles ?? "[]"),
-      userEmailTriggers: settings.userEmailTriggers ?? DEFAULT_GLOBAL_SETTINGS.userEmailTriggers,
       ageLimit: settings.ageLimit ?? null,
       featuredCourseId: settings.featuredCourseId ?? DEFAULT_GLOBAL_SETTINGS.featuredCourseId,
     };
@@ -2438,15 +2433,6 @@ export class SettingsService {
       .where(and(...conditions));
 
     return row?.totalItems ?? 0;
-  }
-
-  private reorderEmailTriggers(emailTriggers: UserEmailTriggersSchema) {
-    const triggerOrder = Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers);
-    return Object.fromEntries(
-      triggerOrder
-        .filter((key) => key in emailTriggers)
-        .map((key) => [key, emailTriggers[key as keyof UserEmailTriggersSchema]]),
-    ) as UserEmailTriggersSchema;
   }
 
   private buildSettingsImageUrl(

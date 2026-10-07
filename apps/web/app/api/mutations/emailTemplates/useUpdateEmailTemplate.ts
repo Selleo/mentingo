@@ -10,7 +10,8 @@ export function useUpdateEmailTemplate() {
 
   return useMutation({
     mutationFn: async ({ id, body }: UpdateEmailTemplateVariables) =>
-      (await ApiClient.api.emailTemplateControllerUpdateEmailTemplate(id, body)).data.data,
+      (await ApiClient.api.emailTemplateManagementControllerUpdateEmailTemplate(id, body)).data
+        .data,
     ...feedback,
   });
 }

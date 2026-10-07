@@ -1,4 +1,6 @@
 import { useNavigate } from "@remix-run/react";
+import { AUTOMATION_RESERVED_BRANDING_PLACEHOLDER } from "@repo/shared";
+import { AlertTriangle, FileText, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -14,26 +16,20 @@ import { useSendTestEmailTemplate } from "~/api/mutations/emailTemplates/useSend
 import { useUpdateEmailTemplate } from "~/api/mutations/emailTemplates/useUpdateEmailTemplate";
 import { useUpdateEmailTemplateBaseLanguage } from "~/api/mutations/emailTemplates/useUpdateEmailTemplateBaseLanguage";
 import { useUploadEmailTemplateImage } from "~/api/mutations/emailTemplates/useUploadEmailTemplateImage";
+import { useEmailTemplateEvents } from "~/api/queries/useEmailTemplateEvents";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { usePlatformLogo } from "~/hooks/usePlatformLogo";
 import { UnsavedChangesExitGuard } from "~/modules/Admin/components/UnsavedChangesExitGuard";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
 import {
   EMAIL_TEMPLATE_ACTIONS,
   EMAIL_TEMPLATE_SOURCES,
   EMAIL_TEMPLATE_STATUSES,
-  EMAIL_TEMPLATE_EVENT_OPTIONS,
   EMAIL_TEMPLATE_LIST_PATH,
 } from "../emailTemplates.constants";
 import {
@@ -42,10 +38,15 @@ import {
   getEmailTemplateInvalidContentLanguage,
   isEmailTemplateTranslationComplete,
 } from "../emailTemplates.utils";
+import {
+  removeEmailTemplateTags,
+  removeTagsFromEmailBlocks,
+} from "../utils/removeEmailTemplateTags";
 
 import { EmailTemplateBlocks } from "./EmailTemplateBlocks";
 import { EmailTemplateConfirmation } from "./EmailTemplateConfirmation";
 import { EmailTemplateEditorToolbar } from "./EmailTemplateEditorToolbar";
+import { EmailTemplateEventSettings } from "./EmailTemplateEventSettings";
 import { EmailTemplateTextField } from "./EmailTemplateTextField";
 
 import type {
@@ -53,7 +54,12 @@ import type {
   EmailTemplate,
   EmailTemplateFormValues,
 } from "../emailTemplates.types";
-import type { SupportedLanguages } from "@repo/shared";
+import type {
+  AutomationEventDefinition,
+  AutomationEventKind,
+  AutomationPlaceholderDefinition,
+  SupportedLanguages,
+} from "@repo/shared";
 
 export type EmailTemplateEditorProps = { template: EmailTemplate };
 
@@ -62,9 +68,28 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
   const navigate = useNavigate();
 
   const { data: branding } = useGlobalSettings();
+  const { data: events } = useEmailTemplateEvents();
   const { data: logoUrl } = usePlatformLogo();
 
   const [savedTemplate, setSavedTemplate] = useState(template);
+  const [triggerEventKind, setTriggerEventKind] = useState<AutomationEventKind | null>(
+    template.triggerEventKind ?? null,
+  );
+  const [placeholders, setPlaceholders] = useState<AutomationPlaceholderDefinition[]>(
+    (template.placeholders ??
+      template.variables
+        .filter((variable) => variable.key !== AUTOMATION_RESERVED_BRANDING_PLACEHOLDER)
+        .map((variable) => ({
+          name: variable.key,
+          label: variable.label,
+          type:
+            variable.type === "text" || variable.type === "date"
+              ? ("string" as const)
+              : variable.type,
+          required: variable.requiredInTemplate ?? false,
+          sampleValue: variable.sampleValue,
+        }))) as AutomationPlaceholderDefinition[],
+  );
 
   const { watch, getValues, setValue, reset } = useForm<
     Pick<EmailTemplateFormValues, "name" | "subject">
@@ -74,8 +99,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
   const [content, setContent] = useState(template.content);
   const formValues: EmailTemplateFormValues = { ...watch(), content };
 
+  const preferredLanguage = useLanguageStore((state) => state.language);
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguages>(
-    template.baseLanguage,
+    template.availableLocales.includes(preferredLanguage)
+      ? preferredLanguage
+      : template.baseLanguage,
   );
 
   const [pendingConfirmation, setPendingConfirmation] =
@@ -100,18 +128,67 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
     !savedTemplate.editable || savedTemplate.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED;
 
   const hasUnsavedChanges =
+    triggerEventKind !== (savedTemplate.triggerEventKind ?? null) ||
+    JSON.stringify(placeholders) !==
+      JSON.stringify(
+        savedTemplate.placeholders ??
+          template.variables
+            .filter((variable) => variable.key !== AUTOMATION_RESERVED_BRANDING_PLACEHOLDER)
+            .map((variable) => ({
+              name: variable.key,
+              label: variable.label,
+              type:
+                variable.type === "text" || variable.type === "date"
+                  ? ("string" as const)
+                  : variable.type,
+              required: variable.requiredInTemplate ?? false,
+              sampleValue: variable.sampleValue,
+            })),
+      ) ||
     JSON.stringify(formValues) !==
-    JSON.stringify({
-      name: savedTemplate.name,
-      subject: savedTemplate.subject,
-      content: savedTemplate.content,
-    });
+      JSON.stringify({
+        name: savedTemplate.name,
+        subject: savedTemplate.subject,
+        content: savedTemplate.content,
+      });
 
   const activeLanguageDocument =
     formValues.content[selectedLanguage] ?? createEmptyEmailTemplateDocument();
 
+  const eventTags = (
+    events?.find((event) => event.kind === triggerEventKind)?.providedVariables ?? []
+  ).map((field) => ({
+    name: field.key,
+    label: field.label,
+    type: field.dataType,
+    required: false,
+    sampleValue: field.sampleValue,
+  }));
+  const availablePlaceholders = [
+    ...placeholders,
+    ...eventTags.filter((tag) => !placeholders.some((item) => item.name === tag.name)),
+  ];
+  const variables = availablePlaceholders
+    .map((item) => ({
+      key: item.name,
+      label: item.label,
+      type:
+        item.type === "string" || item.type === "localized_string" ? ("text" as const) : item.type,
+      requiredInTemplate: item.required,
+      sampleValue: item.sampleValue,
+    }))
+    .concat([
+      {
+        key: AUTOMATION_RESERVED_BRANDING_PLACEHOLDER,
+        label: AUTOMATION_RESERVED_BRANDING_PLACEHOLDER,
+        type: "text",
+        requiredInTemplate: false,
+        sampleValue: branding?.companyInformation?.companyName ?? "",
+      },
+    ]) as EmailTemplate["variables"];
+
   const testEmailPayload = {
-    event: savedTemplate.event,
+    placeholders: availablePlaceholders,
     language: selectedLanguage,
     baseLanguage: savedTemplate.baseLanguage,
     subject: formValues.subject,
@@ -120,6 +197,8 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
 
   const applySavedTemplate = (result: EmailTemplate) => {
     setSavedTemplate(result);
+    setTriggerEventKind(result.triggerEventKind ?? null);
+    setPlaceholders((result.placeholders ?? []) as AutomationPlaceholderDefinition[]);
     reset({ name: result.name, subject: result.subject });
     setContent(result.content);
   };
@@ -139,7 +218,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
 
       return await action();
     } catch (error) {
-      setFormError(getTranslatedApiErrorMessage(error, t, t("emailTemplates.ui.requestFailed")));
+      setFormError(
+        getTranslatedApiErrorMessage(error, t, t("emailTemplates.ui.requestFailed"), {
+          allowUntranslatedMessage: false,
+        }),
+      );
     } finally {
       setIsActionPending(false);
     }
@@ -150,10 +233,56 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
     applySavedTemplate(
       await updateTemplate({
         id: savedTemplate.id,
-        body: getEmailTemplateTranslationChanges(savedTemplate, formValues),
+        body: {
+          ...getEmailTemplateTranslationChanges(savedTemplate, formValues),
+          placeholders: availablePlaceholders,
+          triggerEventKind,
+        },
       }),
     );
   };
+
+  function handleEventChange(event: AutomationEventDefinition | null, replaceTags: boolean) {
+    setTriggerEventKind(event?.kind ?? null);
+
+    if (!replaceTags) {
+      setPlaceholders(availablePlaceholders);
+      return;
+    }
+
+    setPlaceholders(
+      (event?.providedVariables ?? []).map((field) => ({
+        name: field.key,
+        label: field.label,
+        type: field.dataType,
+        required: false,
+        sampleValue: field.sampleValue,
+      })),
+    );
+
+    setValue(
+      "subject",
+      Object.fromEntries(
+        Object.entries(getValues("subject")).map(([language, subject]) => [
+          language,
+          removeEmailTemplateTags(subject),
+        ]),
+      ),
+      { shouldDirty: true },
+    );
+
+    setContent((current) =>
+      Object.fromEntries(
+        Object.entries(current).map(([language, document]) => [
+          language,
+          {
+            ...document,
+            content: removeTagsFromEmailBlocks(document.content),
+          },
+        ]),
+      ),
+    );
+  }
 
   const handleDocumentChange = (content: typeof activeLanguageDocument.content) =>
     setContent((current) => ({
@@ -221,7 +350,7 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
           }
           onCopyDefault={() =>
             void runTemplateAction(async () => {
-              const copiedTemplate = await copyDefaultTemplate(savedTemplate.event);
+              const copiedTemplate = await copyDefaultTemplate(savedTemplate.event!);
               navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copiedTemplate.id}`);
             })
           }
@@ -242,9 +371,10 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
           onPublish={() => setPendingConfirmation(EMAIL_TEMPLATE_ACTIONS.PUBLISH)}
         />
         {savedTemplate.source === EMAIL_TEMPLATE_SOURCES.DEFAULT && (
-          <p className="rounded-lg border bg-neutral-50 p-4 text-sm text-neutral-600">
-            {t("emailTemplates.ui.defaultHint")}
-          </p>
+          <Alert className="border-warning-200 bg-warning-50 text-warning-800 [&>svg]:text-warning-700 [&>svg+div]:translate-y-0">
+            <AlertTriangle className="size-4" aria-hidden="true" />
+            <AlertDescription>{t("emailTemplates.ui.defaultHint")}</AlertDescription>
+          </Alert>
         )}
         {formError && formError !== t("emailTemplates.errors.invalidContent") && (
           <p
@@ -257,37 +387,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
         )}
         <div className="space-y-4">
           <div className="min-w-0 space-y-5">
-            <div className="grid gap-4 rounded-lg border bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="min-w-0 space-y-2 lg:col-start-2 lg:row-start-1">
-                <Label>{t("emailTemplates.ui.event")}</Label>
-                {savedTemplate.source === EMAIL_TEMPLATE_SOURCES.DEFAULT ? (
-                  <Select
-                    value={savedTemplate.event}
-                    disabled={isActionPending}
-                    onValueChange={(event) =>
-                      navigate(`${EMAIL_TEMPLATE_LIST_PATH}/defaults/${event}`)
-                    }
-                  >
-                    <SelectTrigger className="w-full" aria-label={t("emailTemplates.ui.event")}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EMAIL_TEMPLATE_EVENT_OPTIONS.map((event) => (
-                        <SelectItem key={event} value={event}>
-                          {t(`emailTemplates.events.${event}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <p className="flex min-h-10 items-center rounded-md border bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
-                    {t(`emailTemplates.events.${savedTemplate.event}`)}
-                  </p>
-                )}
-              </div>
+            <div className="grid gap-5 rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
               <div className="min-w-0 lg:col-start-1 lg:row-start-1">
                 <EmailTemplateTextField
                   testId={EMAIL_TEMPLATES_HANDLES.NAME}
+                  leadingIcon={<FileText className="size-4" />}
                   label={t("emailTemplates.ui.name")}
                   value={formValues.name[selectedLanguage] ?? ""}
                   disabled={isReadonly || isActionPending}
@@ -302,12 +406,13 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
                   }
                 />
               </div>
-              <div className="min-w-0 lg:col-span-2">
+              <div className="min-w-0 lg:col-start-2 lg:row-start-1">
                 <EmailTemplateTextField
                   testId={EMAIL_TEMPLATES_HANDLES.SUBJECT}
+                  leadingIcon={<Mail className="size-4" />}
                   label={t("emailTemplates.ui.subject")}
                   value={formValues.subject[selectedLanguage] ?? ""}
-                  variables={savedTemplate.variables}
+                  variables={variables}
                   highlightVariables
                   disabled={isReadonly || isActionPending}
                   onChange={(subject) =>
@@ -319,6 +424,15 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
                   }
                 />
               </div>
+              <div className="border-t border-neutral-100 pt-4 lg:col-span-2">
+                <EmailTemplateEventSettings
+                  template={savedTemplate}
+                  eventKind={triggerEventKind}
+                  disabled={isReadonly || isActionPending}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                  onEventChange={handleEventChange}
+                />
+              </div>
             </div>
             {!isEmailTemplateTranslationComplete(formValues, savedTemplate.baseLanguage) && (
               <p className="text-sm text-destructive">
@@ -326,13 +440,15 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
               </p>
             )}
             <EmailTemplateBlocks
+              placeholders={placeholders}
+              onPlaceholdersChange={setPlaceholders}
               showValidationErrors={hasBlockValidationErrors || Boolean(formError)}
               key={selectedLanguage}
               logoUrl={logoUrl}
               companyName={branding?.companyInformation?.companyName}
               primaryColor={branding?.primaryColor}
               blocks={activeLanguageDocument.content}
-              variables={savedTemplate.variables}
+              variables={variables}
               disabled={isReadonly || isActionPending}
               onChange={handleDocumentChange}
               onUpload={async (file) =>

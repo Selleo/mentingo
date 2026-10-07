@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 
-import { EMAIL_TEMPLATE_DEFINITIONS, EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
+import {
+  EMAIL_TEMPLATE_DEFINITIONS,
+  EMAIL_TEMPLATE_EVENTS,
+  getBuiltInTemplatePublication,
+  getBuiltInTemplateEvent,
+  VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS,
+} from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { isNull } from "drizzle-orm";
 import sharp from "sharp";
@@ -38,19 +44,34 @@ export const welcome = EMAIL_TEMPLATE_DEFINITIONS.find(
 export const languages = Object.values(SUPPORTED_LANGUAGES);
 
 export const draftBody = (definition: EmailTemplateDefinition = welcome): CreateEmailTemplateBody =>
-  structuredClone({
-    event: definition.event,
-    name: definition.name,
-    subject: definition.subjects,
-    content: definition.defaultDocuments,
-    baseLanguage: definition.defaultLanguage,
-  });
+  (() => {
+    const { name, subject, content, baseLanguage, placeholders } = getBuiltInTemplatePublication(
+      VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.find(
+        (key) => getBuiltInTemplateEvent(key) === definition.event,
+      )!,
+    );
+
+    return structuredClone({
+      name,
+      subject,
+      content,
+      baseLanguage,
+      placeholders,
+    });
+  })();
 
 export const previewBody = (
   definition: EmailTemplateDefinition = welcome,
 ): PreviewEmailTemplateBody => {
-  const { event, subject, content, baseLanguage } = draftBody(definition);
-  return { event, subject, content, baseLanguage: baseLanguage!, language: SUPPORTED_LANGUAGES.EN };
+  const { placeholders, subject, content, baseLanguage } = draftBody(definition);
+
+  return {
+    placeholders,
+    subject,
+    content,
+    baseLanguage: baseLanguage!,
+    language: SUPPORTED_LANGUAGES.EN,
+  };
 };
 
 export const textDocument = (text = "Template body"): EmailTemplateDocument => ({
@@ -61,8 +82,11 @@ export const textDocument = (text = "Template body"): EmailTemplateDocument => (
 
 export async function setupEmailTemplateTest(options: { worker?: boolean } = {}) {
   const originalRateLimit = process.env.DISABLE_RATE_LIMITING;
+
   process.env.DISABLE_RATE_LIMITING = "true";
+
   const storage = new Map<string, Buffer>();
+
   const s3Service = {
     uploadFile: jest.fn(async (buffer: Buffer, key: string) => {
       storage.set(key, Buffer.from(buffer));
@@ -70,10 +94,15 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
     getSignedUrl: jest.fn(async (key: string) => `https://storage.example/${key}`),
     getFileBuffer: jest.fn(async (key: string) => {
       const buffer = storage.get(key);
-      if (!buffer) throw new Error(`Missing test object: ${key}`);
+
+      if (!buffer) {
+        throw new Error(`Missing test object: ${key}`);
+      }
+
       return buffer;
     }),
   };
+
   const context = await createE2ETest({
     useDbProxy: true,
     customProviders: [
@@ -81,19 +110,26 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
       ...(!options.worker ? [{ provide: EmailTemplateTestWorker, useValue: {} }] : []),
     ],
   });
+
   const { app, defaultTenantId, runAsTenant } = context;
   const close = app.close.bind(app);
+
   app.close = async () => {
     try {
       await close();
     } finally {
-      if (originalRateLimit === undefined) delete process.env.DISABLE_RATE_LIMITING;
-      else process.env.DISABLE_RATE_LIMITING = originalRateLimit;
+      if (originalRateLimit === undefined) {
+        delete process.env.DISABLE_RATE_LIMITING;
+      } else {
+        process.env.DISABLE_RATE_LIMITING = originalRateLimit;
+      }
     }
   };
+
   const db = app.get<DatabasePg>(DB);
   const adapter = app.get<EmailTestingAdapter>(EmailAdapter);
   const fileService = app.get(FileService);
+
   const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: "#123456" } })
     .png()
     .toBuffer();
@@ -102,11 +138,27 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
     try {
       const buffer = Buffer.isBuffer(file) ? file : file.buffer;
       const { format } = await sharp(buffer).metadata();
-      if (format === "jpeg") return { ext: "jpg", mime: "image/jpeg" };
-      if (format === "png") return { ext: "png", mime: "image/png" };
-      if (format === "gif") return { ext: "gif", mime: "image/gif" };
-      if (format === "webp") return { ext: "webp", mime: "image/webp" };
-      if (format === "tiff") return { ext: "tif", mime: "image/tiff" };
+
+      if (format === "jpeg") {
+        return { ext: "jpg", mime: "image/jpeg" };
+      }
+
+      if (format === "png") {
+        return { ext: "png", mime: "image/png" };
+      }
+
+      if (format === "gif") {
+        return { ext: "gif", mime: "image/gif" };
+      }
+
+      if (format === "webp") {
+        return { ext: "webp", mime: "image/webp" };
+      }
+
+      if (format === "tiff") {
+        return { ext: "tif", mime: "image/tiff" };
+      }
+
       return undefined;
     } catch {
       return undefined;
@@ -117,6 +169,7 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
   const sign = jest.spyOn(fileService, "getFileUrl");
   const read = jest.spyOn(fileService, "getRawFileBuffer");
   const settingsService = app.get(SettingsService);
+
   jest.spyOn(settingsService, "getPlatformLogoBuffer").mockResolvedValue(png);
   jest.spyOn(settingsService, "getEmailBorderCircleBuffer").mockResolvedValue(png);
 
@@ -126,26 +179,32 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
       .withAdminSettings(db)
       .create({ tenantId: defaultTenantId }),
   );
+
   const student = await runAsTenant(defaultTenantId, () =>
     createUserFactory(db)
       .withCredentials({ password: "Password123!" })
       .withUserSettings(db)
       .create({ tenantId: defaultTenantId }),
   );
+
   const adminCookie = await cookieFor(admin, app);
   const studentCookie = await cookieFor(student, app);
+
   // Administrative setup is the only cross-tenant DB operation in this helper.
   const [otherTenant] = await context.dbAdmin
     .insert(tenants)
     .values({ name: "Email HTTP tenant", host: `https://${randomUUID()}.example` })
     .returning();
+
   const otherAdmin = await runAsTenant(otherTenant.id, async () => {
     await createSettingsFactory(db).create({ userId: null });
+
     return createUserFactory(db)
       .withCredentials({ password: "Password123!" })
       .withAdminSettings(db)
       .create({ tenantId: otherTenant.id });
   });
+
   const otherCookie = await cookieFor(otherAdmin, app, otherTenant.host);
 
   const http = (
@@ -155,16 +214,27 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
     host?: string,
   ) => {
     const req = request(app.getHttpServer())[method](`${ROOT}${path}`);
-    if (cookie) req.set("Cookie", cookie);
-    if (host) req.set("Referer", `${host}/`);
+
+    if (cookie) {
+      req.set("Cookie", cookie);
+    }
+
+    if (host) {
+      req.set("Referer", `${host}/`);
+    }
+
     return req;
   };
+
   const create = async (body = draftBody()) => {
     const response = await http("post").send(body).expect(201);
+
     return response.body.data as EmailTemplateResponse;
   };
+
   const get = async (id: string) =>
     (await http("get", `/${id}`).expect(200)).body.data as EmailTemplateResponse;
+
   const reset = async () => {
     for (const tenantId of [defaultTenantId, otherTenant.id]) {
       await runAsTenant(tenantId, async () => {
@@ -176,10 +246,12 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
           .where(isNull(settings.userId));
       });
     }
+
     storage.clear();
     adapter.clearEmails();
     jest.clearAllMocks();
   };
+
   return {
     ...context,
     db,

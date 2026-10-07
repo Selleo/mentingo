@@ -8,8 +8,9 @@ import {
 import { SYSTEM_ROLE_SLUGS, TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
+import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { DatabasePg } from "src/common";
-import { EmailTemplateExampleService } from "src/email-templates/services/email-template-example.service";
+import { SampleEmailTemplateSetupService } from "src/email-templates/services/sample-email-template-setup.service";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
@@ -37,7 +38,8 @@ export class TenantsService {
     private readonly tenantsRepository: TenantsRepository,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly userService: UserService,
-    private readonly emailTemplateExampleService: EmailTemplateExampleService,
+    private readonly sampleEmailTemplateSetupService: SampleEmailTemplateSetupService,
+    private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
   ) {}
 
   async findAllTenants(
@@ -104,6 +106,8 @@ export class TenantsService {
         });
       }
 
+      await this.defaultAutomationSetupService.ensureTenantDefaultAutomations();
+
       const adminUser = {
         email: input.adminEmail,
         firstName: adminFirstName,
@@ -118,7 +122,7 @@ export class TenantsService {
         invitedByUserName,
         origin: createdTenant.host,
       });
-      await this.emailTemplateExampleService.ensureExampleEmailTemplate(createdTenant.id);
+      await this.sampleEmailTemplateSetupService.ensureExampleEmailTemplate(createdTenant.id);
     });
 
     await invalidateCorsCache();

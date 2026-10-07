@@ -6,6 +6,7 @@ import { Label } from "~/components/ui/label";
 import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
 import { EMAIL_TEMPLATE_BLOCK_TYPES } from "../emailTemplates.constants";
 
+import { EmailTemplateButtonLink } from "./EmailTemplateButtonLink";
 import { EmailTemplateImageUpload } from "./EmailTemplateImageUpload";
 import { EmailTemplateTextField } from "./EmailTemplateTextField";
 
@@ -45,12 +46,7 @@ export function EmailTemplateBlockSettings({
             disabled={disabled}
             onChange={(label) => onChange({ ...block, attrs: { ...block.attrs, label } })}
           />
-          <EmailTemplateTextField
-            dense
-            stacked
-            testId={EMAIL_TEMPLATES_HANDLES.BUTTON_URL}
-            label={t("emailTemplates.ui.url")}
-            highlightVariables
+          <EmailTemplateButtonLink
             value={block.attrs.url}
             variables={variables}
             disabled={disabled}

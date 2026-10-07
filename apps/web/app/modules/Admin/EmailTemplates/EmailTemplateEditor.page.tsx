@@ -2,19 +2,19 @@ import { useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useEmailTemplate } from "~/api/queries/useEmailTemplate";
+import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Button } from "~/components/ui/button";
 
 import { EmailTemplateEditor } from "./components/EmailTemplateEditor";
-import { EMAIL_TEMPLATE_EVENT_OPTIONS, EMAIL_TEMPLATE_LIST_PATH } from "./emailTemplates.constants";
+import { EMAIL_TEMPLATE_BUILT_IN_KEYS, EMAIL_TEMPLATE_LIST_PATH } from "./emailTemplates.constants";
 
 export default function EmailTemplateEditorPage() {
   const { t } = useTranslation();
   const { id, event } = useParams();
 
-  const defaultEvent = EMAIL_TEMPLATE_EVENT_OPTIONS.find((value) => value === event);
+  const defaultEvent = EMAIL_TEMPLATE_BUILT_IN_KEYS.find((value) => value === event);
 
-  const { data, isPending, isError, refetch } = useEmailTemplate(id, defaultEvent);
+  const { data, isPending, isError } = useEmailTemplate(id, defaultEvent);
 
   if (!id && !defaultEvent)
     return (
@@ -25,10 +25,12 @@ export default function EmailTemplateEditorPage() {
 
   if (isError)
     return (
-      <PageWrapper>
-        <p role="alert">{t("emailTemplates.ui.requestFailed")}</p>
-        <Button onClick={() => void refetch()}>{t("emailTemplates.ui.retry")}</Button>
-      </PageWrapper>
+      <ErrorPage
+        title={t("emailTemplates.ui.requestFailed")}
+        actionLabel={t("common.refreshPage")}
+        onAction={() => window.location.reload()}
+        className="min-h-[50vh]"
+      />
     );
 
   if (isPending || !data)

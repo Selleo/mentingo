@@ -210,6 +210,8 @@ export interface CurrentUserResponse {
       | "settings.update_self"
       | "settings.manage"
       | "email_template.manage"
+      | "automation.manage"
+      | "automation_log.read"
       | "env.read_public"
       | "env.manage"
       | "category.read"
@@ -459,14 +461,6 @@ export interface GetPublicGlobalSettingsResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -755,14 +749,6 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -805,14 +791,6 @@ export interface UpdateEnforceSSOResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -855,14 +833,6 @@ export interface UpdateModernCourseListEnabledResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -909,14 +879,6 @@ export interface UpdateFeaturedCourseResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -959,14 +921,6 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -1009,14 +963,6 @@ export interface UpdateCalendarEnabledResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -1059,14 +1005,6 @@ export interface UpdateLiveTrainingEnabledResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -1114,14 +1052,6 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -1164,14 +1094,6 @@ export interface UpdateLearningPathsEnabledResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -1245,14 +1167,6 @@ export interface UpdateColorSchemaResponse {
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
     primaryColor: string | null;
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
@@ -9010,6 +8924,63 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface ListEmailTemplateEventsResponse {
+  data: {
+    kind:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    label: string;
+    description: string;
+    recipientPolicy: string;
+    fields: {
+      availableWhen?: {
+        field: string;
+        equals: boolean;
+      };
+      key: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      sampleValue: string | number | boolean | null | any[] | object;
+      description?: string;
+      sensitivity?: "ordinary" | "account_action_link";
+    }[];
+    providedVariables: {
+      availableWhen?: {
+        field: string;
+        equals: boolean;
+      };
+      key: string;
+      label: string;
+      labelKey?: string;
+      dataType: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      sampleValue: string | number | boolean | null | any[] | object;
+      sourceKey?: string;
+      sensitivity?: "ordinary" | "account_action_link";
+    }[];
+    accountAction?: "create_password" | "reset_password" | "sign_in";
+  }[];
+}
+
 export interface GetEmailTemplateImageResponse {
   data: {
     /** @format uuid */
@@ -9019,30 +8990,17 @@ export interface GetEmailTemplateImageResponse {
   };
 }
 
-export interface SendTestEmailTemplateBody {
-  event:
-    | "welcome"
-    | "password_recovery"
-    | "password_reminder"
-    | "user_invite"
-    | "user_first_login"
-    | "user_assigned_to_course"
-    | "user_short_inactivity"
-    | "user_long_inactivity"
-    | "user_finished_chapter"
-    | "user_finished_course"
-    | "certificate_expiration_warning"
-    | "certificate_expired"
-    | "admin_new_user"
-    | "admin_finished_course"
-    | "admin_overdue_courses"
-    | "course_due_date_reminder"
-    | "magic_link"
-    | "course_chat_mention"
-    | "announcement"
-    | "live_training_started"
-    | "live_training_reminder"
-    | "live_training_ended";
+export interface EnqueueEmailTemplateTestBody {
+  /** @maxItems 100 */
+  placeholders?: {
+    /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+    name: string;
+    label?: string;
+    type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+    required: boolean;
+    sampleValue?: (string | number | boolean | null) | any[] | object;
+    description?: string;
+  }[];
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @default "en" */
@@ -9984,7 +9942,7 @@ export interface SendTestEmailTemplateBody {
   };
 }
 
-export interface SendTestEmailTemplateResponse {
+export interface EnqueueEmailTemplateTestResponse {
   data: {
     jobId: string;
   };
@@ -10004,6 +9962,8 @@ export interface DuplicateEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -10012,29 +9972,75 @@ export interface DuplicateEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -10991,11 +10997,13 @@ export interface DuplicateEmailTemplateResponse {
   };
 }
 
-export interface GetEmailTemplatesResponse {
+export interface ListEmailTemplatesResponse {
   data: {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -11004,29 +11012,75 @@ export interface GetEmailTemplatesResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -11989,11 +12043,13 @@ export interface GetEmailTemplatesResponse {
   appliedFilters?: object;
 }
 
-export interface GetDefaultEmailTemplateResponse {
+export interface GetBuiltInEmailTemplateResponse {
   data: {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -12002,29 +12058,75 @@ export interface GetDefaultEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -12981,11 +13083,13 @@ export interface GetDefaultEmailTemplateResponse {
   };
 }
 
-export interface CopyDefaultEmailTemplateResponse {
+export interface CreateDraftFromBuiltInEmailTemplateResponse {
   data: {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -12994,29 +13098,75 @@ export interface CopyDefaultEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -13978,6 +14128,8 @@ export interface GetEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -13986,29 +14138,75 @@ export interface GetEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -14966,7 +15164,7 @@ export interface GetEmailTemplateResponse {
 }
 
 export interface CreateEmailTemplateBody {
-  event:
+  triggerEventKind?:
     | "welcome"
     | "password_recovery"
     | "password_reminder"
@@ -14989,6 +15187,17 @@ export interface CreateEmailTemplateBody {
     | "live_training_started"
     | "live_training_reminder"
     | "live_training_ended";
+  populateEventTags?: boolean;
+  /** @maxItems 100 */
+  placeholders?: {
+    /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+    name: string;
+    label?: string;
+    type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+    required: boolean;
+    sampleValue?: (string | number | boolean | null) | any[] | object;
+    description?: string;
+  }[];
   name: {
     en?: string;
     pl?: string;
@@ -15942,6 +16151,8 @@ export interface CreateEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -15950,29 +16161,75 @@ export interface CreateEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -16930,6 +17187,32 @@ export interface CreateEmailTemplateResponse {
 }
 
 export interface UpdateEmailTemplateBody {
+  triggerEventKind?:
+    | (
+        | "welcome"
+        | "password_recovery"
+        | "password_reminder"
+        | "user_invite"
+        | "user_first_login"
+        | "user_assigned_to_course"
+        | "user_short_inactivity"
+        | "user_long_inactivity"
+        | "user_finished_chapter"
+        | "user_finished_course"
+        | "certificate_expiration_warning"
+        | "certificate_expired"
+        | "admin_new_user"
+        | "admin_finished_course"
+        | "admin_overdue_courses"
+        | "course_due_date_reminder"
+        | "magic_link"
+        | "course_chat_mention"
+        | "announcement"
+        | "live_training_started"
+        | "live_training_reminder"
+        | "live_training_ended"
+      )
+    | null;
   name?: {
     en?: string;
     pl?: string;
@@ -17874,6 +18157,16 @@ export interface UpdateEmailTemplateBody {
       )[];
     };
   };
+  /** @maxItems 100 */
+  placeholders?: {
+    /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+    name: string;
+    label?: string;
+    type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+    required: boolean;
+    sampleValue?: (string | number | boolean | null) | any[] | object;
+    description?: string;
+  }[];
 }
 
 export interface UpdateEmailTemplateResponse {
@@ -17881,6 +18174,8 @@ export interface UpdateEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -17889,29 +18184,1120 @@ export interface UpdateEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
+    name: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    subject: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+      es?: string;
+      fr?: string;
+    };
+    content: {
+      en?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      pl?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      de?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      lt?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      cs?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      es?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+      fr?: {
+        type: "doc";
+        version: 1;
+        content: (
+          | {
+              type: "header";
+              attrs: {
+                source: "tenant_branding";
+              };
+            }
+          | {
+              type: "heading";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "text";
+              content: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+          | {
+              type: "button";
+              attrs: {
+                /** @minLength 1 */
+                label: string;
+                /** @minLength 1 */
+                url: string;
+              };
+            }
+          | {
+              type: "image";
+              attrs: {
+                /** @minLength 1 */
+                src: string;
+                alt: string;
+                /**
+                 * @min 1
+                 * @max 1200
+                 */
+                width?: number;
+              };
+            }
+          | {
+              type: "divider";
+              attrs?: {
+                /**
+                 * @min 1
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "spacer";
+              attrs: {
+                /**
+                 * @min 0
+                 * @max 200
+                 */
+                height: number;
+              };
+            }
+          | {
+              type: "footer";
+              attrs: {
+                text: string;
+              };
+              content?: {
+                type: "paragraph";
+                content?: {
+                  type: "text";
+                  text: string;
+                  marks?: (
+                    | {
+                        type: "bold";
+                      }
+                    | {
+                        type: "italic";
+                      }
+                    | {
+                        type: "link";
+                        attrs: {
+                          /** @minLength 1 */
+                          href: string;
+                        };
+                      }
+                  )[];
+                }[];
+              }[];
+            }
+        )[];
+      };
+    };
+    status: ("draft" | "published" | "archived") | null;
+    /** @default "en" */
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    completeLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+    createdAt: string | null;
+    updatedAt: string | null;
+    publishedAt: string | null;
+    archivedAt: string | null;
+  };
+}
+
+export interface UpdateEmailTemplateBaseLanguageBody {
+  /** @default "en" */
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface UpdateEmailTemplateBaseLanguageResponse {
+  data: {
+    id: string | null;
+    source: "default" | "override";
+    editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
+    variables: {
+      key: string;
+      label: string;
+      type: "text" | "url" | "number" | "boolean" | "date" | "collection";
+      required?: boolean;
+      requiredInTemplate?: boolean;
+      sampleValue: string | number | boolean | any[];
+    }[];
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -18873,6 +20259,8 @@ export interface PublishEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -18881,29 +20269,75 @@ export interface PublishEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -19865,6 +21299,8 @@ export interface ArchiveEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -19873,29 +21309,75 @@ export interface ArchiveEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -20861,6 +22343,8 @@ export interface RemoveEmailTemplateLanguageResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -20869,29 +22353,75 @@ export interface RemoveEmailTemplateLanguageResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -21853,6 +23383,8 @@ export interface RestoreEmailTemplateResponse {
     id: string | null;
     source: "default" | "override";
     editable: boolean;
+    publicationVersion?: number;
+    hasUnpublishedChanges?: boolean;
     variables: {
       key: string;
       label: string;
@@ -21861,29 +23393,75 @@ export interface RestoreEmailTemplateResponse {
       requiredInTemplate?: boolean;
       sampleValue: string | number | boolean | any[];
     }[];
-    event:
-      | "welcome"
-      | "password_recovery"
-      | "password_reminder"
-      | "user_invite"
-      | "user_first_login"
-      | "user_assigned_to_course"
-      | "user_short_inactivity"
-      | "user_long_inactivity"
-      | "user_finished_chapter"
-      | "user_finished_course"
-      | "certificate_expiration_warning"
-      | "certificate_expired"
-      | "admin_new_user"
-      | "admin_finished_course"
-      | "admin_overdue_courses"
-      | "course_due_date_reminder"
-      | "magic_link"
-      | "course_chat_mention"
-      | "announcement"
-      | "live_training_started"
-      | "live_training_reminder"
-      | "live_training_ended";
+    triggerEventKind?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    event?:
+      | (
+          | "assignment_with_deadline"
+          | "assignment_without_deadline"
+          | "completion_with_certificate"
+          | "completion_without_certificate"
+          | "certificate_manually_reset"
+          | "certificate_naturally_expired"
+          | "short_inactivity_course"
+          | "short_inactivity_platform"
+          | "long_inactivity_course"
+          | "long_inactivity_platform"
+          | "deadline_today"
+          | "deadline_tomorrow"
+          | "deadline_upcoming"
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_finished_chapter"
+          | "certificate_expiration_warning"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @maxItems 100 */
+    placeholders?: {
+      /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: (string | number | boolean | null) | any[] | object;
+      description?: string;
+    }[];
     name: {
       en?: string;
       pl?: string;
@@ -22841,29 +24419,16 @@ export interface RestoreEmailTemplateResponse {
 }
 
 export interface PreviewEmailTemplateBody {
-  event:
-    | "welcome"
-    | "password_recovery"
-    | "password_reminder"
-    | "user_invite"
-    | "user_first_login"
-    | "user_assigned_to_course"
-    | "user_short_inactivity"
-    | "user_long_inactivity"
-    | "user_finished_chapter"
-    | "user_finished_course"
-    | "certificate_expiration_warning"
-    | "certificate_expired"
-    | "admin_new_user"
-    | "admin_finished_course"
-    | "admin_overdue_courses"
-    | "course_due_date_reminder"
-    | "magic_link"
-    | "course_chat_mention"
-    | "announcement"
-    | "live_training_started"
-    | "live_training_reminder"
-    | "live_training_ended";
+  /** @maxItems 100 */
+  placeholders?: {
+    /** @pattern ^[a-zA-Z][a-zA-Z0-9_]*$ */
+    name: string;
+    label?: string;
+    type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+    required: boolean;
+    sampleValue?: (string | number | boolean | null) | any[] | object;
+    description?: string;
+  }[];
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
   /** @default "en" */
@@ -23807,7 +25372,369 @@ export interface PreviewEmailTemplateBody {
 
 export interface PreviewEmailTemplateResponse {
   data: {
-    event:
+    event?:
+      | (
+          | "welcome"
+          | "password_recovery"
+          | "password_reminder"
+          | "user_invite"
+          | "user_first_login"
+          | "user_assigned_to_course"
+          | "user_short_inactivity"
+          | "user_long_inactivity"
+          | "user_finished_chapter"
+          | "user_finished_course"
+          | "certificate_expiration_warning"
+          | "certificate_expired"
+          | "admin_new_user"
+          | "admin_finished_course"
+          | "admin_overdue_courses"
+          | "course_due_date_reminder"
+          | "magic_link"
+          | "course_chat_mention"
+          | "announcement"
+          | "live_training_started"
+          | "live_training_reminder"
+          | "live_training_ended"
+        )
+      | null;
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    subject: string;
+    html: string;
+    text: string;
+    warnings: string[];
+  };
+}
+
+export interface ListAutomationsResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface ListAutomationRecipientOptionsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    label: string;
+    description?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface ListAutomationEventsResponse {
+  data: {
+    kind:
       | "welcome"
       | "password_recovery"
       | "password_reminder"
@@ -23830,12 +25757,3755 @@ export interface PreviewEmailTemplateResponse {
       | "live_training_started"
       | "live_training_reminder"
       | "live_training_ended";
+    label: string;
+    description: string;
+    recipientPolicy: string;
+    fields: {
+      availableWhen?: {
+        field: string;
+        equals: boolean;
+      };
+      key: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      sampleValue: string | number | boolean | null | any[] | object;
+      description?: string;
+      sensitivity?: "ordinary" | "account_action_link";
+    }[];
+    providedVariables: {
+      availableWhen?: {
+        field: string;
+        equals: boolean;
+      };
+      key: string;
+      label: string;
+      labelKey?: string;
+      dataType: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      sampleValue: string | number | boolean | null | any[] | object;
+      sourceKey?: string;
+      sensitivity?: "ordinary" | "account_action_link";
+    }[];
+    accountAction?: "create_password" | "reset_password" | "sign_in";
+  }[];
+}
+
+export interface ListAvailableEmailTemplatesResponse {
+  data: {
+    reference:
+      | {
+          type: "builtin";
+          key:
+            | "assignment_with_deadline"
+            | "assignment_without_deadline"
+            | "completion_with_certificate"
+            | "completion_without_certificate"
+            | "certificate_manually_reset"
+            | "certificate_naturally_expired"
+            | "short_inactivity_course"
+            | "short_inactivity_platform"
+            | "long_inactivity_course"
+            | "long_inactivity_platform"
+            | "deadline_today"
+            | "deadline_tomorrow"
+            | "deadline_upcoming"
+            | "welcome"
+            | "password_recovery"
+            | "password_reminder"
+            | "user_invite"
+            | "user_first_login"
+            | "user_finished_chapter"
+            | "certificate_expiration_warning"
+            | "admin_new_user"
+            | "admin_finished_course"
+            | "admin_overdue_courses"
+            | "magic_link"
+            | "course_chat_mention"
+            | "announcement"
+            | "live_training_started"
+            | "live_training_reminder"
+            | "live_training_ended";
+        }
+      | {
+          type: "custom";
+          /** @format uuid */
+          id: string;
+        };
+    name: string;
     /** @default "en" */
-    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-    subject: string;
-    html: string;
-    text: string;
-    warnings: string[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    placeholders: {
+      name: string;
+      label: string;
+      type: "string" | "number" | "boolean" | "url" | "localized_string" | "collection";
+      required: boolean;
+      sampleValue: string | number | boolean | null | any[] | object;
+      description?: string;
+    }[];
+  }[];
+}
+
+export interface ListBuiltInAutomationTemplatesResponse {
+  data: {
+    key:
+      | "assignment_with_deadline"
+      | "assignment_without_deadline"
+      | "completion_with_certificate"
+      | "completion_without_certificate"
+      | "certificate_manually_reset"
+      | "certificate_naturally_expired"
+      | "short_inactivity_course"
+      | "short_inactivity_platform"
+      | "long_inactivity_course"
+      | "long_inactivity_platform"
+      | "deadline_today"
+      | "deadline_tomorrow"
+      | "deadline_upcoming"
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_finished_chapter"
+      | "certificate_expiration_warning"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    definition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    };
+  }[];
+}
+
+export interface SimulateAutomationBody {
+  workflow: {
+    rootStepId: string | null;
+    /** @maxItems 100 */
+    steps: (
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "condition";
+          config: {
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            field?: string;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "trigger";
+          config: {
+            eventKind?:
+              | (
+                  | "welcome"
+                  | "password_recovery"
+                  | "password_reminder"
+                  | "user_invite"
+                  | "user_first_login"
+                  | "user_assigned_to_course"
+                  | "user_short_inactivity"
+                  | "user_long_inactivity"
+                  | "user_finished_chapter"
+                  | "user_finished_course"
+                  | "certificate_expiration_warning"
+                  | "certificate_expired"
+                  | "admin_new_user"
+                  | "admin_finished_course"
+                  | "admin_overdue_courses"
+                  | "course_due_date_reminder"
+                  | "magic_link"
+                  | "course_chat_mention"
+                  | "announcement"
+                  | "live_training_started"
+                  | "live_training_reminder"
+                  | "live_training_ended"
+                )
+              | null;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "send_email";
+          config: {
+            template?:
+              | (
+                  | {
+                      type: "builtin";
+                      key:
+                        | "assignment_with_deadline"
+                        | "assignment_without_deadline"
+                        | "completion_with_certificate"
+                        | "completion_without_certificate"
+                        | "certificate_manually_reset"
+                        | "certificate_naturally_expired"
+                        | "short_inactivity_course"
+                        | "short_inactivity_platform"
+                        | "long_inactivity_course"
+                        | "long_inactivity_platform"
+                        | "deadline_today"
+                        | "deadline_tomorrow"
+                        | "deadline_upcoming"
+                        | "welcome"
+                        | "password_recovery"
+                        | "password_reminder"
+                        | "user_invite"
+                        | "user_first_login"
+                        | "user_finished_chapter"
+                        | "certificate_expiration_warning"
+                        | "admin_new_user"
+                        | "admin_finished_course"
+                        | "admin_overdue_courses"
+                        | "magic_link"
+                        | "course_chat_mention"
+                        | "announcement"
+                        | "live_training_started"
+                        | "live_training_reminder"
+                        | "live_training_ended";
+                    }
+                  | {
+                      type: "custom";
+                      /** @format uuid */
+                      id: string;
+                    }
+                )
+              | null;
+            mappings?: object;
+            recipients?:
+              | {
+                  type: "event";
+                }
+              | {
+                  type: "everyone";
+                }
+              | {
+                  type: "user";
+                  /** @format uuid */
+                  userId: string;
+                }
+              | {
+                  type: "group";
+                  /** @format uuid */
+                  groupId: string;
+                }
+              | {
+                  type: "role";
+                  /** @format uuid */
+                  roleId: string;
+                };
+          };
+        }
+    )[];
+  };
+  sampleValues?: object;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface SimulateAutomationResponse {
+  data: {
+    issues: {
+      code:
+        | "cross_automation_reference"
+        | "cycle"
+        | "disconnected_step"
+        | "duplicate_step_id"
+        | "field_unavailable_on_branch"
+        | "invalid_condition_branches"
+        | "invalid_condition_field"
+        | "invalid_condition_value"
+        | "invalid_position"
+        | "invalid_root"
+        | "invalid_sample"
+        | "invalid_step_id"
+        | "invalid_successor"
+        | "invalid_template"
+        | "invalid_template_mapping"
+        | "invalid_trigger_root"
+        | "mapping_type_mismatch"
+        | "missing_account_action"
+        | "missing_action"
+        | "missing_condition_field"
+        | "missing_event"
+        | "missing_mapping"
+        | "missing_parent"
+        | "missing_template"
+        | "missing_trigger"
+        | "non_root_trigger"
+        | "reserved_mapping"
+        | "self_parent"
+        | "unavailable_recipients"
+        | "unavailable_template"
+        | "unknown_event_field"
+        | "unknown_placeholder"
+        | "unsafe_account_action_recipients"
+        | "unsupported_step_type";
+      message: string;
+      stepId?: string;
+      placeholder?: string;
+    }[];
+    steps: {
+      stepId: string;
+      type: "trigger" | "send_email" | "condition";
+      field?: string;
+      /** @min 0 */
+      matchedCount: number;
+      /** @min 0 */
+      skippedCount: number;
+      /** @min 0 */
+      failedCount: number;
+      /** @min 0 */
+      trueCount: number;
+      /** @min 0 */
+      falseCount: number;
+    }[];
+    recipientPolicy: string | null;
+    sampleRecipient: {
+      email: string;
+      name: string;
+    } | null;
+    previews: {
+      stepId: string;
+      sampleRecipient?: {
+        email: string;
+        name: string;
+      } | null;
+      template:
+        | {
+            type: "builtin";
+            key:
+              | "assignment_with_deadline"
+              | "assignment_without_deadline"
+              | "completion_with_certificate"
+              | "completion_without_certificate"
+              | "certificate_manually_reset"
+              | "certificate_naturally_expired"
+              | "short_inactivity_course"
+              | "short_inactivity_platform"
+              | "long_inactivity_course"
+              | "long_inactivity_platform"
+              | "deadline_today"
+              | "deadline_tomorrow"
+              | "deadline_upcoming"
+              | "welcome"
+              | "password_recovery"
+              | "password_reminder"
+              | "user_invite"
+              | "user_first_login"
+              | "user_finished_chapter"
+              | "certificate_expiration_warning"
+              | "admin_new_user"
+              | "admin_finished_course"
+              | "admin_overdue_courses"
+              | "magic_link"
+              | "course_chat_mention"
+              | "announcement"
+              | "live_training_started"
+              | "live_training_reminder"
+              | "live_training_ended";
+          }
+        | {
+            type: "custom";
+            /** @format uuid */
+            id: string;
+          };
+      subject: string;
+      html: string;
+      /** @default "en" */
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    }[];
+  };
+}
+
+export interface CreateAutomationBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name: string;
+  /** @maxLength 5000 */
+  description: string;
+  workflow: {
+    rootStepId: string | null;
+    /** @maxItems 100 */
+    steps: (
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "condition";
+          config: {
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            field?: string;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "trigger";
+          config: {
+            eventKind?:
+              | (
+                  | "welcome"
+                  | "password_recovery"
+                  | "password_reminder"
+                  | "user_invite"
+                  | "user_first_login"
+                  | "user_assigned_to_course"
+                  | "user_short_inactivity"
+                  | "user_long_inactivity"
+                  | "user_finished_chapter"
+                  | "user_finished_course"
+                  | "certificate_expiration_warning"
+                  | "certificate_expired"
+                  | "admin_new_user"
+                  | "admin_finished_course"
+                  | "admin_overdue_courses"
+                  | "course_due_date_reminder"
+                  | "magic_link"
+                  | "course_chat_mention"
+                  | "announcement"
+                  | "live_training_started"
+                  | "live_training_reminder"
+                  | "live_training_ended"
+                )
+              | null;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "send_email";
+          config: {
+            template?:
+              | (
+                  | {
+                      type: "builtin";
+                      key:
+                        | "assignment_with_deadline"
+                        | "assignment_without_deadline"
+                        | "completion_with_certificate"
+                        | "completion_without_certificate"
+                        | "certificate_manually_reset"
+                        | "certificate_naturally_expired"
+                        | "short_inactivity_course"
+                        | "short_inactivity_platform"
+                        | "long_inactivity_course"
+                        | "long_inactivity_platform"
+                        | "deadline_today"
+                        | "deadline_tomorrow"
+                        | "deadline_upcoming"
+                        | "welcome"
+                        | "password_recovery"
+                        | "password_reminder"
+                        | "user_invite"
+                        | "user_first_login"
+                        | "user_finished_chapter"
+                        | "certificate_expiration_warning"
+                        | "admin_new_user"
+                        | "admin_finished_course"
+                        | "admin_overdue_courses"
+                        | "magic_link"
+                        | "course_chat_mention"
+                        | "announcement"
+                        | "live_training_started"
+                        | "live_training_reminder"
+                        | "live_training_ended";
+                    }
+                  | {
+                      type: "custom";
+                      /** @format uuid */
+                      id: string;
+                    }
+                )
+              | null;
+            mappings?: object;
+            recipients?:
+              | {
+                  type: "event";
+                }
+              | {
+                  type: "everyone";
+                }
+              | {
+                  type: "user";
+                  /** @format uuid */
+                  userId: string;
+                }
+              | {
+                  type: "group";
+                  /** @format uuid */
+                  groupId: string;
+                }
+              | {
+                  type: "role";
+                  /** @format uuid */
+                  roleId: string;
+                };
+          };
+        }
+    )[];
+  };
+}
+
+export interface CreateAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface CreateAutomationFromTemplateResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface GetAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateAutomationBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  /** @maxLength 5000 */
+  description?: string;
+  workflow?: {
+    rootStepId: string | null;
+    /** @maxItems 100 */
+    steps: (
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "condition";
+          config: {
+            /**
+             * @minLength 1
+             * @maxLength 200
+             */
+            field?: string;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "trigger";
+          config: {
+            eventKind?:
+              | (
+                  | "welcome"
+                  | "password_recovery"
+                  | "password_reminder"
+                  | "user_invite"
+                  | "user_first_login"
+                  | "user_assigned_to_course"
+                  | "user_short_inactivity"
+                  | "user_long_inactivity"
+                  | "user_finished_chapter"
+                  | "user_finished_course"
+                  | "certificate_expiration_warning"
+                  | "certificate_expired"
+                  | "admin_new_user"
+                  | "admin_finished_course"
+                  | "admin_overdue_courses"
+                  | "course_due_date_reminder"
+                  | "magic_link"
+                  | "course_chat_mention"
+                  | "announcement"
+                  | "live_training_started"
+                  | "live_training_reminder"
+                  | "live_training_ended"
+                )
+              | null;
+          };
+        }
+      | {
+          /** @format uuid */
+          id: string;
+          parentId: string | null;
+          /** @min 0 */
+          position: number;
+          /** @format uuid */
+          automationId?: string;
+          type: "send_email";
+          config: {
+            template?:
+              | (
+                  | {
+                      type: "builtin";
+                      key:
+                        | "assignment_with_deadline"
+                        | "assignment_without_deadline"
+                        | "completion_with_certificate"
+                        | "completion_without_certificate"
+                        | "certificate_manually_reset"
+                        | "certificate_naturally_expired"
+                        | "short_inactivity_course"
+                        | "short_inactivity_platform"
+                        | "long_inactivity_course"
+                        | "long_inactivity_platform"
+                        | "deadline_today"
+                        | "deadline_tomorrow"
+                        | "deadline_upcoming"
+                        | "welcome"
+                        | "password_recovery"
+                        | "password_reminder"
+                        | "user_invite"
+                        | "user_first_login"
+                        | "user_finished_chapter"
+                        | "certificate_expiration_warning"
+                        | "admin_new_user"
+                        | "admin_finished_course"
+                        | "admin_overdue_courses"
+                        | "magic_link"
+                        | "course_chat_mention"
+                        | "announcement"
+                        | "live_training_started"
+                        | "live_training_reminder"
+                        | "live_training_ended";
+                    }
+                  | {
+                      type: "custom";
+                      /** @format uuid */
+                      id: string;
+                    }
+                )
+              | null;
+            mappings?: object;
+            recipients?:
+              | {
+                  type: "event";
+                }
+              | {
+                  type: "everyone";
+                }
+              | {
+                  type: "user";
+                  /** @format uuid */
+                  userId: string;
+                }
+              | {
+                  type: "group";
+                  /** @format uuid */
+                  groupId: string;
+                }
+              | {
+                  type: "role";
+                  /** @format uuid */
+                  roleId: string;
+                };
+          };
+        }
+    )[];
+  };
+}
+
+export interface UpdateAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteAutomationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface DuplicateAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ApplyAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface EnableAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DisableAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ArchiveAutomationResponse {
+  data: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+    /** @format uuid */
+    id: string;
+    status: "draft" | "enabled" | "disabled" | "archived";
+    executionVersion: number;
+    hasUnappliedChanges: boolean;
+    appliedDefinition: {
+      /**
+       * @minLength 1
+       * @maxLength 200
+       */
+      name: string;
+      /** @maxLength 5000 */
+      description: string;
+      workflow: {
+        rootStepId: string | null;
+        /** @maxItems 100 */
+        steps: (
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "condition";
+              config: {
+                /**
+                 * @minLength 1
+                 * @maxLength 200
+                 */
+                field?: string;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "trigger";
+              config: {
+                eventKind?:
+                  | (
+                      | "welcome"
+                      | "password_recovery"
+                      | "password_reminder"
+                      | "user_invite"
+                      | "user_first_login"
+                      | "user_assigned_to_course"
+                      | "user_short_inactivity"
+                      | "user_long_inactivity"
+                      | "user_finished_chapter"
+                      | "user_finished_course"
+                      | "certificate_expiration_warning"
+                      | "certificate_expired"
+                      | "admin_new_user"
+                      | "admin_finished_course"
+                      | "admin_overdue_courses"
+                      | "course_due_date_reminder"
+                      | "magic_link"
+                      | "course_chat_mention"
+                      | "announcement"
+                      | "live_training_started"
+                      | "live_training_reminder"
+                      | "live_training_ended"
+                    )
+                  | null;
+              };
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              parentId: string | null;
+              /** @min 0 */
+              position: number;
+              /** @format uuid */
+              automationId?: string;
+              type: "send_email";
+              config: {
+                template?:
+                  | (
+                      | {
+                          type: "builtin";
+                          key:
+                            | "assignment_with_deadline"
+                            | "assignment_without_deadline"
+                            | "completion_with_certificate"
+                            | "completion_without_certificate"
+                            | "certificate_manually_reset"
+                            | "certificate_naturally_expired"
+                            | "short_inactivity_course"
+                            | "short_inactivity_platform"
+                            | "long_inactivity_course"
+                            | "long_inactivity_platform"
+                            | "deadline_today"
+                            | "deadline_tomorrow"
+                            | "deadline_upcoming"
+                            | "welcome"
+                            | "password_recovery"
+                            | "password_reminder"
+                            | "user_invite"
+                            | "user_first_login"
+                            | "user_finished_chapter"
+                            | "certificate_expiration_warning"
+                            | "admin_new_user"
+                            | "admin_finished_course"
+                            | "admin_overdue_courses"
+                            | "magic_link"
+                            | "course_chat_mention"
+                            | "announcement"
+                            | "live_training_started"
+                            | "live_training_reminder"
+                            | "live_training_ended";
+                        }
+                      | {
+                          type: "custom";
+                          /** @format uuid */
+                          id: string;
+                        }
+                    )
+                  | null;
+                mappings?: object;
+                recipients?:
+                  | {
+                      type: "event";
+                    }
+                  | {
+                      type: "everyone";
+                    }
+                  | {
+                      type: "user";
+                      /** @format uuid */
+                      userId: string;
+                    }
+                  | {
+                      type: "group";
+                      /** @format uuid */
+                      groupId: string;
+                    }
+                  | {
+                      type: "role";
+                      /** @format uuid */
+                      roleId: string;
+                    };
+              };
+            }
+        )[];
+      };
+    } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ListAutomationRunsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    automationId: string;
+    automationName: string;
+    steps: {
+      stepId: string;
+      type: "trigger" | "send_email" | "condition";
+      field?: string;
+      /** @min 0 */
+      matchedCount: number;
+      /** @min 0 */
+      skippedCount: number;
+      /** @min 0 */
+      failedCount: number;
+      /** @min 0 */
+      trueCount: number;
+      /** @min 0 */
+      falseCount: number;
+    }[];
+    failureReasonCode: string | null;
+    emailAddresses: string[];
+    occurrenceId: string;
+    eventKind:
+      | "welcome"
+      | "password_recovery"
+      | "password_reminder"
+      | "user_invite"
+      | "user_first_login"
+      | "user_assigned_to_course"
+      | "user_short_inactivity"
+      | "user_long_inactivity"
+      | "user_finished_chapter"
+      | "user_finished_course"
+      | "certificate_expiration_warning"
+      | "certificate_expired"
+      | "admin_new_user"
+      | "admin_finished_course"
+      | "admin_overdue_courses"
+      | "course_due_date_reminder"
+      | "magic_link"
+      | "course_chat_mention"
+      | "announcement"
+      | "live_training_started"
+      | "live_training_reminder"
+      | "live_training_ended";
+    status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
+    createdAt: string;
+    completedAt: string | null;
+    succeededCount: number;
+    failedCount: number;
+    cancelledCount: number;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAutomationRunResponse {
+  data: {
+    run: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      automationId: string;
+      automationName: string;
+      steps: {
+        stepId: string;
+        type: "trigger" | "send_email" | "condition";
+        field?: string;
+        /** @min 0 */
+        matchedCount: number;
+        /** @min 0 */
+        skippedCount: number;
+        /** @min 0 */
+        failedCount: number;
+        /** @min 0 */
+        trueCount: number;
+        /** @min 0 */
+        falseCount: number;
+      }[];
+      failureReasonCode: string | null;
+      emailAddresses: string[];
+      occurrenceId: string;
+      eventKind:
+        | "welcome"
+        | "password_recovery"
+        | "password_reminder"
+        | "user_invite"
+        | "user_first_login"
+        | "user_assigned_to_course"
+        | "user_short_inactivity"
+        | "user_long_inactivity"
+        | "user_finished_chapter"
+        | "user_finished_course"
+        | "certificate_expiration_warning"
+        | "certificate_expired"
+        | "admin_new_user"
+        | "admin_finished_course"
+        | "admin_overdue_courses"
+        | "course_due_date_reminder"
+        | "magic_link"
+        | "course_chat_mention"
+        | "announcement"
+        | "live_training_started"
+        | "live_training_reminder"
+        | "live_training_ended";
+      status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
+      createdAt: string;
+      completedAt: string | null;
+      succeededCount: number;
+      failedCount: number;
+      cancelledCount: number;
+    };
+    deliveries: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      runId: string;
+      stepId: string;
+      /** @min 0 */
+      stepOrder: number;
+      recipientItemId: string;
+      recipientEmail: string;
+      template:
+        | {
+            type: "builtin";
+            key:
+              | "assignment_with_deadline"
+              | "assignment_without_deadline"
+              | "completion_with_certificate"
+              | "completion_without_certificate"
+              | "certificate_manually_reset"
+              | "certificate_naturally_expired"
+              | "short_inactivity_course"
+              | "short_inactivity_platform"
+              | "long_inactivity_course"
+              | "long_inactivity_platform"
+              | "deadline_today"
+              | "deadline_tomorrow"
+              | "deadline_upcoming"
+              | "welcome"
+              | "password_recovery"
+              | "password_reminder"
+              | "user_invite"
+              | "user_first_login"
+              | "user_finished_chapter"
+              | "certificate_expiration_warning"
+              | "admin_new_user"
+              | "admin_finished_course"
+              | "admin_overdue_courses"
+              | "magic_link"
+              | "course_chat_mention"
+              | "announcement"
+              | "live_training_started"
+              | "live_training_reminder"
+              | "live_training_ended";
+          }
+        | {
+            type: "custom";
+            /** @format uuid */
+            id: string;
+          };
+      status:
+        | "pending"
+        | "processing"
+        | "retrying"
+        | "skipped"
+        | "succeeded"
+        | "failed"
+        | "cancelled";
+      attemptCount: number;
+      language: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr") | null;
+      createdAt: string;
+      completedAt: string | null;
+      reasonCode: string | null;
+    }[];
   };
 }
 
@@ -25184,6 +30854,11 @@ export interface FindAllTenantsResponse {
         | "group_assignment"
         | "users_import"
         | "publish_email_template"
+        | "apply_automation"
+        | "enable_automation"
+        | "disable_automation"
+        | "duplicate_automation"
+        | "archive_automation"
         | "archive_email_template"
         | "restore_email_template"
         | "add_email_template_language"
@@ -25323,6 +30998,11 @@ export interface GetActivityLogsResponse {
       | "group_assignment"
       | "users_import"
       | "publish_email_template"
+      | "apply_automation"
+      | "enable_automation"
+      | "disable_automation"
+      | "duplicate_automation"
+      | "archive_automation"
       | "archive_email_template"
       | "restore_email_template"
       | "add_email_template_language"
@@ -27502,19 +33182,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateInviteOnlyRegistration: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/settings/admin/invite-only-registration`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUserEmailTriggers
-     * @request PATCH:/api/settings/admin/user-email-triggers/{triggerKey}
-     */
-    settingsControllerUpdateUserEmailTriggers: (triggerKey: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/user-email-triggers/${triggerKey}`,
         method: "PATCH",
         ...params,
       }),
@@ -32288,10 +37955,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerGetEmailTemplateImage
+     * @name EmailTemplateManagementControllerListEmailTemplateEvents
+     * @request GET:/api/email-templates/events
+     */
+    emailTemplateManagementControllerListEmailTemplateEvents: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListEmailTemplateEventsResponse, any>({
+        path: `/api/email-templates/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EmailTemplateManagementControllerGetEmailTemplateImage
      * @request GET:/api/email-templates/images/{id}
      */
-    emailTemplateControllerGetEmailTemplateImage: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerGetEmailTemplateImage: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<GetEmailTemplateImageResponse, any>({
         path: `/api/email-templates/images/${id}`,
         method: "GET",
@@ -32302,14 +37993,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerSendTestEmailTemplate
+     * @name EmailTemplateManagementControllerEnqueueEmailTemplateTest
      * @request POST:/api/email-templates/test-send
      */
-    emailTemplateControllerSendTestEmailTemplate: (
-      data: SendTestEmailTemplateBody,
+    emailTemplateManagementControllerEnqueueEmailTemplateTest: (
+      data: EnqueueEmailTemplateTestBody,
       params: RequestParams = {},
     ) =>
-      this.request<SendTestEmailTemplateResponse, any>({
+      this.request<EnqueueEmailTemplateTestResponse, any>({
         path: `/api/email-templates/test-send`,
         method: "POST",
         body: data,
@@ -32321,10 +38012,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerUploadEmailTemplateImage
+     * @name EmailTemplateManagementControllerUploadEmailTemplateImage
      * @request POST:/api/email-templates/images
      */
-    emailTemplateControllerUploadEmailTemplateImage: (
+    emailTemplateManagementControllerUploadEmailTemplateImage: (
       data: {
         /** @format binary */
         file: File;
@@ -32343,10 +38034,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerDuplicateEmailTemplate
+     * @name EmailTemplateManagementControllerDuplicateEmailTemplate
      * @request POST:/api/email-templates/{id}/duplicate
      */
-    emailTemplateControllerDuplicateEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerDuplicateEmailTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<DuplicateEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}/duplicate`,
         method: "POST",
@@ -32357,10 +38051,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerGetEmailTemplates
+     * @name EmailTemplateManagementControllerListEmailTemplates
      * @request GET:/api/email-templates
      */
-    emailTemplateControllerGetEmailTemplates: (
+    emailTemplateManagementControllerListEmailTemplates: (
       query?: {
         /** @min 1 */
         page?: number;
@@ -32369,10 +38063,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @max 100
          */
         perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetEmailTemplatesResponse, any>({
+      this.request<ListEmailTemplatesResponse, any>({
         path: `/api/email-templates`,
         method: "GET",
         query: query,
@@ -32383,10 +38081,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerCreateEmailTemplate
+     * @name EmailTemplateManagementControllerCreateEmailTemplate
      * @request POST:/api/email-templates
      */
-    emailTemplateControllerCreateEmailTemplate: (
+    emailTemplateManagementControllerCreateEmailTemplate: (
       data: CreateEmailTemplateBody,
       params: RequestParams = {},
     ) =>
@@ -32402,27 +38100,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerGetDefaultEmailTemplate
+     * @name EmailTemplateManagementControllerGetBuiltInEmailTemplate
      * @request GET:/api/email-templates/defaults/{event}
      */
-    emailTemplateControllerGetDefaultEmailTemplate: (
+    emailTemplateManagementControllerGetBuiltInEmailTemplate: (
       event:
+        | "assignment_with_deadline"
+        | "assignment_without_deadline"
+        | "completion_with_certificate"
+        | "completion_without_certificate"
+        | "certificate_manually_reset"
+        | "certificate_naturally_expired"
+        | "short_inactivity_course"
+        | "short_inactivity_platform"
+        | "long_inactivity_course"
+        | "long_inactivity_platform"
+        | "deadline_today"
+        | "deadline_tomorrow"
+        | "deadline_upcoming"
         | "welcome"
         | "password_recovery"
         | "password_reminder"
         | "user_invite"
         | "user_first_login"
-        | "user_assigned_to_course"
-        | "user_short_inactivity"
-        | "user_long_inactivity"
         | "user_finished_chapter"
-        | "user_finished_course"
         | "certificate_expiration_warning"
-        | "certificate_expired"
         | "admin_new_user"
         | "admin_finished_course"
         | "admin_overdue_courses"
-        | "course_due_date_reminder"
         | "magic_link"
         | "course_chat_mention"
         | "announcement"
@@ -32431,7 +38136,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_ended",
       params: RequestParams = {},
     ) =>
-      this.request<GetDefaultEmailTemplateResponse, any>({
+      this.request<GetBuiltInEmailTemplateResponse, any>({
         path: `/api/email-templates/defaults/${event}`,
         method: "GET",
         format: "json",
@@ -32441,27 +38146,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerCopyDefaultEmailTemplate
+     * @name EmailTemplateManagementControllerCreateDraftFromBuiltInEmailTemplate
      * @request POST:/api/email-templates/defaults/{event}/copy
      */
-    emailTemplateControllerCopyDefaultEmailTemplate: (
+    emailTemplateManagementControllerCreateDraftFromBuiltInEmailTemplate: (
       event:
+        | "assignment_with_deadline"
+        | "assignment_without_deadline"
+        | "completion_with_certificate"
+        | "completion_without_certificate"
+        | "certificate_manually_reset"
+        | "certificate_naturally_expired"
+        | "short_inactivity_course"
+        | "short_inactivity_platform"
+        | "long_inactivity_course"
+        | "long_inactivity_platform"
+        | "deadline_today"
+        | "deadline_tomorrow"
+        | "deadline_upcoming"
         | "welcome"
         | "password_recovery"
         | "password_reminder"
         | "user_invite"
         | "user_first_login"
-        | "user_assigned_to_course"
-        | "user_short_inactivity"
-        | "user_long_inactivity"
         | "user_finished_chapter"
-        | "user_finished_course"
         | "certificate_expiration_warning"
-        | "certificate_expired"
         | "admin_new_user"
         | "admin_finished_course"
         | "admin_overdue_courses"
-        | "course_due_date_reminder"
         | "magic_link"
         | "course_chat_mention"
         | "announcement"
@@ -32470,7 +38182,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_ended",
       params: RequestParams = {},
     ) =>
-      this.request<CopyDefaultEmailTemplateResponse, any>({
+      this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
         path: `/api/email-templates/defaults/${event}/copy`,
         method: "POST",
         format: "json",
@@ -32480,10 +38192,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerGetEmailTemplate
+     * @name EmailTemplateManagementControllerGetEmailTemplate
      * @request GET:/api/email-templates/{id}
      */
-    emailTemplateControllerGetEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerGetEmailTemplate: (id: string, params: RequestParams = {}) =>
       this.request<GetEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}`,
         method: "GET",
@@ -32494,10 +38206,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerUpdateEmailTemplate
+     * @name EmailTemplateManagementControllerUpdateEmailTemplate
      * @request PATCH:/api/email-templates/{id}
      */
-    emailTemplateControllerUpdateEmailTemplate: (
+    emailTemplateManagementControllerUpdateEmailTemplate: (
       id: string,
       data: UpdateEmailTemplateBody,
       params: RequestParams = {},
@@ -32514,10 +38226,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerDeleteEmailTemplate
+     * @name EmailTemplateManagementControllerDeleteEmailTemplate
      * @request DELETE:/api/email-templates/{id}
      */
-    emailTemplateControllerDeleteEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerDeleteEmailTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<DeleteEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}`,
         method: "DELETE",
@@ -32528,15 +38243,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerUpdateBaseLanguage
+     * @name EmailTemplateManagementControllerUpdateEmailTemplateBaseLanguage
      * @request PATCH:/api/email-templates/{id}/base-language
      */
-    emailTemplateControllerUpdateBaseLanguage: (
+    emailTemplateManagementControllerUpdateEmailTemplateBaseLanguage: (
       id: string,
-      data: UpdateBaseLanguageBody,
+      data: UpdateEmailTemplateBaseLanguageBody,
       params: RequestParams = {},
     ) =>
-      this.request<UpdateBaseLanguageResponse, any>({
+      this.request<UpdateEmailTemplateBaseLanguageResponse, any>({
         path: `/api/email-templates/${id}/base-language`,
         method: "PATCH",
         body: data,
@@ -32548,10 +38263,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerPublishEmailTemplate
+     * @name EmailTemplateManagementControllerPublishEmailTemplate
      * @request POST:/api/email-templates/{id}/publish
      */
-    emailTemplateControllerPublishEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerPublishEmailTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<PublishEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}/publish`,
         method: "POST",
@@ -32562,10 +38280,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerArchiveEmailTemplate
+     * @name EmailTemplateManagementControllerArchiveEmailTemplate
      * @request POST:/api/email-templates/{id}/archive
      */
-    emailTemplateControllerArchiveEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerArchiveEmailTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<ArchiveEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}/archive`,
         method: "POST",
@@ -32576,10 +38297,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerRemoveEmailTemplateLanguage
+     * @name EmailTemplateManagementControllerRemoveEmailTemplateLanguage
      * @request DELETE:/api/email-templates/{id}/languages/{language}
      */
-    emailTemplateControllerRemoveEmailTemplateLanguage: (
+    emailTemplateManagementControllerRemoveEmailTemplateLanguage: (
       id: string,
       language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr",
       params: RequestParams = {},
@@ -32594,10 +38315,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerRestoreEmailTemplate
+     * @name EmailTemplateManagementControllerRestoreEmailTemplate
      * @request POST:/api/email-templates/{id}/restore
      */
-    emailTemplateControllerRestoreEmailTemplate: (id: string, params: RequestParams = {}) =>
+    emailTemplateManagementControllerRestoreEmailTemplate: (
+      id: string,
+      params: RequestParams = {},
+    ) =>
       this.request<RestoreEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}/restore`,
         method: "POST",
@@ -32608,10 +38332,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EmailTemplateControllerPreviewEmailTemplate
+     * @name EmailTemplateManagementControllerPreviewEmailTemplate
      * @request POST:/api/email-templates/preview
      */
-    emailTemplateControllerPreviewEmailTemplate: (
+    emailTemplateManagementControllerPreviewEmailTemplate: (
       data: PreviewEmailTemplateBody,
       params: RequestParams = {},
     ) =>
@@ -32620,6 +38344,443 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerListAutomations
+     * @request GET:/api/automations
+     */
+    automationManagementControllerListAutomations: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        status?: "draft" | "enabled" | "disabled" | "archived";
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAutomationsResponse, any>({
+        path: `/api/automations`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerCreateAutomation
+     * @request POST:/api/automations
+     */
+    automationManagementControllerCreateAutomation: (
+      data: CreateAutomationBody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAutomationResponse, any>({
+        path: `/api/automations`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerListAutomationRecipientOptions
+     * @request GET:/api/automations/recipient-options
+     */
+    automationManagementControllerListAutomationRecipientOptions: (
+      query?: {
+        type?: "user" | "group" | "role";
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        id?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAutomationRecipientOptionsResponse, any>({
+        path: `/api/automations/recipient-options`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerListAutomationEvents
+     * @request GET:/api/automations/events
+     */
+    automationManagementControllerListAutomationEvents: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAutomationEventsResponse, any>({
+        path: `/api/automations/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerListAvailableEmailTemplates
+     * @request GET:/api/automations/templates
+     */
+    automationManagementControllerListAvailableEmailTemplates: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAvailableEmailTemplatesResponse, any>({
+        path: `/api/automations/templates`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerListBuiltInAutomationTemplates
+     * @request GET:/api/automations/workflow-templates
+     */
+    automationManagementControllerListBuiltInAutomationTemplates: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListBuiltInAutomationTemplatesResponse, any>({
+        path: `/api/automations/workflow-templates`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerSimulateAutomation
+     * @request POST:/api/automations/simulate
+     */
+    automationManagementControllerSimulateAutomation: (
+      data: SimulateAutomationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SimulateAutomationResponse, any>({
+        path: `/api/automations/simulate`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerCreateAutomationFromTemplate
+     * @request POST:/api/automations/from-template/{key}
+     */
+    automationManagementControllerCreateAutomationFromTemplate: (
+      key:
+        | "assignment_with_deadline"
+        | "assignment_without_deadline"
+        | "completion_with_certificate"
+        | "completion_without_certificate"
+        | "certificate_manually_reset"
+        | "certificate_naturally_expired"
+        | "short_inactivity_course"
+        | "short_inactivity_platform"
+        | "long_inactivity_course"
+        | "long_inactivity_platform"
+        | "deadline_today"
+        | "deadline_tomorrow"
+        | "deadline_upcoming"
+        | "welcome"
+        | "password_recovery"
+        | "password_reminder"
+        | "user_invite"
+        | "user_first_login"
+        | "user_finished_chapter"
+        | "certificate_expiration_warning"
+        | "admin_new_user"
+        | "admin_finished_course"
+        | "admin_overdue_courses"
+        | "magic_link"
+        | "course_chat_mention"
+        | "announcement"
+        | "live_training_started"
+        | "live_training_reminder"
+        | "live_training_ended",
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAutomationFromTemplateResponse, any>({
+        path: `/api/automations/from-template/${key}`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerGetAutomation
+     * @request GET:/api/automations/{id}
+     */
+    automationManagementControllerGetAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAutomationResponse, any>({
+        path: `/api/automations/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerUpdateAutomation
+     * @request PATCH:/api/automations/{id}
+     */
+    automationManagementControllerUpdateAutomation: (
+      id: string,
+      data: UpdateAutomationBody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAutomationResponse, any>({
+        path: `/api/automations/${id}`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerDeleteAutomation
+     * @request DELETE:/api/automations/{id}
+     */
+    automationManagementControllerDeleteAutomation: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteAutomationResponse, any>({
+        path: `/api/automations/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerDuplicateAutomation
+     * @request POST:/api/automations/{id}/duplicate
+     */
+    automationManagementControllerDuplicateAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DuplicateAutomationResponse, any>({
+        path: `/api/automations/${id}/duplicate`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerApplyAutomation
+     * @request POST:/api/automations/{id}/apply
+     */
+    automationManagementControllerApplyAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApplyAutomationResponse, any>({
+        path: `/api/automations/${id}/apply`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerEnableAutomation
+     * @request POST:/api/automations/{id}/enable
+     */
+    automationManagementControllerEnableAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<EnableAutomationResponse, any>({
+        path: `/api/automations/${id}/enable`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerDisableAutomation
+     * @request POST:/api/automations/{id}/disable
+     */
+    automationManagementControllerDisableAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DisableAutomationResponse, any>({
+        path: `/api/automations/${id}/disable`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationManagementControllerArchiveAutomation
+     * @request POST:/api/automations/{id}/archive
+     */
+    automationManagementControllerArchiveAutomation: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ArchiveAutomationResponse, any>({
+        path: `/api/automations/${id}/archive`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationRunHistoryControllerListAutomationRuns
+     * @request GET:/api/automation-runs
+     */
+    automationRunHistoryControllerListAutomationRuns: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+        /** @format uuid */
+        automationId?: string;
+        status?: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAutomationRunsResponse, any>({
+        path: `/api/automation-runs`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationRunHistoryControllerGetAutomationRun
+     * @request GET:/api/automation-runs/{id}
+     */
+    automationRunHistoryControllerGetAutomationRun: (id: string, params: RequestParams = {}) =>
+      this.request<GetAutomationRunResponse, any>({
+        path: `/api/automation-runs/${id}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
@@ -34529,7 +40690,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "live_training"
           | "learning_path"
           | "scorm"
-          | "email_template";
+          | "email_template"
+          | "automation";
         from?: string;
         to?: string;
         actionTypes?:
@@ -34548,6 +40710,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "group_assignment"
               | "users_import"
               | "publish_email_template"
+              | "apply_automation"
+              | "enable_automation"
+              | "disable_automation"
+              | "duplicate_automation"
+              | "archive_automation"
               | "archive_email_template"
               | "restore_email_template"
               | "add_email_template_language"
@@ -34581,6 +40748,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "group_assignment"
               | "users_import"
               | "publish_email_template"
+              | "apply_automation"
+              | "enable_automation"
+              | "disable_automation"
+              | "duplicate_automation"
+              | "archive_automation"
               | "archive_email_template"
               | "restore_email_template"
               | "add_email_template_language"

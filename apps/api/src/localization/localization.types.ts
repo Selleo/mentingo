@@ -1,6 +1,7 @@
 import type { SupportedLanguages } from "@repo/shared";
 import type {
   courses,
+  automations,
   questionsAndAnswers,
   news,
   articles,
@@ -41,6 +42,7 @@ export const ENTITY_FIELD = {
 } as const;
 
 export type BaseTable =
+  | typeof automations
   | typeof courses
   | typeof questionsAndAnswers
   | typeof articles

@@ -1,34 +1,30 @@
-import styles from "./EmailTemplateCanvasLayout.module.css";
+import { getEmailCardBackground } from "@repo/shared";
 
 import type { ReactNode } from "react";
 
 export function EmailTemplateCanvasLayout({
   primaryColor,
+  headerContent,
+  decoration,
   children,
 }: {
   primaryColor: string;
+  headerContent: ReactNode;
+  decoration: ReactNode;
   children: ReactNode;
 }) {
-  // Equal nonzero side-cell heights divide the spanning card's height evenly.
-  const sideCellStyle = { fontSize: "1px", lineHeight: "1px", padding: 0 };
-
   return (
-    <div className={styles.container}>
-      <table role="presentation" className="w-full border-collapse" cellPadding={0} cellSpacing={0}>
-        <tbody>
-          <tr>
-            <td style={{ ...sideCellStyle, backgroundColor: primaryColor }}>&nbsp;</td>
-            <td rowSpan={2} className={styles.card} style={{ padding: 0, verticalAlign: "top" }}>
-              {children}
-            </td>
-            <td style={{ ...sideCellStyle, backgroundColor: primaryColor }}>&nbsp;</td>
-          </tr>
-          <tr>
-            <td style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>&nbsp;</td>
-            <td style={{ ...sideCellStyle, backgroundColor: "#fafafa" }}>&nbsp;</td>
-          </tr>
-        </tbody>
-      </table>
+    <div style={{ backgroundImage: getEmailCardBackground(primaryColor) }}>
+      <div className="relative mx-auto w-[90%] max-w-[500px] rounded-3xl bg-white pt-8 pb-[50px]">
+        {headerContent}
+        {children}
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 overflow-hidden rounded-bl-3xl"
+          aria-hidden="true"
+        >
+          {decoration}
+        </div>
+      </div>
     </div>
   );
 }

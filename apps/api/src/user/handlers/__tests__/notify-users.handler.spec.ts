@@ -1,14 +1,27 @@
-import { UsersImportInviteEmailsEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
-import { DEFAULT_EMAIL_TRIGGERS } from "src/settings/constants/settings.constants";
 import { NotifyUsersHandler } from "src/user/handlers/notify-users.handler";
 
-import type { UserEmailTriggersSchema } from "src/settings/schemas/settings.schema";
+type UserEmailTriggersSchema = {
+  userFirstLogin: boolean;
+  userCourseAssignment: boolean;
+  userShortInactivity: boolean;
+  userLongInactivity: boolean;
+  userChapterFinished: boolean;
+  userCourseFinished: boolean;
+};
+const DEFAULT_EMAIL_TRIGGERS: UserEmailTriggersSchema = {
+  userFirstLogin: false,
+  userCourseAssignment: false,
+  userShortInactivity: false,
+  userLongInactivity: false,
+  userChapterFinished: false,
+  userCourseFinished: false,
+};
 
 type TriggerKey = keyof UserEmailTriggersSchema;
 type NotificationMethod =
@@ -55,8 +68,9 @@ describe("NotifyUsersHandler", () => {
     {} as never,
     {} as never,
     {} as never,
-    settingsService as never,
     tenantRunner as never,
+    {} as never,
+    {} as never,
   );
 
   const actor = {
@@ -140,7 +154,7 @@ describe("NotifyUsersHandler", () => {
   });
 
   describe.each(cases)("$name email trigger", (testCase) => {
-    it("skips the notification when the trigger is disabled", async () => {
+    it("prepares the notification even when the obsolete organization switch is disabled", async () => {
       settingsService.getGlobalSettings.mockResolvedValue({
         userEmailTriggers: buildTriggers(),
       });
@@ -154,7 +168,8 @@ describe("NotifyUsersHandler", () => {
         testCase.resolvedTenantId ?? tenantId,
         expect.any(Function),
       );
-      expect(notificationSpy).not.toHaveBeenCalled();
+      expect(notificationSpy).toHaveBeenCalled();
+      expect(settingsService.getGlobalSettings).not.toHaveBeenCalled();
     });
 
     it("sends the notification when the trigger is enabled", async () => {
@@ -174,36 +189,5 @@ describe("NotifyUsersHandler", () => {
       );
       expect(notificationSpy).toHaveBeenCalledWith(event);
     });
-  });
-
-  it("sends import invite emails in batches of 5", async () => {
-    let inFlight = 0;
-    let maxInFlight = 0;
-
-    const notifyUserAboutInvite = jest
-      .spyOn(handler, "notifyUserAboutInvite")
-      .mockImplementation(async () => {
-        inFlight += 1;
-        maxInFlight = Math.max(maxInFlight, inFlight);
-
-        await new Promise((resolve) => setTimeout(resolve, 0));
-
-        inFlight -= 1;
-      });
-
-    const event = new UsersImportInviteEmailsEvent({
-      tenantId: "00000000-0000-0000-0000-000000000001",
-      creatorId: "00000000-0000-0000-0000-000000000002",
-      recipients: Array.from({ length: 45 }, (_, index) => ({
-        email: `imported-${index}@example.com`,
-        userId: `00000000-0000-0000-0000-${String(index + 1).padStart(12, "0")}`,
-        token: `token-${index}`,
-      })),
-    });
-
-    await handler.notifyUsersAboutImportInvites(event);
-
-    expect(notifyUserAboutInvite).toHaveBeenCalledTimes(45);
-    expect(maxInFlight).toBe(5);
   });
 });

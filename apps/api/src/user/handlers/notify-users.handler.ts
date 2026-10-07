@@ -1,24 +1,10 @@
-import { Inject } from "@nestjs/common";
-import { EventsHandler } from "@nestjs/cqrs";
-import {
-  EMAIL_TEMPLATE_EVENTS,
-  CreatePasswordReminderEmail,
-  WelcomeEmail,
-  UserFirstLoginEmail,
-  UserAssignedToCourseEmail,
-  UserInviteEmail,
-  UserShortInactivityEmail,
-  UserLongInactivityEmail,
-  UserFinishedChapterEmail,
-  UserFinishedCourseEmail,
-} from "@repo/email-templates";
+import { Injectable, Inject } from "@nestjs/common";
+import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
-import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseService } from "src/courses/course.service";
@@ -26,14 +12,11 @@ import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-cou
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
-import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
-import { UserPasswordEmailsEvent } from "src/events/user/user-password-emails.event";
-import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
-import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
-import { UsersImportInviteEmailsEvent } from "src/events/user/users-import-invite-emails.event";
-import { SettingsService } from "src/settings/settings.service";
+import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
+import { getNotificationUserFields } from "src/notifications/services/notification-fields";
+import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -42,38 +25,16 @@ import { UserService } from "src/user/user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
 import type { InactiveUsers } from "src/events/user/user-short-inactivity.event";
-import type { UserEmailTriggersSchema } from "src/settings/schemas/settings.schema";
 
 type EventType =
-  | UserInviteEvent
   | UserFirstLoginEvent
-  | UserPasswordReminderEvent
-  | UserPasswordEmailsEvent
-  | UserWelcomeEvent
   | UsersAssignedToCourseEvent
-  | UsersImportInviteEmailsEvent
   | UsersShortInactivityEvent
   | UsersLongInactivityEvent
   | UserChapterFinishedEvent
   | UserCourseFinishedEvent;
 
-const UserNotificationEvents = [
-  UserInviteEvent,
-  UserFirstLoginEvent,
-  UserPasswordReminderEvent,
-  UserPasswordEmailsEvent,
-  UserWelcomeEvent,
-  UsersAssignedToCourseEvent,
-  UsersImportInviteEmailsEvent,
-  UsersShortInactivityEvent,
-  UsersLongInactivityEvent,
-  UserChapterFinishedEvent,
-  UserCourseFinishedEvent,
-] as const;
-
-const USERS_IMPORT_INVITE_EMAIL_CONCURRENCY = 5;
-
-@EventsHandler(...UserNotificationEvents)
+@Injectable()
 export class NotifyUsersHandler implements IEventHandler {
   constructor(
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -81,101 +42,77 @@ export class NotifyUsersHandler implements IEventHandler {
     private readonly userService: UserService,
     private readonly courseService: CourseService,
     private readonly statisticsService: StatisticsService,
-    private readonly settingsService: SettingsService,
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly notificationCollectorService: NotificationCollectorService,
+    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
+  onModuleInit() {
+    this.outboxNotificationPreparationService.register(async (event) => {
+      if (
+        !(
+          event instanceof UserFirstLoginEvent ||
+          event instanceof UsersAssignedToCourseEvent ||
+          event instanceof UsersShortInactivityEvent ||
+          event instanceof UsersLongInactivityEvent ||
+          event instanceof UserChapterFinishedEvent ||
+          event instanceof UserCourseFinishedEvent
+        )
+      ) {
+        return [];
+      }
+
+      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
+    });
+  }
+
   async handle(event: EventType) {
-    if (event instanceof UserInviteEvent) {
-      await this.notifyUserAboutInvite(event);
-      return;
-    }
-
-    if (event instanceof UsersImportInviteEmailsEvent) {
-      await this.notifyUsersAboutImportInvites(event);
-      return;
-    }
-
-    if (event instanceof UserPasswordReminderEvent) {
-      await this.notifyUserAboutPasswordReminder(event);
-      return;
-    }
-
-    if (event instanceof UserPasswordEmailsEvent) {
-      await this.notifyUsersAboutPasswordEmails(event);
-      return;
-    }
-
-    if (event instanceof UserWelcomeEvent) {
-      await this.notifyUserAboutWelcome(event);
-      return;
-    }
-
     if (event instanceof UsersShortInactivityEvent) {
-      await this.handleTenantEmailTrigger(
-        event.usersShortInactivity.tenantId,
-        "userShortInactivity",
-        () => this.notifyUserAboutShortInactivity(event),
+      await this.prepareForTenant(event.usersShortInactivity.tenantId, () =>
+        this.notifyUserAboutShortInactivity(event),
       );
       return;
     }
 
     if (event instanceof UsersLongInactivityEvent) {
-      await this.handleTenantEmailTrigger(
-        event.usersLongInactivity.tenantId,
-        "userLongInactivity",
-        () => this.notifyUserAboutLongInactivity(event),
+      await this.prepareForTenant(event.usersLongInactivity.tenantId, () =>
+        this.notifyUserAboutLongInactivity(event),
       );
       return;
     }
 
     if (event instanceof UserFirstLoginEvent) {
-      await this.handleTenantEmailTrigger(
-        await this.getUserTenantId(event.userFirstLogin.userId),
-        "userFirstLogin",
-        () => this.notifyUserAboutFirstLogin(event),
+      await this.prepareForTenant(await this.getUserTenantId(event.userFirstLogin.userId), () =>
+        this.notifyUserAboutFirstLogin(event),
       );
       return;
     }
 
     if (event instanceof UsersAssignedToCourseEvent) {
-      await this.handleTenantEmailTrigger(
+      await this.prepareForTenant(
         await this.getCourseTenantId(event.usersAssignedToCourse.courseId),
-        "userCourseAssignment",
         () => this.notifyUserAboutCourseAssignment(event),
       );
       return;
     }
 
     if (event instanceof UserChapterFinishedEvent) {
-      await this.handleTenantEmailTrigger(
-        event.chapterFinishedData.actor.tenantId,
-        "userChapterFinished",
-        () => this.notifyUserAboutChapterFinished(event),
+      await this.prepareForTenant(event.chapterFinishedData.actor.tenantId, () =>
+        this.notifyUserAboutChapterFinished(event),
       );
       return;
     }
 
     if (event instanceof UserCourseFinishedEvent) {
-      await this.handleTenantEmailTrigger(
-        event.courseFinishedData.actor.tenantId,
-        "userCourseFinished",
-        () => this.notifyUserAboutCourseCompleted(event),
+      await this.prepareForTenant(event.courseFinishedData.actor.tenantId, () =>
+        this.notifyUserAboutCourseCompleted(event),
       );
     }
   }
 
-  private async handleTenantEmailTrigger(
-    tenantId: string,
-    trigger: keyof UserEmailTriggersSchema,
-    sendEmail: () => Promise<void>,
-  ) {
-    await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const { userEmailTriggers } = await this.settingsService.getGlobalSettings();
-
-      if (!userEmailTriggers[trigger]) return;
-
-      await sendEmail();
+  private async prepareForTenant(tenantId: string, prepare: () => Promise<void>) {
+    await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
+      await prepare();
     });
   }
 
@@ -203,78 +140,6 @@ export class NotifyUsersHandler implements IEventHandler {
     return course.tenantId;
   }
 
-  async notifyUserAboutInvite(event: UserInviteEvent) {
-    const { userInvite } = event;
-    const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
-
-    await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
-
-      const url = buildCreateNewPasswordLink(baseOrigin, {
-        createToken: token,
-      });
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        tenantId,
-        userId,
-      );
-
-      const invitingUser = creatorId
-        ? await this.userService.getUserById(creatorId, this.dbAdmin)
-        : null;
-
-      const invitingUsername =
-        invitedByUserName || `${invitingUser?.firstName} ${invitingUser?.lastName}` || "Admin";
-
-      const { text, html } = new UserInviteEmail({
-        invitedByUserName: invitingUsername,
-        createPasswordLink: url,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: email,
-          subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
-          text,
-          html,
-        },
-        {
-          tenantId,
-          template: {
-            event: EMAIL_TEMPLATE_EVENTS.USER_INVITE,
-            language: defaultEmailSettings.language,
-            variables: { invited_by_user_name: invitingUsername, create_password_link: url },
-          },
-        },
-      );
-    });
-  }
-
-  async notifyUsersAboutImportInvites(event: UsersImportInviteEmailsEvent) {
-    const { tenantId, creatorId, origin, invitedByUserName, recipients } =
-      event.usersImportInviteEmails;
-
-    await processInBatches(
-      recipients,
-      ({ email, userId, token }) =>
-        this.notifyUserAboutInvite(
-          new UserInviteEvent({
-            creatorId,
-            email,
-            token,
-            userId,
-            tenantId,
-            invitedByUserName,
-            origin,
-          }),
-        ),
-      {
-        batchSize: USERS_IMPORT_INVITE_EMAIL_CONCURRENCY,
-      },
-    );
-  }
-
   async notifyUserAboutFirstLogin(event: UserFirstLoginEvent) {
     const { userFirstLogin } = event;
     const { userId } = userFirstLogin;
@@ -287,124 +152,22 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFirstLoginEmail({
-      name: user.firstName,
-      coursesUrl: `${baseOrigin}/courses`,
-      ...defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: user.email,
-        subject: getEmailSubject("userFirstLoginEmail", defaultEmailSettings.language),
-        text,
-        html,
-      },
+    await this.notificationCollectorService.captureNotificationRecipient(
+      { to: user.email },
       {
         tenantId: user.tenantId,
         template: {
           event: EMAIL_TEMPLATE_EVENTS.USER_FIRST_LOGIN,
           language: defaultEmailSettings.language,
-          variables: { name: user.firstName, courses_url: `${baseOrigin}/courses` },
+          variables: {
+            ...getNotificationUserFields(user),
+            name: user.firstName,
+            loginDate: new Date().toISOString(),
+            courses_url: `${baseOrigin}/courses`,
+          },
         },
       },
     );
-  }
-
-  async notifyUserAboutPasswordReminder(event: UserPasswordReminderEvent) {
-    const { userPasswordReminder } = event;
-    const { email, token, userId, tenantId, language, origin } = userPasswordReminder;
-
-    await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        tenantId,
-        userId,
-        language,
-      );
-
-      const createPasswordLink = buildCreateNewPasswordLink(baseOrigin, {
-        createToken: token,
-      });
-
-      const { text, html } = new CreatePasswordReminderEmail({
-        createPasswordLink,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: email,
-          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-          text,
-          html,
-        },
-        {
-          tenantId,
-          template: {
-            event: EMAIL_TEMPLATE_EVENTS.PASSWORD_REMINDER,
-            language: defaultEmailSettings.language,
-            variables: { create_password_link: createPasswordLink },
-          },
-        },
-      );
-    });
-  }
-
-  async notifyUsersAboutPasswordEmails(event: UserPasswordEmailsEvent) {
-    const { emails } = event.userPasswordEmails;
-
-    await processInBatches(
-      emails,
-      ({ to, subject, text, html, tenantId, template }) =>
-        this.emailService.sendEmailWithLogo(
-          {
-            to,
-            subject,
-            text,
-            html,
-          },
-          { tenantId, template },
-        ),
-      { batchSize: EMAIL_BATCH_SIZE },
-    );
-  }
-
-  async notifyUserAboutWelcome(event: UserWelcomeEvent) {
-    const { userWelcome } = event;
-    const { email, userId, tenantId, origin } = userWelcome;
-
-    await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        tenantId,
-        userId,
-      );
-
-      const { text, html } = new WelcomeEmail({
-        coursesLink: `${baseOrigin}/courses`,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: email,
-          subject: getEmailSubject("welcomeEmail", defaultEmailSettings.language),
-          text,
-          html,
-        },
-        {
-          tenantId,
-          template: {
-            event: EMAIL_TEMPLATE_EVENTS.WELCOME,
-            language: defaultEmailSettings.language,
-            variables: { courses_link: `${baseOrigin}/courses` },
-          },
-        },
-      );
-    });
   }
 
   async notifyUserAboutCourseAssignment(event: UsersAssignedToCourseEvent) {
@@ -431,28 +194,15 @@ export class NotifyUsersHandler implements IEventHandler {
           studentId,
         );
 
-        const { text, html } = new UserAssignedToCourseEmail({
-          courseName,
-          courseLink: `${baseOrigin}/course/${courseId}`,
-          formatedCourseDueDate: dueDatesByStudent[studentId] ?? null,
-          ...defaultEmailSettings,
-        });
-
-        return await this.emailService.sendEmailWithLogo(
-          {
-            to: email,
-            subject: getEmailSubject("userCourseAssignmentEmail", defaultEmailSettings.language, {
-              courseName,
-            }),
-            text,
-            html,
-          },
+        return await this.notificationCollectorService.captureNotificationRecipient(
+          { to: email },
           {
             tenantId: student.tenantId,
             template: {
               event: EMAIL_TEMPLATE_EVENTS.USER_ASSIGNED_TO_COURSE,
               language: defaultEmailSettings.language,
               variables: {
+                ...getNotificationUserFields(student),
                 course_name: courseName,
                 course_link: `${baseOrigin}/course/${courseId}`,
                 formatted_course_due_date: dueDatesByStudent[studentId] ?? "",
@@ -461,7 +211,7 @@ export class NotifyUsersHandler implements IEventHandler {
           },
         );
       },
-      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: true },
     );
   }
 
@@ -488,29 +238,18 @@ export class NotifyUsersHandler implements IEventHandler {
           user.userId,
         );
 
-        const { text, html } = new UserShortInactivityEmail({
-          courseName,
-          courseLink,
-          ...defaultEmailSettings,
-        });
-
-        return this.emailService.sendEmailWithLogo(
-          {
-            to: user.email,
-            subject: courseName
-              ? getEmailSubject("userShortInactivityEmail", defaultEmailSettings.language, {
-                  courseName,
-                })
-              : getEmailSubject("userShortInactivityPlatformEmail", defaultEmailSettings.language),
-            text,
-            html,
-          },
+        return this.notificationCollectorService.captureNotificationRecipient(
+          { to: user.email },
           {
             tenantId: student.tenantId,
             template: {
               event: EMAIL_TEMPLATE_EVENTS.USER_SHORT_INACTIVITY,
               language: defaultEmailSettings.language,
-              variables: { course_name: courseName ?? "", course_link: courseLink },
+              variables: {
+                ...getNotificationUserFields(student),
+                course_name: courseName ?? "",
+                course_link: courseLink,
+              },
             },
           },
         );
@@ -540,25 +279,18 @@ export class NotifyUsersHandler implements IEventHandler {
           user.userId,
         );
 
-        const { text, html } = new UserLongInactivityEmail({
-          courseName: course?.courseName,
-          courseLink,
-          ...defaultEmailSettings,
-        });
-
-        return this.emailService.sendEmailWithLogo(
-          {
-            to: user.email,
-            subject: getEmailSubject("userLongInactivityEmail", defaultEmailSettings.language),
-            text,
-            html,
-          },
+        return this.notificationCollectorService.captureNotificationRecipient(
+          { to: user.email },
           {
             tenantId: student.tenantId,
             template: {
               event: EMAIL_TEMPLATE_EVENTS.USER_LONG_INACTIVITY,
               language: defaultEmailSettings.language,
-              variables: { course_name: course?.courseName ?? "", course_link: courseLink },
+              variables: {
+                ...getNotificationUserFields(student),
+                course_name: course?.courseName ?? "",
+                course_link: courseLink,
+              },
             },
           },
         );
@@ -583,30 +315,15 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFinishedChapterEmail({
-      courseName,
-      courseLink,
-      chapterName,
-      ...defaultEmailSettings,
-    });
-
-    const subject = getEmailSubject("userChapterFinishedEmail", defaultEmailSettings.language, {
-      chapterName,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: user.email,
-        subject,
-        html,
-        text,
-      },
+    await this.notificationCollectorService.captureNotificationRecipient(
+      { to: user.email },
       {
         tenantId: chapterFinishedData.actor.tenantId,
         template: {
           event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_CHAPTER,
           language: defaultEmailSettings.language,
           variables: {
+            ...getNotificationUserFields(user),
             course_name: courseName,
             chapter_name: chapterName,
             course_link: courseLink,
@@ -634,30 +351,18 @@ export class NotifyUsersHandler implements IEventHandler {
       user.id,
     );
 
-    const { text, html } = new UserFinishedCourseEmail({
-      buttonLink,
-      courseName,
-      ...defaultEmailSettings,
-      hasCertificate,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: user.email,
-        subject: getEmailSubject("userCourseFinishedEmail", defaultEmailSettings.language, {
-          courseName,
-        }),
-        html,
-        text,
-      },
+    await this.notificationCollectorService.captureNotificationRecipient(
+      { to: user.email },
       {
         tenantId: courseFinishedData.actor.tenantId,
         template: {
           event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
           language: defaultEmailSettings.language,
           variables: {
+            ...getNotificationUserFields(user),
             course_name: courseName,
             button_link: buttonLink,
+            course_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
             has_certificate: hasCertificate,
           },
         },

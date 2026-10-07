@@ -24,8 +24,10 @@ test("copying a default creates an editable draft whose changes survive reopenin
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const original = await factory.getDefault();
-    await openEmailTemplateFlow(page, `defaults/${EMAIL_TEMPLATE_DATA.event}`);
-    const copy = await copyEmailTemplateFlow(page, { event: EMAIL_TEMPLATE_DATA.event });
+    await openEmailTemplateFlow(page, `defaults/${EMAIL_TEMPLATE_DATA.builtInTemplateKey}`);
+    const copy = await copyEmailTemplateFlow(page, {
+      templateKey: EMAIL_TEMPLATE_DATA.builtInTemplateKey,
+    });
     cleanup.add(() => factory.delete(copy.id!));
     await expect(page).toHaveURL(new RegExp(`/${copy.id}$`));
     const title = `${EMAIL_TEMPLATE_DATA.namePrefix} ${randomUUID()}`;

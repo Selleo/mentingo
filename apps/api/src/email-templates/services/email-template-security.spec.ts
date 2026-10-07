@@ -55,7 +55,7 @@ describe.each(events)("Credential confinement for %s", (event) => {
     const document = structuredClone(definition.defaultDocuments.en);
     document.content.push(block);
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         event,
         definition.name,
         definition.subjects,
@@ -64,19 +64,23 @@ describe.each(events)("Credential confinement for %s", (event) => {
       ),
     ).toThrow("emailTemplates.errors.restrictedAuthVariables");
     expect(() =>
-      service.validateRuntimeVariables(event, document, service.getSampleVariables(event)),
+      service.assertEmailTemplateVariableValues(
+        event,
+        document,
+        service.buildEmailPreviewVariables(event),
+      ),
     ).toThrow("emailTemplates.errors.restrictedAuthVariables");
   });
 
   it("rejects subject exposure on save and for previously published templates", () => {
-    expect(() => service.validateDraft(event, { en: token }, definition.defaultDocuments)).toThrow(
-      "emailTemplates.errors.restrictedAuthVariables",
-    );
     expect(() =>
-      service.validateRuntimeVariables(
+      service.assertValidEmailTemplateDraft(event, { en: token }, definition.defaultDocuments),
+    ).toThrow("emailTemplates.errors.restrictedAuthVariables");
+    expect(() =>
+      service.assertEmailTemplateVariableValues(
         event,
         definition.defaultDocuments.en,
-        service.getSampleVariables(event),
+        service.buildEmailPreviewVariables(event),
         token,
       ),
     ).toThrow("emailTemplates.errors.restrictedAuthVariables");
@@ -105,7 +109,7 @@ describe.each(events)("Credential confinement for %s", (event) => {
     );
     const before = structuredClone(document);
     expect(() =>
-      service.validatePublished(
+      service.assertEmailTemplatePublishable(
         event,
         definition.name,
         definition.subjects,
@@ -114,7 +118,11 @@ describe.each(events)("Credential confinement for %s", (event) => {
       ),
     ).not.toThrow();
     expect(() =>
-      service.validateRuntimeVariables(event, document, service.getSampleVariables(event)),
+      service.assertEmailTemplateVariableValues(
+        event,
+        document,
+        service.buildEmailPreviewVariables(event),
+      ),
     ).not.toThrow();
     expect(document).toEqual(before);
   });

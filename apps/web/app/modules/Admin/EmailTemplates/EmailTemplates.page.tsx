@@ -1,5 +1,5 @@
-import { Link, useNavigate, useSearchParams } from "@remix-run/react";
-import { Archive, Copy, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { useNavigate, useSearchParams } from "@remix-run/react";
+import { Archive, Copy, MoreVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,12 +9,19 @@ import { useDeleteEmailTemplate } from "~/api/mutations/emailTemplates/useDelete
 import { useDuplicateEmailTemplate } from "~/api/mutations/emailTemplates/useDuplicateEmailTemplate";
 import { useRestoreEmailTemplate } from "~/api/mutations/emailTemplates/useRestoreEmailTemplate";
 import { useEmailTemplates } from "~/api/queries/useEmailTemplates";
-import { Icon } from "~/components/Icon";
-import { languageOptions } from "~/components/LanguageSelector/languageOptions";
+import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ITEMS_PER_PAGE_OPTIONS, Pagination } from "~/components/Pagination/Pagination";
+import { SearchInput } from "~/components/SearchInput/SearchInput";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -23,10 +30,13 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
 import { EMAIL_TEMPLATES_HANDLES } from "../../../../e2e/data/email-templates/handles";
 
+import { CreateEmailTemplateDialog } from "./components/CreateEmailTemplateDialog";
 import { EmailTemplateConfirmation } from "./components/EmailTemplateConfirmation";
 import {
   EMAIL_TEMPLATE_ACTIONS,
@@ -34,13 +44,32 @@ import {
   EMAIL_TEMPLATE_STATUSES,
   EMAIL_TEMPLATE_LIST_PATH,
   EMAIL_TEMPLATE_STATUS_BADGE_VARIANTS,
-  EMAIL_TEMPLATE_STATUS_BADGE_ICONS,
 } from "./emailTemplates.constants";
 import { getLocalizedTemplateName } from "./emailTemplates.utils";
 
-import type { EmailTemplateListConfirmation } from "./emailTemplates.types";
+import type { EmailTemplate, EmailTemplateListConfirmation } from "./emailTemplates.types";
 
 export default function EmailTemplatesPage() {
+  const { t } = useTranslation();
+
+  return (
+    <PageWrapper
+      breadcrumbs={[{ title: t("emailTemplates.ui.title"), href: EMAIL_TEMPLATE_LIST_PATH }]}
+    >
+      <EmailTemplatesContent />
+    </PageWrapper>
+  );
+}
+
+const menuItemClassName =
+  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
+
+const destructiveMenuItemClassName = cn(
+  menuItemClassName,
+  "text-error-700 focus:bg-error-50 focus:text-error-700",
+);
+
+export function EmailTemplatesContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -50,92 +79,136 @@ export default function EmailTemplatesPage() {
   const requestedPage = Number(searchParams.get("page") ?? 1);
   const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const perPage =
-    ITEMS_PER_PAGE_OPTIONS.find((size) => size === Number(searchParams.get("perPage"))) ?? 20;
+    ITEMS_PER_PAGE_OPTIONS.find((size) => size === Number(searchParams.get("perPage"))) ?? 10;
 
   const [pendingConfirmation, setPendingConfirmation] =
     useState<EmailTemplateListConfirmation | null>(null);
-  const { data, isPending, isError, refetch } = useEmailTemplates(page, perPage);
+  const { data, isPending, isError } = useEmailTemplates(
+    page,
+    perPage,
+    searchParams.get("search") ?? "",
+  );
   const { mutateAsync: copyDefaultTemplate, isPending: isCopying } = useCopyDefaultEmailTemplate();
   const { mutateAsync: duplicateTemplate, isPending: isDuplicating } = useDuplicateEmailTemplate();
   const { mutateAsync: deleteTemplate, isPending: isDeleting } = useDeleteEmailTemplate();
   const { mutateAsync: archiveTemplate, isPending: isArchiving } = useArchiveEmailTemplate();
   const { mutateAsync: restoreTemplate, isPending: isRestoring } = useRestoreEmailTemplate();
 
+  const [isCreationOpen, setIsCreationOpen] = useState(false);
+
   const isActionPending = isCopying || isDuplicating || isArchiving || isRestoring || isDeleting;
 
   const handlePaginationChange = (newPage: number, size = perPage) =>
-    setSearchParams({ page: String(newPage), perPage: String(size) });
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set("page", String(newPage));
+      nextParams.set("perPage", String(size));
+      return nextParams;
+    });
+
+  const openEmailTemplate = (template: EmailTemplate) => {
+    const editorPath = template.id
+      ? `${EMAIL_TEMPLATE_LIST_PATH}/${template.id}`
+      : `${EMAIL_TEMPLATE_LIST_PATH}/defaults/${template.event}`;
+
+    navigate(editorPath);
+  };
+
+  if (isError)
+    return (
+      <ErrorPage
+        title={t("emailTemplates.ui.requestFailed")}
+        actionLabel={t("common.refreshPage")}
+        onAction={() => window.location.reload()}
+        className="min-h-[50vh]"
+      />
+    );
 
   return (
-    <PageWrapper
-      breadcrumbs={[{ title: t("emailTemplates.ui.title"), href: EMAIL_TEMPLATE_LIST_PATH }]}
-    >
+    <>
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h4 className="h4">{t("emailTemplates.ui.title")}</h4>
             <p className="mt-2 text-sm text-neutral-600">{t("emailTemplates.ui.description")}</p>
           </div>
-          <Button asChild variant="primary">
-            <Link to={`${EMAIL_TEMPLATE_LIST_PATH}/defaults/welcome`}>
-              <Plus className="mr-2 size-4" />
-              {t("emailTemplates.ui.create")}
-            </Link>
+          <Button
+            variant="primary"
+            disabled={isActionPending}
+            onClick={() => setIsCreationOpen(true)}
+          >
+            <Plus className="mr-2 size-4" />
+            {t("emailTemplates.ui.create")}
           </Button>
         </div>
-        {isError && (
-          <div role="alert" className="rounded-lg border p-4">
-            {t("emailTemplates.ui.requestFailed")}{" "}
-            <Button variant="outline" onClick={() => void refetch()}>
-              {t("emailTemplates.ui.retry")}
-            </Button>
-          </div>
-        )}
-        <div>
+        <SearchInput
+          value={searchParams.get("search") ?? ""}
+          onChange={(event) => {
+            const search = event.target.value;
+            setSearchParams(
+              (current) => {
+                const next = new URLSearchParams(current);
+                if (search) next.set("search", search);
+                else next.delete("search");
+                next.set("page", "1");
+                return next;
+              },
+              { replace: true },
+            );
+          }}
+          maxLength={200}
+          placeholder={t("emailTemplates.ui.searchTemplates")}
+          aria-label={t("emailTemplates.ui.searchTemplates")}
+          wrapperClassName="w-full sm:max-w-xs"
+        />
+        <div className="flex flex-col">
           <Table className="border bg-neutral-50" data-testid={EMAIL_TEMPLATES_HANDLES.TABLE}>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("emailTemplates.ui.name")}</TableHead>
-                <TableHead>{t("emailTemplates.ui.event")}</TableHead>
-                <TableHead>{t("emailTemplates.ui.status")}</TableHead>
-                <TableHead>{t("emailTemplates.ui.languages")}</TableHead>
-                <TableHead className="text-right">{t("emailTemplates.ui.actions")}</TableHead>
+                <TableHead>{t("emailTemplates.ui.subject")}</TableHead>
+                <TableHead className="w-40">{t("emailTemplates.ui.status")}</TableHead>
+                <TableHead className="w-48">{t("emailTemplates.ui.lastUpdated")}</TableHead>
+                <TableHead className="w-12">
+                  <span className="sr-only">{t("emailTemplates.ui.actions")}</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isPending && (
                 <TableRow>
-                  <TableCell colSpan={5}>{t("emailTemplates.ui.loading")}</TableCell>
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                    {t("emailTemplates.ui.loading")}
+                  </TableCell>
                 </TableRow>
               )}
               {data?.data.map((template) => (
                 <TableRow
                   key={template.id ?? template.event}
-                  data-testid={EMAIL_TEMPLATES_HANDLES.ROW(template.id ?? template.event)}
-                  className="cursor-pointer hover:bg-neutral-100"
-                  onClick={(event) => {
-                    if ((event.target as HTMLElement).closest("a, button")) return;
-
-                    navigate(
-                      template.id
-                        ? `${EMAIL_TEMPLATE_LIST_PATH}/${template.id}`
-                        : `${EMAIL_TEMPLATE_LIST_PATH}/defaults/${template.event}`,
-                    );
+                  className="cursor-pointer hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  tabIndex={0}
+                  onClick={() => openEmailTemplate(template)}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && event.key === "Enter") {
+                      openEmailTemplate(template);
+                    }
                   }}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.ROW(
+                    template.id ?? template.event ?? "builtin",
+                  )}
                 >
                   <TableCell>
-                    <Link
-                      className="font-medium text-neutral-900 hover:underline"
-                      to={
-                        template.id
-                          ? `${EMAIL_TEMPLATE_LIST_PATH}/${template.id}`
-                          : `${EMAIL_TEMPLATE_LIST_PATH}/defaults/${template.event}`
-                      }
-                    >
+                    <span className="text-sm font-normal">
                       {getLocalizedTemplateName(template, language)}
-                    </Link>
+                    </span>
                   </TableCell>
-                  <TableCell>{t(`emailTemplates.events.${template.event}`)}</TableCell>
+                  <TableCell className="max-w-xs text-sm text-muted-foreground">
+                    <span className="line-clamp-2 break-words">
+                      {template.subject[language]?.trim() ||
+                        template.subject[template.baseLanguage]?.trim() ||
+                        "—"}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={
@@ -143,66 +216,44 @@ export default function EmailTemplatesPage() {
                           template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM
                         ]
                       }
-                      fontWeight="bold"
-                      icon={
-                        EMAIL_TEMPLATE_STATUS_BADGE_ICONS[
-                          template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM
-                        ]
-                      }
-                      iconClasses="size-4"
                       className="w-fit"
                     >
                       {t(`emailTemplates.ui.${template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {template.completeLocales.map((locale) => {
-                        const option = languageOptions.find((language) => language.key === locale);
-                        if (!option) return null;
-
-                        return (
-                          <span key={locale} title={t(option.translationKey)}>
-                            <Icon
-                              name={option.iconName}
-                              className="h-auto w-6"
-                              role="img"
-                              aria-label={t(option.translationKey)}
-                            />
-                          </span>
-                        );
-                      })}
-                      {!template.completeLocales.length && "—"}
-                    </div>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    {template.updatedAt ? (
+                      <time dateTime={template.updatedAt}>
+                        {formatLocalizedDate(language, template.updatedAt)}
+                      </time>
+                    ) : (
+                      "—"
+                    )}
                   </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      {template.source === EMAIL_TEMPLATE_SOURCES.DEFAULT ? (
+                  <TableCell className="text-right" onClick={(event) => event.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("emailTemplates.ui.copyDefault")}
-                          title={t("emailTemplates.ui.copyDefault")}
+                          className="size-8"
                           disabled={isActionPending}
-                          onClick={() =>
-                            void copyDefaultTemplate(template.event)
-                              .then((copied) =>
-                                navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copied.id}`),
-                              )
-                              .catch(() => undefined)
-                          }
+                          aria-label={t("emailTemplates.ui.actions")}
                         >
-                          <Copy className="size-4" />
+                          <MoreVertical className="size-4" />
                         </Button>
-                      ) : (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-64 space-y-1 p-2">
+                        {template.source === EMAIL_TEMPLATE_SOURCES.DEFAULT ? (
+                          <DropdownMenuItem
+                            className={menuItemClassName}
                             disabled={isActionPending}
-                            aria-label={t("emailTemplates.ui.duplicate")}
-                            onClick={() =>
-                              void duplicateTemplate(template.id!)
+                            onSelect={() =>
+                              void (
+                                template.event
+                                  ? copyDefaultTemplate(template.event)
+                                  : Promise.reject(new Error("Missing built-in template key"))
+                              )
                                 .then((copied) =>
                                   navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copied.id}`),
                                 )
@@ -210,59 +261,77 @@ export default function EmailTemplatesPage() {
                             }
                           >
                             <Copy className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isActionPending}
-                            data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
-                            aria-label={t("emailTemplates.ui.delete")}
-                            onClick={() =>
-                              setPendingConfirmation({
-                                templateId: template.id!,
-                                action: EMAIL_TEMPLATE_ACTIONS.DELETE,
-                              })
-                            }
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                          {template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED ? (
-                            <Button
-                              variant="ghost"
-                              size="icon"
+                            {t("emailTemplates.ui.copyDefault")}
+                          </DropdownMenuItem>
+                        ) : (
+                          <>
+                            <DropdownMenuItem
+                              className={menuItemClassName}
                               disabled={isActionPending}
-                              aria-label={t("emailTemplates.ui.restore")}
-                              onClick={() =>
-                                void restoreTemplate(template.id!).catch(() => undefined)
+                              onSelect={() =>
+                                void duplicateTemplate(template.id!)
+                                  .then((copied) =>
+                                    navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copied.id}`),
+                                  )
+                                  .catch(() => undefined)
                               }
                             >
-                              <RotateCcw className="size-4" />
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="icon"
+                              <Copy className="size-4" />
+                              {t("emailTemplates.ui.duplicate")}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED ? (
+                              <DropdownMenuItem
+                                className={menuItemClassName}
+                                disabled={isActionPending}
+                                onSelect={() =>
+                                  void restoreTemplate(template.id!).catch(() => undefined)
+                                }
+                              >
+                                <RotateCcw className="size-4" />
+                                {t("emailTemplates.ui.restore")}
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                className={destructiveMenuItemClassName}
+                                disabled={isActionPending}
+                                onSelect={() =>
+                                  setPendingConfirmation({
+                                    templateId: template.id!,
+                                    action: EMAIL_TEMPLATE_ACTIONS.ARCHIVE,
+                                  })
+                                }
+                              >
+                                <Archive className="size-4" />
+                                {t("emailTemplates.ui.archive")}
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              className={destructiveMenuItemClassName}
                               disabled={isActionPending}
-                              aria-label={t("emailTemplates.ui.archive")}
-                              onClick={() =>
+                              data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
+                              onSelect={() =>
                                 setPendingConfirmation({
                                   templateId: template.id!,
-                                  action: EMAIL_TEMPLATE_ACTIONS.ARCHIVE,
+                                  action: EMAIL_TEMPLATE_ACTIONS.DELETE,
                                 })
                               }
                             >
-                              <Archive className="size-4" />
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
+                              <Trash2 className="size-4" />
+                              {t("emailTemplates.ui.delete")}
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
               {!isPending && !isError && !data?.data.length && (
                 <TableRow>
-                  <TableCell colSpan={5}>{t("emailTemplates.ui.emptyList")}</TableCell>
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                    {t("emailTemplates.ui.emptyList")}
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -280,6 +349,7 @@ export default function EmailTemplatesPage() {
           />
         </div>
       </div>
+      {isCreationOpen && <CreateEmailTemplateDialog onClose={() => setIsCreationOpen(false)} />}
       <EmailTemplateConfirmation
         action={pendingConfirmation?.action ?? null}
         isActionPending={isArchiving || isDeleting}
@@ -297,6 +367,6 @@ export default function EmailTemplatesPage() {
             .catch(() => undefined);
         }}
       />
-    </PageWrapper>
+    </>
   );
 }

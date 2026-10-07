@@ -10,9 +10,14 @@ type ApiErrorResponseWithCount = ApiErrorResponse & {
 const getFirstMessage = (message?: string | string[]) =>
   Array.isArray(message) ? message[0] : message;
 
-export const getTranslatedApiErrorMessage = (error: unknown, t: TFunction, fallback: string) => {
+export const getTranslatedApiErrorMessage = (
+  error: unknown,
+  t: TFunction,
+  fallback: string,
+  { allowUntranslatedMessage = true }: { allowUntranslatedMessage?: boolean } = {},
+) => {
   if (typeof error === "string" && error.trim()) {
-    return t(error, { defaultValue: error });
+    return t(error, { defaultValue: allowUntranslatedMessage ? error : fallback });
   }
 
   if (error instanceof AxiosError) {
@@ -23,11 +28,14 @@ export const getTranslatedApiErrorMessage = (error: unknown, t: TFunction, fallb
       return t(message, {
         count: responseData?.count,
         ...responseData?.translationParams,
+        defaultValue: allowUntranslatedMessage ? message : fallback,
       });
     }
   }
 
-  if (error instanceof Error && error.message) return error.message;
+  if (error instanceof Error && error.message) {
+    return t(error.message, { defaultValue: allowUntranslatedMessage ? error.message : fallback });
+  }
 
   return fallback;
 };

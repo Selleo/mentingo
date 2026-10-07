@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  AUTOMATION_EVENT_KINDS,
   OnboardingPages,
   PERMISSIONS,
   SESSION_REVOCATION_SOCKET,
@@ -37,11 +38,12 @@ import {
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { isEqual } from "lodash";
-import { nanoid } from "nanoid";
 import { match } from "ts-pattern";
 
+import { CORS_ORIGIN } from "src/auth/consts";
 import { CreatePasswordService } from "src/auth/create-password.service";
-import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
+import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
 import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -55,8 +57,6 @@ import {
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
 import { ArchiveUsersEvent, CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
-import { UserInviteEvent } from "src/events/user/user-invite.event";
-import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { GroupService } from "src/group/group.service";
@@ -76,7 +76,6 @@ import {
 import { WsGateway } from "src/websocket/websocket.gateway";
 
 import {
-  createTokens,
   credentials,
   groups,
   groupManagerGroups,
@@ -153,6 +152,7 @@ export class UserService {
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly wsGateway: WsGateway,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
+    private readonly notificationAccountActionService: NotificationAccountActionService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -776,80 +776,76 @@ export class UserService {
     const createUser = async (trx: DatabasePg) => {
       await this.assertUserEmailAvailable(data.email, trx);
 
-      const { createdUser, token, newUsersLanguage } = await this.createUserCore(
-        trx,
-        data,
-        context,
-      );
+      const { createdUser, newUsersLanguage } = await this.createUserCore(trx, data, context);
+      if (context.flowType === USER_CREATION_FLOW_TYPE.REGISTRATION) return createdUser;
+      if (context.flowType === USER_CREATION_FLOW_TYPE.ADMIN) {
+        const snapshot = await this.buildUserActivitySnapshot(createdUser.id, trx);
+        await this.outboxPublisher.publish(
+          new CreateUserEvent({
+            userId: createdUser.id,
+            actor: context.creator,
+            createdUserData: snapshot,
+          }),
+          trx,
+        );
+      }
+      await this.publishAccountSetupNotification(createdUser, newUsersLanguage, context, trx);
 
-      return await match(context)
-        .with({ flowType: USER_CREATION_FLOW_TYPE.REGISTRATION }, () => createdUser)
-        .with({ flowType: USER_CREATION_FLOW_TYPE.ADMIN }, async (adminContext) => {
-          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
-
-          const snapshot = await this.buildUserActivitySnapshot(createdUser.id, trx);
-
-          await this.outboxPublisher.publish(
-            new CreateUserEvent({
-              userId: createdUser.id,
-              actor: adminContext.creator,
-              createdUserData: snapshot,
-            }),
-            trx,
-          );
-
-          await this.outboxPublisher.publish(
-            new UserInviteEvent({
-              creatorId: adminContext.creator.userId,
-              email: createdUser.email,
-              token,
-              userId: createdUser.id,
-              tenantId: createdUser.tenantId,
-            }),
-            trx,
-          );
-
-          return createdUser;
-        })
-        .with({ flowType: USER_CREATION_FLOW_TYPE.INVITE }, async (inviteContext) => {
-          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
-
-          await this.outboxPublisher.publish(
-            new UserInviteEvent({
-              email: createdUser.email,
-              token,
-              userId: createdUser.id,
-              tenantId: createdUser.tenantId,
-              invitedByUserName: inviteContext.invitedByUserName,
-              origin: inviteContext.origin,
-            }),
-            trx,
-          );
-
-          return createdUser;
-        })
-        .with({ flowType: USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER }, async () => {
-          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
-
-          await this.outboxPublisher.publish(
-            new UserPasswordReminderEvent({
-              email: createdUser.email,
-              token,
-              userId: createdUser.id,
-              tenantId: createdUser.tenantId,
-              language: newUsersLanguage,
-            }),
-            trx,
-          );
-
-          return createdUser;
-        })
-        .exhaustive();
+      return createdUser;
     };
 
     if (dbInstance) return await createUser(dbInstance);
 
     return await this.db.transaction(createUser);
+  }
+
+  private async publishAccountSetupNotification(
+    createdUser: typeof users.$inferSelect,
+    language: SupportedLanguages,
+    context: CreateUserContext,
+    transaction: DatabasePg,
+  ): Promise<void> {
+    const [tenant] = await transaction
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, createdUser.tenantId));
+    const origin = context.flowType === USER_CREATION_FLOW_TYPE.INVITE ? context.origin : undefined;
+    const accountActionIntentId =
+      await this.notificationAccountActionService.createNotificationAccountActionIntent(
+        {
+          userId: createdUser.id,
+          kind: "create_password",
+          applicationOrigin: (origin || tenant?.host || CORS_ORIGIN).replace(/\/$/, ""),
+          tokenTtlMs: 365 * 86400000,
+          usesCalendarYearExpiry: true,
+          reminderCount: 0,
+        },
+        transaction,
+      );
+    let invitedBy = "Admin";
+    if (context.flowType === USER_CREATION_FLOW_TYPE.INVITE)
+      invitedBy = context.invitedByUserName ?? "Admin";
+    if (context.flowType === USER_CREATION_FLOW_TYPE.ADMIN) {
+      const creator = await this.getUserById(context.creator.userId, transaction);
+      invitedBy = `${creator.firstName} ${creator.lastName}`.trim() || "Admin";
+    }
+    const kind =
+      context.flowType === USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER
+        ? AUTOMATION_EVENT_KINDS.PASSWORD_REMINDER
+        : AUTOMATION_EVENT_KINDS.USER_INVITE;
+    await this.outboxPublisher.publish(
+      createUserNotificationEvent({
+        kind,
+        user: createdUser,
+        language,
+        eventFields: {
+          invitedByUserName: invitedBy,
+          invited_by_user_name: invitedBy,
+        },
+        accountActionIntentId,
+      }),
+      transaction,
+    );
   }
 
   private async assertUserEmailAvailable(email: string, dbInstance: DatabasePg) {
@@ -912,8 +908,6 @@ export class UserService {
       return { createdUser, newUsersLanguage };
     }
 
-    const token = await this.createUserPasswordToken(createdUser.id, trx);
-
     const rolePermissions = await this.getPermissionsForRoleSlugs(
       roleSlugs,
       createdUser.tenantId,
@@ -932,25 +926,7 @@ export class UserService {
         .values({ userId: createdUser.id, contactEmail: createdUser.email });
     }
 
-    return { createdUser, token, newUsersLanguage };
-  }
-
-  private async createUserPasswordToken(userId: UUIDType, trx: DatabasePg) {
-    const token = nanoid(64);
-
-    const hashedCreateToken = hashToken(token);
-
-    const expiryDate = new Date();
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-
-    await trx.insert(createTokens).values({
-      userId,
-      tokenHash: hashedCreateToken,
-      expiryDate,
-      reminderCount: 0,
-    });
-
-    return token;
+    return { createdUser, newUsersLanguage };
   }
 
   private async resolveCreateUserSettings(
@@ -1290,6 +1266,8 @@ export class UserService {
       .select({
         id: users.id,
         email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
         tenantId: users.tenantId,
         tenantHost: tenants.host,
         defaultEmailSettings: sql<

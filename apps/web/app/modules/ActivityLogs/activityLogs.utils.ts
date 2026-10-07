@@ -43,6 +43,11 @@ const defaultActionConfig: ActivityLogActionConfig = {
 };
 
 export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogActionConfig> = {
+  apply_automation: defaultActionConfig,
+  enable_automation: { ...defaultActionConfig, icon: Play },
+  disable_automation: defaultActionConfig,
+  duplicate_automation: defaultActionConfig,
+  archive_automation: { ...defaultActionConfig, icon: Archive },
   create: {
     icon: CirclePlus,
     badgeClassName: "border-green-200 bg-green-50 text-green-700",

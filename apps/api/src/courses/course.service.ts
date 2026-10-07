@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import {
   BadRequestException,
   ConflictException,
@@ -9,8 +11,10 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { EMAIL_TEMPLATE_EVENTS, OverdueCoursesEmail } from "@repo/email-templates";
+import { buildOverdueCoursesEventFields } from "@repo/email-templates";
 import {
+  AUTOMATION_EVENT_KINDS,
+  SUPPORTED_LANGUAGES,
   COURSE_FEATURE,
   COURSE_ENROLLMENT,
   COURSE_ORIGIN_TYPES,
@@ -52,12 +56,11 @@ import { alias } from "drizzle-orm/pg-core";
 import { isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
+import { NotificationEvent } from "src/automation-execution/events/notification-event";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
-import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import {
@@ -111,6 +114,7 @@ import { LumaService } from "src/luma/luma.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { dbAls } from "src/storage/db/db-als.store";
 import {
   groupCourses,
   aiJudgeBlockingErrors,
@@ -1669,7 +1673,9 @@ export class CourseService {
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
-                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${assessmentQuestions.id})
+                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${
+                      assessmentQuestions.id
+                    })
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
@@ -1678,7 +1684,9 @@ export class CourseService {
                 }
                   AND ${studentLessonProgress.studentId} = ${userId}
                 LEFT JOIN ${assessments} ON ${assessments.lessonId} = ${lessons.id}
-                LEFT JOIN ${assessmentQuestions} ON ${assessments.id} = ${assessmentQuestions.assessmentId}
+                LEFT JOIN ${assessmentQuestions} ON ${assessments.id} = ${
+                  assessmentQuestions.assessmentId
+                }
                 LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
                 GROUP BY
@@ -5451,11 +5459,7 @@ export class CourseService {
   async sendOverdueCoursesEmails() {
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutOverdueCourse();
 
-    if (adminsToNotify.length === 0) return;
-
-    const requestedLanguages = Array.from(
-      new Set(adminsToNotify.map(({ defaultEmailSettings }) => defaultEmailSettings.language)),
-    );
+    const requestedLanguages = Object.values(SUPPORTED_LANGUAGES);
 
     const overdueCoursesByLanguage = await this.getOverdueCoursesByLanguage(requestedLanguages);
 
@@ -5465,40 +5469,63 @@ export class CourseService {
       overdueCoursesByLanguage.map(({ language, courses }) => [language, courses]),
     );
 
-    await processInBatches(
-      adminsToNotify,
-      async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
+    const localizedCollections = Object.fromEntries(
+      overdueCoursesByLanguage.map(({ language, courses }) => [language, courses]),
+    );
+    const localizedSummary = buildOverdueCoursesEventFields(localizedCollections);
+    const recipients = adminsToNotify.flatMap(
+      ({ email, firstName, lastName, tenantHost, defaultEmailSettings }) => {
         const coursesForLanguage = overdueCoursesMap.get(defaultEmailSettings.language);
-
-        if (!coursesForLanguage?.length) return;
-
-        const { text, html } = new OverdueCoursesEmail({
-          courses: coursesForLanguage,
-          coursesLink: this.buildAdminCoursesUrl(tenantHost),
-          ...defaultEmailSettings,
-        });
-
-        return this.emailService.sendEmailWithLogo(
+        if (!coursesForLanguage?.length) return [];
+        return [
           {
-            to: email,
-            subject: getEmailSubject("adminOverdueCoursesEmail", defaultEmailSettings.language),
-            text,
-            html,
-          },
-          {
-            tenantId,
-            template: {
-              event: EMAIL_TEMPLATE_EVENTS.ADMIN_OVERDUE_COURSES,
-              language: defaultEmailSettings.language,
-              variables: {
-                courses: coursesForLanguage,
-                courses_link: this.buildAdminCoursesUrl(tenantHost),
-              },
+            itemId: email,
+            email,
+            language: defaultEmailSettings.language,
+            eventFields: {
+              userFirstName: firstName,
+              userLastName: lastName,
+              userEmail: email,
+              courses: localizedCollections,
+              courses_link: this.buildAdminCoursesUrl(tenantHost),
+              ...localizedSummary,
             },
           },
-        );
+        ];
       },
-      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
+    );
+    const tenantId = dbAls.getStore()?.tenantId;
+
+    if (!tenantId) {
+      throw new Error("Overdue course notifications require an originating tenant");
+    }
+
+    const [tenant] = await this.db
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    if (!tenant) {
+      throw new Error("Overdue course notification tenant was not found");
+    }
+
+    await this.outboxPublisher.publish(
+      new NotificationEvent(
+        randomUUID(),
+        AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES,
+        recipients,
+        [
+          {
+            itemId: tenantId,
+            eventFields: {
+              courses: localizedCollections,
+              courses_link: this.buildAdminCoursesUrl(tenant.host),
+              ...localizedSummary,
+            },
+          },
+        ],
+      ),
     );
   }
 
@@ -5537,6 +5564,8 @@ export class CourseService {
       .selectDistinct({
         studentId: users.id,
         studentEmail: users.email,
+        studentFirstName: users.firstName,
+        studentLastName: users.lastName,
         tenantId: users.tenantId,
         tenantHost: tenants.host,
         courseId: courses.id,

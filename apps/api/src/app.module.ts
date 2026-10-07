@@ -8,10 +8,13 @@ import { ThrottlerModule } from "@nestjs/throttler";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
+import { AutomationExecutionModule } from "src/automation-execution/automation-execution.module";
+import { AutomationModule } from "src/automations/automation.module";
 import { EnvModule } from "src/env/env.module";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
+import { NotificationsModule } from "src/notifications/notifications.module";
 import { QAModule } from "src/qa/qa.module";
 import { QueueModule } from "src/queue";
 import { REDIS_CLIENT, RedisClientsModule } from "src/redis";
@@ -144,6 +147,9 @@ import type { RedisClient } from "src/redis";
     UserModule,
     EmailModule,
     EmailTemplateModule,
+    AutomationModule,
+    AutomationExecutionModule,
+    NotificationsModule,
     TestConfigModule,
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),

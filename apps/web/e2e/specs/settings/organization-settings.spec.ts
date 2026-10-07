@@ -8,10 +8,6 @@ import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.fl
 
 import type { FixtureApiClient } from "../../utils/api-client";
 import type { Locator, Page } from "@playwright/test";
-import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
-
-type GlobalSettings = GetPublicGlobalSettingsResponse["data"];
-type UserEmailTriggerKey = keyof GlobalSettings["userEmailTriggers"];
 
 const openOrganizationSettings = async (page: Page) => {
   await openSettingsPageFlow(page);
@@ -103,46 +99,12 @@ test("admin can toggle invite-only registration and the setting persists", async
   });
 });
 
-test("admin can toggle each user email trigger and the changed state persists", async ({
-  apiClient,
-  cleanup,
-  withWorkerPage,
+test("organization settings no longer expose email trigger switches", async ({
+  withReadonlyPage,
 }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalSettings = await getGlobalSettings(apiClient);
-    const triggerKeys = Object.keys(originalSettings.userEmailTriggers) as UserEmailTriggerKey[];
-
-    cleanup.add(async () => {
-      const currentSettings = await getGlobalSettings(apiClient);
-
-      for (const triggerKey of triggerKeys) {
-        if (
-          currentSettings.userEmailTriggers[triggerKey] !==
-          originalSettings.userEmailTriggers[triggerKey]
-        ) {
-          await apiClient.api.settingsControllerUpdateUserEmailTriggers(triggerKey);
-        }
-      }
-    });
-
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
     await openOrganizationSettings(page);
-
-    for (const triggerKey of triggerKeys) {
-      await page.getByTestId(SETTINGS_PAGE_HANDLES.userEmailTriggerSwitch(triggerKey)).click();
-      await expect
-        .poll(async () => (await getGlobalSettings(apiClient)).userEmailTriggers[triggerKey])
-        .toBe(!originalSettings.userEmailTriggers[triggerKey]);
-    }
-
-    await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-
-    for (const triggerKey of triggerKeys) {
-      await expectSwitchState(
-        page.getByTestId(SETTINGS_PAGE_HANDLES.userEmailTriggerSwitch(triggerKey)),
-        !originalSettings.userEmailTriggers[triggerKey],
-      );
-    }
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_EMAIL_TRIGGERS_CARD)).toHaveCount(0);
   });
 });
 

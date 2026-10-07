@@ -3,7 +3,6 @@ import { AgeLimitSelect } from "~/modules/Dashboard/Settings/components/admin/Ag
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
 import { LiveTrainingMaxParallelSessionsSetting } from "~/modules/Dashboard/Settings/components/admin/LiveTrainingMaxParallelSessionsSetting";
 import { UploadFilesToLoginPage } from "~/modules/Dashboard/Settings/components/admin/UploadFilesToLoginPage";
-import UserEmailTriggers from "~/modules/Dashboard/Settings/components/admin/UserEmailTriggers";
 
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
@@ -28,7 +27,6 @@ export default function OrganizationTabContent({ globalSettings }: OrganizationT
     <>
       <ConfigurationStatus />
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
-      <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />
       <InviteOnlyRegistration inviteOnlyRegistration={globalSettings.inviteOnlyRegistration} />
       <LiveTrainingMaxParallelSessionsSetting
         value={globalSettings.liveTrainingMaxParallelSessions}

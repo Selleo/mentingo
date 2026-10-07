@@ -3,6 +3,15 @@ import { PERMISSIONS } from "@repo/shared";
 import { checkRouteAccess } from "../RouteGuard";
 
 describe("checkRouteAccess", () => {
+  it("keeps management and log permissions separate", () => {
+    for (const route of ["admin/automations", "admin/automations/new", "admin/automations/id"]) {
+      expect(checkRouteAccess(route, [PERMISSIONS.AUTOMATION_MANAGE])).toBe(true);
+      expect(checkRouteAccess(route, [PERMISSIONS.AUTOMATION_LOG_READ])).toBe(false);
+      expect(checkRouteAccess(route, [PERMISSIONS.EMAIL_TEMPLATE_MANAGE])).toBe(false);
+    }
+    expect(checkRouteAccess("admin/automation-logs", [PERMISSIONS.AUTOMATION_LOG_READ])).toBe(true);
+    expect(checkRouteAccess("admin/automation-logs", [PERMISSIONS.AUTOMATION_MANAGE])).toBe(false);
+  });
   it("requires email-template permission for every builder route", () => {
     for (const route of [
       "admin/email-templates",

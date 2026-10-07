@@ -1,0 +1,1 @@
+export const DEFAULT_EMAIL_PRIMARY_COLOR = "#4796FD";

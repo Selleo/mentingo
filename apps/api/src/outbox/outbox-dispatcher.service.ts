@@ -3,6 +3,7 @@ import { EventBus } from "@nestjs/cqrs";
 
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { OutboxDirectHandlerService } from "./outbox-direct-handler.service";
 import { materializeLegacyEvent } from "./outbox.event-registry";
 import { OutboxRepository } from "./outbox.repository";
 
@@ -14,9 +15,10 @@ export class OutboxDispatcherService {
   private isRunning = false;
 
   constructor(
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly outboxRepository: OutboxRepository,
     private readonly eventBus: EventBus,
+    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
   ) {}
 
   async dispatchPendingEvents(): Promise<void> {
@@ -25,7 +27,8 @@ export class OutboxDispatcherService {
     this.isRunning = true;
 
     try {
-      await this.tenantRunner.runForEachTenant(async (tenantId) => {
+      await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
+        await this.outboxRepository.recoverNotificationIntake();
         let event = await this.outboxRepository.claimNext();
 
         while (event) {
@@ -47,6 +50,15 @@ export class OutboxDispatcherService {
     }
 
     try {
+      const handled = await this.outboxDirectHandlerService.dispatch(
+        event.eventType,
+        event.payload,
+        event.id,
+      );
+      if (handled) {
+        await this.outboxRepository.markPublished(event.id, true);
+        return;
+      }
       const materializedEvent = materializeLegacyEvent(
         event.eventType,
         event.payload as Record<string, unknown>,
@@ -55,6 +67,15 @@ export class OutboxDispatcherService {
       await this.eventBus.publish(materializedEvent);
       await this.outboxRepository.markPublished(event.id);
     } catch (error) {
+      if (
+        event.eventType === "NotificationEvent" ||
+        event.eventType === "AutomationEmailDeliveryRequestedEvent"
+      ) {
+        const message = "Notification outbox intake failed";
+        this.logger.error(`[tenant=${tenantId}] ${message}: event=${event.id}`);
+        await this.outboxRepository.markFailed(event.id, message, event.attemptCount + 1);
+        return;
+      }
       this.logger.error(
         `[tenant=${tenantId}] Failed processing outbox event ${event.id} (${event.eventType}): ${error}`,
       );

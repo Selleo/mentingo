@@ -1,8 +1,5 @@
 import type { SupportedLanguages } from "@repo/shared";
-import type {
-  CompanyInformationSchema,
-  UserEmailTriggersSchema,
-} from "src/settings/schemas/settings.schema";
+import type { CompanyInformationSchema } from "src/settings/schemas/settings.schema";
 
 export type ActivityHistory = {
   [date: string]: boolean;
@@ -16,7 +13,6 @@ export type GlobalSettings = {
   calendarEnabled: boolean;
   liveTrainingEnabled: boolean;
   companyInformation?: CompanyInformationSchema;
-  userEmailTriggers?: UserEmailTriggersSchema;
   platformLogoS3Key: string | null;
   platformSimpleLogoS3Key: string | null;
   primaryColor: string | null;

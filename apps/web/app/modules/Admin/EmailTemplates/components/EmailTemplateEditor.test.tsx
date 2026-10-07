@@ -20,11 +20,11 @@ const api = vi.hoisted(() => ({
 vi.mock("~/api/api-client", () => ({
   ApiClient: {
     api: {
-      emailTemplateControllerPreviewEmailTemplate: api.preview,
-      emailTemplateControllerUpdateEmailTemplate: api.save,
-      emailTemplateControllerDeleteEmailTemplate: api.delete,
-      emailTemplateControllerRemoveEmailTemplateLanguage: api.removeLanguage,
-      emailTemplateControllerUploadEmailTemplateImage: api.upload,
+      emailTemplateManagementControllerPreviewEmailTemplate: api.preview,
+      emailTemplateManagementControllerUpdateEmailTemplate: api.save,
+      emailTemplateManagementControllerDeleteEmailTemplate: api.delete,
+      emailTemplateManagementControllerRemoveEmailTemplateLanguage: api.removeLanguage,
+      emailTemplateManagementControllerUploadEmailTemplateImage: api.upload,
     },
   },
 }));
@@ -87,6 +87,41 @@ const imageTemplate: EmailTemplate = {
 
 describe("EmailTemplateEditor", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("authors placeholders independently of events and saves their declarations", async () => {
+    api.save.mockResolvedValue({ data: { data: template } });
+    const user = userEvent.setup();
+    renderWith({ withQuery: true }).render(<EmailTemplateEditor template={template} />);
+    expect(screen.queryByRole("combobox", { name: "Notification event" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Add placeholder" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Placeholder name" }), {
+      target: { value: "learner_name" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "Placeholder label" }), {
+      target: { value: "Learner name" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "Sample value" }), {
+      target: { value: "Alex" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() =>
+      expect(api.save).toHaveBeenCalledWith(
+        "template-id",
+        expect.objectContaining({
+          placeholders: [
+            {
+              name: "learner_name",
+              label: "Learner name",
+              type: "string",
+              required: false,
+              sampleValue: "Alex",
+            },
+          ],
+        }),
+      ),
+    );
+    expect(api.save.mock.calls[0]![1]).not.toHaveProperty("event");
+  });
 
   it("keeps a block selected while editing its content", async () => {
     const user = userEvent.setup();
@@ -269,6 +304,7 @@ describe("EmailTemplateEditor", () => {
         name: {},
         subject: { en: "New subject" },
         content: {},
+        placeholders: [],
       }),
     );
     await waitFor(() => expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled());

@@ -49,3 +49,6 @@ export { EMAIL_TEMPLATE_DEFINITIONS, EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT, getEma
 export * from "./template-registry.types";
 export * from "./template-renderer";
 export * from "./template-renderer.types";
+export * from "./publication.types";
+export * from "./publications";
+export * from "./template-usage";
