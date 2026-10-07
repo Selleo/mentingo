@@ -3,8 +3,10 @@ import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useUnreadAnnouncementsCount } from "~/api/queries/useUnreadAnnouncementsCount";
+import { monoNavigationRowVariants } from "~/components/Navigation/NavigationMenuItem";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 import { NOTIFICATIONS_HANDLES } from "../handles";
@@ -32,14 +34,26 @@ export function NotificationsNavigationItem({
 
   const unreadCount = data?.unreadCount ?? 0;
 
-  const baseTriggerClassName = cn(
-    "relative flex w-full items-center gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
-    { "justify-center": !showLabel },
-  );
+  const getTriggerClassName = (isActive = false) =>
+    cn(
+      !IS_MONO_DESIGN && [
+        "relative flex w-full items-center gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+        { "justify-center": !showLabel, "border-primary-200 text-primary-800": isActive },
+      ],
+      IS_MONO_DESIGN && monoNavigationRowVariants({ isActive, isCollapsed: !showLabel }),
+    );
 
   const renderTriggerContent = (isActive = false) => (
     <>
-      <Bell className={cn("size-6", { "text-primary-700": isActive })} aria-hidden />
+      <Bell
+        className={cn(
+          "size-6",
+          { "text-primary-700": isActive },
+          IS_MONO_DESIGN && "size-5",
+          IS_MONO_DESIGN && showLabel && "hidden",
+        )}
+        aria-hidden
+      />
       <span
         className={cn("line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize", {
           "sr-only": !showLabel,
@@ -65,11 +79,7 @@ export function NotificationsNavigationItem({
       <NavLink
         to="/notifications"
         onClick={onMobileNavigate}
-        className={({ isActive }) =>
-          cn(baseTriggerClassName, "2xl:hidden", {
-            "border-primary-200 text-primary-800": isActive,
-          })
-        }
+        className={({ isActive }) => cn(getTriggerClassName(isActive), "2xl:hidden")}
         data-testid={NOTIFICATIONS_HANDLES.MOBILE_TRIGGER}
       >
         {({ isActive }) => renderTriggerContent(isActive)}
@@ -79,7 +89,7 @@ export function NotificationsNavigationItem({
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger
-              className={cn(baseTriggerClassName, "hidden 2xl:flex")}
+              className={cn(getTriggerClassName(), "hidden 2xl:flex")}
               data-testid={NOTIFICATIONS_HANDLES.TRIGGER}
             >
               {renderTriggerContent()}

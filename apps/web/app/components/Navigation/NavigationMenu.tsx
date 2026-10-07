@@ -1,4 +1,6 @@
 import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
+import { IS_MONO_DESIGN } from "~/config/designVariant";
+import { cn } from "~/lib/utils";
 
 import { ExpandableNavigationMenu } from "./ExpandableNavigationMenu";
 import { NavigationMenuItem } from "./NavigationMenuItem";
@@ -53,7 +55,7 @@ export function NavigationMenu({
   }
 
   return (
-    <menu className="flex flex-col gap-y-3 2xl:h-min">
+    <menu className={cn("flex flex-col gap-y-3 2xl:h-min", IS_MONO_DESIGN && "gap-y-0")}>
       {filteredMenuItems.map((item) => {
         return (
           <NavigationMenuItem

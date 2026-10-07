@@ -1,12 +1,13 @@
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
-import { NavigationMenuItem } from "./NavigationMenuItem";
+import { monoNavigationRowVariants, NavigationMenuItem } from "./NavigationMenuItem";
 import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 import { useNavigationStore } from "./stores/navigationStore";
 
@@ -94,10 +95,19 @@ export const ExpandableNavigationMenu = ({
           type="button"
           data-testid={testId}
           className={cn(
-            "text-md flex w-full items-center justify-between gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 hover:bg-white hover:text-neutral-900 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
+            !IS_MONO_DESIGN &&
+              "text-md flex w-full items-center justify-between gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 hover:bg-white hover:text-neutral-900 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
+            IS_MONO_DESIGN && monoNavigationRowVariants({ isCollapsed: !showNavigationLabels }),
           )}
         >
-          <Icon name={expandableIcon} className="size-6" />
+          <Icon
+            name={expandableIcon}
+            className={cn(
+              "size-6",
+              IS_MONO_DESIGN && "size-5",
+              IS_MONO_DESIGN && showNavigationLabels && "hidden",
+            )}
+          />
           <span
             className={cn(
               "line-clamp-1 grow truncate whitespace-nowrap text-left font-normal capitalize",
@@ -110,9 +120,11 @@ export const ExpandableNavigationMenu = ({
           </span>
           {showNavigationLabels && (
             <ChevronDown
-              className={cn("size-6 shrink-0 text-neutral-500", {
-                "rotate-180": isExpanded,
-              })}
+              className={cn(
+                "size-6 shrink-0 text-neutral-500",
+                { "rotate-180": isExpanded },
+                IS_MONO_DESIGN && "size-5",
+              )}
             />
           )}
         </button>
@@ -134,7 +146,7 @@ export const ExpandableNavigationMenu = ({
       )}
 
       {!shouldUseDropdownLayout && isExpanded && (
-        <menu className="ml-4 flex flex-col gap-y-3">
+        <menu className={cn("ml-4 flex flex-col gap-y-3", IS_MONO_DESIGN && "gap-y-0")}>
           {items.map((item) => {
             return (
               <div key={item.label}>

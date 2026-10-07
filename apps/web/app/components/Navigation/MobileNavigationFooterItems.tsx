@@ -2,6 +2,7 @@ import { startTransition } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLogoutUser } from "~/api/mutations";
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
@@ -80,9 +81,12 @@ export const MobileNavigationFooterItems = ({
                   logout();
                 });
               }}
-              className="flex flex-col sm:flex-row gap-y-1 sm:gap-y-0 w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2 body-sm-md"
+              className={cn(
+                "flex flex-col sm:flex-row gap-y-1 sm:gap-y-0 w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2 body-sm-md",
+                IS_MONO_DESIGN && "rounded px-2 font-normal text-neutral-800 hover:bg-neutral-50",
+              )}
             >
-              <Icon name="Logout" className="size-6" />
+              <Icon name="Logout" className={cn("size-6", IS_MONO_DESIGN && "size-5")} />
               <span
                 className={cn(
                   "line-clamp-1 truncate whitespace-nowrap 2xl:sr-only 3xl:not-sr-only",
