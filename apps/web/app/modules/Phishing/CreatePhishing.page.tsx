@@ -6,17 +6,29 @@ import { useCreatePhishingCampaign } from "~/api/mutations/useCreatePhishingCamp
 import { usePhishingOptions } from "~/api/queries/usePhishingOptions";
 import { usePhishingScenarios } from "~/api/queries/usePhishingScenarios";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import MultipleSelector, { type Option } from "~/components/ui/multiselect";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "~/components/ui/select";
 
 import { PhishingGate } from "./PhishingGate";
+import { PhishingLoading, PhishingError, PhishingEmpty } from "./PhishingStates";
 
 import type { FormEvent } from "react";
 import type { ApiClient } from "~/api/api-client";
 type CampaignInput = Parameters<typeof ApiClient.api.phishingControllerCreatePhishingCampaign>[0];
 function CreateCampaign() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { data: options, isPending: loadingOptions, isError: optionsError } = usePhishingOptions();
   const {
@@ -28,6 +40,8 @@ function CreateCampaign() {
   const [review, setReview] = useState<CampaignInput | null>(null),
     [scheduled, setScheduled] = useState(false),
     [error, setError] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<Option[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<Option[]>([]);
   const [requestId] = useState(() => crypto.randomUUID());
   function prepare(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,8 +52,8 @@ function CreateCampaign() {
       name: String(form.get("name")),
       scenarioId: String(form.get("scenarioId")),
       courseId: String(form.get("courseId")),
-      userIds: form.getAll("userIds").map(String),
-      groupIds: form.getAll("groupIds").map(String),
+      userIds: selectedUsers.map(({ value }) => value),
+      groupIds: selectedGroups.map(({ value }) => value),
       sendWindow: {
         start: scheduled ? new Date(String(form.get("start"))).toISOString() : now,
         end: scheduled ? new Date(String(form.get("end"))).toISOString() : now,
@@ -76,119 +90,167 @@ function CreateCampaign() {
   if (loadingOptions || loadingScenarios)
     return (
       <PageWrapper>
-        <p role="status">{t("phishing.loading")}</p>
+        <PhishingLoading />
       </PageWrapper>
     );
   if (optionsError || scenariosError)
     return (
       <PageWrapper>
-        <p role="alert">{t("phishing.serviceError")}</p>
-        <Link to="/phishing">{t("phishing.back")}</Link>
+        <PhishingError />
+        <Button variant="ghost" asChild>
+          <Link to="/phishing">{t("phishing.back")}</Link>
+        </Button>
+      </PageWrapper>
+    );
+  if (!scenarios?.length || !options?.courses.length)
+    return (
+      <PageWrapper>
+        <Button variant="ghost" asChild>
+          <Link to="/phishing">{t("phishing.back")}</Link>
+        </Button>
+        <PhishingEmpty message={t("phishing.noOptions")} />
       </PageWrapper>
     );
   return (
     <PageWrapper>
-      <Link to="/phishing">{t("phishing.back")}</Link>
-      <h1 className="my-6 text-2xl font-semibold">{t("phishing.newCampaign")}</h1>
-      <form onSubmit={prepare} className="max-w-2xl space-y-5" hidden={!!review}>
-        <div>
-          <Label htmlFor="name">{t("phishing.name")}</Label>
-          <Input id="name" name="name" required maxLength={150} />
-        </div>
-        <div>
-          <Label htmlFor="scenarioId">{t("phishing.scenario")}</Label>
-          <select id="scenarioId" name="scenarioId" className="w-full rounded border p-3" required>
-            <option value="">{t("phishing.choose")}</option>
-            {scenarios?.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} — {s.description}
-              </option>
-            ))}
-          </select>
-          <p className="text-sm text-neutral-600">{t("phishing.scenarioLanguage")}</p>
-        </div>
-        <div>
-          <Label htmlFor="courseId">{t("phishing.course")}</Label>
-          <select id="courseId" name="courseId" className="w-full rounded border p-3" required>
-            <option value="">{t("phishing.choose")}</option>
-            {options?.courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="userIds">{t("phishing.people")}</Label>
-          <select id="userIds" name="userIds" multiple className="h-44 w-full rounded border p-3">
-            {options?.users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="groupIds">{t("phishing.groups")}</Label>
-          <select id="groupIds" name="groupIds" multiple className="h-32 w-full rounded border p-3">
-            {options?.groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.label}
-              </option>
-            ))}
-          </select>
-          <p className="text-sm">{t("phishing.selectionHelp")}</p>
-        </div>
-        <label className="flex gap-2">
-          <input
-            type="checkbox"
-            checked={scheduled}
-            onChange={(e) => setScheduled(e.target.checked)}
-          />
-          {t("phishing.schedule")}
-        </label>
-        {scheduled && (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="start">{t("phishing.start")}</Label>
-              <Input id="start" name="start" type="datetime-local" required />
+      <Button variant="ghost" asChild>
+        <Link to="/phishing">{t("phishing.back")}</Link>
+      </Button>
+      <h1 className="h4 my-6">{t("phishing.newCampaign")}</h1>
+      <Card className="max-w-3xl" hidden={!!review}>
+        <CardContent className="pt-6">
+          <form onSubmit={prepare} className="space-y-6" hidden={!!review}>
+            <div className="space-y-2">
+              <Label htmlFor="name">{t("phishing.name")}</Label>
+              <Input id="name" name="name" required maxLength={150} />
             </div>
-            <div>
-              <Label htmlFor="end">{t("phishing.end")}</Label>
-              <Input id="end" name="end" type="datetime-local" required />
+            <div className="space-y-2">
+              <Label htmlFor="scenarioId">{t("phishing.scenario")}</Label>
+              <Select name="scenarioId" required>
+                <SelectTrigger id="scenarioId" aria-describedby="scenarioLanguage">
+                  <SelectValue placeholder={t("phishing.choose")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {scenarios?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} — {s.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p id="scenarioLanguage" className="text-sm text-muted-foreground">
+                {t("phishing.scenarioLanguage")}
+              </p>
             </div>
-          </div>
-        )}
-        {error && <p role="alert">{error}</p>}
-        <Button type="submit">{t("phishing.review")}</Button>
-      </form>
+            <div className="space-y-2">
+              <Label htmlFor="courseId">{t("phishing.course")}</Label>
+              <Select name="courseId" required>
+                <SelectTrigger id="courseId">
+                  <SelectValue placeholder={t("phishing.choose")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {options?.courses.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label asChild>
+                <span>{t("phishing.people")}</span>
+              </Label>
+              <MultipleSelector
+                value={selectedUsers}
+                onChange={setSelectedUsers}
+                options={options?.users.map((u) => ({ value: u.id, label: u.label }))}
+                placeholder={t("phishing.choose")}
+                commandProps={{ label: t("phishing.people") }}
+                inputProps={{ "aria-label": t("phishing.people") }}
+                emptyIndicator={t("phishing.noOptions")}
+                checkbox={false}
+                getRemoveLabel={(option) => t("phishing.removeSelection", { label: option.label })}
+                hideClearAllButton
+              />
+            </div>
+            <div className="space-y-2">
+              <Label asChild>
+                <span>{t("phishing.groups")}</span>
+              </Label>
+              <MultipleSelector
+                value={selectedGroups}
+                onChange={setSelectedGroups}
+                options={options?.groups.map((g) => ({ value: g.id, label: g.label }))}
+                placeholder={t("phishing.choose")}
+                commandProps={{ label: t("phishing.groups") }}
+                inputProps={{ "aria-label": t("phishing.groups") }}
+                emptyIndicator={t("phishing.noOptions")}
+                checkbox={false}
+                getRemoveLabel={(option) => t("phishing.removeSelection", { label: option.label })}
+                hideClearAllButton
+              />
+              <p className="text-sm">{t("phishing.selectionHelp")}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="scheduled"
+                checked={scheduled}
+                onCheckedChange={(checked) => setScheduled(checked === true)}
+              />
+              <Label htmlFor="scheduled">{t("phishing.schedule")}</Label>
+            </div>
+            {scheduled && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="start">{t("phishing.start")}</Label>
+                  <Input id="start" name="start" type="datetime-local" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end">{t("phishing.end")}</Label>
+                  <Input id="end" name="end" type="datetime-local" required />
+                </div>
+              </div>
+            )}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit">{t("phishing.review")}</Button>
+          </form>
+        </CardContent>
+      </Card>
       {review && (
-        <section className="max-w-2xl space-y-4 rounded-lg border p-6">
-          <h2 className="text-xl font-medium">{review.name}</h2>
-          <p>{scenarios?.find((s) => s.id === review.scenarioId)?.name}</p>
-          <p>
-            {t("phishing.course")}: {options?.courses.find((c) => c.id === review.courseId)?.label}
-          </p>
-          <p>
-            {t("phishing.reviewAudience", {
-              people: audienceCount,
-              groups: review.groupIds.length,
-            })}
-          </p>
-          <p>
-            {new Date(review.sendWindow.start).toLocaleString()} –{" "}
-            {new Date(review.sendWindow.end).toLocaleString()}
-          </p>
-          <p>{t("phishing.authorization")}</p>
-          <div className="flex gap-3">
-            <Button onClick={() => void launch()} disabled={isPending}>
-              {isPending ? t("phishing.loading") : t("phishing.launch")}
-            </Button>
-            <Button variant="outline" disabled={isPending} onClick={() => setReview(null)}>
-              {t("phishing.edit")}
-            </Button>
-          </div>
-        </section>
+        <Card className="max-w-3xl">
+          <CardContent className="space-y-4 pt-6">
+            <h2 className="text-xl font-medium">{review.name}</h2>
+            <p>{scenarios?.find((s) => s.id === review.scenarioId)?.name}</p>
+            <p>
+              {t("phishing.course")}:{" "}
+              {options?.courses.find((c) => c.id === review.courseId)?.label}
+            </p>
+            <p>
+              {t("phishing.reviewAudience", {
+                people: audienceCount,
+                groups: review.groupIds.length,
+              })}
+            </p>
+            <p>
+              {new Date(review.sendWindow.start).toLocaleString(i18n.language)} –{" "}
+              {new Date(review.sendWindow.end).toLocaleString(i18n.language)}
+            </p>
+            <p>{t("phishing.authorization")}</p>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => void launch()} disabled={isPending}>
+                {isPending ? t("phishing.loading") : t("phishing.launch")}
+              </Button>
+              <Button variant="outline" disabled={isPending} onClick={() => setReview(null)}>
+                {t("phishing.edit")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </PageWrapper>
   );

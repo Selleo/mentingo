@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Button } from "~/components/ui/button";
+
+import { PhishingEmpty, PhishingError, PhishingLoading } from "./PhishingStates";
 
 import type { ReactNode } from "react";
 export function PhishingGate({ children }: { children: ReactNode }) {
@@ -11,21 +12,20 @@ export function PhishingGate({ children }: { children: ReactNode }) {
   if (isPending)
     return (
       <PageWrapper>
-        <p role="status">{t("phishing.loading")}</p>
+        <PhishingLoading />
       </PageWrapper>
     );
   if (isError)
     return (
       <PageWrapper>
-        <p role="alert">{t("phishing.serviceError")}</p>
-        <Button onClick={() => void refetch()}>{t("phishing.retry")}</Button>
+        <PhishingError onRetry={() => void refetch()} />
       </PageWrapper>
     );
   if (!data?.enabled)
     return (
       <PageWrapper>
-        <h1 className="text-2xl font-semibold">{t("phishing.title")}</h1>
-        <p>{t("phishing.unavailable")}</p>
+        <h1 className="h4 mb-6">{t("phishing.title")}</h1>
+        <PhishingEmpty message={t("phishing.unavailable")} />
       </PageWrapper>
     );
   return <>{children}</>;
