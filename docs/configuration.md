@@ -22,6 +22,12 @@ All configuration is done through environment variables. `apps/api/.env.example`
 | `DEV_TENANT_ORIGINS`       | Comma-separated tenant origins seeded and allowed in development.                                                           |
 | `INTEGRATION_CORS_ORIGINS` | Additional origins allowed only for `/api/integration/*` routes - use this to embed Mentingo endpoints in your own product. |
 
+## Interface design
+
+| Variable              | Purpose                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_DESIGN_VARIANT` | Web build-time interface design: `default` (when unset) or `mono`. Every tenant served by the build uses it; pass it as a build arg. |
+
 ## Single sign-on
 
 Each provider is enabled independently, and the corresponding flag must be set in **both** the API and the web `.env`.
