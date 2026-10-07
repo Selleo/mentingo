@@ -2,6 +2,7 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check, Minus } from "lucide-react";
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Checkbox = React.forwardRef<
@@ -14,6 +15,9 @@ const Checkbox = React.forwardRef<
       isSquareCheck
         ? "mb-1 flex size-5 shrink-0 items-center justify-center rounded-sm border border-primary-700"
         : "data-[state=checked]:text-white peer size-4 shrink-0 rounded-sm border border-accent-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary",
+      IS_MONO_DESIGN &&
+        !isSquareCheck &&
+        "border-neutral-700 data-[state=checked]:border-primary-700 data-[state=indeterminate]:border-primary-700 data-[state=indeterminate]:bg-primary-700 data-[state=indeterminate]:text-white",
       className,
     )}
     {...props}

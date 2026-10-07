@@ -20,4 +20,16 @@ describe("DESIGN_VARIANT", () => {
     expect(await loadDesignVariant("")).toBe("default");
     expect(await loadDesignVariant("unknown")).toBe("default");
   });
+
+  it("gives shared components their mono classes only in mono builds", async () => {
+    const loadButtonClasses = async (value: string) => {
+      vi.stubEnv("VITE_DESIGN_VARIANT", value);
+      vi.resetModules();
+
+      return (await import("~/components/ui/button")).buttonVariants();
+    };
+
+    expect(await loadButtonClasses("mono")).toContain("font-control");
+    expect(await loadButtonClasses("default")).not.toContain("font-control");
+  });
 });

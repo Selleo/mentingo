@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -23,7 +24,11 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("[&_tr:last-child]:border-0", className)} {...props} />
+  <tbody
+    ref={ref}
+    className={cn("[&_tr:last-child]:border-0", IS_MONO_DESIGN && "bg-background", className)}
+    {...props}
+  />
 ));
 TableBody.displayName = "TableBody";
 
@@ -45,6 +50,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
       ref={ref}
       className={cn(
         "hover:bg-muted/50 border-b transition-colors data-[state=selected]:bg-muted",
+        IS_MONO_DESIGN && "hover:bg-neutral-50 data-[state=selected]:bg-primary-50",
         className,
       )}
       {...props}
@@ -61,6 +67,8 @@ const TableHead = React.forwardRef<
     ref={ref}
     className={cn(
       "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      IS_MONO_DESIGN &&
+        "font-control text-xs font-semibold uppercase tracking-wide text-neutral-700",
       className,
     )}
     {...props}

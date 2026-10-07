@@ -1,6 +1,7 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Avatar = React.forwardRef<
@@ -35,6 +36,7 @@ const AvatarFallback = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      IS_MONO_DESIGN && "bg-neutral-300 font-semibold text-neutral-950",
       className,
     )}
     {...props}

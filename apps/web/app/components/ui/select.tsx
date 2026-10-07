@@ -2,6 +2,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Select = SelectPrimitive.Root;
@@ -18,13 +19,17 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-[42px] w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1",
+      IS_MONO_DESIGN &&
+        "h-10 rounded text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=open]:border-primary-700 aria-[invalid=true]:border-error-500 disabled:bg-neutral-100 disabled:text-neutral-600 disabled:opacity-100",
       className,
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-4 opacity-50" />
+      <ChevronDown
+        className={cn("size-4 opacity-50", IS_MONO_DESIGN && "text-neutral-800 opacity-100")}
+      />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));

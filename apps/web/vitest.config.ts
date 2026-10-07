@@ -26,6 +26,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
+    env: { VITE_DESIGN_VARIANT: "default" },
     include: ["./app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     coverage: {
       exclude: ["**/browser.ts", "**/handler.ts"],

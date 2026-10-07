@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 @import url("https://use.typekit.net/qqt7bjl.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wdth,wght@62.5..100,400..600&family=Roboto:wght@400;500;600&display=swap");
 
 @import url("./styles/overrides.css");
 
@@ -16,6 +17,25 @@ body {
 /* All-round-gothic font for headings */
 .font-gothic {
   font-family: "all-round-gothic", sans-serif;
+}
+
+/* Mono design variant: condensed monospace UI text; long-form rich content stays sans serif */
+:root[data-design-variant="mono"],
+:root[data-design-variant="mono"] body,
+:root[data-design-variant="mono"] :is(.font-gothic, .h1, .h2, .h3, .h4, .h5, .h6) {
+  font-family: "Noto Sans Mono", ui-monospace, monospace;
+  font-stretch: 75%;
+  letter-spacing: -0.01em;
+}
+
+:root[data-design-variant="mono"] :is(.h1, .h2, .h3, .h4, .h5, .h6) {
+  font-weight: 500;
+}
+
+:root[data-design-variant="mono"] :is(.tiptap, .prose) {
+  font-family: "Roboto", sans-serif;
+  font-stretch: normal;
+  letter-spacing: normal;
 }
 
 /* Smooth scrolling for better UX */
@@ -201,6 +221,50 @@ html {
     --chart-3: var(--error-400);
     --chart-4: var(--secondary-500);
     --chart-5: var(--error-500);
+  }
+
+  :root[data-design-variant="mono"] {
+    --primary-50: #e6f4ff;
+    --primary-100: #d7edff;
+    --primary-200: #b3daff;
+    --primary-300: #75bfff;
+    --primary-400: #3d9bf0;
+    --primary-500: #0074e8;
+    --primary-600: #0068da;
+    --primary-700: #005fcb;
+    --primary-800: #004ba9;
+    --primary-900: #003c96;
+    --primary-950: #002966;
+    --neutral-50: #f5f7fa;
+    --neutral-100: #edf0f4;
+    --neutral-200: #e4e8ee;
+    --neutral-300: #d7dce4;
+    --neutral-400: #c5ccd8;
+    --neutral-500: #b6bece;
+    --neutral-600: #8f99ad;
+    --neutral-700: #6e788c;
+    --neutral-800: #5a6272;
+    --neutral-900: #4c525e;
+    --neutral-950: #40454f;
+    --error-50: #fff0ef;
+    --error-100: #ffdcda;
+    --error-500: #d31510;
+    --error-600: #b40000;
+    --error-700: #930000;
+    --color-white: #ffffff;
+    --foreground: var(--neutral-950);
+    --card-foreground: var(--neutral-950);
+    --popover-foreground: var(--neutral-950);
+    --secondary: var(--primary-50);
+    --secondary-foreground: var(--primary-700);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-700);
+    --accent: var(--primary-50);
+    --accent-foreground: var(--primary-700);
+    --destructive-foreground: var(--color-white);
+    --border: var(--neutral-300);
+    --input: var(--neutral-500);
+    --ring: var(--primary-300);
   }
 }
 
