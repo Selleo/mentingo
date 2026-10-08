@@ -111,7 +111,7 @@ describe("Email template delivery integration (e2e)", () => {
     attachments: Attachment[] = [],
   ) => {
     const branding = await emails.getDefaultEmailProperties(tenantId);
-    const samples = validation.buildEmailPreviewVariables(definition.event);
+    const samples = validation.buildEmailPreviewVariables(draftBody(definition).placeholders!);
     const fields = {
       ...samples,
       ...values,

@@ -47,6 +47,7 @@ import type { DatabasePg } from "src/common";
 
 describe("CertificatesController (e2e)", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -59,7 +60,12 @@ describe("CertificatesController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest({ enableActivityLogs: true });
+    const {
+      app: testApp,
+      runAsTenant,
+      defaultTenantId,
+    } = await createE2ETest({ enableActivityLogs: true });
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -431,20 +437,22 @@ describe("CertificatesController (e2e)", () => {
         ])
         .returning();
 
-      await certificatesService.applyValidityToExistingCertificates(
-        course.id,
-        {
-          type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
-          value: 1,
-          unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
-        },
-        {
-          userId: admin.id,
-          email: admin.email,
-          tenantId: admin.tenantId,
-          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
-        },
+      await inTenant(() =>
+        certificatesService.applyValidityToExistingCertificates(
+          course.id,
+          {
+            type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
+            value: 1,
+            unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
+          },
+          {
+            userId: admin.id,
+            email: admin.email,
+            tenantId: admin.tenantId,
+            roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+            permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+          },
+        ),
       );
 
       const updatedCertificates = await db.select().from(certificates);
@@ -533,13 +541,15 @@ describe("CertificatesController (e2e)", () => {
         ])
         .returning();
 
-      await certificatesService.applyValidityToExistingCertificates(course.id, null, {
-        userId: admin.id,
-        email: admin.email,
-        tenantId: admin.tenantId,
-        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-        permissions: [PERMISSIONS.COURSE_ENROLLMENT],
-      });
+      await inTenant(() =>
+        certificatesService.applyValidityToExistingCertificates(course.id, null, {
+          userId: admin.id,
+          email: admin.email,
+          tenantId: admin.tenantId,
+          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+        }),
+      );
 
       const updatedCertificates = await db.select().from(certificates);
       const updatedActiveCertificate = updatedCertificates.find(
@@ -1448,7 +1458,7 @@ describe("CertificatesController (e2e)", () => {
         })
         .returning();
 
-      await certificatesService.expireCertificates();
+      await inTenant(() => certificatesService.expireCertificates());
 
       const [activityLog] = await db
         .select()
@@ -1487,7 +1497,7 @@ describe("CertificatesController (e2e)", () => {
         expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       });
 
-      await certificatesService.expireCertificates();
+      await inTenant(() => certificatesService.expireCertificates());
 
       const [activityLog] = await db
         .select()

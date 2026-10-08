@@ -41,6 +41,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { deliverPendingAutomationEmails } from "../../../test/helpers/automation-emails";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 
@@ -73,7 +74,7 @@ describe("LiveTrainingController (e2e)", () => {
   };
 
   beforeAll(async () => {
-    const testContext = await createE2ETest();
+    const testContext = await createE2ETest({ manualAutomationEmails: true });
 
     app = testContext.app;
     db = app.get(DB);
@@ -165,6 +166,7 @@ describe("LiveTrainingController (e2e)", () => {
   };
 
   const waitForEmails = async (count: number) => {
+    await deliverPendingAutomationEmails(app, defaultTenantId);
     for (let attempt = 0; attempt < 25; attempt += 1) {
       const emails = emailAdapter.getAllEmails();
 

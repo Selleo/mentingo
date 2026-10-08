@@ -153,6 +153,14 @@ describe("NotifyUsersHandler", () => {
     ...(enabledTrigger ? { [enabledTrigger]: true } : {}),
   });
 
+  it("does not prepare assignment emails when a group adds no new students", async () => {
+    await expect(
+      handler.notifyUserAboutCourseAssignment(
+        new UsersAssignedToCourseEvent({ courseId, studentIds: [] }),
+      ),
+    ).resolves.toBeUndefined();
+  });
+
   describe.each(cases)("$name email trigger", (testCase) => {
     it("prepares the notification even when the obsolete organization switch is disabled", async () => {
       settingsService.getGlobalSettings.mockResolvedValue({

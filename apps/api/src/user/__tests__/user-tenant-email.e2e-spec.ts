@@ -11,6 +11,7 @@ import { UserService } from "src/user/user.service";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { deliverPendingAutomationEmails } from "../../../test/helpers/automation-emails";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -30,7 +31,7 @@ describe("Tenant-scoped user emails (e2e)", () => {
   const testPassword = "Password123@";
 
   beforeAll(async () => {
-    const testApp = await createE2ETest({ useDbProxy: true });
+    const testApp = await createE2ETest({ useDbProxy: true, manualAutomationEmails: true });
     app = testApp.app;
     defaultTenantId = testApp.defaultTenantId;
     authService = app.get(AuthService);
@@ -116,6 +117,8 @@ describe("Tenant-scoped user emails (e2e)", () => {
 
     await tenantRunner.runWithTenant(secondTenantId, () => authService.forgotPassword(email));
     await tenantRunner.runWithTenant(secondTenantId, () => authService.createMagicLink(email));
+
+    await deliverPendingAutomationEmails(app, secondTenantId);
 
     const defaultResetTokens = await baseDb
       .select()

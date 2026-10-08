@@ -34,6 +34,7 @@ import type { DatabasePg } from "src/common";
 
 describe("AuthController (e2e)", () => {
   let app: INestApplication;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
   let authService: AuthService;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -42,7 +43,8 @@ describe("AuthController (e2e)", () => {
   let settingsService: SettingsService;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, runAsTenant, defaultTenantId } = await createE2ETest();
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     authService = app.get(AuthService);
     settingsService = app.get(SettingsService);
@@ -132,7 +134,7 @@ describe("AuthController (e2e)", () => {
         language: SUPPORTED_LANGUAGES.EN,
       };
 
-      await authService.register(existingUser);
+      await inTenant(() => authService.register(existingUser));
 
       await request(app.getHttpServer()).post("/api/auth/register").send(existingUser).expect(409);
     });
@@ -169,13 +171,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "pl",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "pl",
+        }),
+      );
 
       const userSettings = await settingsService.getUserSettings(registeredUser.id);
 
@@ -358,13 +362,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       await settingsService.updateCompanyInformation({
         companyName: "Acme Corp",
@@ -380,13 +386,15 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      const registeredUser = await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       const { otpauth } = await authService.generateMFASecret(registeredUser.id);
 
@@ -401,13 +409,15 @@ describe("AuthController (e2e)", () => {
 
       const user = userFactory.build();
       const password = "Password123@";
-      await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
@@ -445,13 +455,15 @@ describe("AuthController (e2e)", () => {
       const user = await userFactory.build();
       const password = "Password123@";
 
-      await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.register({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "en",
+        }),
+      );
 
       let refreshToken = "";
 
@@ -874,11 +886,13 @@ describe("AuthController (e2e)", () => {
 
       const password = "Password123@";
 
-      await authService.createPassword({
-        createToken: token,
-        password,
-        language: "pl",
-      });
+      await inTenant(() =>
+        authService.createPassword({
+          createToken: token,
+          password,
+          language: "pl",
+        }),
+      );
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
@@ -952,11 +966,13 @@ describe("AuthController (e2e)", () => {
         reminderCount: 0,
       });
 
-      await authService.createPassword({
-        createToken: token,
-        password: "Password123@",
-        language: "en",
-      });
+      await inTenant(() =>
+        authService.createPassword({
+          createToken: token,
+          password: "Password123@",
+          language: "en",
+        }),
+      );
 
       const [remainingToken] = await db
         .select()

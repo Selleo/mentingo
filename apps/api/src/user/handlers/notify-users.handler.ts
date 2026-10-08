@@ -174,6 +174,8 @@ export class NotifyUsersHandler implements IEventHandler {
     const { usersAssignedToCourse } = event;
     const { courseId, studentIds } = usersAssignedToCourse;
 
+    if (!studentIds.length) return;
+
     const { courseName } = await this.courseService.getCourseEmailData(courseId);
 
     const dueDatesByStudent = await this.courseService.getStudentsDueDatesForCourse(

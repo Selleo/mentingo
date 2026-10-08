@@ -95,24 +95,9 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
-      env: {
-        ...process.env,
-        DATABASE_URL: TEST_DATABASE_URL,
-        LMS_DATABASE_URL: TEST_LMS_DATABASE_URL,
-        MODE: "test",
-        DISABLE_RATE_LIMITING: "true",
-        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
-      },
-      reuseExistingServer: false,
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-    {
-      command: "cd ../api && pnpm build && pnpm run start",
+      command: "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
-      timeout: 120 * 1000,
+      timeout: 240 * 1000,
       reuseExistingServer: false,
       env: {
         ...process.env,

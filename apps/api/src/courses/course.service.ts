@@ -5578,7 +5578,7 @@ export class CourseService {
         daysBeforeDueDate: sql<CourseDueDateReminderDays>`CASE ${sql.join(
           reminderWindows.map(
             ({ daysBeforeDueDate, startsAt, endsAt }) =>
-              sql`WHEN ${groupCourses.dueDate} BETWEEN ${startsAt}::timestamptz AND ${endsAt}::timestamptz THEN ${daysBeforeDueDate}`,
+              sql`WHEN ${groupCourses.dueDate} BETWEEN ${startsAt}::timestamptz AND ${endsAt}::timestamptz THEN ${daysBeforeDueDate}::integer`,
           ),
           sql` `,
         )} END`,

@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 
-import { EMAIL_TEMPLATE_DEFINITIONS } from "@repo/email-templates";
+import {
+  VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS,
+  getBuiltInTemplatePublication,
+} from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
@@ -99,10 +102,11 @@ describe("Email template HTTP contracts (e2e)", () => {
     });
   });
 
-  it.each(EMAIL_TEMPLATE_DEFINITIONS)(
-    "reads and independently copies the $event default",
-    async (definition) => {
-      const path = `/defaults/${definition.event}`;
+  it.each(VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS)(
+    "reads and independently copies the %s default",
+    async (key) => {
+      const publication = getBuiltInTemplatePublication(key);
+      const path = `/defaults/${key}`;
       const original = (await t.http("get", path).expect(200)).body.data;
       expect(Value.Check(emailTemplateSchema, original)).toBe(true);
       expect(original).toMatchObject({
@@ -110,8 +114,8 @@ describe("Email template HTTP contracts (e2e)", () => {
         source: "default",
         editable: false,
         status: null,
-        subject: draftBody(definition).subject,
-        content: draftBody(definition).content,
+        subject: publication.subject,
+        content: publication.content,
       });
       const first = (await t.http("post", `${path}/copy`).expect(201)).body.data;
       const second = (await t.http("post", `${path}/copy`).expect(201)).body.data;
@@ -159,12 +163,12 @@ describe("Email template HTTP contracts (e2e)", () => {
     expect(firstPage.pagination).toMatchObject({
       page: 1,
       perPage: 3,
-      totalItems: EMAIL_TEMPLATE_DEFINITIONS.length + 2,
+      totalItems: VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.length + 2,
     });
-    expect(firstPage.data[2].event).toBe(EMAIL_TEMPLATE_DEFINITIONS[0].event);
+    expect(firstPage.data[2].event).toBe(VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS[0]);
     const secondPage = (await t.http("get").query({ page: 2, perPage: 3 }).expect(200)).body;
     expect(secondPage.data.map((item: { event: string }) => item.event)).toEqual(
-      EMAIL_TEMPLATE_DEFINITIONS.slice(1, 4).map(({ event }) => event),
+      VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.slice(1, 4),
     );
     const defaults = (await t.http("get").expect(200)).body;
     expect(defaults.pagination).toMatchObject({ page: 1, perPage: DEFAULT_PAGE_SIZE });
