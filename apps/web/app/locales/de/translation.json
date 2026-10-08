@@ -6395,6 +6395,15 @@
     "openWorkspace": "Mit KI generieren",
     "openLegacyDraft": "Alten Entwurf fortsetzen",
     "activityRail": {
+      "retryFailedParts": "Fehlgeschlagene Teile erneut versuchen",
+      "retryProvider": "Verbindung erneut versuchen",
+      "recoveringFailedParts": "Fehlgeschlagene Teile werden fortgesetzt…",
+      "failureGeneration": "Der generierte Inhalt hat die Validierung nicht bestanden. Ein erneuter Versuch erstellt neue Inhalte für die fehlgeschlagenen Teile und behält abgeschlossene Arbeit.",
+      "failureProvider": "Der Anbieter konnte die Anfrage nicht abschließen. Ein erneuter Versuch setzt die offene Arbeit fort.",
+      "failureEvidence": "Die verfügbaren Quellen belegen die erforderlichen Aussagen nicht. Sie können Quellen hinzufügen oder die Anfrage präzisieren.",
+      "failureAnswerQuestion": "Beantworten Sie die Frage unten, um das Problem zu lösen und mit der gespeicherten Arbeit fortzufahren.",
+      "failureServiceFix": "Dieser Schritt erfordert eine Korrektur des Dienstes. Abgeschlossene Arbeit ist gespeichert; ein erneuter Versuch löst das Problem nicht.",
+      "repairProgress": "Reparaturversuch {{attempt}} von {{limit}}",
       "plan": "Plan",
       "planStepCount": "{{count}} Schritte",
       "planStepCount_one": "{{count}} Schritt",
@@ -6414,6 +6423,7 @@
       "moreSearchQueries": "+{{count}} weitere Suchanfragen",
       "completedResearchSteps": "Abgeschlossene Recherche-Schritte: {{count}}",
       "chapterStatus": {
+        "failed": "Fehlgeschlagen",
         "pending": "ausstehend",
         "running": "in Bearbeitung",
         "complete": "geplant"

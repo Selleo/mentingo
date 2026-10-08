@@ -6403,6 +6403,15 @@
     "openWorkspace": "Generuoti su DI",
     "openLegacyDraft": "Tęsti seną juodraštį",
     "activityRail": {
+      "retryFailedParts": "Kartoti nepavykusias dalis",
+      "retryProvider": "Kartoti prisijungimą",
+      "recoveringFailedParts": "Atkuriamos nepavykusios dalys…",
+      "failureGeneration": "Sugeneruotas turinys neatitiko patikros. Pakartojimas sukurs naują nepavykusių dalių turinį ir išsaugos užbaigtą darbą.",
+      "failureProvider": "Teikėjas negalėjo užbaigti užklausos. Pakartojimas tęs neužbaigtą darbą.",
+      "failureEvidence": "Turimi šaltiniai nepatvirtina reikiamų teiginių. Galite pridėti šaltinių arba patikslinti užklausą.",
+      "failureAnswerQuestion": "Atsakykite į toliau pateiktą klausimą, kad išspręstumėte problemą ir tęstumėte išsaugotą darbą.",
+      "failureServiceFix": "Šiam žingsniui reikia paslaugos pataisymo. Užbaigtas darbas išsaugotas; kartojimas šios problemos neišspręs.",
+      "repairProgress": "Taisymo bandymas {{attempt}} iš {{limit}}",
       "plan": "Planas",
       "planStepCount": "Žingsniai: {{count}}",
       "planStepCount_one": "Žingsnis: {{count}}",
@@ -6422,6 +6431,7 @@
       "moreSearchQueries": "+{{count}} daugiau užklausų",
       "completedResearchSteps": "Užbaigti tyrimo veiksmai: {{count}}",
       "chapterStatus": {
+        "failed": "Nepavyko",
         "pending": "laukiama",
         "running": "vykdoma",
         "complete": "suplanuota"

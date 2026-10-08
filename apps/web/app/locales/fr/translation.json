@@ -6144,6 +6144,15 @@
     "openWorkspace": "Générer avec l’IA",
     "openLegacyDraft": "Continuer l’ancien brouillon",
     "activityRail": {
+      "retryFailedParts": "Réessayer les parties en échec",
+      "retryProvider": "Réessayer la connexion",
+      "recoveringFailedParts": "Reprise des parties en échec…",
+      "failureGeneration": "Le contenu généré n’a pas passé la validation. Réessayer créera un nouveau contenu pour les parties en échec et conservera le travail terminé.",
+      "failureProvider": "Le fournisseur n’a pas pu terminer la demande. Réessayer reprendra le travail inachevé.",
+      "failureEvidence": "Les sources disponibles ne couvrent pas les affirmations requises. Vous pouvez ajouter des sources ou préciser la demande.",
+      "failureAnswerQuestion": "Répondez à la question ci-dessous pour résoudre ce problème et reprendre le travail enregistré.",
+      "failureServiceFix": "Cette étape nécessite une correction du service. Votre travail terminé est enregistré ; réessayer ne résoudra pas ce problème.",
+      "repairProgress": "Tentative de réparation {{attempt}} sur {{limit}}",
       "plan": "Plan",
       "planStepCount": "{{count}} étapes",
       "planStepCount_one": "{{count}} étape",
@@ -6163,6 +6172,7 @@
       "moreSearchQueries": "+{{count}} requêtes de plus",
       "completedResearchSteps": "Étapes de recherche terminées : {{count}}",
       "chapterStatus": {
+        "failed": "Échec",
         "pending": "en attente",
         "running": "en cours",
         "complete": "planifié"

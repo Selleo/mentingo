@@ -6463,6 +6463,15 @@
     "openWorkspace": "Generuj z AI",
     "openLegacyDraft": "Kontynuuj starszą wersję roboczą",
     "activityRail": {
+      "retryFailedParts": "Ponów nieudane części",
+      "retryProvider": "Ponów połączenie",
+      "recoveringFailedParts": "Wznawianie nieudanych części…",
+      "failureGeneration": "Wygenerowana treść nie przeszła walidacji. Ponowienie utworzy nową treść dla nieudanych części i zachowa ukończoną pracę.",
+      "failureProvider": "Dostawca nie mógł ukończyć żądania. Ponowienie wznowi niedokończoną pracę.",
+      "failureEvidence": "Dostępne źródła nie potwierdzają wymaganych twierdzeń. Możesz dodać źródła lub doprecyzować prośbę.",
+      "failureAnswerQuestion": "Odpowiedz na pytanie poniżej, aby rozwiązać problem i kontynuować zapisaną pracę.",
+      "failureServiceFix": "Ten krok wymaga poprawki po stronie usługi. Ukończona praca jest zapisana; ponowienie nie rozwiąże problemu.",
+      "repairProgress": "Próba naprawy {{attempt}} z {{limit}}",
       "plan": "Plan",
       "planStepCount": "Kroki: {{count}}",
       "planStepCount_one": "Krok: {{count}}",
@@ -6484,6 +6493,7 @@
       "moreSearchQueries": "+{{count}} kolejnych zapytań",
       "completedResearchSteps": "Ukończone kroki wyszukiwania: {{count}}",
       "chapterStatus": {
+        "failed": "Niepowodzenie",
         "pending": "oczekuje",
         "running": "w trakcie",
         "complete": "zaplanowano"

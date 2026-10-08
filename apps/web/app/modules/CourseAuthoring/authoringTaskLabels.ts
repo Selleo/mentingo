@@ -9,6 +9,8 @@ export const authoringPhaseLabel = (task: AuthoringTask, t: (key: string) => str
     return t("courseAuthoring.conversation.preparingResponse");
   }
   if (task.status === "waiting_author") return t("courseAuthoring.conversation.waiting");
+  if (task.workProgress?.stage === "recovering")
+    return t("courseAuthoring.activityRail.recoveringFailedParts");
   if (task.workProgress?.stage === "repairing") {
     return t(
       task.kind === "lesson"

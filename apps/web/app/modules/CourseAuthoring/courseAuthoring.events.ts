@@ -1,4 +1,6 @@
 /** Applies durable sequence rules to websocket events and requests snapshot recovery on gaps. */
+import { parseAuthoringTaskFailure } from "./authoringTaskFailure";
+
 import type {
   AuthoringEvent,
   AuthoringPartKind,
@@ -411,6 +413,10 @@ export const applyAuthoringEvent = (
       errorCode:
         taskStatusValue === "failed"
           ? (stringValue(taskSnapshot.errorCode) ?? errorCode ?? existingTask?.errorCode ?? null)
+          : null,
+      failure:
+        taskStatusValue === "failed" || taskStatusValue === "waiting_author"
+          ? (parseAuthoringTaskFailure(taskSnapshot.failure) ?? existingTask?.failure ?? null)
           : null,
       outputId: stringValue(taskSnapshot.outputId) ?? outputId ?? existingTask?.outputId ?? null,
     };

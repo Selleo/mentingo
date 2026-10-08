@@ -20,13 +20,15 @@ export type AuthoringWorkProgressStage =
   | "lesson_planning"
   | "lesson_generation"
   | "validation"
-  | "repairing";
+  | "repairing"
+  | "recovering";
 
 export type AuthoringWorkProgressChapter = {
   chapterId: string;
   title: string;
   lessonCount: number;
-  status: "pending" | "running" | "complete";
+  status: "pending" | "running" | "complete" | "failed";
+  failureCode?: string;
 };
 
 export type AuthoringWorkProgress = {
@@ -38,6 +40,28 @@ export type AuthoringWorkProgress = {
   lessonTitle?: string;
   chapterId?: string;
   chapterTitle?: string;
+  failedLessonIds?: string[];
+  repairAttempt?: number;
+  repairLimit?: number;
+};
+
+export type AuthoringTaskFailure = {
+  code: string;
+  category:
+    | "generation"
+    | "evidence"
+    | "author_decision"
+    | "provider"
+    | "configuration"
+    | "internal";
+  stage: string;
+  recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+  retryable: boolean;
+  affectedChapterIds: string[];
+  affectedLessonIds: string[];
+  correlationId: string | null;
+  detailKey: string | null;
+  generationRevision: number;
 };
 
 export type AuthoringTask = {
@@ -50,6 +74,7 @@ export type AuthoringTask = {
   errorCode: string | null;
   outputId: string | null;
   workProgress?: AuthoringWorkProgress;
+  failure?: AuthoringTaskFailure | null;
 };
 
 export type AuthoringTurnStatus =

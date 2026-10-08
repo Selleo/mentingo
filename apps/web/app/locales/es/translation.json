@@ -6351,6 +6351,15 @@
     "openWorkspace": "Generar con IA",
     "openLegacyDraft": "Continuar borrador anterior",
     "activityRail": {
+      "retryFailedParts": "Reintentar las partes fallidas",
+      "retryProvider": "Reintentar la conexión",
+      "recoveringFailedParts": "Recuperando las partes fallidas…",
+      "failureGeneration": "El contenido generado no superó la validación. El reintento creará contenido nuevo para las partes fallidas y conservará el trabajo terminado.",
+      "failureProvider": "El proveedor no pudo completar la solicitud. El reintento continuará el trabajo pendiente.",
+      "failureEvidence": "Las fuentes disponibles no respaldan las afirmaciones requeridas. Puedes añadir fuentes o aclarar la solicitud.",
+      "failureAnswerQuestion": "Responde a la pregunta de abajo para resolver este problema y continuar desde el trabajo guardado.",
+      "failureServiceFix": "Este paso requiere una corrección del servicio. Tu trabajo terminado está guardado; reintentar no resolverá este problema.",
+      "repairProgress": "Intento de reparación {{attempt}} de {{limit}}",
       "plan": "Plan",
       "planStepCount": "{{count}} pasos",
       "planStepCount_one": "{{count}} paso",
@@ -6370,6 +6379,7 @@
       "moreSearchQueries": "+{{count}} consultas más",
       "completedResearchSteps": "Pasos de investigación completados: {{count}}",
       "chapterStatus": {
+        "failed": "Fallido",
         "pending": "en espera",
         "running": "en curso",
         "complete": "planificado"

@@ -6,6 +6,19 @@ import { projectWorkspaceRecords } from "./courseAuthoring.records";
 
 import type { AuthoringEvent, AuthoringSession } from "./courseAuthoring.types";
 
+const failure = {
+  code: "planning_batch_invalid",
+  category: "generation",
+  stage: "generate",
+  recoveryAction: "retry_failed_parts",
+  retryable: true,
+  affectedChapterIds: ["chapter-1"],
+  affectedLessonIds: [],
+  correlationId: null,
+  detailKey: null,
+  generationRevision: 0,
+};
+
 const session: AuthoringSession = {
   schemaVersion: 1,
   sessionId: "session-1",
@@ -289,6 +302,7 @@ describe("course authoring event cursor", () => {
         status: "waiting_dependencies",
         phase: "updating_course",
         errorCode: null,
+        failure: null,
         outputId: null,
       },
     ]);
@@ -321,6 +335,7 @@ describe("course authoring event cursor", () => {
           taskId: "task-1",
           requestId: "request-1",
           errorCode: "task_execution_failed",
+          failure,
         },
       },
     );
@@ -339,7 +354,8 @@ describe("course authoring event cursor", () => {
       status: "failed",
       errorCode: "task_execution_failed",
     });
-    expect(queued.tasks[0]).toMatchObject({ status: "queued", errorCode: null });
+    expect(failed.tasks[0].failure).toEqual(failure);
+    expect(queued.tasks[0]).toMatchObject({ status: "queued", errorCode: null, failure: null });
     expect(succeeded.tasks[0]).toMatchObject({
       status: "succeeded",
       errorCode: null,

@@ -7149,7 +7149,7 @@
           },
           {
             "name": "studentId",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -20266,6 +20266,15 @@
         "operationId": "CourseAuthoringController_previewAuthoringAsset",
         "parameters": [
           {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -20290,15 +20299,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "revision",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer"
             }
           }
         ],
@@ -20491,6 +20491,15 @@
         "operationId": "CourseAuthoringController_getAuthoringEvents",
         "parameters": [
           {
+            "name": "afterSequence",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -20506,15 +20515,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "afterSequence",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "type": "integer"
             }
           }
         ],
@@ -20535,6 +20535,17 @@
       "get": {
         "operationId": "CourseAuthoringController_getAuthoringCourseContext",
         "parameters": [
+          {
+            "name": "lessonIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
           {
             "name": "courseId",
             "required": true,
@@ -20579,17 +20590,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "lessonIds",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             }
           }
         ],
@@ -36046,483 +36046,6 @@
         "required": [
           "data"
         ]
-      },
-      "ChatWithCourseGenerationAgentBody": {
-        "type": "object",
-        "properties": {
-          "integrationId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "message": {
-            "additionalProperties": true,
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "role": {
-                "type": "string"
-              },
-              "parts": {
-                "type": "array",
-                "items": {}
-              }
-            },
-            "required": [
-              "id",
-              "role",
-              "parts"
-            ]
-          }
-        },
-        "required": [
-          "integrationId",
-          "message"
-        ]
-      },
-      "GetCourseGenerationMessagesResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "draftId": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "role": {
-              "type": "string"
-            },
-            "content": {
-              "type": "string"
-            },
-            "contentType": {
-              "type": "string"
-            },
-            "draftMetadata": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "patternProperties": {
-                    "^(.*)$": {}
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "createdAt": {
-              "type": "string"
-            },
-            "updatedAt": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "draftId",
-            "role",
-            "content",
-            "contentType",
-            "createdAt",
-            "updatedAt"
-          ]
-        }
-      },
-      "GetCourseGenerationDraftResponse": {
-        "type": "object",
-        "properties": {
-          "integrationId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "draftId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isCourseGenerated": {
-            "type": "boolean"
-          },
-          "coreSync": {
-            "type": "object",
-            "properties": {
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "not_started",
-                    "type": "string"
-                  },
-                  {
-                    "const": "processing",
-                    "type": "string"
-                  },
-                  {
-                    "const": "failed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "processed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "dismissed",
-                    "type": "string"
-                  }
-                ]
-              },
-              "draftId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "attemptCount": {
-                "type": "number"
-              },
-              "startedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "processedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "failedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "dismissedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "lastError": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "status",
-              "draftId",
-              "attemptCount",
-              "startedAt",
-              "processedAt",
-              "failedAt",
-              "dismissedAt",
-              "lastError"
-            ]
-          }
-        },
-        "required": [
-          "integrationId",
-          "draftId",
-          "isCourseGenerated",
-          "coreSync"
-        ]
-      },
-      "SyncGeneratedCourseBody": {
-        "type": "object",
-        "properties": {
-          "integrationId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "integrationId"
-        ]
-      },
-      "SyncGeneratedCourseResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "anyOf": [
-              {
-                "const": "not_started",
-                "type": "string"
-              },
-              {
-                "const": "processing",
-                "type": "string"
-              },
-              {
-                "const": "failed",
-                "type": "string"
-              },
-              {
-                "const": "processed",
-                "type": "string"
-              },
-              {
-                "const": "dismissed",
-                "type": "string"
-              }
-            ]
-          },
-          "draftId": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "attemptCount": {
-            "type": "number"
-          },
-          "startedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "processedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "failedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dismissedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "lastError": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "status",
-          "draftId",
-          "attemptCount",
-          "startedAt",
-          "processedAt",
-          "failedAt",
-          "dismissedAt",
-          "lastError"
-        ]
-      },
-      "DismissGeneratedCourseSyncBody": {
-        "type": "object",
-        "properties": {
-          "integrationId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "integrationId"
-        ]
-      },
-      "DismissGeneratedCourseSyncResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "anyOf": [
-              {
-                "const": "not_started",
-                "type": "string"
-              },
-              {
-                "const": "processing",
-                "type": "string"
-              },
-              {
-                "const": "failed",
-                "type": "string"
-              },
-              {
-                "const": "processed",
-                "type": "string"
-              },
-              {
-                "const": "dismissed",
-                "type": "string"
-              }
-            ]
-          },
-          "draftId": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "attemptCount": {
-            "type": "number"
-          },
-          "startedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "processedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "failedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dismissedAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "lastError": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "status",
-          "draftId",
-          "attemptCount",
-          "startedAt",
-          "processedAt",
-          "failedAt",
-          "dismissedAt",
-          "lastError"
-        ]
-      },
-      "IngestCourseGenerationFilesBody": {
-        "type": "object",
-        "properties": {
-          "integrationId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "integrationId"
-        ]
-      },
-      "GetCourseGenerationFilesResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "filename": {
-              "type": "string"
-            },
-            "contentType": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "filename",
-            "contentType"
-          ]
-        }
       },
       "GetChapterWithLessonResponse": {
         "type": "object",
@@ -135588,2211 +135111,6 @@
           "data"
         ]
       },
-      "GetPhishingConfigurationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "enabled"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ListPhishingScenariosResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "action": {
-                  "anyOf": [
-                    {
-                      "const": "clicked",
-                      "type": "string"
-                    },
-                    {
-                      "const": "submitted",
-                      "type": "string"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "description",
-                "action"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPhishingOptionsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "users": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "label"
-                  ]
-                }
-              },
-              "groups": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "userIds": {
-                      "type": "array",
-                      "items": {
-                        "format": "uuid",
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "label",
-                    "userIds"
-                  ]
-                }
-              },
-              "courses": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "label"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "users",
-              "groups",
-              "courses"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ListPhishingCampaignsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "scenarioId": {
-                  "type": "string"
-                },
-                "courseId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "createdBy": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "scheduled",
-                      "type": "string"
-                    },
-                    {
-                      "const": "completed",
-                      "type": "string"
-                    },
-                    {
-                      "const": "cancelled",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "sendWindow": {
-                  "type": "object",
-                  "properties": {
-                    "start": {
-                      "type": "string"
-                    },
-                    "end": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "start",
-                    "end"
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "scenarioId",
-                "courseId",
-                "createdBy",
-                "createdAt",
-                "status",
-                "sendWindow"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreatePhishingCampaignBody": {
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "requestId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "minLength": 1,
-            "maxLength": 150,
-            "type": "string"
-          },
-          "scenarioId": {
-            "minLength": 1,
-            "maxLength": 100,
-            "type": "string"
-          },
-          "courseId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "userIds": {
-            "maxItems": 10000,
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "groupIds": {
-            "maxItems": 1000,
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "sendWindow": {
-            "additionalProperties": false,
-            "type": "object",
-            "properties": {
-              "start": {
-                "format": "date-time",
-                "type": "string"
-              },
-              "end": {
-                "format": "date-time",
-                "type": "string"
-              }
-            },
-            "required": [
-              "start",
-              "end"
-            ]
-          }
-        },
-        "required": [
-          "requestId",
-          "name",
-          "scenarioId",
-          "courseId",
-          "userIds",
-          "groupIds",
-          "sendWindow"
-        ]
-      },
-      "CreatePhishingCampaignResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "scenarioId": {
-                "type": "string"
-              },
-              "courseId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "createdBy": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "scheduled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cancelled",
-                    "type": "string"
-                  }
-                ]
-              },
-              "sendWindow": {
-                "type": "object",
-                "properties": {
-                  "start": {
-                    "type": "string"
-                  },
-                  "end": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "start",
-                  "end"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "scenarioId",
-              "courseId",
-              "createdBy",
-              "createdAt",
-              "status",
-              "sendWindow"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CancelPhishingCampaignResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "scenarioId": {
-                "type": "string"
-              },
-              "courseId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "createdBy": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "scheduled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cancelled",
-                    "type": "string"
-                  }
-                ]
-              },
-              "sendWindow": {
-                "type": "object",
-                "properties": {
-                  "start": {
-                    "type": "string"
-                  },
-                  "end": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "start",
-                  "end"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "scenarioId",
-              "courseId",
-              "createdBy",
-              "createdAt",
-              "status",
-              "sendWindow"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPhishingReportResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "campaign": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "scenarioId": {
-                    "type": "string"
-                  },
-                  "courseId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "createdBy": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "createdAt": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "scheduled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "completed",
-                        "type": "string"
-                      },
-                      {
-                        "const": "cancelled",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "sendWindow": {
-                    "type": "object",
-                    "properties": {
-                      "start": {
-                        "type": "string"
-                      },
-                      "end": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "start",
-                      "end"
-                    ]
-                  }
-                },
-                "required": [
-                  "id",
-                  "name",
-                  "scenarioId",
-                  "courseId",
-                  "createdBy",
-                  "createdAt",
-                  "status",
-                  "sendWindow"
-                ]
-              },
-              "recipients": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "userId": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "email": {
-                      "type": "string"
-                    },
-                    "firstName": {
-                      "type": "string"
-                    },
-                    "lastName": {
-                      "type": "string"
-                    },
-                    "groupIds": {
-                      "type": "array",
-                      "items": {
-                        "format": "uuid",
-                        "type": "string"
-                      }
-                    },
-                    "sentAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "clickedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "submittedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "failed": {
-                      "type": "boolean"
-                    },
-                    "courseStatus": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "userId",
-                    "email",
-                    "firstName",
-                    "lastName",
-                    "groupIds",
-                    "sentAt",
-                    "clickedAt",
-                    "submittedAt",
-                    "failed",
-                    "courseStatus"
-                  ]
-                }
-              },
-              "totals": {
-                "type": "object",
-                "properties": {
-                  "recipients": {
-                    "type": "number"
-                  },
-                  "sent": {
-                    "type": "number"
-                  },
-                  "clicked": {
-                    "type": "number"
-                  },
-                  "submitted": {
-                    "type": "number"
-                  },
-                  "risky": {
-                    "type": "number"
-                  },
-                  "riskRate": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "recipients",
-                  "sent",
-                  "clicked",
-                  "submitted",
-                  "risky",
-                  "riskRate"
-                ]
-              },
-              "groups": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "totals": {
-                      "type": "object",
-                      "properties": {
-                        "recipients": {
-                          "type": "number"
-                        },
-                        "sent": {
-                          "type": "number"
-                        },
-                        "clicked": {
-                          "type": "number"
-                        },
-                        "submitted": {
-                          "type": "number"
-                        },
-                        "risky": {
-                          "type": "number"
-                        },
-                        "riskRate": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "recipients",
-                        "sent",
-                        "clicked",
-                        "submitted",
-                        "risky",
-                        "riskRate"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "totals"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "campaign",
-              "recipients",
-              "totals",
-              "groups"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ConnectionProbeBody": {
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "nonce": {
-            "pattern": "^[a-f0-9]{32}$",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tenantId",
-          "nonce"
-        ]
-      },
-      "ConnectionProbeResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "nonce": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "nonce"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetConsentResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "clientName": {
-                "type": "string"
-              },
-              "clientId": {
-                "type": "string"
-              },
-              "redirectUri": {
-                "type": "string"
-              },
-              "accountEmail": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "clientName",
-              "clientId",
-              "redirectUri",
-              "accountEmail"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetEventsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "events": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "uid": {
-                      "type": "string"
-                    },
-                    "sourceType": {
-                      "anyOf": [
-                        {
-                          "const": "live_training",
-                          "type": "string"
-                        },
-                        {
-                          "const": "course_due_date",
-                          "type": "string"
-                        },
-                        {
-                          "const": "microsoft_outlook",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "sourceId": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "startsAt": {
-                      "type": "string"
-                    },
-                    "endsAt": {
-                      "type": "string"
-                    },
-                    "allDay": {
-                      "type": "boolean"
-                    },
-                    "timezone": {
-                      "type": "string"
-                    },
-                    "location": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "status": {
-                      "anyOf": [
-                        {
-                          "const": "scheduled",
-                          "type": "string"
-                        },
-                        {
-                          "const": "cancelled",
-                          "type": "string"
-                        },
-                        {
-                          "const": "ended",
-                          "type": "string"
-                        },
-                        {
-                          "const": "expired",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "payload": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "liveTraining": {
-                              "type": "object",
-                              "properties": {
-                                "deliveryType": {
-                                  "anyOf": [
-                                    {
-                                      "const": "online",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "offline",
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
-                                "status": {
-                                  "anyOf": [
-                                    {
-                                      "const": "scheduled",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "active",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "ended",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "cancelled",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "expired",
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
-                                "visibilityScope": {
-                                  "anyOf": [
-                                    {
-                                      "const": "all",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "linked_courses",
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
-                                "sourceRole": {
-                                  "anyOf": [
-                                    {
-                                      "const": "admin",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "author",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "trainer",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "observer",
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
-                                "linkedCourses": {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "object",
-                                    "properties": {
-                                      "courseId": {
-                                        "format": "uuid",
-                                        "type": "string"
-                                      },
-                                      "courseTitle": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "courseId",
-                                      "courseTitle"
-                                    ]
-                                  }
-                                }
-                              },
-                              "required": [
-                                "deliveryType",
-                                "status",
-                                "visibilityScope",
-                                "sourceRole",
-                                "linkedCourses"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "liveTraining"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "courseDueDate": {
-                              "type": "object",
-                              "properties": {
-                                "courseId": {
-                                  "format": "uuid",
-                                  "type": "string"
-                                },
-                                "courseTitle": {
-                                  "type": "string"
-                                },
-                                "groupId": {
-                                  "format": "uuid",
-                                  "type": "string"
-                                },
-                                "groupName": {
-                                  "type": "string"
-                                },
-                                "dueDate": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "courseId",
-                                "courseTitle",
-                                "groupId",
-                                "groupName",
-                                "dueDate"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "courseDueDate"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "outlookCalendar": {
-                              "type": "object",
-                              "properties": {
-                                "webLink": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "isSensitive": {
-                                  "type": "boolean"
-                                },
-                                "availability": {
-                                  "anyOf": [
-                                    {
-                                      "const": "free",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "tentative",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "busy",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "out_of_office",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "working_elsewhere",
-                                      "type": "string"
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "webLink",
-                                "isSensitive",
-                                "availability"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "outlookCalendar"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "uid",
-                    "sourceType",
-                    "sourceId",
-                    "title",
-                    "description",
-                    "startsAt",
-                    "endsAt",
-                    "allDay",
-                    "timezone",
-                    "location",
-                    "status",
-                    "payload"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "events"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetDashboardEventsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "sourceType": {
-                  "anyOf": [
-                    {
-                      "const": "live_training",
-                      "type": "string"
-                    },
-                    {
-                      "const": "course_due_date",
-                      "type": "string"
-                    },
-                    {
-                      "const": "microsoft_outlook",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "targetId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "startsAt": {
-                  "type": "string"
-                },
-                "allDay": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "id",
-                "sourceType",
-                "targetId",
-                "title",
-                "startsAt",
-                "allDay"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetEventDetailsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "uid": {
-                "type": "string"
-              },
-              "sourceType": {
-                "anyOf": [
-                  {
-                    "const": "live_training",
-                    "type": "string"
-                  },
-                  {
-                    "const": "course_due_date",
-                    "type": "string"
-                  },
-                  {
-                    "const": "microsoft_outlook",
-                    "type": "string"
-                  }
-                ]
-              },
-              "sourceId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              },
-              "description": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "startsAt": {
-                "type": "string"
-              },
-              "endsAt": {
-                "type": "string"
-              },
-              "allDay": {
-                "type": "boolean"
-              },
-              "timezone": {
-                "type": "string"
-              },
-              "location": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "scheduled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cancelled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "ended",
-                    "type": "string"
-                  },
-                  {
-                    "const": "expired",
-                    "type": "string"
-                  }
-                ]
-              },
-              "payload": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "liveTraining": {
-                        "type": "object",
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "deliveryType": {
-                                "anyOf": [
-                                  {
-                                    "const": "online",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "offline",
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "status": {
-                                "anyOf": [
-                                  {
-                                    "const": "scheduled",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "active",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "ended",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "cancelled",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "expired",
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "visibilityScope": {
-                                "anyOf": [
-                                  {
-                                    "const": "all",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "linked_courses",
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "sourceRole": {
-                                "anyOf": [
-                                  {
-                                    "const": "admin",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "author",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "trainer",
-                                    "type": "string"
-                                  },
-                                  {
-                                    "const": "observer",
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "linkedCourses": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "courseId": {
-                                      "format": "uuid",
-                                      "type": "string"
-                                    },
-                                    "courseTitle": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "courseId",
-                                    "courseTitle"
-                                  ]
-                                }
-                              }
-                            },
-                            "required": [
-                              "deliveryType",
-                              "status",
-                              "visibilityScope",
-                              "sourceRole",
-                              "linkedCourses"
-                            ]
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "author": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "format": "uuid",
-                                    "type": "string"
-                                  },
-                                  "fullName": {
-                                    "anyOf": [
-                                      {
-                                        "type": "string"
-                                      },
-                                      {
-                                        "type": "null"
-                                      }
-                                    ]
-                                  },
-                                  "email": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "fullName",
-                                  "email"
-                                ]
-                              },
-                              "hosts": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "userId": {
-                                      "format": "uuid",
-                                      "type": "string"
-                                    },
-                                    "fullName": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "email": {
-                                      "type": "string"
-                                    },
-                                    "role": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "userId",
-                                    "fullName",
-                                    "email",
-                                    "role"
-                                  ]
-                                }
-                              },
-                              "materials": {
-                                "type": "object",
-                                "properties": {
-                                  "before": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "resourceId": {
-                                          "format": "uuid",
-                                          "type": "string"
-                                        },
-                                        "title": {
-                                          "type": "string"
-                                        },
-                                        "mimeType": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "null"
-                                            }
-                                          ]
-                                        },
-                                        "size": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number"
-                                            },
-                                            {
-                                              "type": "null"
-                                            }
-                                          ]
-                                        },
-                                        "relationshipType": {
-                                          "anyOf": [
-                                            {
-                                              "const": "live_training_before",
-                                              "type": "string"
-                                            },
-                                            {
-                                              "const": "live_training_after",
-                                              "type": "string"
-                                            }
-                                          ]
-                                        }
-                                      },
-                                      "required": [
-                                        "resourceId",
-                                        "title",
-                                        "mimeType",
-                                        "size",
-                                        "relationshipType"
-                                      ]
-                                    }
-                                  },
-                                  "after": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "resourceId": {
-                                          "format": "uuid",
-                                          "type": "string"
-                                        },
-                                        "title": {
-                                          "type": "string"
-                                        },
-                                        "mimeType": {
-                                          "anyOf": [
-                                            {
-                                              "type": "string"
-                                            },
-                                            {
-                                              "type": "null"
-                                            }
-                                          ]
-                                        },
-                                        "size": {
-                                          "anyOf": [
-                                            {
-                                              "type": "number"
-                                            },
-                                            {
-                                              "type": "null"
-                                            }
-                                          ]
-                                        },
-                                        "relationshipType": {
-                                          "anyOf": [
-                                            {
-                                              "const": "live_training_before",
-                                              "type": "string"
-                                            },
-                                            {
-                                              "const": "live_training_after",
-                                              "type": "string"
-                                            }
-                                          ]
-                                        }
-                                      },
-                                      "required": [
-                                        "resourceId",
-                                        "title",
-                                        "mimeType",
-                                        "size",
-                                        "relationshipType"
-                                      ]
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "before",
-                                  "after"
-                                ]
-                              },
-                              "latestSession": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "id": {
-                                        "format": "uuid",
-                                        "type": "string"
-                                      },
-                                      "status": {
-                                        "anyOf": [
-                                          {
-                                            "const": "waiting",
-                                            "type": "string"
-                                          },
-                                          {
-                                            "const": "active",
-                                            "type": "string"
-                                          },
-                                          {
-                                            "const": "ended",
-                                            "type": "string"
-                                          },
-                                          {
-                                            "const": "failed",
-                                            "type": "string"
-                                          }
-                                        ]
-                                      },
-                                      "actualStartedAt": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "actualEndedAt": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "peakParticipants": {
-                                        "type": "number"
-                                      },
-                                      "uniqueParticipantCount": {
-                                        "type": "number"
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "status",
-                                      "actualStartedAt",
-                                      "actualEndedAt",
-                                      "peakParticipants",
-                                      "uniqueParticipantCount"
-                                    ]
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "author",
-                              "hosts",
-                              "materials",
-                              "latestSession"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "liveTraining"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "courseDueDate": {
-                        "type": "object",
-                        "properties": {
-                          "courseId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "courseTitle": {
-                            "type": "string"
-                          },
-                          "groupId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "groupName": {
-                            "type": "string"
-                          },
-                          "dueDate": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "courseId",
-                          "courseTitle",
-                          "groupId",
-                          "groupName",
-                          "dueDate"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "courseDueDate"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "outlookCalendar": {
-                        "type": "object",
-                        "properties": {
-                          "webLink": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isSensitive": {
-                            "type": "boolean"
-                          },
-                          "availability": {
-                            "anyOf": [
-                              {
-                                "const": "free",
-                                "type": "string"
-                              },
-                              {
-                                "const": "tentative",
-                                "type": "string"
-                              },
-                              {
-                                "const": "busy",
-                                "type": "string"
-                              },
-                              {
-                                "const": "out_of_office",
-                                "type": "string"
-                              },
-                              {
-                                "const": "working_elsewhere",
-                                "type": "string"
-                              }
-                            ]
-                          }
-                        },
-                        "required": [
-                          "webLink",
-                          "isSensitive",
-                          "availability"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "outlookCalendar"
-                    ]
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "uid",
-              "sourceType",
-              "sourceId",
-              "title",
-              "description",
-              "startsAt",
-              "endsAt",
-              "allDay",
-              "timezone",
-              "location",
-              "status",
-              "payload"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetConnectionResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "available": {
-                "type": "boolean"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "disconnected",
-                    "type": "string"
-                  },
-                  {
-                    "const": "syncing",
-                    "type": "string"
-                  },
-                  {
-                    "const": "connected",
-                    "type": "string"
-                  },
-                  {
-                    "const": "error",
-                    "type": "string"
-                  },
-                  {
-                    "const": "reconnect_required",
-                    "type": "string"
-                  }
-                ]
-              },
-              "accountEmail": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "lastSuccessfulSyncAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "subscriptionExpiresAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "errorCode": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "stale": {
-                "type": "boolean"
-              },
-              "outboundSyncEnabled": {
-                "type": "boolean"
-              },
-              "outboundStatus": {
-                "type": "string"
-              },
-              "outboundCalendarId": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "outboundErrorCode": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "lastOutboundSyncAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "available",
-              "status",
-              "accountEmail",
-              "lastSuccessfulSyncAt",
-              "subscriptionExpiresAt",
-              "errorCode",
-              "stale",
-              "outboundSyncEnabled",
-              "outboundStatus",
-              "outboundCalendarId",
-              "outboundErrorCode",
-              "lastOutboundSyncAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "SyncResponse": {
-        "type": "null"
-      },
-      "UpdateOutboundBody": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled"
-        ]
-      },
-      "UpdateOutboundResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "authorizationUrl": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "authorizationUrl"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "DisconnectResponse": {
-        "type": "null"
-      },
-      "NotificationsBody": {
-        "additionalProperties": true,
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "array",
-            "items": {
-              "additionalProperties": true,
-              "type": "object",
-              "properties": {
-                "subscriptionId": {
-                  "type": "string"
-                },
-                "clientState": {
-                  "type": "string"
-                },
-                "lifecycleEvent": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "LifecycleNotificationsBody": {
-        "additionalProperties": true,
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "array",
-            "items": {
-              "additionalProperties": true,
-              "type": "object",
-              "properties": {
-                "subscriptionId": {
-                  "type": "string"
-                },
-                "clientState": {
-                  "type": "string"
-                },
-                "lifecycleEvent": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "ListResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "title": {
-                  "minLength": 1,
-                  "maxLength": 200,
-                  "type": "string"
-                },
-                "completed": {
-                  "type": "boolean"
-                },
-                "completedAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "position": {
-                  "type": "number"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title",
-                "completed",
-                "completedAt",
-                "position",
-                "createdAt",
-                "updatedAt"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreateBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "minLength": 1,
-            "maxLength": 200,
-            "type": "string"
-          }
-        },
-        "required": [
-          "title"
-        ]
-      },
-      "CreateResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "title": {
-                "minLength": 1,
-                "maxLength": 200,
-                "type": "string"
-              },
-              "completed": {
-                "type": "boolean"
-              },
-              "completedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "position": {
-                "type": "number"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "title",
-              "completed",
-              "completedAt",
-              "position",
-              "createdAt",
-              "updatedAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "minLength": 1,
-            "maxLength": 200,
-            "type": "string"
-          },
-          "completed": {
-            "type": "boolean"
-          }
-        }
-      },
-      "UpdateResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "title": {
-                "minLength": 1,
-                "maxLength": 200,
-                "type": "string"
-              },
-              "completed": {
-                "type": "boolean"
-              },
-              "completedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "position": {
-                "type": "number"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "title",
-              "completed",
-              "completedAt",
-              "position",
-              "createdAt",
-              "updatedAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ReorderBody": {
-        "type": "object",
-        "properties": {
-          "activeTaskIds": {
-            "maxItems": 100,
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "completedTaskIds": {
-            "maxItems": 100,
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "activeTaskIds",
-          "completedTaskIds"
-        ]
-      },
-      "ReorderResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "title": {
-                  "minLength": 1,
-                  "maxLength": 200,
-                  "type": "string"
-                },
-                "completed": {
-                  "type": "boolean"
-                },
-                "completedAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "position": {
-                  "type": "number"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title",
-                "completed",
-                "completedAt",
-                "position",
-                "createdAt",
-                "updatedAt"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "OpenAuthoringSessionBody": {
         "additionalProperties": false,
         "type": "object",
@@ -138669,6 +135987,126 @@
                       "anyOf": [
                         {
                           "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failure": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "anyOf": [
+                                {
+                                  "const": "generation",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "evidence",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "author_decision",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "configuration",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "internal",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "stage": {
+                              "type": "string"
+                            },
+                            "recoveryAction": {
+                              "anyOf": [
+                                {
+                                  "const": "retry_failed_parts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "answer_question",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "retry_provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "service_fix",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "retryable": {
+                              "type": "boolean"
+                            },
+                            "affectedChapterIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "affectedLessonIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "correlationId": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "detailKey": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "generationRevision": {
+                              "minimum": 0,
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "category",
+                            "stage",
+                            "recoveryAction",
+                            "retryable",
+                            "affectedChapterIds",
+                            "affectedLessonIds",
+                            "correlationId",
+                            "detailKey",
+                            "generationRevision"
+                          ]
                         },
                         {
                           "type": "null"
@@ -139670,6 +137108,126 @@
                       "anyOf": [
                         {
                           "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failure": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "anyOf": [
+                                {
+                                  "const": "generation",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "evidence",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "author_decision",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "configuration",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "internal",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "stage": {
+                              "type": "string"
+                            },
+                            "recoveryAction": {
+                              "anyOf": [
+                                {
+                                  "const": "retry_failed_parts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "answer_question",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "retry_provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "service_fix",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "retryable": {
+                              "type": "boolean"
+                            },
+                            "affectedChapterIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "affectedLessonIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "correlationId": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "detailKey": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "generationRevision": {
+                              "minimum": 0,
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "category",
+                            "stage",
+                            "recoveryAction",
+                            "retryable",
+                            "affectedChapterIds",
+                            "affectedLessonIds",
+                            "correlationId",
+                            "detailKey",
+                            "generationRevision"
+                          ]
                         },
                         {
                           "type": "null"
@@ -148920,6 +146478,2211 @@
               "imageUrl",
               "faviconUrl"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListPhishingScenariosResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "action": {
+                  "anyOf": [
+                    {
+                      "const": "clicked",
+                      "type": "string"
+                    },
+                    {
+                      "const": "submitted",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "action"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "userIds"
+                  ]
+                }
+              },
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "users",
+              "groups",
+              "courses"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListPhishingCampaignsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "scenarioId": {
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdBy": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "scheduled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cancelled",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "sendWindow": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string"
+                    },
+                    "end": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "scenarioId",
+                "courseId",
+                "createdBy",
+                "createdAt",
+                "status",
+                "sendWindow"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePhishingCampaignBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "maxLength": 150,
+            "type": "string"
+          },
+          "scenarioId": {
+            "minLength": 1,
+            "maxLength": 100,
+            "type": "string"
+          },
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userIds": {
+            "maxItems": 10000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "groupIds": {
+            "maxItems": 1000,
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "sendWindow": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "start": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "end": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          }
+        },
+        "required": [
+          "requestId",
+          "name",
+          "scenarioId",
+          "courseId",
+          "userIds",
+          "groupIds",
+          "sendWindow"
+        ]
+      },
+      "CreatePhishingCampaignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "scenarioId": {
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdBy": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sendWindow": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "scenarioId",
+              "courseId",
+              "createdBy",
+              "createdAt",
+              "status",
+              "sendWindow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CancelPhishingCampaignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "scenarioId": {
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdBy": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sendWindow": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string"
+                  },
+                  "end": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "scenarioId",
+              "courseId",
+              "createdBy",
+              "createdAt",
+              "status",
+              "sendWindow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPhishingReportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "campaign": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "scenarioId": {
+                    "type": "string"
+                  },
+                  "courseId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "createdBy": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "scheduled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cancelled",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "sendWindow": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "scenarioId",
+                  "courseId",
+                  "createdBy",
+                  "createdAt",
+                  "status",
+                  "sendWindow"
+                ]
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "groupIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    },
+                    "sentAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "clickedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "submittedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failed": {
+                      "type": "boolean"
+                    },
+                    "courseStatus": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "groupIds",
+                    "sentAt",
+                    "clickedAt",
+                    "submittedAt",
+                    "failed",
+                    "courseStatus"
+                  ]
+                }
+              },
+              "totals": {
+                "type": "object",
+                "properties": {
+                  "recipients": {
+                    "type": "number"
+                  },
+                  "sent": {
+                    "type": "number"
+                  },
+                  "clicked": {
+                    "type": "number"
+                  },
+                  "submitted": {
+                    "type": "number"
+                  },
+                  "risky": {
+                    "type": "number"
+                  },
+                  "riskRate": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "recipients",
+                  "sent",
+                  "clicked",
+                  "submitted",
+                  "risky",
+                  "riskRate"
+                ]
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "recipients": {
+                          "type": "number"
+                        },
+                        "sent": {
+                          "type": "number"
+                        },
+                        "clicked": {
+                          "type": "number"
+                        },
+                        "submitted": {
+                          "type": "number"
+                        },
+                        "risky": {
+                          "type": "number"
+                        },
+                        "riskRate": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "recipients",
+                        "sent",
+                        "clicked",
+                        "submitted",
+                        "risky",
+                        "riskRate"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "totals"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "campaign",
+              "recipients",
+              "totals",
+              "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ConnectionProbeBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "nonce": {
+            "pattern": "^[a-f0-9]{32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenantId",
+          "nonce"
+        ]
+      },
+      "ConnectionProbeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "nonce": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "nonce"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetConsentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientName": {
+                "type": "string"
+              },
+              "clientId": {
+                "type": "string"
+              },
+              "redirectUri": {
+                "type": "string"
+              },
+              "accountEmail": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientName",
+              "clientId",
+              "redirectUri",
+              "accountEmail"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEventsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "type": "string"
+                    },
+                    "sourceType": {
+                      "anyOf": [
+                        {
+                          "const": "live_training",
+                          "type": "string"
+                        },
+                        {
+                          "const": "course_due_date",
+                          "type": "string"
+                        },
+                        {
+                          "const": "microsoft_outlook",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "sourceId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "startsAt": {
+                      "type": "string"
+                    },
+                    "endsAt": {
+                      "type": "string"
+                    },
+                    "allDay": {
+                      "type": "boolean"
+                    },
+                    "timezone": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "scheduled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cancelled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "ended",
+                          "type": "string"
+                        },
+                        {
+                          "const": "expired",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "payload": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "liveTraining": {
+                              "type": "object",
+                              "properties": {
+                                "deliveryType": {
+                                  "anyOf": [
+                                    {
+                                      "const": "online",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "offline",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "status": {
+                                  "anyOf": [
+                                    {
+                                      "const": "scheduled",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "active",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "ended",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "cancelled",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "expired",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "visibilityScope": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "linked_courses",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "sourceRole": {
+                                  "anyOf": [
+                                    {
+                                      "const": "admin",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "author",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "trainer",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "observer",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "linkedCourses": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "courseId": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "courseTitle": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "courseId",
+                                      "courseTitle"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "deliveryType",
+                                "status",
+                                "visibilityScope",
+                                "sourceRole",
+                                "linkedCourses"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "liveTraining"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "courseDueDate": {
+                              "type": "object",
+                              "properties": {
+                                "courseId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "courseTitle": {
+                                  "type": "string"
+                                },
+                                "groupId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "groupName": {
+                                  "type": "string"
+                                },
+                                "dueDate": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "courseId",
+                                "courseTitle",
+                                "groupId",
+                                "groupName",
+                                "dueDate"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "courseDueDate"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "outlookCalendar": {
+                              "type": "object",
+                              "properties": {
+                                "webLink": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "isSensitive": {
+                                  "type": "boolean"
+                                },
+                                "availability": {
+                                  "anyOf": [
+                                    {
+                                      "const": "free",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tentative",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "busy",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "out_of_office",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "working_elsewhere",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "webLink",
+                                "isSensitive",
+                                "availability"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "outlookCalendar"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "uid",
+                    "sourceType",
+                    "sourceId",
+                    "title",
+                    "description",
+                    "startsAt",
+                    "endsAt",
+                    "allDay",
+                    "timezone",
+                    "location",
+                    "status",
+                    "payload"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "events"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDashboardEventsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceType": {
+                  "anyOf": [
+                    {
+                      "const": "live_training",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_due_date",
+                      "type": "string"
+                    },
+                    {
+                      "const": "microsoft_outlook",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "targetId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "startsAt": {
+                  "type": "string"
+                },
+                "allDay": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "sourceType",
+                "targetId",
+                "title",
+                "startsAt",
+                "allDay"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEventDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "uid": {
+                "type": "string"
+              },
+              "sourceType": {
+                "anyOf": [
+                  {
+                    "const": "live_training",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course_due_date",
+                    "type": "string"
+                  },
+                  {
+                    "const": "microsoft_outlook",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sourceId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "startsAt": {
+                "type": "string"
+              },
+              "endsAt": {
+                "type": "string"
+              },
+              "allDay": {
+                "type": "boolean"
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ended",
+                    "type": "string"
+                  },
+                  {
+                    "const": "expired",
+                    "type": "string"
+                  }
+                ]
+              },
+              "payload": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "liveTraining": {
+                        "type": "object",
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "deliveryType": {
+                                "anyOf": [
+                                  {
+                                    "const": "online",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "offline",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "status": {
+                                "anyOf": [
+                                  {
+                                    "const": "scheduled",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "active",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "ended",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cancelled",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "expired",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "visibilityScope": {
+                                "anyOf": [
+                                  {
+                                    "const": "all",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "linked_courses",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "sourceRole": {
+                                "anyOf": [
+                                  {
+                                    "const": "admin",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "author",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "trainer",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "observer",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "linkedCourses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "courseId": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "courseTitle": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "courseId",
+                                    "courseTitle"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "deliveryType",
+                              "status",
+                              "visibilityScope",
+                              "sourceRole",
+                              "linkedCourses"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "author": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "fullName": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "email": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "fullName",
+                                  "email"
+                                ]
+                              },
+                              "hosts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "userId": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "fullName": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "email": {
+                                      "type": "string"
+                                    },
+                                    "role": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "userId",
+                                    "fullName",
+                                    "email",
+                                    "role"
+                                  ]
+                                }
+                              },
+                              "materials": {
+                                "type": "object",
+                                "properties": {
+                                  "before": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "resourceId": {
+                                          "format": "uuid",
+                                          "type": "string"
+                                        },
+                                        "title": {
+                                          "type": "string"
+                                        },
+                                        "mimeType": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "size": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "relationshipType": {
+                                          "anyOf": [
+                                            {
+                                              "const": "live_training_before",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "live_training_after",
+                                              "type": "string"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "resourceId",
+                                        "title",
+                                        "mimeType",
+                                        "size",
+                                        "relationshipType"
+                                      ]
+                                    }
+                                  },
+                                  "after": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "resourceId": {
+                                          "format": "uuid",
+                                          "type": "string"
+                                        },
+                                        "title": {
+                                          "type": "string"
+                                        },
+                                        "mimeType": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "size": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "relationshipType": {
+                                          "anyOf": [
+                                            {
+                                              "const": "live_training_before",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "live_training_after",
+                                              "type": "string"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "resourceId",
+                                        "title",
+                                        "mimeType",
+                                        "size",
+                                        "relationshipType"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "before",
+                                  "after"
+                                ]
+                              },
+                              "latestSession": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "status": {
+                                        "anyOf": [
+                                          {
+                                            "const": "waiting",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "active",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "ended",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "failed",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "actualStartedAt": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      },
+                                      "actualEndedAt": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      },
+                                      "peakParticipants": {
+                                        "type": "number"
+                                      },
+                                      "uniqueParticipantCount": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "status",
+                                      "actualStartedAt",
+                                      "actualEndedAt",
+                                      "peakParticipants",
+                                      "uniqueParticipantCount"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "author",
+                              "hosts",
+                              "materials",
+                              "latestSession"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "liveTraining"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "courseDueDate": {
+                        "type": "object",
+                        "properties": {
+                          "courseId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "courseTitle": {
+                            "type": "string"
+                          },
+                          "groupId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "groupName": {
+                            "type": "string"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "courseId",
+                          "courseTitle",
+                          "groupId",
+                          "groupName",
+                          "dueDate"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "courseDueDate"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "outlookCalendar": {
+                        "type": "object",
+                        "properties": {
+                          "webLink": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isSensitive": {
+                            "type": "boolean"
+                          },
+                          "availability": {
+                            "anyOf": [
+                              {
+                                "const": "free",
+                                "type": "string"
+                              },
+                              {
+                                "const": "tentative",
+                                "type": "string"
+                              },
+                              {
+                                "const": "busy",
+                                "type": "string"
+                              },
+                              {
+                                "const": "out_of_office",
+                                "type": "string"
+                              },
+                              {
+                                "const": "working_elsewhere",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "webLink",
+                          "isSensitive",
+                          "availability"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "outlookCalendar"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "uid",
+              "sourceType",
+              "sourceId",
+              "title",
+              "description",
+              "startsAt",
+              "endsAt",
+              "allDay",
+              "timezone",
+              "location",
+              "status",
+              "payload"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "available": {
+                "type": "boolean"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "disconnected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "syncing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "connected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "error",
+                    "type": "string"
+                  },
+                  {
+                    "const": "reconnect_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "accountEmail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastSuccessfulSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "subscriptionExpiresAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "outboundSyncEnabled": {
+                "type": "boolean"
+              },
+              "outboundStatus": {
+                "type": "string"
+              },
+              "outboundCalendarId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "outboundErrorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastOutboundSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "available",
+              "status",
+              "accountEmail",
+              "lastSuccessfulSyncAt",
+              "subscriptionExpiresAt",
+              "errorCode",
+              "stale",
+              "outboundSyncEnabled",
+              "outboundStatus",
+              "outboundCalendarId",
+              "outboundErrorCode",
+              "lastOutboundSyncAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SyncResponse": {
+        "type": "null"
+      },
+      "UpdateOutboundBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "UpdateOutboundResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "authorizationUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "authorizationUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DisconnectResponse": {
+        "type": "null"
+      },
+      "NotificationsBody": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": {
+              "additionalProperties": true,
+              "type": "object",
+              "properties": {
+                "subscriptionId": {
+                  "type": "string"
+                },
+                "clientState": {
+                  "type": "string"
+                },
+                "lifecycleEvent": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LifecycleNotificationsBody": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": {
+              "additionalProperties": true,
+              "type": "object",
+              "properties": {
+                "subscriptionId": {
+                  "type": "string"
+                },
+                "clientState": {
+                  "type": "string"
+                },
+                "lifecycleEvent": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "completed": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "position": {
+                  "type": "number"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "completed",
+                "completedAt",
+                "position",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "CreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "minLength": 1,
+                "maxLength": 200,
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "position": {
+                "type": "number"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "completed",
+              "completedAt",
+              "position",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "minLength": 1,
+                "maxLength": 200,
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "position": {
+                "type": "number"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "completed",
+              "completedAt",
+              "position",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReorderBody": {
+        "type": "object",
+        "properties": {
+          "activeTaskIds": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "completedTaskIds": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "activeTaskIds",
+          "completedTaskIds"
+        ]
+      },
+      "ReorderResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "completed": {
+                  "type": "boolean"
+                },
+                "completedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "position": {
+                  "type": "number"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "completed",
+                "completedAt",
+                "position",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
           }
         },
         "required": [

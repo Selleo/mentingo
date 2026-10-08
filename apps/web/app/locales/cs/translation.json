@@ -6407,6 +6407,15 @@
     "openWorkspace": "Generovat s AI",
     "openLegacyDraft": "Pokračovat ve starším konceptu",
     "activityRail": {
+      "retryFailedParts": "Zopakovat neúspěšné části",
+      "retryProvider": "Zopakovat připojení",
+      "recoveringFailedParts": "Obnovování neúspěšných částí…",
+      "failureGeneration": "Vygenerovaný obsah neprošel validací. Opakování vytvoří nový obsah pro neúspěšné části a zachová dokončenou práci.",
+      "failureProvider": "Poskytovatel nemohl dokončit požadavek. Opakování obnoví nedokončenou práci.",
+      "failureEvidence": "Dostupné zdroje nepokrývají požadovaná tvrzení. Můžete přidat zdroje nebo upřesnit požadavek.",
+      "failureAnswerQuestion": "Odpovězte na otázku níže, abyste vyřešili problém a pokračovali v uložené práci.",
+      "failureServiceFix": "Tento krok vyžaduje opravu služby. Dokončená práce je uložena; opakování tento problém nevyřeší.",
+      "repairProgress": "Pokus o opravu {{attempt}} z {{limit}}",
       "plan": "Plán",
       "planStepCount": "Kroky: {{count}}",
       "planStepCount_one": "Krok: {{count}}",
@@ -6427,6 +6436,7 @@
       "moreSearchQueries": "+{{count}} dalších dotazů",
       "completedResearchSteps": "Dokončené kroky rešerše: {{count}}",
       "chapterStatus": {
+        "failed": "Neúspěšné",
         "pending": "čeká",
         "running": "probíhá",
         "complete": "naplánováno"

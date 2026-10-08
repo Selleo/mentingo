@@ -15,6 +15,29 @@ import { authoringOperationSchema } from "./course-authoring-operations.schema";
 
 const strict = { additionalProperties: false };
 const nullableString = Type.Union([Type.String(), Type.Null()]);
+export const authoringTaskFailureSchema = Type.Object(
+  {
+    code: Type.String(),
+    category: Type.Union(
+      ["generation", "evidence", "author_decision", "provider", "configuration", "internal"].map(
+        (value) => Type.Literal(value),
+      ),
+    ),
+    stage: Type.String(),
+    recoveryAction: Type.Union(
+      ["retry_failed_parts", "answer_question", "retry_provider", "service_fix"].map((value) =>
+        Type.Literal(value),
+      ),
+    ),
+    retryable: Type.Boolean(),
+    affectedChapterIds: Type.Array(UUIDSchema),
+    affectedLessonIds: Type.Array(UUIDSchema),
+    correlationId: nullableString,
+    detailKey: nullableString,
+    generationRevision: Type.Integer({ minimum: 0 }),
+  },
+  strict,
+);
 const taskKind = Type.Optional(Type.Union([Type.Enum(TaskKind), Type.Null()]));
 const sourcePolicy = Type.Object(
   {
@@ -302,6 +325,7 @@ export const authoringSessionSchema = Type.Object({
       kind: taskKind,
       status: Type.String(),
       errorCode: nullableString,
+      failure: Type.Optional(Type.Union([authoringTaskFailureSchema, Type.Null()])),
       outputId: Type.Union([UUIDSchema, Type.Null()]),
     }),
   ),

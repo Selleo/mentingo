@@ -6420,6 +6420,15 @@
     "openWorkspace": "Generate with AI",
     "openLegacyDraft": "Continue legacy generation draft",
     "activityRail": {
+      "retryFailedParts": "Retry failed parts",
+      "retryProvider": "Retry connection",
+      "recoveringFailedParts": "Recovering failed parts…",
+      "failureGeneration": "Generated content did not pass validation. Retry will create fresh content for the failed parts and keep completed work.",
+      "failureProvider": "The provider could not complete the request. Retry will resume the unfinished work.",
+      "failureEvidence": "The available evidence does not cover the required claims. You can add sources or clarify the request.",
+      "failureAnswerQuestion": "Answer the question below to resolve this issue and continue from saved work.",
+      "failureServiceFix": "This step requires a service fix. Your completed work is saved; retrying cannot resolve this issue.",
+      "repairProgress": "Repair attempt {{attempt}} of {{limit}}",
       "plan": "Plan",
       "planStepCount": "{{count}} steps",
       "planStepCount_one": "{{count}} step",
@@ -6439,6 +6448,7 @@
       "moreSearchQueries": "+{{count}} more queries",
       "completedResearchSteps": "Research steps complete: {{count}}",
       "chapterStatus": {
+        "failed": "Failed",
         "pending": "waiting",
         "running": "in progress",
         "complete": "planned"

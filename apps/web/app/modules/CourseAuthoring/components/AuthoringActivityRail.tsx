@@ -21,6 +21,12 @@ import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
+import {
+  authoringTaskFailureLabel,
+  authoringTaskRetryLabel,
+  canRetryAuthoringTask,
+} from "../authoringTaskFailure";
+
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
 
 import type {
@@ -253,11 +259,8 @@ const taskKindLabel = (task: AuthoringTask, t: (key: string) => string) =>
     .with("creatingVisual", () => t("courseAuthoring.conversation.creatingVisual"))
     .otherwise(() => t("courseAuthoring.activityRail.taskKind.working"));
 
-/** Shows the safe diagnostic sent by the authoring worker without exposing exception text. */
 const taskFailureLabel = (task: AuthoringTask, t: (key: string) => string) =>
-  task.errorCode === "task_execution_failed"
-    ? t("courseAuthoring.activityRail.taskExecutionFailed")
-    : t("courseAuthoring.activityRail.taskFailed");
+  t(`courseAuthoring.activityRail.${authoringTaskFailureLabel(task)}`);
 
 /** Maps task state to the activity icon used by the rail. */
 const taskStatusIcon = (status: AuthoringTask["status"]) =>
@@ -531,10 +534,11 @@ export const AuthoringActivityRail = ({
     task: AuthoringTask,
     options: { showStop?: boolean; showChapterContext?: boolean } = {},
   ) => {
-    const label =
-      task.kind === "detailed_plan" && task.workProgress
-        ? taskKindLabel(task, t)
-        : (taskLabels[task.taskId] ?? task.workProgress?.lessonTitle ?? taskKindLabel(task, t));
+    let label = taskLabels[task.taskId] ?? task.workProgress?.lessonTitle ?? taskKindLabel(task, t);
+    if (task.kind === "detailed_plan" && task.workProgress) label = taskKindLabel(task, t);
+    if (task.workProgress?.stage === "recovering") {
+      label = t("courseAuthoring.activityRail.recoveringFailedParts");
+    }
     const canStop = options.showStop !== false && canStopTask(task);
     const canDiscard = ["waiting_author", "waiting_dependencies"].includes(task.status);
     const requestAction = canDiscard && onDiscardRequest ? onDiscardRequest : onStopRequest;
@@ -581,7 +585,7 @@ export const AuthoringActivityRail = ({
                 <Square className="size-3 fill-current" />
               </Button>
             )}
-            {task.status === "failed" && (
+            {canRetryAuthoringTask(task) && (
               <Button
                 type="button"
                 variant="ghost"
@@ -589,13 +593,22 @@ export const AuthoringActivityRail = ({
                 className="size-7 shrink-0 rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-950"
                 disabled={busy}
                 onClick={() => onRetry(task.taskId)}
-                aria-label={t("courseAuthoring.activityRail.retry")}
-                title={t("courseAuthoring.activityRail.retry")}
+                aria-label={t(`courseAuthoring.activityRail.${authoringTaskRetryLabel(task)}`)}
+                title={t(`courseAuthoring.activityRail.${authoringTaskRetryLabel(task)}`)}
               >
                 <RotateCcw className="size-3.5" />
               </Button>
             )}
           </div>
+          {task.workProgress?.repairAttempt !== undefined &&
+            task.workProgress.repairLimit !== undefined && (
+              <p className="pl-6 text-xs text-neutral-500">
+                {t("courseAuthoring.activityRail.repairProgress", {
+                  attempt: task.workProgress.repairAttempt,
+                  limit: task.workProgress.repairLimit,
+                })}
+              </p>
+            )}
           {options.showChapterContext !== false && chapterContext && (
             <p className="pl-6 text-xs text-neutral-500">{chapterContext}</p>
           )}
@@ -606,6 +619,7 @@ export const AuthoringActivityRail = ({
                 let iconStatus: AuthoringTask["status"] = "queued";
                 if (chapterStatus === "running") iconStatus = "running";
                 if (chapterStatus === "complete") iconStatus = "succeeded";
+                if (chapterStatus === "failed") iconStatus = "failed";
 
                 return (
                   <li
@@ -629,7 +643,7 @@ export const AuthoringActivityRail = ({
               })}
             </ol>
           )}
-          {task.status === "failed" && (
+          {(task.status === "failed" || task.failure) && (
             <p className="pl-6 text-xs text-destructive">{taskFailureLabel(task, t)}</p>
           )}
         </div>
@@ -664,13 +678,13 @@ export const AuthoringActivityRail = ({
         {options.showChapterContext !== false && chapterContext && (
           <p className="mt-2 pl-6 text-xs text-neutral-500">{chapterContext}</p>
         )}
-        {task.status === "failed" && (
+        {(task.status === "failed" || task.failure) && (
           <div className="mt-2 text-xs text-destructive">
             <p>{taskFailureLabel(task, t)}</p>
           </div>
         )}
         <div className="mt-2 flex justify-end gap-1">
-          {task.status === "failed" && (
+          {canRetryAuthoringTask(task) && (
             <Button
               type="button"
               variant="ghost"
@@ -678,7 +692,8 @@ export const AuthoringActivityRail = ({
               disabled={busy}
               onClick={() => onRetry(task.taskId)}
             >
-              <RotateCcw className="mr-1 size-3.5" /> {t("courseAuthoring.activityRail.retry")}
+              <RotateCcw className="mr-1 size-3.5" />{" "}
+              {t(`courseAuthoring.activityRail.${authoringTaskRetryLabel(task)}`)}
             </Button>
           )}
         </div>

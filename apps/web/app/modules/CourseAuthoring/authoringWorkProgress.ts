@@ -1,3 +1,5 @@
+import { attachAuthoringTaskFailures } from "./authoringTaskFailure";
+
 import type {
   AuthoringRecord,
   AuthoringTask,
@@ -20,7 +22,8 @@ const isWorkProgressStage = (value: unknown): value is AuthoringWorkProgressStag
   value === "lesson_planning" ||
   value === "lesson_generation" ||
   value === "validation" ||
-  value === "repairing";
+  value === "repairing" ||
+  value === "recovering";
 
 const parseChapter = (value: unknown): AuthoringWorkProgressChapter | null => {
   if (!isObject(value)) return null;
@@ -33,12 +36,18 @@ const parseChapter = (value: unknown): AuthoringWorkProgressChapter | null => {
     !chapterId ||
     !title ||
     lessonCount === null ||
-    (status !== "pending" && status !== "running" && status !== "complete")
+    (status !== "pending" && status !== "running" && status !== "complete" && status !== "failed")
   ) {
     return null;
   }
 
-  return { chapterId, title, lessonCount, status };
+  return {
+    chapterId,
+    title,
+    lessonCount,
+    status,
+    ...(typeof value.failureCode === "string" ? { failureCode: value.failureCode } : {}),
+  };
 };
 
 const optionalString = (value: unknown): string | undefined =>
@@ -68,6 +77,16 @@ const parseWorkProgress = (value: unknown): AuthoringWorkProgress | null => {
 
   return {
     stage: value.stage,
+    ...(Array.isArray(value.failedLessonIds) &&
+    value.failedLessonIds.every((id) => typeof id === "string")
+      ? { failedLessonIds: value.failedLessonIds as string[] }
+      : {}),
+    ...(integerValue(value.repairAttempt, 0) !== null
+      ? { repairAttempt: value.repairAttempt as number }
+      : {}),
+    ...(integerValue(value.repairLimit, 1) !== null
+      ? { repairLimit: value.repairLimit as number }
+      : {}),
     ...(Array.isArray(value.chapters)
       ? {
           chapters: value.chapters.flatMap((chapter) => {
@@ -118,7 +137,7 @@ export const attachAuthoringWorkProgress = (
     }
   });
 
-  return tasks.map((task) => {
+  return attachAuthoringTaskFailures(tasks, records).map((task) => {
     const latest = latestByTaskId.get(task.taskId);
     if (!latest || latest.requestId !== task.requestId) return task;
     return { ...task, workProgress: latest.progress };

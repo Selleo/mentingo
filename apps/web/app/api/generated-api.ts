@@ -3120,92 +3120,6 @@ export interface GetCourseOwnershipResponse {
   };
 }
 
-export interface ChatWithCourseGenerationAgentBody {
-  /** @format uuid */
-  integrationId: string;
-  message: {
-    id: string;
-    role: string;
-    parts: any[];
-    [key: string]: any;
-  };
-}
-
-export type GetCourseGenerationMessagesResponse = {
-  /** @format uuid */
-  id: string;
-  /** @format uuid */
-  draftId: string;
-  role: string;
-  content: string;
-  contentType: string;
-  draftMetadata?: object | null;
-  createdAt: string;
-  updatedAt: string;
-}[];
-
-export interface GetCourseGenerationDraftResponse {
-  /** @format uuid */
-  integrationId: string;
-  /** @format uuid */
-  draftId: string;
-  isCourseGenerated: boolean;
-  coreSync: {
-    status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-    draftId: string | null;
-    attemptCount: number;
-    startedAt: string | null;
-    processedAt: string | null;
-    failedAt: string | null;
-    dismissedAt: string | null;
-    lastError: string | null;
-  };
-}
-
-export interface SyncGeneratedCourseBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export interface SyncGeneratedCourseResponse {
-  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-  draftId: string | null;
-  attemptCount: number;
-  startedAt: string | null;
-  processedAt: string | null;
-  failedAt: string | null;
-  dismissedAt: string | null;
-  lastError: string | null;
-}
-
-export interface DismissGeneratedCourseSyncBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export interface DismissGeneratedCourseSyncResponse {
-  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-  draftId: string | null;
-  attemptCount: number;
-  startedAt: string | null;
-  processedAt: string | null;
-  failedAt: string | null;
-  dismissedAt: string | null;
-  lastError: string | null;
-}
-
-export interface IngestCourseGenerationFilesBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export type GetCourseGenerationFilesResponse = {
-  /** @format uuid */
-  id: string;
-  filename: string;
-  contentType: string;
-}[];
-
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -26009,510 +25923,6 @@ export interface GenerateArticlePreviewResponse {
   };
 }
 
-export interface GetPhishingConfigurationResponse {
-  data: {
-    enabled: boolean;
-  };
-}
-
-export interface ListPhishingScenariosResponse {
-  data: {
-    id: string;
-    name: string;
-    description: string;
-    action: "clicked" | "submitted";
-  }[];
-}
-
-export interface GetPhishingOptionsResponse {
-  data: {
-    users: {
-      /** @format uuid */
-      id: string;
-      label: string;
-    }[];
-    groups: {
-      /** @format uuid */
-      id: string;
-      label: string;
-      userIds: string[];
-    }[];
-    courses: {
-      /** @format uuid */
-      id: string;
-      label: string;
-    }[];
-  };
-}
-
-export interface ListPhishingCampaignsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    scenarioId: string;
-    /** @format uuid */
-    courseId: string;
-    /** @format uuid */
-    createdBy: string;
-    createdAt: string;
-    status: "scheduled" | "completed" | "cancelled";
-    sendWindow: {
-      start: string;
-      end: string;
-    };
-  }[];
-}
-
-export interface CreatePhishingCampaignBody {
-  /** @format uuid */
-  requestId: string;
-  /**
-   * @minLength 1
-   * @maxLength 150
-   */
-  name: string;
-  /**
-   * @minLength 1
-   * @maxLength 100
-   */
-  scenarioId: string;
-  /** @format uuid */
-  courseId: string;
-  /**
-   * @maxItems 10000
-   * @uniqueItems true
-   */
-  userIds: string[];
-  /**
-   * @maxItems 1000
-   * @uniqueItems true
-   */
-  groupIds: string[];
-  sendWindow: {
-    /** @format date-time */
-    start: string;
-    /** @format date-time */
-    end: string;
-  };
-}
-
-export interface CreatePhishingCampaignResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    scenarioId: string;
-    /** @format uuid */
-    courseId: string;
-    /** @format uuid */
-    createdBy: string;
-    createdAt: string;
-    status: "scheduled" | "completed" | "cancelled";
-    sendWindow: {
-      start: string;
-      end: string;
-    };
-  };
-}
-
-export interface CancelPhishingCampaignResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    scenarioId: string;
-    /** @format uuid */
-    courseId: string;
-    /** @format uuid */
-    createdBy: string;
-    createdAt: string;
-    status: "scheduled" | "completed" | "cancelled";
-    sendWindow: {
-      start: string;
-      end: string;
-    };
-  };
-}
-
-export interface GetPhishingReportResponse {
-  data: {
-    campaign: {
-      /** @format uuid */
-      id: string;
-      name: string;
-      scenarioId: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      createdBy: string;
-      createdAt: string;
-      status: "scheduled" | "completed" | "cancelled";
-      sendWindow: {
-        start: string;
-        end: string;
-      };
-    };
-    recipients: {
-      /** @format uuid */
-      userId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      groupIds: string[];
-      sentAt: string | null;
-      clickedAt: string | null;
-      submittedAt: string | null;
-      failed: boolean;
-      courseStatus: string;
-    }[];
-    totals: {
-      recipients: number;
-      sent: number;
-      clicked: number;
-      submitted: number;
-      risky: number;
-      riskRate: number;
-    };
-    groups: {
-      /** @format uuid */
-      id: string;
-      name: string;
-      totals: {
-        recipients: number;
-        sent: number;
-        clicked: number;
-        submitted: number;
-        risky: number;
-        riskRate: number;
-      };
-    }[];
-  };
-}
-
-export interface ConnectionProbeBody {
-  /** @format uuid */
-  tenantId: string;
-  /** @pattern ^[a-f0-9]{32}$ */
-  nonce: string;
-}
-
-export interface ConnectionProbeResponse {
-  data: {
-    nonce: string;
-  };
-}
-
-export interface GetConsentResponse {
-  data: {
-    clientName: string;
-    clientId: string;
-    redirectUri: string;
-    accountEmail: string;
-  };
-}
-
-export interface GetEventsResponse {
-  data: {
-    events: {
-      /** @format uuid */
-      id: string;
-      uid: string;
-      sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
-      /** @format uuid */
-      sourceId: string;
-      title: string;
-      description: string | null;
-      startsAt: string;
-      endsAt: string;
-      allDay: boolean;
-      timezone: string;
-      location: string | null;
-      status: "scheduled" | "cancelled" | "ended" | "expired";
-      payload:
-        | {
-            liveTraining: {
-              deliveryType: "online" | "offline";
-              status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-              visibilityScope: "all" | "linked_courses";
-              sourceRole: "admin" | "author" | "trainer" | "observer";
-              linkedCourses: {
-                /** @format uuid */
-                courseId: string;
-                courseTitle: string;
-              }[];
-            };
-          }
-        | {
-            courseDueDate: {
-              /** @format uuid */
-              courseId: string;
-              courseTitle: string;
-              /** @format uuid */
-              groupId: string;
-              groupName: string;
-              dueDate: string;
-            };
-          }
-        | {
-            outlookCalendar: {
-              webLink: string | null;
-              isSensitive: boolean;
-              availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
-            };
-          };
-    }[];
-  };
-}
-
-export interface GetDashboardEventsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
-    /** @format uuid */
-    targetId: string;
-    title: string;
-    startsAt: string;
-    allDay: boolean;
-  }[];
-}
-
-export interface GetEventDetailsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    uid: string;
-    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
-    /** @format uuid */
-    sourceId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    status: "scheduled" | "cancelled" | "ended" | "expired";
-    payload:
-      | {
-          liveTraining: {
-            deliveryType: "online" | "offline";
-            status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-            visibilityScope: "all" | "linked_courses";
-            sourceRole: "admin" | "author" | "trainer" | "observer";
-            linkedCourses: {
-              /** @format uuid */
-              courseId: string;
-              courseTitle: string;
-            }[];
-          } & {
-            author: {
-              /** @format uuid */
-              id: string;
-              fullName: string | null;
-              email: string;
-            };
-            hosts: {
-              /** @format uuid */
-              userId: string;
-              fullName: string | null;
-              email: string;
-              role: string;
-            }[];
-            materials: {
-              before: {
-                /** @format uuid */
-                resourceId: string;
-                title: string;
-                mimeType: string | null;
-                size: number | null;
-                relationshipType: "live_training_before" | "live_training_after";
-              }[];
-              after: {
-                /** @format uuid */
-                resourceId: string;
-                title: string;
-                mimeType: string | null;
-                size: number | null;
-                relationshipType: "live_training_before" | "live_training_after";
-              }[];
-            };
-            latestSession: {
-              /** @format uuid */
-              id: string;
-              status: "waiting" | "active" | "ended" | "failed";
-              actualStartedAt: string | null;
-              actualEndedAt: string | null;
-              peakParticipants: number;
-              uniqueParticipantCount: number;
-            } | null;
-          };
-        }
-      | {
-          courseDueDate: {
-            /** @format uuid */
-            courseId: string;
-            courseTitle: string;
-            /** @format uuid */
-            groupId: string;
-            groupName: string;
-            dueDate: string;
-          };
-        }
-      | {
-          outlookCalendar: {
-            webLink: string | null;
-            isSensitive: boolean;
-            availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
-          };
-        };
-  };
-}
-
-export interface GetConnectionResponse {
-  data: {
-    available: boolean;
-    status: "disconnected" | "syncing" | "connected" | "error" | "reconnect_required";
-    accountEmail: string | null;
-    lastSuccessfulSyncAt: string | null;
-    subscriptionExpiresAt: string | null;
-    errorCode: string | null;
-    stale: boolean;
-    outboundSyncEnabled: boolean;
-    outboundStatus: string;
-    outboundCalendarId: string | null;
-    outboundErrorCode: string | null;
-    lastOutboundSyncAt: string | null;
-  };
-}
-
-export type SyncResponse = null;
-
-export interface UpdateOutboundBody {
-  enabled: boolean;
-}
-
-export interface UpdateOutboundResponse {
-  data: {
-    authorizationUrl: string | null;
-  };
-}
-
-export type DisconnectResponse = null;
-
-export interface NotificationsBody {
-  value?: {
-    subscriptionId?: string;
-    clientState?: string;
-    lifecycleEvent?: string;
-    [key: string]: any;
-  }[];
-  [key: string]: any;
-}
-
-export interface LifecycleNotificationsBody {
-  value?: {
-    subscriptionId?: string;
-    clientState?: string;
-    lifecycleEvent?: string;
-    [key: string]: any;
-  }[];
-  [key: string]: any;
-}
-
-export interface ListResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @minLength 1
-     * @maxLength 200
-     */
-    title: string;
-    completed: boolean;
-    completedAt: string | null;
-    position: number;
-    createdAt: string;
-    updatedAt: string;
-  }[];
-}
-
-export interface CreateBody {
-  /**
-   * @minLength 1
-   * @maxLength 200
-   */
-  title: string;
-}
-
-export interface CreateResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @minLength 1
-     * @maxLength 200
-     */
-    title: string;
-    completed: boolean;
-    completedAt: string | null;
-    position: number;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface UpdateBody {
-  /**
-   * @minLength 1
-   * @maxLength 200
-   */
-  title?: string;
-  completed?: boolean;
-}
-
-export interface UpdateResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @minLength 1
-     * @maxLength 200
-     */
-    title: string;
-    completed: boolean;
-    completedAt: string | null;
-    position: number;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface ReorderBody {
-  /** @maxItems 100 */
-  activeTaskIds: string[];
-  /** @maxItems 100 */
-  completedTaskIds: string[];
-}
-
-export interface ReorderResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @minLength 1
-     * @maxLength 200
-     */
-    title: string;
-    completed: boolean;
-    completedAt: string | null;
-    position: number;
-    createdAt: string;
-    updatedAt: string;
-  }[];
-}
-
 export interface OpenAuthoringSessionBody {
   /** @format uuid */
   commandId: string;
@@ -26717,6 +26127,25 @@ export interface OpenAuthoringSessionResponse {
         | null;
       status: string;
       errorCode: string | null;
+      failure?: {
+        code: string;
+        category:
+          | "generation"
+          | "evidence"
+          | "author_decision"
+          | "provider"
+          | "configuration"
+          | "internal";
+        stage: string;
+        recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+        retryable: boolean;
+        affectedChapterIds: string[];
+        affectedLessonIds: string[];
+        correlationId: string | null;
+        detailKey: string | null;
+        /** @min 0 */
+        generationRevision: number;
+      } | null;
       outputId: string | null;
     }[];
   };
@@ -26946,6 +26375,25 @@ export interface GetAuthoringSessionResponse {
         | null;
       status: string;
       errorCode: string | null;
+      failure?: {
+        code: string;
+        category:
+          | "generation"
+          | "evidence"
+          | "author_decision"
+          | "provider"
+          | "configuration"
+          | "internal";
+        stage: string;
+        recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+        retryable: boolean;
+        affectedChapterIds: string[];
+        affectedLessonIds: string[];
+        correlationId: string | null;
+        detailKey: string | null;
+        /** @min 0 */
+        generationRevision: number;
+      } | null;
       outputId: string | null;
     }[];
   };
@@ -28653,6 +28101,510 @@ export interface GetAuthoringLinkPreviewResponse {
     imageUrl: string | null;
     faviconUrl: string | null;
   };
+}
+
+export interface GetPhishingConfigurationResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface ListPhishingScenariosResponse {
+  data: {
+    id: string;
+    name: string;
+    description: string;
+    action: "clicked" | "submitted";
+  }[];
+}
+
+export interface GetPhishingOptionsResponse {
+  data: {
+    users: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+    groups: {
+      /** @format uuid */
+      id: string;
+      label: string;
+      userIds: string[];
+    }[];
+    courses: {
+      /** @format uuid */
+      id: string;
+      label: string;
+    }[];
+  };
+}
+
+export interface ListPhishingCampaignsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  }[];
+}
+
+export interface CreatePhishingCampaignBody {
+  /** @format uuid */
+  requestId: string;
+  /**
+   * @minLength 1
+   * @maxLength 150
+   */
+  name: string;
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  scenarioId: string;
+  /** @format uuid */
+  courseId: string;
+  /**
+   * @maxItems 10000
+   * @uniqueItems true
+   */
+  userIds: string[];
+  /**
+   * @maxItems 1000
+   * @uniqueItems true
+   */
+  groupIds: string[];
+  sendWindow: {
+    /** @format date-time */
+    start: string;
+    /** @format date-time */
+    end: string;
+  };
+}
+
+export interface CreatePhishingCampaignResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export interface CancelPhishingCampaignResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    scenarioId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdBy: string;
+    createdAt: string;
+    status: "scheduled" | "completed" | "cancelled";
+    sendWindow: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export interface GetPhishingReportResponse {
+  data: {
+    campaign: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      scenarioId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      createdBy: string;
+      createdAt: string;
+      status: "scheduled" | "completed" | "cancelled";
+      sendWindow: {
+        start: string;
+        end: string;
+      };
+    };
+    recipients: {
+      /** @format uuid */
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      groupIds: string[];
+      sentAt: string | null;
+      clickedAt: string | null;
+      submittedAt: string | null;
+      failed: boolean;
+      courseStatus: string;
+    }[];
+    totals: {
+      recipients: number;
+      sent: number;
+      clicked: number;
+      submitted: number;
+      risky: number;
+      riskRate: number;
+    };
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      totals: {
+        recipients: number;
+        sent: number;
+        clicked: number;
+        submitted: number;
+        risky: number;
+        riskRate: number;
+      };
+    }[];
+  };
+}
+
+export interface ConnectionProbeBody {
+  /** @format uuid */
+  tenantId: string;
+  /** @pattern ^[a-f0-9]{32}$ */
+  nonce: string;
+}
+
+export interface ConnectionProbeResponse {
+  data: {
+    nonce: string;
+  };
+}
+
+export interface GetConsentResponse {
+  data: {
+    clientName: string;
+    clientId: string;
+    redirectUri: string;
+    accountEmail: string;
+  };
+}
+
+export interface GetEventsResponse {
+  data: {
+    events: {
+      /** @format uuid */
+      id: string;
+      uid: string;
+      sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+      /** @format uuid */
+      sourceId: string;
+      title: string;
+      description: string | null;
+      startsAt: string;
+      endsAt: string;
+      allDay: boolean;
+      timezone: string;
+      location: string | null;
+      status: "scheduled" | "cancelled" | "ended" | "expired";
+      payload:
+        | {
+            liveTraining: {
+              deliveryType: "online" | "offline";
+              status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+              visibilityScope: "all" | "linked_courses";
+              sourceRole: "admin" | "author" | "trainer" | "observer";
+              linkedCourses: {
+                /** @format uuid */
+                courseId: string;
+                courseTitle: string;
+              }[];
+            };
+          }
+        | {
+            courseDueDate: {
+              /** @format uuid */
+              courseId: string;
+              courseTitle: string;
+              /** @format uuid */
+              groupId: string;
+              groupName: string;
+              dueDate: string;
+            };
+          }
+        | {
+            outlookCalendar: {
+              webLink: string | null;
+              isSensitive: boolean;
+              availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+            };
+          };
+    }[];
+  };
+}
+
+export interface GetDashboardEventsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    /** @format uuid */
+    targetId: string;
+    title: string;
+    startsAt: string;
+    allDay: boolean;
+  }[];
+}
+
+export interface GetEventDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    uid: string;
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    /** @format uuid */
+    sourceId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    allDay: boolean;
+    timezone: string;
+    location: string | null;
+    status: "scheduled" | "cancelled" | "ended" | "expired";
+    payload:
+      | {
+          liveTraining: {
+            deliveryType: "online" | "offline";
+            status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+            visibilityScope: "all" | "linked_courses";
+            sourceRole: "admin" | "author" | "trainer" | "observer";
+            linkedCourses: {
+              /** @format uuid */
+              courseId: string;
+              courseTitle: string;
+            }[];
+          } & {
+            author: {
+              /** @format uuid */
+              id: string;
+              fullName: string | null;
+              email: string;
+            };
+            hosts: {
+              /** @format uuid */
+              userId: string;
+              fullName: string | null;
+              email: string;
+              role: string;
+            }[];
+            materials: {
+              before: {
+                /** @format uuid */
+                resourceId: string;
+                title: string;
+                mimeType: string | null;
+                size: number | null;
+                relationshipType: "live_training_before" | "live_training_after";
+              }[];
+              after: {
+                /** @format uuid */
+                resourceId: string;
+                title: string;
+                mimeType: string | null;
+                size: number | null;
+                relationshipType: "live_training_before" | "live_training_after";
+              }[];
+            };
+            latestSession: {
+              /** @format uuid */
+              id: string;
+              status: "waiting" | "active" | "ended" | "failed";
+              actualStartedAt: string | null;
+              actualEndedAt: string | null;
+              peakParticipants: number;
+              uniqueParticipantCount: number;
+            } | null;
+          };
+        }
+      | {
+          courseDueDate: {
+            /** @format uuid */
+            courseId: string;
+            courseTitle: string;
+            /** @format uuid */
+            groupId: string;
+            groupName: string;
+            dueDate: string;
+          };
+        }
+      | {
+          outlookCalendar: {
+            webLink: string | null;
+            isSensitive: boolean;
+            availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+          };
+        };
+  };
+}
+
+export interface GetConnectionResponse {
+  data: {
+    available: boolean;
+    status: "disconnected" | "syncing" | "connected" | "error" | "reconnect_required";
+    accountEmail: string | null;
+    lastSuccessfulSyncAt: string | null;
+    subscriptionExpiresAt: string | null;
+    errorCode: string | null;
+    stale: boolean;
+    outboundSyncEnabled: boolean;
+    outboundStatus: string;
+    outboundCalendarId: string | null;
+    outboundErrorCode: string | null;
+    lastOutboundSyncAt: string | null;
+  };
+}
+
+export type SyncResponse = null;
+
+export interface UpdateOutboundBody {
+  enabled: boolean;
+}
+
+export interface UpdateOutboundResponse {
+  data: {
+    authorizationUrl: string | null;
+  };
+}
+
+export type DisconnectResponse = null;
+
+export interface NotificationsBody {
+  value?: {
+    subscriptionId?: string;
+    clientState?: string;
+    lifecycleEvent?: string;
+    [key: string]: any;
+  }[];
+  [key: string]: any;
+}
+
+export interface LifecycleNotificationsBody {
+  value?: {
+    subscriptionId?: string;
+    clientState?: string;
+    lifecycleEvent?: string;
+    [key: string]: any;
+  }[];
+  [key: string]: any;
+}
+
+export interface ListResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+}
+
+export interface CreateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title?: string;
+  completed?: boolean;
+}
+
+export interface UpdateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ReorderBody {
+  /** @maxItems 100 */
+  activeTaskIds: string[];
+  /** @maxItems 100 */
+  completedTaskIds: string[];
+}
+
+export interface ReorderResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    title: string;
+    completed: boolean;
+    completedAt: string | null;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
 }
 
 import type {
@@ -32226,10 +32178,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     lessonControllerGetLessonById: (
       id: string,
-      query: {
+      query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        studentId: string;
+        studentId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -38328,8 +38280,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseAuthoringControllerGetAuthoringCourseContext: (
       courseId: string,
       query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         lessonIds?: string[];
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>

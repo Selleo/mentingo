@@ -4,6 +4,7 @@ import { validate } from "uuid";
 
 import {
   authoringCommandBodySchema,
+  authoringTaskFailureSchema,
   authoringTurnPartSchema,
 } from "./course-authoring-session.schema";
 
@@ -182,5 +183,35 @@ describe("course authoring turn part schema", () => {
         planSteps: ["Research Mentingo", "Draft lessons"],
       }),
     ).toBe(true);
+  });
+});
+
+describe("course authoring failure schema", () => {
+  beforeAll(() => FormatRegistry.Set("uuid", validate));
+  const failure = {
+    code: "planning_batch_invalid",
+    category: "generation",
+    stage: "generate",
+    recoveryAction: "retry_failed_parts",
+    retryable: true,
+    affectedChapterIds: [requestId],
+    affectedLessonIds: [],
+    correlationId: null,
+    detailKey: null,
+    generationRevision: 0,
+  };
+  it("accepts the safe recovery contract", () => {
+    expect(Value.Check(authoringTaskFailureSchema, failure)).toBe(true);
+  });
+  it("rejects raw exception data and unsupported recovery actions", () => {
+    expect(
+      Value.Check(authoringTaskFailureSchema, { ...failure, rawMessage: "private context" }),
+    ).toBe(false);
+    expect(
+      Value.Check(authoringTaskFailureSchema, { ...failure, recoveryAction: "restart_course" }),
+    ).toBe(false);
+    expect(Value.Check(authoringTaskFailureSchema, { ...failure, generationRevision: -1 })).toBe(
+      false,
+    );
   });
 });

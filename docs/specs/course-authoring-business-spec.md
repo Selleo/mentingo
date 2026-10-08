@@ -25,11 +25,11 @@ Course authors describe the course material or changes they need in AI course ge
 - Answer durable clarification and permission questions in the assistant turn where they arise; web-search permission uses compact, visibly clickable **Allow** and **Deny** actions and is saved with the session.
 - Review one generation request as a single course-change group once actual changes exist, even when the request writes several lessons in separate tasks. The chat card summarizes the combined changes with their targets and statuses and offers one **Review changes** action; changes are included by default, can be excluded individually in curriculum review mode, and are applied together.
 - Keep the active response indicator below completed messages and work in the conversation. Saved plans and tool activity explain visible progress; private model reasoning is not exposed.
-- Keep a named product or organization in the resolved course brief and every authored lesson. Permitted web research informs both the outline and individual lessons; an empty search tries a small number of alternate queries. Previously fetched session research can be selected as durable evidence for a later request. With explicit permission for an illustrative draft, the assistant can use clearly labelled hypothetical practice scenarios, but it does not present invented product behavior as verified fact.
+- Keep a named product or organization in the resolved course brief and every authored lesson. Permitted web research informs both the outline and individual lessons; an empty search tries a small number of alternate queries. Previously fetched session research can be selected as durable evidence for a later request. Clearly labelled fictional practice scenarios are allowed alongside researched factual material without an extra content-mode selection. These examples do not count as evidence or authorize invented product behavior.
 - Inspect the completed draft before review opens, then write one change request for the whole iteration. Submitting it appears as a new user message in the conversation, closes the prior draft's review action, and starts a revised draft that becomes reviewable only after its work finishes.
 - Review fill-in-the-blanks questions with visible answer placements and word choices. The read-only preview keeps the original colors and omits drag handles, removal buttons, and other editing controls.
 - Edits require at least one valid course operation before they can become a reviewable proposal. Ambiguous target scope must be resolved before writing; an empty edit is invalid rather than a course change.
-- Stop active generation from the composer while keeping Send available for a new request; retry individual failed tasks from the activity surface.
+- Stop active generation from the composer while keeping Send available for a new request. When a step fails, see whether it needs a fresh draft, a provider retry, an author answer, or a service fix. Retry failed parts while preserving completed chapter plans, research and author approvals.
 - Generate visuals through the configured Napkin provider, explicitly approve uncertain generation retries, and omit optional visuals from an application when appropriate. Public-web image import is outside this authoring scope.
 - Provider usage is recorded for operational accounting; it is not displayed in the authoring interaction.
 
@@ -157,7 +157,7 @@ Nested research-depth and source-replacement Selects were separately verified by
 
 Research and uploaded document passages are stored in the authoring session, isolated by organization. Luma uses native 1536-dimensional passage vectors together with lexical search; later requests and parallel writers can retrieve permitted session knowledge without relying on chat history. DDGS discovers pages and Trafilatura extracts fetched content. Research shares a request budget, follows useful leads, and records quote-backed findings. It does not introduce a full knowledge graph or video curation.
 
-Detailed planning maps each lesson's objectives and Bloom level to practice, assessment criteria, evidence and explicit gaps. Writers receive that lesson map and can retrieve relevant passages or research a narrow missing fact when web access is enabled. The approved general-knowledge or illustrative mode remains part of the task contract. Creator warnings do not become instructions asking learners to verify the course's own content.
+Detailed planning maps each lesson's objectives and Bloom level to practice, assessment criteria, evidence and explicit gaps. Writers receive that lesson map and can retrieve relevant passages or research a narrow missing fact when web access is enabled. The approved source permissions remain part of the task contract. Clearly labelled fictional exercises remain separate from the evidence supporting factual claims. Creator warnings do not become instructions asking learners to verify the course's own content.
 
 Once all lesson drafts exist, a course-wide review checks actual revision-pinned bodies for progression, repetition and assessment alignment. It can dispatch one bounded repair round for still-reviewable drafts; accepted, rejected or changed revisions are not silently regenerated. The same live-work view shows research, writing and course review using localized activity labels.
 
@@ -169,7 +169,7 @@ Course planning and whole-document questions read permitted extracted document b
 
 A selected upload that is still processing or has failed appears beside the composer even when it came from an earlier upload. Sending stays blocked until all selected files are ready or the author removes the blocking selection. Removing an older selection does not attach unrelated ready files to the next chat message.
 
-Detailed-plan evidence validation recognizes both ordered document reads and retrieved passages. A fully returned ready section can support a lesson evidence reference; catalogues, omitted sections, non-ready content and incomplete section slices cannot. Required references to duplicate selected versions retain their source-specific identities. Generation and review receive evidence as structured JSON rather than an escaped JSON string. Failed tasks resume their saved checkpoint through the existing retry command, retaining author approval and review/apply boundaries.
+Detailed-plan evidence validation recognizes both ordered document reads and retrieved passages. A fully returned ready section can support a lesson evidence reference; catalogues, omitted sections, non-ready content and incomplete section slices cannot. Required references to duplicate selected versions retain their source-specific identities. Generation and review receive evidence as structured JSON rather than an escaped JSON string. Failed tasks use the existing retry command with an explicit recovery action, retaining author approval and review/apply boundaries. Rejected planning responses remain available for diagnosis and repair, but cannot be reused as accepted chapter plans.
 
 ### Writer validation and diagram brief recovery
 
@@ -317,3 +317,11 @@ implicit web search. Larger drafts and assembled courses expose quality findings
 automatically replacing proposals or generating lessons again. Authors request revisions explicitly.
 Task completion reports execution success; educational quality findings remain a separate review
 signal. Provider response time remains variable.
+
+### Actionable generation recovery
+
+Authors can continue an interrupted generation request without rebuilding its completed work. The activity rail shows failed chapter plans and bounded repair progress. A retry creates fresh content for failed parts while retaining accepted plans and research. Failure guidance survives reopening the session and distinguishes a content problem, an unavailable provider, a required author decision and a service problem.
+
+When an author decision is needed, the existing saved question flow collects the answer before generation resumes. Malformed model output is handled internally; a provider or implementation failure is not presented as a content question. A service failure has no ineffective Retry action. Clearly labelled fictional practice exercises are permitted without a hidden mode selection, while factual assertions still follow the selected source permissions.
+
+Focused tests verify safe failure contracts, retained failure guidance, retry clearing, failed chapter progress and recovery actions in both activity layouts. Authenticated browser recovery and live provider behavior remain unverified.

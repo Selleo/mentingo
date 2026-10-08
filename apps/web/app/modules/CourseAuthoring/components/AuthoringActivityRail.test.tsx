@@ -687,3 +687,72 @@ describe("AuthoringActivityRail live work", () => {
     expect(screen.getByText("+17 more lessons running")).toBeVisible();
   });
 });
+
+describe("AuthoringActivityRail recovery", () => {
+  it.each([true, false])(
+    "hides ineffective retries and offers failed-part recovery (compact=%s)",
+    async (compact) => {
+      const onRetry = vi.fn();
+      const failure = {
+        code: "planning_batch_invalid",
+        category: "generation" as const,
+        stage: "generate",
+        recoveryAction: "retry_failed_parts" as const,
+        retryable: true,
+        affectedChapterIds: ["chapter-1"],
+        affectedLessonIds: [],
+        correlationId: null,
+        detailKey: null,
+        generationRevision: 0,
+      };
+      renderWith().render(
+        <AuthoringActivityRail
+          compact={compact}
+          tasks={[
+            {
+              taskId: "failed-plan",
+              requestId: "request-1",
+              kind: "detailed_plan",
+              status: "failed",
+              errorCode: failure.code,
+              outputId: null,
+              failure,
+            },
+            {
+              taskId: "broken-service",
+              requestId: "request-2",
+              kind: "edit",
+              status: "failed",
+              errorCode: "internal",
+              outputId: null,
+              failure: {
+                ...failure,
+                category: "internal",
+                recoveryAction: "service_fix",
+                retryable: false,
+              },
+            },
+          ]}
+          questions={[]}
+          assetTasks={[]}
+          applications={[]}
+          connection="live"
+          onRetry={onRetry}
+          onStopRequest={vi.fn()}
+          onAnswer={vi.fn()}
+          onAssetAction={vi.fn()}
+          onSkipAsset={vi.fn()}
+        />,
+      );
+      expect(
+        screen.getByText(
+          "This step requires a service fix. Your completed work is saved; retrying cannot resolve this issue.",
+        ),
+      ).toBeVisible();
+      expect(screen.getAllByRole("button", { name: "Retry failed parts" })).toHaveLength(1);
+      expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+      await userEvent.setup().click(screen.getByRole("button", { name: "Retry failed parts" }));
+      expect(onRetry).toHaveBeenCalledWith("failed-plan");
+    },
+  );
+});

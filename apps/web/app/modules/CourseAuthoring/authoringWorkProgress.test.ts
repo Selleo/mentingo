@@ -66,6 +66,27 @@ describe("attachAuthoringWorkProgress", () => {
     ]);
   });
 
+  it("retains failed chapters and bounded repair progress during recovery", () => {
+    const recovering = progress({
+      stage: "recovering",
+      repairAttempt: 1,
+      repairLimit: 2,
+      failedLessonIds: ["lesson-2"],
+      chapters: [
+        {
+          chapterId: "chapter-1",
+          title: "Getting started",
+          lessonCount: 2,
+          status: "failed",
+          failureCode: "planning_batch_invalid",
+        },
+      ],
+    });
+    expect(attachAuthoringWorkProgress([task()], [record(14, recovering)])[0].workProgress).toEqual(
+      recovering,
+    );
+  });
+
   it("keeps lesson writer progress when it carries context without course totals", () => {
     const writerProgress = {
       stage: "lesson_generation",
