@@ -2,7 +2,6 @@ import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { Circle } from "lucide-react";
 import * as React from "react";
 
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const RadioGroup = React.forwardRef<
@@ -22,7 +21,7 @@ const RadioGroupItem = React.forwardRef<
       ref={ref}
       className={cn(
         "aspect-square size-4 rounded-full border border-accent-foreground text-accent-foreground ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        IS_MONO_DESIGN && "border-neutral-700 data-[state=checked]:border-primary-700",
+        "mono:border-neutral-700 mono:data-[state=checked]:border-primary-700",
         className,
       )}
       {...props}

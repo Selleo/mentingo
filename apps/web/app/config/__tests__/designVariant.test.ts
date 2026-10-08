@@ -1,3 +1,5 @@
+import { render } from "@testing-library/react";
+import { createElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const loadDesignVariant = async (value: string) => {
@@ -21,15 +23,18 @@ describe("DESIGN_VARIANT", () => {
     expect(await loadDesignVariant("unknown")).toBe("default");
   });
 
-  it("gives shared components their mono classes only in mono builds", async () => {
-    const loadButtonClasses = async (value: string) => {
+  it("gives badges the mono design only in mono builds", async () => {
+    const loadBadgeClasses = async (value: string) => {
       vi.stubEnv("VITE_DESIGN_VARIANT", value);
       vi.resetModules();
 
-      return (await import("~/components/ui/button")).buttonVariants();
+      const { Badge } = await import("~/components/ui/badge");
+      const { container } = render(createElement(Badge, { variant: "success" }, "Done"));
+
+      return container.firstElementChild?.className;
     };
 
-    expect(await loadButtonClasses("mono")).toContain("font-control");
-    expect(await loadButtonClasses("default")).not.toContain("font-control");
+    expect(await loadBadgeClasses("mono")).toContain("uppercase");
+    expect(await loadBadgeClasses("default")).not.toContain("uppercase");
   });
 });

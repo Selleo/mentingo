@@ -59,12 +59,13 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 
 ## Design Variants
 
-- The design variant is a build-time setting: `VITE_DESIGN_VARIANT` (`default` when unset, or `mono`), so every tenant served by one build shares the same design.
-- Read it only through `~/config/designVariant` (`DESIGN_VARIANT`, `IS_MONO_DESIGN`); do not read `import.meta.env.VITE_DESIGN_VARIANT` elsewhere.
-- The `default` variant is the current UI and must keep working unchanged.
+- The design variant is a build-time setting: `VITE_DESIGN_VARIANT` (`default` when unset, or `mono`), so every tenant served by one build shares the same design. `app/root.tsx` sets it as `data-design-variant` on `<html>`.
+- The `default` variant is the current UI and must keep working unchanged. Do not edit or wrap default class strings to make room for mono.
 - Mono token defaults live in the `:root[data-design-variant="mono"]` block in `app/index.css`.
-- Put mono classes in the component's own file: `cn(defaultClasses, IS_MONO_DESIGN && "…", className)`, or a mono cva next to the default one when every variant changes (Button, Badge). Use built-in Tailwind values and color tokens instead of arbitrary hex/rgba, and write classes out literally.
-- Fork a component into a `mono/` folder only when its markup differs; keep the same props and `data-testid` values.
+- Style mono with the `mono:` Tailwind variant, as its own class string after the component's classes and before `className`: `cn(defaultClasses, "mono:rounded mono:border-input", className)`. In cva, add the mono string as a second array item next to each default string.
+- `mono:` classes come later in the stylesheet than plain classes, so in mono builds they win over the component's defaults and over the call site's `className`. To override a mono style at a call site, add a `mono:` class there (`className="px-8 mono:px-8"`). Default `hover:`/`2xl:` classes still win unless the mono class repeats the modifier (`mono:hover:…`, `mono:2xl:…`). Always put `mono:` first. Keep mono classes to look and feel (colors, borders, radius, typography), not sizes that call sites set.
+- Use built-in Tailwind values and color tokens instead of arbitrary hex/rgba, and write classes out literally.
+- Read `DESIGN_VARIANT`/`IS_MONO_DESIGN` from `~/config/designVariant` only in the switch points allowed by `no-restricted-imports` in `.eslintrc.cjs`, and never read `import.meta.env.VITE_DESIGN_VARIANT` directly. A switch point is for markup that classes cannot express: fork the component into a `mono/` folder, choose it in one place, and keep the same props and `data-testid` values.
 - Do not use client or customer names in variant names, code, comments, or docs.
 
 ## Important Flows

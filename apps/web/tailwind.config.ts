@@ -1,3 +1,5 @@
+import plugin from "tailwindcss/plugin";
+
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -226,7 +228,13 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    // `mono:` classes apply only in the mono design variant. `:where()` keeps them at the specificity
+    // of a plain class, so they behave like classes appended after the component's default ones.
+    plugin(({ addVariant }) => addVariant("mono", ':where([data-design-variant="mono"]) &')),
+  ],
 } satisfies Config;
 
 export default config;

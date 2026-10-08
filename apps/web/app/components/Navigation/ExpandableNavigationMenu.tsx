@@ -1,7 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
@@ -95,18 +94,13 @@ export const ExpandableNavigationMenu = ({
           type="button"
           data-testid={testId}
           className={cn(
-            !IS_MONO_DESIGN &&
-              "text-md flex w-full items-center justify-between gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 hover:bg-white hover:text-neutral-900 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
-            IS_MONO_DESIGN && monoNavigationRowVariants({ isCollapsed: !showNavigationLabels }),
+            "text-md flex w-full items-center justify-between gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 hover:bg-white hover:text-neutral-900 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
+            monoNavigationRowVariants({ isCollapsed: !showNavigationLabels }),
           )}
         >
           <Icon
             name={expandableIcon}
-            className={cn(
-              "size-6",
-              IS_MONO_DESIGN && "size-5",
-              IS_MONO_DESIGN && showNavigationLabels && "hidden",
-            )}
+            className={cn("size-6 mono:size-5", showNavigationLabels && "mono:hidden")}
           />
           <span
             className={cn(
@@ -123,7 +117,7 @@ export const ExpandableNavigationMenu = ({
               className={cn(
                 "size-6 shrink-0 text-neutral-500",
                 { "rotate-180": isExpanded },
-                IS_MONO_DESIGN && "size-5",
+                "mono:size-5",
               )}
             />
           )}
@@ -146,7 +140,7 @@ export const ExpandableNavigationMenu = ({
       )}
 
       {!shouldUseDropdownLayout && isExpanded && (
-        <menu className={cn("ml-4 flex flex-col gap-y-3", IS_MONO_DESIGN && "gap-y-0")}>
+        <menu className="ml-4 flex flex-col gap-y-3 mono:gap-y-0">
           {items.map((item) => {
             return (
               <div key={item.label}>
