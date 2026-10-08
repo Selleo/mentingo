@@ -33,6 +33,7 @@ import {
   EMAIL_TEMPLATE_LIST_PATH,
 } from "../emailTemplates.constants";
 import {
+  getEmailTemplatePublicationConflicts,
   createEmptyEmailTemplateDocument,
   getEmailTemplateTranslationChanges,
   getEmailTemplateInvalidContentLanguage,
@@ -50,6 +51,7 @@ import { EmailTemplateEventSettings } from "./EmailTemplateEventSettings";
 import { EmailTemplateTextField } from "./EmailTemplateTextField";
 
 import type {
+  EmailTemplatePublicationConflict,
   EmailTemplateConfirmationAction,
   EmailTemplate,
   EmailTemplateFormValues,
@@ -109,6 +111,9 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
   const [pendingConfirmation, setPendingConfirmation] =
     useState<EmailTemplateConfirmationAction>(null);
   const [formError, setFormError] = useState("");
+  const [publicationConflicts, setPublicationConflicts] = useState<
+    EmailTemplatePublicationConflict[]
+  >([]);
   const [hasBlockValidationErrors, setHasBlockValidationErrors] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
 
@@ -218,6 +223,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
 
       return await action();
     } catch (error) {
+      const conflicts = getEmailTemplatePublicationConflicts(error);
+      if (conflicts) {
+        setPublicationConflicts(conflicts);
+        return;
+      }
       setFormError(
         getTranslatedApiErrorMessage(error, t, t("emailTemplates.ui.requestFailed"), {
           allowUntranslatedMessage: false,
@@ -368,7 +378,11 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
             })
           }
           onSave={() => void runTemplateAction(handleSaveTemplate, true)}
-          onPublish={() => setPendingConfirmation(EMAIL_TEMPLATE_ACTIONS.PUBLISH)}
+          onPublish={() => {
+            setFormError("");
+            setPublicationConflicts([]);
+            setPendingConfirmation(EMAIL_TEMPLATE_ACTIONS.PUBLISH);
+          }}
         />
         {savedTemplate.source === EMAIL_TEMPLATE_SOURCES.DEFAULT && (
           <Alert className="border-warning-200 bg-warning-50 text-warning-800 [&>svg]:text-warning-700 [&>svg+div]:translate-y-0">
@@ -460,14 +474,25 @@ export function EmailTemplateEditor({ template }: EmailTemplateEditorProps) {
       </div>
       <EmailTemplateConfirmation
         action={pendingConfirmation}
+        publicationConflicts={publicationConflicts}
+        errorMessage={formError}
         isActionPending={isActionPending}
-        onClose={() => setPendingConfirmation(null)}
+        onClose={() => {
+          setPendingConfirmation(null);
+          setPublicationConflicts([]);
+        }}
         onConfirm={() =>
           void runTemplateAction(async () => {
             if (pendingConfirmation === EMAIL_TEMPLATE_ACTIONS.PUBLISH) {
               if (hasUnsavedChanges) await handleSaveTemplate();
 
-              applySavedTemplate(await publishTemplate(savedTemplate.id!));
+              applySavedTemplate(
+                await publishTemplate({
+                  id: savedTemplate.id!,
+                  confirmedAutomationIds: publicationConflicts.map(({ id }) => id),
+                }),
+              );
+              setPublicationConflicts([]);
             }
             if (pendingConfirmation === EMAIL_TEMPLATE_ACTIONS.ARCHIVE)
               applySavedTemplate(await archiveTemplate(savedTemplate.id!));

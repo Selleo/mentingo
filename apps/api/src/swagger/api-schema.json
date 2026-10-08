@@ -12985,6 +12985,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishEmailTemplateBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -111939,6 +111949,52 @@
         "required": [
           "data"
         ]
+      },
+      "PublishEmailTemplateBody": {
+        "type": "object",
+        "properties": {
+          "confirmedAutomationIds": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        }
       },
       "PublishEmailTemplateResponse": {
         "type": "object",

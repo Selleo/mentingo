@@ -1,5 +1,15 @@
-import { ConflictException, Injectable, UnprocessableEntityException } from "@nestjs/common";
 import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnprocessableEntityException,
+} from "@nestjs/common";
+import {
+  AUTOMATION_STATUSES,
+  PERMISSIONS,
+  hasPermission,
+  type SupportedLanguages,
+  type AutomationWorkflowIssue,
   AUTOMATION_DEFINITION_KINDS,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
@@ -16,12 +26,16 @@ import {
 import { AutomationDefinitionStorageService } from "src/automations/services/automation-definition-storage.service";
 import { EmailTemplateValidationService } from "src/email-templates/services/email-template-validation.service";
 
+import { AUTOMATION_EMAIL_DELIVERY_REASON_CODES } from "../automation-execution.constants";
+
 import { AutomationRunStatusService } from "./automation-run-status.service";
 
 import type { PublishedEmailTemplate } from "@repo/email-templates";
 import type { AutomationRecord } from "src/automations/automation.types";
 import type { DatabasePg, UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { EmailTemplateDependencies } from "src/email-templates/email-template.types";
+import type { PublishEmailTemplateBody } from "src/email-templates/schemas/email-template.schema";
 
 @Injectable()
 export class EmailTemplateAutomationUsageService implements EmailTemplateDependencies {
@@ -70,15 +84,58 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
     }
   }
 
-  async validateEmailTemplatePublicationDependencies(
+  async prepareAutomationsForEmailTemplatePublication(
     templateId: UUIDType,
     publication: PublishedEmailTemplate,
     transaction: DatabasePg,
+    options: PublishEmailTemplateBody = {},
+    actor?: ActorUserType,
   ): Promise<void> {
-    const dependents = await this.listEnabledAutomationsUsingEmailTemplate(templateId, transaction);
+    const dependents = await this.listEnabledAutomationsUsingEmailTemplate(
+      templateId,
+      transaction,
+      options.language,
+    );
 
-    for (const automation of dependents) {
-      this.validateAutomationEmailTemplateDependency(automation, templateId, publication);
+    const incompatibleAutomations = dependents.flatMap((automation) => {
+      const issues = this.getAutomationEmailTemplateIssues(automation, templateId, publication);
+
+      return issues.length > 0 ? [{ automation, issues }] : [];
+    });
+
+    if (incompatibleAutomations.length === 0) {
+      return;
+    }
+
+    const confirmedIds = new Set(options.confirmedAutomationIds ?? []);
+
+    if (incompatibleAutomations.some(({ automation }) => !confirmedIds.has(automation.id))) {
+      throw new ConflictException({
+        message: "emailTemplates.errors.incompatiblePublication",
+        automations: incompatibleAutomations.map(({ automation, issues }) => ({
+          id: automation.id,
+          name: automation.name,
+          issues,
+        })),
+      });
+    }
+
+    if (!actor || !hasPermission(actor.permissions, PERMISSIONS.AUTOMATION_MANAGE)) {
+      throw new ForbiddenException("auth.error.missingPermission");
+    }
+
+    for (const { automation } of incompatibleAutomations) {
+      await this.automationDefinitionStorageService.updateAutomation(
+        automation.id,
+        { status: AUTOMATION_STATUSES.DISABLED, executionVersion: automation.executionVersion + 1 },
+        transaction,
+        options.language,
+      );
+      await this.automationRunStatusService.cancelPendingAutomationEmailDeliveries(
+        transaction,
+        automation.id,
+        AUTOMATION_EMAIL_DELIVERY_REASON_CODES.AUTOMATION_DISABLED,
+      );
     }
   }
 
@@ -95,9 +152,12 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
   private async listEnabledAutomationsUsingEmailTemplate(
     templateId: UUIDType,
     transaction: DatabasePg,
+    language?: SupportedLanguages,
   ): Promise<AutomationRecord[]> {
-    const enabledAutomations =
-      await this.automationDefinitionStorageService.listEnabledAutomations(transaction);
+    const enabledAutomations = await this.automationDefinitionStorageService.listEnabledAutomations(
+      transaction,
+      language,
+    );
 
     return enabledAutomations.filter((automation) =>
       automation.appliedDefinition?.workflow.steps.some(
@@ -109,11 +169,11 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
     );
   }
 
-  private validateAutomationEmailTemplateDependency(
+  private getAutomationEmailTemplateIssues(
     automation: AutomationRecord,
     templateId: UUIDType,
     publication: PublishedEmailTemplate,
-  ): void {
+  ) {
     if (!automation.appliedDefinition) {
       throw new UnprocessableEntityException("automations.errors.notReady");
     }
@@ -129,6 +189,8 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
     if (!event) {
       throw new UnprocessableEntityException("automations.errors.notReady");
     }
+
+    const dependencyIssues: AutomationWorkflowIssue[] = [];
 
     for (const step of path) {
       if (
@@ -152,14 +214,7 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
         ),
       ];
 
-      if (issues.length > 0) {
-        throw new UnprocessableEntityException({
-          message: "emailTemplates.errors.incompatiblePublication",
-          automationId: automation.id,
-          automationName: automation.name,
-          issues,
-        });
-      }
+      dependencyIssues.push(...issues);
 
       const sensitivePlaceholders = getAccountActionPlaceholderNames(event, mappings);
 
@@ -168,5 +223,7 @@ export class EmailTemplateAutomationUsageService implements EmailTemplateDepende
         sensitivePlaceholders,
       );
     }
+
+    return dependencyIssues;
   }
 }

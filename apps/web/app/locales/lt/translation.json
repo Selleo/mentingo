@@ -181,6 +181,9 @@
       "editHint": "Pakeitimus išsaugokite mygtuku. Peržiūrai ir testams naudojamas neišsaugotas turinys su pavyzdiniais duomenimis; testai siunčiami tik jums.",
       "publishedHint": "Išsaugojimas atnaujina juodraštį. Paskelbimas aktyvuoja pakeitimus šabloną naudojančiam automatizavimui.",
       "languageHint": "Neužbaigtam vertimui naudojama pagrindinė kalba. Prieš keisdami pagrindinę kalbą išsaugokite visą vertimą.",
+      "publishDeactivateTitle": "Paskelbti ir išjungti automatizavimus?",
+      "publishDeactivateHint": "Paskelbus bus išjungti toliau nurodyti automatizavimai, nes jų žymos nebeatitinka laiško. Jie nebesiųs laiškų. Atnaujinkite žymų reikšmių nustatymus ir vėl juos įjunkite.",
+      "publishAndDeactivate": "Paskelbti ir išjungti",
       "publishHint": "Paskelbti šabloną? Pakeitimai bus išsaugoti. Laukiantys siuntimai su šiuo šablonu bus atšaukti. Kiti šablonai liks paskelbti.",
       "archiveHint": "Archyvuoti šabloną? Pirmiausia pakeiskite jį aktyviame automatizavime arba išjunkite automatizavimą.",
       "unsavedTitle": "Neišsaugoti pakeitimai",
@@ -238,7 +241,7 @@
       "populateEventTags": "Pridėti galimas įvykio žymas",
       "populateEventTagsHint": "Įtraukite į sąrašą žymas, pavyzdžiui, vardą ar kurso pavadinimą. Redaguodami galėsite jas įterpti į laišką.",
       "changeEventTitle": "Atnaujinti laiško žymas?",
-      "changeEventHint": "Pakeisti žymas pasirinkto įvykio žymomis? Esamos žymos bus pašalintos iš temos, turinio ir nuorodų visomis kalbomis. Be įvykio naujos žymos nebus pridėtos.",
+      "changeEventHint": "Esamos žymos neveiks su nauju įvykiu. Pakeitus jos bus pašalintos visomis kalbomis. Atnaujinkite temą, turinį ir nuorodas naudodami naujas žymas.",
       "keepEventTags": "Palikti esamas žymas",
       "replaceEventTags": "Pakeisti žymas",
       "clearEvent": "Pašalinti įvykio pasirinkimą",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "Pagrindinės kalbos pašalinti negalima.",
       "archivedReadOnly": "Prieš keisdami kalbas atkurkite šabloną.",
       "notPublished": "Prieš naudodami automatizavime paskelbkite el. laiško šabloną.",
-      "incompatiblePublication": "Prieš paskelbdami patikrinkite, kaip susietuose automatizavimuose užpildomos žymos.",
+      "incompatiblePublication": "Kai kurie aktyvūs automatizavimai negali užpildyti šio laiško žymų. Paskelbkite ir išjunkite juos arba atšaukite ir atnaujinkite žymų nustatymus.",
       "usedByAutomations": "Šis šablonas naudojamas automatizavimuose. Prieš pašalindami pakeiskite jų el. laiškų veiksmus."
     },
     "warnings": {

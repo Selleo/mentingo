@@ -17,11 +17,13 @@ export function BranchTimeline({
   eventKind,
   deliveries,
   blocked = false,
+  executedOnly = false,
 }: {
   steps: AutomationStepTrace[];
   eventKind?: AutomationEventKind;
   deliveries?: AutomationEmailDeliverySummary[];
   blocked?: boolean;
+  executedOnly?: boolean;
 }) {
   const { t } = useTranslation();
   const variables = eventKind ? AUTOMATION_EVENT_VARIABLES[eventKind] : [];
@@ -34,6 +36,7 @@ export function BranchTimeline({
         .map((step) => {
           const isCondition = step.type === "condition";
           if (!isCondition) emailNumber++;
+          if (executedOnly && !step.matchedCount && !step.failedCount) return null;
           const variable = variables?.find(
             (variable) =>
               variable.key === step.field ||

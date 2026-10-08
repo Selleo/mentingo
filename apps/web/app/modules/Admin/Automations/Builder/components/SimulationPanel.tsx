@@ -8,7 +8,7 @@ import {
   type AutomationWorkflow,
   type AutomationSendEmailStep,
 } from "@repo/shared";
-import { Loader2, Mail, Variable, X } from "lucide-react";
+import { Loader2, Mail, Play, Variable, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +29,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { getBooleanConditionFieldOptions } from "../utils/conditionFields";
 import { getSelectableAutomationVariables } from "../utils/selectableVariables";
 
-import { AutomationSearchSelect } from "./AutomationSearchSelect";
 import { BranchTimeline } from "./BranchTimeline";
 import { SimulationEmailPreview } from "./SimulationEmailPreview";
 
@@ -66,6 +65,27 @@ export function SimulationPanel({
           getCanonicalAutomationField(event, field.key),
     ),
   );
+
+  const scenarioValues = { ...scenario };
+  for (const field of conditionFields) {
+    const canonicalField = event ? getCanonicalAutomationField(event, field.key) : field.key;
+    const selectedValue = scenario[field.key] ?? scenario[canonicalField];
+    const evaluatedCondition = result?.steps.find(
+      (step) =>
+        step.type === "condition" &&
+        step.field &&
+        event &&
+        getCanonicalAutomationField(event, step.field) === canonicalField &&
+        (step.trueCount > 0 || step.falseCount > 0),
+    );
+    if (typeof selectedValue === "boolean") {
+      scenarioValues[field.key] = selectedValue;
+    } else if (evaluatedCondition) {
+      scenarioValues[field.key] = evaluatedCondition.trueCount > 0;
+    } else {
+      scenarioValues[field.key] = field.sampleValue === true;
+    }
+  }
 
   function getSampleValue(variable: AutomationProvidedVariable) {
     const value =
@@ -108,38 +128,56 @@ export function SimulationPanel({
           </Button>
         </DialogHeader>
         {conditionFields.length > 0 && (
-          <div className="flex flex-wrap items-end gap-3 border-t bg-white px-5 py-3">
-            {conditionFields.map((field) => (
-              <div key={field.key} className="min-w-48 space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  {t(field.labelKey, { defaultValue: field.label })}
-                </p>
-                <AutomationSearchSelect
-                  label={t(field.labelKey, { defaultValue: field.label })}
-                  placeholder={t("automationBuilder.condition.yes")}
-                  value={String(
-                    scenario[field.key] ??
-                      (event
-                        ? scenario[getCanonicalAutomationField(event, field.key)]
-                        : undefined) ??
-                      true,
-                  )}
-                  disabled={loading}
-                  onValueChange={(value) =>
-                    setScenario({ ...scenario, [field.key]: value === "true" })
-                  }
-                  groups={[
-                    {
-                      options: [
-                        { value: "true", label: t("automationBuilder.condition.yes") },
-                        { value: "false", label: t("automationBuilder.condition.no") },
-                      ],
-                    },
-                  ]}
-                />
-              </div>
-            ))}
-            <Button size="sm" disabled={loading} onClick={() => onSimulate(scenario)}>
+          <div className="flex flex-wrap items-center gap-3 border-t bg-white px-4 py-3 sm:px-6">
+            <div className="flex min-w-0 flex-1 flex-wrap gap-3">
+              {conditionFields.map((field) => (
+                <div
+                  key={field.key}
+                  className="flex min-w-52 flex-1 items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2"
+                >
+                  <span className="text-sm font-medium text-neutral-700">
+                    {t(field.labelKey, { defaultValue: field.label })}
+                  </span>
+                  <Tabs
+                    value={String(scenarioValues[field.key])}
+                    onValueChange={(value) =>
+                      setScenario({ ...scenario, [field.key]: value === "true" })
+                    }
+                  >
+                    <TabsList
+                      aria-label={t(field.labelKey, { defaultValue: field.label })}
+                      className="h-8 bg-neutral-200/60 p-0.5"
+                    >
+                      {[true, false].map((value) => (
+                        <TabsTrigger
+                          key={String(value)}
+                          value={String(value)}
+                          disabled={loading}
+                          className="px-3 py-1 text-xs data-[state=active]:bg-white data-[state=active]:text-neutral-950"
+                        >
+                          {t(
+                            value
+                              ? "automationBuilder.condition.yes"
+                              : "automationBuilder.condition.no",
+                          )}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </div>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              className="shrink-0 gap-2"
+              disabled={loading}
+              onClick={() => onSimulate(scenarioValues)}
+            >
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Play className="size-3.5" />
+              )}
               {t("automationBuilder.condition.tryScenario")}
             </Button>
           </div>
@@ -215,6 +253,7 @@ export function SimulationPanel({
                               issue.code ===
                               AUTOMATION_VALIDATION_ISSUE_CODES.INVALID_CONDITION_VALUE,
                           )}
+                          executedOnly
                           steps={result.steps}
                           eventKind={event?.kind}
                         />

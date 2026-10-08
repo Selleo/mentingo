@@ -181,6 +181,9 @@
       "editHint": "Změny ukládejte tlačítkem. Náhled a testy používají neuložený obsah s ukázkovými daty; testy přijdou jen vám.",
       "publishedHint": "Uložení aktualizuje koncept. Publikování aktivuje změny pro automatizace používající šablonu.",
       "languageHint": "Neúplné překlady použijí základní jazyk. Před změnou základního jazyka uložte úplný překlad.",
+      "publishDeactivateTitle": "Publikovat a deaktivovat automatizace?",
+      "publishDeactivateHint": "Publikováním se deaktivují níže uvedené automatizace, protože jejich značky již neodpovídají e-mailu. Přestanou odesílat e-maily. Upravte způsob vyplňování značek a poté je znovu aktivujte.",
+      "publishAndDeactivate": "Publikovat a deaktivovat",
       "publishHint": "Publikovat šablonu? Změny budou nejprve uloženy. Čekající doručení této šablony budou zrušena. Ostatní šablony zůstanou publikované.",
       "archiveHint": "Archivovat šablonu? Nejprve ji nahraďte v aktivních automatizacích nebo tyto automatizace vypněte.",
       "unsavedTitle": "Neuložené změny",
@@ -238,7 +241,7 @@
       "populateEventTags": "Přidat dostupné značky události",
       "populateEventTagsHint": "Přidejte do seznamu značky, například jméno nebo název kurzu. Při úpravách je můžete vložit do e-mailu.",
       "changeEventTitle": "Aktualizovat značky e-mailu?",
-      "changeEventHint": "Nahradit značky značkami vybrané události? Stávající značky se odstraní z předmětu, obsahu a odkazů ve všech jazycích. Bez události se nové značky nepřidají.",
+      "changeEventHint": "Stávající značky nebudou s novou událostí fungovat. Nahrazením se odstraní ve všech jazycích. Aktualizujte předmět, obsah a odkazy pomocí nových značek.",
       "keepEventTags": "Ponechat značky",
       "replaceEventTags": "Nahradit značky",
       "clearEvent": "Zrušit výběr události",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "Základní jazyk nelze odebrat.",
       "archivedReadOnly": "Před změnou jazyků šablonu obnovte.",
       "notPublished": "Před použitím v automatizaci publikujte šablonu e-mailu.",
-      "incompatiblePublication": "Před publikováním zkontrolujte vyplňování značek v propojených automatizacích.",
+      "incompatiblePublication": "Některé aktivní automatizace nemohou vyplnit značky v tomto e-mailu. Publikujte a deaktivujte je, nebo akci zrušte a upravte nastavení značek.",
       "usedByAutomations": "Tuto šablonu používají automatizace. Před odstraněním změňte jejich e-mailové kroky."
     },
     "warnings": {

@@ -181,6 +181,9 @@
       "editHint": "Enregistrez les modifications explicitement. L’aperçu et les tests utilisent le contenu non enregistré avec des exemples ; les tests sont envoyés uniquement à votre adresse.",
       "publishedHint": "Enregistrer met à jour le brouillon. Publier active les modifications pour les automatisations utilisant ce modèle.",
       "languageHint": "Les traductions incomplètes utilisent la langue de base. Enregistrez une traduction complète avant de la définir comme base.",
+      "publishDeactivateTitle": "Publier et désactiver les automatisations ?",
+      "publishDeactivateHint": "La publication désactivera les automatisations ci-dessous, car leurs balises ne correspondent plus à l’e-mail. Elles cesseront d’envoyer des e-mails. Corrigez les valeurs associées aux balises, puis réactivez-les.",
+      "publishAndDeactivate": "Publier et désactiver",
       "publishHint": "Publier ce modèle ? Les modifications seront enregistrées. Les envois en attente utilisant ce modèle seront annulés. Les autres modèles restent publiés.",
       "archiveHint": "Archiver ce modèle ? Remplacez-le dans les automatisations actives ou désactivez-les d’abord.",
       "unsavedTitle": "Modifications non enregistrées",
@@ -238,7 +241,7 @@
       "populateEventTags": "Ajouter les balises disponibles pour cet événement",
       "populateEventTagsHint": "Ajoutez à la liste des balises comme un prénom ou un titre de cours. Vous pourrez les insérer dans l’e-mail pendant sa rédaction.",
       "changeEventTitle": "Mettre à jour les balises ?",
-      "changeEventHint": "Remplacer les balises par celles de l’événement choisi ? Les balises actuelles seront retirées de l’objet, du contenu et des liens dans toutes les langues. Sans événement, aucune balise ne sera ajoutée.",
+      "changeEventHint": "Les balises actuelles ne fonctionneront plus avec le nouvel événement. Les remplacer les supprime dans toutes les langues. Actualisez l’objet, le contenu et les liens avec les nouvelles balises.",
       "keepEventTags": "Conserver les balises",
       "replaceEventTags": "Remplacer les balises",
       "clearEvent": "Effacer l’événement",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "La langue de base ne peut pas être supprimée.",
       "archivedReadOnly": "Restaurez le modèle avant de modifier ses langues.",
       "notPublished": "Publiez ce modèle d’e-mail avant de l’utiliser dans une automatisation.",
-      "incompatiblePublication": "Avant de publier, vérifiez comment les balises sont remplies dans les automatisations liées.",
+      "incompatiblePublication": "Certaines automatisations actives ne peuvent pas remplir les balises de cet e-mail. Publiez et désactivez-les, ou annulez et corrigez les paramètres des balises.",
       "usedByAutomations": "Ce modèle est utilisé par des automatisations. Modifiez leurs étapes d’envoi avant de le supprimer."
     },
     "warnings": {

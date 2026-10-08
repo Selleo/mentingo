@@ -39,7 +39,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
   const dependencies = {
     removeUnusedEmailTagMappingsFromAutomations: jest.fn(),
     assertEmailTemplateCanBeArchived: jest.fn(),
-    validateEmailTemplatePublicationDependencies: jest.fn(),
+    prepareAutomationsForEmailTemplatePublication: jest.fn(),
     cancelPendingEmailTemplateDeliveries: jest.fn(),
   };
   const createActor = () => ({
@@ -401,6 +401,22 @@ describe("EmailTemplateManagementService mutation validation", () => {
     expect(publishEmailTemplate).toHaveBeenCalledWith(
       template.id,
       expect.objectContaining({ placeholders: template.placeholders, subject: template.subject }),
+      undefined,
+    );
+  });
+
+  it("passes explicit automation consent and the selected language to publication preparation", async () => {
+    const actor = createActor();
+    const options = { confirmedAutomationIds: [template.id], language: SUPPORTED_LANGUAGES.PL };
+
+    await service.publishEmailTemplate(template.id, actor, options);
+
+    expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
+      template.id,
+      expect.any(Object),
+      undefined,
+      options,
+      actor,
     );
   });
 
@@ -443,9 +459,11 @@ describe("EmailTemplateManagementService mutation validation", () => {
     await service.updateEmailTemplate(template.id, { subject: { en: "New draft" } });
     expect(dependencies.cancelPendingEmailTemplateDeliveries).not.toHaveBeenCalled();
     await service.publishEmailTemplate(template.id);
-    expect(dependencies.validateEmailTemplatePublicationDependencies).toHaveBeenCalledWith(
+    expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
       template.id,
       expect.objectContaining({ subject: { ...definition.subjects, en: "New draft" } }),
+      undefined,
+      {},
       undefined,
     );
     expect(dependencies.cancelPendingEmailTemplateDeliveries).toHaveBeenCalledWith(
@@ -454,7 +472,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
     );
   });
   it("blocks incompatible publication before the published content changes", async () => {
-    dependencies.validateEmailTemplatePublicationDependencies.mockRejectedValueOnce(
+    dependencies.prepareAutomationsForEmailTemplatePublication.mockRejectedValueOnce(
       new Error("Enabled automation mapping incompatible"),
     );
     await expect(service.publishEmailTemplate(template.id)).rejects.toThrow(

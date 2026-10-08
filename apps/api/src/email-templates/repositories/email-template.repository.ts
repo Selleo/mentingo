@@ -203,10 +203,14 @@ export class EmailTemplateRepository {
       );
   }
 
-  async publishEmailTemplate(id: UUIDType, publication: PublishedEmailTemplate) {
+  async publishEmailTemplate(
+    id: UUIDType,
+    publication: PublishedEmailTemplate,
+    transaction: DatabasePg = this.database,
+  ) {
     const now = new Date().toISOString();
 
-    const [template] = await this.database
+    const [template] = await transaction
       .update(emailTemplates)
       .set({
         status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,

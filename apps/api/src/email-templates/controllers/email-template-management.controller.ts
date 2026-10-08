@@ -35,6 +35,8 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
 import { EMAIL_TEMPLATE_IMAGE_MAX_BYTES } from "../email-template.constants";
 import {
+  publishEmailTemplateSchema,
+  type PublishEmailTemplateBody,
   createEmailTemplateSchema,
   builtInEmailTemplateKeySchema,
   emailTemplatePreviewResponseSchema,
@@ -279,15 +281,19 @@ export class EmailTemplateManagementController {
 
   @Post(":id/publish")
   @Validate({
-    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: publishEmailTemplateSchema },
+    ],
     response: baseResponse(emailTemplateSchema),
   })
   async publishEmailTemplate(
     @Param("id") id: UUIDType,
+    @Body() body: PublishEmailTemplateBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EmailTemplateResponse>> {
     return new BaseResponse(
-      await this.emailTemplateManagementService.publishEmailTemplate(id, currentUser),
+      await this.emailTemplateManagementService.publishEmailTemplate(id, currentUser, body),
     );
   }
 

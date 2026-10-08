@@ -46,8 +46,8 @@ export class EmailTemplateFactory {
   }
 
   async publish(id: string) {
-    return (await this.apiClient.api.emailTemplateManagementControllerPublishEmailTemplate(id)).data
-      .data;
+    return (await this.apiClient.api.emailTemplateManagementControllerPublishEmailTemplate(id, {}))
+      .data.data;
   }
 
   async exists(id: string) {

@@ -1,5 +1,6 @@
 import type { EMAIL_TEMPLATE_ACTIONS } from "./emailTemplates.constants";
 import type {
+  PublishEmailTemplateBody,
   GetEmailTemplateResponse,
   UpdateEmailTemplateBody,
   UpdateBaseLanguageBody,
@@ -28,4 +29,15 @@ export type EmailTemplateVariableInserter = ((token: string) => void) | null;
 export type EmailTemplateListConfirmation = {
   templateId: string;
   action: Exclude<EmailTemplateConfirmationAction, null>;
+};
+
+export type EmailTemplatePublicationConflict = {
+  id: string;
+  name: string;
+  issues: { code: string; placeholder?: string; stepId?: string }[];
+};
+
+export type PublishEmailTemplateVariables = {
+  id: string;
+  confirmedAutomationIds?: PublishEmailTemplateBody["confirmedAutomationIds"];
 };

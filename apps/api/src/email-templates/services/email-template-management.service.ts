@@ -58,6 +58,7 @@ import { addEmailTagLabelsAndSampleValues } from "./email-template-placeholder.u
 import { EmailTemplateValidationService } from "./email-template-validation.service";
 
 import type {
+  PublishEmailTemplateBody,
   CreateEmailTemplateBody,
   EmailTemplatePreviewResponse,
   EmailTemplateResponse,
@@ -372,7 +373,11 @@ export class EmailTemplateManagementService {
     });
   }
 
-  async publishEmailTemplate(id: UUIDType, actor?: ActorUserType) {
+  async publishEmailTemplate(
+    id: UUIDType,
+    actor?: ActorUserType,
+    options: PublishEmailTemplateBody = {},
+  ) {
     return this.emailTemplateRepository.withLockedEmailTemplate(
       id,
       async (existing, transaction) => {
@@ -401,15 +406,18 @@ export class EmailTemplateManagementService {
           transaction,
         );
 
-        await this.emailTemplateDependencies.validateEmailTemplatePublicationDependencies(
+        await this.emailTemplateDependencies.prepareAutomationsForEmailTemplatePublication(
           id,
           publication,
           transaction,
+          options,
+          actor,
         );
 
         const { template } = await this.emailTemplateRepository.publishEmailTemplate(
           id,
           publication,
+          transaction,
         );
 
         await this.emailTemplateDependencies.cancelPendingEmailTemplateDeliveries(id, transaction);
@@ -422,6 +430,7 @@ export class EmailTemplateManagementService {
               previous: this.mapEmailTemplateActivitySnapshot(existing),
               changedFields: ["publication"],
             }),
+            transaction,
           );
         }
 

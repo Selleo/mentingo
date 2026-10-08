@@ -20254,6 +20254,13 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
   };
 }
 
+export interface PublishEmailTemplateBody {
+  /** @uniqueItems true */
+  confirmedAutomationIds?: string[];
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
 export interface PublishEmailTemplateResponse {
   data: {
     id: string | null;
@@ -38268,11 +38275,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     emailTemplateManagementControllerPublishEmailTemplate: (
       id: string,
+      data: PublishEmailTemplateBody,
       params: RequestParams = {},
     ) =>
       this.request<PublishEmailTemplateResponse, any>({
         path: `/api/email-templates/${id}/publish`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

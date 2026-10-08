@@ -181,6 +181,9 @@
       "editHint": "Änderungen ausdrücklich speichern. Vorschau und Tests nutzen ungespeicherte Inhalte mit Beispieldaten; Tests gehen nur an Ihre Adresse.",
       "publishedHint": "Speichern aktualisiert den Entwurf. Veröffentlichen aktiviert Änderungen für zugeordnete Automatisierungen.",
       "languageHint": "Unvollständige Übersetzungen verwenden die Basissprache. Speichern Sie eine vollständige Übersetzung, bevor Sie sie zur Basis machen.",
+      "publishDeactivateTitle": "Veröffentlichen und Automatisierungen deaktivieren?",
+      "publishDeactivateHint": "Beim Veröffentlichen werden die folgenden Automatisierungen deaktiviert, da ihre Tags nicht mehr zur E-Mail passen. Sie senden keine E-Mails mehr. Passe die Werte der Tags an und aktiviere sie anschließend wieder.",
+      "publishAndDeactivate": "Veröffentlichen und deaktivieren",
       "publishHint": "Vorlage veröffentlichen? Änderungen werden zuerst gespeichert. Ausstehende Zustellungen dieser Vorlage werden abgebrochen. Andere Vorlagen bleiben veröffentlicht.",
       "archiveHint": "Vorlage archivieren? Ersetzen Sie sie zuerst in aktiven Automatisierungen oder deaktivieren Sie diese.",
       "unsavedTitle": "Ungespeicherte Änderungen",
@@ -238,7 +241,7 @@
       "populateEventTags": "Verfügbare Ereignis-Tags hinzufügen",
       "populateEventTagsHint": "Füge Tags wie einen Namen oder Kurstitel zur Liste hinzu. Beim Bearbeiten kannst du sie in die E-Mail einsetzen.",
       "changeEventTitle": "E-Mail-Tags aktualisieren?",
-      "changeEventHint": "Tags durch die des gewählten Ereignisses ersetzen? Bestehende Tags werden aus Betreff, Inhalt und Links in allen Sprachen entfernt. Ohne Ereignis werden keine neuen Tags hinzugefügt.",
+      "changeEventHint": "Bestehende Tags funktionieren mit dem neuen Ereignis nicht mehr. Beim Ersetzen werden sie in allen Sprachen entfernt. Aktualisiere Betreff, Inhalt und Links mit den neuen Tags.",
       "keepEventTags": "Vorhandene Tags behalten",
       "replaceEventTags": "Tags ersetzen",
       "clearEvent": "Ereignisauswahl entfernen",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden.",
       "archivedReadOnly": "Stellen Sie die Vorlage wieder her, bevor Sie ihre Sprachen ändern.",
       "notPublished": "Veröffentlichen Sie diese E-Mail-Vorlage vor der Verwendung in einer Automatisierung.",
-      "incompatiblePublication": "Prüfen Sie vor der Veröffentlichung die Tag-Zuordnung in den verbundenen Automatisierungen.",
+      "incompatiblePublication": "Einige aktive Automatisierungen können die Tags dieser E-Mail nicht ausfüllen. Veröffentliche und deaktiviere sie oder brich ab und passe ihre Tag-Einstellungen an.",
       "usedByAutomations": "Diese Vorlage wird von Automatisierungen verwendet. Ändern Sie deren E-Mail-Schritte, bevor Sie sie entfernen."
     },
     "warnings": {

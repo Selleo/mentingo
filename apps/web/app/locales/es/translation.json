@@ -181,6 +181,9 @@
       "editHint": "Guarda los cambios explícitamente. La vista previa y las pruebas usan contenido sin guardar y datos de ejemplo; las pruebas se envían solo a tu dirección.",
       "publishedHint": "Guardar actualiza el borrador. Publicar activa los cambios para las automatizaciones que usan esta plantilla.",
       "languageHint": "Las traducciones incompletas usan el idioma base. Guarda una traducción completa antes de establecerla como base.",
+      "publishDeactivateTitle": "¿Publicar y desactivar las automatizaciones?",
+      "publishDeactivateHint": "Al publicar, se desactivarán las automatizaciones siguientes porque sus etiquetas ya no coinciden con el correo. Dejarán de enviar correos. Actualiza cómo se rellenan sus etiquetas y vuelve a activarlas.",
+      "publishAndDeactivate": "Publicar y desactivar",
       "publishHint": "¿Publicar la plantilla? Los cambios se guardarán primero. Se cancelarán los envíos pendientes que la usen. Las demás plantillas seguirán publicadas.",
       "archiveHint": "¿Archivar la plantilla? Sustitúyela primero en las automatizaciones activas o desactívalas.",
       "unsavedTitle": "Cambios sin guardar",
@@ -238,7 +241,7 @@
       "populateEventTags": "Añadir las etiquetas disponibles del evento",
       "populateEventTagsHint": "Añade a la lista etiquetas como el nombre o el título del curso. Podrás insertarlas en el correo al editarlo.",
       "changeEventTitle": "¿Actualizar las etiquetas?",
-      "changeEventHint": "¿Sustituir las etiquetas por las del evento elegido? Las actuales se quitarán del asunto, contenido y enlaces en todos los idiomas. Sin evento, no se añadirán etiquetas nuevas.",
+      "changeEventHint": "Las etiquetas actuales no funcionarán con el nuevo evento. Al sustituirlas, se eliminarán en todos los idiomas. Actualiza el asunto, el contenido y los enlaces con las nuevas etiquetas.",
       "keepEventTags": "Conservar etiquetas",
       "replaceEventTags": "Sustituir etiquetas",
       "clearEvent": "Quitar evento",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "No se puede eliminar el idioma base.",
       "archivedReadOnly": "Restaura la plantilla antes de cambiar sus idiomas.",
       "notPublished": "Publica esta plantilla antes de usarla en una automatización.",
-      "incompatiblePublication": "Antes de publicar, revisa cómo se rellenan las etiquetas en las automatizaciones vinculadas.",
+      "incompatiblePublication": "Algunas automatizaciones activas no pueden rellenar las etiquetas de este correo. Publica y desactívalas, o cancela y actualiza la configuración de sus etiquetas.",
       "usedByAutomations": "Esta plantilla se usa en automatizaciones. Modifica sus pasos de envío antes de eliminarla."
     },
     "warnings": {

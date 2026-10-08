@@ -181,6 +181,9 @@
       "editHint": "Zapisuj zmiany przyciskiem. Podgląd i testy używają niezapisanej treści oraz danych przykładowych. Testy trafiają tylko na Twój adres.",
       "publishedHint": "Zapis aktualizuje szkic. Publikacja aktywuje zmiany dla automatyzacji korzystających z szablonu.",
       "languageHint": "Niekompletne tłumaczenie odbiorcy użyje języka bazowego. Zapisz kompletne tłumaczenie, zanim ustawisz je jako bazowe.",
+      "publishDeactivateTitle": "Opublikować i dezaktywować automatyzacje?",
+      "publishDeactivateHint": "Publikacja dezaktywuje poniższe automatyzacje, ponieważ ich znaczniki nie pasują do e-maila. Przestaną wysyłać wiadomości. Popraw sposób uzupełniania znaczników, a potem ponownie je aktywuj.",
+      "publishAndDeactivate": "Opublikuj i dezaktywuj",
       "publishHint": "Opublikować szablon? Niezapisane zmiany zostaną zapisane. Oczekujące wysyłki używające szablonu zostaną anulowane. Pozostałe szablony pozostaną opublikowane.",
       "archiveHint": "Zarchiwizować szablon? Najpierw zastąp go w aktywnych automatyzacjach lub wyłącz te automatyzacje.",
       "unsavedTitle": "Niezapisane zmiany",
@@ -238,7 +241,7 @@
       "populateEventTags": "Dodaj dostępne znaczniki zdarzenia",
       "populateEventTagsHint": "Dodaj do listy znaczniki, np. imię lub tytuł kursu. Podczas edycji możesz wstawić je do e-maila.",
       "changeEventTitle": "Zaktualizować znaczniki e-maila?",
-      "changeEventHint": "Zastąpić znaczniki znacznikami wybranego zdarzenia? Obecne znaczniki zostaną usunięte z tematu, treści i linków we wszystkich językach. Bez wybranego zdarzenia nowe znaczniki nie zostaną dodane.",
+      "changeEventHint": "Obecne znaczniki nie zadziałają z nowym zdarzeniem. Zastąpienie usunie je we wszystkich językach. Uzupełnij temat, treść i linki nowymi znacznikami.",
       "keepEventTags": "Zachowaj znaczniki",
       "replaceEventTags": "Zastąp znaczniki",
       "clearEvent": "Usuń wybór zdarzenia",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego.",
       "archivedReadOnly": "Przywróć szablon przed zmianą jego języków.",
       "notPublished": "Opublikuj szablon e-maila, zanim użyjesz go w automatyzacji.",
-      "incompatiblePublication": "Przed publikacją sprawdź, jak znaczniki są uzupełniane w powiązanych automatyzacjach.",
+      "incompatiblePublication": "Niektóre aktywne automatyzacje nie mogą uzupełnić znaczników tego e-maila. Opublikuj i dezaktywuj je lub anuluj i popraw ustawienia znaczników.",
       "usedByAutomations": "Ten szablon jest używany w automatyzacjach. Zmień ich kroki wysyłania e-maili, zanim go usuniesz."
     },
     "warnings": {

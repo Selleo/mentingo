@@ -143,9 +143,9 @@ export class AutomationDefinitionRepository {
       .where(and(inArray(automations.id, ids), isNull(automations.deletedAt)));
   }
 
-  findEnabledAutomations(transaction: DatabasePg) {
+  findEnabledAutomations(transaction: DatabasePg, language?: SupportedLanguages) {
     return transaction
-      .select(this.getLocalizedAutomationColumns())
+      .select(this.getLocalizedAutomationColumns(language))
       .from(automations)
       .where(
         and(eq(automations.status, AUTOMATION_STATUSES.ENABLED), isNull(automations.deletedAt)),

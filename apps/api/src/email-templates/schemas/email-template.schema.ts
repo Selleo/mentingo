@@ -327,3 +327,9 @@ export const emailTemplateTestResponseSchema = Type.Object(
 );
 export type EmailTemplateImageResponse = Static<typeof emailTemplateImageResponseSchema>;
 export type EmailTemplateTestResponse = Static<typeof emailTemplateTestResponseSchema>;
+
+export const publishEmailTemplateSchema = Type.Object({
+  confirmedAutomationIds: Type.Optional(Type.Array(UUIDSchema, { uniqueItems: true })),
+  language: Type.Optional(supportedLanguagesSchema),
+});
+export type PublishEmailTemplateBody = Static<typeof publishEmailTemplateSchema>;

@@ -1,7 +1,11 @@
-import type { PreviewEmailTemplateBody } from "./schemas/email-template.schema";
+import type {
+  PublishEmailTemplateBody,
+  PreviewEmailTemplateBody,
+} from "./schemas/email-template.schema";
 import type { EmailTemplateEvent, PublishedEmailTemplate } from "@repo/email-templates";
 import type { AutomationTemplateReference } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { emailTemplates } from "src/storage/schema";
 
 export type EmailTemplateRecord = typeof emailTemplates.$inferSelect;
@@ -46,10 +50,12 @@ export interface EmailTemplateDependencies {
     transaction: DatabasePg,
   ): Promise<void>;
   assertEmailTemplateCanBeArchived(templateId: UUIDType, transaction: DatabasePg): Promise<void>;
-  validateEmailTemplatePublicationDependencies(
+  prepareAutomationsForEmailTemplatePublication(
     templateId: UUIDType,
     publication: PublishedEmailTemplate,
     transaction: DatabasePg,
+    options?: PublishEmailTemplateBody,
+    actor?: ActorUserType,
   ): Promise<void>;
   cancelPendingEmailTemplateDeliveries(
     templateId: UUIDType,

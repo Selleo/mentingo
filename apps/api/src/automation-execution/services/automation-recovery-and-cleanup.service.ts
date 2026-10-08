@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { Cron } from "@nestjs/schedule";
 import { EMAIL_TEMPLATE_STATUSES } from "@repo/email-templates";
 import {
   AUTOMATION_STATUSES,
@@ -35,7 +34,7 @@ import type { DatabasePg } from "src/common";
 
 @Injectable()
 export class AutomationRecoveryAndCleanupService {
-  private running = false;
+  private isRunning = false;
 
   constructor(
     private readonly automationDefinitionStorageService: AutomationDefinitionStorageService,
@@ -47,20 +46,19 @@ export class AutomationRecoveryAndCleanupService {
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
   ) {}
 
-  @Cron("*/30 * * * * *")
   async recoverInterruptedAutomationDeliveries(): Promise<void> {
-    if (this.running) {
+    if (this.isRunning) {
       return;
     }
 
-    this.running = true;
+    this.isRunning = true;
 
     try {
       await this.tenantDbRunnerService.runForEachTenant(() =>
         this.recoverTenantAutomationDeliveries(),
       );
     } finally {
-      this.running = false;
+      this.isRunning = false;
     }
   }
 
@@ -245,7 +243,6 @@ export class AutomationRecoveryAndCleanupService {
     return deliveriesByRun;
   }
 
-  @Cron("0 3 * * *")
   async purgeExpiredAutomationRuns(): Promise<void> {
     const cutoff = new Date(Date.now() - AUTOMATION_RUN_RETENTION_DAYS * 86400000).toISOString();
 

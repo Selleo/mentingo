@@ -181,6 +181,9 @@
       "editHint": "Save changes explicitly. Preview and test emails use unsaved content with sample data; tests go only to your email address.",
       "publishedHint": "Saves update the draft. Publish activates changes for automations using this template.",
       "languageHint": "Incomplete recipient translations fall back to the base language. Save a complete translation before making it the base.",
+      "publishDeactivateTitle": "Publish and deactivate automations?",
+      "publishDeactivateHint": "Publishing will deactivate the automations below because their email tags no longer match. They will stop sending emails. Update how their tags are filled, then activate them again.",
+      "publishAndDeactivate": "Publish and deactivate",
       "publishHint": "Publish this template? Unsaved changes will be saved first. Pending deliveries using this template will be cancelled. Other templates remain published.",
       "archiveHint": "Archive this template? Templates used by enabled automations must first be replaced or those automations disabled.",
       "unsavedTitle": "Unsaved changes",
@@ -238,7 +241,7 @@
       "populateEventTags": "Add available event tags",
       "populateEventTagsHint": "Add tags such as a name or course title to the list. You can insert them into your email while editing.",
       "changeEventTitle": "Update email tags?",
-      "changeEventHint": "Replace tags with those from the selected event? Existing tags will be removed from the subject, content, and links in every language. Without an event, no new tags will be added.",
+      "changeEventHint": "Existing tags won’t work with the new event. Replacing them removes them in every language. Update the email’s subject, content, and links with the new tags.",
       "keepEventTags": "Keep existing tags",
       "replaceEventTags": "Replace tags",
       "clearEvent": "Clear event",
@@ -295,7 +298,7 @@
       "cannotRemoveBaseLanguage": "The base language cannot be removed.",
       "archivedReadOnly": "Restore this template before changing its languages.",
       "notPublished": "Publish this email template before using it in an automation.",
-      "incompatiblePublication": "Check how tags are filled in the connected automations before publishing.",
+      "incompatiblePublication": "Some active automations cannot fill the tags in this email. Publish and deactivate them, or cancel and update their tag settings.",
       "usedByAutomations": "This template is used by automations. Change their email steps before removing it."
     },
     "warnings": {

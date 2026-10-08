@@ -11,6 +11,7 @@ export const AUTOMATION_EMAIL_DELIVERY_REASON_CODES = {
   ATTEMPTS_EXHAUSTED: "attempts_exhausted",
   TEMPLATE_CHANGED: "template_changed",
   BUILTIN_TEMPLATE_CHANGED: "builtin_template_changed",
+  AUTOMATION_DISABLED: "automation_disable",
   TEMPLATE_REPUBLISHED: "template_republished",
   ACCOUNT_ACTION_EXPIRED_OR_REVOKED: "account_action_expired_or_revoked",
   EMAIL_ACTION_FAILED: "email_action_failed",

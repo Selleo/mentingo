@@ -120,8 +120,14 @@ export class AutomationDefinitionStorageService {
     return this.loadAutomationRecordsWithSteps(rows, transaction);
   }
 
-  async listEnabledAutomations(transaction: DatabasePg): Promise<AutomationRecord[]> {
-    const rows = await this.automationDefinitionRepository.findEnabledAutomations(transaction);
+  async listEnabledAutomations(
+    transaction: DatabasePg,
+    language?: SupportedLanguages,
+  ): Promise<AutomationRecord[]> {
+    const rows = await this.automationDefinitionRepository.findEnabledAutomations(
+      transaction,
+      language,
+    );
 
     return this.loadAutomationRecordsWithSteps(rows, transaction);
   }

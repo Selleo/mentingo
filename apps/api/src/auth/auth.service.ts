@@ -134,13 +134,12 @@ export class AuthService {
         await trx.insert(formFieldAnswers).values(registrationAnswers);
       }
 
-      const branding = await this.emailService.getDefaultEmailProperties(user.tenantId, user.id);
       const origin = await this.resolveTenantOrigin(user.tenantId);
       await this.outboxPublisher.publish(
         createUserNotificationEvent({
           kind: AUTOMATION_EVENT_KINDS.WELCOME,
           user,
-          language: branding.language,
+          language,
           eventFields: { courses_link: `${origin}/courses` },
         }),
         trx,
