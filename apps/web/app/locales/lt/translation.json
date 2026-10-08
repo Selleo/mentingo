@@ -2216,6 +2216,8 @@
         "todo_task_manage_self": "Gali kurti ir tvarkyti savo užduotis.",
         "settings_manage": "Gali valdyti bendruosius platformos nustatymus.",
         "email_template_manage": "Gali valdyti ir skelbti el. laiškų šablonus, įkelti vaizdus ir siųsti bandomuosius el. laiškus.",
+        "automation_manage": "Kurti, redaguoti, skelbti ir valdyti automatizavimus.",
+        "automation_log_read": "Peržiūrėti automatizavimų vykdymo žurnalus.",
         "env_read_public": "Gali peržiūrėti viešas aplinkos konfigūracijos reikšmes.",
         "env_manage": "Gali valdyti aplinkos konfigūracijos reikšmes.",
         "category_read": "Gali peržiūrėti kursų kategorijas.",

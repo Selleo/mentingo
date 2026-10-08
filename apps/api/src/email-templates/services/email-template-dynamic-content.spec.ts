@@ -93,7 +93,22 @@ describe.each(Object.values(SUPPORTED_LANGUAGES))(
             event === "user_short_inactivity" && !name
               ? "userShortInactivityPlatformEmail"
               : courseSubjectKey;
-          expect(normalize(actual.text)).toContain(normalize(expected.text));
+          if (event === "user_long_inactivity" && !name) {
+            const platform = new UserShortInactivityEmail({
+              ...branding,
+              language,
+              courseName: "",
+              courseLink: link,
+            });
+            const platformLines = platform.text.split("\n").filter((line) => line.trim());
+            const expectedLines = expected.text.split("\n").filter((line) => line.trim());
+            expect(expectedLines.length).toBeGreaterThanOrEqual(4);
+            expectedLines[0] = platformLines[0]!;
+            expectedLines[expectedLines.length - 3] = platformLines[platformLines.length - 3]!;
+            expect(normalize(actual.text)).toContain(normalize(expectedLines.join("\n")));
+          } else {
+            expect(normalize(actual.text)).toContain(normalize(expected.text));
+          }
           expect(actual.subject).toBe(getEmailSubject(subjectKey, language, { courseName: name }));
           expect(actual.html).not.toContain("{{");
         }

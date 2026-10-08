@@ -2216,6 +2216,8 @@
         "todo_task_manage_self": "Eigene Aufgaben erstellen und verwalten.",
         "settings_manage": "Globale Plattformeinstellungen verwalten.",
         "email_template_manage": "E-Mail-Vorlagen verwalten und veröffentlichen, Bilder hochladen und Test-E-Mails senden.",
+        "automation_manage": "Automatisierungen erstellen, bearbeiten, veröffentlichen und verwalten.",
+        "automation_log_read": "Ausführungsprotokolle von Automatisierungen anzeigen.",
         "env_read_public": "Öffentliche Werte der Umgebungskonfiguration anzeigen.",
         "env_manage": "Werte der Umgebungskonfiguration verwalten.",
         "category_read": "Kurskategorien anzeigen.",

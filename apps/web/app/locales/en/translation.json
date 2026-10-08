@@ -2217,6 +2217,8 @@
         "todo_task_manage_self": "Create and manage their own to-do tasks.",
         "settings_manage": "Manage global platform settings.",
         "email_template_manage": "Manage and publish email templates, upload images, and send test emails.",
+        "automation_manage": "Create, edit, publish, and manage automations.",
+        "automation_log_read": "View automation execution logs.",
         "env_read_public": "View public environment configuration values.",
         "env_manage": "Manage environment configuration values.",
         "category_read": "View course categories.",

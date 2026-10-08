@@ -99,9 +99,14 @@ describe("Email template request schema", () => {
             label: "Items",
             type: "collection",
             required: true,
-            sampleValue: undefined,
           },
         ],
+      }),
+    ).toBe(true);
+    expect(
+      compiled.Check({
+        ...generic,
+        placeholders: [{ name: "items", type: "invalid", required: true }],
       }),
     ).toBe(false);
   });

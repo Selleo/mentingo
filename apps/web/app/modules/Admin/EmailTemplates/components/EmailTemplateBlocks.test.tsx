@@ -190,7 +190,7 @@ describe("EmailTemplateBlocks", () => {
       />,
     );
     const variable = screen.getByRole("button", { name: "{{ formatted_course_due_date }}" });
-    expect(variable).toHaveClass("whitespace-nowrap");
+    expect(within(variable).getByText("{{ formatted_course_due_date }}")).toHaveClass("truncate");
     expect(variable).toHaveAttribute("draggable", "true");
     const setData = vi.fn();
     fireEvent.dragStart(variable, { dataTransfer: { setData } });
@@ -249,7 +249,7 @@ describe("EmailTemplateBlocks", () => {
     },
   );
 
-  it("renders trailing footers outside the white card and body copy below the brand background", () => {
+  it("renders trailing footers outside the rounded white card", () => {
     renderWith({ withQuery: true }).render(
       <EmailTemplateBlocks
         blocks={[createEmailTemplateBlock("text"), createEmailTemplateBlock("footer")]}
@@ -259,15 +259,15 @@ describe("EmailTemplateBlocks", () => {
         onUpload={vi.fn()}
       />,
     );
-    const body = screen.getByRole("region", { name: "Text 1" }).parentElement;
+    const body = screen.getByRole("region", { name: "Text 1" }).closest(".rounded-3xl");
     const footer = screen.getByRole("region", { name: "Footer 2" }).parentElement;
-    expect(body).toHaveClass("bg-white", "rounded-b-3xl");
-    expect(body?.closest("td[rowspan]")).toHaveAttribute("rowspan", "2");
+    expect(body).toHaveClass("bg-white");
+    expect(body).not.toContainElement(footer);
     expect(footer).not.toHaveClass("bg-white");
     expect(footer).not.toHaveClass("py-11");
   });
 
-  it("spans the complete card across two solid background rows, matching sent emails", () => {
+  it("keeps all blocks inside one rounded white card", () => {
     renderWith({ withQuery: true }).render(
       <EmailTemplateBlocks
         blocks={[
@@ -283,15 +283,10 @@ describe("EmailTemplateBlocks", () => {
         onUpload={vi.fn()}
       />,
     );
-    const card = screen.getAllByRole("region")[0].closest("td[rowspan]");
-    expect(card).toHaveAttribute("rowspan", "2");
-    const table = card?.closest("table");
-    const rows = table?.querySelectorAll(":scope > tbody > tr");
-    expect(rows).toHaveLength(2);
-    expect(rows?.[0].firstElementChild).toHaveStyle({ backgroundColor: "#5345ad" });
-    expect(rows?.[1].firstElementChild).toHaveStyle({ backgroundColor: "#fafafa" });
+    const card = screen.getAllByRole("region")[0].closest(".rounded-3xl");
+    expect(card).toHaveClass("bg-white");
     screen.getAllByRole("region").forEach((block) => {
-      expect(block.closest("td[rowspan]")).toBe(card);
+      expect(card).toContainElement(block);
     });
   });
 

@@ -35,6 +35,8 @@ vi.mock("~/api/queries/useEmailTemplates", () => ({
           id: "saved-template",
           event: "welcome",
           name: { en: "Saved template" },
+          subject: { en: "Welcome subject" },
+          updatedAt: null,
           baseLanguage: "en",
           source: "override",
           status: "draft",
@@ -44,6 +46,8 @@ vi.mock("~/api/queries/useEmailTemplates", () => ({
           id: null,
           event: "welcome",
           name: { en: "Welcome template" },
+          subject: { en: "Welcome subject" },
+          updatedAt: null,
           baseLanguage: "en",
           source: "default",
           status: null,
@@ -70,15 +74,14 @@ describe("EmailTemplatesPage", () => {
   it("allows cancellation and confirms deletion only for saved templates", async () => {
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplatesPage />);
-    const defaultRow = screen.getByRole("link", { name: "Welcome template" }).closest("tr")!;
-    expect(
-      within(defaultRow).queryByRole("button", { name: "Delete template" }),
-    ).not.toBeInTheDocument();
-    const deleteButton = screen.getByRole("button", { name: "Delete template" });
-    await user.click(deleteButton);
+    const savedRow = screen.getByText("Saved template").closest("tr")!;
+    const actions = within(savedRow).getByRole("button", { name: "Actions" });
+    await user.click(actions);
+    await user.click(screen.getByRole("menuitem", { name: "Delete template" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Cancel" }));
     expect(mocks.deleteTemplate).not.toHaveBeenCalled();
-    await user.click(deleteButton);
+    await user.click(actions);
+    await user.click(screen.getByRole("menuitem", { name: "Delete template" }));
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", { name: "Delete template" }),
     );
@@ -87,16 +90,15 @@ describe("EmailTemplatesPage", () => {
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it("shows System badges and repository flags", () => {
+  it("shows the system status, subject, and actions", () => {
     renderWith({ withQuery: true }).render(<EmailTemplatesPage />);
-    const row = screen.getByRole("link", { name: "Welcome template" }).closest("tr")!;
+    const row = screen.getByText("Welcome template").closest("tr")!;
     expect(within(row).getByText("System")).toHaveClass("text-neutral-600", "bg-neutral-100");
-    expect(within(row).getByRole("link")).toHaveClass("text-neutral-900");
-    expect(within(row).getByRole("img")).toHaveAccessibleName();
-    expect(within(row).getByRole("button")).toHaveClass("size-10");
+    expect(within(row).getByText("Welcome subject")).toBeInTheDocument();
+    expect(within(row).getByRole("button", { name: "Actions" })).toBeEnabled();
   });
 
-  it("opens the template when clicking outside its name link", async () => {
+  it("opens the template when clicking its status cell", async () => {
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplatesPage />);
     await user.click(screen.getByText("System"));
@@ -106,8 +108,11 @@ describe("EmailTemplatesPage", () => {
   it("copies a system template without opening the source row", async () => {
     const user = userEvent.setup();
     renderWith({ withQuery: true }).render(<EmailTemplatesPage />);
-    const row = screen.getByRole("link", { name: "Welcome template" }).closest("tr")!;
-    await user.click(within(row).getByRole("button"));
+    const row = screen.getByText("Welcome template").closest("tr")!;
+    await user.click(within(row).getByRole("button", { name: "Actions" }));
+    expect(screen.queryByRole("menuitem", { name: "Delete template" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("menuitem", { name: "Copy" }));
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledOnce());
     expect(mocks.copyDefault).toHaveBeenCalledWith("welcome");
     expect(mocks.navigate).toHaveBeenCalledOnce();
     expect(mocks.navigate).toHaveBeenCalledWith("/admin/email-templates/copied-template");

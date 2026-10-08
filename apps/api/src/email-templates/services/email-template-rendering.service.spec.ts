@@ -1,4 +1,4 @@
-import { getBuiltInTemplatePublication } from "@repo/email-templates";
+import { getBuiltInTemplatePublication, getBuiltInTemplateEvent } from "@repo/email-templates";
 import { BUILT_IN_EMAIL_TEMPLATE_KEYS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { findAutomationEventDefinition } from "src/automations/catalog/automation-event-catalog";
@@ -32,7 +32,7 @@ describe("EmailTemplateRenderingService", () => {
       "renders the complete occurrence contract in %s",
       async (language) => {
         const publication = getBuiltInTemplatePublication(key);
-        const event = findAutomationEventDefinition(key)!;
+        const event = findAutomationEventDefinition(getBuiltInTemplateEvent(key))!;
         const mappings: AutomationPlaceholderMappings = Object.fromEntries(
           publication.placeholders.map((placeholder) => [
             placeholder.name,
@@ -65,7 +65,7 @@ describe("EmailTemplateRenderingService", () => {
       publication,
       subject: { en: "Unsaved" },
     });
-    expect(await service.getPublishedEmailTemplate({ type: "custom", id: "template" })).toBe(
+    expect(await service.getPublishedEmailTemplate({ type: "custom", id: "template" })).toEqual(
       publication,
     );
     expect(

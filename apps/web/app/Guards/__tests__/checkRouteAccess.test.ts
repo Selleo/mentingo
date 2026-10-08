@@ -3,8 +3,19 @@ import { PERMISSIONS } from "@repo/shared";
 import { checkRouteAccess } from "../RouteGuard";
 
 describe("checkRouteAccess", () => {
+  it("allows workspace access for each tab permission", () => {
+    for (const permission of [
+      PERMISSIONS.AUTOMATION_MANAGE,
+      PERMISSIONS.AUTOMATION_LOG_READ,
+      PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
+    ]) {
+      expect(checkRouteAccess("admin/automations", [permission])).toBe(true);
+    }
+    expect(checkRouteAccess("admin/automations", [])).toBe(false);
+    expect(checkRouteAccess("admin/automations", [PERMISSIONS.USER_MANAGE])).toBe(false);
+  });
   it("keeps management and log permissions separate", () => {
-    for (const route of ["admin/automations", "admin/automations/new", "admin/automations/id"]) {
+    for (const route of ["admin/automations/new", "admin/automations/id"]) {
       expect(checkRouteAccess(route, [PERMISSIONS.AUTOMATION_MANAGE])).toBe(true);
       expect(checkRouteAccess(route, [PERMISSIONS.AUTOMATION_LOG_READ])).toBe(false);
       expect(checkRouteAccess(route, [PERMISSIONS.EMAIL_TEMPLATE_MANAGE])).toBe(false);

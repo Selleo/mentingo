@@ -15,23 +15,23 @@ describe("EmailTemplateValidationService", () => {
   const service = new EmailTemplateValidationService();
 
   it.each([undefined, Number.NaN, new Date(), { nested: undefined }])(
-    "rejects non-JSON sample values in generic collections: %j",
+    "replaces supplied collection samples with generated preview values: %j",
     (value) => {
-      expect(() =>
-        service.assertValidEmailTemplateDraft(
-          [
-            {
-              name: "items",
-              label: "Items",
-              type: "collection",
-              required: false,
-              sampleValue: [value] as never,
-            },
-          ],
-          {},
-          {},
-        ),
-      ).toThrow("emailTemplates.errors.invalidContent");
+      const placeholders = [
+        {
+          name: "items",
+          label: "Items",
+          type: "collection" as const,
+          required: false,
+          sampleValue: [value] as never,
+        },
+      ];
+      expect(() => service.assertValidEmailTemplateDraft(placeholders, {}, {})).not.toThrow();
+      const preview = service.buildEmailPreviewVariables(placeholders);
+      expect(Array.isArray(preview.items)).toBe(true);
+      expect(preview.items).toEqual(
+        service.buildEmailPreviewVariables([{ ...placeholders[0]!, sampleValue: [] }]).items,
+      );
     },
   );
 

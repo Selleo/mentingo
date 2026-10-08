@@ -2441,6 +2441,8 @@
         "todo_task_manage_self": "Może tworzyć i zarządzać własnymi zadaniami.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "email_template_manage": "Może zarządzać szablonami wiadomości e-mail, publikować je, przesyłać obrazy i wysyłać wiadomości testowe.",
+        "automation_manage": "Tworzenie, edytowanie, publikowanie i zarządzanie automatyzacjami.",
+        "automation_log_read": "Wyświetlanie dzienników wykonań automatyzacji.",
         "env_read_public": "Może przeglądać publiczne wartości konfiguracji środowiska.",
         "env_manage": "Może zarządzać wartościami konfiguracji środowiska.",
         "category_read": "Może przeglądać kategorie kursów.",

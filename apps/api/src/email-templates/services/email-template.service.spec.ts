@@ -1,5 +1,5 @@
 import {
-  EMAIL_TEMPLATE_DEFINITIONS,
+  VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS,
   EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT,
   EMAIL_TEMPLATE_STATUSES,
   getBuiltInTemplatePublication,
@@ -219,23 +219,25 @@ describe("EmailTemplateManagementService mutation validation", () => {
       });
 
       const result = await service.listEmailTemplates(page, perPage);
-      const expectedDefaults = EMAIL_TEMPLATE_DEFINITIONS.slice(defaultStart, defaultEnd);
+      const expectedDefaults = VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.slice(defaultStart, defaultEnd);
 
       expect(findCustomEmailTemplatePageWithCount).toHaveBeenCalledWith(
         (page - 1) * perPage,
         perPage,
+        "",
+        SUPPORTED_LANGUAGES.EN,
       );
       expect(result.data.map(({ source }) => source)).toEqual([
         ...Array.from({ length: returnedOverrides }, () => "override"),
         ...expectedDefaults.map(() => "default"),
       ]);
       expect(result.data.slice(returnedOverrides).map(({ event }) => event)).toEqual(
-        expectedDefaults.map(({ event }) => event),
+        expectedDefaults,
       );
       expect(result.pagination).toEqual({
         page,
         perPage,
-        totalItems: overrideCount + EMAIL_TEMPLATE_DEFINITIONS.length,
+        totalItems: overrideCount + VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS.length,
       });
     },
   );
@@ -434,7 +436,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
     expect(publishEmailTemplate).toHaveBeenCalledWith(
       template.id,
       expect.objectContaining({ placeholders: template.placeholders, subject: template.subject }),
-      undefined,
+      transaction,
     );
   });
 
@@ -447,7 +449,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
     expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
       template.id,
       expect.any(Object),
-      undefined,
+      transaction,
       options,
       actor,
     );
@@ -495,13 +497,13 @@ describe("EmailTemplateManagementService mutation validation", () => {
     expect(dependencies.prepareAutomationsForEmailTemplatePublication).toHaveBeenCalledWith(
       template.id,
       expect.objectContaining({ subject: { ...definition.subjects, en: "New draft" } }),
-      undefined,
+      transaction,
       {},
       undefined,
     );
     expect(dependencies.cancelPendingEmailTemplateDeliveries).toHaveBeenCalledWith(
       template.id,
-      undefined,
+      transaction,
     );
   });
   it("blocks incompatible publication before the published content changes", async () => {

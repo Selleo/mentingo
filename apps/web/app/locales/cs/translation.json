@@ -2222,6 +2222,8 @@
         "todo_task_manage_self": "Může vytvářet a spravovat vlastní úkoly.",
         "settings_manage": "Může spravovat globální nastavení platformy.",
         "email_template_manage": "Může spravovat a publikovat e-mailové šablony, nahrávat obrázky a odesílat testovací e-maily.",
+        "automation_manage": "Vytvářet, upravovat, publikovat a spravovat automatizace.",
+        "automation_log_read": "Zobrazovat protokoly spuštění automatizací.",
         "env_read_public": "Může zobrazit veřejné hodnoty konfigurace prostředí.",
         "env_manage": "Může spravovat hodnoty konfigurace prostředí.",
         "category_read": "Může zobrazit kategorie kurzů.",

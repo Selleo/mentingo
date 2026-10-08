@@ -2211,6 +2211,8 @@
         "todo_task_manage_self": "Créer et gérer leurs propres tâches.",
         "settings_manage": "Gérez les paramètres globaux de la plateforme.",
         "email_template_manage": "Gérez et publiez les modèles d’e-mail, importez des images et envoyez des e-mails de test.",
+        "automation_manage": "Créer, modifier, publier et gérer les automatisations.",
+        "automation_log_read": "Consulter les journaux d’exécution des automatisations.",
         "env_read_public": "Afficher les valeurs de configuration de l'environnement public.",
         "env_manage": "Gérer les valeurs de configuration de l'environnement.",
         "category_read": "Afficher les catégories de cours.",
