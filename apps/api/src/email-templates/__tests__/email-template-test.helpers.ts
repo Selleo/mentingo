@@ -34,6 +34,7 @@ import type {
   EmailTemplateResponse,
   PreviewEmailTemplateBody,
 } from "../schemas/email-template.schema";
+import type { Provider } from "@nestjs/common";
 import type { EmailTemplateDefinition, EmailTemplateDocument } from "@repo/email-templates";
 import type { DatabasePg } from "src/common";
 
@@ -80,7 +81,9 @@ export const textDocument = (text = "Template body"): EmailTemplateDocument => (
   content: [{ type: "text", content: [{ type: "paragraph", content: [{ type: "text", text }] }] }],
 });
 
-export async function setupEmailTemplateTest(options: { worker?: boolean } = {}) {
+export async function setupEmailTemplateTest(
+  options: { worker?: boolean; providers?: Provider[] } = {},
+) {
   const originalRateLimit = process.env.DISABLE_RATE_LIMITING;
 
   process.env.DISABLE_RATE_LIMITING = "true";
@@ -108,6 +111,7 @@ export async function setupEmailTemplateTest(options: { worker?: boolean } = {})
     customProviders: [
       { provide: S3Service, useValue: s3Service },
       ...(!options.worker ? [{ provide: EmailTemplateTestWorker, useValue: {} }] : []),
+      ...(options.providers ?? []),
     ],
   });
 
