@@ -174,7 +174,13 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     if (req.path.startsWith("/api/better-auth")) {
       next();
     } else {
-      express.json({ limit: "5mb" })(req, res, (err) => {
+      express.json({
+        limit: "5mb",
+        verify: (incoming, _response, buffer) => {
+          if (req.path.startsWith("/api/phishing/webhook"))
+            (incoming as express.Request & { rawBody: Buffer }).rawBody = buffer;
+        },
+      })(req, res, (err) => {
         if (err) {
           next(err);
           return;

@@ -7,12 +7,14 @@ import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useLearningPaths } from "~/api/queries/useLearningPaths";
+import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { matchesRequirement } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
+import { routeAccessConfig } from "~/config/routeAccessConfig";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
@@ -57,6 +59,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
+  const { data: phishingConfiguration, isError: isPhishingConfigurationError } =
+    usePhishingConfiguration(matchesRequirement(permissions, routeAccessConfig.phishing));
 
   const { data: globalSettings } = useGlobalSettings();
 
@@ -108,6 +112,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         isStripeConfigured?.enabled,
         isLearningPathsEnabled,
         shouldShowLearningPaths,
+        phishingConfiguration?.enabled === true && !isPhishingConfigurationError,
       ),
     );
   }

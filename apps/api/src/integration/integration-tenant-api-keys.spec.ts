@@ -203,6 +203,74 @@ describe("Integration tenant API key updates", () => {
     expect(Value.Check(integrationUpdateTenantApiKeysSchema, body)).toBe(false);
   });
 
+  it("writes the three phishing settings together, encrypted and scoped to the path tenant", async () => {
+    const { service, persisted, bulkUpsertEnv, publish, runWithTenantTransaction } =
+      createService();
+    const input = {
+      baseUrl: "https://plugins.example.test",
+      apiKey: "p".repeat(48),
+      webhookSecret: "w".repeat(48),
+    };
+    await expect(
+      service.configurePhishingConnection(
+        tenantId,
+        input,
+        { ...actor, tenantId: "header-tenant" },
+        keyTenant,
+      ),
+    ).resolves.toEqual({ tenantId });
+    expect(runWithTenantTransaction).toHaveBeenCalledTimes(1);
+    expect(runWithTenantTransaction).toHaveBeenCalledWith(tenantId, expect.any(Function));
+    expect(bulkUpsertEnv).toHaveBeenCalledTimes(1);
+    expect(bulkUpsertEnv.mock.calls[0][0]).toHaveLength(3);
+    expect([...persisted.keys()]).toEqual([
+      `${tenantId}:PHISHING_BASE_URL`,
+      `${tenantId}:PHISHING_API_KEY`,
+      `${tenantId}:PHISHING_WEBHOOK_SECRET`,
+    ]);
+    expect(JSON.stringify([...persisted.values()])).not.toContain(input.apiKey);
+    expect(JSON.stringify(publish.mock.calls)).not.toContain(input.webhookSecret);
+  });
+
+  it.each([false, true])(
+    "rejects phishing setup without managing ownership/permission (%s)",
+    async (managing) => {
+      const { service, bulkUpsertEnv, getTenantById } = createService();
+      await expect(
+        service.configurePhishingConnection(
+          tenantId,
+          {
+            baseUrl: "https://plugins.example.test",
+            apiKey: "p".repeat(48),
+            webhookSecret: "w".repeat(48),
+          },
+          { ...actor, permissions: [PERMISSIONS.INTEGRATION_API_USE] },
+          { ...keyTenant, isManaging: managing },
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(getTenantById).not.toHaveBeenCalled();
+      expect(bulkUpsertEnv).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    "https://user:pass@plugins.example.test",
+    "https://plugins.example.test/path",
+    "https://plugins.example.test?key=secret",
+    "http://outside.example.test",
+  ])("rejects unsafe phishing URL %s", async (baseUrl) => {
+    const { service, bulkUpsertEnv } = createService();
+    await expect(
+      service.configurePhishingConnection(
+        tenantId,
+        { baseUrl, apiKey: "p".repeat(48), webhookSecret: "w".repeat(48) },
+        actor,
+        keyTenant,
+      ),
+    ).rejects.toThrow();
+    expect(bulkUpsertEnv).not.toHaveBeenCalled();
+  });
+
   it("accepts a valid selected key", () => {
     expect(
       Value.Check(integrationUpdateTenantApiKeysSchema, { name: "LUMA_API_KEY", value: apiKey }),

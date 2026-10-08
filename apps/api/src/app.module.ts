@@ -40,6 +40,7 @@ import emailConfig from "./common/configuration/email";
 import jwtConfig from "./common/configuration/jwt";
 import livekitConfig from "./common/configuration/livekit";
 import { getOptionalConfigs } from "./common/configuration/optional-config-loader";
+import phishingConfig from "./common/configuration/phishing";
 import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
@@ -69,6 +70,7 @@ import { NativeArchiveModule } from "./native-archive/native-archive.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
+import { PhishingModule } from "./phishing/phishing.module";
 import { QuizModule } from "./quiz/quiz.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
@@ -100,6 +102,7 @@ import type { RedisClient } from "src/redis";
         emailConfig,
         s3Config,
         stripeConfig,
+        phishingConfig,
         redisConfig,
         callbackUrlConfig,
         bunnyConfig,
@@ -195,6 +198,7 @@ import type { RedisClient } from "src/redis";
     OutboxModule,
     AudioModule,
     LumaModule,
+    PhishingModule,
     McpModule,
     LiveTrainingModule,
     CalendarModule,

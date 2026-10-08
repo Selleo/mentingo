@@ -1,4 +1,4 @@
-FROM node:20.15.0-alpine AS build
+FROM node:22.15.0-alpine AS build
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
@@ -14,17 +14,17 @@ ARG VITE_POSTHOG_HOST
 
 ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 
-RUN npm install -g pnpm@9.15.2
+RUN npm install -g pnpm@10.22.0
 
 WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm -w packages:build
 RUN pnpm build --filter=web
 # TODO: Move pnpm deploy to turbo prune workflow
-RUN pnpm deploy --filter=web pnpm-deploy-output --prod
+RUN pnpm deploy --filter=web pnpm-deploy-output --prod --legacy
 
 FROM nginx:1.27.1
 COPY ./apps/web/nginx.conf /etc/nginx/nginx.conf

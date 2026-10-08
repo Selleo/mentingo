@@ -13,7 +13,7 @@ import { eq, inArray } from "drizzle-orm";
 import _ from "lodash";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
-import { MAX_TOKENS } from "src/ai/ai.constants";
+import { AI_MENTOR_REASONING_EFFORT, MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
@@ -422,7 +422,7 @@ export class AiService {
           () =>
             this.chatService.generatePrompt(
               welcomeMessagePrompt,
-              OPENAI_MODELS.BASIC,
+              OPENAI_MODELS.MENTOR,
               systemPrompt,
               AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_WELCOME,
             ),
@@ -685,9 +685,12 @@ export class AiService {
                       model: openai(OPENAI_MODELS.TRANSLATION),
                       schema,
                       system: prompt,
-                      temperature: 0,
-                      topP: 0.9,
-                      topK: 10,
+                      providerOptions: {
+                        openai: {
+                          reasoningEffort: AI_MENTOR_REASONING_EFFORT,
+                          forceReasoning: true,
+                        },
+                      },
                       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.COURSE_TRANSLATION),
                       messages: [
                         {
@@ -768,7 +771,13 @@ export class AiService {
       messages,
       maxOutputTokens: MAX_TOKENS,
       abortSignal: data.abortSignal,
-      ...generationConfig,
+      ...(model === OPENAI_MODELS.MENTOR
+        ? {
+            providerOptions: {
+              openai: { reasoningEffort: AI_MENTOR_REASONING_EFFORT, forceReasoning: true },
+            },
+          }
+        : generationConfig),
       telemetry: buildAiTelemetry(AI_TELEMETRY_FUNCTION_IDS.AI_MENTOR_CHAT),
       onFinish: async (event) => {
         const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;

@@ -42,6 +42,15 @@
     "turbo": "2.3.3",
     "typescript": "5.4.5"
   },
+  "pnpm": {
+    "packageExtensions": {
+      "@hookform/resolvers@3.9.0": {
+        "dependencies": {
+          "zod": "3.25.76"
+        }
+      }
+    }
+  },
   "packageManager": "pnpm@10.22.0",
   "engines": {
     "node": ">=22.15.0"

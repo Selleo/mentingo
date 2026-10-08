@@ -1,0 +1,1 @@
+JSON.stringify([...(window.__demoAmbient||[])].filter(e=>e.isConnected&&![...(window.__demoAmbient||[])].some(o=>o!==e&&o.contains(e))).map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)]}).filter(b=>b[2]>0&&b[3]>0&&b[2]*b[3]<0.15*innerWidth*innerHeight).slice(0,12))
