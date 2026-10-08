@@ -297,6 +297,7 @@
       "invalidCollection": "Données de collection incorrectes.",
       "cannotRemoveBaseLanguage": "La langue de base ne peut pas être supprimée.",
       "archivedReadOnly": "Restaurez le modèle avant de modifier ses langues.",
+      "restoreRequiresArchived": "Seuls les modèles d’e-mail archivés peuvent être restaurés.",
       "notPublished": "Publiez ce modèle d’e-mail avant de l’utiliser dans une automatisation.",
       "incompatiblePublication": "Certaines automatisations actives ne peuvent pas remplir les balises de cet e-mail. Publiez et désactivez-les, ou annulez et corrigez les paramètres des balises.",
       "usedByAutomations": "Ce modèle est utilisé par des automatisations. Modifiez leurs étapes d’envoi avant de le supprimer."

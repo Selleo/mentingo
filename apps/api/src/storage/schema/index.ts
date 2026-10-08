@@ -3166,6 +3166,7 @@ export const notificationAccountActionIntents = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
+    recipientEmail: text("recipient_email"),
     kind: text("kind").$type<NotificationAccountActionKind>().notNull(),
     applicationOrigin: text("application_origin").notNull(),
     tokenTtlMs: bigint("token_ttl_ms", { mode: "number" }).notNull(),

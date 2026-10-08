@@ -297,6 +297,7 @@
       "invalidCollection": "Datos de colección no válidos.",
       "cannotRemoveBaseLanguage": "No se puede eliminar el idioma base.",
       "archivedReadOnly": "Restaura la plantilla antes de cambiar sus idiomas.",
+      "restoreRequiresArchived": "Solo se pueden restaurar las plantillas de correo archivadas.",
       "notPublished": "Publica esta plantilla antes de usarla en una automatización.",
       "incompatiblePublication": "Algunas automatizaciones activas no pueden rellenar las etiquetas de este correo. Publica y desactívalas, o cancela y actualiza la configuración de sus etiquetas.",
       "usedByAutomations": "Esta plantilla se usa en automatizaciones. Modifica sus pasos de envío antes de eliminarla."

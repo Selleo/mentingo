@@ -297,6 +297,7 @@
       "invalidCollection": "Nieprawidłowe dane kolekcji.",
       "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego.",
       "archivedReadOnly": "Przywróć szablon przed zmianą jego języków.",
+      "restoreRequiresArchived": "Można przywrócić tylko zarchiwizowane szablony e-maili.",
       "notPublished": "Opublikuj szablon e-maila, zanim użyjesz go w automatyzacji.",
       "incompatiblePublication": "Niektóre aktywne automatyzacje nie mogą uzupełnić znaczników tego e-maila. Opublikuj i dezaktywuj je lub anuluj i popraw ustawienia znaczników.",
       "usedByAutomations": "Ten szablon jest używany w automatyzacjach. Zmień ich kroki wysyłania e-maili, zanim go usuniesz."

@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS "notification_account_action_intents" (
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL,
 	"user_id" uuid NOT NULL,
+	"recipient_email" text,
 	"kind" text NOT NULL,
 	"application_origin" text NOT NULL,
 	"token_ttl_ms" bigint NOT NULL,

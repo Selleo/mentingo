@@ -263,6 +263,21 @@ describe("Email template HTTP lifecycle and translations (e2e)", () => {
     ).toBe("published");
   });
 
+  it.each([EMAIL_TEMPLATE_STATUSES.DRAFT, EMAIL_TEMPLATE_STATUSES.PUBLISHED])(
+    "rejects restoring a %s template directly",
+    async (status) => {
+      const template = await t.create();
+      if (status === EMAIL_TEMPLATE_STATUSES.PUBLISHED) {
+        await t.http("post", `/${template.id}/publish`).expect(201);
+      }
+
+      const response = await t.http("post", `/${template.id}/restore`).expect(400);
+
+      expect(response.body.message).toBe("emailTemplates.errors.restoreRequiresArchived");
+      expect((await t.get(template.id!)).status).toBe(status);
+    },
+  );
+
   it.each(Object.values(EMAIL_TEMPLATE_STATUSES))(
     "archives, restores and deletes from %s",
     async (status) => {

@@ -51,6 +51,7 @@ export type ClaimedAutomationEmailDelivery = {
 export interface NotificationAccountActionPreparation {
   prepareNotificationAccountActionFields(
     reference: string,
+    recipientEmail: string,
   ): Promise<Record<string, AutomationPlaceholderValue> | null>;
   purgeUnusedNotificationAccountActionIntents(): Promise<void>;
 }
@@ -138,15 +139,25 @@ export type PreparedNotificationAccountActionIntent = Pick<
   "authTokenId" | "encryptedToken" | "tokenCreatedAt" | "tokenExpiresAt"
 >;
 
-export type NotificationAccountActionIntent = {
+type NotificationAccountActionIntentBase = {
   userId: UUIDType;
-  kind: NotificationAccountActionKind;
   applicationOrigin: string;
   tokenTtlMs: number;
   usesCalendarYearExpiry?: boolean;
   reminderCount?: number;
   revokePreviousPasswordSetupTokens?: boolean;
 };
+export type NotificationAccountActionIntent = NotificationAccountActionIntentBase &
+  (
+    | { kind: typeof NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN; recipientEmail: string }
+    | {
+        kind: Exclude<
+          NotificationAccountActionKind,
+          typeof NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN
+        >;
+        recipientEmail?: string;
+      }
+  );
 export type EncryptedAccountActionToken = {
   ciphertext: string;
   iv: string;

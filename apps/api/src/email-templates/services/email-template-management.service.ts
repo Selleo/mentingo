@@ -490,26 +490,35 @@ export class EmailTemplateManagementService {
   }
 
   async restoreEmailTemplate(id: UUIDType, actor?: ActorUserType) {
-    return this.emailTemplateRepository.withLockedEmailTemplate(id, async (existing) => {
-      const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
-        status: EMAIL_TEMPLATE_STATUSES.DRAFT,
-        archivedAt: null,
-        updatedAt: new Date().toISOString(),
-      });
+    return this.emailTemplateRepository.withLockedEmailTemplate(
+      id,
+      async (existing, transaction) => {
+        if (existing.status !== EMAIL_TEMPLATE_STATUSES.ARCHIVED) {
+          throw new BadRequestException("emailTemplates.errors.restoreRequiresArchived");
+        }
 
-      if (actor && template) {
-        await this.outboxPublisher.publish(
-          new RestoreEmailTemplateEvent({
-            actor,
-            resource: this.mapEmailTemplateActivitySnapshot(template),
-            previous: this.mapEmailTemplateActivitySnapshot(existing),
-            changedFields: ["status"],
-          }),
-        );
-      }
+        await this.emailTemplateDependencies.assertEmailTemplateCanBeArchived(id, transaction);
 
-      return this.mapUpdatedEmailTemplateResponse(template);
-    });
+        const template = await this.emailTemplateRepository.updateEmailTemplate(id, {
+          status: EMAIL_TEMPLATE_STATUSES.DRAFT,
+          archivedAt: null,
+          updatedAt: new Date().toISOString(),
+        });
+
+        if (actor && template) {
+          await this.outboxPublisher.publish(
+            new RestoreEmailTemplateEvent({
+              actor,
+              resource: this.mapEmailTemplateActivitySnapshot(template),
+              previous: this.mapEmailTemplateActivitySnapshot(existing),
+              changedFields: ["status"],
+            }),
+          );
+        }
+
+        return this.mapUpdatedEmailTemplateResponse(template);
+      },
+    );
   }
 
   async removeEmailTemplateLanguage(

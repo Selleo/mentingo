@@ -29,6 +29,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
   const definition = EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT.password_recovery;
   let template: EmailTemplateRecord;
   let lockHeld: boolean;
+  const transaction = {} as never;
   const updateEmailTemplate = jest.fn();
   const publishEmailTemplate = jest.fn();
   const createEmailTemplate = jest.fn();
@@ -78,7 +79,7 @@ describe("EmailTemplateManagementService mutation validation", () => {
       withLockedEmailTemplate: jest.fn(async (_id, callback) => {
         lockHeld = true;
         try {
-          return await callback(template);
+          return await callback(template, transaction);
         } finally {
           lockHeld = false;
         }
@@ -345,6 +346,38 @@ describe("EmailTemplateManagementService mutation validation", () => {
     expect(publishEvent).toHaveBeenCalledTimes(1);
     expect(publishEvent.mock.calls[0][0]).toBeInstanceOf(RestoreEmailTemplateEvent);
     expect(publishEvent.mock.calls[0][0].data).toMatchObject({ actor, changedFields: ["status"] });
+    expect(dependencies.assertEmailTemplateCanBeArchived).toHaveBeenCalledWith(
+      template.id,
+      transaction,
+    );
+    expect(lockHeld).toBe(false);
+  });
+
+  it.each([EMAIL_TEMPLATE_STATUSES.DRAFT, EMAIL_TEMPLATE_STATUSES.PUBLISHED])(
+    "rejects restoring a %s template without changing it",
+    async (status) => {
+      template.status = status;
+
+      await expect(service.restoreEmailTemplate(template.id)).rejects.toThrow(
+        "emailTemplates.errors.restoreRequiresArchived",
+      );
+
+      expect(updateEmailTemplate).not.toHaveBeenCalled();
+      expect(dependencies.assertEmailTemplateCanBeArchived).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not restore an archived template referenced by an enabled automation", async () => {
+    template.status = EMAIL_TEMPLATE_STATUSES.ARCHIVED;
+    dependencies.assertEmailTemplateCanBeArchived.mockRejectedValueOnce(
+      new Error("emailTemplates.errors.usedByAutomations"),
+    );
+
+    await expect(service.restoreEmailTemplate(template.id)).rejects.toThrow(
+      "emailTemplates.errors.usedByAutomations",
+    );
+
+    expect(updateEmailTemplate).not.toHaveBeenCalled();
     expect(lockHeld).toBe(false);
   });
 

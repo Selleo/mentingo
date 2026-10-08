@@ -297,6 +297,7 @@
       "invalidCollection": "Netinkami rinkinio duomenys.",
       "cannotRemoveBaseLanguage": "Pagrindinės kalbos pašalinti negalima.",
       "archivedReadOnly": "Prieš keisdami kalbas atkurkite šabloną.",
+      "restoreRequiresArchived": "Atkurti galima tik archyvuotus el. laiškų šablonus.",
       "notPublished": "Prieš naudodami automatizavime paskelbkite el. laiško šabloną.",
       "incompatiblePublication": "Kai kurie aktyvūs automatizavimai negali užpildyti šio laiško žymų. Paskelbkite ir išjunkite juos arba atšaukite ir atnaujinkite žymų nustatymus.",
       "usedByAutomations": "Šis šablonas naudojamas automatizavimuose. Prieš pašalindami pakeiskite jų el. laiškų veiksmus."

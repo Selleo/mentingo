@@ -297,6 +297,7 @@
       "invalidCollection": "Invalid collection data.",
       "cannotRemoveBaseLanguage": "The base language cannot be removed.",
       "archivedReadOnly": "Restore this template before changing its languages.",
+      "restoreRequiresArchived": "Only archived email templates can be restored.",
       "notPublished": "Publish this email template before using it in an automation.",
       "incompatiblePublication": "Some active automations cannot fill the tags in this email. Publish and deactivate them, or cancel and update their tag settings.",
       "usedByAutomations": "This template is used by automations. Change their email steps before removing it."

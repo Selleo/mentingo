@@ -297,6 +297,7 @@
       "invalidCollection": "Neplatná data kolekce.",
       "cannotRemoveBaseLanguage": "Základní jazyk nelze odebrat.",
       "archivedReadOnly": "Před změnou jazyků šablonu obnovte.",
+      "restoreRequiresArchived": "Obnovit lze pouze archivované e-mailové šablony.",
       "notPublished": "Před použitím v automatizaci publikujte šablonu e-mailu.",
       "incompatiblePublication": "Některé aktivní automatizace nemohou vyplnit značky v tomto e-mailu. Publikujte a deaktivujte je, nebo akci zrušte a upravte nastavení značek.",
       "usedByAutomations": "Tuto šablonu používají automatizace. Před odstraněním změňte jejich e-mailové kroky."

@@ -125,6 +125,7 @@ export class AutomationEmailDeliveryService {
     const accountActionFields =
       await this.notificationAccountActionService.prepareNotificationAccountActionFields(
         delivery.accountActionIntentId,
+        delivery.recipientEmail,
       );
 
     if (!accountActionFields) {

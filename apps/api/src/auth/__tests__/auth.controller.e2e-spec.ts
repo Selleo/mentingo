@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
 import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { EnvService } from "src/env/services/env.service";
@@ -18,6 +19,7 @@ import {
   magicLinkTokens,
   notificationAccountActionIntents,
   resetTokens,
+  users,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -993,7 +995,8 @@ describe("AuthController (e2e)", () => {
         .from(notificationAccountActionIntents)
         .where(eq(notificationAccountActionIntents.userId, user.id));
       expect(intent).toMatchObject({
-        kind: "sign_in",
+        kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+        recipientEmail: user.email,
         tokenTtlMs: 15 * 60 * 1000,
         encryptedToken: null,
         authTokenId: null,
@@ -1062,6 +1065,45 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("GET /api/auth/magic-link/verify", () => {
+    it("rejects an automation-issued link after the account email changes", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({ email: `magiclink-email-change-${nanoid(8)}@example.com` });
+
+      const token = await authService.createMagicLinkToken(user.id);
+
+      const [storedToken] = await db
+        .select({ id: magicLinkTokens.id })
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      await db.insert(notificationAccountActionIntents).values({
+        userId: user.id,
+        kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+        recipientEmail: user.email,
+        applicationOrigin: "https://tenant1.lms.localhost",
+        tokenTtlMs: 15 * 60 * 1000,
+        authTokenId: storedToken.id,
+      });
+
+      await db
+        .update(users)
+        .set({ email: `magiclink-new-${nanoid(8)}@example.com` })
+        .where(eq(users.id, user.id));
+
+      await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token })
+        .expect(401);
+
+      const [remainingToken] = await db
+        .select({ id: magicLinkTokens.id })
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.id, storedToken.id));
+      expect(remainingToken).toBeDefined();
+    });
+
     it("should log in with a valid magic link and remove the consumed token", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })

@@ -50,6 +50,7 @@ export class NotificationAccountActionService implements NotificationAccountActi
 
   async prepareNotificationAccountActionFields(
     reference: string,
+    recipientEmail: string,
   ): Promise<Record<string, AutomationPlaceholderValue> | null> {
     return this.tenantDbRunnerService.transactionWithHandle(async (transaction) => {
       const [intent] =
@@ -59,6 +60,26 @@ export class NotificationAccountActionService implements NotificationAccountActi
         );
 
       if (!intent) {
+        return null;
+      }
+
+      if (
+        intent.kind === NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN &&
+        intent.recipientEmail !== recipientEmail
+      ) {
+        return null;
+      }
+
+      if (this.calculateAccountActionTokenExpiry(intent).getTime() <= Date.now()) {
+        return null;
+      }
+
+      const [user] = await this.notificationAccountActionRepository.listCurrentUserEmail(
+        intent.userId,
+        transaction,
+      );
+
+      if (!user || user.email !== recipientEmail) {
         return null;
       }
 
@@ -161,11 +182,12 @@ export class NotificationAccountActionService implements NotificationAccountActi
   }
 
   private calculateAccountActionTokenExpiry(intent: NotificationAccountActionIntentRecord): Date {
-    const expiresAt = new Date(Date.now() + intent.tokenTtlMs);
+    const expiresAt = new Date(intent.createdAt);
 
     if (intent.usesCalendarYearExpiry) {
-      expiresAt.setTime(Date.now());
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    } else {
+      expiresAt.setTime(expiresAt.getTime() + intent.tokenTtlMs);
     }
 
     return expiresAt;

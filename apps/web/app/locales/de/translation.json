@@ -297,6 +297,7 @@
       "invalidCollection": "Ungültige Sammlungsdaten.",
       "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden.",
       "archivedReadOnly": "Stellen Sie die Vorlage wieder her, bevor Sie ihre Sprachen ändern.",
+      "restoreRequiresArchived": "Nur archivierte E-Mail-Vorlagen können wiederhergestellt werden.",
       "notPublished": "Veröffentlichen Sie diese E-Mail-Vorlage vor der Verwendung in einer Automatisierung.",
       "incompatiblePublication": "Einige aktive Automatisierungen können die Tags dieser E-Mail nicht ausfüllen. Veröffentliche und deaktiviere sie oder brich ab und passe ihre Tag-Einstellungen an.",
       "usedByAutomations": "Diese Vorlage wird von Automatisierungen verwendet. Ändern Sie deren E-Mail-Schritte, bevor Sie sie entfernen."

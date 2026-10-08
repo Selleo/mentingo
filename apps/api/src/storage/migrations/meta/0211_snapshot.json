@@ -1,6 +1,6 @@
 {
-  "id": "47839982-f1f1-4423-bf2d-eb4c1950fbb7",
-  "prevId": "dcfb0977-3051-47ed-bd8f-57e32efda907",
+  "id": "4adf8c7f-8ee0-4107-ae6e-1b0b3e0ad586",
+  "prevId": "5304cf97-b37c-44b7-ae64-d1586a1c1bfe",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -12229,6 +12229,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "recipient_email": {
+          "name": "recipient_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "kind": {
           "name": "kind",

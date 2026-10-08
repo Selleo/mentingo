@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { AUTOMATION_EMAIL_DELIVERY_STATUSES } from "@repo/shared";
-import { and, eq, isNotNull, lt, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { OUTBOX_STATUSES } from "src/outbox/outbox.types";
@@ -11,6 +11,7 @@ import {
   credentials,
   notificationAccountActionIntents,
   outboxEvents,
+  users,
 } from "src/storage/schema";
 
 import type {
@@ -58,6 +59,13 @@ export class NotificationAccountActionRepository {
       .select({ userId: credentials.userId })
       .from(credentials)
       .where(eq(credentials.userId, userId));
+  }
+
+  listCurrentUserEmail(userId: UUIDType, transaction: DatabasePg) {
+    return transaction
+      .select({ email: users.email })
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
   }
 
   deleteUserCreatePasswordTokens(userId: UUIDType, transaction: DatabasePg) {

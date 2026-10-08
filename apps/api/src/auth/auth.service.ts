@@ -25,6 +25,7 @@ import { authenticator } from "otplib";
 
 import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
 import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
 import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
 import { DatabasePg, type UUIDType } from "src/common";
@@ -47,6 +48,7 @@ import {
   credentials,
   formFieldAnswers,
   magicLinkTokens,
+  notificationAccountActionIntents,
   userOnboarding,
   tenants,
   users,
@@ -806,7 +808,8 @@ export class AuthService {
           await this.notificationAccountActionService.createNotificationAccountActionIntent(
             {
               userId: user.id,
-              kind: "sign_in",
+              kind: NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN,
+              recipientEmail: user.email,
               applicationOrigin: origin,
               tokenTtlMs: MAGIC_LINK_EXPIRATION_TIME,
             },
@@ -847,9 +850,33 @@ export class AuthService {
       if (magicLinkToken.expiryDate < dateNow)
         throw new UnauthorizedException("magicLink.error.expiredToken");
 
+      const [currentAccount] = await trx
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, magicLinkToken.userId))
+        .for("update");
+
+      if (!currentAccount) throw new UnauthorizedException("magicLink.error.invalidToken");
+
       const user = await this.userService.getUserById(magicLinkToken.userId);
 
       if (user.archived) throw new UnauthorizedException("user.error.archived");
+
+      const [accountAction] = await trx
+        .select({ recipientEmail: notificationAccountActionIntents.recipientEmail })
+        .from(notificationAccountActionIntents)
+        .where(
+          and(
+            eq(notificationAccountActionIntents.authTokenId, magicLinkToken.id),
+            eq(notificationAccountActionIntents.userId, user.id),
+            eq(notificationAccountActionIntents.kind, NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN),
+          ),
+        )
+        .limit(1);
+
+      if (accountAction && accountAction.recipientEmail !== currentAccount.email) {
+        throw new UnauthorizedException("magicLink.error.invalidToken");
+      }
 
       await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
 
