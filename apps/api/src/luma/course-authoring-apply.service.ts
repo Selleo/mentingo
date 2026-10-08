@@ -47,6 +47,7 @@ import {
   mentorCourseContextKey,
   mentorTargetedContextKey,
 } from "./course-authoring-mentor-context";
+import { buildAuthoringPlacements } from "./course-authoring-ordering";
 import { authoringOperationSchema } from "./schema/course-authoring-operations.schema";
 
 import type {
@@ -287,6 +288,7 @@ export class CourseAuthoringApplyService {
         }
         const pending = [...input.operations];
         const completed = new Set<string>();
+        const appliedOperations: AuthoringOperation[] = [];
         while (pending.length) {
           const index = pending.findIndex((operation) =>
             operation.dependencies.every((id) => completed.has(id)),
@@ -294,16 +296,38 @@ export class CourseAuthoringApplyService {
           if (index < 0) throw new BadRequestException("courseAuthoring.errors.dependencyCycle");
           const [operation] = pending.splice(index, 1);
           await this.execute(operation, input, actor, mappings);
-          if (
-            (operation.type === "lesson.create" || operation.type === "lesson.update") &&
-            operation.displayOrder !== undefined
-          )
-            await this.lessonService.updateLessonDisplayOrder({
-              lessonId: mappings[operation.targetId] ?? operation.targetId,
-              displayOrder: operation.displayOrder + 1,
+          completed.add(operation.operationId);
+          appliedOperations.push(operation);
+        }
+        const lessonCounts = new Map<string, number>();
+        // Absolute curriculum positions are applied only after every sibling exists.
+        for (const placement of buildAuthoringPlacements(appliedOperations)) {
+          const persistedId = mappings[placement.targetId] ?? placement.targetId;
+          if (placement.kind === "chapter") {
+            await this.chapterService.updateChapterDisplayOrder({
+              chapterId: persistedId,
+              displayOrder: placement.displayOrder,
               currentUser: actor,
             });
-          completed.add(operation.operationId);
+          } else {
+            const chapterId = mappings[placement.chapterId] ?? placement.chapterId;
+            let siblingCount = lessonCounts.get(chapterId);
+            if (siblingCount === undefined) {
+              const [result] = await transaction
+                .select({ value: sql<number>`count(*)::int` })
+                .from(lessons)
+                .where(eq(lessons.chapterId, chapterId));
+              siblingCount = result.value;
+              lessonCounts.set(chapterId, siblingCount);
+            }
+            if (siblingCount < 1)
+              throw new BadRequestException("courseAuthoring.errors.targetOutsideCourse");
+            await this.lessonService.updateLessonDisplayOrder({
+              lessonId: persistedId,
+              displayOrder: Math.min(placement.displayOrder, siblingCount),
+              currentUser: actor,
+            });
+          }
         }
         return {
           applicationId: randomUUID(),
@@ -336,11 +360,6 @@ export class CourseAuthoringApplyService {
           actor,
         );
         mappings[operation.targetId] = chapter.id;
-        await this.chapterService.updateChapterDisplayOrder({
-          chapterId: chapter.id,
-          displayOrder: operation.payload.displayOrder + 1,
-          currentUser: actor,
-        });
         return;
       }
       case "chapter.update":
@@ -349,11 +368,6 @@ export class CourseAuthoringApplyService {
           { title: operation.payload.title, language: operation.language },
           actor,
         );
-        await this.chapterService.updateChapterDisplayOrder({
-          chapterId: targetId,
-          displayOrder: operation.payload.displayOrder + 1,
-          currentUser: actor,
-        });
         return;
       case "chapter.delete":
         await this.chapterService.removeChapter(targetId, actor);
@@ -362,20 +376,7 @@ export class CourseAuthoringApplyService {
         await this.lessonService.removeLesson(targetId, actor);
         return;
       case "chapter.reorder":
-        for (const [index, id] of operation.payload.orderedIds.entries())
-          await this.chapterService.updateChapterDisplayOrder({
-            chapterId: mappings[id] ?? id,
-            displayOrder: index + 1,
-            currentUser: actor,
-          });
-        return;
       case "lesson.reorder":
-        for (const [index, id] of operation.payload.orderedIds.entries())
-          await this.lessonService.updateLessonDisplayOrder({
-            lessonId: mappings[id] ?? id,
-            displayOrder: index + 1,
-            currentUser: actor,
-          });
         return;
       case "course.metadata.update":
         await this.courseService.updateCourse(

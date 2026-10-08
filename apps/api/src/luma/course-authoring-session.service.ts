@@ -55,8 +55,7 @@ export class CourseAuthoringSessionService {
     await this.context.prepareBlockIdentities(courseId, input.language, actor);
     const context = await this.context.getContext(courseId, { language: input.language }, actor);
     const client = await this.lumaService.getLumaClient();
-    const session = this.validate(
-      authoringSessionSchema,
+    const session = this.validateSession(
       await this.call(() =>
         client.authoring.createSession({
           commandId: input.commandId,
@@ -108,8 +107,7 @@ export class CourseAuthoringSessionService {
   async get(courseId: UUIDType, sessionId: UUIDType, actor: CurrentUserType) {
     await this.context.authorize(courseId, actor);
     const client = await this.lumaService.getLumaClient();
-    const snapshot = this.validate(
-      authoringSessionSchema,
+    const snapshot = this.validateSession(
       await this.call(() => client.authoring.getSession({ sessionId })),
     );
     if (snapshot.courseId !== courseId) throw new ForbiddenException("common.toast.noAccess");
@@ -288,6 +286,14 @@ export class CourseAuthoringSessionService {
     if (!detected || !ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(detected.mime))
       throw new BadRequestException("courseAuthoring.errors.assetPreviewUnsupported");
     return { bytes, mimeType: detected.mime };
+  }
+
+  private validateSession(value: unknown): Static<typeof authoringSessionSchema> {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      return this.validate(authoringSessionSchema, value);
+    }
+    const { usage: _usage, ...snapshot } = value as Record<string, unknown>;
+    return this.validate(authoringSessionSchema, snapshot);
   }
 
   /** Rejects invalid producer responses and logs field paths without copying their contents. */

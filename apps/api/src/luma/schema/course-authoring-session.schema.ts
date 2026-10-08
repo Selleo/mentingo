@@ -1,4 +1,4 @@
-/** TypeBox contracts for authoring sessions, commands, durable replay, usage, and export preparation. */
+/** TypeBox contracts for authoring sessions, commands, durable replay and export preparation. */
 import {
   ReasoningEffort,
   TaskKind,
@@ -275,61 +275,39 @@ const authoringTurn = Type.Object(
   },
   strict,
 );
-const usageTotals = Type.Object({
-  invocationCount: Type.Integer({ minimum: 0 }),
-  pendingInvocationCount: Type.Integer({ minimum: 0 }),
-  unknownTokenInvocationCount: Type.Integer({ minimum: 0 }),
-  unknownCostInvocationCount: Type.Integer({ minimum: 0 }),
-  reportedCostInvocationCount: Type.Integer({ minimum: 0 }),
-  estimatedCostInvocationCount: Type.Integer({ minimum: 0 }),
-  configurationEstimateInvocationCount: Type.Integer({ minimum: 0 }),
-  inputTokens: Type.Integer({ minimum: 0 }),
-  outputTokens: Type.Integer({ minimum: 0 }),
-  cachedInputTokens: Type.Integer({ minimum: 0 }),
-  reportedUsd: Type.String(),
-  estimatedUsd: Type.String(),
-  knownUsd: Type.String(),
-  tokensComplete: Type.Boolean(),
-  costComplete: Type.Boolean(),
-});
-const scopedUsage = Type.Composite([usageTotals, Type.Object({ scopeId: UUIDSchema })]);
-const usageReport = Type.Object({
-  total: usageTotals,
-  byTask: Type.Array(scopedUsage),
-  byRequest: Type.Array(scopedUsage),
-  byApiKey: Type.Array(scopedUsage),
-});
-export const authoringSessionSchema = Type.Object({
-  usage: usageReport,
-  reasoningControlAvailable: Type.Optional(Type.Boolean()),
-  schemaVersion: Type.Literal(1),
-  sessionId: UUIDSchema,
-  courseId: UUIDSchema,
-  language: Type.Enum(SUPPORTED_LANGUAGES),
-  status: Type.Union([
-    Type.Literal("active"),
-    Type.Literal("paused"),
-    Type.Literal("stopped"),
-    Type.Literal("discarded"),
-  ]),
-  snapshotSequence: Type.Integer(),
-  workspaceRevision: Type.Integer(),
-  records: Type.Array(record),
-  turns: Type.Optional(Type.Array(authoringTurn)),
-  hasMoreTurns: Type.Optional(Type.Boolean()),
-  nextBeforeRequestId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
-  tasks: Type.Array(
-    Type.Object({
-      taskId: UUIDSchema,
-      requestId: UUIDSchema,
-      kind: taskKind,
-      status: Type.String(),
-      errorCode: nullableString,
-      failure: Type.Optional(Type.Union([authoringTaskFailureSchema, Type.Null()])),
-      outputId: Type.Union([UUIDSchema, Type.Null()]),
-    }),
-  ),
-});
+export const authoringSessionSchema = Type.Object(
+  {
+    reasoningControlAvailable: Type.Optional(Type.Boolean()),
+    schemaVersion: Type.Literal(1),
+    sessionId: UUIDSchema,
+    courseId: UUIDSchema,
+    language: Type.Enum(SUPPORTED_LANGUAGES),
+    status: Type.Union([
+      Type.Literal("active"),
+      Type.Literal("paused"),
+      Type.Literal("stopped"),
+      Type.Literal("discarded"),
+    ]),
+    snapshotSequence: Type.Integer(),
+    workspaceRevision: Type.Integer(),
+    records: Type.Array(record),
+    turns: Type.Optional(Type.Array(authoringTurn)),
+    hasMoreTurns: Type.Optional(Type.Boolean()),
+    nextBeforeRequestId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+    tasks: Type.Array(
+      Type.Object({
+        taskId: UUIDSchema,
+        requestId: UUIDSchema,
+        kind: taskKind,
+        status: Type.String(),
+        errorCode: nullableString,
+        failure: Type.Optional(Type.Union([authoringTaskFailureSchema, Type.Null()])),
+        outputId: Type.Union([UUIDSchema, Type.Null()]),
+      }),
+    ),
+  },
+  strict,
+);
 export const authoringSessionResponseSchema = Type.Object({ data: authoringSessionSchema });
 export const authoringTurnHistorySchema = Type.Object({
   courseId: UUIDSchema,

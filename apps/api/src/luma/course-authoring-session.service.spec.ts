@@ -1,10 +1,12 @@
 import { ForbiddenException, Logger } from "@nestjs/common";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { FormatRegistry } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
 import { AxiosError, AxiosHeaders } from "axios";
 import { validate as isUuid } from "uuid";
 
 import { CourseAuthoringSessionService } from "./course-authoring-session.service";
+import { authoringSessionSchema } from "./schema/course-authoring-session.schema";
 
 import type { CourseAuthoringContextService } from "./course-authoring-context.service";
 import type { LumaService } from "./luma.service";
@@ -115,13 +117,20 @@ describe("CourseAuthoringSessionService source refresh", () => {
       refreshId: commandId,
       refreshStatus: "needs_mapping",
     };
+    const createSession = jest.fn().mockResolvedValue(snapshot);
     const getSession = jest.fn().mockResolvedValue(snapshot);
     const sendCommand = jest.fn().mockResolvedValue(receipt);
     const service = new CourseAuthoringSessionService(
       {
-        getLumaClient: jest.fn().mockResolvedValue({ authoring: { getSession, sendCommand } }),
+        getLumaClient: jest
+          .fn()
+          .mockResolvedValue({ authoring: { createSession, getSession, sendCommand } }),
       } as unknown as LumaService,
-      { authorize, getContext } as unknown as CourseAuthoringContextService,
+      {
+        authorize,
+        getContext,
+        prepareBlockIdentities: jest.fn(),
+      } as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
     );
     const input: AuthoringCommandBody = {
@@ -131,8 +140,46 @@ describe("CourseAuthoringSessionService source refresh", () => {
       targetId: oldVersion,
       replacementSourceVersionId: newVersion,
     };
-    return { service, authorize, snapshot, receipt, getSession, sendCommand, input };
+    return { service, authorize, snapshot, receipt, createSession, getSession, sendCommand, input };
   }
+
+  it("omits legacy upstream accounting while preserving the reasoning control", async () => {
+    const test = setup();
+    test.getSession.mockResolvedValue({ ...test.snapshot, reasoningControlAvailable: true });
+    const result = await test.service.get(courseId, sessionId, actor);
+    expect(result).not.toHaveProperty("usage");
+    expect(result.reasoningControlAvailable).toBe(true);
+    expect(Value.Check(authoringSessionSchema, test.snapshot)).toBe(false);
+  });
+
+  it("accepts a producer snapshot without accounting", async () => {
+    const test = setup();
+    const { usage: _usage, ...snapshot } = test.snapshot;
+    test.getSession.mockResolvedValue(snapshot);
+    expect(Value.Check(authoringSessionSchema, snapshot)).toBe(true);
+    await expect(test.service.get(courseId, sessionId, actor)).resolves.toEqual(snapshot);
+  });
+
+  it.each([true, false])(
+    "opens legacy and current snapshots without exposing accounting (legacy=%s)",
+    async (legacy) => {
+      const test = setup();
+      const { usage: _usage, ...snapshot } = test.snapshot;
+      const producerSnapshot = legacy ? test.snapshot : snapshot;
+      test.createSession.mockResolvedValue({
+        ...producerSnapshot,
+        reasoningControlAvailable: true,
+      });
+      const result = await test.service.open(
+        courseId,
+        { commandId, language: SUPPORTED_LANGUAGES.EN },
+        actor,
+      );
+      expect(result).not.toHaveProperty("usage");
+      expect(result.reasoningControlAvailable).toBe(true);
+      expect(result.sessionId).toBe(sessionId);
+    },
+  );
 
   it("forwards the exact source replacement with the authenticated actor and preserves mapping status", async () => {
     const test = setup();

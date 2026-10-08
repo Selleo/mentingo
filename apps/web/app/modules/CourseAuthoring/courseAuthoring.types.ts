@@ -137,31 +137,6 @@ export type AuthoringTurn = {
   updatedSequence: number;
 };
 
-export type UsageTotals = {
-  invocationCount: number;
-  pendingInvocationCount: number;
-  unknownTokenInvocationCount: number;
-  unknownCostInvocationCount: number;
-  reportedCostInvocationCount: number;
-  estimatedCostInvocationCount: number;
-  configurationEstimateInvocationCount: number;
-  inputTokens: number;
-  outputTokens: number;
-  cachedInputTokens: number;
-  reportedUsd: string;
-  estimatedUsd: string;
-  knownUsd: string;
-  tokensComplete: boolean;
-  costComplete: boolean;
-};
-
-export type UsageReport = {
-  total: UsageTotals;
-  byTask: Array<UsageTotals & { scopeId: string }>;
-  byRequest: Array<UsageTotals & { scopeId: string }>;
-  byApiKey: Array<UsageTotals & { scopeId: string }>;
-};
-
 export type AuthoringRecord = {
   id: string;
   kind: string;
@@ -182,7 +157,6 @@ export type AuthoringSession = {
   turns?: AuthoringTurn[];
   hasMoreTurns?: boolean;
   nextBeforeRequestId?: string | null;
-  usage?: UsageReport;
 };
 
 export type AuthoringTurnHistoryPage = {

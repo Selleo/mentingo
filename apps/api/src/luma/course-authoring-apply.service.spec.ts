@@ -93,7 +93,18 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     query.from.mockReturnValue(query);
     query.innerJoin.mockReturnValue(query);
     query.where.mockReturnValue(query);
-    const transaction = { execute: jest.fn(), select: jest.fn().mockReturnValue(query) };
+    const persistedLessonCount = jest.fn().mockReturnValue(100);
+    const countQuery = { from: jest.fn(), where: jest.fn() };
+    countQuery.from.mockReturnValue(countQuery);
+    countQuery.where.mockImplementation(async () => [{ value: persistedLessonCount() }]);
+    const transaction = {
+      execute: jest.fn(),
+      select: jest
+        .fn()
+        .mockImplementation((fields: Record<string, unknown>) =>
+          "value" in fields ? countQuery : query,
+        ),
+    };
     const context = {
       authorize: jest.fn(),
       getContext: jest.fn().mockResolvedValue({
@@ -118,6 +129,8 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     };
     const removeLesson = jest.fn();
     const removeChapter = jest.fn();
+    const createChapterForCourse = jest.fn();
+    const updateChapterDisplayOrder = jest.fn();
     const createLessonForChapter = jest.fn().mockResolvedValue(operationId);
     const createAiMentorLesson = jest.fn().mockResolvedValue(operationId);
     const updateLesson = jest.fn();
@@ -140,7 +153,11 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       transaction as unknown as Dependencies[0],
       context as unknown as Dependencies[1],
       { applyOnce } as unknown as Dependencies[2],
-      { removeChapter } as unknown as Dependencies[3],
+      {
+        removeChapter,
+        createChapterForCourse,
+        updateChapterDisplayOrder,
+      } as unknown as Dependencies[3],
       lessonService as unknown as Dependencies[4],
       {} as Dependencies[5],
       {} as Dependencies[6],
@@ -172,10 +189,14 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     };
     return {
       service,
+      persistedLessonCount,
       input,
       context,
       removeLesson,
       removeChapter,
+      createChapterForCourse,
+      updateChapterDisplayOrder,
+      updateLessonDisplayOrder,
       createLessonForChapter,
       createAiMentorLesson,
       updateLesson,
@@ -185,6 +206,86 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       replaceCourseAuthoringMentorContext,
     };
   }
+  it.each([
+    [2, 1, 0],
+    [2, 0],
+  ])(
+    "persists approved positions for full and partial out-of-order sibling selections (%j)",
+    async (...arrivalOrder) => {
+      const test = setup();
+      const chapterIds = [7, 8, 9].map(
+        (value) => `00000000-0000-4000-8000-${String(value).padStart(12, "0")}`,
+      );
+      const lessonIds = [10, 11, 12].map(
+        (value) => `00000000-0000-4000-8000-${String(value).padStart(12, "0")}`,
+      );
+      const chapters: string[] = [];
+      const lessons: string[] = [];
+      const move = (ids: string[], id: string, oneBasedIndex: number) => {
+        const from = ids.indexOf(id);
+        ids.splice(from, 1);
+        ids.splice(oneBasedIndex - 1, 0, id);
+      };
+      test.context.getContext.mockResolvedValue({
+        baselineHash: "course",
+        fieldHashes: {},
+        chapters: [],
+      });
+      test.createChapterForCourse.mockImplementation(async ({ title }: { title: string }) => {
+        chapters.push(title);
+        return { id: title };
+      });
+      test.updateChapterDisplayOrder.mockImplementation(
+        async ({ chapterId: id, displayOrder }: { chapterId: string; displayOrder: number }) => {
+          expect(chapters).toHaveLength(arrivalOrder.length);
+          move(chapters, id, displayOrder);
+        },
+      );
+      test.createLessonForChapter.mockImplementation(async ({ title }: { title: string }) => {
+        lessons.push(title);
+        return title;
+      });
+      test.updateLessonDisplayOrder.mockImplementation(
+        async ({ lessonId: id, displayOrder }: { lessonId: string; displayOrder: number }) => {
+          expect(lessons).toHaveLength(arrivalOrder.length);
+          expect(displayOrder).toBeLessThanOrEqual(lessons.length);
+          move(lessons, id, displayOrder);
+        },
+      );
+      test.persistedLessonCount.mockImplementation(() => lessons.length);
+      test.input.operations = arrivalOrder.flatMap((index) => [
+        {
+          type: "chapter.create" as const,
+          operationId: chapterIds[index],
+          targetId: chapterIds[index],
+          baselineHash: null,
+          language: "en" as const,
+          dependencies: [],
+          payload: { title: chapterIds[index], displayOrder: index },
+        },
+        {
+          type: "lesson.create" as const,
+          operationId: lessonIds[index],
+          targetId: lessonIds[index],
+          chapterId: chapterIds[0],
+          displayOrder: index,
+          baselineHash: null,
+          language: "en" as const,
+          dependencies: [chapterIds[0]],
+          payload: {
+            lessonType: "content" as const,
+            title: lessonIds[index],
+            description: "<p>Example</p>",
+          },
+        },
+      ]);
+      await test.service.applyPreparedExport(test.input, actor);
+      expect(chapters).toEqual(chapterIds.filter((_, index) => arrivalOrder.includes(index)));
+      expect(lessons).toEqual(lessonIds.filter((_, index) => arrivalOrder.includes(index)));
+      expect(test.persistedLessonCount).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it("rejects attempted quiz deletion before a native mutation when acknowledgement is absent", async () => {
     const test = setup();
     await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
