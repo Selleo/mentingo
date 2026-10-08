@@ -10,7 +10,9 @@ import type { BuiltInEmailTemplateKey } from "@repo/shared";
 
 export function useCreateAutomationFromTemplate() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback(
+    "automations.success.createdFromTemplate",
+  );
 
   return useMutation({
     mutationFn: async (key: BuiltInEmailTemplateKey) => {

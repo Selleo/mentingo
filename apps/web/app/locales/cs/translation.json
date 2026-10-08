@@ -5221,6 +5221,14 @@
       "resource": "Zdroj:"
     },
     "actions": {
+      "save_automation_draft": "Koncept automatizace uložen",
+      "simulate_automation": "Automatizace simulována",
+      "apply_automation": "Automatizace publikována / použita",
+      "enable_automation": "Automatizace aktivována",
+      "disable_automation": "Automatizace deaktivována",
+      "duplicate_automation": "Automatizace duplikována",
+      "archive_automation": "Automatizace archivována",
+
       "create": "Vytvořeno",
       "update": "Aktualizováno",
       "bulk_course_category_update": "Hromadně aktualizována kategorie kurzů",
@@ -5254,6 +5262,7 @@
       "complete_scorm": "SCORM dokončen"
     },
     "entity": {
+      "automation": "Automatizace",
       "course": "Kurz",
       "chapter": "Kapitola",
       "lesson": "Lekce",
@@ -6114,6 +6123,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automatizace vytvořena.",
+      "createdFromTemplate": "Automatizace vytvořena ze šablony.",
+      "draftSaved": "Koncept uložen.",
+      "applied": "Změny automatizace použity.",
+      "activated": "Automatizace aktivována.",
+      "deactivated": "Automatizace deaktivována.",
+      "duplicated": "Automatizace duplikována.",
+      "archived": "Automatizace archivována.",
+      "deleted": "Automatizace odstraněna.",
+      "simulationCompleted": "Simulace dokončena."
+    },
     "alsoUsedBy_one": "Používá také {{count}} automatizace",
     "alsoUsedBy_few": "Používají také {{count}} automatizace",
     "alsoUsedBy_other": "Používá také {{count}} automatizací",

@@ -14097,6 +14097,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyAutomationBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -18809,6 +18819,14 @@
                       "type": "string"
                     },
                     {
+                      "const": "save_automation_draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "simulate_automation",
+                      "type": "string"
+                    },
+                    {
                       "const": "apply_automation",
                       "type": "string"
                     },
@@ -18956,6 +18974,14 @@
                       },
                       {
                         "const": "publish_email_template",
+                        "type": "string"
+                      },
+                      {
+                        "const": "save_automation_draft",
+                        "type": "string"
+                      },
+                      {
+                        "const": "simulate_automation",
                         "type": "string"
                       },
                       {
@@ -135968,6 +135994,10 @@
         "additionalProperties": false,
         "type": "object",
         "properties": {
+          "automationId": {
+            "format": "uuid",
+            "type": "string"
+          },
           "workflow": {
             "additionalProperties": false,
             "type": "object",
@@ -144701,6 +144731,617 @@
         "required": [
           "data"
         ]
+      },
+      "ApplyAutomationBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "definition": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "name": {
+                "minLength": 1,
+                "maxLength": 200,
+                "type": "string"
+              },
+              "description": {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              "workflow": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "rootStepId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "steps": {
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "parentId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "position": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "automationId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "type": {
+                              "const": "condition",
+                              "type": "string"
+                            },
+                            "config": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "minLength": 1,
+                                  "maxLength": 200,
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "parentId",
+                            "position",
+                            "type",
+                            "config"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "parentId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "position": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "automationId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "type": {
+                              "const": "trigger",
+                              "type": "string"
+                            },
+                            "config": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "eventKind": {
+                                  "anyOf": [
+                                    {
+                                      "anyOf": [
+                                        {
+                                          "const": "welcome",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "password_recovery",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "password_reminder",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_invite",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_first_login",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_assigned_to_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_short_inactivity",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_long_inactivity",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_finished_chapter",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "user_finished_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "certificate_expiration_warning",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "certificate_expired",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "admin_new_user",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "admin_finished_course",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "admin_overdue_courses",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "course_due_date_reminder",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "magic_link",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "course_chat_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "announcement",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "live_training_started",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "live_training_reminder",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "live_training_ended",
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "parentId",
+                            "position",
+                            "type",
+                            "config"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "parentId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "position": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "automationId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "type": {
+                              "const": "send_email",
+                              "type": "string"
+                            },
+                            "config": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "template": {
+                                  "anyOf": [
+                                    {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "const": "builtin",
+                                              "type": "string"
+                                            },
+                                            "key": {
+                                              "anyOf": [
+                                                {
+                                                  "const": "assignment_with_deadline",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "assignment_without_deadline",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "completion_with_certificate",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "completion_without_certificate",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "certificate_manually_reset",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "certificate_naturally_expired",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "short_inactivity_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "short_inactivity_platform",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "long_inactivity_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "long_inactivity_platform",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "deadline_today",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "deadline_tomorrow",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "deadline_upcoming",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "welcome",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "password_recovery",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "password_reminder",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_invite",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_first_login",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "user_finished_chapter",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "certificate_expiration_warning",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_new_user",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_finished_course",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "magic_link",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "course_chat_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "announcement",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "live_training_started",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "live_training_reminder",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "live_training_ended",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "key"
+                                          ]
+                                        },
+                                        {
+                                          "additionalProperties": false,
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "const": "custom",
+                                              "type": "string"
+                                            },
+                                            "id": {
+                                              "format": "uuid",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "id"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "mappings": {
+                                  "type": "object",
+                                  "patternProperties": {
+                                    "^(.*)$": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "const": "event_field",
+                                              "type": "string"
+                                            },
+                                            "field": {
+                                              "minLength": 1,
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "field"
+                                          ]
+                                        },
+                                        {
+                                          "additionalProperties": false,
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "const": "static",
+                                              "type": "string"
+                                            },
+                                            "value": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "number"
+                                                },
+                                                {
+                                                  "type": "boolean"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                },
+                                                {
+                                                  "type": "array",
+                                                  "items": {}
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "patternProperties": {
+                                                    "^(.*)$": {}
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "recipients": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "event",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "everyone",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "user",
+                                          "type": "string"
+                                        },
+                                        "userId": {
+                                          "format": "uuid",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "userId"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "group",
+                                          "type": "string"
+                                        },
+                                        "groupId": {
+                                          "format": "uuid",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "groupId"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "role",
+                                          "type": "string"
+                                        },
+                                        "roleId": {
+                                          "format": "uuid",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "roleId"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "parentId",
+                            "position",
+                            "type",
+                            "config"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "rootStepId",
+                  "steps"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "description",
+              "workflow"
+            ]
+          }
+        }
       },
       "ApplyAutomationResponse": {
         "type": "object",
@@ -156970,6 +157611,14 @@
                                 "type": "string"
                               },
                               {
+                                "const": "save_automation_draft",
+                                "type": "string"
+                              },
+                              {
+                                "const": "simulate_automation",
+                                "type": "string"
+                              },
+                              {
                                 "const": "apply_automation",
                                 "type": "string"
                               },
@@ -157525,6 +158174,14 @@
                     },
                     {
                       "const": "publish_email_template",
+                      "type": "string"
+                    },
+                    {
+                      "const": "save_automation_draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "simulate_automation",
                       "type": "string"
                     },
                     {

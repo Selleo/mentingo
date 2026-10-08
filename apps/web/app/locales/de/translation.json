@@ -5212,6 +5212,14 @@
       "resource": "Ressource:"
     },
     "actions": {
+      "save_automation_draft": "Automatisierungsentwurf gespeichert",
+      "simulate_automation": "Automatisierung simuliert",
+      "apply_automation": "Automatisierung veröffentlicht / angewendet",
+      "enable_automation": "Automatisierung aktiviert",
+      "disable_automation": "Automatisierung deaktiviert",
+      "duplicate_automation": "Automatisierung dupliziert",
+      "archive_automation": "Automatisierung archiviert",
+
       "create": "Erstellt",
       "update": "Aktualisiert",
       "bulk_course_category_update": "Kurskategorie gesammelt aktualisiert",
@@ -5245,6 +5253,7 @@
       "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
+      "automation": "Automatisierung",
       "course": "Kurs",
       "chapter": "Kapitel",
       "lesson": "Lektion",
@@ -6101,6 +6110,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automatisierung erstellt.",
+      "createdFromTemplate": "Automatisierung aus Vorlage erstellt.",
+      "draftSaved": "Entwurf gespeichert.",
+      "applied": "Änderungen an der Automatisierung angewendet.",
+      "activated": "Automatisierung aktiviert.",
+      "deactivated": "Automatisierung deaktiviert.",
+      "duplicated": "Automatisierung dupliziert.",
+      "archived": "Automatisierung archiviert.",
+      "deleted": "Automatisierung gelöscht.",
+      "simulationCompleted": "Simulation abgeschlossen."
+    },
     "alsoUsedBy_one": "Auch in {{count}} Automatisierung",
     "alsoUsedBy_other": "Auch in {{count}} Automatisierungen",
     "recipientPolicy": "Berechtigte Empfänger werden vom Ereignisauslöser ausgewählt. Kontofunktionen und In-App-Benachrichtigungen bleiben unabhängig.",

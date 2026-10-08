@@ -5,7 +5,7 @@ import { ApiClient } from "~/api/api-client";
 import { useAutomationMutationFeedback } from "./useAutomationMutationFeedback";
 
 export function useDeleteAutomation() {
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback("automations.success.deleted");
 
   return useMutation({
     mutationFn: async (automationId: string): Promise<void> => {

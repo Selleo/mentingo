@@ -13,7 +13,6 @@ import {
   type SupportedLanguages,
   type BuiltInEmailTemplateKey,
   ACTIVITY_LOG_ACTION_TYPES,
-  ACTIVITY_LOG_RESOURCE_TYPES,
   duplicateAutomationWorkflow,
   getAutomationWorkflowIssues,
   type ActivityLogActionType,
@@ -21,7 +20,6 @@ import {
   type AutomationRecipientOptionsQuery,
 } from "@repo/shared";
 
-import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { BUILT_IN_AUTOMATIONS } from "src/automation-execution/catalog";
 import { buildBuiltInAutomationDefinition } from "src/automation-execution/mappers/builtin-automation.mapper";
 import { acquireAutomationLifecycleLock } from "src/automation-execution/utils/acquire-automation-lifecycle-lock";
@@ -31,9 +29,12 @@ import {
   AUTOMATION_LIFECYCLE_TARGET_STATUSES,
   AUTOMATION_LIFECYCLE_ACTIVITY_TYPES,
 } from "src/automations/automation.constants";
+import { AutomationActivityEvent } from "src/events/automation/automation-activity.event";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import { AutomationRuntime } from "../automation.types";
+import { buildAutomationActivitySnapshot } from "../mappers/automation-activity.mapper";
 import { AutomationRecipientOptionsRepository } from "../repositories/automation-recipient-options.repository";
 
 import { AutomationDefinitionStorageService } from "./automation-definition-storage.service";
@@ -46,7 +47,7 @@ import type {
   CreateAutomationBody,
   UpdateAutomationBody,
 } from "../schema/automation.schema";
-import type { UUIDType } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -55,7 +56,7 @@ export class AutomationManagementService {
     private readonly automationDefinitionStorageService: AutomationDefinitionStorageService,
     private readonly automationRecipientOptionsRepository: AutomationRecipientOptionsRepository,
     private readonly automationValidationAndSimulationService: AutomationValidationAndSimulationService,
-    private readonly activityLogsService: ActivityLogsService,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
     @Inject(AUTOMATION_RUNTIME) private readonly automationRuntime: AutomationRuntime,
   ) {}
@@ -111,21 +112,32 @@ export class AutomationManagementService {
 
     this.assertAutomationWorkflowStructure(body.workflow, id);
 
-    const record = await this.automationDefinitionStorageService.createAutomation(
-      {
-        id,
-        name: body.name,
-        description: body.description,
-        draftDefinition: body,
-        tenantId: actor.tenantId,
+    return this.automationDefinitionStorageService.withAutomationTransaction(
+      async (transaction) => {
+        const record = await this.automationDefinitionStorageService.createAutomation(
+          {
+            id,
+            name: body.name,
+            description: body.description,
+            draftDefinition: body,
+            tenantId: actor.tenantId,
+          },
+          transaction,
+          language,
+        );
+
+        await this.recordAutomationActivity(
+          ACTIVITY_LOG_ACTION_TYPES.CREATE,
+          actor,
+          record,
+          undefined,
+          { language: language ?? record.baseLanguage },
+          transaction,
+        );
+
+        return this.mapAutomationResponse(record);
       },
-      undefined,
-      language,
     );
-
-    await this.recordAutomationActivity(ACTIVITY_LOG_ACTION_TYPES.CREATE, actor, record);
-
-    return this.mapAutomationResponse(record);
   }
 
   async createAutomationFromTemplate(
@@ -141,26 +153,37 @@ export class AutomationManagementService {
 
     const definition = buildBuiltInAutomationDefinition(builtin);
 
-    const record = await this.automationDefinitionStorageService.createAutomation(
-      {
-        name: definition.name,
-        description: definition.description,
-        draftDefinition: definition,
-        tenantId: actor.tenantId,
-        localizedMetadata: {
-          name: builtin.name,
-          description: builtin.description,
-          baseLanguage: SUPPORTED_LANGUAGES.EN,
-          availableLocales: Object.values(SUPPORTED_LANGUAGES),
-        },
+    return this.automationDefinitionStorageService.withAutomationTransaction(
+      async (transaction) => {
+        const record = await this.automationDefinitionStorageService.createAutomation(
+          {
+            name: definition.name,
+            description: definition.description,
+            draftDefinition: definition,
+            tenantId: actor.tenantId,
+            localizedMetadata: {
+              name: builtin.name,
+              description: builtin.description,
+              baseLanguage: SUPPORTED_LANGUAGES.EN,
+              availableLocales: Object.values(SUPPORTED_LANGUAGES),
+            },
+          },
+          transaction,
+          language,
+        );
+
+        await this.recordAutomationActivity(
+          ACTIVITY_LOG_ACTION_TYPES.CREATE,
+          actor,
+          record,
+          undefined,
+          { templateKey: key, language: language ?? record.baseLanguage },
+          transaction,
+        );
+
+        return this.mapAutomationResponse(record);
       },
-      undefined,
-      language,
     );
-
-    await this.recordAutomationActivity(ACTIVITY_LOG_ACTION_TYPES.CREATE, actor, record);
-
-    return this.mapAutomationResponse(record);
   }
 
   async updateAutomation(
@@ -198,10 +221,12 @@ export class AutomationManagementService {
         );
 
         await this.recordAutomationActivity(
-          ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+          ACTIVITY_LOG_ACTION_TYPES.SAVE_AUTOMATION_DRAFT,
           actor,
           record,
           current,
+          { language: language ?? record.baseLanguage },
+          transaction,
         );
 
         return this.mapAutomationResponse(record);
@@ -231,18 +256,15 @@ export class AutomationManagementService {
         "automation_deleted",
       );
 
-      await this.activityLogsService.recordActivity({
-        actor,
-        operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
-        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION,
-        resourceId: current.id,
-        before: {
-          name: current.name,
-          status: current.status,
-          executionVersion: String(current.executionVersion),
-        },
-        after: null,
-      });
+      await this.outboxPublisher.publish(
+        new AutomationActivityEvent({
+          actor,
+          operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+          resourceId: current.id,
+          previous: buildAutomationActivitySnapshot(current),
+        }),
+        transaction,
+      );
     });
   }
 
@@ -263,38 +285,45 @@ export class AutomationManagementService {
       workflow: duplicateAutomationWorkflow(current.draftDefinition.workflow, () => randomUUID()),
     };
 
-    const record = await this.automationDefinitionStorageService.createAutomation(
-      {
-        name: definition.name,
-        description: definition.description,
-        draftDefinition: definition,
-        tenantId: actor.tenantId,
-        localizedMetadata: {
-          ...metadata,
-          name: Object.fromEntries(
-            Object.entries(metadata.name).map(([locale, name]) => [
-              locale,
-              `${name} (copy)`.slice(0, 200),
-            ]),
-          ),
-          description: metadata.description,
-        },
-      },
-      undefined,
-      language,
-    );
+    return this.automationDefinitionStorageService.withAutomationTransaction(
+      async (transaction) => {
+        const record = await this.automationDefinitionStorageService.createAutomation(
+          {
+            name: definition.name,
+            description: definition.description,
+            draftDefinition: definition,
+            tenantId: actor.tenantId,
+            localizedMetadata: {
+              ...metadata,
+              name: Object.fromEntries(
+                Object.entries(metadata.name).map(([locale, name]) => [
+                  locale,
+                  `${name} (copy)`.slice(0, 200),
+                ]),
+              ),
+              description: metadata.description,
+            },
+          },
+          transaction,
+          language,
+        );
 
-    await this.recordAutomationActivity(
-      ACTIVITY_LOG_ACTION_TYPES.DUPLICATE_AUTOMATION,
-      actor,
-      record,
-      undefined,
-      {
-        sourceAutomationId: id,
+        await this.recordAutomationActivity(
+          ACTIVITY_LOG_ACTION_TYPES.DUPLICATE_AUTOMATION,
+          actor,
+          record,
+          undefined,
+          {
+            sourceAutomationId: id,
+            sourceAutomationName: current.name,
+            language: language ?? record.baseLanguage,
+          },
+          transaction,
+        );
+
+        return this.mapAutomationResponse(record);
       },
     );
-
-    return this.mapAutomationResponse(record);
   }
 
   async changeAutomationLifecycle(
@@ -302,6 +331,7 @@ export class AutomationManagementService {
     operation: AutomationLifecycleOperation,
     actor: CurrentUserType,
     language?: SupportedLanguages,
+    definition?: CreateAutomationBody,
   ) {
     return this.automationDefinitionStorageService.withAutomationTransaction(
       async (transaction) => {
@@ -332,8 +362,10 @@ export class AutomationManagementService {
           isApply ||
           (operation === AUTOMATION_LIFECYCLE_OPERATIONS.ENABLE && !current.appliedDefinition);
 
+        const draftDefinition = isApply && definition ? definition : current.draftDefinition;
+
         await this.assertWorkflowReadyForLifecycleChange(
-          current,
+          { ...current, draftDefinition },
           operation,
           shouldApplyDraft,
           actor.tenantId,
@@ -344,7 +376,10 @@ export class AutomationManagementService {
           {
             status: targetStatus,
             executionVersion: current.executionVersion + 1,
-            ...(shouldApplyDraft ? { appliedDefinition: current.draftDefinition } : {}),
+            ...(isApply && definition
+              ? { name: definition.name, description: definition.description, draftDefinition }
+              : {}),
+            ...(shouldApplyDraft ? { appliedDefinition: draftDefinition } : {}),
           },
           transaction,
           language,
@@ -361,6 +396,8 @@ export class AutomationManagementService {
           actor,
           record,
           current,
+          { language: language ?? record.baseLanguage },
+          transaction,
         );
 
         return this.mapAutomationResponse(record);
@@ -429,26 +466,18 @@ export class AutomationManagementService {
     record: AutomationRecord,
     before?: AutomationRecord,
     context?: Record<string, string>,
+    transaction?: DatabasePg,
   ) {
-    await this.activityLogsService.recordActivity({
-      actor,
-      operation,
-      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION,
-      resourceId: record.id,
-      before: before
-        ? {
-            name: before.name,
-            status: before.status,
-            executionVersion: String(before.executionVersion),
-          }
-        : null,
-      after: {
-        name: record.name,
-        status: record.status,
-        executionVersion: String(record.executionVersion),
-      },
-      changedFields: before ? ["definition", "status", "executionVersion"] : undefined,
-      context,
-    });
+    await this.outboxPublisher.publish(
+      new AutomationActivityEvent({
+        actor,
+        operation,
+        resourceId: record.id,
+        previous: before ? buildAutomationActivitySnapshot(before) : undefined,
+        resource: buildAutomationActivitySnapshot(record),
+        context,
+      }),
+      transaction,
+    );
   }
 }

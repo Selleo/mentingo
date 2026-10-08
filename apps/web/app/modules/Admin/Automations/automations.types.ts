@@ -1,4 +1,5 @@
 import type {
+  AutomationDefinition,
   AutomationPlaceholderDefinition,
   AutomationTemplateReference,
   SupportedLanguages,
@@ -13,3 +14,5 @@ export type AutomationTemplateOption = {
 };
 
 export type UpdateAutomationMutationInput = { id: string; data: UpdateAutomationInput };
+
+export type ApplyAutomationMutationInput = { id: string; definition?: AutomationDefinition };

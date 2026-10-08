@@ -174,6 +174,11 @@ export function useAutomationEditor(automation?: AutomationDto) {
   }
 
   async function applySavedDraft() {
+    if (!definition.name.trim()) {
+      setIssues([t("automations.nameRequired")]);
+      return;
+    }
+
     const errors = getAutomationWorkflowIssues(definition.workflow, { requireComplete: true });
 
     if (errors.length) {
@@ -187,9 +192,13 @@ export function useAutomationEditor(automation?: AutomationDto) {
       return;
     }
 
-    const saved = await saveDraft();
+    setIssues([]);
 
-    if (saved) await applyAutomation(saved.id);
+    const saved = automation ?? (await createAutomation(definition));
+    if (!automation) navigate(`/admin/automations/${saved.id}`);
+
+    const applied = await applyAutomation({ id: saved.id, definition });
+    setSavedDefinition(createInitialDefinition(applied));
   }
 
   async function runSimulation(
@@ -200,6 +209,7 @@ export function useAutomationEditor(automation?: AutomationDto) {
     setSimulation(null);
 
     const result = await simulateAutomation({
+      automationId: automation?.id,
       workflow: definition.workflow,
       language,
       sampleValues,

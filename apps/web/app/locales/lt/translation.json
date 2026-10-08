@@ -5217,6 +5217,14 @@
       "resource": "Išteklius:"
     },
     "actions": {
+      "save_automation_draft": "Automatizavimo juodraštis išsaugotas",
+      "simulate_automation": "Automatizavimas simuliuotas",
+      "apply_automation": "Automatizavimas paskelbtas / pritaikytas",
+      "enable_automation": "Automatizavimas aktyvuotas",
+      "disable_automation": "Automatizavimas išjungtas",
+      "duplicate_automation": "Automatizavimas nukopijuotas",
+      "archive_automation": "Automatizavimas archyvuotas",
+
       "create": "Sukurta",
       "update": "Atnaujinta",
       "bulk_course_category_update": "Masiniu būdu atnaujinta kursų kategorija",
@@ -5250,6 +5258,7 @@
       "complete_scorm": "SCORM užbaigtas"
     },
     "entity": {
+      "automation": "Automatizavimas",
       "course": "Kursas",
       "chapter": "Skyrius",
       "lesson": "Pamoka",
@@ -6110,6 +6119,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automatizavimas sukurtas.",
+      "createdFromTemplate": "Automatizavimas sukurtas iš šablono.",
+      "draftSaved": "Juodraštis išsaugotas.",
+      "applied": "Automatizavimo pakeitimai pritaikyti.",
+      "activated": "Automatizavimas aktyvuotas.",
+      "deactivated": "Automatizavimas išjungtas.",
+      "duplicated": "Automatizavimas nukopijuotas.",
+      "archived": "Automatizavimas archyvuotas.",
+      "deleted": "Automatizavimas ištrintas.",
+      "simulationCompleted": "Simuliacija baigta."
+    },
     "alsoUsedBy_one": "Taip pat naudoja {{count}} automatizacija",
     "alsoUsedBy_few": "Taip pat naudoja {{count}} automatizacijos",
     "alsoUsedBy_many": "Taip pat naudoja {{count}} automatizacijos",

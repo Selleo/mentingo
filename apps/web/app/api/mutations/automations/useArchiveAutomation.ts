@@ -10,7 +10,7 @@ import type { AutomationDto } from "@repo/shared";
 
 export function useArchiveAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback("automations.success.archived");
 
   return useMutation({
     mutationFn: async (automationId: string): Promise<AutomationDto> => {

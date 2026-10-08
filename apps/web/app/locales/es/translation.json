@@ -5813,6 +5813,14 @@
       "resource": "Recurso:"
     },
     "actions": {
+      "save_automation_draft": "Borrador de automatización guardado",
+      "simulate_automation": "Automatización simulada",
+      "apply_automation": "Automatización publicada / aplicada",
+      "enable_automation": "Automatización activada",
+      "disable_automation": "Automatización desactivada",
+      "duplicate_automation": "Automatización duplicada",
+      "archive_automation": "Automatización archivada",
+
       "create": "Creado",
       "update": "Actualizado",
       "bulk_course_category_update": "Categoría de cursos masivos actualizada",
@@ -5846,6 +5854,7 @@
       "complete_scorm": "SCORM completado"
     },
     "entity": {
+      "automation": "Automatización",
       "course": "Curso",
       "chapter": "Capítulo",
       "lesson": "Lección",
@@ -6059,6 +6068,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automatización creada.",
+      "createdFromTemplate": "Automatización creada a partir de una plantilla.",
+      "draftSaved": "Borrador guardado.",
+      "applied": "Cambios de la automatización aplicados.",
+      "activated": "Automatización activada.",
+      "deactivated": "Automatización desactivada.",
+      "duplicated": "Automatización duplicada.",
+      "archived": "Automatización archivada.",
+      "deleted": "Automatización eliminada.",
+      "simulationCompleted": "Simulación completada."
+    },
     "alsoUsedBy_one": "También usado por {{count}} automatización",
     "alsoUsedBy_other": "También usado por {{count}} automatizaciones",
     "recipientPolicy": "El origen del evento selecciona los destinatarios. Las operaciones de cuenta y las notificaciones de la aplicación son independientes.",

@@ -59,6 +59,7 @@ export function BuilderHeader(props: BuilderHeaderProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [saveMenuWidth, setSaveMenuWidth] = useState<number>();
+  const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
   const applyControlsRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLInputElement>(null);
@@ -166,17 +167,31 @@ export function BuilderHeader(props: BuilderHeaderProps) {
             )}
             {t(isActive ? "automations.disable" : "automations.enable")}
           </Button>
-          <div ref={applyControlsRef} className="flex items-center">
+          <div
+            ref={applyControlsRef}
+            className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center"
+          >
+            <span
+              aria-hidden="true"
+              className="invisible pointer-events-none col-span-2 col-start-1 row-start-1 flex h-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-sm font-medium"
+            >
+              <Save className="size-4 shrink-0" />
+              {t("automations.save")}
+            </span>
             <Button
               variant="primary"
-              className="rounded-r-none"
+              className={cn("col-start-1 row-start-1 whitespace-nowrap rounded-r-none", {
+                "rounded-bl-none": isSaveMenuOpen,
+              })}
               disabled={!canApply}
               onClick={props.onApply}
             >
               {t("automations.apply")}
             </Button>
             <DropdownMenu
+              open={isSaveMenuOpen}
               onOpenChange={(isOpen) => {
+                setIsSaveMenuOpen(isOpen);
                 if (isOpen) {
                   setSaveMenuWidth(applyControlsRef.current?.getBoundingClientRect().width);
                 }
@@ -185,7 +200,10 @@ export function BuilderHeader(props: BuilderHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="primary"
-                  className="rounded-l-none border-l border-white/25 px-2"
+                  className={cn(
+                    "col-start-2 row-start-1 rounded-l-none border-l border-white/25 px-2",
+                    { "rounded-br-none": isSaveMenuOpen },
+                  )}
                   disabled={!canSaveDraft}
                   aria-label={t("automationBuilder.header.saveOptions")}
                 >
@@ -194,15 +212,18 @@ export function BuilderHeader(props: BuilderHeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
+                side="bottom"
+                sideOffset={0}
+                avoidCollisions={false}
                 style={{ width: saveMenuWidth }}
-                className="min-w-0 rounded-lg border-0 bg-transparent p-0 shadow-none"
+                className="min-w-0 rounded-t-none rounded-b-lg border-0 bg-transparent p-0 shadow-none"
               >
                 <DropdownMenuItem
-                  className="flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-background px-3 text-sm font-medium text-primary-800 outline-none transition-colors hover:border-primary-500 focus:border-primary-500 focus:bg-primary-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  className="flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-t-none rounded-b-lg border border-input bg-background px-3 text-sm font-medium text-primary-800 outline-none transition-colors hover:border-primary-500 focus:border-primary-500 focus:bg-primary-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                   disabled={!canSaveDraft}
                   onSelect={props.onSave}
                 >
-                  <Save className="size-4" />
+                  <Save className="size-4 shrink-0" />
                   {t("automations.save")}
                 </DropdownMenuItem>
               </DropdownMenuContent>

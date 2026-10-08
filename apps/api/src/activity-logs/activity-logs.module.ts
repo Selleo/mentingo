@@ -12,6 +12,7 @@ import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 import { ActivityLogsService } from "./activity-logs.service";
 import { AnnouncementActivityHandler } from "./handlers/announcement-activity.handler";
 import { AuthActivityHandler } from "./handlers/auth-activity.handler";
+import { AutomationActivityHandler } from "./handlers/automation-activity.handler";
 import { CategoryActivityHandler } from "./handlers/category-activity.handler";
 import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
@@ -35,6 +36,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
   controllers: [ActivityLogsController],
   providers: [
     ActivityLogsService,
+    AutomationActivityHandler,
     ActivityLogResourceNameService,
     ChapterActivityHandler,
     LessonActivityHandler,

@@ -7,15 +7,20 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { useAutomationMutationFeedback } from "./useAutomationMutationFeedback";
 
 import type { AutomationDto } from "@repo/shared";
+import type { ApplyAutomationMutationInput } from "~/modules/Admin/Automations/automations.types";
 
 export function useApplyAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback("automations.success.applied");
 
   return useMutation({
-    mutationFn: async (automationId: string): Promise<AutomationDto> => {
+    mutationFn: async ({
+      id,
+      definition,
+    }: ApplyAutomationMutationInput): Promise<AutomationDto> => {
       const response = await ApiClient.api.automationManagementControllerApplyAutomation(
-        automationId,
+        id,
+        { definition },
         {
           language,
         },

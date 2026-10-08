@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { getUsedEmailTemplateVariables, type PublishedEmailTemplate } from "@repo/email-templates";
 import {
+  ACTIVITY_LOG_ACTION_TYPES,
   AUTOMATION_VALIDATION_ISSUE_CODES,
   AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_PLACEHOLDER_TYPES,
@@ -39,7 +40,9 @@ import {
 } from "src/email-templates/services/email-template-placeholder.utils";
 import { EmailTemplateRenderingService } from "src/email-templates/services/email-template-rendering.service";
 import { EmailTemplateValidationService } from "src/email-templates/services/email-template-validation.service";
+import { AutomationActivityEvent } from "src/events/automation/automation-activity.event";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import { findAutomationEventDefinition } from "../catalog/automation-event-catalog";
 import {
@@ -50,6 +53,8 @@ import {
   isValidAutomationPlaceholderValue,
 } from "../mappers/automation-mapping";
 import { AutomationRecipientOptionsRepository } from "../repositories/automation-recipient-options.repository";
+
+import { AutomationDefinitionStorageService } from "./automation-definition-storage.service";
 
 import type { AutomationSimulationEventData } from "../automation.types";
 import type {
@@ -63,6 +68,8 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 @Injectable()
 export class AutomationValidationAndSimulationService {
   constructor(
+    private readonly outboxPublisher: OutboxPublisher,
+    private readonly automationDefinitionStorageService: AutomationDefinitionStorageService,
     private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
     private readonly emailTemplateManagementService: EmailTemplateManagementService,
     private readonly emailService: EmailService,
@@ -158,6 +165,42 @@ export class AutomationValidationAndSimulationService {
   }
 
   async simulateAutomation(
+    body: SimulateAutomationBody,
+    actor: CurrentUserType,
+  ): Promise<AutomationSimulationResponse> {
+    const record = body.automationId
+      ? await this.automationDefinitionStorageService.getAutomation(
+          body.automationId,
+          undefined,
+          false,
+          body.language,
+        )
+      : undefined;
+
+    const result = await this.evaluateSimulation(body, actor);
+
+    await this.outboxPublisher.publish(
+      new AutomationActivityEvent({
+        actor,
+        operation: ACTIVITY_LOG_ACTION_TYPES.SIMULATE_AUTOMATION,
+        resourceId: record?.id,
+        context: {
+          name: record?.name ?? "",
+          language: body.language ?? record?.baseLanguage ?? SUPPORTED_LANGUAGES.EN,
+          outcome: result.issues.length ? "issues_found" : "success",
+          issueCodes: JSON.stringify(result.issues.map((issue) => issue.code)),
+          issueCount: String(result.issues.length),
+          previewCount: String(result.previews.length),
+          evaluatedStepCount: String(result.steps.length),
+          savedAutomation: String(Boolean(record)),
+        },
+      }),
+    );
+
+    return result;
+  }
+
+  private async evaluateSimulation(
     body: SimulateAutomationBody,
     actor: CurrentUserType,
   ): Promise<AutomationSimulationResponse> {

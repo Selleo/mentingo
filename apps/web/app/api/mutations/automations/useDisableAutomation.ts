@@ -10,7 +10,9 @@ import type { AutomationDto } from "@repo/shared";
 
 export function useDisableAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback(
+    "automations.success.deactivated",
+  );
 
   return useMutation({
     mutationFn: async (automationId: string): Promise<AutomationDto> => {

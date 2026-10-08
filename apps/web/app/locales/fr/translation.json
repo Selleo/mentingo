@@ -5597,6 +5597,14 @@
       "resource": "Ressource :"
     },
     "actions": {
+      "save_automation_draft": "Brouillon d’automatisation enregistré",
+      "simulate_automation": "Automatisation simulée",
+      "apply_automation": "Automatisation publiée / appliquée",
+      "enable_automation": "Automatisation activée",
+      "disable_automation": "Automatisation désactivée",
+      "duplicate_automation": "Automatisation dupliquée",
+      "archive_automation": "Automatisation archivée",
+
       "create": "Créé",
       "update": "Mis à jour",
       "bulk_course_category_update": "Catégorie de cours en masse mise à jour",
@@ -5630,6 +5638,7 @@
       "complete_scorm": "SCORM terminé"
     },
     "entity": {
+      "automation": "Automatisation",
       "course": "Cours",
       "chapter": "Chapitre",
       "lesson": "Leçon",
@@ -5844,6 +5853,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automatisation créée.",
+      "createdFromTemplate": "Automatisation créée à partir du modèle.",
+      "draftSaved": "Brouillon enregistré.",
+      "applied": "Modifications de l’automatisation appliquées.",
+      "activated": "Automatisation activée.",
+      "deactivated": "Automatisation désactivée.",
+      "duplicated": "Automatisation dupliquée.",
+      "archived": "Automatisation archivée.",
+      "deleted": "Automatisation supprimée.",
+      "simulationCompleted": "Simulation terminée."
+    },
     "alsoUsedBy_one": "Aussi utilisé par {{count}} automatisation",
     "alsoUsedBy_other": "Aussi utilisé par {{count}} automatisations",
     "recipientPolicy": "Les destinataires sont choisis par la source de l’événement. Les opérations du compte et les notifications de l’application restent indépendantes.",

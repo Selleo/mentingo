@@ -10,7 +10,7 @@ import type { AutomationDto, CreateAutomationInput } from "@repo/shared";
 
 export function useCreateAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback("automations.success.created");
 
   return useMutation({
     mutationFn: async (input: CreateAutomationInput): Promise<AutomationDto> => {

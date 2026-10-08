@@ -5921,6 +5921,14 @@
       "resource": "Zasób:"
     },
     "actions": {
+      "save_automation_draft": "Zapisano szkic automatyzacji",
+      "simulate_automation": "Przeprowadzono symulację automatyzacji",
+      "apply_automation": "Opublikowano / zastosowano automatyzację",
+      "enable_automation": "Aktywowano automatyzację",
+      "disable_automation": "Dezaktywowano automatyzację",
+      "duplicate_automation": "Zduplikowano automatyzację",
+      "archive_automation": "Zarchiwizowano automatyzację",
+
       "create": "Utworzono",
       "update": "Zaktualizowano",
       "bulk_course_category_update": "Zbiorowo zaktualizowano kategorię kursów",
@@ -5954,6 +5962,7 @@
       "complete_scorm": "Ukończono SCORM"
     },
     "entity": {
+      "automation": "Automatyzacja",
       "course": "Kurs",
       "chapter": "Rozdział",
       "lesson": "Lekcja",
@@ -6173,6 +6182,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Utworzono automatyzację.",
+      "createdFromTemplate": "Utworzono automatyzację z szablonu.",
+      "draftSaved": "Zapisano szkic.",
+      "applied": "Zastosowano zmiany automatyzacji.",
+      "activated": "Aktywowano automatyzację.",
+      "deactivated": "Dezaktywowano automatyzację.",
+      "duplicated": "Zduplikowano automatyzację.",
+      "archived": "Zarchiwizowano automatyzację.",
+      "deleted": "Usunięto automatyzację.",
+      "simulationCompleted": "Zakończono symulację."
+    },
     "alsoUsedBy_one": "Używany też przez {{count}} automatyzację",
     "alsoUsedBy_few": "Używany też przez {{count}} automatyzacje",
     "alsoUsedBy_many": "Używany też przez {{count}} automatyzacji",

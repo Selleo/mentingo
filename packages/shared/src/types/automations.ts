@@ -193,6 +193,7 @@ export type AutomationWorkflowIssue = {
   placeholder?: string;
 };
 export type AutomationSimulationInput = {
+  automationId?: string;
   workflow: AutomationWorkflow;
   sampleValues?: Record<string, AutomationPlaceholderValue>;
   language?: SupportedLanguages;

@@ -26175,6 +26175,8 @@ export interface SimulateAutomationBody {
   sampleValues?: object;
   /** @default "en" */
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  /** @format uuid */
+  automationId?: string;
 }
 
 export interface SimulateAutomationResponse {
@@ -30861,6 +30863,8 @@ export interface FindAllTenantsResponse {
         | "group_assignment"
         | "users_import"
         | "publish_email_template"
+        | "save_automation_draft"
+        | "simulate_automation"
         | "apply_automation"
         | "enable_automation"
         | "disable_automation"
@@ -31005,6 +31009,8 @@ export interface GetActivityLogsResponse {
       | "group_assignment"
       | "users_import"
       | "publish_email_template"
+      | "save_automation_draft"
+      | "simulate_automation"
       | "apply_automation"
       | "enable_automation"
       | "disable_automation"
@@ -31950,6 +31956,156 @@ export interface ReorderResponse {
     createdAt: string;
     updatedAt: string;
   }[];
+}
+
+export interface ApplyAutomationBody {
+  definition?: {
+    /**
+     * @minLength 1
+     * @maxLength 200
+     */
+    name: string;
+    /** @maxLength 5000 */
+    description: string;
+    workflow: {
+      rootStepId: string | null;
+      /** @maxItems 100 */
+      steps: (
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "condition";
+            config: {
+              /**
+               * @minLength 1
+               * @maxLength 200
+               */
+              field?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "trigger";
+            config: {
+              eventKind?:
+                | (
+                    | "welcome"
+                    | "password_recovery"
+                    | "password_reminder"
+                    | "user_invite"
+                    | "user_first_login"
+                    | "user_assigned_to_course"
+                    | "user_short_inactivity"
+                    | "user_long_inactivity"
+                    | "user_finished_chapter"
+                    | "user_finished_course"
+                    | "certificate_expiration_warning"
+                    | "certificate_expired"
+                    | "admin_new_user"
+                    | "admin_finished_course"
+                    | "admin_overdue_courses"
+                    | "course_due_date_reminder"
+                    | "magic_link"
+                    | "course_chat_mention"
+                    | "announcement"
+                    | "live_training_started"
+                    | "live_training_reminder"
+                    | "live_training_ended"
+                  )
+                | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            id: string;
+            parentId: string | null;
+            /** @min 0 */
+            position: number;
+            /** @format uuid */
+            automationId?: string;
+            type: "send_email";
+            config: {
+              template?:
+                | (
+                    | {
+                        type: "builtin";
+                        key:
+                          | "assignment_with_deadline"
+                          | "assignment_without_deadline"
+                          | "completion_with_certificate"
+                          | "completion_without_certificate"
+                          | "certificate_manually_reset"
+                          | "certificate_naturally_expired"
+                          | "short_inactivity_course"
+                          | "short_inactivity_platform"
+                          | "long_inactivity_course"
+                          | "long_inactivity_platform"
+                          | "deadline_today"
+                          | "deadline_tomorrow"
+                          | "deadline_upcoming"
+                          | "welcome"
+                          | "password_recovery"
+                          | "password_reminder"
+                          | "user_invite"
+                          | "user_first_login"
+                          | "user_finished_chapter"
+                          | "certificate_expiration_warning"
+                          | "admin_new_user"
+                          | "admin_finished_course"
+                          | "admin_overdue_courses"
+                          | "magic_link"
+                          | "course_chat_mention"
+                          | "announcement"
+                          | "live_training_started"
+                          | "live_training_reminder"
+                          | "live_training_ended";
+                      }
+                    | {
+                        type: "custom";
+                        /** @format uuid */
+                        id: string;
+                      }
+                  )
+                | null;
+              mappings?: object;
+              recipients?:
+                | {
+                    type: "event";
+                  }
+                | {
+                    type: "everyone";
+                  }
+                | {
+                    type: "user";
+                    /** @format uuid */
+                    userId: string;
+                  }
+                | {
+                    type: "group";
+                    /** @format uuid */
+                    groupId: string;
+                  }
+                | {
+                    type: "role";
+                    /** @format uuid */
+                    roleId: string;
+                  };
+            };
+          }
+      )[];
+    };
+  };
 }
 
 import type {
@@ -38670,6 +38826,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     automationManagementControllerApplyAutomation: (
       id: string,
+      data: ApplyAutomationBody,
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -38680,6 +38837,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/automations/${id}/apply`,
         method: "POST",
         query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -40720,6 +40879,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "group_assignment"
               | "users_import"
               | "publish_email_template"
+              | "save_automation_draft"
+              | "simulate_automation"
               | "apply_automation"
               | "enable_automation"
               | "disable_automation"
@@ -40758,6 +40919,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "group_assignment"
               | "users_import"
               | "publish_email_template"
+              | "save_automation_draft"
+              | "simulate_automation"
               | "apply_automation"
               | "enable_automation"
               | "disable_automation"

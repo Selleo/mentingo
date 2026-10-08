@@ -28,6 +28,8 @@ import { AUTOMATION_LIFECYCLE_OPERATIONS } from "./automation.constants";
 import { buildAutomationEventCatalogWithSamples } from "./mappers/automation-event-preview.mapper";
 import {
   automationSchema,
+  applyAutomationSchema,
+  type ApplyAutomationBody,
   automationLanguageQuerySchema,
   automationRecipientOptionTypeSchema,
   paginatedAutomationRecipientOptionSchema,
@@ -275,18 +277,27 @@ export class AutomationManagementController {
   }
 
   @Post(":id/apply")
-  @Validate({ request: [idRequest, languageRequest], response: baseResponse(automationSchema) })
+  @Validate({
+    request: [idRequest, { type: "body", schema: applyAutomationSchema }, languageRequest],
+    response: baseResponse(automationSchema),
+  })
   async applyAutomation(
     @Param("id") id: UUIDType,
+    @Body() body: ApplyAutomationBody,
     @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() user: CurrentUserType,
   ): Promise<BaseResponse<AutomationResponse>> {
+    if (body) {
+      this.automationValidationAndSimulationService.assertJsonSerializableAutomationInput(body);
+    }
+
     return new BaseResponse(
       await this.automationManagementService.changeAutomationLifecycle(
         id,
         AUTOMATION_LIFECYCLE_OPERATIONS.APPLY,
         user,
         language,
+        body?.definition,
       ),
     );
   }

@@ -11,7 +11,9 @@ import type { UpdateAutomationMutationInput } from "~/modules/Admin/Automations/
 
 export function useUpdateAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback(
+    "automations.success.draftSaved",
+  );
 
   return useMutation({
     mutationFn: async (input: UpdateAutomationMutationInput): Promise<AutomationDto> => {

@@ -106,3 +106,4 @@ export * from "./email-template/restore-email-template.event";
 export * from "./email-template/add-email-template-language.event";
 export * from "./email-template/remove-email-template-language.event";
 export * from "./email-template/delete-email-template.event";
+export * from "./automation/automation-activity.event";

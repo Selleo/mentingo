@@ -173,6 +173,10 @@ export const automationDefinitionSchema = Type.Object(
 
 export const createAutomationSchema = automationDefinitionSchema;
 
+export const applyAutomationSchema = Type.Optional(
+  Type.Object({ definition: Type.Optional(automationDefinitionSchema) }, closed),
+);
+
 export const automationWorkflowTemplateSchema = Type.Object(
   {
     key: Type.Enum(BUILT_IN_EMAIL_TEMPLATE_KEYS),
@@ -217,6 +221,7 @@ export const automationIssueSchema = Type.Object(
 
 export const simulateAutomationSchema = Type.Object(
   {
+    automationId: Type.Optional(UUIDSchema),
     workflow: automationWorkflowSchema,
     sampleValues: Type.Optional(Type.Record(Type.String(), automationValueSchema)),
     language: Type.Optional(supportedLanguagesSchema),
@@ -400,6 +405,8 @@ export type AutomationResponse = Omit<
 export type CreateAutomationBody = AutomationDefinition;
 
 export type UpdateAutomationBody = Partial<AutomationDefinition>;
+
+export type ApplyAutomationBody = { definition?: AutomationDefinition };
 
 export type SimulateAutomationBody = Omit<
   Static<typeof simulateAutomationSchema>,

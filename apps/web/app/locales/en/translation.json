@@ -5876,6 +5876,14 @@
       "resource": "Resource:"
     },
     "actions": {
+      "save_automation_draft": "Automation draft saved",
+      "simulate_automation": "Automation simulated",
+      "apply_automation": "Automation published / applied",
+      "enable_automation": "Automation activated",
+      "disable_automation": "Automation deactivated",
+      "duplicate_automation": "Automation duplicated",
+      "archive_automation": "Automation archived",
+
       "create": "Created",
       "update": "Updated",
       "bulk_course_category_update": "Bulk course category updated",
@@ -5909,6 +5917,7 @@
       "complete_scorm": "SCORM completed"
     },
     "entity": {
+      "automation": "Automation",
       "course": "Course",
       "chapter": "Chapter",
       "lesson": "Lesson",
@@ -6123,6 +6132,18 @@
     }
   },
   "automations": {
+    "success": {
+      "created": "Automation created.",
+      "createdFromTemplate": "Automation created from template.",
+      "draftSaved": "Draft saved.",
+      "applied": "Automation changes applied.",
+      "activated": "Automation activated.",
+      "deactivated": "Automation deactivated.",
+      "duplicated": "Automation duplicated.",
+      "archived": "Automation archived.",
+      "deleted": "Automation deleted.",
+      "simulationCompleted": "Simulation completed."
+    },
     "alsoUsedBy_one": "Also used by {{count}} automation",
     "alsoUsedBy_other": "Also used by {{count}} automations",
     "recipientPolicy": "Eligible recipients selected by the event producer. Account operations and in-app notifications remain independent.",

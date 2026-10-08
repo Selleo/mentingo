@@ -5,7 +5,7 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-export function useAutomationMutationFeedback(invalidateAutomations = true) {
+export function useAutomationMutationFeedback(successKey: string, invalidateAutomations = true) {
   const { t } = useTranslation();
   const { toast } = useToast();
 
@@ -14,6 +14,7 @@ export function useAutomationMutationFeedback(invalidateAutomations = true) {
       if (invalidateAutomations) {
         await queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
       }
+      toast({ description: t(successKey) });
     },
     onError: (error: unknown) =>
       toast({

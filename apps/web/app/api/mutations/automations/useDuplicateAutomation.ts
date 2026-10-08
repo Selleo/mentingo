@@ -10,7 +10,9 @@ import type { AutomationDto } from "@repo/shared";
 
 export function useDuplicateAutomation() {
   const language = useLanguageStore((state) => state.language);
-  const automationMutationFeedback = useAutomationMutationFeedback(true);
+  const automationMutationFeedback = useAutomationMutationFeedback(
+    "automations.success.duplicated",
+  );
 
   return useMutation({
     mutationFn: async (automationId: string): Promise<AutomationDto> => {
