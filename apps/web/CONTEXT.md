@@ -7,8 +7,8 @@ Glossary for the web app's interface design.
 - **Design variant** — the interface design of a web build, set at build time with `VITE_DESIGN_VARIANT`. Every tenant served by the build shares it.
 - **Default variant** — the current UI. Must stay visually unchanged.
 - **Mono variant** — monospace UI text, 4px controls, 8px surfaces, flat cards, blue brand by default. It restyles shared components and redesigns only the redesigned layouts below.
-- **Mono classes** — mono-only classes in a component's own file, behind `IS_MONO_DESIGN`.
-- **Variant fork** — a mono copy of a component in a `mono/` folder, used only when markup differs.
+- **Mono classes** — `mono:`-prefixed Tailwind classes in a component's own file. They apply only under `data-design-variant="mono"`.
+- **Variant fork** — a mono copy of a component in a `mono/` folder, used only when markup differs and chosen in one switch point.
 - **Redesigned layout** — the logged-in app shell (sidebar + top bar), the page header and the auth pages. The courses page keeps its layout.
 - **Top bar** — part of the mono app shell: global search on the left, user menu on the right. The tenant logo stays in the sidebar.
 

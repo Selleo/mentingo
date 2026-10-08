@@ -3,21 +3,20 @@ import { cva } from "class-variance-authority";
 
 import { Icon } from "~/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 import type { Dispatch, SetStateAction } from "react";
 import type { MenuItemType } from "~/config/navigationConfig";
 
 export const monoNavigationRowVariants = cva(
-  "relative flex h-14 w-full items-center gap-x-3 border-b border-border bg-background px-6 font-normal text-neutral-800 hover:bg-neutral-50 body-sm-md",
+  "mono:relative mono:h-14 mono:w-full mono:rounded-none mono:border-0 mono:border-b mono:border-border mono:bg-background mono:px-6 mono:py-0 mono:font-normal mono:text-neutral-800 mono:hover:border-border mono:hover:bg-neutral-50 mono:hover:text-neutral-800 mono:2xl:bg-background mono:2xl:px-6 mono:2xl:py-0 mono:2xl:hover:bg-neutral-50 mono:3xl:hover:bg-neutral-50",
   {
     variants: {
       isActive: {
-        true: "font-semibold text-primary-700 before:absolute before:inset-y-2 before:left-2 before:w-0.5 before:bg-primary-500",
+        true: "mono:font-semibold mono:text-primary-700 mono:hover:text-primary-700 mono:before:absolute mono:before:inset-y-2 mono:before:left-2 mono:before:w-0.5 mono:before:bg-primary-500",
       },
       isCollapsed: {
-        true: "justify-center px-0",
+        true: "mono:justify-center mono:px-0 mono:2xl:px-0",
       },
     },
   },
@@ -52,23 +51,17 @@ export function NavigationMenuItem({
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>
               cn(
-                !IS_MONO_DESIGN && [
-                  "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
-                  {
-                    "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
-                    "bg-white text-neutral-900": !isActive,
-                    "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
-                    "justify-center": !showLabel,
-                  },
-                ],
-                IS_MONO_DESIGN &&
-                  !isFooter &&
-                  monoNavigationRowVariants({ isActive, isCollapsed: !showLabel }),
-                IS_MONO_DESIGN &&
-                  isFooter && [
-                    "relative flex flex-col items-center gap-x-3 gap-y-1 rounded bg-background px-2 py-3.5 font-normal text-neutral-800 hover:bg-neutral-50 sm:flex-row sm:gap-y-0 body-sm-md",
-                    isActive && "text-primary-700",
-                  ],
+                "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                {
+                  "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
+                  "bg-white text-neutral-900": !isActive,
+                  "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
+                  "justify-center": !showLabel,
+                },
+                !isFooter && monoNavigationRowVariants({ isActive, isCollapsed: !showLabel }),
+                isFooter &&
+                  "mono:rounded mono:border-0 mono:bg-background mono:px-2 mono:font-normal mono:text-neutral-800 mono:hover:bg-neutral-50 mono:2xl:bg-background mono:2xl:px-2 mono:2xl:py-3.5 mono:2xl:hover:bg-neutral-50",
+                isFooter && isActive && "mono:text-primary-700",
               )
             }
           >
@@ -79,8 +72,8 @@ export function NavigationMenuItem({
                   className={cn(
                     "size-6",
                     { "text-primary-700": isActive },
-                    IS_MONO_DESIGN && "size-5",
-                    IS_MONO_DESIGN && showLabel && !isFooter && "hidden",
+                    "mono:size-5",
+                    showLabel && !isFooter && "mono:hidden",
                   )}
                 />
                 <span

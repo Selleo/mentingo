@@ -2,7 +2,6 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import * as React from "react";
 
 import { buttonVariants } from "~/components/ui/button";
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const AlertDialog = AlertDialogPrimitive.Root;
@@ -18,7 +17,7 @@ const AlertDialogOverlay = React.forwardRef<
   <AlertDialogPrimitive.Overlay
     className={cn(
       "bg-black/80 fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      IS_MONO_DESIGN && "bg-neutral-700 opacity-70",
+      "mono:bg-neutral-700 mono:opacity-70",
       className,
     )}
     {...props}
@@ -68,7 +67,7 @@ const AlertDialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold",
-      IS_MONO_DESIGN && "text-xl font-medium leading-7",
+      "mono:text-xl mono:font-medium mono:leading-7",
       className,
     )}
     {...props}

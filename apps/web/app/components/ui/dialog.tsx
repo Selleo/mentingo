@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import * as React from "react";
 
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
@@ -38,7 +37,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50 bg-[#000]/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      IS_MONO_DESIGN && "bg-neutral-700 opacity-70",
+      "mono:bg-neutral-700 mono:opacity-70",
       className,
     )}
     {...props}
@@ -94,7 +93,7 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      IS_MONO_DESIGN && "text-xl font-medium leading-7 tracking-normal",
+      "mono:text-xl mono:font-medium mono:leading-7 mono:tracking-normal",
       className,
     )}
     {...props}

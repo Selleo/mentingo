@@ -2,7 +2,6 @@ import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const labelVariants = cva(
@@ -17,7 +16,7 @@ const Label = React.forwardRef<
     ref={ref}
     className={cn(
       labelVariants(),
-      IS_MONO_DESIGN && "font-control text-sm font-semibold text-neutral-950",
+      "mono:font-control mono:text-sm mono:font-semibold mono:text-neutral-950",
       className,
     )}
     {...props}

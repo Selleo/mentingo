@@ -13,7 +13,6 @@ import { matchesRequirement } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { routeAccessConfig } from "~/config/routeAccessConfig";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -133,23 +132,22 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           isSidebarCollapsed
             ? "2xl:w-14 2xl:px-2 2xl:py-4 3xl:w-14 3xl:px-2 3xl:py-4"
             : "2xl:w-64 2xl:p-4 3xl:w-64 3xl:p-4",
-          IS_MONO_DESIGN &&
-            "z-10 border-b border-border bg-background 2xl:gap-y-0 2xl:border-b-0 2xl:p-0 2xl:shadow-md 3xl:relative 3xl:p-0",
-          IS_MONO_DESIGN && !isSidebarCollapsed && "2xl:w-56 3xl:w-56",
+          "mono:z-10 mono:border-b mono:border-border mono:bg-background mono:2xl:gap-y-0 mono:2xl:border-b-0 mono:2xl:p-0 mono:2xl:shadow-md mono:3xl:relative mono:3xl:p-0",
+          !isSidebarCollapsed && "mono:2xl:w-56 mono:3xl:w-56",
         )}
       >
         {is2xlBreakpoint && (
           <div
             className={cn(
               "flex justify-end",
-              IS_MONO_DESIGN && "absolute top-3 z-10",
-              IS_MONO_DESIGN && (isSidebarCollapsed ? "left-2" : "right-3"),
+              "mono:absolute mono:top-3 mono:z-10",
+              isSidebarCollapsed ? "mono:left-2" : "mono:right-3",
             )}
           >
             <Button
               onClick={toggleSidebarCollapsed}
-              className={cn("gap-2 py-2.5", IS_MONO_DESIGN && "text-neutral-800")}
-              variant={IS_MONO_DESIGN ? "ghost" : "outline"}
+              className="gap-2 py-2.5 mono:border-0 mono:bg-transparent mono:text-neutral-800 mono:hover:text-neutral-800"
+              variant="outline"
               size="icon"
             >
               <Icon
@@ -173,31 +171,21 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           containerClassName={cn(
             "hidden w-full 2xl:block",
             { "2xl:flex 2xl:justify-center": isSidebarCollapsed },
-            IS_MONO_DESIGN && "2xl:shrink-0 2xl:border-b 2xl:border-border 2xl:px-4 2xl:py-3",
-            IS_MONO_DESIGN && isSidebarCollapsed && "2xl:px-2",
+            "mono:2xl:shrink-0 mono:2xl:border-b mono:2xl:border-border mono:2xl:px-4 mono:2xl:py-3",
+            isSidebarCollapsed && "mono:2xl:px-2",
           )}
         />
 
-        <Separator
-          className={cn(
-            "sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px",
-            IS_MONO_DESIGN && "hidden",
-          )}
-        />
+        <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px mono:hidden" />
         <nav
           className={cn("2xl:flex 2xl:h-full 2xl:min-h-0 2xl:flex-col 2xl:justify-between", {
             "flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0 2xl:overflow-hidden":
               isMobileNavOpen,
             "sr-only 2xl:not-sr-only": !isMobileNavOpen,
-            "bg-background p-0": IS_MONO_DESIGN && isMobileNavOpen,
+            "mono:bg-background mono:p-0": isMobileNavOpen,
           })}
         >
-          <div
-            className={cn(
-              "scrollbar-hide flex min-h-0 flex-1 flex-col gap-y-3 overflow-y-auto overscroll-contain",
-              IS_MONO_DESIGN && "gap-y-0",
-            )}
-          >
+          <div className="scrollbar-hide flex min-h-0 flex-1 flex-col gap-y-3 overflow-y-auto overscroll-contain mono:gap-y-0">
             {menuItems.map((group) => {
               const { restrictedAccessRequirement, restrictedManagingTenantAdmin } = group;
 
@@ -222,15 +210,13 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
                     shouldShowTooltips={shouldShowTooltips}
                     isSidebarCollapsed={isSidebarCollapsed}
                   />
-                  <Separator
-                    className={cn("bg-neutral-200 2xl:h-px", IS_MONO_DESIGN && "hidden")}
-                  />
+                  <Separator className="bg-neutral-200 2xl:h-px mono:hidden" />
                 </Fragment>
               );
             })}
           </div>
 
-          <div className={cn("shrink-0 mt-3", IS_MONO_DESIGN && "mt-0 border-t border-border")}>
+          <div className="shrink-0 mt-3 mono:mt-0 mono:border-t mono:border-border">
             <NavigationFooter
               setIsMobileNavOpen={setIsMobileNavOpen}
               hasConfigurationIssues={hasConfigurationIssues}

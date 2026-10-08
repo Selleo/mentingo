@@ -7,7 +7,6 @@ import { useLogoutUser } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { NotificationsNavigationItem } from "~/modules/Notifications/components";
@@ -54,12 +53,12 @@ export function NavigationFooter({
     <menu
       className={cn(
         "grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end",
-        IS_MONO_DESIGN && "px-4 pb-3 2xl:gap-0 2xl:px-0 2xl:pb-0",
+        "mono:px-4 mono:pb-3 mono:2xl:gap-0 mono:2xl:px-0 mono:2xl:pb-0",
       )}
     >
       {canViewAnnouncements && (
         <NotificationsNavigationItem
-          className={cn("col-span-4 md:col-span-8 2xl:block", IS_MONO_DESIGN && "-mx-4 2xl:mx-0")}
+          className="col-span-4 md:col-span-8 2xl:block mono:-mx-4 mono:2xl:mx-0"
           showLabel={showNavigationLabels}
           showTooltip={shouldShowTooltips}
           isSidebarCollapsed={isSidebarCollapsed}
@@ -67,7 +66,7 @@ export function NavigationFooter({
         />
       )}
 
-      <li className={cn("col-span-4 md:col-span-8 2xl:hidden", IS_MONO_DESIGN && "hidden")}>
+      <li className="col-span-4 md:col-span-8 2xl:hidden mono:hidden">
         <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
 
@@ -86,20 +85,20 @@ export function NavigationFooter({
             className={cn(
               "flex w-full items-center justify-between gap-2 p-2 relative",
               { "justify-center": hideLabels },
-              IS_MONO_DESIGN && "h-14 px-6 hover:bg-neutral-50",
-              IS_MONO_DESIGN && hideLabels && "px-0",
+              "mono:h-14 mono:px-6 mono:hover:bg-neutral-50",
+              hideLabels && "mono:px-0",
             )}
           >
             <UserAvatar
               userName={`${user?.firstName} ${user?.lastName}`}
               profilePictureUrl={user?.profilePictureUrl}
-              className={cn("size-8", IS_MONO_DESIGN && "size-6")}
+              className="size-8 mono:size-6"
             />
             <span
               className={cn(
                 "block grow text-left body-sm-md",
                 { hidden: hideLabels },
-                IS_MONO_DESIGN && "truncate font-normal",
+                "mono:truncate mono:font-normal",
               )}
             >{`${user?.firstName} ${user?.lastName}`}</span>
             <ChevronDown
@@ -108,7 +107,7 @@ export function NavigationFooter({
                 {
                   hidden: hideLabels,
                 },
-                IS_MONO_DESIGN && "size-5",
+                "mono:size-5",
               )}
             />
             {hasConfigurationIssues && (
@@ -172,13 +171,11 @@ export function NavigationFooter({
               >
                 <div
                   className={cn(
-                    !IS_MONO_DESIGN &&
-                      "flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
-                    IS_MONO_DESIGN &&
-                      "flex cursor-pointer items-center gap-x-3 rounded px-3 py-2.5 font-normal text-neutral-800 hover:bg-neutral-50 body-sm-md",
+                    "flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                    "mono:rounded mono:px-3 mono:py-2.5 mono:font-normal mono:text-neutral-800 mono:hover:bg-neutral-50 mono:hover:outline-none mono:2xl:px-3 mono:2xl:py-2.5 mono:2xl:hover:bg-neutral-50",
                   )}
                 >
-                  <Icon name="Logout" className={cn("size-6", IS_MONO_DESIGN && "size-5")} />
+                  <Icon name="Logout" className="size-6 mono:size-5" />
                   <span className="line-clamp-1 truncate whitespace-nowrap">
                     {t("navigationSideBar.logout")}
                   </span>

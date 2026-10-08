@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -9,7 +8,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
       ref={ref}
       className={cn(
         "rounded-lg border bg-card text-card-foreground shadow-sm",
-        IS_MONO_DESIGN && "border-input shadow-none",
+        "mono:border-input mono:shadow-none",
         className,
       )}
       {...props}
@@ -31,7 +30,7 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HT
       ref={ref}
       className={cn(
         "text-2xl font-semibold leading-none tracking-tight",
-        IS_MONO_DESIGN && "text-base leading-6",
+        "mono:text-base mono:leading-6",
         className,
       )}
       {...props}
