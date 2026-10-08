@@ -20266,15 +20266,6 @@
         "operationId": "CourseAuthoringController_previewAuthoringAsset",
         "parameters": [
           {
-            "name": "revision",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -20299,6 +20290,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
             }
           }
         ],
@@ -20491,15 +20491,6 @@
         "operationId": "CourseAuthoringController_getAuthoringEvents",
         "parameters": [
           {
-            "name": "afterSequence",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          {
             "name": "courseId",
             "required": true,
             "in": "path",
@@ -20515,6 +20506,15 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "afterSequence",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
             }
           }
         ],
@@ -20535,17 +20535,6 @@
       "get": {
         "operationId": "CourseAuthoringController_getAuthoringCourseContext",
         "parameters": [
-          {
-            "name": "lessonIds",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
           {
             "name": "courseId",
             "required": true,
@@ -20590,6 +20579,17 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "lessonIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -138482,6 +138482,106 @@
                           }
                         },
                         "type": {
+                          "const": "lesson.metadata.update",
+                          "type": "string"
+                        },
+                        "payload": {
+                          "additionalProperties": false,
+                          "minProperties": 1,
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "operationId",
+                        "targetId",
+                        "language",
+                        "baselineHash",
+                        "dependencies",
+                        "type",
+                        "payload"
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "operationId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "targetId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "language": {
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
+                              "type": "string"
+                            },
+                            {
+                              "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "baselineHash": {
+                          "anyOf": [
+                            {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "dependencies": {
+                          "type": "array",
+                          "items": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "fieldBaselines": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "type": {
                           "const": "course.metadata.update",
                           "type": "string"
                         },
@@ -140743,6 +140843,106 @@
                           }
                         },
                         "type": {
+                          "const": "lesson.metadata.update",
+                          "type": "string"
+                        },
+                        "payload": {
+                          "additionalProperties": false,
+                          "minProperties": 1,
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "operationId",
+                        "targetId",
+                        "language",
+                        "baselineHash",
+                        "dependencies",
+                        "type",
+                        "payload"
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "operationId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "targetId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "language": {
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
+                              "type": "string"
+                            },
+                            {
+                              "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "baselineHash": {
+                          "anyOf": [
+                            {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "dependencies": {
+                          "type": "array",
+                          "items": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "fieldBaselines": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "type": {
                           "const": "course.metadata.update",
                           "type": "string"
                         },
@@ -142924,6 +143124,106 @@
                         "dependencies",
                         "type",
                         "chapterId",
+                        "payload"
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "operationId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "targetId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "language": {
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
+                              "type": "string"
+                            },
+                            {
+                              "const": "es",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "baselineHash": {
+                          "anyOf": [
+                            {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "dependencies": {
+                          "type": "array",
+                          "items": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "fieldBaselines": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "type": {
+                          "const": "lesson.metadata.update",
+                          "type": "string"
+                        },
+                        "payload": {
+                          "additionalProperties": false,
+                          "minProperties": 1,
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "operationId",
+                        "targetId",
+                        "language",
+                        "baselineHash",
+                        "dependencies",
+                        "type",
                         "payload"
                       ]
                     },

@@ -156,6 +156,16 @@ export const mergeCurriculumPreview = (
         chapter.title = operation.payload.title;
       return;
     }
+    if (operation.type === "lesson.metadata.update") {
+      const lesson = merged
+        .flatMap((chapter) => chapter.lessons)
+        .find((item) => item.id === operation.targetId);
+      if (!lesson) return;
+      if (typeof operation.payload.title === "string") lesson.title = operation.payload.title;
+      if (typeof operation.payload.description === "string")
+        lesson.description = operation.payload.description;
+      return;
+    }
     if (operation.type === "lesson.create" || operation.type === "lesson.update") {
       const chapter = merged.find((item) => item.id === operation.chapterId);
       if (!chapter) return;

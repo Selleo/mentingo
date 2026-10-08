@@ -81,13 +81,14 @@ const createMentorOperation = (sourceVersionIds: string[]): AuthoringOperation =
 describe("CourseAuthoringApplyService reviewed assessment guard", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
   function setup() {
+    const persistedLessonType = jest.fn().mockReturnValue("quiz");
     const query = {
       from: jest.fn(),
       innerJoin: jest.fn(),
       where: jest.fn(),
       for: jest.fn().mockResolvedValue([]),
       *[Symbol.iterator]() {
-        yield { id: chapterId, description: "" };
+        yield { id: chapterId, description: "", type: persistedLessonType() };
       },
     };
     query.from.mockReturnValue(query);
@@ -190,6 +191,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     return {
       service,
       persistedLessonCount,
+      persistedLessonType,
       input,
       context,
       removeLesson,
@@ -286,6 +288,103 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     },
   );
 
+  it.each(["quiz", "ai_mentor"])(
+    "renames %s without rebuilding its teaching configuration",
+    async (type) => {
+      const test = setup();
+      test.persistedLessonType.mockReturnValue(type);
+      test.input.operations = [
+        {
+          type: "lesson.metadata.update",
+          operationId,
+          targetId: lessonId,
+          language: "en",
+          baselineHash: "b".repeat(64),
+          dependencies: [],
+          payload: { title: "Renamed lesson" },
+        },
+      ];
+      await test.service.applyPreparedExport(test.input, actor);
+      expect(test.updateLesson).toHaveBeenCalledWith(
+        lessonId,
+        { language: "en", title: "Renamed lesson" },
+        actor,
+      );
+      expect(test.saveQuizFromAuthoring).not.toHaveBeenCalled();
+      expect(test.createAiMentorLesson).not.toHaveBeenCalled();
+      expect(test.assignDocumentToAiMentorLesson).not.toHaveBeenCalled();
+      expect(test.replaceCourseAuthoringMentorContext).not.toHaveBeenCalled();
+      expect(test.updateLessonDisplayOrder).not.toHaveBeenCalled();
+    },
+  );
+  it("normalizes content metadata images through native lesson resources", async () => {
+    const test = setup();
+    test.persistedLessonType.mockReturnValue("content");
+    test.input.assetMappings = { image: `${chapterId}/image.png` };
+    test.input.assetMimeTypes = { image: "image/png" };
+    test.input.operations = [
+      {
+        type: "lesson.metadata.update",
+        operationId,
+        targetId: lessonId,
+        language: "en",
+        baselineHash: "b".repeat(64),
+        dependencies: [],
+        payload: {
+          description:
+            '<p>Existing content.</p><img data-authoring-asset-id="image" alt="Illustration">',
+        },
+      },
+    ];
+    await test.service.applyPreparedExport(test.input, actor);
+    expect(test.createLessonResources).toHaveBeenCalledWith(lessonId, [
+      expect.objectContaining({ reference: `${chapterId}/image.png` }),
+    ]);
+    const patch = test.updateLesson.mock.calls[0][1];
+    expect(patch.title).toBeUndefined();
+    expect(patch.description).toContain('data-node-type="image"');
+    expect(patch.description).toContain("data-authoring-block-id");
+    expect(patch.description).not.toContain("data-authoring-asset-id");
+  });
+  it("clears a quiz introduction without replacing its questions", async () => {
+    const test = setup();
+    test.input.operations = [
+      {
+        type: "lesson.metadata.update",
+        operationId,
+        targetId: lessonId,
+        language: "en",
+        baselineHash: "b".repeat(64),
+        dependencies: [],
+        payload: { description: "" },
+      },
+    ];
+    await test.service.applyPreparedExport(test.input, actor);
+    expect(test.updateLesson).toHaveBeenCalledWith(
+      lessonId,
+      { language: "en", description: "" },
+      actor,
+    );
+    expect(test.saveQuizFromAuthoring).not.toHaveBeenCalled();
+  });
+  it("rejects stale metadata before native mutations", async () => {
+    const test = setup();
+    test.input.operations = [
+      {
+        type: "lesson.metadata.update",
+        operationId,
+        targetId: lessonId,
+        language: "en",
+        baselineHash: "a".repeat(64),
+        dependencies: [],
+        payload: { title: "Renamed lesson" },
+      },
+    ];
+    await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.baselineChanged",
+    );
+    expect(test.updateLesson).not.toHaveBeenCalled();
+  });
   it("rejects attempted quiz deletion before a native mutation when acknowledgement is absent", async () => {
     const test = setup();
     await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(

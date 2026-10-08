@@ -203,6 +203,8 @@ export class CourseAuthoringApplyService {
               ? context.baselineHash
               : (chapter?.baselineHash ?? lesson?.baselineHash);
           if (operation.type === "chapter.delete") actualHash = chapter?.deletionBaselineHash;
+          if (operation.type === "lesson.metadata.update" && !lesson)
+            throw new BadRequestException("courseAuthoring.errors.targetOutsideCourse");
           if (operation.type === "lesson.block.replace" && lesson) {
             if (lesson.lessonType !== "content")
               throw new BadRequestException("courseAuthoring.errors.invalidBlockTarget");
@@ -425,6 +427,28 @@ export class CourseAuthoringApplyService {
           certificateSignatureAssetId
             ? this.assetKey(certificateSignatureAssetId, input)
             : undefined,
+        );
+        return;
+      }
+      case "lesson.metadata.update": {
+        let description = operation.payload.description;
+        if (description !== undefined) {
+          const [lesson] = await this.db
+            .select({ type: lessons.type })
+            .from(lessons)
+            .where(and(eq(lessons.id, targetId), eq(lessons.tenantId, actor.tenantId)));
+          if (!lesson) throw new ConflictException("courseAuthoring.errors.baselineChanged");
+          if (lesson.type === "content")
+            description = await this.prepareHtml(description, targetId, input, actor);
+        }
+        await this.lessonService.updateLesson(
+          targetId,
+          {
+            language: operation.language,
+            ...(operation.payload.title !== undefined ? { title: operation.payload.title } : {}),
+            ...(description !== undefined ? { description } : {}),
+          },
+          actor,
         );
         return;
       }

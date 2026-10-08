@@ -26521,6 +26521,22 @@ export type SendAuthoringCommandBody =
             baselineHash: string | null;
             dependencies: string[];
             fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
             type: "course.metadata.update";
             payload: {
               title?: string | null;
@@ -26933,6 +26949,22 @@ export type SendAuthoringCommandBody =
             baselineHash: string | null;
             dependencies: string[];
             fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
             type: "course.metadata.update";
             payload: {
               title?: string | null;
@@ -27334,6 +27366,22 @@ export type SendAuthoringCommandBody =
                       };
                     }
                 );
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
           }
         | {
             /** @format uuid */
@@ -38048,8 +38096,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseAuthoringControllerGetAuthoringCourseContext: (
       courseId: string,
       query?: {
-        lessonIds?: string[];
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        lessonIds?: string[];
       },
       params: RequestParams = {},
     ) =>

@@ -191,3 +191,23 @@ describe("mergeCurriculumPreview", () => {
     expect(first.lessons).toHaveLength(1);
   });
 });
+
+it("projects metadata without a chapter override or replacing lesson content", () => {
+  const existing = chapter("chapter-existing", "Existing chapter", "lesson-existing");
+  const result = mergeCurriculumPreview([existing], {
+    proposalId: "metadata-proposal",
+    status: "pending",
+    outline: [],
+    operations: [
+      {
+        operationId: "metadata-1",
+        targetId: "lesson-existing",
+        type: "lesson.metadata.update",
+        dependencies: [],
+        payload: { title: "New title" },
+      },
+    ],
+  });
+  expect(result[0].lessons[0]).toEqual({ ...existing.lessons[0], title: "New title" });
+  expect(existing.lessons[0].title).toBe("Existing lesson");
+});

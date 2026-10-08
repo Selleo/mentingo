@@ -39,6 +39,38 @@ describe("authoring producer operation compatibility", () => {
     ).toBe(false);
   });
 
+  it.each([{ title: "Renamed lesson" }, { description: "" }, { description: "New introduction" }])(
+    "accepts a partial lesson metadata patch %j",
+    (payload) => {
+      expect(
+        Value.Check(authoringOperationSchema, {
+          operationId: "00000000-0000-4000-8000-000000000001",
+          targetId: "00000000-0000-4000-8000-000000000002",
+          language: "en",
+          baselineHash: "a".repeat(64),
+          dependencies: [],
+          type: "lesson.metadata.update",
+          payload,
+        }),
+      ).toBe(true);
+    },
+  );
+  it.each([{}, { title: "" }, { title: null }, { description: null }, { questions: [] }])(
+    "rejects invalid lesson metadata patches %j",
+    (payload) => {
+      expect(
+        Value.Check(authoringOperationSchema, {
+          operationId: "00000000-0000-4000-8000-000000000001",
+          targetId: "00000000-0000-4000-8000-000000000002",
+          language: "en",
+          baselineHash: "a".repeat(64),
+          dependencies: [],
+          type: "lesson.metadata.update",
+          payload,
+        }),
+      ).toBe(false);
+    },
+  );
   it("rejects unknown lesson capabilities", () => {
     const operation = fixture("content") as Record<string, unknown>;
     expect(

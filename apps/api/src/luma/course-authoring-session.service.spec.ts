@@ -404,6 +404,21 @@ describe("CourseAuthoringSessionService source refresh", () => {
     expect(test.sendCommand).not.toHaveBeenCalled();
   });
 
+  it("rejects a different producer session before forwarding a command", async () => {
+    const test = setup();
+    test.getSession.mockResolvedValue({ ...test.snapshot, sessionId: newVersion });
+    await expect(test.service.command(courseId, sessionId, test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.invalidServiceResponse",
+    );
+    expect(test.sendCommand).not.toHaveBeenCalled();
+  });
+  it("rejects a created session bound to another course", async () => {
+    const test = setup();
+    test.createSession.mockResolvedValue({ ...test.snapshot, courseId: newVersion });
+    await expect(test.service.open(courseId, { commandId, language: "en" }, actor)).rejects.toThrow(
+      "courseAuthoring.errors.invalidServiceResponse",
+    );
+  });
   it("rechecks editor access before each refresh", async () => {
     const test = setup();
     test.authorize.mockRejectedValueOnce(new ForbiddenException());

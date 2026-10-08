@@ -154,3 +154,87 @@ describe("proposed fill-in-the-blanks lesson", () => {
     });
   });
 });
+
+describe("metadata-only lesson preview", () => {
+  it.each(["quiz", "ai_mentor", "content"] as const)(
+    "preserves the existing %s lesson while clearing its description",
+    (type) => {
+      const current = {
+        id: "lesson-existing",
+        title: "Existing title",
+        type,
+        description: "Existing description",
+        displayOrder: 4,
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        chapterId: "chapter-1",
+        thresholdScore: 70,
+        questions: [],
+      };
+      const node: ReviewLessonNode = {
+        ...mentorNode,
+        id: current.id,
+        title: "New title",
+        current,
+        operations: [
+          {
+            operationId: "metadata-1",
+            targetId: current.id,
+            type: AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+            dependencies: [],
+            payload: { title: "New title", description: "" },
+          },
+        ],
+      };
+      expect(proposedLesson(node)).toEqual({ ...current, title: "New title", description: "" });
+      expect(proposedMentorConfiguration(node)).toEqual({});
+    },
+  );
+});
+
+it("combines ordered metadata patches with a block edit in the preview", () => {
+  const current = {
+    id: "lesson-existing",
+    title: "Existing title",
+    type: "content" as const,
+    description: '<p data-authoring-block-id="block-1">Before</p>',
+    displayOrder: 1,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    chapterId: "chapter-1",
+  };
+  const node: ReviewLessonNode = {
+    ...mentorNode,
+    id: current.id,
+    title: "Renamed",
+    current,
+    operations: [
+      {
+        operationId: "metadata-1",
+        targetId: current.id,
+        type: AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+        dependencies: [],
+        payload: { title: "First rename" },
+      },
+      {
+        operationId: "block-edit",
+        targetId: current.id,
+        type: AUTHORING_OPERATION_TYPE.LESSON_BLOCK_REPLACE,
+        dependencies: [],
+        payload: {
+          blockId: "block-1",
+          html: '<p data-authoring-block-id="block-1">After</p>',
+        },
+      },
+      {
+        operationId: "metadata-2",
+        targetId: current.id,
+        type: AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+        dependencies: [],
+        payload: { title: "Renamed" },
+      },
+    ],
+  };
+  expect(proposedLesson(node)).toMatchObject({
+    title: "Renamed",
+    description: current.description.replace("Before", "After"),
+  });
+});

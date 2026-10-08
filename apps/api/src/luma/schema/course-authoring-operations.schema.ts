@@ -240,6 +240,20 @@ const settingsUpdate = Type.Object(
 );
 export const authoringOperationSchema = Type.Union([
   lessonWrite,
+  Type.Object(
+    {
+      ...operationBase,
+      type: Type.Literal("lesson.metadata.update"),
+      payload: Type.Object(
+        {
+          title: Type.Optional(Type.String({ minLength: 1 })),
+          description: Type.Optional(text),
+        },
+        { ...strict, minProperties: 1 },
+      ),
+    },
+    strict,
+  ),
   metadataUpdate,
   settingsUpdate,
   Type.Object(

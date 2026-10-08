@@ -302,6 +302,24 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     expect(retry).toHaveBeenCalledTimes(1);
     expect(test.enqueue).not.toHaveBeenCalled();
   });
+  it("rejects another frozen export before asset work or native writes", async () => {
+    const test = setup();
+    test.exported.exportId = assetId;
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+    await expect(test.service.process({ courseId, sessionId, exportId, actor })).rejects.toThrow(
+      "courseAuthoring.errors.invalidServiceResponse",
+    );
+    expect(test.client.authoring.downloadAsset).not.toHaveBeenCalled();
+    expect(test.applyPreparedExport).not.toHaveBeenCalled();
+    expect(test.client.authoring.recordReceipt).not.toHaveBeenCalled();
+  });
+  it("does not report another session's committed export as applied", async () => {
+    const test = setup();
+    test.findReceipt.mockResolvedValue({ ...test.receipt, sessionId: assetId });
+    await expect(test.service.status(courseId, sessionId, exportId, actor)).rejects.toThrow(
+      "courseAuthoring.errors.applicationNotFound",
+    );
+  });
   it("rejects a modified export before asset work or content application", async () => {
     const test = setup();
     await expect(test.service.process({ courseId, sessionId, exportId, actor })).rejects.toThrow(

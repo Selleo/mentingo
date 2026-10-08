@@ -1226,3 +1226,71 @@ it("restores request history in durable order without retaining hidden context",
   expect(result.requests[0]).not.toHaveProperty("context");
   expect(result.unsupportedRecordCount).toBe(1);
 });
+
+it("resolves metadata-only previews through the existing lesson identity", () => {
+  const proposal: ProposalView = {
+    id: "metadata-preview",
+    revision: 1,
+    taskId: "metadata-task",
+    summary: "Rename a lesson",
+    rationale: "",
+    warnings: [],
+    blockedQuality: false,
+    qualityConcernsAccepted: false,
+    evidenceCount: 0,
+    outline: null,
+    decision: "pending",
+    parentProposalId: null,
+    manual: false,
+    protectedEdits: [],
+    operations: [
+      {
+        operationId: "metadata-1",
+        type: "lesson.metadata.update",
+        targetId: "lesson-existing",
+        dependencies: [],
+        payload: { title: "Renamed lesson" },
+      },
+    ],
+  };
+  const context: CourseContext = {
+    courseId: "course-1",
+    language: "en",
+    title: "Course",
+    description: "",
+    baselineHash: "course-hash",
+    fieldHashes: {},
+    chapters: [
+      {
+        id: "chapter-existing",
+        title: "Existing chapter",
+        displayOrder: 0,
+        baselineHash: "chapter-hash",
+        lessons: [
+          {
+            id: "lesson-existing",
+            title: "Existing lesson",
+            lessonType: "quiz",
+            displayOrder: 3,
+            baselineHash: "lesson-hash",
+          },
+        ],
+      },
+    ],
+  };
+  expect(curriculumPreviewFromProposal(proposal, context)).toMatchObject({
+    outline: [
+      {
+        id: "chapter-existing",
+        lessons: [
+          {
+            id: "lesson-existing",
+            title: "Renamed lesson",
+            lessonType: "quiz",
+            displayOrder: 3,
+          },
+        ],
+      },
+    ],
+  });
+});

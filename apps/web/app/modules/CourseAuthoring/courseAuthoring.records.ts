@@ -146,6 +146,7 @@ const curriculumOperationTypes = new Set([
   "chapter.update",
   "lesson.create",
   "lesson.update",
+  "lesson.metadata.update",
 ]);
 
 /** Builds the same read-only curriculum model for an explicit outline or typed operations. */
@@ -194,6 +195,25 @@ export const curriculumPreviewFromProposal = (
         ...(currentDisplayOrder !== undefined ? { displayOrder: currentDisplayOrder } : {}),
         lessons: current?.lessons ?? [],
       });
+      return;
+    }
+
+    if (operation.type === "lesson.metadata.update") {
+      const parent = [...contextChapters.values()].find((chapter) =>
+        chapter.lessons.some((lesson) => lesson.id === operation.targetId),
+      );
+      const current = parent?.lessons.find((lesson) => lesson.id === operation.targetId);
+      const chapter = parent ? ensureChapter(parent.id) : null;
+      if (!chapter || !current) return;
+      const lesson = {
+        id: current.id,
+        title: stringValue(operation.payload.title) || current.title,
+        lessonType: current.lessonType,
+        ...(current.displayOrder !== null ? { displayOrder: current.displayOrder } : {}),
+      };
+      const index = chapter.lessons.findIndex((item) => item.id === current.id);
+      if (index < 0) chapter.lessons.push(lesson);
+      else chapter.lessons[index] = lesson;
       return;
     }
 

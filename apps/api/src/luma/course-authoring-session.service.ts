@@ -66,6 +66,8 @@ export class CourseAuthoringSessionService {
         }),
       ),
     );
+    if (session.courseId !== courseId)
+      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
     await this.contextBridge.bind({
       tenantId: actor.tenantId,
       courseId,
@@ -111,6 +113,8 @@ export class CourseAuthoringSessionService {
       await this.call(() => client.authoring.getSession({ sessionId })),
     );
     if (snapshot.courseId !== courseId) throw new ForbiddenException("common.toast.noAccess");
+    if (snapshot.sessionId !== sessionId)
+      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
     return snapshot;
   }
 

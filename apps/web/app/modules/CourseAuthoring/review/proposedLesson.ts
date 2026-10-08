@@ -137,7 +137,7 @@ const toFormQuestion = (value: unknown, index: number): Question | null => {
  * version for new and edited lessons, and the live lesson otherwise. Returns null when the
  * proposal cannot be expressed in the native form.
  */
-export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
+const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
   const write = node.operations.find((operation) => WRITE_TYPES.has(operation.type));
   const blockReplacements = node.operations.flatMap((operation) => {
     const blockId = text(operation.payload.blockId);
@@ -211,6 +211,25 @@ export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
   }
 
   return null;
+};
+
+export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
+  const lesson = proposedLessonContent(node);
+  if (!lesson) return null;
+  const lastWriteIndex = node.operations.reduce(
+    (last, operation, index) => (WRITE_TYPES.has(operation.type) ? index : last),
+    -1,
+  );
+  return node.operations.slice(lastWriteIndex + 1).reduce((current, operation) => {
+    if (operation.type !== AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) return current;
+    return {
+      ...current,
+      ...(typeof operation.payload.title === "string" ? { title: operation.payload.title } : {}),
+      ...(typeof operation.payload.description === "string"
+        ? { description: operation.payload.description }
+        : {}),
+    };
+  }, lesson);
 };
 
 /** Maps the proposed Mentor and judge configuration to the AI Mentor form's draft shapes. */

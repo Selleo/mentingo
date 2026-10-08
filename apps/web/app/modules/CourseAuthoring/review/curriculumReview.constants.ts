@@ -55,6 +55,7 @@ export const AUTHORING_OPERATION_TYPE = {
   CHAPTER_REORDER: "chapter.reorder",
   LESSON_CREATE: "lesson.create",
   LESSON_UPDATE: "lesson.update",
+  LESSON_METADATA_UPDATE: "lesson.metadata.update",
   LESSON_DELETE: "lesson.delete",
   LESSON_REORDER: "lesson.reorder",
   LESSON_BLOCK_REPLACE: "lesson.block.replace",

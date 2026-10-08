@@ -207,7 +207,11 @@ export class CourseAuthoringApplicationService {
   ): Promise<AuthoringApplyStatus> {
     await this.sessions.get(courseId, sessionId, actor);
     const receipt = await this.receipts.findReceipt(courseId, exportId, actor.tenantId);
-    if (receipt) return { exportId, status: "applied", receipt };
+    if (receipt) {
+      if (receipt.sessionId !== sessionId)
+        throw new NotFoundException("courseAuthoring.errors.applicationNotFound");
+      return { exportId, status: "applied", receipt };
+    }
     const job = await this.queue
       .getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY)
       .getJob(`${actor.tenantId}-${exportId}`);
@@ -242,7 +246,8 @@ export class CourseAuthoringApplicationService {
     if (
       !Value.Check(frozenAuthoringExportSchema, exported) ||
       exported.courseId !== data.courseId ||
-      exported.sessionId !== data.sessionId
+      exported.sessionId !== data.sessionId ||
+      exported.exportId !== data.exportId
     )
       throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
     if (courseAuthoringExportHash(exported) !== exported.exportHash)
@@ -293,7 +298,7 @@ export class CourseAuthoringApplicationService {
             (operation.type !== "lesson.create" && operation.type !== "lesson.update") ||
             operation.payload.lessonType !== "ai_mentor" ||
             (asset.sourceVersionId &&
-              !operation.payload.sourceVersionIds.includes(asset.sourceVersionId))
+              !(operation.payload.sourceVersionIds ?? []).includes(asset.sourceVersionId))
           )
             throw new BadRequestException("courseAuthoring.errors.invalidMentorMaterial");
           file.originalname = `${actor.tenantId}-${asset.assetId}-${asset.revision}.txt`;
