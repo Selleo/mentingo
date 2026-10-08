@@ -7,7 +7,7 @@ import { CourseAuthoringGateway } from "./course-authoring.gateway";
 import type { CourseAuthoringContextService } from "./course-authoring-context.service";
 import type { CourseAuthoringSessionService } from "./course-authoring-session.service";
 import type { LumaService } from "./luma.service";
-import type { SubscribeAuthoringEventsOptions } from "@japro/luma-sdk";
+import type { SubscribeAuthoringEventsOptions } from "@mentingo/luma-sdk";
 import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import type { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 import type { AuthenticatedSocket } from "src/websocket/websocket.types";

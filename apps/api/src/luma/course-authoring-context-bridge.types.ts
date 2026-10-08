@@ -3,7 +3,7 @@ import type {
   AuthoringContextFailure,
   AuthoringContextFailureReceipt,
   AuthoringContextResponse,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 

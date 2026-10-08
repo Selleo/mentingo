@@ -4,7 +4,7 @@ import {
   LUMA_MENTOR_STREAM_EVENT_TYPES,
   LUMA_SOCKET_MESSAGE_TYPES,
   TRANSCRIPTION_MODES,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import { PERMISSIONS, SUPPORTED_LANGUAGES, VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
@@ -17,13 +17,13 @@ import type {
   AudioOutputInterruptedPayload,
   AudioStartedPayload,
   LumaSocket,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import type { StartAudioBody } from "src/audio/types/audio.types";
 import type { ExternalAudioSession } from "src/audio/types/external-audio-session.types";
 import type { WsUser } from "src/websocket/websocket.types";
 
-jest.mock("@japro/luma-sdk", () => ({
-  ...jest.requireActual("@japro/luma-sdk"),
+jest.mock("@mentingo/luma-sdk", () => ({
+  ...jest.requireActual("@mentingo/luma-sdk"),
   createLumaSocket: jest.fn(),
 }));
 

@@ -1,4 +1,4 @@
-import type { LUMA_CAPTURE_PROFILES, LumaCaptureProfile } from "@japro/luma-sdk/contracts";
+import type { LUMA_CAPTURE_PROFILES, LumaCaptureProfile } from "@mentingo/luma-sdk/contracts";
 
 export const VOICE_ACTION = {
   TRANSCRIPT: "transcript",

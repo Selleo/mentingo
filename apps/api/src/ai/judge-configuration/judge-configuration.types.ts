@@ -1,4 +1,4 @@
-import type { MentorJudgeResponse } from "@japro/luma-sdk";
+import type { MentorJudgeResponse } from "@mentingo/luma-sdk";
 import type { SupportedLanguages } from "@repo/shared";
 
 export const AI_JUDGE_CRITERION_STATUS = {

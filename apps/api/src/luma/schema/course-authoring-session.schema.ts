@@ -5,7 +5,7 @@ import {
   TurnPartKind,
   TurnPartStatus,
   TurnStatus,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 

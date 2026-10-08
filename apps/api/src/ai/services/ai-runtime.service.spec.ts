@@ -1,4 +1,4 @@
-import { AiCapability, AiCapabilityMode, AiCapabilityProvider } from "@japro/luma-sdk";
+import { AiCapability, AiCapabilityMode, AiCapabilityProvider } from "@mentingo/luma-sdk";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";

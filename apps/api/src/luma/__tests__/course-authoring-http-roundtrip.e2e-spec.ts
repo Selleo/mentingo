@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { ReasoningEffort } from "@japro/luma-sdk";
+import { ReasoningEffort } from "@mentingo/luma-sdk";
 import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";

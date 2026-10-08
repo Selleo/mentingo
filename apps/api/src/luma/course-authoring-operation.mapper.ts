@@ -2,7 +2,7 @@
 import { BadRequestException } from "@nestjs/common";
 
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
-import type { AuthoringOperation as WireOperation } from "@japro/luma-sdk";
+import type { AuthoringOperation as WireOperation } from "@mentingo/luma-sdk";
 
 /** Preserve the operation discriminant when converting the grouped TypeBox union. */
 /** Maps validated Core operation payloads to the generated client wire contract. */

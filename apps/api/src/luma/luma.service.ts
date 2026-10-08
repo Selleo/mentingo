@@ -1,4 +1,4 @@
-import { createLumaClient } from "@japro/luma-sdk";
+import { createLumaClient } from "@mentingo/luma-sdk";
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { EnvService } from "src/env/services/env.service";

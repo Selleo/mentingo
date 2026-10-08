@@ -15,7 +15,7 @@ import {
   type TranscribeDictationResponse,
   type ValidateAiJudgeConfigurationOptions,
   type ValidateAiMentorConfigurationOptions,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import { Injectable, Logger } from "@nestjs/common";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
