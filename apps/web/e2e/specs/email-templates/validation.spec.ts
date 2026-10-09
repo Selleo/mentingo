@@ -3,6 +3,7 @@ import { USER_ROLE } from "~/config/userRoles";
 import { EMAIL_TEMPLATES_HANDLES } from "../../data/email-templates/handles";
 import { editEmailButtonFlow } from "../../flows/email-templates/edit-email-template.flow";
 import { openEmailTemplateFlow } from "../../flows/email-templates/editor.flow";
+import { saveEmailDraftFlow } from "../../flows/email-templates/template-actions.flow";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -16,15 +17,18 @@ test("incomplete button validation prevents saving until the administrator fixes
     await openEmailTemplateFlow(page, template.id!);
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.PALETTE_BLOCK("button")).click();
     await editEmailButtonFlow(page, { label: "", url: "" });
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
+    await saveEmailDraftFlow(page);
     const invalidBlock = page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK).last();
     await expect(invalidBlock).toHaveAttribute("aria-describedby", /-error$/);
     const errorId = await invalidBlock.getAttribute("aria-describedby");
     await expect(page.locator(`[id="${errorId}"]`)).toBeVisible();
     expect((await factory.getById(template.id!)).content).toEqual(template.content);
     await editEmailButtonFlow(page, { label: "Start learning", url: "https://example.com/learn" });
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await expect(invalidBlock).not.toHaveAttribute("aria-describedby", /-error$/);
+    await page.locator(`[id="${errorId}"]`).waitFor({ state: "detached" });
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.BUTTON_URL).blur();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => (await factory.getById(template.id!)).content.en?.content.at(-1))
       .toEqual({

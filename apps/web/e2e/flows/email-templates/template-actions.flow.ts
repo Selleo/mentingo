@@ -7,7 +7,8 @@ import type { GetEmailTemplateResponse } from "~/api/generated-api";
 export const openEmailCatalogFromNavigationFlow = async (page: Page) => {
   await page.goto("/");
   await page.getByTestId(NAVIGATION_HANDLES.MANAGE_TOGGLE).click();
-  await page.getByTestId(NAVIGATION_HANDLES.EMAIL_TEMPLATES_LINK).click();
+  await page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK).click();
+  await page.getByRole("tab", { name: "Email templates", exact: true }).click();
 };
 
 export const copyEmailTemplateFlow = async (page: Page, input: { templateKey: string }) => {
@@ -26,6 +27,7 @@ export const duplicateEmailTemplateFlow = async (page: Page, input: { id: string
     (response) =>
       response.url().endsWith(`/${input.id}/duplicate`) && response.request().method() === "POST",
   );
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.DUPLICATE).click();
   const result: GetEmailTemplateResponse = await (await created).json();
   return result.data;
@@ -37,14 +39,22 @@ export const sendTestEmailFlow = async (page: Page) => {
       response.url().endsWith("/email-templates/test-send") &&
       response.request().method() === "POST",
   );
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SEND_TEST).click();
   return queued;
 };
 
 export const returnToEmailCatalogFlow = async (page: Page) => {
-  const catalogLink = page.getByTestId(NAVIGATION_HANDLES.EMAIL_TEMPLATES_LINK);
-  if (!(await catalogLink.isVisible())) {
+  const workspaceLink = page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK);
+  if (!(await workspaceLink.isVisible())) {
     await page.getByTestId(NAVIGATION_HANDLES.MANAGE_TOGGLE).click();
   }
-  await catalogLink.click();
+  await workspaceLink.click();
+};
+
+export const saveEmailDraftFlow = async (page: Page) => {
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU).click();
+  const saveItem = page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE);
+  await saveItem.click();
+  await saveItem.waitFor({ state: "detached" });
 };

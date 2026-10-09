@@ -45,7 +45,7 @@ test("send test delivers unsaved content with sample variables only to the curre
     expect(bodies).toContain(`Unsaved invitation: ${sample}`);
     expect(bodies).not.toContain(`{{ ${EMAIL_TEMPLATE_DATA.variable} }}`);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(subject);
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeEnabled();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeEnabled();
     const saved = await factory.getById(template.id!);
     expect(saved.subject).toEqual(template.subject);
     expect(saved.content).toEqual(template.content);

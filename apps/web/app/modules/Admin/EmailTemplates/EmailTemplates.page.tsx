@@ -238,6 +238,7 @@ export function EmailTemplatesContent() {
                           size="icon"
                           className="size-8"
                           disabled={isActionPending}
+                          data-testid={EMAIL_TEMPLATES_HANDLES.ACTIONS}
                           aria-label={t("emailTemplates.ui.actions")}
                         >
                           <MoreVertical className="size-4" />

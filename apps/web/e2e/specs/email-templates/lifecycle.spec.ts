@@ -7,6 +7,7 @@ import {
   openEmailTemplateFlow,
   confirmEmailActionFlow,
 } from "../../flows/email-templates/editor.flow";
+import { saveEmailDraftFlow } from "../../flows/email-templates/template-actions.flow";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -27,7 +28,7 @@ test("publishing saves current edits while other templates remain independently 
     expect((await factory.getById(template.id!)).status).toBe("draft");
     expect((await factory.getById(previous.id!)).status).toBe("published");
     await confirmEmailActionFlow(page, EMAIL_TEMPLATES_HANDLES.PUBLISH);
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toHaveCount(0);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeDisabled();
     await expect
       .poll(async () => {
         const saved = await factory.getById(template.id!);
@@ -46,11 +47,11 @@ test("publishing saves current edits while other templates remain independently 
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(
       "Published directly from unsaved edits",
     );
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toHaveCount(0);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeDisabled();
     const publicationVersion = (await factory.getById(template.id!)).publicationVersion;
     await editEmailTemplateFlow(page, { subject: "Draft after publication" });
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => {
         const saved = await factory.getById(template.id!);
@@ -97,8 +98,8 @@ test("archived templates become read-only and can be restored to editable drafts
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.RESTORE).click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toBeEnabled();
     await editEmailTemplateFlow(page, { subject: "Restored content" });
-    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => {
         const saved = await factory.getById(template.id!);
@@ -119,25 +120,30 @@ for (const entry of ["editor", "list"] as const) {
       await openEmailTemplateFlow(page, template.id!);
       if (entry === "editor") {
         await editEmailTemplateFlow(page, { subject: "Unsaved change" });
+        await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
         await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)).toBeDisabled();
-        await page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE).click();
-        await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE)).toBeDisabled();
+        await page.keyboard.press("Escape");
+        await saveEmailDraftFlow(page);
+        await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
       } else {
         await page.goto(EMAIL_TEMPLATE_DATA.listPath);
       }
-      const deleteButton =
+      const actionsMenu =
         entry === "editor"
-          ? page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)
+          ? page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS)
           : page
               .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))
-              .getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE);
+              .getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS);
+      const deleteButton = page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE);
+      await actionsMenu.click();
       await deleteButton.click();
       await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CANCEL).click();
       await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM)).toBeHidden();
       expect(await factory.exists(template.id!)).toBe(true);
+      await actionsMenu.click();
       await deleteButton.click();
       await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();
-      await expect(page).toHaveURL(new RegExp(`${EMAIL_TEMPLATE_DATA.listPath}$`));
+      await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
       await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
       await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
       await expect.poll(() => factory.exists(template.id!)).toBe(false);

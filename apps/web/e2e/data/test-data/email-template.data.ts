@@ -4,6 +4,7 @@ import type { CreateEmailTemplateBody } from "~/api/generated-api";
 
 export const EMAIL_TEMPLATE_DATA = {
   builtInTemplateKey: BUILT_IN_EMAIL_TEMPLATE_KEYS.ASSIGNMENT_WITH_DEADLINE,
+  catalogPath: "/admin/automations?tab=email-templates",
   listPath: "/admin/email-templates",
   namePrefix: "E2E Email",
   subject: "Your learning assignment",

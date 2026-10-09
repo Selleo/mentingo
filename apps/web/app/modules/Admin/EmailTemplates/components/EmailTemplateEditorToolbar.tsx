@@ -208,6 +208,7 @@ export function EmailTemplateEditorToolbar({
                     },
                   )}
                   disabled={!canSaveDraft}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.SAVE_MENU}
                   aria-label={t("emailTemplates.ui.saveDraft")}
                 >
                   <ChevronDown className="size-4" />
@@ -240,6 +241,7 @@ export function EmailTemplateEditorToolbar({
               variant="ghost"
               size="icon"
               className="size-8"
+              data-testid={EMAIL_TEMPLATES_HANDLES.ACTIONS}
               aria-label={t("emailTemplates.ui.actions")}
             >
               <MoreVertical className="size-4" />
