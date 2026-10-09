@@ -21,7 +21,7 @@ import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { DatabasePg } from "src/common";
 import {
   getCourseAuthoringBlocks,
-  normalizeCourseAuthoringContent,
+  normalizeCourseAuthoringHtml,
   replaceCourseAuthoringBlock,
 } from "src/common/utils/courseAuthoringBlocks";
 import { CourseService } from "src/courses/course.service";
@@ -992,7 +992,7 @@ export class CourseAuthoringApplyService {
       node.replaceWith(replacement);
     }
     const html = $("body").html() ?? "";
-    return assignBlocks ? normalizeCourseAuthoringContent(html) : html;
+    return assignBlocks ? normalizeCourseAuthoringHtml(html) : html;
   }
 
   /** Resolves a staged asset to its tenant-prefixed storage key or rejects it. */

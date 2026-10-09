@@ -193,9 +193,20 @@ export const normalizeCourseAuthoringContent = (
   content: string,
   createId: () => string = randomUUID,
 ) => {
-  const html = supportedMarkup(content)
-    ? content
-    : `<p>${escapeHtml(content)}</p>`;
+  const html = supportedMarkup(content) ? content : `<p>${escapeHtml(content)}</p>`;
+  return normalizeCourseAuthoringBlocks(html, createId);
+};
+
+/** Assigns blocks to already validated lesson HTML without reclassifying semantic tags as text. */
+export const normalizeCourseAuthoringHtml = (
+  content: string,
+  createId: () => string = randomUUID,
+) => {
+  const $ = loadHtml(content);
+  const body = $("body");
+  // Plain copy still needs a block. Keep encoded markup as text: decoding it into
+  // another HTML parse would change what the author approved and bypass validation.
+  const html = body.children().length ? content : `<p>${escapeHtml(body.text())}</p>`;
   return normalizeCourseAuthoringBlocks(html, createId);
 };
 

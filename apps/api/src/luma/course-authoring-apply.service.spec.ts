@@ -475,7 +475,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       expect(test.updateLesson.mock.calls[0][1].description).not.toContain("attacker.example");
     },
   );
-  it("normalizes content metadata images through native lesson resources", async () => {
+  it("preserves lesson HTML around figure images while creating native resources", async () => {
     const test = setup();
     test.persistedLessonType.mockReturnValue("content");
     test.input.assetMappings = { image: `${chapterId}/image.png` };
@@ -490,7 +490,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
         dependencies: [],
         payload: {
           description:
-            '<p>Existing content.</p><img data-authoring-asset-id="image" alt="Illustration">',
+            '<h2>Architecture</h2><p>Existing content.</p><figure><img data-authoring-asset-id="image" alt="Illustration"><figcaption>Data flow</figcaption></figure>',
         },
       },
     ];
@@ -503,6 +503,10 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(patch.description).toContain('data-node-type="image"');
     expect(patch.description).toContain("data-authoring-block-id");
     expect(patch.description).not.toContain("data-authoring-asset-id");
+    expect(patch.description).toContain("<h2");
+    expect(patch.description).toContain("<figure");
+    expect(patch.description).toContain("<figcaption>Data flow</figcaption>");
+    expect(patch.description).not.toContain("&lt;h2");
   });
   it("clears a quiz introduction without replacing its questions", async () => {
     const test = setup();

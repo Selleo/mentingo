@@ -7,6 +7,7 @@ import {
   getCourseAuthoringContentFingerprint,
   getCourseAuthoringBlocks,
   normalizeCourseAuthoringContent,
+  normalizeCourseAuthoringHtml,
   normalizeCourseAuthoringBlocks,
   replaceCourseAuthoringBlock,
 } from "../courseAuthoringBlocks";
@@ -33,6 +34,38 @@ const expectBlockError = (callback: () => unknown, code: string) => {
 };
 
 describe("course authoring blocks", () => {
+  it("preserves validated semantic lesson HTML and image captions", () => {
+    const normalized = normalizeCourseAuthoringHtml(
+      '<h2>Architecture</h2><figure><div data-node-type="image" data-src="/image.png"></div><figcaption>Data flow</figcaption></figure><p>Explanation</p>',
+      idFactory(),
+    );
+    const $ = loadHtml(normalized);
+
+    expect(
+      $("body")
+        .children()
+        .toArray()
+        .map((node) => $(node).prop("tagName")),
+    ).toEqual(["H2", "FIGURE", "P"]);
+    expect($("figcaption").text()).toBe("Data flow");
+    expect($("figure [data-node-type='image']")).toHaveLength(1);
+    expect(normalized).not.toContain("&lt;h2&gt;");
+    expect(normalizeCourseAuthoringHtml(normalized, idFactory())).toBe(normalized);
+  });
+
+  it.each(["Use x < y & z", "&lt;h2&gt;Literal example&lt;/h2&gt;"])(
+    "keeps validated plain or encoded copy as text: %s",
+    (content) => {
+      const normalized = normalizeCourseAuthoringHtml(content, idFactory());
+      const $ = loadHtml(normalized);
+
+      expect($("body").children()).toHaveLength(1);
+      expect($("body").children().first().prop("tagName")).toBe("P");
+      expect($("h2")).toHaveLength(0);
+      expect($("body").text()).toBe(loadHtml(content)("body").text());
+    },
+  );
+
   it("wraps plain text in a stable top-level paragraph", () => {
     const normalized = normalizeCourseAuthoringContent("A clear lesson introduction", idFactory());
     const $ = loadHtml(normalized);
@@ -200,9 +233,12 @@ describe("course authoring blocks", () => {
     const after = getCourseAuthoringBlocks(changed);
     expect(after[0].baselineHash).toBe(before[0].baselineHash);
     expect(after[1].baselineHash).not.toBe(before[1].baselineHash);
-    const applied = replaceCourseAuthoringBlock({ content: changed, targetBlockId: before[0].id, replacementHtml: "<p>AI first</p>" });
+    const applied = replaceCourseAuthoringBlock({
+      content: changed,
+      targetBlockId: before[0].id,
+      replacementHtml: "<p>AI first</p>",
+    });
     expect(applied).toContain("AI first");
     expect(applied).toContain("Manual change");
   });
-
 });
