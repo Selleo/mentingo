@@ -420,21 +420,23 @@ describe("AuthoringActivityRail live work", () => {
     ["started", "Synthesizing saved sources"],
     ["completed", "Source synthesis complete"],
     ["failed", "Source synthesis failed"],
-    ["stopped", "Source synthesis stopped"],
+    ["stopped", "Source synthesis incomplete"],
   ] as const)("renders local synthesis separately from searches: %s", (status, label) => {
     renderWith().render(
       <AuthoringToolActivity
         tool={{
           toolCallId: "local-synthesis",
           toolName: "research_synthesis",
-          display: "3/9",
+          display: status === "completed" ? "9/9" : "3/9",
           status,
           result: { query: "This is not an external search query" },
         }}
       />,
     );
     expect(screen.getByText(label)).toBeVisible();
-    expect(screen.getByText("3/9")).toBeVisible();
+    expect(
+      screen.getByText(status === "completed" ? "Topics assessed: 9/9" : "Topics assessed: 3/9"),
+    ).toBeVisible();
     expect(screen.queryByRole("list")).toBeNull();
     expect(screen.queryByText("This is not an external search query")).toBeNull();
     const activity = screen.getByTestId("course-authoring-tool-local-synthesis");
@@ -443,6 +445,25 @@ describe("AuthoringActivityRail live work", () => {
       status === "started",
     );
   });
+
+  it.each(["stopped", "completed"] as const)(
+    "shows incomplete synthesis without claiming any topics were assessed: %s",
+    (status) => {
+      renderWith().render(
+        <AuthoringToolActivity
+          tool={{
+            toolCallId: "incomplete-synthesis",
+            toolName: "research_synthesis",
+            display: "0/3",
+            status,
+          }}
+        />,
+      );
+      expect(screen.getByText("Source synthesis incomplete")).toBeVisible();
+      expect(screen.getByText("Topics assessed: 0/3")).toBeVisible();
+      expect(screen.queryByText("Source synthesis complete")).toBeNull();
+    },
+  );
 
   it("shows exact search queries beneath the individual tool row", () => {
     renderWith().render(

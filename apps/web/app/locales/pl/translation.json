@@ -6352,11 +6352,12 @@
       "deny": "Odmów",
       "capabilityAllowed": "Zezwolono na wyszukiwanie w sieci",
       "capabilityDenied": "Odmówiono wyszukiwania w sieci",
+      "researchSynthesisProgress": "Ocenione tematy: {{progress}}",
       "researchSynthesisTool": {
         "started": "Synteza zapisanych źródeł",
         "completed": "Synteza źródeł zakończona",
         "failed": "Synteza źródeł nie powiodła się",
-        "stopped": "Synteza źródeł zatrzymana"
+        "stopped": "Synteza źródeł nie została ukończona"
       },
       "deepResearchAllowed": "Włączono pogłębiony research",
       "deepResearchDenied": "Odmówiono pogłębionego researchu",

@@ -6309,11 +6309,12 @@
       "deny": "Deny",
       "capabilityAllowed": "Web search allowed",
       "capabilityDenied": "Web search denied",
+      "researchSynthesisProgress": "Topics assessed: {{progress}}",
       "researchSynthesisTool": {
         "started": "Synthesizing saved sources",
         "completed": "Source synthesis complete",
         "failed": "Source synthesis failed",
-        "stopped": "Source synthesis stopped"
+        "stopped": "Source synthesis incomplete"
       },
       "deepResearchAllowed": "Deep research enabled",
       "deepResearchDenied": "Deep research declined",

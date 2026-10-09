@@ -6284,11 +6284,12 @@
       "deny": "Ablehnen",
       "capabilityAllowed": "Websuche erlaubt",
       "capabilityDenied": "Websuche abgelehnt",
+      "researchSynthesisProgress": "Bewertete Themen: {{progress}}",
       "researchSynthesisTool": {
         "started": "Gespeicherte Quellen zusammenführen",
         "completed": "Quellensynthese abgeschlossen",
         "failed": "Quellensynthese fehlgeschlagen",
-        "stopped": "Quellensynthese angehalten"
+        "stopped": "Quellensynthese unvollständig"
       },
       "deepResearchAllowed": "Vertiefte Recherche aktiviert",
       "deepResearchDenied": "Vertiefte Recherche abgelehnt",

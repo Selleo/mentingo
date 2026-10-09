@@ -6296,11 +6296,12 @@
       "deny": "Odmítnout",
       "capabilityAllowed": "Vyhledávání na webu povoleno",
       "capabilityDenied": "Vyhledávání na webu odmítnuto",
+      "researchSynthesisProgress": "Vyhodnocená témata: {{progress}}",
       "researchSynthesisTool": {
         "started": "Syntéza uložených zdrojů",
         "completed": "Syntéza zdrojů dokončena",
         "failed": "Syntéza zdrojů selhala",
-        "stopped": "Syntéza zdrojů zastavena"
+        "stopped": "Syntéza zdrojů není dokončena"
       },
       "deepResearchAllowed": "Hloubkový výzkum povolen",
       "deepResearchDenied": "Hloubkový výzkum odmítnut",

@@ -6240,11 +6240,12 @@
       "deny": "Denegar",
       "capabilityAllowed": "Búsqueda web permitida",
       "capabilityDenied": "Búsqueda web denegada",
+      "researchSynthesisProgress": "Temas evaluados: {{progress}}",
       "researchSynthesisTool": {
         "started": "Sintetizando fuentes guardadas",
         "completed": "Síntesis de fuentes completada",
         "failed": "Error en la síntesis de fuentes",
-        "stopped": "Síntesis de fuentes detenida"
+        "stopped": "Síntesis de fuentes incompleta"
       },
       "deepResearchAllowed": "Investigación profunda activada",
       "deepResearchDenied": "Investigación profunda rechazada",

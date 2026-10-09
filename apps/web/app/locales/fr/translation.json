@@ -6033,11 +6033,12 @@
       "deny": "Refuser",
       "capabilityAllowed": "Recherche sur le Web autorisée",
       "capabilityDenied": "Recherche sur le Web refusée",
+      "researchSynthesisProgress": "Sujets évalués : {{progress}}",
       "researchSynthesisTool": {
         "started": "Synthèse des sources enregistrées",
         "completed": "Synthèse des sources terminée",
         "failed": "Échec de la synthèse des sources",
-        "stopped": "Synthèse des sources arrêtée"
+        "stopped": "Synthèse des sources incomplète"
       },
       "deepResearchAllowed": "Recherche approfondie activée",
       "deepResearchDenied": "Recherche approfondie refusée",

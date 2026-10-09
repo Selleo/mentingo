@@ -6292,11 +6292,12 @@
       "deny": "Neleisti",
       "capabilityAllowed": "Paieška internete leista",
       "capabilityDenied": "Paieška internete atmesta",
+      "researchSynthesisProgress": "Įvertintos temos: {{progress}}",
       "researchSynthesisTool": {
         "started": "Išsaugotų šaltinių sintezė",
         "completed": "Šaltinių sintezė baigta",
         "failed": "Šaltinių sintezė nepavyko",
-        "stopped": "Šaltinių sintezė sustabdyta"
+        "stopped": "Šaltinių sintezė nebaigta"
       },
       "deepResearchAllowed": "Išsamus tyrimas įjungtas",
       "deepResearchDenied": "Išsamus tyrimas atmestas",

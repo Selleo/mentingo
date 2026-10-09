@@ -402,10 +402,22 @@ export const AuthoringToolActivity = ({
   const isWebToolActivity = isWebTool(tool);
   const isExtraction = tool.toolName === "web_extract";
   const isSynthesis = tool.toolName === "research_synthesis";
-  const isRunning = tool.status === "started";
-  const isProblem = tool.status === "failed" || tool.status === "stopped";
+  const progressParts = tool.display.split("/");
+  const assessedCount = Number(progressParts[0]);
+  const topicCount = Number(progressParts[1]);
+  const incompletePersistedSynthesis =
+    isSynthesis &&
+    tool.status === "completed" &&
+    progressParts.length === 2 &&
+    Number.isInteger(assessedCount) &&
+    Number.isInteger(topicCount) &&
+    assessedCount >= 0 &&
+    assessedCount < topicCount;
+  const displayStatus = incompletePersistedSynthesis ? "stopped" : tool.status;
+  const isRunning = displayStatus === "started";
+  const isProblem = displayStatus === "failed" || displayStatus === "stopped";
   let label = tool.display;
-  if (isSynthesis) label = t(`courseAuthoring.conversation.researchSynthesisTool.${tool.status}`);
+  if (isSynthesis) label = t(`courseAuthoring.conversation.researchSynthesisTool.${displayStatus}`);
   else if (isExtraction) label = t(`courseAuthoring.conversation.webExtractTool.${tool.status}`);
   else if (isWebToolActivity)
     label = t(`courseAuthoring.conversation.webSearchTool.${tool.status}`);
@@ -454,7 +466,9 @@ export const AuthoringToolActivity = ({
         )}
       </div>
       {isSynthesis && tool.display && (
-        <p className="ml-7 text-xs text-neutral-600">{tool.display}</p>
+        <p className="ml-7 text-xs text-neutral-600">
+          {t("courseAuthoring.conversation.researchSynthesisProgress", { progress: tool.display })}
+        </p>
       )}
       {isExtraction && typeof tool.result?.query === "string" && (
         <p className="ml-7 break-all text-xs text-neutral-600">{tool.result.query}</p>
