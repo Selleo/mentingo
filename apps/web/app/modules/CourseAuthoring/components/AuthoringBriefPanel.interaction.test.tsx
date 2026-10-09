@@ -206,6 +206,117 @@ describe("AuthoringBriefPanel", () => {
     });
   });
 
+  it.each(["standard", "deep"] as const)(
+    "accepts a newer approved policy after strict-source overrides: %s",
+    async (researchDepth) => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
+      const onSelectSources = vi.fn();
+      const initialPolicy = {
+        sourceVersionIds: ["source-1"],
+        webEnabled: true,
+        generalKnowledgeEnabled: false,
+        researchDepth: "standard" as const,
+        requiredSectionIds: [],
+        excludedSectionIds: [],
+      };
+      const props = {
+        course,
+        sessionId: "session-1",
+        onSubmit,
+        onSelectSources,
+        sources: [readySource("source-1", "Guide.pdf")],
+        initialSourcePolicy: initialPolicy,
+      };
+      const rendered = renderWith().render(
+        <AuthoringBriefPanel {...props} sourcePolicySequence={1} />,
+      );
+      await user.click(screen.getByRole("button", { name: /Open course tools/ }));
+      await user.click(screen.getByRole("button", { name: /Only my sources/ }));
+      expect(onSelectSources).toHaveBeenLastCalledWith(
+        expect.objectContaining({ webEnabled: false }),
+      );
+      await user.keyboard("{Escape}");
+      // A new durable grant can equal the pre-override policy; its sequence still matters.
+      rendered.rerender(
+        <AuthoringBriefPanel
+          {...props}
+          sourcePolicySequence={2}
+          initialSourcePolicy={{ ...initialPolicy, researchDepth }}
+        />,
+      );
+      await user.type(
+        screen.getByTestId("course-authoring-brief-input"),
+        "Research the next lesson",
+      );
+      await user.click(screen.getByRole("button", { name: "Send" }));
+      expect(onSubmit).toHaveBeenCalledOnce();
+      expect(onSubmit.mock.calls[0]?.[0].sourcePolicy).toMatchObject({
+        webEnabled: true,
+        researchDepth,
+      });
+    },
+  );
+
+  it("preserves the newest local edit through earlier acknowledgments and accepts later revocation", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const onSelectSources = vi.fn();
+    const initialPolicy = {
+      sourceVersionIds: [],
+      webEnabled: false,
+      generalKnowledgeEnabled: true,
+      researchDepth: "standard" as const,
+      requiredSectionIds: [],
+      excludedSectionIds: [],
+    };
+    const props = { course, sessionId: "session-1", onSubmit, onSelectSources };
+    const rendered = renderWith().render(
+      <AuthoringBriefPanel
+        {...props}
+        initialSourcePolicy={initialPolicy}
+        sourcePolicySequence={1}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: /Open course tools/ }));
+    await user.click(screen.getByRole("button", { name: "Web search" }));
+    const webPolicy = onSelectSources.mock.calls.at(-1)?.[0];
+    await user.click(screen.getByRole("button", { name: "Deep research" }));
+    const deepPolicy = onSelectSources.mock.calls.at(-1)?.[0];
+    rendered.rerender(
+      <AuthoringBriefPanel {...props} initialSourcePolicy={webPolicy} sourcePolicySequence={2} />,
+    );
+    expect(screen.getByRole("button", { name: "Deep research" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    rendered.rerender(
+      <AuthoringBriefPanel {...props} initialSourcePolicy={deepPolicy} sourcePolicySequence={3} />,
+    );
+    rendered.rerender(
+      <AuthoringBriefPanel
+        {...props}
+        initialSourcePolicy={initialPolicy}
+        sourcePolicySequence={4}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Web search" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    // An older incoming snapshot cannot restore permission after the revocation.
+    rendered.rerender(
+      <AuthoringBriefPanel {...props} initialSourcePolicy={webPolicy} sourcePolicySequence={2} />,
+    );
+    await user.keyboard("{Escape}");
+    await user.type(screen.getByTestId("course-authoring-brief-input"), "Next request");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(onSubmit.mock.calls[0]?.[0].sourcePolicy).toMatchObject({
+      webEnabled: false,
+      researchDepth: "standard",
+    });
+  });
+
   it("uses check rows for independent web, deep-thinking, and strict-source controls", async () => {
     const user = userEvent.setup();
     const onSelectSources = vi.fn();

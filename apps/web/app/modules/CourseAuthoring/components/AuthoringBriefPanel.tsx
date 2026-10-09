@@ -30,6 +30,7 @@ type Props = {
   onUploadSource?: (file: File) => void | Promise<string | void>;
   isUploadingSource?: boolean;
   initialSourcePolicy?: SourcePolicy | null;
+  sourcePolicySequence?: number | null;
   sources?: SourceView[];
   sourceRefreshes?: SourceRefreshView[];
   onRefreshSource?: (
@@ -139,6 +140,7 @@ export const AuthoringBriefPanel = ({
   onUploadSource,
   isUploadingSource,
   initialSourcePolicy,
+  sourcePolicySequence,
   sources = [],
   sourceRefreshes = [],
   onRefreshSource,
@@ -162,7 +164,9 @@ export const AuthoringBriefPanel = ({
   const [composerAttachments, setComposerAttachments] = useState<ComposerAttachment[]>([]);
   const [sourceUploadError, setSourceUploadError] = useState<string | null>(null);
   const [sourceSelectionError, setSourceSelectionError] = useState<string | null>(null);
-  const userPolicyOverrideRef = useRef<SourcePolicy | null>(null);
+  const pendingPolicySelectionsRef = useRef<SourcePolicy[]>([]);
+  const incomingPolicyRef = useRef(policy);
+  const incomingPolicySequenceRef = useRef(sourcePolicySequence ?? null);
   const policyRef = useRef(policy);
   const composerAttachmentsRef = useRef(composerAttachments);
   const sessionIdRef = useRef(sessionId);
@@ -207,7 +211,8 @@ export const AuthoringBriefPanel = ({
     const sessionChanged = previousSessionId !== sessionId;
     if (sessionChanged) {
       sessionIdRef.current = sessionId;
-      userPolicyOverrideRef.current = null;
+      pendingPolicySelectionsRef.current = [];
+      incomingPolicySequenceRef.current = null;
       setStrictSourceMode(false);
       // Upload acceptance may be the event that creates the first durable session.
       // Preserve its composer chip through that transition; clear only on a real switch.
@@ -226,15 +231,58 @@ export const AuthoringBriefPanel = ({
       hydratedDraftSessionRef.current = sessionId;
       skipDraftWriteSessionRef.current = sessionId;
     }
-    if (userPolicyOverrideRef.current && !sessionChanged) return;
-    userPolicyOverrideRef.current = null;
+    const incomingSequence = sourcePolicySequence ?? null;
+    const previousSequence = incomingPolicySequenceRef.current;
+    if (
+      !sessionChanged &&
+      incomingSequence !== null &&
+      previousSequence !== null &&
+      incomingSequence <= previousSequence
+    )
+      return;
+    const incomingKey = JSON.stringify(incomingPolicy);
+    const previousKey = JSON.stringify(incomingPolicyRef.current);
+    const selectionAdvanced =
+      incomingSequence !== null &&
+      (previousSequence === null || incomingSequence > previousSequence);
+    if (pendingPolicySelectionsRef.current.length > 0 && !sessionChanged) {
+      // Preserve unsaved local intent through unchanged/stale snapshots. A newer
+      // durable selection (including an approved grant) must supersede it.
+      if (!selectionAdvanced && incomingKey === previousKey) return;
+      let acknowledgedIndex = -1;
+      pendingPolicySelectionsRef.current.forEach((selection, index) => {
+        if (JSON.stringify(selection) === incomingKey) acknowledgedIndex = index;
+      });
+      incomingPolicyRef.current = incomingPolicy;
+      incomingPolicySequenceRef.current = incomingSequence;
+      if (
+        acknowledgedIndex >= 0 &&
+        acknowledgedIndex < pendingPolicySelectionsRef.current.length - 1
+      ) {
+        pendingPolicySelectionsRef.current = pendingPolicySelectionsRef.current.slice(
+          acknowledgedIndex + 1,
+        );
+        return;
+      }
+      pendingPolicySelectionsRef.current = [];
+    }
+    incomingPolicyRef.current = incomingPolicy;
+    incomingPolicySequenceRef.current = incomingSequence;
     policyRef.current = incomingPolicy;
     setPolicy(incomingPolicy);
-  }, [composerAttachments.length, initialSourcePolicy, sessionId, updateComposerAttachments]);
+    if (incomingPolicy.webEnabled || incomingPolicy.generalKnowledgeEnabled)
+      setStrictSourceMode(false);
+  }, [
+    composerAttachments.length,
+    initialSourcePolicy,
+    sourcePolicySequence,
+    sessionId,
+    updateComposerAttachments,
+  ]);
 
   /** Updates source policy and persists the selection for future requests. */
   const updatePolicy = (next: SourcePolicy) => {
-    userPolicyOverrideRef.current = next;
+    pendingPolicySelectionsRef.current.push(next);
     policyRef.current = next;
     setPolicy(next);
     setSourceSelectionError(null);

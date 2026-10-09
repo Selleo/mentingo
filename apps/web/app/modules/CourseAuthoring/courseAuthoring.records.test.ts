@@ -1109,7 +1109,7 @@ describe("course authoring record projection", () => {
     },
   );
 
-  it("reconciles web permission prompts against persisted policy and task state after reload", () => {
+  it("keeps waiting web permission prompts unanswered despite a persisted session grant", () => {
     const result = projectWorkspaceRecords(
       [
         {
@@ -1184,8 +1184,8 @@ describe("course authoring record projection", () => {
     expect(result.questions).toMatchObject([
       {
         id: "question-web-still-waiting",
-        answer: "allow",
-        answered: true,
+        answer: null,
+        answered: false,
       },
     ]);
   });

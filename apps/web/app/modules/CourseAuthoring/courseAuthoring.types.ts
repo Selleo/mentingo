@@ -528,6 +528,7 @@ export type WorkspaceProjection = {
   applications: ApplicationView[];
   unsupportedRecordCount: number;
   sourcePolicy: SourcePolicy | null;
+  sourcePolicySequence?: number | null;
   sourceRefreshes: SourceRefreshView[];
   assetTasks: AssetTaskView[];
   readyAssetIds: string[];

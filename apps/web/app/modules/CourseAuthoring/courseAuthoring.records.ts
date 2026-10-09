@@ -860,6 +860,9 @@ export const projectWorkspaceRecords = (
     .sort((left, right) => right.sequence - left.sequence)[0]?.record;
   if (selection) {
     projection.sourcePolicy = parseSourcePolicy(selection.payload);
+    projection.sourcePolicySequence = projection.sourcePolicy
+      ? numberValue(selection.payload.sequence)
+      : null;
     if (!projection.sourcePolicy) projection.unsupportedRecordCount += 1;
   }
 
@@ -917,15 +920,6 @@ export const projectWorkspaceRecords = (
       if (!question.answered) {
         const task = tasks.find((candidate) => candidate.taskId === question.taskId);
         if (task && task.status !== "waiting_author") return;
-      }
-
-      if (question.capability === "web_search" && !question.answered) {
-        // Source policy is the durable authorization record. A prior grant resolves
-        // stale permission prompts even when the workflow's question event lagged it.
-        if (projection.sourcePolicy?.webEnabled) {
-          projection.questions.push({ ...question, answer: "allow", answered: true });
-          return;
-        }
       }
 
       projection.questions.push(question);

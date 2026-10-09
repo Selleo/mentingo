@@ -1540,6 +1540,7 @@ export const CourseGenerationSession = ({
             <AuthoringBriefPanel
               course={context}
               initialSourcePolicy={projection.sourcePolicy}
+              sourcePolicySequence={projection.sourcePolicySequence}
               sources={projection.sources}
               sourceRefreshes={projection.sourceRefreshes}
               onRefreshSource={refreshSource}
