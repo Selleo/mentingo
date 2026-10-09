@@ -15,6 +15,15 @@ import type { UUIDType } from "src/common";
 @Injectable()
 export class LocalizationService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
+
+  getLocalizedValue<T>(
+    translations: Partial<Record<SupportedLanguages, T>>,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
+  ): T | undefined {
+    return translations[language] ?? translations[baseLanguage];
+  }
+
   async getBaseLanguage(
     entityType: EntityType,
     entityId: UUIDType,

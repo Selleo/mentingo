@@ -9,7 +9,7 @@ export function useDuplicateEmailTemplate() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      (await ApiClient.api.emailTemplateControllerDuplicateEmailTemplate(id)).data.data,
+      (await ApiClient.api.emailTemplateManagementControllerDuplicateEmailTemplate(id)).data.data,
     ...feedback,
   });
 }

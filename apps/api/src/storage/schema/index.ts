@@ -3,9 +3,13 @@ import {
   type EmailTemplateEvent,
   type EmailTemplateStatus,
   type LocalizedEmailTemplateContent,
+  type PublishedEmailTemplate,
 } from "@repo/email-templates";
 import {
   COURSE_TYPE,
+  AUTOMATION_NODE_KINDS,
+  AUTOMATION_STATUSES,
+  AUTOMATION_RUN_STATUSES,
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   LEARNING_PATH_ENROLLMENT_TYPES,
@@ -39,6 +43,61 @@ import {
   AI_MENTOR_TEACHING_STYLE,
   AI_MENTOR_TYPE,
   RESOURCE_VISIBILITY,
+  type AutomationStepTrace,
+  type AutomationDefinitionKind,
+  type AutomationStepConfiguration,
+  type AutomationEmailDeliveryStatus,
+  type AutomationEventKind,
+  type AutomationPlaceholderDefinition,
+  type AutomationPlaceholderValue,
+  type AutomationTemplateReference,
+  type CourseStatus,
+  type CourseType,
+  type CourseOriginType,
+  type FormType,
+  type LocalizedText,
+  type MasterCourseEntityType,
+  type MasterCourseExportSyncStatus,
+  type LearningPathEntityType,
+  type LearningPathCertificateStatus,
+  type RegistrationFormFieldType,
+  type ScormCompletionStatus,
+  type ScormPackageEntityType,
+  type ScormPackageStatus,
+  type ScormStandard,
+  type ScormSuccessStatus,
+  type SupportedLanguages,
+  type PermissionKey,
+  type SupportSessionStatus,
+  type TenantStatus,
+  type LearningPathEnrollmentType,
+  type LearningPathProgressStatus,
+  type LearningPathStatus,
+  type CertificateArchiveReason,
+  type CertificateStatus,
+  type CalendarEventStatus,
+  type CalendarProvider,
+  type AnnouncementEmailTemplate,
+  type AnnouncementSourceType,
+  type AnnouncementStatus,
+  type CourseGenerationSyncStatus,
+  type LiveTrainingDeliveryType,
+  type LiveTrainingLinkEntityType,
+  type LiveTrainingMemberRole,
+  type LiveTrainingParticipantRole,
+  type LiveTrainingSettings,
+  type LiveTrainingSessionStatus,
+  type LiveTrainingStatus,
+  type LiveTrainingVisibilityScope,
+  type MicrosoftCalendarConnectionStatus,
+  type MicrosoftCalendarOutboundStatus,
+  type OutlookEventAvailability,
+  type OutlookEventSensitivity,
+  type AnnouncementAudience,
+  type AiMentorRoleplayDifficulty,
+  type AiMentorTeachingStyle,
+  type AiMentorType,
+  type ResourceVisibility,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -52,6 +111,7 @@ import {
   numeric,
   pgTable,
   pgEnum,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -69,7 +129,7 @@ import {
 } from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
-import { int4multirange, tsvector } from "./custom-types";
+import { int4multirange, nativeJsonb, tsvector } from "./custom-types";
 export * from "./quiz.schema";
 import {
   archived,
@@ -82,58 +142,13 @@ import {
   withTenantIdIndex,
 } from "./utils";
 
-import type {
-  CourseStatus,
-  CourseType,
-  CourseOriginType,
-  FormType,
-  LocalizedText,
-  MasterCourseEntityType,
-  MasterCourseExportSyncStatus,
-  LearningPathEntityType,
-  LearningPathCertificateStatus,
-  RegistrationFormFieldType,
-  ScormCompletionStatus,
-  ScormPackageEntityType,
-  ScormPackageStatus,
-  ScormStandard,
-  ScormSuccessStatus,
-  SupportedLanguages,
-  PermissionKey,
-  SupportSessionStatus,
-  TenantStatus,
-  LearningPathEnrollmentType,
-  LearningPathProgressStatus,
-  LearningPathStatus,
-  CertificateArchiveReason,
-  CertificateStatus,
-  CalendarEventStatus,
-  CalendarProvider,
-  AnnouncementEmailTemplate,
-  AnnouncementSourceType,
-  AnnouncementStatus,
-  CourseGenerationSyncStatus,
-  LiveTrainingDeliveryType,
-  LiveTrainingLinkEntityType,
-  LiveTrainingMemberRole,
-  LiveTrainingParticipantRole,
-  LiveTrainingSettings,
-  LiveTrainingSessionStatus,
-  LiveTrainingStatus,
-  LiveTrainingVisibilityScope,
-  MicrosoftCalendarConnectionStatus,
-  MicrosoftCalendarOutboundStatus,
-  OutlookEventAvailability,
-  OutlookEventSensitivity,
-  AnnouncementAudience,
-  AiMentorRoleplayDifficulty,
-  AiMentorTeachingStyle,
-  AiMentorType,
-  ResourceVisibility,
-} from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiMentorPracticeStatus } from "src/ai/ai-practice.types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
+import type {
+  EncryptedAccountActionToken,
+  NotificationAccountActionKind,
+} from "src/automation-execution/automation-execution.types";
 import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
@@ -2256,7 +2271,7 @@ export const outboxEvents = pgTable(
     ...id,
     ...timestamps,
     eventType: text("event_type").notNull(),
-    payload: jsonb("payload").notNull(),
+    payload: nativeJsonb<Record<string, unknown>>("payload").notNull(),
     status: text("status").notNull().default("pending"),
     attemptCount: integer("attempt_count").notNull().default(0),
     publishedAt: timestamp("published_at", {
@@ -2968,7 +2983,13 @@ export const emailTemplates = pgTable(
       .$type<EmailTemplateStatus>()
       .notNull()
       .default(EMAIL_TEMPLATE_STATUSES.DRAFT),
-    event: text("event").$type<EmailTemplateEvent>().notNull(),
+    event: text("event").$type<EmailTemplateEvent>(),
+    triggerEventKind: text("trigger_event_kind").$type<AutomationEventKind>(),
+    placeholders: nativeJsonb<AutomationPlaceholderDefinition[]>("placeholders")
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    publication: nativeJsonb<PublishedEmailTemplate>("publication"),
+    publicationVersion: integer("publication_version").notNull().default(0),
     baseLanguage,
     availableLocales,
     publishedAt: timestampWithTimezone({ name: "published_at" }),
@@ -2978,8 +2999,186 @@ export const emailTemplates = pgTable(
   },
   (table) => ({
     tenantEventIdx: index("email_templates_tenant_event_idx").on(table.tenantId, table.event),
-    publishedEventUniqueIdx: uniqueIndex("email_templates_published_event_unique_idx")
-      .on(table.tenantId, table.event)
-      .where(sql`${table.status} = 'published'`),
   }),
+);
+
+export const automationStatusEnum = pgEnum("automation_status", [
+  AUTOMATION_STATUSES.ENABLED,
+  AUTOMATION_STATUSES.DISABLED,
+  AUTOMATION_STATUSES.ARCHIVED,
+  AUTOMATION_STATUSES.DRAFT,
+]);
+
+export const automations = pgTable(
+  "automations",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    status: automationStatusEnum("status").notNull().default(AUTOMATION_STATUSES.DRAFT),
+    name: nativeJsonb<LocalizedText>("name").notNull(),
+    description: nativeJsonb<LocalizedText>("description").notNull(),
+    appliedName: nativeJsonb<LocalizedText>("applied_name"),
+    appliedDescription: nativeJsonb<LocalizedText>("applied_description"),
+    draftRootStepId: uuid("draft_root_step_id"),
+    appliedRootStepId: uuid("applied_root_step_id"),
+    baseLanguage,
+    availableLocales,
+    executionVersion: integer("execution_version").notNull().default(0),
+    deletedAt: timestampWithTimezone({ name: "deleted_at" }),
+    builtInKey: text("built_in_key").$type<AutomationEventKind>(),
+  },
+  withTenantIdIndex("automations", (table) => ({
+    builtInKeyIdx: uniqueIndex("automations_built_in_key_unique_idx").on(
+      table.tenantId,
+      table.builtInKey,
+    ),
+  })),
+);
+
+export const automationNodeKindEnum = pgEnum("automation_node_kind", [
+  AUTOMATION_NODE_KINDS.ACTION,
+  AUTOMATION_NODE_KINDS.CONDITION,
+  AUTOMATION_NODE_KINDS.TRIGGER,
+]);
+
+export const automationSteps = pgTable(
+  "automation_steps",
+  {
+    id: uuid("id").notNull(),
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    definitionKind: text("definition_kind").$type<AutomationDefinitionKind>().notNull(),
+    parentId: uuid("parent_id"),
+    position: integer("position").notNull().default(0),
+    nodeKind: automationNodeKindEnum("node_kind").notNull(),
+    configuration: nativeJsonb<AutomationStepConfiguration>("configuration").notNull(),
+  },
+  (table) => ({
+    identity: primaryKey({ columns: [table.automationId, table.id, table.definitionKind] }),
+    ...withTenantIdIndex("automation_steps")(table),
+  }),
+);
+
+export const automationOccurrences = pgTable(
+  "automation_occurrences",
+  {
+    tenantId,
+    occurrenceId: text("occurrence_id").notNull(),
+    createdAt: timestampWithTimezone({ name: "created_at" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  withTenantIdIndex("automation_occurrences", (table) => ({
+    identity: primaryKey({ columns: [table.tenantId, table.occurrenceId] }),
+  })),
+);
+
+export const automationRunStatusEnum = pgEnum("automation_run_status", [
+  AUTOMATION_RUN_STATUSES.PENDING,
+  AUTOMATION_RUN_STATUSES.PROCESSING,
+  AUTOMATION_RUN_STATUSES.SUCCEEDED,
+  AUTOMATION_RUN_STATUSES.WARNINGS,
+  AUTOMATION_RUN_STATUSES.FAILED,
+  AUTOMATION_RUN_STATUSES.CANCELLED,
+]);
+
+export const automationRuns = pgTable(
+  "automation_runs",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id)
+      .notNull(),
+    automationName: text("automation_name").notNull().default(""),
+    failureReasonCode: text("failure_reason_code"),
+    steps: nativeJsonb<AutomationStepTrace[]>("steps")
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    emailAddresses: nativeJsonb<string[]>("email_addresses")
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    occurrenceId: text("occurrence_id").notNull(),
+    eventKind: text("event_kind").$type<AutomationEventKind>().notNull(),
+    executionVersion: integer("execution_version").notNull(),
+    status: automationRunStatusEnum("status").notNull().default(AUTOMATION_RUN_STATUSES.PENDING),
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+    succeededCount: integer("succeeded_count").notNull().default(0),
+    failedCount: integer("failed_count").notNull().default(0),
+    cancelledCount: integer("cancelled_count").notNull().default(0),
+  },
+  withTenantIdIndex("automation_runs", (table) => ({
+    occurrenceIdx: uniqueIndex("automation_runs_occurrence_idx").on(
+      table.tenantId,
+      table.automationId,
+      table.occurrenceId,
+    ),
+    retentionIdx: index("automation_runs_retention_idx").on(table.tenantId, table.completedAt),
+  })),
+);
+
+export const automationEmailDeliveries = pgTable(
+  "automation_email_deliveries",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    runId: uuid("run_id")
+      .references(() => automationRuns.id, { onDelete: "cascade" })
+      .notNull(),
+    stepId: text("step_id").notNull(),
+    recipientItemId: text("recipient_item_id").notNull(),
+    stepOrder: integer("step_order").notNull().default(0),
+    recipientEmail: text("recipient_email").notNull(),
+    language: text("language").$type<SupportedLanguages>(),
+    template: nativeJsonb<AutomationTemplateReference>("template").notNull(),
+    templateVersion: integer("template_version").notNull(),
+    status: text("status").$type<AutomationEmailDeliveryStatus>().notNull().default("pending"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    eventFields: nativeJsonb<Record<string, AutomationPlaceholderValue>>("event_fields"),
+    accountActionIntentId: uuid("account_action_intent_id"),
+    claimedAt: timestampWithTimezone({ name: "claimed_at" }),
+    completedAt: timestampWithTimezone({ name: "completed_at" }),
+    reasonCode: text("reason_code"),
+  },
+  withTenantIdIndex("automation_email_deliveries", (table) => ({
+    identityIdx: uniqueIndex("automation_email_deliveries_identity_idx").on(
+      table.tenantId,
+      table.runId,
+      table.stepId,
+      table.recipientItemId,
+    ),
+    statusIdx: index("automation_email_deliveries_status_idx").on(table.tenantId, table.status),
+  })),
+);
+
+export const notificationAccountActionIntents = pgTable(
+  "notification_account_action_intents",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    recipientEmail: text("recipient_email"),
+    kind: text("kind").$type<NotificationAccountActionKind>().notNull(),
+    applicationOrigin: text("application_origin").notNull(),
+    tokenTtlMs: bigint("token_ttl_ms", { mode: "number" }).notNull(),
+    usesCalendarYearExpiry: boolean("uses_calendar_year_expiry").notNull().default(false),
+    reminderCount: integer("reminder_count").notNull().default(0),
+    revokePreviousPasswordSetupTokens: boolean("revoke_previous_password_setup_tokens")
+      .notNull()
+      .default(false),
+    authTokenId: uuid("auth_token_id"),
+    encryptedToken: nativeJsonb<EncryptedAccountActionToken>("encrypted_token"),
+    tokenCreatedAt: timestampWithTimezone({ name: "token_created_at" }),
+    tokenExpiresAt: timestampWithTimezone({ name: "token_expires_at" }),
+  },
+  withTenantIdIndex("notification_account_action_intents"),
 );

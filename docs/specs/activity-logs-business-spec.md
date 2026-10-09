@@ -26,6 +26,7 @@ The main workflow is investigation: an admin opens Activity Logs, identifies the
 - Track key platform events across authentication, users, groups, courses, lessons, chapters, announcements, settings, categories, Q&A, news, articles, live training, certificates, and integrations.
 - Record successful single-course and bulk-course deletions, including enough course context to investigate hard-deleted courses later.
 - Track who created, edited, published, archived, restored, or deleted an email template, and when a translation language was added or removed.
+- Audit automation creation (including workflow templates), draft saves and edits, publication/application, activation, deactivation, duplication, archiving, deletion, and simulation.
 - Preserve actor identity, actor role, timestamp, action type, resource type, and resource reference where the source event provides it.
 
 ## End-User Value
@@ -46,6 +47,8 @@ When supported domain events happen elsewhere in Mentingo, the activity-log hand
 
 Email-template changes appear with the administrator, template name, and action. Editing details show before and after values for changed localized names, subjects, and content, alongside the affected fields and languages. Publishing one template also records the automatic archive of the previously active template. Administrators can add translations in supported languages and remove a saved non-base translation; removal clears that language's name, subject, and content after confirmation.
 
+Automation entries preserve the workflow name at the time of the action, including after deletion. Draft saves show actual changes to metadata and workflow definitions, while publication/application and activation retain the applied definition and execution-version changes. Changes saved as part of Apply are included in its single publication/application entry; only an explicit Save draft action produces a draft-save entry. Template-based creation and duplication retain their source context. Simulation entries summarize outcomes, issue codes, and counts without recording sample inputs or rendered emails; unsaved simulations have no resource ID. Automatic execution and delivery outcomes are available in automation run history.
+
 ## Key Technical Context
 
 - Frontend UI lives in `apps/web/app/modules/ActivityLogs/ActivityLogs.page.tsx`.
@@ -64,3 +67,5 @@ API E2E coverage verifies paginated retrieval, readable resource-name resolution
 Frontend component coverage verifies that metadata-free activity displays its resolved resource name and ID and that unresolved names use the translated fallback. No dedicated frontend Activity Logs E2E spec was found.
 
 Focused handler tests cover email-template actions. Email-template service and handler tests verify distinct events inside successful mutations and before/after edit values; lifecycle API E2E verifies a failed outbox publication rolls back the edit. No authenticated browser E2E check of these new rows was run.
+
+Automation unit tests exercise management events through outbox materialization and the activity handler, precise before/after differences, no-op lifecycle requests, failed mutations, and saved/unsaved simulation summaries. Frontend tests verify that the automation filter includes deletion, draft saves, simulation, and lifecycle actions, with labels in every supported language. Database transaction rollback and the new automation rows have not been verified in authenticated browser or database E2E tests.

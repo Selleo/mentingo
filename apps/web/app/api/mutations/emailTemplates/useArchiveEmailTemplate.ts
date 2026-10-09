@@ -9,7 +9,7 @@ export function useArchiveEmailTemplate() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      (await ApiClient.api.emailTemplateControllerArchiveEmailTemplate(id)).data.data,
+      (await ApiClient.api.emailTemplateManagementControllerArchiveEmailTemplate(id)).data.data,
     ...feedback,
   });
 }

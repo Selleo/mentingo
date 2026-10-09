@@ -24,6 +24,12 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    server: {
+      deps: {
+        // Transform tooltip packages together so their CommonJS default export resolves correctly.
+        inline: ["@tiptap/react", /@tiptap\/extension-(bubble|floating)-menu/, "tippy.js"],
+      },
+    },
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["./app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],

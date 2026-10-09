@@ -4553,8 +4553,14 @@ describe("CourseController (e2e)", () => {
               thumbnailS3Key: null,
             });
 
-            const student1 = await userFactory.withCredentials({ password }).create();
-            const student2 = await userFactory.withCredentials({ password }).create();
+            const student1 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
+            const student2 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
 
             await db.insert(studentCourses).values({
               studentId: student1.id,
@@ -4614,7 +4620,7 @@ describe("CourseController (e2e)", () => {
 
           const students = await Promise.all(
             Array.from({ length: 2 }, (_, _i) =>
-              userFactory.withCredentials({ password }).create(),
+              userFactory.withCredentials({ password }).withUserSettings(db).create(),
             ),
           );
           const studentsIds = students.map((student) => student.id);
@@ -4959,7 +4965,10 @@ describe("CourseController (e2e)", () => {
             expect(groupCourse.courseId).toBe(course.id);
 
             // Create a new user and assign to the group
-            const newUser = await userFactory.withCredentials({ password }).create();
+            const newUser = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
 
             await request(app.getHttpServer())
               .post(`/api/group/set?userId=${newUser.id}`)
@@ -5012,9 +5021,18 @@ describe("CourseController (e2e)", () => {
             });
 
             // Create users
-            const student1 = await userFactory.withCredentials({ password }).create();
-            const student2 = await userFactory.withCredentials({ password }).create();
-            const student3 = await userFactory.withCredentials({ password }).create();
+            const student1 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
+            const student2 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
+            const student3 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
 
             // Create group with all three users
             const group = await groupFactory
@@ -5093,8 +5111,14 @@ describe("CourseController (e2e)", () => {
             });
 
             // Create users
-            const student1 = await userFactory.withCredentials({ password }).create();
-            const student2 = await userFactory.withCredentials({ password }).create();
+            const student1 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
+            const student2 = await userFactory
+              .withCredentials({ password })
+              .withUserSettings(db)
+              .create();
 
             // Create group with both users
             const group = await groupFactory.withMembers([student1.id, student2.id]).create();
@@ -5228,7 +5252,10 @@ describe("CourseController (e2e)", () => {
             thresholdScore: 0,
           });
 
-          const student = await userFactory.withCredentials({ password }).create();
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
           const group = await groupFactory.withMembers([student.id]).create();
           const cookies = await cookieFor(admin, app);
 
@@ -5357,7 +5384,10 @@ describe("CourseController (e2e)", () => {
             thresholdScore: 0,
           });
 
-          const student = await userFactory.withCredentials({ password }).create();
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
           const group1 = await groupFactory.withMembers([student.id]).create();
           const group2 = await groupFactory.withMembers([student.id]).create();
 
@@ -5431,7 +5461,7 @@ describe("CourseController (e2e)", () => {
         thresholdScore: 0,
       });
 
-      const student = await userFactory.withCredentials({ password }).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
       const group = await groupFactory.withMembers([student.id]).create();
 
       const cookies = await cookieFor(admin, app);

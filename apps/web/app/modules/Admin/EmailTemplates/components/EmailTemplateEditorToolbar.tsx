@@ -1,19 +1,35 @@
-import { Archive, Check, Copy, RotateCcw, Save, Send, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ChevronDown,
+  Copy,
+  MoreVertical,
+  RotateCcw,
+  Save,
+  Send,
+  Trash2,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { LanguageSelector } from "~/components/LanguageSelector/LanguageSelector";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { cn } from "~/lib/utils";
 
 import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
-import {
-  EMAIL_TEMPLATE_STATUSES,
-  EMAIL_TEMPLATE_STATUS_BADGE_VARIANTS,
-  EMAIL_TEMPLATE_STATUS_BADGE_ICONS,
-} from "../emailTemplates.constants";
+import { EMAIL_TEMPLATE_STATUSES } from "../emailTemplates.constants";
 
 import type { EmailTemplate } from "../emailTemplates.types";
 import type { SupportedLanguages } from "@repo/shared";
+
+const menuItemClassName =
+  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
 export type EmailTemplateEditorToolbarProps = {
   template: EmailTemplate;
@@ -55,93 +71,83 @@ export function EmailTemplateEditorToolbar({
   onPublish,
 }: EmailTemplateEditorToolbarProps) {
   const { t } = useTranslation();
-  const isReadonly = !template.editable || template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED;
+  const publishControlsRef = useRef<HTMLDivElement>(null);
+  const [saveMenuWidth, setSaveMenuWidth] = useState<number>();
+  const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
+  const isArchived = template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED;
+  const isReadonly = !template.editable || isArchived;
+  const canSaveDraft = !isActionPending && !isReadonly && hasUnsavedChanges;
+  const canPublish =
+    !isActionPending &&
+    !isReadonly &&
+    (hasUnsavedChanges ||
+      template.hasUnpublishedChanges ||
+      template.status !== EMAIL_TEMPLATE_STATUSES.PUBLISHED);
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <h4 className="h4">
-          {template.name[template.baseLanguage] || t("emailTemplates.ui.editor")}
-        </h4>
-        <Badge
-          data-testid={EMAIL_TEMPLATES_HANDLES.STATUS}
-          variant={
-            EMAIL_TEMPLATE_STATUS_BADGE_VARIANTS[template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM]
-          }
-          fontWeight="bold"
-          icon={
-            EMAIL_TEMPLATE_STATUS_BADGE_ICONS[template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM]
-          }
-          iconClasses="size-4"
-          className="w-fit"
-        >
+    <header className="flex flex-wrap items-center justify-between gap-3">
+      <div className="min-w-0 flex-1 space-y-1">
+        <h1 className="h4 truncate">
+          {template.name[language] ||
+            template.name[template.baseLanguage] ||
+            t("emailTemplates.ui.editor")}
+        </h1>
+        <p className="text-xs text-neutral-500" data-testid={EMAIL_TEMPLATES_HANDLES.STATUS}>
           {t(`emailTemplates.ui.${template.status ?? EMAIL_TEMPLATE_STATUSES.SYSTEM}`)}
-        </Badge>
+        </p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="space-y-2">
-            <fieldset
-              disabled={isActionPending}
-              aria-label={t("emailTemplates.ui.language")}
-              className="[&_button]:h-10"
-            >
-              <LanguageSelector
-                testIds={{
-                  select: EMAIL_TEMPLATES_HANDLES.LANGUAGE,
-                  option: EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION,
-                  createDialog: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_DIALOG,
-                  createConfirmButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_CONFIRM,
-                  deleteButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_DELETE,
-                }}
-                formKey={template.id ?? template.event}
-                value={language}
-                baseLanguage={template.baseLanguage}
-                availableLocales={template.availableLocales}
-                onChange={(nextLanguage) => {
-                  if (!isActionPending) onLanguageChange(nextLanguage);
-                }}
-                onCreateLanguage={onCreateLanguage}
-                onDeleteLanguage={onDeleteLanguage}
-                canCreateLanguage={!isReadonly}
-                canDeleteLanguage={!isReadonly && !hasUnsavedChanges}
-                canSetBaseLanguage={false}
-              />
-            </fieldset>
-          </div>
-          {!isReadonly && (
-            <Button
-              variant="outline"
-              disabled={
-                isActionPending ||
-                hasUnsavedChanges ||
-                language === template.baseLanguage ||
-                !isTranslationComplete
-              }
-              data-testid={EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE}
-              onClick={onSetBaseLanguage}
-            >
-              {t("emailTemplates.ui.setBaseLanguage")}
-            </Button>
-          )}
-        </div>
-        <div
-          className="flex h-10 items-center gap-1 rounded-lg border bg-white p-1 [&>button]:h-full"
-          role="group"
-          aria-label={t("emailTemplates.ui.sendTest")}
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            title={t("emailTemplates.ui.sendTest")}
-            aria-label={t("emailTemplates.ui.sendTest")}
-            disabled={isActionPending}
-            data-testid={EMAIL_TEMPLATES_HANDLES.SEND_TEST}
-            onClick={onSendTest}
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+        {hasUnsavedChanges && (
+          <span
+            className="inline-flex h-10 items-center text-xs leading-none text-neutral-500"
+            role="status"
           >
-            <Send className="size-4" />
+            {t("emailTemplates.ui.unsavedTitle")}
+          </span>
+        )}
+        <fieldset
+          disabled={isActionPending}
+          aria-label={t("emailTemplates.ui.language")}
+          className="[&_button]:h-10"
+        >
+          <LanguageSelector
+            testIds={{
+              select: EMAIL_TEMPLATES_HANDLES.LANGUAGE,
+              option: EMAIL_TEMPLATES_HANDLES.LANGUAGE_OPTION,
+              createDialog: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_DIALOG,
+              createConfirmButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_CREATE_CONFIRM,
+              deleteButton: EMAIL_TEMPLATES_HANDLES.LANGUAGE_DELETE,
+            }}
+            formKey={template.id ?? template.event ?? "builtin"}
+            value={language}
+            baseLanguage={template.baseLanguage}
+            availableLocales={template.availableLocales}
+            onChange={(nextLanguage) => {
+              if (!isActionPending) onLanguageChange(nextLanguage);
+            }}
+            onCreateLanguage={onCreateLanguage}
+            onDeleteLanguage={onDeleteLanguage}
+            canCreateLanguage={!isReadonly}
+            canDeleteLanguage={!isReadonly && !hasUnsavedChanges}
+            canSetBaseLanguage={false}
+          />
+        </fieldset>
+        {!isReadonly && (
+          <Button
+            variant="outline"
+            disabled={
+              isActionPending ||
+              hasUnsavedChanges ||
+              language === template.baseLanguage ||
+              !isTranslationComplete
+            }
+            data-testid={EMAIL_TEMPLATES_HANDLES.BASE_LANGUAGE}
+            onClick={onSetBaseLanguage}
+          >
+            {t("emailTemplates.ui.setBaseLanguage")}
           </Button>
-        </div>
-        {!template.editable ? (
+        )}
+        {!template.editable && (
           <Button
             disabled={isActionPending}
             data-testid={EMAIL_TEMPLATES_HANDLES.COPY}
@@ -150,88 +156,150 @@ export function EmailTemplateEditorToolbar({
             <Copy className="mr-2 size-4" />
             {t("emailTemplates.ui.copyDefault")}
           </Button>
-        ) : (
-          <>
-            <div
-              className="flex h-10 items-center gap-1 rounded-lg border bg-white p-1 [&>button]:h-full"
-              role="group"
+        )}
+        {template.editable && isArchived && (
+          <Button
+            disabled={isActionPending}
+            data-testid={EMAIL_TEMPLATES_HANDLES.RESTORE}
+            onClick={onRestore}
+          >
+            <RotateCcw className="mr-2 size-4" />
+            {t("emailTemplates.ui.restore")}
+          </Button>
+        )}
+        {!isReadonly && (
+          <div
+            ref={publishControlsRef}
+            className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center"
+          >
+            <span
+              aria-hidden="true"
+              className="invisible pointer-events-none col-span-2 col-start-1 row-start-1 flex h-0 items-center justify-center gap-2 whitespace-nowrap px-3 text-sm font-medium"
+            >
+              <Save className="size-4 shrink-0" />
+              {t("emailTemplates.ui.saveDraft")}
+            </span>
+            <Button
+              variant="primary"
+              className={cn("col-start-1 row-start-1 whitespace-nowrap rounded-r-none", {
+                "rounded-bl-none": isSaveMenuOpen,
+              })}
+              data-testid={EMAIL_TEMPLATES_HANDLES.PUBLISH}
+              disabled={!canPublish}
+              onClick={onPublish}
+            >
+              {t("emailTemplates.ui.publish")}
+            </Button>
+            <DropdownMenu
+              open={isSaveMenuOpen}
+              onOpenChange={(open) => {
+                setIsSaveMenuOpen(open);
+                if (open)
+                  setSaveMenuWidth(publishControlsRef.current?.getBoundingClientRect().width);
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="primary"
+                  className={cn(
+                    "col-start-2 row-start-1 rounded-l-none border-l border-white/25 px-2",
+                    {
+                      "rounded-br-none": isSaveMenuOpen,
+                    },
+                  )}
+                  disabled={!canSaveDraft}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.SAVE_MENU}
+                  aria-label={t("emailTemplates.ui.saveDraft")}
+                >
+                  <ChevronDown className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                side="bottom"
+                sideOffset={0}
+                avoidCollisions={false}
+                style={{ width: saveMenuWidth }}
+                className="min-w-0 rounded-t-none rounded-b-lg border-0 bg-transparent p-0 shadow-none"
+              >
+                <DropdownMenuItem
+                  className="flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-t-none rounded-b-lg border border-input bg-background px-3 text-sm font-medium text-primary-800 outline-none transition-colors hover:border-primary-500 focus:border-primary-500 focus:bg-primary-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  data-testid={EMAIL_TEMPLATES_HANDLES.SAVE}
+                  disabled={!canSaveDraft}
+                  onSelect={onSave}
+                >
+                  <Save className="size-4 shrink-0" />
+                  {t("emailTemplates.ui.saveDraft")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              data-testid={EMAIL_TEMPLATES_HANDLES.ACTIONS}
               aria-label={t("emailTemplates.ui.actions")}
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                title={t("emailTemplates.ui.duplicate")}
-                aria-label={t("emailTemplates.ui.duplicate")}
-                disabled={isActionPending || hasUnsavedChanges}
-                data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE}
-                onClick={onDuplicate}
-              >
-                <Copy className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                title={t("emailTemplates.ui.delete")}
-                aria-label={t("emailTemplates.ui.delete")}
-                disabled={isActionPending || hasUnsavedChanges}
-                data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
-                onClick={onDelete}
-              >
-                <Trash2 className="size-4" />
-              </Button>
-              {template.status !== EMAIL_TEMPLATE_STATUSES.ARCHIVED && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  title={t("emailTemplates.ui.archive")}
-                  aria-label={t("emailTemplates.ui.archive")}
+              <MoreVertical className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-48 space-y-1 p-2">
+            <DropdownMenuItem
+              className={menuItemClassName}
+              disabled={isActionPending}
+              data-testid={EMAIL_TEMPLATES_HANDLES.SEND_TEST}
+              onSelect={onSendTest}
+            >
+              <Send className="size-4" />
+              {t("emailTemplates.ui.sendTest")}
+            </DropdownMenuItem>
+            {template.editable && (
+              <>
+                <DropdownMenuItem
+                  className={menuItemClassName}
                   disabled={isActionPending || hasUnsavedChanges}
-                  data-testid={EMAIL_TEMPLATES_HANDLES.ARCHIVE}
-                  onClick={onArchive}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.DUPLICATE}
+                  onSelect={onDuplicate}
                 >
-                  <Archive className="size-4" />
-                </Button>
-              )}
-            </div>
-            {template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED ? (
-              <Button
-                disabled={isActionPending}
-                data-testid={EMAIL_TEMPLATES_HANDLES.RESTORE}
-                onClick={onRestore}
-              >
-                <RotateCcw className="mr-2 size-4" />
-                {t("emailTemplates.ui.restore")}
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  data-testid={EMAIL_TEMPLATES_HANDLES.SAVE}
-                  disabled={isActionPending || !hasUnsavedChanges}
-                  onClick={onSave}
-                >
-                  <Save className="mr-2 size-4" />
-                  {t(
-                    template.status === EMAIL_TEMPLATE_STATUSES.PUBLISHED
-                      ? "emailTemplates.ui.save"
-                      : "emailTemplates.ui.saveDraft",
-                  )}
-                </Button>
-                {template.status !== EMAIL_TEMPLATE_STATUSES.PUBLISHED && (
-                  <Button
-                    data-testid={EMAIL_TEMPLATES_HANDLES.PUBLISH}
-                    disabled={isActionPending}
-                    onClick={onPublish}
+                  <Copy className="size-4" />
+                  {t("emailTemplates.ui.duplicate")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {!isArchived && (
+                  <DropdownMenuItem
+                    className={cn(
+                      menuItemClassName,
+                      "text-error-700 focus:bg-error-50 focus:text-error-700",
+                    )}
+                    disabled={isActionPending || hasUnsavedChanges}
+                    data-testid={EMAIL_TEMPLATES_HANDLES.ARCHIVE}
+                    onSelect={onArchive}
                   >
-                    <Check className="mr-2 size-4" />
-                    {t("emailTemplates.ui.publish")}
-                  </Button>
+                    <Archive className="size-4" />
+                    {t("emailTemplates.ui.archive")}
+                  </DropdownMenuItem>
                 )}
-              </div>
+                <DropdownMenuItem
+                  className={cn(
+                    menuItemClassName,
+                    "text-error-700 focus:bg-error-50 focus:text-error-700",
+                  )}
+                  disabled={isActionPending || hasUnsavedChanges}
+                  data-testid={EMAIL_TEMPLATES_HANDLES.DELETE}
+                  onSelect={onDelete}
+                >
+                  <Trash2 className="size-4" />
+                  {t("emailTemplates.ui.delete")}
+                </DropdownMenuItem>
+              </>
             )}
-          </>
-        )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </div>
+    </header>
   );
 }

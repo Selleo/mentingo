@@ -1,9 +1,10 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { BUILT_IN_EMAIL_TEMPLATE_KEYS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import type { CreateEmailTemplateBody } from "~/api/generated-api";
 
 export const EMAIL_TEMPLATE_DATA = {
-  event: "user_assigned_to_course",
+  builtInTemplateKey: BUILT_IN_EMAIL_TEMPLATE_KEYS.ASSIGNMENT_WITH_DEADLINE,
+  catalogPath: "/admin/automations?tab=email-templates",
   listPath: "/admin/email-templates",
   namePrefix: "E2E Email",
   subject: "Your learning assignment",
@@ -23,3 +24,14 @@ export const emailTemplateDocument = (
     content: [{ type: "paragraph", content: [{ type: "text", text }] }],
   })),
 });
+
+/** Generic author-declared values; these declarations are independent of notification events. */
+export const EMAIL_TEMPLATE_PLACEHOLDERS = [
+  {
+    name: EMAIL_TEMPLATE_DATA.variable,
+    label: "Course name",
+    type: "string",
+    required: false,
+    sampleValue: "Sample learning course",
+  },
+] satisfies NonNullable<CreateEmailTemplateBody["placeholders"]>;

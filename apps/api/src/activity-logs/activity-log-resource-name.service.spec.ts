@@ -6,6 +6,23 @@ import type { DatabasePg, UUIDType } from "src/common";
 import type { LocalizationService } from "src/localization/localization.service";
 
 describe("ActivityLogResourceNameService", () => {
+  it("resolves legacy automation entries from tenant-scoped localized names", async () => {
+    const where = jest.fn().mockResolvedValue([{ id: "automation-id", name: "Welcome" }]);
+    const from = jest.fn().mockReturnValue({ where });
+    const select = jest.fn().mockReturnValue({ from });
+    const getLocalizedSqlField = jest.fn().mockReturnValue("localized-name");
+    const service = new ActivityLogResourceNameService(
+      { select } as unknown as DatabasePg,
+      { getLocalizedSqlField } as unknown as LocalizationService,
+    );
+    const names = await service.resolveCurrentResourceNames([
+      { resourceType: ACTIVITY_LOG_RESOURCE_TYPES.AUTOMATION, resourceId: "automation-id" },
+    ]);
+    expect(names.get("automation:automation-id")).toBe("Welcome");
+    expect(getLocalizedSqlField).toHaveBeenCalledTimes(1);
+    expect(where).toHaveBeenCalledTimes(1);
+  });
+
   it("deduplicates IDs and resolves each resource type in one batch", async () => {
     const service = new ActivityLogResourceNameService({} as DatabasePg, {} as LocalizationService);
     const fetchResourceNamesByType = jest

@@ -1,3 +1,5 @@
+import { Link } from "@remix-run/react";
+
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -35,21 +37,15 @@ export const Breadcrumbs = ({ breadcrumbs = [] }: BreadcrumbsProps) => {
     <BreadcrumbList className="mb-4">
       {breadcrumbs.slice(0, lastIndex).map(({ href, title }, index) => (
         <BreadcrumbItem key={index}>
-          <BreadcrumbLink
-            className="details-md text-neutral-800 hover:text-neutral-800"
-            href={href}
-          >
-            {title}
+          <BreadcrumbLink asChild className="details-md text-neutral-800 hover:text-neutral-800">
+            <Link to={href}>{title}</Link>
           </BreadcrumbLink>
           <BreadcrumbSeparator />
         </BreadcrumbItem>
       ))}
       <BreadcrumbItem>
-        <BreadcrumbLink
-          className="details-md text-neutral-950 hover:text-neutral-950"
-          href={lastBreadcrumb.href}
-        >
-          {lastBreadcrumb.title}
+        <BreadcrumbLink asChild className="details-md text-neutral-950 hover:text-neutral-950">
+          <Link to={lastBreadcrumb.href}>{lastBreadcrumb.title}</Link>
         </BreadcrumbLink>
       </BreadcrumbItem>
     </BreadcrumbList>

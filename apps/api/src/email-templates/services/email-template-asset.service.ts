@@ -31,7 +31,7 @@ export class EmailTemplateAssetService {
   ) {}
 
   async getEmailTemplateImage(id: UUIDType, tenantId: UUIDType) {
-    const resource = await this.getOwnedEmailTemplateAsset(id, tenantId);
+    const resource = await this.getEmailTemplateAssetForTenantOrThrow(id, tenantId);
 
     return {
       resourceId: id,
@@ -68,18 +68,27 @@ export class EmailTemplateAssetService {
     };
   }
 
-  async validateEmailTemplateAssets(content: LocalizedEmailTemplateContent, tenantId: UUIDType) {
+  async assertEmailTemplateAssetsAccessible(
+    content: LocalizedEmailTemplateContent,
+    tenantId: UUIDType,
+  ) {
     const assetIds = new Set(
       Object.values(content).flatMap((document) =>
         document.content.flatMap((block) => {
-          if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) return [];
+          if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) {
+            return [];
+          }
+
           const match = block.attrs.src.match(EMAIL_TEMPLATE_ASSET_PATTERN);
+
           return match ? [match[1]] : [];
         }),
       ),
     );
 
-    for (const id of assetIds) await this.getOwnedEmailTemplateAsset(id, tenantId);
+    for (const id of assetIds) {
+      await this.getEmailTemplateAssetForTenantOrThrow(id, tenantId);
+    }
   }
 
   async resolveEmailTemplateAssets(
@@ -92,16 +101,22 @@ export class EmailTemplateAssetService {
     const sources = new Map<string, string>();
 
     for (const block of resolvedDocument.content) {
-      if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) continue;
+      if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) {
+        continue;
+      }
 
       const match = block.attrs.src.match(EMAIL_TEMPLATE_ASSET_PATTERN);
-      if (!match) continue;
+
+      if (!match) {
+        continue;
+      }
 
       const id = match[1];
       let source = sources.get(id);
 
       if (!source) {
         const attachment = await this.createEmailTemplateAttachment(id, tenantId);
+
         source = preview
           ? `data:image/webp;base64,${attachment.content.toString("base64")}`
           : `cid:${attachment.cid}`;
@@ -117,16 +132,19 @@ export class EmailTemplateAssetService {
   }
 
   private async createEmailTemplateAttachment(id: UUIDType, tenantId: UUIDType) {
-    const resource = await this.getOwnedEmailTemplateAsset(id, tenantId);
+    const resource = await this.getEmailTemplateAssetForTenantOrThrow(id, tenantId);
     const buffer = await this.fileService.getRawFileBuffer(resource.reference);
-    if (!buffer) throw new BadRequestException("files.toast.invalidData");
+
+    if (!buffer) {
+      throw new BadRequestException("files.toast.invalidData");
+    }
 
     const cid = `email-template-${id}`;
 
     return { filename: `${cid}.webp`, content: buffer, contentType: "image/webp", cid };
   }
 
-  private async getOwnedEmailTemplateAsset(id: UUIDType, tenantId: UUIDType) {
+  private async getEmailTemplateAssetForTenantOrThrow(id: UUIDType, tenantId: UUIDType) {
     const resource = await this.emailTemplateAssetRepository.findEmailTemplateAsset(id, tenantId);
 
     if (

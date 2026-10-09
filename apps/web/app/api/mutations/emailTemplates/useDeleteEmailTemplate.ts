@@ -9,7 +9,7 @@ export function useDeleteEmailTemplate() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      (await ApiClient.api.emailTemplateControllerDeleteEmailTemplate(id)).data.data,
+      (await ApiClient.api.emailTemplateManagementControllerDeleteEmailTemplate(id)).data.data,
     ...feedback,
   });
 }

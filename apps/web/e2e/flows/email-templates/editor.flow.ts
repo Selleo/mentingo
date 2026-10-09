@@ -14,6 +14,8 @@ export const editEmailTextFlow = async (page: Page, index: number, text: string)
   const editor = block.getByRole("textbox");
   if (!(await editor.isVisible()))
     await block.getByTestId(EMAIL_TEMPLATES_HANDLES.EDIT_BLOCK).click();
+  await editor.click();
+  await page.getByRole("tooltip").getByTestId(EMAIL_TEMPLATES_HANDLES.DRAG_BLOCK).waitFor();
   await editor.fill(text);
 };
 
@@ -31,6 +33,9 @@ export const createEmailLanguageFlow = async (page: Page, language: SupportedLan
 };
 
 export const confirmEmailActionFlow = async (page: Page, action: string) => {
+  if (action === EMAIL_TEMPLATES_HANDLES.ARCHIVE || action === EMAIL_TEMPLATES_HANDLES.DELETE) {
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
+  }
   await page.getByTestId(action).click();
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).waitFor({ state: "hidden" });

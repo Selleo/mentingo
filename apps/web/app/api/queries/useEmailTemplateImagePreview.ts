@@ -12,7 +12,10 @@ export function useEmailTemplateImagePreview(src: string) {
     refetchInterval: 30 * 60 * 1000,
     retry: false,
     queryFn: async () =>
-      (await ApiClient.api.emailTemplateControllerGetEmailTemplateImage(src.slice("asset:".length)))
-        .data.data.previewUrl,
+      (
+        await ApiClient.api.emailTemplateManagementControllerGetEmailTemplateImage(
+          src.slice("asset:".length),
+        )
+      ).data.data.previewUrl,
   });
 }

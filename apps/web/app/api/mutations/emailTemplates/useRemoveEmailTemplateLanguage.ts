@@ -11,8 +11,12 @@ export function useRemoveEmailTemplateLanguage() {
 
   return useMutation({
     mutationFn: async ({ id, language }: { id: string; language: SupportedLanguages }) =>
-      (await ApiClient.api.emailTemplateControllerRemoveEmailTemplateLanguage(id, language)).data
-        .data,
+      (
+        await ApiClient.api.emailTemplateManagementControllerRemoveEmailTemplateLanguage(
+          id,
+          language,
+        )
+      ).data.data,
     ...feedback,
   });
 }

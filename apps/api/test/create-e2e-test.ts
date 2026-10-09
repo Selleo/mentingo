@@ -7,6 +7,7 @@ import postgres from "postgres";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
+import { AutomationEmailWorker } from "src/automation-execution/workers/automation-email.worker";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
 import { createTenantAwareDb } from "src/storage/db/tenant-aware-session";
@@ -25,6 +26,7 @@ type E2ETestOptions = {
   customProviders?: Provider[];
   enableActivityLogs?: boolean;
   useDbProxy?: boolean;
+  manualAutomationEmails?: boolean;
 };
 
 const TEST_APP_ROLE = "lms_test_app_user";
@@ -118,6 +120,10 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     .useClass(EmailTestingAdapter);
 
   testModuleBuilder = testModuleBuilder.overrideProvider(DB).useValue(dbForApp);
+
+  if (options.manualAutomationEmails) {
+    testModuleBuilder = testModuleBuilder.overrideProvider(AutomationEmailWorker).useValue({});
+  }
 
   // Disable activity logging by default to prevent deadlocks between
   // async activity log INSERTs and TRUNCATE during test cleanup.

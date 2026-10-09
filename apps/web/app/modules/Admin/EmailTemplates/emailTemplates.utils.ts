@@ -1,4 +1,6 @@
+import { isAxiosError } from "axios";
 import { match } from "ts-pattern";
+import { z } from "zod";
 
 import { EMAIL_TEMPLATE_BLOCK_TYPES } from "./emailTemplates.constants";
 
@@ -184,3 +186,28 @@ export const getEmailTemplateInvalidContentLanguage = (
         (block.type === EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE && !block.attrs.src.trim()),
     ),
   )?.[0] as SupportedLanguages | undefined;
+
+const publicationConflictsSchema = z.object({
+  message: z.literal("emailTemplates.errors.incompatiblePublication"),
+  automations: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+        issues: z.array(
+          z.object({
+            code: z.string(),
+            placeholder: z.string().optional(),
+            stepId: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .min(1),
+});
+
+export function getEmailTemplatePublicationConflicts(error: unknown) {
+  if (!isAxiosError(error) || error.response?.status !== 409) return null;
+  const result = publicationConflictsSchema.safeParse(error.response.data);
+  return result.success ? result.data.automations : null;
+}

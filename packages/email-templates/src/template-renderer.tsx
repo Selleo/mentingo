@@ -1,9 +1,7 @@
 import { Button, Column, Hr, Img, Row, Section, Text, render } from "@react-email/components";
 import React from "react";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { getEmailTemplateLayoutSections, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { formatEmailTemplateVariables } from "./utils/formatEmailTemplateVariables";
-import { getDynamicEmailTemplateContent } from "./utils/dynamicEmailTemplateContent";
-import { resolveLegacyEmailTemplateContent } from "./utils/resolveLegacyEmailTemplateContent";
 import { resolveInlineVariables } from "./utils/resolveInlineVariables";
 
 import {
@@ -150,25 +148,9 @@ const EmailTemplateDocumentComponent = ({
     }
   });
 
-  // Only trailing footers belong outside the card; preserve the order of all other blocks.
-  let footerStart = document.content.length;
-  while (
-    footerStart > 0 &&
-    document.content[footerStart - 1]?.type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER
-  ) {
-    footerStart -= 1;
-  }
-  let lowerContentStart = 0;
+  const { headerEndIndex, footerStartIndex } = getEmailTemplateLayoutSections(document.content);
 
-  while (
-    lowerContentStart < footerStart &&
-    (document.content[lowerContentStart]?.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADER ||
-      document.content[lowerContentStart]?.type === EMAIL_TEMPLATE_BLOCK_TYPES.HEADING)
-  ) {
-    lowerContentStart += 1;
-  }
-
-  const cardBlocks = renderedBlocks.slice(0, footerStart).map((content, index) => (
+  const cardBlocks = renderedBlocks.slice(0, footerStartIndex).map((content, index) => (
     <Section
       key={index}
       style={
@@ -185,9 +167,9 @@ const EmailTemplateDocumentComponent = ({
     <EmailLayout
       primaryColor={branding.primaryColor}
       borderCircleUrl={branding.borderCircleUrl}
-      headerContent={cardBlocks.slice(0, lowerContentStart)}
-      lowerContent={cardBlocks.slice(lowerContentStart)}
-      footerContent={renderedBlocks.slice(footerStart)}
+      headerContent={cardBlocks.slice(0, headerEndIndex)}
+      lowerContent={cardBlocks.slice(headerEndIndex)}
+      footerContent={renderedBlocks.slice(footerStartIndex)}
     />
   );
 };
@@ -200,27 +182,21 @@ export const renderEmailTemplate = ({
   branding,
   language = SUPPORTED_LANGUAGES.EN,
 }: RenderEmailTemplateInput): RenderedEmailTemplate => {
-  const { derivedVariables, legacyReplacements } = getDynamicEmailTemplateContent(
-    event,
-    variables,
-    language,
-  );
   const resolvedVariables = {
-    ...formatEmailTemplateVariables(variables, language),
-    ...derivedVariables,
+    ...(event ? formatEmailTemplateVariables(variables, language) : variables),
     company_name: branding.companyName,
   };
 
   const email = (
     <EmailTemplateDocumentComponent
-      document={resolveLegacyEmailTemplateContent(document, legacyReplacements)}
+      document={document}
       variables={resolvedVariables}
       branding={branding}
     />
   );
 
   return {
-    subject: replaceVariables(legacyReplacements.get(subject) ?? subject, resolvedVariables),
+    subject: replaceVariables(subject, resolvedVariables),
     html: render(email),
     text: render(email, { plainText: true }),
   };

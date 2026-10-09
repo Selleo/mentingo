@@ -6,9 +6,9 @@ import { test as setup } from "@playwright/test";
 setup("database reset", async () => {
   const apiDir = path.resolve(process.cwd(), "../api");
   const isCI = process.env.CI === "true";
-  const command = isCI
-    ? "pnpm db:migrate && pnpm db:seed-e2e"
-    : "docker compose up -d && pnpm db:migrate && pnpm db:seed-e2e";
+
+  if (isCI) return;
+  const command = "docker compose up -d && pnpm db:migrate && pnpm db:seed-e2e";
 
   execSync(command, {
     cwd: apiDir,

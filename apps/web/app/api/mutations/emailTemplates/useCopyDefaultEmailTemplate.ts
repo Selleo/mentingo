@@ -10,7 +10,11 @@ export function useCopyDefaultEmailTemplate() {
 
   return useMutation({
     mutationFn: async (event: EmailTemplateEvent) =>
-      (await ApiClient.api.emailTemplateControllerCopyDefaultEmailTemplate(event)).data.data,
+      (
+        await ApiClient.api.emailTemplateManagementControllerCreateDraftFromBuiltInEmailTemplate(
+          event,
+        )
+      ).data.data,
     ...feedback,
   });
 }

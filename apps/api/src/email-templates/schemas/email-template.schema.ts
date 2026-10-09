@@ -7,12 +7,21 @@ import {
   EMAIL_TEMPLATE_STATUSES,
   EMAIL_TEMPLATE_VARIABLE_TYPES,
 } from "@repo/email-templates";
+import {
+  AUTOMATION_EVENT_KINDS,
+  BUILT_IN_EMAIL_TEMPLATE_KEYS,
+  AUTOMATION_PLACEHOLDER_TYPES,
+  type AutomationPlaceholderDefinition,
+} from "@repo/shared";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { UUIDSchema, paginatedResponse } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
+export const builtInEmailTemplateKeySchema = Type.Enum(BUILT_IN_EMAIL_TEMPLATE_KEYS);
+
 export const emailTemplateEventSchema = Type.Enum(EMAIL_TEMPLATE_EVENTS);
+
 const emailTemplateStatusSchema = Type.Enum(EMAIL_TEMPLATE_STATUSES);
 
 const localizedValueSchema = <T extends TSchema>(valueSchema: T) =>
@@ -150,11 +159,46 @@ export const emailTemplateDocumentSchema = Type.Object(
 const localizedTextSchema = localizedValueSchema(Type.String());
 const localizedContentSchema = localizedValueSchema(emailTemplateDocumentSchema);
 
+const jsonPrimitiveSchema = Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()]);
+
+const jsonValueSchema = Type.Union([
+  jsonPrimitiveSchema,
+  Type.Array(Type.Unknown()),
+  Type.Record(Type.String(), Type.Unknown()),
+]);
+
+export const templatePlaceholderSchema = Type.Object(
+  {
+    name: Type.String({ pattern: "^[a-zA-Z][a-zA-Z0-9_]*$" }),
+    label: Type.String(),
+    type: Type.Enum(AUTOMATION_PLACEHOLDER_TYPES),
+    required: Type.Boolean(),
+    sampleValue: jsonValueSchema,
+    description: Type.Optional(Type.String()),
+  },
+  { additionalProperties: false },
+);
+
+const placeholdersSchema = Type.Array(templatePlaceholderSchema, { maxItems: 100 });
+
+const placeholderInputSchema = Type.Object(
+  {
+    ...templatePlaceholderSchema.properties,
+    label: Type.Optional(Type.String()),
+    sampleValue: Type.Optional(jsonValueSchema),
+  },
+  { additionalProperties: false },
+);
+
+const placeholderInputsSchema = Type.Array(placeholderInputSchema, { maxItems: 100 });
+
 export const emailTemplateSchema = Type.Object(
   {
     id: Type.Union([UUIDSchema, Type.Null()]),
     source: Type.Union([Type.Literal("default"), Type.Literal("override")]),
     editable: Type.Boolean(),
+    publicationVersion: Type.Optional(Type.Integer()),
+    hasUnpublishedChanges: Type.Optional(Type.Boolean()),
     variables: Type.Array(
       Type.Object(
         {
@@ -173,7 +217,9 @@ export const emailTemplateSchema = Type.Object(
         { additionalProperties: false },
       ),
     ),
-    event: emailTemplateEventSchema,
+    triggerEventKind: Type.Optional(Type.Union([Type.Enum(AUTOMATION_EVENT_KINDS), Type.Null()])),
+    event: Type.Optional(Type.Union([builtInEmailTemplateKeySchema, Type.Null()])),
+    placeholders: Type.Optional(placeholdersSchema),
     name: localizedTextSchema,
     subject: localizedTextSchema,
     content: localizedContentSchema,
@@ -193,7 +239,9 @@ export const paginatedEmailTemplateSchema = paginatedResponse(Type.Array(emailTe
 
 export const createEmailTemplateSchema = Type.Object(
   {
-    event: emailTemplateEventSchema,
+    triggerEventKind: Type.Optional(Type.Enum(AUTOMATION_EVENT_KINDS)),
+    populateEventTags: Type.Optional(Type.Boolean()),
+    placeholders: Type.Optional(placeholderInputsSchema),
     name: localizedTextSchema,
     subject: localizedTextSchema,
     content: localizedContentSchema,
@@ -204,7 +252,13 @@ export const createEmailTemplateSchema = Type.Object(
 
 export const updateEmailTemplateSchema = Type.Partial(
   Type.Object(
-    { name: localizedTextSchema, subject: localizedTextSchema, content: localizedContentSchema },
+    {
+      triggerEventKind: Type.Union([Type.Enum(AUTOMATION_EVENT_KINDS), Type.Null()]),
+      name: localizedTextSchema,
+      subject: localizedTextSchema,
+      content: localizedContentSchema,
+      placeholders: placeholderInputsSchema,
+    },
     { additionalProperties: false },
   ),
   { minProperties: 1 },
@@ -217,7 +271,7 @@ export const updateEmailTemplateBaseLanguageSchema = Type.Object(
 
 export const previewEmailTemplateSchema = Type.Object(
   {
-    event: emailTemplateEventSchema,
+    placeholders: Type.Optional(placeholderInputsSchema),
     language: supportedLanguagesSchema,
     baseLanguage: supportedLanguagesSchema,
     subject: localizedTextSchema,
@@ -228,7 +282,7 @@ export const previewEmailTemplateSchema = Type.Object(
 
 export const emailTemplatePreviewResponseSchema = Type.Object(
   {
-    event: emailTemplateEventSchema,
+    event: Type.Optional(Type.Union([emailTemplateEventSchema, Type.Null()])),
     language: supportedLanguagesSchema,
     subject: Type.String(),
     html: Type.String(),
@@ -238,12 +292,22 @@ export const emailTemplatePreviewResponseSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export type CreateEmailTemplateBody = Static<typeof createEmailTemplateSchema>;
-export type UpdateEmailTemplateBody = Static<typeof updateEmailTemplateSchema>;
+type WithTypedPlaceholders<T> = Omit<T, "placeholders"> & {
+  placeholders?: AutomationPlaceholderDefinition[];
+};
+
+export type CreateEmailTemplateBody = WithTypedPlaceholders<
+  Static<typeof createEmailTemplateSchema>
+>;
+export type UpdateEmailTemplateBody = WithTypedPlaceholders<
+  Static<typeof updateEmailTemplateSchema>
+>;
 export type UpdateEmailTemplateBaseLanguageBody = Static<
   typeof updateEmailTemplateBaseLanguageSchema
 >;
-export type PreviewEmailTemplateBody = Static<typeof previewEmailTemplateSchema>;
+export type PreviewEmailTemplateBody = WithTypedPlaceholders<
+  Static<typeof previewEmailTemplateSchema>
+>;
 export type EmailTemplateResponse = Static<typeof emailTemplateSchema>;
 export type EmailTemplatePreviewResponse = Static<typeof emailTemplatePreviewResponseSchema>;
 
@@ -263,3 +327,9 @@ export const emailTemplateTestResponseSchema = Type.Object(
 );
 export type EmailTemplateImageResponse = Static<typeof emailTemplateImageResponseSchema>;
 export type EmailTemplateTestResponse = Static<typeof emailTemplateTestResponseSchema>;
+
+export const publishEmailTemplateSchema = Type.Object({
+  confirmedAutomationIds: Type.Optional(Type.Array(UUIDSchema, { uniqueItems: true })),
+  language: Type.Optional(supportedLanguagesSchema),
+});
+export type PublishEmailTemplateBody = Static<typeof publishEmailTemplateSchema>;

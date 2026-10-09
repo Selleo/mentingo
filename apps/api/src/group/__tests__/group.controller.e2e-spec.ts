@@ -896,7 +896,10 @@ describe("groupController (e2e)", () => {
         thresholdScore: 0,
       });
 
-      const existingUser1 = await userFactory.withCredentials({ password }).create();
+      const existingUser1 = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
       const group = await groupFactory.withMembers([existingUser1.id]).create();
 
       const cookies = await cookieFor(admin, app);
@@ -912,7 +915,7 @@ describe("groupController (e2e)", () => {
         .set("Cookie", cookies)
         .expect(201);
 
-      const newUser = await userFactory.withCredentials({ password }).create();
+      const newUser = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
       await request(app.getHttpServer())
         .post(`/api/group/set?userId=${newUser.id}`)
@@ -976,8 +979,11 @@ describe("groupController (e2e)", () => {
         thresholdScore: 0,
       });
 
-      const user = await userFactory.withCredentials({ password }).create();
-      const existingGroupMember = await userFactory.withCredentials({ password }).create();
+      const user = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const existingGroupMember = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create();
       const group = await groupFactory.withMembers([existingGroupMember.id]).create();
 
       const cookies = await cookieFor(admin, app);

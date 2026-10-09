@@ -23,7 +23,7 @@ process.env.LMS_DATABASE_URL ||= TEST_LMS_DATABASE_URL;
 if (process.env.CI === "true") process.env.SEED_MANAGE_DB_ROLE ||= "true";
 
 const baseURL = process.env.CI
-  ? "http://localhost:5173"
+  ? "https://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
 
 const config: PlaywrightTestConfig = {
@@ -95,24 +95,9 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
-      env: {
-        ...process.env,
-        DATABASE_URL: TEST_DATABASE_URL,
-        LMS_DATABASE_URL: TEST_LMS_DATABASE_URL,
-        MODE: "test",
-        DISABLE_RATE_LIMITING: "true",
-        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
-      },
-      reuseExistingServer: false,
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-    {
-      command: "cd ../api && pnpm build && pnpm run start",
+      command: "cd ../api && pnpm build && pnpm db:migrate && pnpm db:seed-e2e && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
-      timeout: 120 * 1000,
+      timeout: 240 * 1000,
       reuseExistingServer: false,
       env: {
         ...process.env,
@@ -123,14 +108,15 @@ if (process.env.CI) {
         E2E: "true",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+        CORS_ORIGIN: process.env.CORS_ORIGIN || "https://localhost:5173",
       },
       stderr: "pipe",
       stdout: "pipe",
     },
     {
       command: "cd ../web && pnpm build && caddy run --config Caddyfile.e2e",
-      url: "http://localhost:5173/",
+      url: "https://localhost:5173/",
+      ignoreHTTPSErrors: true,
       timeout: 120 * 1000,
       reuseExistingServer: false,
       env: {

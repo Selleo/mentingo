@@ -1,36 +1,42 @@
-import { Inject, Logger } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import {
-  AnnouncementEmail,
-  EMAIL_TEMPLATE_EVENTS,
-  LiveTrainingEndedEmail,
-  LiveTrainingReminderEmail,
-  LiveTrainingStartedEmail,
-} from "@repo/email-templates";
+import { Injectable, Inject, Logger } from "@nestjs/common";
+import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
 import { ANNOUNCEMENT_EMAIL_TEMPLATES, isSupportedLanguage } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
-import { EmailService } from "src/common/emails/emails.service";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent } from "src/events";
+import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
+import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { AnnouncementsRepository } from "../announcements.repository";
 
-import type { AnnouncementEmailTemplate, LocalizedText, SupportedLanguages } from "@repo/shared";
+import type { IEventHandler } from "@nestjs/cqrs";
+import type { AnnouncementEmailTemplate, LocalizedText } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
-@EventsHandler(AnnouncementPublishedEvent)
+@Injectable()
 export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPublishedEvent> {
   private readonly logger = new Logger(AnnouncementEmailHandler.name);
 
   constructor(
     private readonly announcementsRepository: AnnouncementsRepository,
-    private readonly emailService: EmailService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly notificationCollectorService: NotificationCollectorService,
+    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
+
+  onModuleInit() {
+    this.outboxNotificationPreparationService.register(async (event) => {
+      if (!(event instanceof AnnouncementPublishedEvent)) {
+        return [];
+      }
+
+      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
+    });
+  }
 
   async handle(event: AnnouncementPublishedEvent) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(
@@ -43,44 +49,43 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
       announcement.id,
     );
     const tenantOrigin = await resolveTenantOrigin(this.dbAdmin, announcement.tenantId);
-    const { language: _defaultLanguage, ...defaultEmailSettings } =
-      await this.emailService.getDefaultEmailProperties(announcement.tenantId);
+    const localizedContent = await this.announcementsRepository.getAnnouncementEmailContent(
+      announcement.id,
+    );
+    const title: LocalizedText = Object.fromEntries(
+      localizedContent.map(({ language, title }) => [language, title]),
+    );
+    const content: LocalizedText = Object.fromEntries(
+      localizedContent.map(({ language, content }) => [language, htmlToPlainText(content)]),
+    );
+    const buttonLink = this.getButtonLink(
+      tenantOrigin,
+      announcement.emailTemplate,
+      announcement.sourceId,
+    );
+
+    this.notificationCollectorService.captureNotificationItem(announcement.id, {
+      tenantId: announcement.tenantId,
+      template: {
+        event:
+          announcement.emailTemplate === ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT
+            ? EMAIL_TEMPLATE_EVENTS.ANNOUNCEMENT
+            : announcement.emailTemplate,
+        language: announcement.baseLanguage,
+        variables: {
+          title,
+          content,
+          button_link: buttonLink,
+          live_training_link: buttonLink,
+        },
+      },
+    });
 
     await processInBatches(
       recipients,
       async (recipient) => {
-        const emailLanguage = this.getEmailLanguage(
-          announcement.title,
-          recipient.language,
-          announcement.baseLanguage,
-        );
-        const title = this.getLocalizedValue(
-          announcement.title,
-          emailLanguage,
-          announcement.baseLanguage,
-        );
-        const localizedContent = this.getLocalizedValue(
-          announcement.content,
-          emailLanguage,
-          announcement.baseLanguage,
-        );
-        const content = htmlToPlainText(localizedContent);
-        const { text, html } = this.buildEmail({
-          title,
-          content,
-          template: announcement.emailTemplate,
-          link: this.getButtonLink(tenantOrigin, announcement.emailTemplate, announcement.sourceId),
-          ...defaultEmailSettings,
-          language: emailLanguage,
-        });
-
-        await this.emailService.sendEmailWithLogo(
-          {
-            to: recipient.email,
-            subject: title,
-            text,
-            html,
-          },
+        await this.notificationCollectorService.captureNotificationRecipient(
+          { to: recipient.email },
           {
             tenantId: announcement.tenantId,
             template: {
@@ -90,20 +95,15 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
                   : announcement.emailTemplate,
               language: isSupportedLanguage(recipient.language)
                 ? recipient.language
-                : emailLanguage,
+                : announcement.baseLanguage,
               variables: {
+                userEmail: recipient.email,
+                userFirstName: recipient.firstName,
+                userLastName: recipient.lastName,
                 title,
                 content,
-                button_link: this.getButtonLink(
-                  tenantOrigin,
-                  announcement.emailTemplate,
-                  announcement.sourceId,
-                ),
-                live_training_link: this.getButtonLink(
-                  tenantOrigin,
-                  announcement.emailTemplate,
-                  announcement.sourceId,
-                ),
+                button_link: buttonLink,
+                live_training_link: buttonLink,
               },
             },
           },
@@ -111,77 +111,12 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
       },
       {
         batchSize: EMAIL_BATCH_SIZE,
-        throwOnError: false,
+        throwOnError: true,
         onItemError: (error, recipient) => {
           this.logger.error(`Announcement email failed for recipient ${recipient.id}`, error);
         },
       },
     );
-  }
-
-  private getLocalizedValue(
-    value: LocalizedText,
-    language: SupportedLanguages,
-    baseLanguage: SupportedLanguages,
-  ) {
-    return value[language] ?? value[baseLanguage] ?? Object.values(value)[0] ?? "";
-  }
-
-  private getEmailLanguage(
-    value: LocalizedText,
-    language: string,
-    baseLanguage: SupportedLanguages,
-  ): SupportedLanguages {
-    if (isSupportedLanguage(language) && value[language]) {
-      return language;
-    }
-
-    if (value[baseLanguage]) {
-      return baseLanguage;
-    }
-
-    return Object.keys(value).find(isSupportedLanguage) ?? baseLanguage;
-  }
-
-  private buildEmail(input: {
-    title: string;
-    content: string;
-    template: AnnouncementEmailTemplate;
-    link: string;
-    primaryColor: string;
-    companyName: string;
-    language: SupportedLanguages;
-  }) {
-    const commonProps = {
-      title: input.title,
-      content: input.content,
-      primaryColor: input.primaryColor,
-      companyName: input.companyName,
-      language: input.language,
-    };
-
-    switch (input.template) {
-      case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_REMINDER:
-        return new LiveTrainingReminderEmail({
-          ...commonProps,
-          liveTrainingLink: input.link,
-        });
-      case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED:
-        return new LiveTrainingStartedEmail({
-          ...commonProps,
-          liveTrainingLink: input.link,
-        });
-      case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_ENDED:
-        return new LiveTrainingEndedEmail({
-          ...commonProps,
-          liveTrainingLink: input.link,
-        });
-      default:
-        return new AnnouncementEmail({
-          ...commonProps,
-          buttonLink: input.link,
-        });
-    }
   }
 
   private getButtonLink(

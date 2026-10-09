@@ -1,6 +1,8 @@
 export const EMAIL_TEMPLATES_HANDLES = {
   TABLE: "email-templates-table",
   EDITOR: "email-template-editor",
+  SAVE_MENU: "email-template-save-menu",
+  ACTIONS: "email-template-actions",
   SAVE: "email-template-save",
   PUBLISH: "email-template-publish",
   PREVIEW: "email-template-preview",

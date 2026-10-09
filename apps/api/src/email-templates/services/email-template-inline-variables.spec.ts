@@ -30,7 +30,11 @@ describe("Email template variables across formatting boundaries", () => {
       ],
     };
     expect(() =>
-      validation.validateDraft("user_first_login", { en: "Hello" }, { en: document }),
+      validation.assertValidEmailTemplateDraft(
+        "user_first_login",
+        { en: "Hello" },
+        { en: document },
+      ),
     ).not.toThrow();
     const result = renderEmailTemplate({
       event: "user_first_login",
@@ -58,7 +62,11 @@ describe("Email template variables across formatting boundaries", () => {
       ],
     };
     expect(() =>
-      validation.validateDraft("user_first_login", { en: "Hello" }, { en: document }),
+      validation.assertValidEmailTemplateDraft(
+        "user_first_login",
+        { en: "Hello" },
+        { en: document },
+      ),
     ).toThrow("emailTemplates.errors.malformedVariables");
   });
 });

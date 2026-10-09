@@ -1471,6 +1471,20 @@
       "when": 1790855868667,
       "tag": "0209_add_archived_field_to_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 210,
+      "version": "7",
+      "when": 1791453501465,
+      "tag": "0210_notification_automations",
+      "breakpoints": true
+    },
+    {
+      "idx": 211,
+      "version": "7",
+      "when": 1791453507697,
+      "tag": "0211_notification_automations_tenant_rls",
+      "breakpoints": true
     }
   ]
 }

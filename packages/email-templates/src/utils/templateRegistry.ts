@@ -50,7 +50,7 @@ const createParagraphNode = (text: string) => ({
   content: text ? [{ type: "text" as const, text }] : undefined,
 });
 
-const createDocumentFromEmailContent = (
+export const createDocumentFromEmailContent = (
   content: EmailContent,
   buttonUrl: string,
 ): EmailTemplateDocument => ({

@@ -166,3 +166,17 @@ export const buildSqlInClause = (values: string[]) =>
     values.map((value) => sql`${value}`),
     sql`, `,
   )})`;
+
+/** Retains only the requested keys of a JSONB object, including an empty key list. */
+export function retainJsonbObjectKeys(field: SqlExpression, keys: readonly string[]): SQL {
+  if (!keys.length) return sql`'{}'::jsonb`;
+
+  return sql`COALESCE((
+    SELECT jsonb_object_agg(entry.key, entry.value)
+    FROM jsonb_each(${field}) AS entry
+    WHERE entry.key IN (${sql.join(
+      keys.map((key) => sql`${key}`),
+      sql`, `,
+    )})
+  ), '{}'::jsonb)`;
+}

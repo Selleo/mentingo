@@ -55,3 +55,18 @@ export const uploadEmailImageFlow = async (page: Page, input: { file: string; al
     .setInputFiles(input.file);
   await page.getByTestId(EMAIL_TEMPLATES_HANDLES.IMAGE_ALT).fill(input.alt);
 };
+
+export const clickEmailBlockActionFlow = async (
+  page: Page,
+  input: { index: number; action: string },
+) => {
+  const block = page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK).nth(input.index);
+  const editor = block.getByRole("textbox");
+  if (await editor.isVisible()) {
+    await editor.click();
+    await page.getByRole("tooltip").getByTestId(input.action).click();
+    return;
+  }
+  await block.hover();
+  await block.getByTestId(input.action).click();
+};

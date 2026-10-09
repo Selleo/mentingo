@@ -11,6 +11,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { DEFAULT_EMAIL_PRIMARY_COLOR, getEmailTemplateLayoutSections } from "@repo/shared";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +31,7 @@ import {
   moveEmailTemplateBlockToInsertion,
 } from "../emailTemplates.utils";
 import { useEmailTemplateBlockIds } from "../useEmailTemplateBlockIds";
+import { centerEmailBlockOnPointer } from "../utils/centerEmailBlockOnPointer";
 
 import { EmailTemplateBlockSidebar } from "./EmailTemplateBlockSidebar";
 import { EmailTemplateCanvasBlock } from "./EmailTemplateCanvasBlock";
@@ -45,10 +47,13 @@ import type {
   EmailTemplateVariables,
 } from "../emailTemplates.types";
 import type { DragEndEvent } from "@dnd-kit/core";
+import type { AutomationPlaceholderDefinition } from "@repo/shared";
 
 export type EmailTemplateBlocksProps = {
   blocks: EmailTemplateBlock[];
   variables: EmailTemplateVariables;
+  placeholders?: AutomationPlaceholderDefinition[];
+  onPlaceholdersChange?: (value: AutomationPlaceholderDefinition[]) => void;
   onChange: (blocks: EmailTemplateBlock[]) => void;
   onUpload: (file: File) => Promise<string | undefined>;
   disabled: boolean;
@@ -61,6 +66,8 @@ export type EmailTemplateBlocksProps = {
 export function EmailTemplateBlocks({
   blocks,
   variables,
+  placeholders,
+  onPlaceholdersChange,
   onChange,
   onUpload,
   disabled,
@@ -81,15 +88,10 @@ export function EmailTemplateBlocks({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const isEditingDisabled = disabled || isPreviewMode;
   const [hoveredBlockIndex, setHoveredBlockIndex] = useState<number | null>(null);
-  const emailPrimaryColor = primaryColor || "var(--primary-700)";
+  const emailPrimaryColor = primaryColor || DEFAULT_EMAIL_PRIMARY_COLOR;
 
-  let footerStartIndex = blocks.length;
+  const { headerEndIndex, footerStartIndex } = getEmailTemplateLayoutSections(blocks);
 
-  while (
-    footerStartIndex > 0 &&
-    blocks[footerStartIndex - 1].type === EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER
-  )
-    footerStartIndex -= 1;
   const variableInserterRef = useRef<EmailTemplateVariableInserter>(null);
   const handleRegisterVariableInserter = useCallback((insert: EmailTemplateVariableInserter) => {
     variableInserterRef.current = insert;
@@ -162,17 +164,10 @@ export function EmailTemplateBlocks({
   };
 
   const renderedBlocks = blocks.map((block, index) => (
-    <div
-      key={getBlockId(block)}
-      style={{
-        backgroundColor: index === 0 && index < footerStartIndex ? emailPrimaryColor : undefined,
-      }}
-    >
+    <div key={getBlockId(block)}>
       <div
         className={cn("relative mx-auto w-full max-w-[500px]", {
           "bg-white": index < footerStartIndex,
-          "rounded-t-3xl pt-8": index === 0 && index < footerStartIndex,
-          "rounded-b-3xl pb-[50px]": index === footerStartIndex - 1,
         })}
         onMouseEnter={() => setHoveredBlockIndex(index)}
       >
@@ -208,14 +203,6 @@ export function EmailTemplateBlocks({
           onRemove={() => handleRemoveBlock(index)}
           onRegisterVariableInserter={handleRegisterVariableInserter}
         />
-        {index === footerStartIndex - 1 && (
-          <div
-            className="pointer-events-none absolute bottom-0 left-0 overflow-hidden rounded-bl-3xl"
-            aria-hidden="true"
-          >
-            <EmailBorderCircle className="h-[50px] w-auto" style={{ color: emailPrimaryColor }} />
-          </div>
-        )}
         <div className="relative">
           <EmailTemplateInsertionPoint
             index={index + 1}
@@ -233,6 +220,7 @@ export function EmailTemplateBlocks({
   return (
     <DndContext
       sensors={sensors}
+      modifiers={[centerEmailBlockOnPointer]}
       collisionDetection={closestCenter}
       onDragStart={({ active }) => {
         setDraggedBlockId(
@@ -257,51 +245,78 @@ export function EmailTemplateBlocks({
       >
         <EmailTemplateBlockSidebar
           variables={variables}
+          placeholders={placeholders}
+          onPlaceholdersChange={onPlaceholdersChange}
           disabled={isEditingDisabled}
           hidden={isPreviewMode}
           onInsertBlock={(type) => handleInsertBlock(type, insertionIndex)}
           onInsertVariable={handleInsertVariable}
         />
-        <div className="min-w-0 bg-neutral-100">
+        <div className="flex min-w-0 flex-col bg-neutral-100">
           <EmailTemplateCanvasToolbar
             isMobilePreview={isMobilePreview}
             isPreviewMode={isPreviewMode}
             onMobileChange={setIsMobilePreview}
             onTogglePreview={() => setIsPreviewMode((current) => !current)}
           />
-          <div className="overflow-x-auto">
+          <div className="flex flex-1 flex-col overflow-x-auto">
             <div
               data-testid={EMAIL_TEMPLATES_HANDLES.CANVAS}
               className={cn("mx-auto w-full bg-[#fafafa] text-[#222222]", {
                 "max-w-[375px]": isMobilePreview,
+                "flex flex-1 flex-col": blocks.length === 0,
               })}
               style={{ fontFamily: '"Open Sans", Arial, sans-serif' }}
             >
-              <div className="h-[50px]" style={{ backgroundColor: emailPrimaryColor }} />
-              <div onMouseLeave={() => setHoveredBlockIndex(null)}>
+              {blocks.length > 0 && (
+                <div className="h-[50px]" style={{ backgroundColor: emailPrimaryColor }} />
+              )}
+              <div
+                className={cn({ "flex flex-1 flex-col": blocks.length === 0 })}
+                onMouseLeave={() => setHoveredBlockIndex(null)}
+              >
                 <SortableContext
                   items={blocks.map(getBlockId)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="relative mx-auto w-[90%] max-w-[500px]">
+                  {blocks.length === 0 ? (
                     <EmailTemplateInsertionPoint
                       index={0}
                       disabled={isEditingDisabled}
-                      visible={!blocks.length || hoveredBlockIndex === 0 || !!draggedBlockType}
+                      emptyCanvas
                       onInsert={(type) => handleInsertBlock(type, 0)}
                     />
-                  </div>
-                  {!blocks.length && (
-                    <p className="p-8 text-center text-sm text-neutral-500">
-                      {t("emailTemplates.ui.emptyContent")}
-                    </p>
+                  ) : (
+                    <>
+                      <div className="relative mx-auto w-[90%] max-w-[500px]">
+                        <EmailTemplateInsertionPoint
+                          index={0}
+                          disabled={isEditingDisabled}
+                          visible={hoveredBlockIndex === 0 || !!draggedBlockType}
+                          onInsert={(type) => handleInsertBlock(type, 0)}
+                        />
+                      </div>
+                      <EmailTemplateCanvasLayout
+                        primaryColor={emailPrimaryColor}
+                        headerContent={renderedBlocks.slice(0, headerEndIndex)}
+                        decoration={
+                          <EmailBorderCircle
+                            className="h-[50px] w-auto"
+                            style={{ color: emailPrimaryColor }}
+                          />
+                        }
+                      >
+                        {renderedBlocks.slice(headerEndIndex, footerStartIndex)}
+                      </EmailTemplateCanvasLayout>
+                      {footerStartIndex < blocks.length ? (
+                        <div className="mx-auto w-[90%] max-w-[500px]">
+                          {renderedBlocks.slice(footerStartIndex)}
+                        </div>
+                      ) : (
+                        <div className="h-[50px] bg-white" aria-hidden="true" />
+                      )}
+                    </>
                   )}
-                  <EmailTemplateCanvasLayout primaryColor={emailPrimaryColor}>
-                    {renderedBlocks.slice(0, footerStartIndex)}
-                  </EmailTemplateCanvasLayout>
-                  <div className="mx-auto w-[90%] max-w-[500px]">
-                    {renderedBlocks.slice(footerStartIndex)}
-                  </div>
                 </SortableContext>
               </div>
             </div>

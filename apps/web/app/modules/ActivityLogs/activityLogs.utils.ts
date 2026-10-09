@@ -5,6 +5,7 @@ import {
   Bell,
   CheckCircle2,
   CirclePlus,
+  Copy,
   KeyRound,
   Languages,
   LogIn,
@@ -12,7 +13,10 @@ import {
   MailPlus,
   Pencil,
   Play,
+  Power,
+  PowerOff,
   RotateCcw,
+  Save,
   Send,
   ShieldAlert,
   Tags,
@@ -43,6 +47,48 @@ const defaultActionConfig: ActivityLogActionConfig = {
 };
 
 export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogActionConfig> = {
+  save_automation_draft: {
+    icon: Save,
+    badgeClassName: "border-blue-200 bg-blue-50 text-blue-700",
+    iconClassName: "text-blue-700",
+    ringClassName: "border-blue-600",
+  },
+  simulate_automation: {
+    icon: Play,
+    badgeClassName: "border-violet-200 bg-violet-50 text-violet-700",
+    iconClassName: "text-violet-700",
+    ringClassName: "border-violet-600",
+  },
+  apply_automation: {
+    icon: Send,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
+  },
+  enable_automation: {
+    icon: Power,
+    badgeClassName: "border-green-200 bg-green-50 text-green-700",
+    iconClassName: "text-green-700",
+    ringClassName: "border-green-600",
+  },
+  disable_automation: {
+    icon: PowerOff,
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-700",
+    iconClassName: "text-amber-700",
+    ringClassName: "border-amber-600",
+  },
+  duplicate_automation: {
+    icon: Copy,
+    badgeClassName: "border-indigo-200 bg-indigo-50 text-indigo-700",
+    iconClassName: "text-indigo-700",
+    ringClassName: "border-indigo-600",
+  },
+  archive_automation: {
+    icon: Archive,
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    iconClassName: "text-slate-700",
+    ringClassName: "border-slate-600",
+  },
   create: {
     icon: CirclePlus,
     badgeClassName: "border-green-200 bg-green-50 text-green-700",
