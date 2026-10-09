@@ -25979,6 +25979,18 @@ export interface OpenAuthoringSessionResponse {
           display: string;
           status: "started" | "completed" | "failed" | "stopped";
           result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
             sourceCount?: number | null;
             findingCount?: number | null;
           } | null;
@@ -26115,6 +26127,18 @@ export interface GetAuthoringSessionResponse {
           display: string;
           status: "started" | "completed" | "failed" | "stopped";
           result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
             sourceCount?: number | null;
             findingCount?: number | null;
           } | null;
@@ -26207,6 +26231,18 @@ export interface GetOlderAuthoringTurnsResponse {
           display: string;
           status: "started" | "completed" | "failed" | "stopped";
           result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
             sourceCount?: number | null;
             findingCount?: number | null;
           } | null;

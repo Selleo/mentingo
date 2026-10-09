@@ -218,6 +218,23 @@ const record = Type.Object({
 });
 const turnToolResult = Type.Object(
   {
+    query: Type.Optional(Type.Union([Type.String({ maxLength: 12000 }), Type.Null()])),
+    queries: Type.Optional(Type.Union([Type.Array(Type.String(), { maxItems: 64 }), Type.Null()])),
+    sources: Type.Optional(
+      Type.Union([
+        Type.Array(
+          Type.Object(
+            {
+              url: Type.String({ minLength: 1, maxLength: 2048 }),
+              title: Type.Optional(Type.Union([Type.String({ maxLength: 600 }), Type.Null()])),
+            },
+            strict,
+          ),
+          { maxItems: 64 },
+        ),
+        Type.Null(),
+      ]),
+    ),
     sourceCount: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
     findingCount: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
   },

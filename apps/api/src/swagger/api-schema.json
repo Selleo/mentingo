@@ -135484,6 +135484,67 @@
                                         "additionalProperties": false,
                                         "type": "object",
                                         "properties": {
+                                          "query": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 12000,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "queries": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "sources": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "additionalProperties": false,
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "url": {
+                                                      "minLength": 1,
+                                                      "maxLength": 2048,
+                                                      "type": "string"
+                                                    },
+                                                    "title": {
+                                                      "anyOf": [
+                                                        {
+                                                          "maxLength": 600,
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "type": "null"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "url"
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
                                           "sourceCount": {
                                             "anyOf": [
                                               {
@@ -136288,6 +136349,67 @@
                                         "additionalProperties": false,
                                         "type": "object",
                                         "properties": {
+                                          "query": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 12000,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "queries": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "sources": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "additionalProperties": false,
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "url": {
+                                                      "minLength": 1,
+                                                      "maxLength": 2048,
+                                                      "type": "string"
+                                                    },
+                                                    "title": {
+                                                      "anyOf": [
+                                                        {
+                                                          "maxLength": 600,
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "type": "null"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "url"
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
                                           "sourceCount": {
                                             "anyOf": [
                                               {
@@ -136845,6 +136967,67 @@
                                         "additionalProperties": false,
                                         "type": "object",
                                         "properties": {
+                                          "query": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 12000,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "queries": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "sources": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "additionalProperties": false,
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "url": {
+                                                      "minLength": 1,
+                                                      "maxLength": 2048,
+                                                      "type": "string"
+                                                    },
+                                                    "title": {
+                                                      "anyOf": [
+                                                        {
+                                                          "maxLength": 600,
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "type": "null"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "url"
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
                                           "sourceCount": {
                                             "anyOf": [
                                               {
