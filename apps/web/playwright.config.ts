@@ -23,7 +23,7 @@ process.env.LMS_DATABASE_URL ||= TEST_LMS_DATABASE_URL;
 if (process.env.CI === "true") process.env.SEED_MANAGE_DB_ROLE ||= "true";
 
 const baseURL = process.env.CI
-  ? "http://localhost:5173"
+  ? "https://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
 
 const config: PlaywrightTestConfig = {
@@ -108,14 +108,15 @@ if (process.env.CI) {
         E2E: "true",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+        CORS_ORIGIN: process.env.CORS_ORIGIN || "https://localhost:5173",
       },
       stderr: "pipe",
       stdout: "pipe",
     },
     {
       command: "cd ../web && pnpm build && caddy run --config Caddyfile.e2e",
-      url: "http://localhost:5173/",
+      url: "https://localhost:5173/",
+      ignoreHTTPSErrors: true,
       timeout: 120 * 1000,
       reuseExistingServer: false,
       env: {
