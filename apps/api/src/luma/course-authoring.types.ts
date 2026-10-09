@@ -52,7 +52,3 @@ export type AuthoringMentorPayload = Extract<
   Extract<AuthoringOperation, { chapterId: string }>["payload"],
   { lessonType: "ai_mentor" }
 >;
-
-export type CourseAuthoringPlacement =
-  | { kind: "chapter"; targetId: UUIDType; displayOrder: number }
-  | { kind: "lesson"; chapterId: UUIDType; targetId: UUIDType; displayOrder: number };

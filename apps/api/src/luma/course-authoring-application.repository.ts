@@ -1,6 +1,6 @@
 /** Stores idempotency claims and delivery state for course-authoring applications within a tenant. */
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import { and, eq, sql, isNull, asc, lt, inArray } from "drizzle-orm";
+import { and, eq, sql, isNull, asc, desc, lt, inArray } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -29,6 +29,56 @@ export class CourseAuthoringApplicationRepository {
         ),
       );
     return record?.result ?? null;
+  }
+
+  /** Supplies a new export-command identity after an authoritative session failure. */
+  async latestTerminalSessionReceipt(tenantId: string, courseId: string, sessionId: string) {
+    const [record] = await this.db
+      .select()
+      .from(courseAuthoringApplications)
+      .where(
+        and(
+          eq(courseAuthoringApplications.tenantId, tenantId),
+          eq(courseAuthoringApplications.courseId, courseId),
+          eq(courseAuthoringApplications.sessionId, sessionId),
+          sql`${courseAuthoringApplications.result}->>'status' in ('failed', 'conflict')`,
+        ),
+      )
+      .orderBy(desc(courseAuthoringApplications.createdAt), desc(courseAuthoringApplications.id))
+      .limit(1);
+    return record?.result ?? null;
+  }
+
+  /** Commits a terminal non-applied outcome under the same lock as native application. */
+  async recordFailureOnce(
+    claim: CourseAuthoringApplicationClaim,
+    result: CourseAuthoringApplicationResult,
+  ) {
+    return this.db.transaction(async (transaction) => {
+      await transaction.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended(${`${claim.tenantId}:${claim.exportId}`}, 0))`,
+      );
+      const [existing] = await transaction
+        .select()
+        .from(courseAuthoringApplications)
+        .where(
+          and(
+            eq(courseAuthoringApplications.tenantId, claim.tenantId),
+            eq(courseAuthoringApplications.exportId, claim.exportId),
+          ),
+        );
+      if (existing) {
+        if (
+          existing.exportHash !== claim.exportHash ||
+          existing.courseId !== claim.courseId ||
+          existing.sessionId !== claim.sessionId
+        )
+          throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
+        return existing.result;
+      }
+      await transaction.insert(courseAuthoringApplications).values({ ...claim, result });
+      return result;
+    });
   }
 
   /** Registers an asset before upload so a worker crash leaves a reclaimable inventory row. */
@@ -174,6 +224,8 @@ export class CourseAuthoringApplicationRepository {
         ) {
           throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
         }
+        if (existing.result.status !== "applied")
+          throw new ConflictException("courseAuthoring.errors.applicationFailed");
         return existing.result;
       }
       if (stagedKeys.length) {

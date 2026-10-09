@@ -9,7 +9,7 @@ import { CourseGenerationDrawer } from "./CourseGenerationDrawer";
 import type { ListAuthoringSessionsResponse } from "~/api/generated-api";
 
 const COURSE_ID = "00000000-0000-4000-8000-000000000001";
-const TOTAL_SESSIONS = 12;
+const TOTAL_SESSIONS = 24;
 
 const allSessions = Array.from({ length: TOTAL_SESSIONS }, (_, index) => ({
   sessionId: `00000000-0000-4000-8000-00000000${String(index + 1).padStart(4, "0")}`,
@@ -58,12 +58,7 @@ describe("CourseGenerationDrawer session menu", () => {
       .withQuery()
       .withI18n()
       .render(
-        <CourseGenerationDrawer
-          courseId={COURSE_ID}
-          language="en"
-          open
-          onOpenChange={() => {}}
-        />,
+        <CourseGenerationDrawer courseId={COURSE_ID} language="en" open onOpenChange={() => {}} />,
       );
 
     const trigger = await screen.findByTestId("course-authoring-session-menu-trigger");
@@ -75,9 +70,39 @@ describe("CourseGenerationDrawer session menu", () => {
     const loadMoreButton = await screen.findByRole("button", { name: /load more/i });
     await user.click(loadMoreButton);
 
-    await waitFor(() => expect(within(list).getByText(`Chat ${TOTAL_SESSIONS}`)).toBeInTheDocument());
+    await waitFor(() => expect(within(list).getByText("Chat 16")).toBeInTheDocument());
 
     expect(screen.getByTestId("course-authoring-session-menu-search")).toBeInTheDocument();
     expect(screen.getByTestId("course-authoring-session-menu-list")).toBeInTheDocument();
+  });
+
+  it("keeps a selected session from a later page selected after the first-page query updates", async () => {
+    const user = userEvent.setup();
+    renderWith()
+      .withQuery()
+      .withI18n()
+      .render(
+        <CourseGenerationDrawer courseId={COURSE_ID} language="en" open onOpenChange={() => {}} />,
+      );
+
+    await user.click(await screen.findByTestId("course-authoring-session-menu-trigger"));
+    const list = await screen.findByTestId("course-authoring-session-menu-list");
+    await waitFor(() => expect(within(list).getByText("Chat 1")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /load more/i }));
+    await waitFor(() => expect(within(list).getByText("Chat 16")).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: /load more/i }));
+    await waitFor(() => expect(within(list).getByText("Chat 24")).toBeInTheDocument());
+
+    const olderSessionItem = within(list).getByTestId(
+      "course-authoring-session-menu-item-00000000-0000-4000-8000-000000000024",
+    );
+    await user.click(olderSessionItem);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("course-authoring-session-menu-trigger")).toHaveTextContent(
+        "Chat 24",
+      ),
+    );
   });
 });

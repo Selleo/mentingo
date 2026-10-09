@@ -6,6 +6,10 @@ jest.mock("bullmq", () => ({
 import { ForbiddenException } from "@nestjs/common";
 import { UnrecoverableError } from "bullmq";
 
+import { dbAls } from "src/storage/db/db-als.store";
+import { MissingTenantContextError } from "src/storage/db/db-errors";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+
 import { CourseAuthoringContextBridgeWorker } from "./course-authoring-context-bridge.worker";
 
 describe("CourseAuthoringContextBridgeWorker", () => {
@@ -47,7 +51,9 @@ describe("CourseAuthoringContextBridgeWorker", () => {
         request: { status: "pending", payload: request },
         binding,
       }),
-      markFailed: jest.fn().mockResolvedValue(undefined),
+      markFailed: jest.fn().mockImplementation(async () => {
+        if (dbAls.getStore()?.tenantId !== tenantId) throw new MissingTenantContextError();
+      }),
       markFulfilled: jest.fn().mockResolvedValue(undefined),
     };
     const detailLesson = {
@@ -109,9 +115,8 @@ describe("CourseAuthoringContextBridgeWorker", () => {
       } as never,
       db as never,
     );
-    const tenantRunner = {
-      runWithTenant: jest.fn((_tenantId: string, callback: () => Promise<unknown>) => callback()),
-    };
+    const tenantRunner = new TenantDbRunnerService({} as never);
+    jest.spyOn(tenantRunner, "runWithTenant");
     return { worker, tenantRunner, repository, context, fulfillContext, failContext, request, db };
   }
 
@@ -146,6 +151,15 @@ describe("CourseAuthoringContextBridgeWorker", () => {
   it("fails closed and marks the request failed when the bound actor loses course access", async () => {
     const test = setup();
     test.context.getContext.mockRejectedValue(new ForbiddenException("revoked"));
+    const pending = await test.repository.findRequest();
+    test.repository.findRequest.mockImplementation(async () => {
+      if (dbAls.getStore()?.tenantId !== tenantId) throw new MissingTenantContextError();
+      return pending;
+    });
+    test.failContext.mockImplementation(async () => {
+      expect(dbAls.getStore()?.tenantId).toBe(tenantId);
+      return { contextRequestId, taskId, status: "failed", failureHash: "failure-hash" };
+    });
 
     await expect(
       test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner as never),
@@ -164,6 +178,38 @@ describe("CourseAuthoringContextBridgeWorker", () => {
       }),
     );
     expect(test.fulfillContext).not.toHaveBeenCalled();
+  });
+
+  it("keeps a rejected request pending when failure delivery is temporarily unavailable", async () => {
+    const test = setup();
+    test.context.getContext.mockRejectedValue(new ForbiddenException("revoked"));
+    const deliveryError = new Error("temporary upstream failure");
+    test.failContext.mockRejectedValueOnce(deliveryError);
+
+    await expect(
+      test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner),
+    ).rejects.toBe(deliveryError);
+    expect(test.repository.markFailed).not.toHaveBeenCalled();
+
+    await expect(
+      test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner),
+    ).rejects.toBeInstanceOf(UnrecoverableError);
+    expect(test.failContext).toHaveBeenCalledTimes(2);
+    expect(test.repository.markFailed).toHaveBeenCalledTimes(1);
+    expect(dbAls.getStore()).toBeUndefined();
+  });
+
+  it("propagates infrastructure failures without delivering a permanent context rejection", async () => {
+    const test = setup();
+    const infrastructureError = new Error("database unavailable");
+    test.context.getContext.mockRejectedValue(infrastructureError);
+
+    await expect(
+      test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner),
+    ).rejects.toBe(infrastructureError);
+    expect(test.failContext).not.toHaveBeenCalled();
+    expect(test.repository.markFailed).not.toHaveBeenCalled();
+    expect(dbAls.getStore()).toBeUndefined();
   });
 
   it("does not redeliver a request after its durable status is fulfilled", async () => {

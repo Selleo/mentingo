@@ -25932,6 +25932,10 @@ export interface OpenAuthoringSessionBody {
 export interface OpenAuthoringSessionResponse {
   data: {
     reasoningControlAvailable?: boolean;
+    applicationDelta?: {
+      appliedOperationIds: string[];
+      idMappings: object;
+    };
     schemaVersion: 1;
     /** @format uuid */
     sessionId: string;
@@ -26064,6 +26068,10 @@ export interface ListAuthoringSessionsResponse {
 export interface GetAuthoringSessionResponse {
   data: {
     reasoningControlAvailable?: boolean;
+    applicationDelta?: {
+      appliedOperationIds: string[];
+      idMappings: object;
+    };
     schemaVersion: 1;
     /** @format uuid */
     sessionId: string;
@@ -27706,6 +27714,7 @@ export interface GetAuthoringCourseContextResponse {
       /** @format uuid */
       id: string;
       title: string;
+      /** Zero-based visible sibling position; native persisted ranks are kept in baselines. */
       displayOrder: number | null;
       baselineHash: string;
       deletionBaselineHash: string;
@@ -27716,6 +27725,7 @@ export interface GetAuthoringCourseContextResponse {
         lessonType: string;
         /** @min 0 */
         assessmentAttemptCount: number;
+        /** Zero-based visible sibling position; native persisted ranks are kept in baselines. */
         displayOrder: number | null;
         baselineHash: string;
         description?: string;

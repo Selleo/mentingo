@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -22,7 +22,7 @@ const configuredAssessment: AiJudgeConfigurationDraft = {
       scoreGuidance: [],
     },
   ],
-  blockingErrors: [],
+  blockingErrors: [{ description: "Invents product capabilities" }],
 };
 
 type AiJudgeConfigurationCardOverrides = Partial<
@@ -86,6 +86,23 @@ describe("AiJudgeConfigurationCard", () => {
     expect(screen.getByRole("button", { name: "Edit assessment" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Improve with AI" })).not.toBeInTheDocument();
     expect(onConfigureWithAi).not.toHaveBeenCalled();
+  });
+
+  it("allows expanding blocking-error details in the read-only assessment", async () => {
+    const user = userEvent.setup();
+    renderCard({ value: configuredAssessment, isPersisted: true, readOnly: true });
+
+    await user.click(screen.getByRole("button", { name: "View assessment" }));
+    const section = await screen.findByTestId("curriculum-ai-mentor-judge-blocking-errors-section");
+
+    expect(section).not.toHaveAttribute("open");
+    await user.click(within(section).getByText("Blocking errors"));
+
+    expect(section).toHaveAttribute("open");
+    expect(screen.getByRole("textbox", { name: "Blocking error 1" })).toHaveValue(
+      "Invents product capabilities",
+    );
+    expect(screen.getByRole("textbox", { name: "Blocking error 1" })).toHaveAttribute("readonly");
   });
 
   it("blocks AI creation until AI Mentor behavior is configured", async () => {

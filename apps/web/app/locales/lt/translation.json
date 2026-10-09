@@ -6234,6 +6234,12 @@
         "failed": "Paieška internete nepavyko",
         "stopped": "Paieška internete sustabdyta"
       },
+      "webExtractTool": {
+        "started": "Skaitomas puslapis pagal nuorodą",
+        "completed": "Puslapis pagal nuorodą perskaitytas",
+        "failed": "Nepavyko išgauti puslapio",
+        "stopped": "Puslapio išgavimas sustabdytas"
+      },
       "toolSourceCount": "Šaltiniai: {{count}}",
       "toolFindingCount": "Įžvalgos: {{count}}",
       "opening": "Atidaromas kursas…",
@@ -6598,6 +6604,9 @@
       "sourceUploadFailed": "Nepavyko įkelti šaltinio. Patikrinkite jo tipą bei dydį ir bandykite dar kartą.",
       "sourceReplacementNotReady": "Palaukite, kol pakaitinis failas bus apdorotas.",
       "sourceRefreshSelectionChanged": "Šaltinių pasirinkimas pasikeitė. Peržiūrėkite dabartinius šaltinius ir bandykite dar kartą.",
+      "mediaOutsideCourse": "Šis vaizdas arba įterpta medija nėra patvirtinta šiam kursui. Įkelkite failą arba paprašykite sugeneruoti vaizdą, tada sugeneruokite pakeitimą iš naujo.",
+      "previewUnavailable": "Šioje peržiūroje trūksta būtinų pakeitimų arba tvarka nenuosekli. Atnaujinkite sesiją ir įtraukite būtinus pakeitimus prieš bandydami dar kartą.",
+      "applicationInProgress": "Taikomi kiti pakeitimai. Jei įtraukti į eilę nepavyko, pakartokite pradinį pasiūlymų pasirinkimą, kad tęstumėte.",
       "receiptSynchronizationPending": "Ankstesni pakeitimai saugomi AI darbo srityje. Netrukus bandykite dar kartą pritaikyti tą patį pasirinkimą.",
       "appliedRefreshPending": "Pakeitimai pritaikyti. Atnaujinkite kursą, jei jų dar nematote.",
       "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams."
@@ -6605,6 +6614,7 @@
     "review": {
       "generatedImage": "Sugeneruotas paveikslėlis",
       "openImageFile": "Atidaryti paveikslėlio failą",
+      "mediaPreviewBlocked": "Ši medija nėra iš pasirinkto kurso ar patvirtintų failų.",
       "imagePreviewUnavailable": "Paveikslėlio peržiūra dar nepasiekiama.",
       "imagePreviewFailed": "Kai kurių vaizdų peržiūrų nepavyko įkelti.",
       "retryImagePreviews": "Bandyti peržiūras dar kartą",

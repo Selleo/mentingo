@@ -1,5 +1,8 @@
+import { createHash } from "node:crypto";
+
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
-import { COURSE_STATUSES, PERMISSIONS } from "@repo/shared";
+import { COURSE_STATUSES, PERMISSIONS, planCourseAuthoringOrder } from "@repo/shared";
+import { PgDialect } from "drizzle-orm/pg-core";
 
 import { CourseAuthoringContextService } from "./course-authoring-context.service";
 
@@ -168,9 +171,15 @@ describe("CourseAuthoringContextService selected lesson details", () => {
     description: "<p>Selected content</p>",
     lessonType: "content",
     displayOrder: 1,
+    authoringDisplayOrder: 0,
     updatedAt: "2026-09-17T00:00:00.000Z",
   };
-  const parentChapter = { id: chapterId, title: "Parent chapter", displayOrder: 1 };
+  const parentChapter = {
+    id: chapterId,
+    title: "Parent chapter",
+    displayOrder: 1,
+    authoringDisplayOrder: 0,
+  };
 
   it("reads only localized content lesson bodies for Mentor context", async () => {
     const contentLesson = {
@@ -214,15 +223,55 @@ describe("CourseAuthoringContextService selected lesson details", () => {
     );
 
     expect(result.chapters).toHaveLength(1);
-    expect(result.chapters[0]).toMatchObject({ id: chapterId, title: "Parent chapter" });
+    expect(result.chapters[0]).toMatchObject({
+      id: chapterId,
+      title: "Parent chapter",
+      displayOrder: 0,
+    });
     expect(result.chapters[0]?.lessons).toHaveLength(1);
     expect(result.chapters[0]?.lessons[0]).toMatchObject({
       id: selectedLessonId,
       description: "<p>Selected content</p>",
       lessonType: "content",
+      displayOrder: 0,
     });
     expect(result.chapters[0]?.lessons[0]?.baselineHash).toMatch(/^[0-9a-f]{64}$/);
+    const { authoringDisplayOrder: _ordinal, ...nativeLesson } = selectedLesson;
+    const legacyBaseline = createHash("sha256").update(JSON.stringify(nativeLesson)).digest("hex");
+    expect(result.chapters[0]?.lessons[0]?.baselineHash).not.toBe(legacyBaseline);
     expect(select).toHaveBeenCalledTimes(5);
+  });
+
+  it("preserves complete sibling ordinals when only later sparse-ranked rows are selected", async () => {
+    const { service, select } = createService([
+      [{ id: courseId, availableLocales: ["en"] }],
+      [{ ...selectedLesson, displayOrder: 11, authoringDisplayOrder: 1 }],
+      [{ ...parentChapter, displayOrder: 5, authoringDisplayOrder: 1 }],
+      [],
+      [],
+    ]);
+    const result = await service.getSelectedLessonDetails(
+      courseId,
+      "en",
+      [selectedLessonId],
+      actor,
+    );
+    expect(result.chapters[0].displayOrder).toBe(1);
+    expect(result.chapters[0].lessons[0].displayOrder).toBe(1);
+
+    const dialect = new PgDialect();
+    const lessonOrdinal = dialect.sqlToQuery(select.mock.calls[1][0].authoringDisplayOrder).sql;
+    const chapterOrdinal = dialect.sqlToQuery(select.mock.calls[2][0].authoringDisplayOrder).sql;
+    expect(lessonOrdinal).toContain('from "lessons" as authoring_sibling_lesson');
+    expect(lessonOrdinal).toContain(
+      '"authoring_sibling_lesson"."chapter_id" = "lessons"."chapter_id"',
+    );
+    expect(lessonOrdinal).toContain('"authoring_sibling_lesson"."id" < "lessons"."id"');
+    expect(chapterOrdinal).toContain('from "chapters" as authoring_sibling_chapter');
+    expect(chapterOrdinal).toContain(
+      '"authoring_sibling_chapter"."course_id" = "chapters"."course_id"',
+    );
+    expect(chapterOrdinal).toContain('"authoring_sibling_chapter"."id" < "chapters"."id"');
   });
 
   it("rejects a lesson that is outside the authorized course", async () => {
@@ -299,7 +348,10 @@ describe("CourseAuthoringContextService selected lesson details", () => {
       learningOutcomes: {},
       thumbnailS3Key: null,
     };
-    const chapters = [parentChapter, { id: otherChapterId, title: "Other", displayOrder: 2 }];
+    const chapters = [
+      { ...parentChapter, displayOrder: 3 },
+      { id: otherChapterId, title: "Other", displayOrder: 5 },
+    ];
     const lessons = [
       selectedLesson,
       {
@@ -317,6 +369,24 @@ describe("CourseAuthoringContextService selected lesson details", () => {
       { language: "en", lessonIds: [selectedLessonId] },
       actor,
     );
+    expect(fullContext.chapters.map((chapter) => chapter.displayOrder)).toEqual([0, 1]);
+    expect(
+      planCourseAuthoringOrder(
+        [{ kind: "chapter", orderedIds: chapters.map((chapter) => chapter.id) }],
+        [
+          {
+            type: "chapter.update",
+            operationId: selectedLessonId,
+            targetId: chapterId,
+            dependencies: [],
+            payload: { displayOrder: fullContext.chapters[0].displayOrder },
+          },
+        ],
+      ),
+    ).toEqual([]);
+    expect(fullContext.chapters[0].lessons[0].displayOrder).toBe(0);
+    expect(chapters.map((chapter) => chapter.displayOrder)).toEqual([3, 5]);
+    expect(selectedLesson.displayOrder).toBe(1);
     expect(fullContext.course).toMatchObject({
       id: courseId,
       status: COURSE_STATUSES.PRIVATE,
@@ -336,8 +406,24 @@ describe("CourseAuthoringContextService selected lesson details", () => {
         "lessonSequenceEnabled",
         "quizFeedbackEnabled",
         "certificateValidity",
+        "orderedIds",
       ]),
     );
+    const changedNativeRank = createService([
+      [course],
+      [{ ...chapters[0], displayOrder: 4 }, chapters[1]],
+      lessons,
+      assessments,
+      mentorVersions,
+    ]);
+    const changedContext = await changedNativeRank.service.getContext(
+      courseId,
+      { language: "en", lessonIds: [selectedLessonId] },
+      actor,
+    );
+    expect(changedContext.chapters[0].displayOrder).toBe(0);
+    expect(changedContext.chapters[0].baselineHash).not.toBe(fullContext.chapters[0].baselineHash);
+    expect(changedContext.baselineHash).not.toBe(fullContext.baselineHash);
     const selected = createService([
       [{ id: courseId, availableLocales: ["en"] }],
       [selectedLesson],

@@ -61,18 +61,20 @@ export class CourseAuthoringContextBridgeWorker implements OnModuleDestroy {
   }
 
   async handleJob(job: CourseAuthoringContextFulfillmentJob, tenants: TenantDbRunnerService) {
-    try {
-      return await tenants.runWithTenant(job.tenantId, () => this.fulfill(job));
-    } catch (error) {
-      const reasonCode = this.failureReason(error);
-      if (!reasonCode) throw error;
-      const row = await this.repository.findRequest(job.tenantId, job.contextRequestId);
-      if (row?.request.status === "pending") {
-        await this.sendFailure(row.request.payload as CourseAuthoringContextRequest, reasonCode);
-        await this.repository.markFailed(job.tenantId, job.contextRequestId, reasonCode);
+    return tenants.runWithTenant(job.tenantId, async () => {
+      try {
+        return await this.fulfill(job);
+      } catch (error) {
+        const reasonCode = this.failureReason(error);
+        if (!reasonCode) throw error;
+        const row = await this.repository.findRequest(job.tenantId, job.contextRequestId);
+        if (row?.request.status === "pending") {
+          await this.sendFailure(row.request.payload as CourseAuthoringContextRequest, reasonCode);
+          await this.repository.markFailed(job.tenantId, job.contextRequestId, reasonCode);
+        }
+        throw new UnrecoverableError(error instanceof Error ? error.message : reasonCode);
       }
-      throw new UnrecoverableError(error instanceof Error ? error.message : reasonCode);
-    }
+    });
   }
 
   private failureReason(error: unknown): ContextFailureReason | undefined {

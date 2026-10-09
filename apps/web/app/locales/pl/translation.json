@@ -6294,6 +6294,12 @@
         "failed": "Wyszukiwanie w internecie nie powiodło się",
         "stopped": "Wyszukiwanie w internecie zatrzymane"
       },
+      "webExtractTool": {
+        "started": "Odczytywanie strony z linku",
+        "completed": "Odczytano stronę z linku",
+        "failed": "Nie udało się odczytać strony",
+        "stopped": "Odczytywanie strony zatrzymane"
+      },
       "toolSourceCount": "Źródła: {{count}}",
       "toolFindingCount": "Ustalenia: {{count}}",
       "opening": "Otwieranie kursu…",
@@ -6660,6 +6666,9 @@
       "sourceUploadFailed": "Nie udało się przesłać źródła. Sprawdź jego typ i rozmiar, a następnie spróbuj ponownie.",
       "sourceReplacementNotReady": "Poczekaj na zakończenie przetwarzania nowego pliku.",
       "sourceRefreshSelectionChanged": "Wybór źródeł uległ zmianie. Sprawdź aktualne źródła i spróbuj ponownie.",
+      "mediaOutsideCourse": "Ten obraz lub materiał osadzony nie jest zatwierdzony dla tego kursu. Prześlij plik lub poproś o wygenerowanie obrazu, a następnie wygeneruj zmianę ponownie.",
+      "previewUnavailable": "W podglądzie brakuje wymaganych zmian lub kolejność jest niespójna. Odśwież sesję i uwzględnij wymagane zmiany przed ponowną próbą.",
+      "applicationInProgress": "Trwa stosowanie innych zmian. Jeśli nie udało się dodać zadania do kolejki, ponów pierwotny wybór propozycji, aby je wznowić.",
       "receiptSynchronizationPending": "Trwa zapisywanie poprzednich zmian w przestrzeni AI. Za chwilę spróbuj ponownie zastosować ten sam wybór.",
       "appliedRefreshPending": "Zmiany zostały zastosowane. Odśwież kurs, jeśli nie są jeszcze widoczne.",
       "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości."
@@ -6667,6 +6676,7 @@
     "review": {
       "generatedImage": "Wygenerowana grafika",
       "openImageFile": "Otwórz plik graficzny",
+      "mediaPreviewBlocked": "Ten materiał nie pochodzi z wybranego kursu ani zatwierdzonych plików.",
       "imagePreviewUnavailable": "Podgląd grafiki nie jest jeszcze dostępny.",
       "imagePreviewFailed": "Nie udało się wczytać niektórych podglądów obrazów.",
       "retryImagePreviews": "Ponów podglądy",

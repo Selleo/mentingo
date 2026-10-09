@@ -45,6 +45,7 @@ import type {
 
 interface CourseLessonsProps {
   chapters?: Chapter[];
+  trustedCourseDescription?: string;
   baseLanguageChapters?: Chapter[];
   canRefetchChapterList: boolean;
   language: SupportedLanguages;
@@ -56,6 +57,7 @@ interface CourseLessonsProps {
 
 const CourseLessons = ({
   chapters,
+  trustedCourseDescription,
   baseLanguageChapters,
   canRefetchChapterList,
   language,
@@ -349,6 +351,7 @@ const CourseLessons = ({
         <CurriculumReviewWorkspace
           key={authoringCurriculumPreview.proposalId}
           chapters={chapters ?? []}
+          trustedCourseDescription={trustedCourseDescription}
           preview={authoringCurriculumPreview}
           actions={curriculumPreviewActions}
           courseId={courseId}

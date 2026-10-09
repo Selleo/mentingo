@@ -6,6 +6,7 @@ import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
+import { CourseAuthoringApplicationService } from "./course-authoring-application.service";
 import { LumaService } from "./luma.service";
 
 import type { CourseAuthoringReceiptJob } from "./course-authoring.types";
@@ -15,22 +16,35 @@ import type { CourseAuthoringReceiptJob } from "./course-authoring.types";
 export class CourseAuthoringReceiptService {
   private readonly logger = new Logger(CourseAuthoringReceiptService.name);
   private scanning = false;
+  private readonly failedScanOffsets = new Map<string, number>();
   /** Injects receipt persistence, producer delivery, queueing, and tenant iteration. */
   constructor(
     private readonly receipts: CourseAuthoringApplicationRepository,
     private readonly luma: LumaService,
     private readonly queue: QueueService,
     private readonly tenants: TenantDbRunnerService,
+    private readonly applications: CourseAuthoringApplicationService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
   /** Scans each tenant for undelivered receipts and enqueues stable retry jobs. */
+  @Cron(CronExpression.EVERY_MINUTE)
   async enqueuePendingReceipts() {
     if (this.scanning) return;
     this.scanning = true;
     try {
       await this.tenants.runForEachTenant(async (tenantId) => {
         try {
+          try {
+            const nextOffset = await this.applications.reconcileFailedApplications(
+              tenantId,
+              this.failedScanOffsets.get(tenantId) ?? 0,
+            );
+            this.failedScanOffsets.set(tenantId, nextOffset);
+          } catch {
+            this.logger.warn(
+              "Failed-job reconciliation will retry without blocking committed receipts",
+            );
+          }
           for (const receipt of await this.receipts.pendingReceipts(tenantId)) {
             await this.queue.enqueue<CourseAuthoringReceiptJob>(
               QUEUE_NAMES.COURSE_AUTHORING_APPLY,
@@ -71,9 +85,9 @@ export class CourseAuthoringReceiptService {
         applicationId: receipt.applicationId,
         exportId: data.exportId,
         exportHash: data.exportHash,
-        status: "applied",
+        status: receipt.status,
         idMappings: receipt.entityMappings,
-        reason: null,
+        reason: receipt.reason ?? null,
       },
     });
     await this.receipts.markDelivered(data.tenantId, data.exportId, data.exportHash);

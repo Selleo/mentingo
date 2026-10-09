@@ -40,12 +40,21 @@ export class CourseAuthoringApplicationWorker implements OnModuleDestroy {
             );
           return await tenants.runWithTenant(data.tenantId, () => receipts.deliver(data));
         } catch (error) {
-          if (
+          const permanent =
             error instanceof BadRequestException ||
             error instanceof ConflictException ||
-            error instanceof ForbiddenException
+            error instanceof ForbiddenException;
+          if (
+            "actor" in job.data &&
+            (permanent || job.attemptsMade + 1 >= (job.opts.attempts ?? 1))
           )
-            throw new UnrecoverableError(error.message);
+            await tenants.runWithTenant(job.data.actor.tenantId, () =>
+              applications.recordTerminalFailure(
+                job.data as CourseAuthoringApplyJob,
+                error instanceof Error ? error.message : "courseAuthoring.errors.applicationFailed",
+              ),
+            );
+          if (permanent) throw new UnrecoverableError(error.message);
           throw error;
         }
       },

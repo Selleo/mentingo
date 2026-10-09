@@ -22,6 +22,27 @@ export const safeHttpUrl = (value: string | null | undefined): string | null => 
   }
 };
 
+/** Validates and deduplicates fetched-page provenance before rendering external citations. */
+export const parseFetchedResearchSources = (
+  value: unknown,
+): { url: string; title: string | null }[] => {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object" || !("url" in item) || typeof item.url !== "string") {
+      return [];
+    }
+    const url = safeHttpUrl(item.url);
+    if (!url || url.length > 4096 || seen.has(url)) return [];
+    const parsed = new URL(url);
+    if (parsed.username || parsed.password) return [];
+    seen.add(url);
+    const title =
+      "title" in item && typeof item.title === "string" ? item.title.trim().slice(0, 300) : null;
+    return [{ url, title: title || null }];
+  });
+};
+
 /** Short, readable host used as the chip label. */
 export const sourceDomain = (url: string) => {
   try {

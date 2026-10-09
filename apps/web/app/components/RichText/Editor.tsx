@@ -9,6 +9,7 @@ import { Lock, Unlock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useRichTextContentPolicy } from "~/components/RichText/contentPolicyContext";
 import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
@@ -102,6 +103,8 @@ const Editor = ({
   variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
 }: EditorProps) => {
   const { t } = useTranslation();
+  const mediaPolicy = useRichTextContentPolicy();
+  const safeContent = mediaPolicy ? mediaPolicy(content ?? "") : content;
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
   const [pendingDrop, setPendingDrop] = useState<{ files: File[]; position: number } | null>(null);
@@ -204,7 +207,7 @@ const Editor = ({
 
   const editor = useEditor({
     extensions,
-    content: content,
+    content: safeContent,
     editable,
     onUpdate: ({ editor }) => {
       if (!editor.isEditable) return;
@@ -247,10 +250,10 @@ const Editor = ({
       content !== editor.getHTML() &&
       content !== lastEmittedContentRef.current
     ) {
-      editor.commands.setContent(content || "");
+      editor.commands.setContent(safeContent || "");
       lastEmittedContentRef.current = content || "";
     }
-  }, [content, editor]);
+  }, [content, safeContent, editor]);
 
   if (!editor) return <></>;
 

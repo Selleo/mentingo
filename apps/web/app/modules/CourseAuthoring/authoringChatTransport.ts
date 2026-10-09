@@ -1,3 +1,5 @@
+import { parseFetchedResearchSources } from "./authoringSources";
+
 import type {
   AuthoringCommand,
   AuthoringEvent,
@@ -135,6 +137,19 @@ const toolValue = (value: unknown): AuthoringTurnPart["tool"] => {
     status,
     result: result
       ? {
+          ...(typeof result.query === "string" || result.query === null
+            ? { query: result.query }
+            : {}),
+          ...(Array.isArray(result.queries)
+            ? {
+                queries: result.queries.filter(
+                  (query): query is string => typeof query === "string",
+                ),
+              }
+            : {}),
+          ...(Array.isArray(result.sources)
+            ? { sources: parseFetchedResearchSources(result.sources) }
+            : {}),
           sourceCount:
             typeof result.sourceCount === "number" && Number.isFinite(result.sourceCount)
               ? result.sourceCount

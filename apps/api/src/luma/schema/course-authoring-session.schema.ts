@@ -278,6 +278,15 @@ const authoringTurn = Type.Object(
 export const authoringSessionSchema = Type.Object(
   {
     reasoningControlAvailable: Type.Optional(Type.Boolean()),
+    applicationDelta: Type.Optional(
+      Type.Object(
+        {
+          appliedOperationIds: Type.Array(UUIDSchema),
+          idMappings: Type.Record(Type.String(), UUIDSchema),
+        },
+        strict,
+      ),
+    ),
     schemaVersion: Type.Literal(1),
     sessionId: UUIDSchema,
     courseId: UUIDSchema,

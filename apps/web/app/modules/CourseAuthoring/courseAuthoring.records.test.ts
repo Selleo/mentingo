@@ -1008,6 +1008,71 @@ describe("course authoring record projection", () => {
     expect(result.unsupportedRecordCount).toBe(0);
   });
 
+  it("keeps a design clarification answerable when an older record retains a capability tag", () => {
+    const result = projectWorkspaceRecords(
+      [
+        {
+          id: "web-policy",
+          kind: "source_selection",
+          payload: { sequence: 2, webEnabled: true, sourceVersionIds: [] },
+        },
+        {
+          id: "duration-question",
+          kind: "question",
+          payload: {
+            taskId: "course-task",
+            revision: 2,
+            action: "request.clarification",
+            question: "How long should the course be?",
+            capability: "web_search",
+            reason: "Stale permission reason",
+            choices: ["About an hour", "Two hours", "Half a day"],
+          },
+        },
+      ],
+      [
+        {
+          taskId: "course-task",
+          requestId: "course-request",
+          status: "waiting_author",
+          errorCode: null,
+          outputId: null,
+        },
+      ],
+    );
+    expect(result.questions).toHaveLength(1);
+    expect(result.questions[0]).toMatchObject({
+      capability: null,
+      answered: false,
+      answer: null,
+      prompt: "How long should the course be?",
+      choices: ["About an hour", "Two hours", "Half a day"],
+    });
+  });
+
+  it.each(["stopped", "superseded", "succeeded"] as const)(
+    "does not offer an unanswered clarification after its task is %s",
+    (status) => {
+      const result = projectWorkspaceRecords(
+        [
+          {
+            id: "old-question",
+            kind: "question",
+            payload: {
+              taskId: "old-task",
+              revision: 2,
+              action: "request.clarification",
+              question: "How long should the course be?",
+              capability: "web_search",
+            },
+          },
+        ],
+        [{ taskId: "old-task", requestId: "old-request", status, errorCode: null, outputId: null }],
+      );
+      expect(result.questions).toEqual([]);
+    },
+  );
+
   it("reconciles web permission prompts against persisted policy and task state after reload", () => {
     const result = projectWorkspaceRecords(
       [
@@ -1293,4 +1358,156 @@ it("resolves metadata-only previews through the existing lesson identity", () =>
       },
     ],
   });
+});
+
+it("uses committed application mappings after partial Apply without replaying settled dependencies", () => {
+  const proposal: ProposalView = {
+    id: "remaining-proposal",
+    revision: 1,
+    taskId: "task-remaining",
+    summary: "Add remaining lesson",
+    rationale: "",
+    warnings: [],
+    blockedQuality: false,
+    qualityConcernsAccepted: false,
+    evidenceCount: 0,
+    decision: "accepted",
+    parentProposalId: null,
+    manual: false,
+    protectedEdits: [],
+    outline: [
+      {
+        id: "temporary-chapter",
+        title: "Old draft title",
+        lessons: [
+          {
+            id: "temporary-applied-lesson",
+            title: "Already applied",
+            lessonType: "content",
+            objectives: [],
+          },
+          { id: "remaining-lesson", title: "Remaining", lessonType: "quiz", objectives: [] },
+        ],
+      },
+    ],
+    operations: [
+      {
+        operationId: "remaining-op",
+        type: "lesson.create",
+        targetId: "remaining-lesson",
+        chapterId: "temporary-chapter",
+        displayOrder: 1,
+        dependencies: ["applied-chapter-op"],
+        payload: { title: "Remaining", lessonType: "quiz" },
+      },
+    ],
+  };
+  const context: CourseContext = {
+    courseId: "course-1",
+    language: "en",
+    title: "Course",
+    description: "",
+    baselineHash: "course-hash",
+    fieldHashes: {},
+    chapters: [
+      {
+        id: "native-chapter",
+        title: "Current native title",
+        displayOrder: 0,
+        baselineHash: "chapter-hash",
+        lessons: [],
+      },
+    ],
+  };
+  const preview = curriculumPreviewFromProposal(proposal, context, {
+    appliedOperationIds: ["applied-chapter-op"],
+    idMappings: {
+      "temporary-chapter": "native-chapter",
+      "temporary-applied-lesson": "native-lesson",
+    },
+  });
+  expect(preview).toMatchObject({
+    operations: [{ targetId: "remaining-lesson", chapterId: "native-chapter", dependencies: [] }],
+    outline: [
+      {
+        id: "native-chapter",
+        title: "Current native title",
+        lessons: [{ id: "remaining-lesson" }],
+      },
+    ],
+  });
+  expect(preview?.outline[0].lessons).toHaveLength(1);
+  expect(proposal.operations[0].dependencies).toEqual(["applied-chapter-op"]);
+  expect(() =>
+    curriculumPreviewFromProposal(proposal, context, { appliedOperationIds: [], idMappings: {} }),
+  ).toThrow("missingDependency");
+});
+
+it("merges identical shared chapter prerequisites across independently reviewable lessons", () => {
+  const sharedChapter = {
+    operationId: "shared-chapter-create",
+    targetId: "chapter-new",
+    type: "chapter.create",
+    language: "en" as const,
+    dependencies: [],
+    payload: { title: "New chapter", displayOrder: 0 },
+  };
+  const proposals: ProposalView[] = ["first", "second"].map((id, index) => ({
+    id,
+    revision: 1,
+    taskId: `task-${id}`,
+    summary: "Add lesson",
+    rationale: "",
+    warnings: [],
+    blockedQuality: false,
+    qualityConcernsAccepted: false,
+    evidenceCount: 0,
+    outline: null,
+    decision: "pending",
+    parentProposalId: null,
+    manual: false,
+    protectedEdits: [],
+    operations: [
+      { ...sharedChapter, payload: { displayOrder: 0, title: "New chapter" } },
+      {
+        operationId: `lesson-create-${id}`,
+        targetId: `lesson-${id}`,
+        chapterId: "chapter-new",
+        type: "lesson.create",
+        displayOrder: index,
+        dependencies: [sharedChapter.operationId],
+        payload: { title: `Lesson ${id}`, lessonType: "content" },
+      },
+    ],
+  }));
+  proposals[0].operations[0] = sharedChapter;
+
+  const preview = curriculumPreviewFromProposals(proposals);
+  expect(preview?.operations).toHaveLength(3);
+  expect(preview?.outline).toHaveLength(1);
+  expect(preview?.outline[0].lessons.map((lesson) => lesson.id)).toEqual([
+    "lesson-first",
+    "lesson-second",
+  ]);
+  expect(preview?.proposalIds).toEqual(["first", "second"]);
+  expect(proposals[1].operations).toHaveLength(2);
+
+  const conflict = structuredClone(proposals);
+  conflict[1].operations[0].payload.title = "Conflicting title";
+  expect(() => curriculumPreviewFromProposals(conflict)).toThrow("duplicateOperation");
+
+  const missingDependency = structuredClone(proposals);
+  missingDependency[1].operations[1].dependencies = ["unknown-operation"];
+  expect(() => curriculumPreviewFromProposals(missingDependency)).toThrow("missingDependency");
+
+  const dependencyCycle = structuredClone(proposals);
+  dependencyCycle[0].operations[1].dependencies.push("lesson-create-second");
+  dependencyCycle[1].operations[1].dependencies.push("lesson-create-first");
+  expect(() => curriculumPreviewFromProposals(dependencyCycle)).toThrow("dependencyCycle");
+
+  const repeatedWithinProposal = structuredClone(proposals);
+  repeatedWithinProposal[0].operations.push(sharedChapter);
+  expect(() => curriculumPreviewFromProposals(repeatedWithinProposal)).toThrow(
+    "duplicateOperation",
+  );
 });

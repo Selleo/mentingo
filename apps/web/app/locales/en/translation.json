@@ -6251,6 +6251,12 @@
         "failed": "Web search failed",
         "stopped": "Web search stopped"
       },
+      "webExtractTool": {
+        "started": "Reading linked page",
+        "completed": "Read linked page",
+        "failed": "Page extraction failed",
+        "stopped": "Page extraction stopped"
+      },
       "toolSourceCount": "{{count}} sources",
       "toolFindingCount": "{{count}} findings",
       "opening": "Opening course…",
@@ -6615,6 +6621,9 @@
       "sourceUploadFailed": "The source could not be uploaded. Check its type and size, then try again.",
       "sourceReplacementNotReady": "Wait for the replacement file to finish processing.",
       "sourceRefreshSelectionChanged": "The source selection changed. Review the current sources and try again.",
+      "mediaOutsideCourse": "This image or embed is not authorized for this course. Upload the file or request a generated image, then regenerate the change.",
+      "previewUnavailable": "This preview is missing required changes or has inconsistent ordering. Refresh the session and include the required changes before trying again.",
+      "applicationInProgress": "Another application is in progress. If queueing failed, retry the original proposal selection to resume it.",
       "receiptSynchronizationPending": "Saving previous changes to the AI workspace. Try applying this same selection again shortly.",
       "appliedRefreshPending": "Changes were applied. Refresh the course if they are not visible yet.",
       "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages."
@@ -6622,6 +6631,7 @@
     "review": {
       "generatedImage": "Generated image",
       "openImageFile": "Open image file",
+      "mediaPreviewBlocked": "This media was not included in the selected course or approved assets.",
       "imagePreviewUnavailable": "Image preview is not available yet.",
       "imagePreviewFailed": "Some image previews could not be loaded.",
       "retryImagePreviews": "Retry previews",

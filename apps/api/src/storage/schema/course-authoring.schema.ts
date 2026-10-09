@@ -2,7 +2,8 @@
 export type CourseAuthoringApplicationResult = {
   applicationId: string;
   exportHash: string;
-  status: "applied";
+  status: "applied" | "failed" | "conflict";
+  reason?: string | null;
   exportId: string;
   courseId: string;
   sessionId: string;

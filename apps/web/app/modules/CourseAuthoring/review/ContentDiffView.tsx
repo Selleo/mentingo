@@ -15,6 +15,7 @@ type Props = {
   before: string;
   after: string;
   assetPreviewUrls?: Readonly<Record<string, string>>;
+  trustedContent?: string;
 };
 
 type ViewMode = (typeof CONTENT_VIEW_MODE)[keyof typeof CONTENT_VIEW_MODE];
@@ -70,8 +71,10 @@ const segment = (entries: BlockDiffEntry[]): Segment[] =>
 const UnchangedRun = ({
   entries,
   assetPreviewUrls,
+  trustedContent,
 }: {
   entries: BlockDiffEntry[];
+  trustedContent: string;
   assetPreviewUrls?: Readonly<Record<string, string>>;
 }) => {
   const { t } = useTranslation();
@@ -84,6 +87,7 @@ const UnchangedRun = ({
             entry.status === BLOCK_DIFF_STATUS.UNCHANGED && (
               <AuthoringContentPreview
                 assetPreviewUrls={assetPreviewUrls}
+                trustedContent={trustedContent}
                 key={index}
                 content={entry.after.html}
                 className="text-sm"
@@ -106,7 +110,12 @@ const UnchangedRun = ({
   );
 };
 
-export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props) => {
+export const ContentDiffView = ({
+  before,
+  after,
+  assetPreviewUrls = {},
+  trustedContent = before,
+}: Props) => {
   const { t } = useTranslation();
   const [mode, setMode] = useState<ViewMode>(CONTENT_VIEW_MODE.CHANGES);
   const previewBefore = withAuthoringAssetPreviewUrls(before, assetPreviewUrls);
@@ -140,6 +149,7 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
       {mode === CONTENT_VIEW_MODE.BEFORE && (
         <AuthoringContentPreview
           assetPreviewUrls={assetPreviewUrls}
+          trustedContent={trustedContent}
           content={previewBefore}
           className="text-sm"
         />
@@ -147,6 +157,7 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
       {mode === CONTENT_VIEW_MODE.AFTER && (
         <AuthoringContentPreview
           assetPreviewUrls={assetPreviewUrls}
+          trustedContent={trustedContent}
           content={previewAfter}
           className="text-sm"
         />
@@ -160,6 +171,7 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
                   key={index}
                   entries={item.entries}
                   assetPreviewUrls={assetPreviewUrls}
+                  trustedContent={trustedContent}
                 />
               );
             const { entry } = item;
@@ -184,6 +196,7 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
                 {entry.status === BLOCK_DIFF_STATUS.ADDED && (
                   <AuthoringContentPreview
                     assetPreviewUrls={assetPreviewUrls}
+                    trustedContent={trustedContent}
                     content={entry.after.html}
                     className="text-sm"
                   />
@@ -191,6 +204,7 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
                 {entry.status === BLOCK_DIFF_STATUS.REMOVED && (
                   <AuthoringContentPreview
                     assetPreviewUrls={assetPreviewUrls}
+                    trustedContent={trustedContent}
                     content={entry.before.html}
                     className="text-sm text-neutral-500 line-through decoration-error-400"
                   />
@@ -202,11 +216,13 @@ export const ContentDiffView = ({ before, after, assetPreviewUrls = {} }: Props)
                     <div className="grid gap-3 sm:grid-cols-2">
                       <AuthoringContentPreview
                         assetPreviewUrls={assetPreviewUrls}
+                        trustedContent={trustedContent}
                         content={entry.before.html}
                         className="text-sm opacity-70"
                       />
                       <AuthoringContentPreview
                         assetPreviewUrls={assetPreviewUrls}
+                        trustedContent={trustedContent}
                         content={entry.after.html}
                         className="text-sm"
                       />

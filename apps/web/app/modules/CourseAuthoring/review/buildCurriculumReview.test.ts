@@ -99,7 +99,15 @@ describe("buildCurriculumReview", () => {
     const model = buildCurriculumReview({
       chapters: course(),
       preview: preview(
-        [create, edit],
+        [
+          create,
+          edit,
+          operation({
+            type: "chapter.update",
+            targetId: "c2",
+            payload: { title: "Advanced topics", displayOrder: 1 },
+          }),
+        ],
         [
           {
             id: "c2",

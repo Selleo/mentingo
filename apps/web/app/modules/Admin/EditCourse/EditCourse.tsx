@@ -492,6 +492,7 @@ const EditCourse = () => {
                 <CourseLessons
                   showCourseGenerationButton={showCourseGenerationButton}
                   chapters={course?.chapters as Chapter[]}
+                  trustedCourseDescription={course?.description ?? ""}
                   baseLanguageChapters={baseLanguageChapters}
                   canRefetchChapterList={!!canRefetchChapterList}
                   language={courseLanguage}

@@ -37,7 +37,7 @@ type Props = {
   requestId: string;
   proposals: ProposalView[];
   busy?: boolean;
-  incomplete?: boolean;
+  generationPending?: boolean;
   onReview?: (focusProposalId?: string) => void;
   onDiscard?: () => void;
   targetLabelById?: Record<string, string>;
@@ -115,7 +115,7 @@ export const ProposalGroup = ({
   requestId,
   proposals,
   busy,
-  incomplete = false,
+  generationPending = false,
   onReview,
   onDiscard,
   targetLabelById = {},
@@ -143,7 +143,7 @@ export const ProposalGroup = ({
   );
 
   const state: ChangeSetState = (() => {
-    if (incomplete && pending.length > 0) return CHANGE_SET_STATE.GENERATING;
+    if (generationPending) return CHANGE_SET_STATE.GENERATING;
     if (
       statuses.some(
         (status) =>
@@ -236,6 +236,7 @@ export const ProposalGroup = ({
 
   const canReview =
     Boolean(onReview) &&
+    !generationPending &&
     [
       CHANGE_SET_STATE.READY,
       CHANGE_SET_STATE.OUTLINE_READY,

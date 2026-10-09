@@ -47,6 +47,7 @@ describe("mergeCurriculumPreview", () => {
     const unrelated = chapter("chapter-unrelated", "Unrelated chapter", "lesson-unrelated");
     const existing = {
       ...chapter("chapter-existing", "Existing chapter", "lesson-existing"),
+      displayOrder: 2,
       lessonCount: 2,
       lessons: [
         ...chapter("chapter-existing", "Existing chapter", "lesson-existing").lessons,
@@ -210,4 +211,113 @@ it("projects metadata without a chapter override or replacing lesson content", (
   });
   expect(result[0].lessons[0]).toEqual({ ...existing.lessons[0], title: "New title" });
   expect(existing.lessons[0].title).toBe("Existing lesson");
+});
+
+const orderingOperation = (id: string, index: number) => ({
+  operationId: `order-${id}`,
+  type: "lesson.update",
+  targetId: id,
+  chapterId: "chapter-1",
+  displayOrder: index,
+  dependencies: [],
+  payload: { title: id, lessonType: "content" },
+});
+const orderedChapter = () => ({
+  ...chapter("chapter-1", "Chapter", "A"),
+  lessonCount: 4,
+  lessons: ["A", "B", "C", "D"].map((id, index) => ({
+    ...chapter("chapter-1", "Chapter", id).lessons[0],
+    id,
+    title: id,
+    displayOrder: index + 1,
+  })),
+});
+
+it("previews simultaneous absolute moves to the end without moving one target twice", () => {
+  const result = mergeCurriculumPreview([orderedChapter()], {
+    proposalId: "order-preview",
+    status: "pending",
+    outline: [],
+    operations: [orderingOperation("A", 2), orderingOperation("B", 3)],
+  });
+  expect(result[0].lessons.map((lesson) => lesson.id)).toEqual(["C", "D", "A", "B"]);
+});
+
+it("uses the reorder target chapter rather than an absent chapterId", () => {
+  const result = mergeCurriculumPreview([orderedChapter()], {
+    proposalId: "order-preview",
+    status: "pending",
+    outline: [],
+    operations: [
+      {
+        operationId: "reorder-1",
+        type: "lesson.reorder",
+        targetId: "chapter-1",
+        dependencies: [],
+        payload: { orderedIds: ["D", "C", "B", "A"] },
+      },
+    ],
+  });
+  expect(result[0].lessons.map((lesson) => lesson.id)).toEqual(["D", "C", "B", "A"]);
+});
+
+it("preserves canonical content in an outline-only title preview", () => {
+  const original = orderedChapter();
+  const result = mergeCurriculumPreview([original], {
+    proposalId: "title-preview",
+    status: "pending",
+    outline: [
+      {
+        id: original.id,
+        title: original.title,
+        lessons: [{ id: "A", title: "Renamed", lessonType: "content" }],
+      },
+    ],
+  });
+  expect(result[0].lessons[0]).toMatchObject({ title: "Renamed", description: "Existing content" });
+  expect(original.lessons[0].title).toBe("A");
+});
+
+it("appends unpositioned creates in dependency order rather than stale outline order", () => {
+  const result = mergeCurriculumPreview([], {
+    proposalId: "dependency-preview",
+    status: "pending",
+    outline: [
+      {
+        id: "chapter-1",
+        title: "Chapter",
+        lessons: [
+          { id: "B", title: "B", lessonType: "content" },
+          { id: "A", title: "A", lessonType: "content" },
+          { id: "not-generated", title: "Future lesson", lessonType: "content" },
+        ],
+      },
+    ],
+    operations: [
+      {
+        operationId: "B-op",
+        type: "lesson.create",
+        targetId: "B",
+        chapterId: "chapter-1",
+        dependencies: ["A-op"],
+        payload: { title: "B", lessonType: "content" },
+      },
+      {
+        operationId: "chapter-op",
+        type: "chapter.create",
+        targetId: "chapter-1",
+        dependencies: [],
+        payload: { title: "Chapter", displayOrder: 0 },
+      },
+      {
+        operationId: "A-op",
+        type: "lesson.create",
+        targetId: "A",
+        chapterId: "chapter-1",
+        dependencies: ["chapter-op"],
+        payload: { title: "A", lessonType: "content" },
+      },
+    ],
+  });
+  expect(result[0].lessons.map((lesson) => lesson.id)).toEqual(["A", "B"]);
 });

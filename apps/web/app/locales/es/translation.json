@@ -6182,6 +6182,12 @@
         "failed": "La búsqueda web ha fallado",
         "stopped": "Búsqueda web detenida"
       },
+      "webExtractTool": {
+        "started": "Leyendo la página enlazada",
+        "completed": "Página enlazada leída",
+        "failed": "Error al extraer la página",
+        "stopped": "Extracción de la página detenida"
+      },
       "toolSourceCount": "{{count}} fuentes",
       "toolFindingCount": "{{count}} hallazgos",
       "opening": "Abriendo el curso…",
@@ -6547,12 +6553,16 @@
       "sourceUploadFailed": "No se pudo cargar la fuente. Comprueba su tipo y tamaño e inténtalo de nuevo.",
       "sourceReplacementNotReady": "Espera a que el archivo de reemplazo termine de procesarse.",
       "sourceRefreshSelectionChanged": "La selección de fuentes cambió. Revisa las fuentes actuales y vuelve a intentarlo.",
+      "mediaOutsideCourse": "Esta imagen o contenido incrustado no está autorizado para este curso. Sube el archivo o solicita una imagen generada y vuelve a generar el cambio.",
+      "previewUnavailable": "A esta vista previa le faltan cambios necesarios o el orden es incoherente. Actualiza la sesión e incluye los cambios necesarios antes de volver a intentarlo.",
+      "applicationInProgress": "Se están aplicando otros cambios. Si falló la puesta en cola, vuelve a intentar la selección original de propuestas para reanudarla.",
       "receiptSynchronizationPending": "Se están guardando los cambios anteriores en el espacio de trabajo de IA. Vuelve a aplicar la misma selección en unos instantes.",
       "appliedRefreshPending": "Los cambios se aplicaron. Actualiza el curso si aún no son visibles."
     },
     "review": {
       "generatedImage": "Imagen generada",
       "openImageFile": "Abrir archivo de imagen",
+      "mediaPreviewBlocked": "Este contenido multimedia no pertenece al curso seleccionado ni a los archivos aprobados.",
       "imagePreviewUnavailable": "La vista previa de la imagen aún no está disponible.",
       "imagePreviewFailed": "No se pudieron cargar algunas vistas previas de imágenes.",
       "retryImagePreviews": "Reintentar vistas previas",

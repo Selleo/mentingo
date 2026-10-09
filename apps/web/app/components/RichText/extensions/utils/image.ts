@@ -1,3 +1,4 @@
+import { safeEmbedUrl } from "./embedUrl";
 import { extractResourceIdFromUrl } from "./resourceNode";
 
 export const IMAGE_NODE_TYPE = "image" as const;
@@ -17,7 +18,7 @@ type ImageEmbedAttrsInput = {
 };
 
 export const normalizeImageEmbedAttributes = (attrs: ImageEmbedAttrsInput): ImageEmbedAttrs => {
-  const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
+  const src = safeEmbedUrl(attrs.src, true) ?? "";
   const alt = typeof attrs.alt === "string" ? attrs.alt : null;
   const resourceId =
     typeof attrs.resourceId === "string" && attrs.resourceId.trim()

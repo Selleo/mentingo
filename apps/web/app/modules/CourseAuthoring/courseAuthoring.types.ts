@@ -117,6 +117,7 @@ export type AuthoringTurnPart = {
     result?: {
       query?: string | null;
       queries?: string[] | null;
+      sources?: { url: string; title: string | null }[];
       sourceCount?: number | null;
       findingCount?: number | null;
     } | null;
@@ -143,9 +144,15 @@ export type AuthoringRecord = {
   payload: Record<string, unknown>;
 };
 
+export type AuthoringApplicationDelta = {
+  appliedOperationIds: string[];
+  idMappings: Record<string, string>;
+};
+
 export type AuthoringSession = {
   schemaVersion: 1;
   reasoningControlAvailable?: boolean;
+  applicationDelta?: AuthoringApplicationDelta;
   sessionId: string;
   courseId: string;
   language: SupportedLanguages;

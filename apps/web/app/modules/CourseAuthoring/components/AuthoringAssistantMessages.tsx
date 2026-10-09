@@ -168,10 +168,10 @@ const AuthoringQuestionCard = ({
             disabled={submitting || !onAnswer}
             onClick={() => void submit(choice)}
           >
-            <span className="font-semibold text-primary-700">
+            <span className="shrink-0 font-semibold text-primary-700">
               {String.fromCharCode(65 + index)}.
             </span>
-            <span>{choice}</span>
+            <span className="min-w-0 flex-1 whitespace-normal break-words">{choice}</span>
           </button>
         ))}
         <button

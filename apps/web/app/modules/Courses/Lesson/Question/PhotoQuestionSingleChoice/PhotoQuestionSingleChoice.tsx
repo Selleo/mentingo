@@ -1,3 +1,4 @@
+import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import { QuestionCard } from "../QuestionCard";
@@ -16,6 +17,9 @@ export const PhotoQuestionSingleChoice = ({
 }: PhotoQuestionSingleChoiceProps) => {
   const { isPreviewMode } = useCourseAccessProvider();
 
+  const safePhotoUrl = useRichTextMediaUrl(
+    question.photoS3Key || "https://placehold.co/960x620/png",
+  );
   return (
     <QuestionCard
       title={question.title}
@@ -23,11 +27,9 @@ export const PhotoQuestionSingleChoice = ({
       questionNumber={question.displayOrder}
       data-testid="photo-question-single-choice"
     >
-      <img
-        src={question.photoS3Key || "https://placehold.co/960x620/png"}
-        alt=""
-        className="h-auto w-full max-w-[960px] rounded-lg"
-      />
+      {safePhotoUrl && (
+        <img src={safePhotoUrl} alt="" className="h-auto w-full max-w-[960px] rounded-lg" />
+      )}
       <SingleChoiceOptionList
         options={question.options || []}
         questionId={question.id}

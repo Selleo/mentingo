@@ -21,6 +21,7 @@ import { renderReviewNativeForm } from "~/modules/Admin/EditCourse/CourseLessons
 
 import { CURRICULUM_HANDLES } from "../../../../e2e/data/curriculum/handles";
 
+import { AuthoringMediaPolicyProvider } from "./authoringMediaPolicy";
 import { buildCurriculumReview, reviewNodeKey } from "./buildCurriculumReview";
 import {
   AUTHORING_OPERATION_TYPE,
@@ -56,6 +57,7 @@ const collectStrings = (value: unknown): string[] => {
 
 type Props = {
   chapters: Chapter[];
+  trustedCourseDescription?: string;
   preview: CurriculumPreview;
   actions: CurriculumPreviewActions | null;
   courseId?: string;
@@ -79,6 +81,7 @@ const isTypingTarget = (target: EventTarget | null) =>
 
 export const CurriculumReviewWorkspace = ({
   chapters,
+  trustedCourseDescription = "",
   preview,
   actions,
   courseId,
@@ -89,6 +92,41 @@ export const CurriculumReviewWorkspace = ({
 }: Props) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const trustedResourceIds = useMemo(
+    () =>
+      chapters.flatMap((chapter) =>
+        chapter.lessons.flatMap((lesson) =>
+          (lesson.lessonResources ?? []).map((resource) => resource.id),
+        ),
+      ),
+    [chapters],
+  );
+  const trustedMediaUrls = useMemo(
+    () =>
+      chapters.flatMap((chapter) =>
+        chapter.lessons.flatMap((lesson) =>
+          [
+            lesson.avatarReferenceUrl,
+            lesson.fileS3SignedUrl,
+            ...(lesson.questions ?? []).map((question) => question.photoS3SingedUrl),
+            ...(lesson.lessonResources ?? []).map((resource) => resource.fileUrl),
+          ].filter((url): url is string => typeof url === "string"),
+        ),
+      ),
+    [chapters],
+  );
+  const trustedMediaHtml = useMemo(
+    () => [
+      trustedCourseDescription,
+      ...chapters.flatMap((chapter) =>
+        chapter.lessons.flatMap((lesson) => [
+          lesson.description,
+          ...collectStrings(lesson.questions ?? []),
+        ]),
+      ),
+    ],
+    [chapters, trustedCourseDescription],
+  );
   const proposals = useMemo(() => preview.proposals ?? [], [preview.proposals]);
   const outlineOnly =
     preview.outline.length > 0 &&
@@ -363,149 +401,156 @@ export const CurriculumReviewWorkspace = ({
   ]);
 
   return (
-    <Dialog
-      open={feedbackDialogOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          if (submittingRefinements) return;
-          clearFeedback();
-        }
-        setFeedbackDialogOpen(open);
-      }}
+    <AuthoringMediaPolicyProvider
+      trustedHtml={trustedMediaHtml}
+      trustedUrls={trustedMediaUrls}
+      trustedResourceIds={trustedResourceIds}
+      assetPreviewUrls={assetPreviewUrls}
     >
-      <div className="flex w-full flex-col gap-6" data-testid="course-authoring-review-workspace">
-        <CurriculumReviewBar
-          outlineOnly={outlineOnly}
-          totalChanges={model.changes.length}
-          currentIndex={changeIndex < 0 ? null : changeIndex}
-          readOnly={readOnly}
-          streaming={streaming}
-          applying={applying}
-          requiresAssessmentAcknowledgement={requiresAssessmentAcknowledgement}
-          assessmentConfirmationOpen={assessmentConfirmationOpen}
-          onAssessmentConfirmationOpenChange={setAssessmentConfirmationOpen}
-          changesOnly={changesOnly}
-          onChangesOnlyChange={setChangesOnly}
-          onPrevious={() => step(-1)}
-          onNext={() => step(1)}
-          onApply={apply}
-          onDiscard={() => void discard()}
-          onExit={onExit}
-        />
-        {failedAssetIds.length > 0 && (
-          <Alert>
-            <AlertDescription className="flex items-center justify-between gap-3">
-              <span>{t("courseAuthoring.review.imagePreviewFailed")}</span>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={retryingPreviews}
-                onClick={() => void retryFailedPreviews()}
-              >
-                {t("courseAuthoring.review.retryImagePreviews")}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-        <div className="flex flex-col gap-8 md:flex-row md:items-start">
-          <div className="flex w-full flex-col md:w-[480px] md:shrink-0">
-            <ReviewCurriculumList
-              model={model}
-              decisions={decisions}
-              selectedKey={selectedKey}
-              changesOnly={changesOnly}
-              language={language}
-              baseLanguage={baseLanguage}
-              onSelect={select}
-            />
-          </div>
-          <div
-            ref={detailRef}
-            className="min-w-0 flex-1 md:sticky md:top-32 md:max-h-[calc(100dvh-10rem)] md:overflow-y-auto"
-          >
-            {selectedNode ? (
-              <ReviewChangeDetail
-                key={selectedKey}
-                node={selectedNode}
+      <Dialog
+        open={feedbackDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            if (submittingRefinements) return;
+            clearFeedback();
+          }
+          setFeedbackDialogOpen(open);
+        }}
+      >
+        <div className="flex w-full flex-col gap-6" data-testid="course-authoring-review-workspace">
+          <CurriculumReviewBar
+            outlineOnly={outlineOnly}
+            totalChanges={model.changes.length}
+            currentIndex={changeIndex < 0 ? null : changeIndex}
+            readOnly={readOnly}
+            streaming={streaming}
+            applying={applying}
+            requiresAssessmentAcknowledgement={requiresAssessmentAcknowledgement}
+            assessmentConfirmationOpen={assessmentConfirmationOpen}
+            onAssessmentConfirmationOpenChange={setAssessmentConfirmationOpen}
+            changesOnly={changesOnly}
+            onChangesOnlyChange={setChangesOnly}
+            onPrevious={() => step(-1)}
+            onNext={() => step(1)}
+            onApply={apply}
+            onDiscard={() => void discard()}
+            onExit={onExit}
+          />
+          {failedAssetIds.length > 0 && (
+            <Alert>
+              <AlertDescription className="flex items-center justify-between gap-3">
+                <span>{t("courseAuthoring.review.imagePreviewFailed")}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={retryingPreviews}
+                  onClick={() => void retryFailedPreviews()}
+                >
+                  {t("courseAuthoring.review.retryImagePreviews")}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="flex flex-col gap-8 md:flex-row md:items-start">
+            <div className="flex w-full flex-col md:w-[480px] md:shrink-0">
+              <ReviewCurriculumList
                 model={model}
-                proposals={proposals}
-                courseTitle={preview.courseTitle}
-                nativeForm={nativeForm}
-                assetPreviewUrls={assetPreviewUrls}
+                decisions={decisions}
+                selectedKey={selectedKey}
+                changesOnly={changesOnly}
+                language={language}
+                baseLanguage={baseLanguage}
+                onSelect={select}
               />
-            ) : (
-              <p className="body-base rounded-lg bg-white p-8 text-center text-neutral-600">
-                {t("courseAuthoring.reviewMode.selectPrompt")}
-              </p>
-            )}
+            </div>
+            <div
+              ref={detailRef}
+              className="min-w-0 flex-1 md:sticky md:top-32 md:max-h-[calc(100dvh-10rem)] md:overflow-y-auto"
+            >
+              {selectedNode ? (
+                <ReviewChangeDetail
+                  key={selectedKey}
+                  node={selectedNode}
+                  model={model}
+                  proposals={proposals}
+                  courseTitle={preview.courseTitle}
+                  nativeForm={nativeForm}
+                  assetPreviewUrls={assetPreviewUrls}
+                />
+              ) : (
+                <p className="body-base rounded-lg bg-white p-8 text-center text-neutral-600">
+                  {t("courseAuthoring.reviewMode.selectPrompt")}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      {actions?.refineBatch && !readOnly && (
-        <DialogContent
-          className="max-h-[90dvh] overflow-y-auto"
-          noCloseButton={submittingRefinements}
-        >
-          <DialogHeader>
-            <DialogTitle>{t("courseAuthoring.reviewMode.revisionHeading")}</DialogTitle>
-            <DialogDescription>{t("courseAuthoring.reviewMode.revisionHint")}</DialogDescription>
-          </DialogHeader>
-          <form className="space-y-3" onSubmit={(event) => void submitRevision(event)}>
-            <Controller
-              control={control}
-              name="feedback"
-              rules={{
-                validate: () =>
-                  Boolean(feedbackText.trim()) &&
-                  feedbackText.length <= COURSE_AUTHORING_FEEDBACK_MAX_LENGTH,
-              }}
-              render={({ field }) => (
-                <BoldBulletEditor
-                  id="curriculum-review-feedback"
-                  content={field.value ?? ""}
-                  onChange={field.onChange}
-                  onTextChange={setFeedbackText}
-                  onBlur={() => field.onBlur()}
-                  ariaLabel={t("courseAuthoring.reviewMode.revisionHeading")}
-                  placeholder={t("courseAuthoring.reviewMode.revisionPlaceholder")}
-                  editable={!submittingRefinements}
-                  contentClassName="min-h-0 max-h-40 overflow-y-auto sm:max-h-48"
-                  editorClassName="min-h-28 p-3"
-                />
-              )}
-            />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={submittingRefinements}
-                onClick={() => {
-                  clearFeedback();
-                  setFeedbackDialogOpen(false);
+        {actions?.refineBatch && !readOnly && (
+          <DialogContent
+            className="max-h-[90dvh] overflow-y-auto"
+            noCloseButton={submittingRefinements}
+          >
+            <DialogHeader>
+              <DialogTitle>{t("courseAuthoring.reviewMode.revisionHeading")}</DialogTitle>
+              <DialogDescription>{t("courseAuthoring.reviewMode.revisionHint")}</DialogDescription>
+            </DialogHeader>
+            <form className="space-y-3" onSubmit={(event) => void submitRevision(event)}>
+              <Controller
+                control={control}
+                name="feedback"
+                rules={{
+                  validate: () =>
+                    Boolean(feedbackText.trim()) &&
+                    feedbackText.length <= COURSE_AUTHORING_FEEDBACK_MAX_LENGTH,
                 }}
-              >
-                {t("courseAuthoring.review.cancelFeedback")}
-              </Button>
-              <Button
-                type="submit"
-                disabled={
-                  !feedbackText.trim() ||
-                  feedbackText.length > COURSE_AUTHORING_FEEDBACK_MAX_LENGTH ||
-                  submittingRefinements
-                }
-              >
-                {submittingRefinements && <LoaderCircle className="mr-2 size-4 animate-spin" />}
-                {t("courseAuthoring.reviewMode.submitRevision")}
-              </Button>
-            </DialogFooter>
-            <p className="text-right text-xs text-neutral-500" aria-live="polite">
-              {t("courseAuthoring.review.feedbackCount", {
-                count: feedbackText.length,
-              })}
-            </p>
-          </form>
-        </DialogContent>
-      )}
-    </Dialog>
+                render={({ field }) => (
+                  <BoldBulletEditor
+                    id="curriculum-review-feedback"
+                    content={field.value ?? ""}
+                    onChange={field.onChange}
+                    onTextChange={setFeedbackText}
+                    onBlur={() => field.onBlur()}
+                    ariaLabel={t("courseAuthoring.reviewMode.revisionHeading")}
+                    placeholder={t("courseAuthoring.reviewMode.revisionPlaceholder")}
+                    editable={!submittingRefinements}
+                    contentClassName="min-h-0 max-h-40 overflow-y-auto sm:max-h-48"
+                    editorClassName="min-h-28 p-3"
+                  />
+                )}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={submittingRefinements}
+                  onClick={() => {
+                    clearFeedback();
+                    setFeedbackDialogOpen(false);
+                  }}
+                >
+                  {t("courseAuthoring.review.cancelFeedback")}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    !feedbackText.trim() ||
+                    feedbackText.length > COURSE_AUTHORING_FEEDBACK_MAX_LENGTH ||
+                    submittingRefinements
+                  }
+                >
+                  {submittingRefinements && <LoaderCircle className="mr-2 size-4 animate-spin" />}
+                  {t("courseAuthoring.reviewMode.submitRevision")}
+                </Button>
+              </DialogFooter>
+              <p className="text-right text-xs text-neutral-500" aria-live="polite">
+                {t("courseAuthoring.review.feedbackCount", {
+                  count: feedbackText.length,
+                })}
+              </p>
+            </form>
+          </DialogContent>
+        )}
+      </Dialog>
+    </AuthoringMediaPolicyProvider>
   );
 };

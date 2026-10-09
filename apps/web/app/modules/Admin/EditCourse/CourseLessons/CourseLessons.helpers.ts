@@ -1,3 +1,4 @@
+import { orderCourseAuthoringOperations, planCourseAuthoringOrder } from "@repo/shared";
 import { match } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
@@ -76,133 +77,179 @@ export const mergeCurriculumPreview = (
   if (!preview) return chapters;
 
   const draftChapters = curriculumPreviewToChapters(preview);
-  const merged = chapters.map((chapter) => ({
-    ...chapter,
-    lessons: chapter.lessons.map((lesson) => ({ ...lesson })),
-  }));
+  const merged = [...chapters]
+    .sort(
+      (left, right) => left.displayOrder - right.displayOrder || left.id.localeCompare(right.id),
+    )
+    .map((chapter) => ({
+      ...chapter,
+      lessons: [...chapter.lessons]
+        .sort(
+          (left, right) =>
+            left.displayOrder - right.displayOrder || left.id.localeCompare(right.id),
+        )
+        .map((lesson) => ({ ...lesson })),
+    }));
 
-  draftChapters.forEach((draftChapter, chapterIndex) => {
-    const existingChapterIndex = merged.findIndex(({ id }) => id === draftChapter.id);
-    if (existingChapterIndex < 0) {
-      merged.splice(
-        Math.min(draftChapter.displayOrder ?? chapterIndex, merged.length),
-        0,
-        draftChapter,
-      );
-      return;
-    }
-
-    const existingChapter = merged[existingChapterIndex];
-    const mergedLessons = existingChapter.lessons.map((lesson) => ({ ...lesson }));
-    draftChapter.lessons.forEach((draftLesson, lessonIndex) => {
-      const existingLesson = existingChapter.lessons.find(({ id }) => id === draftLesson.id);
-      const currentLessonIndex = mergedLessons.findIndex(({ id }) => id === draftLesson.id);
-      if (existingLesson && currentLessonIndex >= 0) {
-        mergedLessons[currentLessonIndex] = { ...existingLesson, ...draftLesson };
-        return;
+  if (!preview.operations?.length)
+    draftChapters.forEach((draftChapter) => {
+      let parent = merged.find((chapter) => chapter.id === draftChapter.id);
+      if (!parent) {
+        parent = { ...draftChapter, lessons: [] };
+        merged.push(parent);
+      } else {
+        parent.title = draftChapter.title;
       }
-      mergedLessons.splice(
-        Math.min(draftLesson.displayOrder ?? lessonIndex, mergedLessons.length),
-        0,
-        draftLesson,
-      );
+      for (const draftLesson of draftChapter.lessons) {
+        const existing = merged
+          .flatMap((chapter) => chapter.lessons)
+          .find((lesson) => lesson.id === draftLesson.id);
+        if (existing) {
+          existing.title = draftLesson.title;
+        } else {
+          parent.lessons.push(draftLesson);
+        }
+      }
     });
-    merged[existingChapterIndex] = {
-      ...existingChapter,
-      title: draftChapter.title,
-      lessonCount: mergedLessons.length,
-      lessons: mergedLessons,
-    };
-  });
 
-  // An operation-only proposal may have no outline. Project removals and
-  // ordering onto the native rows so its preview still opens in the curriculum.
-  preview.operations?.forEach((operation) => {
+  const operations = orderCourseAuthoringOperations(preview.operations ?? []);
+  for (const operation of operations) {
     if (operation.type === "chapter.delete") {
       const index = merged.findIndex((chapter) => chapter.id === operation.targetId);
       if (index >= 0) merged.splice(index, 1);
-      return;
+      continue;
     }
     if (operation.type === "lesson.delete") {
-      merged.forEach((chapter) => {
+      for (const chapter of merged)
         chapter.lessons = chapter.lessons.filter((lesson) => lesson.id !== operation.targetId);
-        chapter.lessonCount = chapter.lessons.length;
-      });
-      return;
+      continue;
     }
-    if (operation.type === "chapter.reorder" || operation.type === "lesson.reorder") {
-      const orderedIds = operation.payload.orderedIds;
-      if (!Array.isArray(orderedIds) || !orderedIds.every((id) => typeof id === "string")) return;
-      const position = new Map(orderedIds.map((id, index) => [id, index]));
-      if (operation.type === "chapter.reorder") {
-        merged.sort(
-          (left, right) =>
-            (position.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
-            (position.get(right.id) ?? Number.MAX_SAFE_INTEGER),
-        );
-      } else {
-        const chapter = merged.find((item) => item.id === operation.chapterId);
-        chapter?.lessons.sort(
-          (left, right) =>
-            (position.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
-            (position.get(right.id) ?? Number.MAX_SAFE_INTEGER),
-        );
+    if (operation.type === "chapter.update" || operation.type === "chapter.create") {
+      let chapter = merged.find((item) => item.id === operation.targetId);
+      if (
+        !chapter &&
+        operation.type === "chapter.create" &&
+        typeof operation.payload.title === "string"
+      ) {
+        chapter = {
+          id: operation.targetId,
+          title: operation.payload.title,
+          updatedAt: "1970-01-01T00:00:00.000Z",
+          displayOrder: merged.length,
+          isFree: false,
+          lessonCount: 0,
+          lessons: [],
+        };
+        merged.push(chapter);
       }
-      return;
-    }
-    if (operation.type === "chapter.update") {
-      const chapter = merged.find((item) => item.id === operation.targetId);
       if (chapter && typeof operation.payload.title === "string")
         chapter.title = operation.payload.title;
-      return;
+      continue;
     }
-    if (operation.type === "lesson.metadata.update") {
-      const lesson = merged
+    if (
+      operation.type === "lesson.metadata.update" ||
+      operation.type === "lesson.update" ||
+      operation.type === "lesson.create"
+    ) {
+      let lesson = merged
         .flatMap((chapter) => chapter.lessons)
         .find((item) => item.id === operation.targetId);
-      if (!lesson) return;
-      if (typeof operation.payload.title === "string") lesson.title = operation.payload.title;
-      if (typeof operation.payload.description === "string")
-        lesson.description = operation.payload.description;
-      return;
-    }
-    if (operation.type === "lesson.create" || operation.type === "lesson.update") {
-      const chapter = merged.find((item) => item.id === operation.chapterId);
-      if (!chapter) return;
-      const lesson = chapter.lessons.find((item) => item.id === operation.targetId);
-      if (lesson) {
-        if (typeof operation.payload.title === "string") lesson.title = operation.payload.title;
-        if (typeof operation.payload.description === "string")
-          lesson.description = operation.payload.description;
-      } else if (
+      if (
+        !lesson &&
         operation.type === "lesson.create" &&
         typeof operation.payload.title === "string"
       ) {
-        chapter.lessons.splice(
-          Math.min(operation.displayOrder ?? chapter.lessons.length, chapter.lessons.length),
-          0,
-          {
-            id: operation.targetId,
-            updatedAt: "1970-01-01T00:00:00.000Z",
-            type: ["content", "quiz", "ai_mentor"].includes(String(operation.payload.lessonType))
-              ? (operation.payload.lessonType as Lesson["type"])
-              : "content",
-            displayOrder: operation.displayOrder ?? chapter.lessons.length,
-            title: operation.payload.title,
-            description:
-              typeof operation.payload.description === "string"
-                ? operation.payload.description
-                : "",
-            chapterId: chapter.id,
-          },
-        );
-        chapter.lessonCount = chapter.lessons.length;
+        const chapter = merged.find((item) => item.id === operation.chapterId);
+        if (!chapter) continue;
+        lesson = {
+          id: operation.targetId,
+          updatedAt: "1970-01-01T00:00:00.000Z",
+          type: ["content", "quiz", "ai_mentor"].includes(String(operation.payload.lessonType))
+            ? (operation.payload.lessonType as Lesson["type"])
+            : "content",
+          displayOrder: chapter.lessons.length,
+          title: operation.payload.title,
+          description: "",
+          chapterId: chapter.id,
+        };
+        chapter.lessons.push(lesson);
       }
+      if (!lesson) continue;
+      if (typeof operation.payload.title === "string") lesson.title = operation.payload.title;
+      if (typeof operation.payload.description === "string")
+        lesson.description = operation.payload.description;
     }
-  });
+  }
+
+  const orderingOperations = operations.length
+    ? operations
+    : preview.outline
+        .flatMap((chapter, chapterIndex) => [
+          {
+            operationId: `preview-chapter:${chapter.id}`,
+            dependencies: [],
+            type: "chapter.update",
+            targetId: chapter.id,
+            payload: { displayOrder: chapter.displayOrder ?? chapterIndex },
+          },
+          ...chapter.lessons.map((lesson, lessonIndex) => ({
+            operationId: `preview-lesson:${lesson.id}`,
+            dependencies: [],
+            type: "lesson.update",
+            targetId: lesson.id,
+            chapterId: chapter.id,
+            displayOrder: lesson.displayOrder ?? lessonIndex,
+            payload: {},
+          })),
+        ])
+        .filter((operation) => {
+          if (operation.type === "chapter.update") {
+            const outlined = preview.outline.find((chapter) => chapter.id === operation.targetId);
+            return (
+              outlined?.displayOrder !== undefined ||
+              !chapters.some((chapter) => chapter.id === operation.targetId)
+            );
+          }
+          const outlined = preview.outline
+            .flatMap((chapter) => chapter.lessons)
+            .find((lesson) => lesson.id === operation.targetId);
+          return (
+            outlined?.displayOrder !== undefined ||
+            !chapters.some((chapter) =>
+              chapter.lessons.some((lesson) => lesson.id === operation.targetId),
+            )
+          );
+        });
+  const orderGroups = planCourseAuthoringOrder(
+    [
+      { kind: "chapter", orderedIds: merged.map((chapter) => chapter.id) },
+      ...merged.map((chapter) => ({
+        kind: "lesson" as const,
+        chapterId: chapter.id,
+        orderedIds: chapter.lessons.map((lesson) => lesson.id),
+      })),
+    ],
+    orderingOperations,
+  );
+  for (const group of orderGroups) {
+    const positions = new Map(group.orderedIds.map((id, index) => [id, index]));
+    if (group.kind === "chapter") {
+      merged.sort(
+        (left, right) =>
+          (positions.get(left.id) ?? Infinity) - (positions.get(right.id) ?? Infinity),
+      );
+    } else {
+      const chapter = merged.find((item) => item.id === group.chapterId);
+      chapter?.lessons.sort(
+        (left, right) =>
+          (positions.get(left.id) ?? Infinity) - (positions.get(right.id) ?? Infinity),
+      );
+    }
+  }
 
   return merged.map((chapter, index) => ({
     ...chapter,
+    lessonCount: chapter.lessons.length,
     displayOrder: index + 1,
     lessons: chapter.lessons.map((lesson, lessonIndex) => ({
       ...lesson,

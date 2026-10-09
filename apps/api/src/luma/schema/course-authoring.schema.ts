@@ -9,7 +9,9 @@ import { aiMentorConfigurationResponseSchema } from "src/lesson/ai-mentor-config
 
 import { quizPayload } from "./course-authoring-operations.schema";
 
-const nullableOrder = Type.Union([Type.Integer(), Type.Null()]);
+const nullableOrder = Type.Union([Type.Integer({ minimum: 0 }), Type.Null()], {
+  description: "Zero-based visible sibling position; native persisted ranks are kept in baselines.",
+});
 const authoringCourseSettingsSchema = Type.Omit(coursesSettingsSchema, ["certificateSignature"]);
 const authoringCourseSchema = Type.Object(
   {

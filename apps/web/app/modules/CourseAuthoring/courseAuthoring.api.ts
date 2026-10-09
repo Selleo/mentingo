@@ -31,6 +31,16 @@ const taskStatuses = new Set([
 /** Converts a generated response into the projection shape expected by the workspace. */
 const normalizeSession = (session: OpenAuthoringSessionResponse["data"]): AuthoringSession => ({
   ...session,
+  applicationDelta: session.applicationDelta
+    ? {
+        appliedOperationIds: session.applicationDelta.appliedOperationIds,
+        idMappings: Object.fromEntries(
+          Object.entries(session.applicationDelta.idMappings).filter(
+            ([, value]) => typeof value === "string",
+          ),
+        ),
+      }
+    : undefined,
   records: session.records.map((record) => ({
     ...record,
     payload:

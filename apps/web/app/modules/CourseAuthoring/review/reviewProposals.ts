@@ -26,6 +26,8 @@ export const toReviewProposals = (proposals: ProposalView[]): ReviewProposal[] =
       ...new Set(
         proposal.operations.flatMap((operation) =>
           operation.dependencies.flatMap((dependency) => {
+            if (proposal.operations.some((operation) => operation.operationId === dependency))
+              return [];
             const owner = ownerByOperationId.get(dependency);
             return owner && owner !== proposal.id ? [owner] : [];
           }),

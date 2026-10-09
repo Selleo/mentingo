@@ -1,5 +1,5 @@
 /** Validates frozen authoring exports, stages assets, and queues atomic native application work. */
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
 
 import {
@@ -7,6 +7,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
@@ -34,6 +35,7 @@ import { CourseAuthoringSessionService } from "./course-authoring-session.servic
 import { LumaService } from "./luma.service";
 import { frozenAuthoringExportSchema } from "./schema/course-authoring-application.schema";
 
+import type { AuthoringMentorContextLesson } from "./course-authoring-context.types";
 import type { CourseAuthoringApplyJob, CourseAuthoringReceiptJob } from "./course-authoring.types";
 import type { AuthoringApplyStatus } from "./schema/course-authoring-application.schema";
 import type {
@@ -46,10 +48,16 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 const AUTHORING_SELECTION_NAMESPACE = "d7c56648-dc67-4a51-9a91-c318311b10e7";
 
 /** Identifies the immutable export contents independently of the editor and apply attempt. */
-const selectionCommandId = (sessionId: string, proposalIds: string[], omittedAssetIds: string[]) =>
+const selectionCommandId = (
+  sessionId: string,
+  proposalIds: string[],
+  omittedAssetIds: string[],
+  terminalApplicationId: string | null = null,
+) =>
   uuidv5(
     JSON.stringify({
       sessionId,
+      ...(terminalApplicationId ? { terminalApplicationId } : {}),
       proposalIds: [...new Set(proposalIds)].sort(),
       omittedAssetIds: [...new Set(omittedAssetIds)].sort(),
     }),
@@ -59,6 +67,7 @@ const selectionCommandId = (sessionId: string, proposalIds: string[], omittedAss
 @Injectable()
 /** Coordinates export preparation, asset staging, queued application, and receipt handoff. */
 export class CourseAuthoringApplicationService {
+  private readonly logger = new Logger(CourseAuthoringApplicationService.name);
   /** Injects session, export, queue, storage, and native-apply collaborators. */
   constructor(
     private readonly sessions: CourseAuthoringSessionService,
@@ -114,7 +123,17 @@ export class CourseAuthoringApplicationService {
     const client = await this.luma.getLumaClient();
     const proposalIds = [...new Set(input.proposalIds)].sort();
     const omitOptionalAssetIds = [...new Set(input.omitOptionalAssetIds ?? [])].sort();
-    const commandId = selectionCommandId(sessionId, proposalIds, omitOptionalAssetIds);
+    const terminal = await this.receipts.latestTerminalSessionReceipt(
+      actor.tenantId,
+      courseId,
+      sessionId,
+    );
+    const commandId = selectionCommandId(
+      sessionId,
+      proposalIds,
+      omitOptionalAssetIds,
+      terminal?.applicationId ?? null,
+    );
     const exported = await client.authoring
       .prepareExport({
         sessionId,
@@ -133,6 +152,8 @@ export class CourseAuthoringApplicationService {
           if (reason === "AUTHORING_IDEMPOTENCY_CONFLICT")
             throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
           const conflictMessages: Record<string, string> = {
+            AUTHORING_APPLICATION_PENDING: "courseAuthoring.errors.applicationInProgress",
+            AUTHORING_EXPORT_PENDING: "courseAuthoring.errors.applicationInProgress",
             AUTHORING_PROPOSAL_NOT_ACCEPTED: "courseAuthoring.errors.proposalNotReady",
             AUTHORING_ASSET_NOT_READY: "courseAuthoring.errors.assetNotReady",
             AUTHORING_DEPENDENCY_UNREADY: "courseAuthoring.errors.missingDependency",
@@ -160,22 +181,11 @@ export class CourseAuthoringApplicationService {
         throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
       const state = await existingJob.getState();
       if (state !== "failed") return this.status(courseId, sessionId, exported.exportId, actor);
-      if (existingJob.failedReason === "courseAuthoring.errors.baselineChanged")
-        return this.status(courseId, sessionId, exported.exportId, actor);
-      await existingJob.updateData({
-        ...existingJob.data,
-        actor,
-        acknowledgeAssessmentChanges:
-          existingJob.data.acknowledgeAssessmentChanges === true ||
-          input.acknowledgeAssessmentChanges === true,
-      });
-      try {
-        await existingJob.retry();
-      } catch (error) {
-        // Another editor may have resumed the same failed job first.
-        if ((await existingJob.getState()) === "failed") throw error;
-      }
-      return this.status(courseId, sessionId, exported.exportId, actor);
+      await this.recordTerminalFailure(
+        existingJob.data as CourseAuthoringApplyJob,
+        existingJob.failedReason,
+      );
+      throw new ConflictException("courseAuthoring.errors.receiptSynchronizationPending");
     }
     await this.queue.enqueue<CourseAuthoringApplyJob>(
       QUEUE_NAMES.COURSE_AUTHORING_APPLY,
@@ -210,7 +220,13 @@ export class CourseAuthoringApplicationService {
     if (receipt) {
       if (receipt.sessionId !== sessionId)
         throw new NotFoundException("courseAuthoring.errors.applicationNotFound");
-      return { exportId, status: "applied", receipt };
+      if (receipt.status !== "applied")
+        return {
+          exportId,
+          status: receipt.status,
+          reason: receipt.reason ?? "courseAuthoring.errors.applicationFailed",
+        };
+      return { exportId, status: "applied", receipt: { ...receipt, status: "applied" } };
     }
     const job = await this.queue
       .getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY)
@@ -234,6 +250,99 @@ export class CourseAuthoringApplicationService {
     return { exportId, status: state === "active" ? "running" : "queued" };
   }
 
+  /** Reconciles a bounded page of final failed jobs after transient receipt-store outages. */
+  async reconcileFailedApplications(tenantId: string, offset: number) {
+    const jobs = await this.queue
+      .getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY)
+      .getJobs(["failed"], offset, offset + 99);
+    for (const job of jobs) {
+      const data = job.data as CourseAuthoringApplyJob | CourseAuthoringReceiptJob;
+      if (
+        !("actor" in data) ||
+        data.actor.tenantId !== tenantId ||
+        (await job.getState()) !== "failed"
+      )
+        continue;
+      try {
+        await this.recordTerminalFailure(data, job.failedReason);
+      } catch {
+        this.logger.warn("A terminal application outcome will retry on a later receipt scan");
+      }
+    }
+    return jobs.length === 100 ? offset + 100 : 0;
+  }
+
+  /** Records only a final queue failure; a committed native receipt always wins. */
+  async recordTerminalFailure(data: CourseAuthoringApplyJob, reason: string) {
+    const existing = await this.receipts.findReceipt(
+      data.courseId,
+      data.exportId,
+      data.actor.tenantId,
+    );
+    if (existing) return existing;
+    const client = await this.luma.getLumaClient();
+    const exported = await client.authoring.getExport({
+      sessionId: data.sessionId,
+      exportId: data.exportId,
+    });
+    if (
+      !Value.Check(frozenAuthoringExportSchema, exported) ||
+      exported.courseId !== data.courseId ||
+      exported.sessionId !== data.sessionId ||
+      exported.exportId !== data.exportId ||
+      courseAuthoringExportHash(exported) !== exported.exportHash
+    )
+      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    const safeReason =
+      reason.startsWith("courseAuthoring.errors.") ||
+      reason.startsWith("aiJudgeConfiguration.errors.") ||
+      reason.startsWith("adminCourseView.curriculum.lesson.aiJudge.validation.") ||
+      reason === "adminCourseView.toast.languageNotSupported"
+        ? reason
+        : "courseAuthoring.errors.applicationFailed";
+    const result = await this.receipts.recordFailureOnce(
+      {
+        tenantId: data.actor.tenantId,
+        actorId: data.actor.userId,
+        courseId: data.courseId,
+        sessionId: data.sessionId,
+        exportId: data.exportId,
+        exportHash: exported.exportHash,
+      },
+      {
+        applicationId: randomUUID(),
+        exportHash: exported.exportHash,
+        exportId: data.exportId,
+        courseId: data.courseId,
+        sessionId: data.sessionId,
+        status: safeReason === "courseAuthoring.errors.baselineChanged" ? "conflict" : "failed",
+        reason: safeReason,
+        appliedOperationIds: [],
+        entityMappings: {},
+        assetMappings: {},
+      },
+    );
+    await this.queue.enqueue<CourseAuthoringReceiptJob>(
+      QUEUE_NAMES.COURSE_AUTHORING_APPLY,
+      "receipt",
+      {
+        tenantId: data.actor.tenantId,
+        courseId: data.courseId,
+        sessionId: data.sessionId,
+        exportId: data.exportId,
+        exportHash: result.exportHash,
+      },
+      {
+        jobId: `receipt-${data.actor.tenantId}-${data.exportId}`,
+        attempts: 5,
+        backoff: { type: "exponential", delay: 1000 },
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
+    return result;
+  }
+
   /** Downloads and verifies a frozen export before applying it and recording its receipt. */
   async process(data: CourseAuthoringApplyJob) {
     const actor = await this.context.authorize(data.courseId, data.actor);
@@ -253,6 +362,8 @@ export class CourseAuthoringApplicationService {
     if (courseAuthoringExportHash(exported) !== exported.exportHash)
       throw new BadGatewayException("courseAuthoring.errors.exportHashMismatch");
     const existing = await this.receipts.findReceipt(data.courseId, data.exportId, actor.tenantId);
+    if (existing && existing.status !== "applied")
+      throw new ConflictException(existing.reason ?? "courseAuthoring.errors.applicationFailed");
     if (existing && existing.exportHash !== exported.exportHash)
       throw new ConflictException("courseAuthoring.errors.exportChanged");
     const assets: Record<string, string> = {};
@@ -348,16 +459,22 @@ export class CourseAuthoringApplicationService {
           !preparedDocumentIds[mentorTargetedContextKey(operation.operationId)]?.length,
       );
       if (mentorOperations.length) {
-        const existingLessons = await this.context.getMentorContextLessons(
-          data.courseId,
-          exported.language,
-          actor,
-        );
+        const lessonsByLanguage = new Map<string, AuthoringMentorContextLesson[]>();
         for (const operation of mentorOperations) {
+          let existingLessons = lessonsByLanguage.get(operation.language);
+          if (!existingLessons) {
+            existingLessons = await this.context.getMentorContextLessons(
+              data.courseId,
+              operation.language,
+              actor,
+            );
+            lessonsByLanguage.set(operation.language, existingLessons);
+          }
           const documentText = buildMentorCourseContextDocument(
             operation.payload.title,
             existingLessons,
             operations,
+            operation.language,
           );
           if (!documentText) continue;
           const buffer = Buffer.from(documentText, "utf8");

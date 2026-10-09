@@ -135167,6 +135167,32 @@
               "reasoningControlAvailable": {
                 "type": "boolean"
               },
+              "applicationDelta": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "appliedOperationIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "idMappings": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "appliedOperationIds",
+                  "idMappings"
+                ]
+              },
               "schemaVersion": {
                 "const": 1,
                 "type": "number"
@@ -135944,6 +135970,32 @@
             "properties": {
               "reasoningControlAvailable": {
                 "type": "boolean"
+              },
+              "applicationDelta": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "appliedOperationIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "idMappings": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "appliedOperationIds",
+                  "idMappings"
+                ]
               },
               "schemaVersion": {
                 "const": 1,
@@ -144855,8 +144907,10 @@
                       "type": "string"
                     },
                     "displayOrder": {
+                      "description": "Zero-based visible sibling position; native persisted ranks are kept in baselines.",
                       "anyOf": [
                         {
+                          "minimum": 0,
                           "type": "integer"
                         },
                         {
@@ -144890,8 +144944,10 @@
                             "type": "integer"
                           },
                           "displayOrder": {
+                            "description": "Zero-based visible sibling position; native persisted ranks are kept in baselines.",
                             "anyOf": [
                               {
+                                "minimum": 0,
                                 "type": "integer"
                               },
                               {

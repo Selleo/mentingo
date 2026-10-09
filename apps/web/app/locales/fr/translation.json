@@ -5975,6 +5975,12 @@
         "failed": "La recherche web a échoué",
         "stopped": "Recherche web arrêtée"
       },
+      "webExtractTool": {
+        "started": "Lecture de la page liée",
+        "completed": "Page liée lue",
+        "failed": "Échec de l’extraction de la page",
+        "stopped": "Extraction de la page arrêtée"
+      },
       "toolSourceCount": "{{count}} sources",
       "toolFindingCount": "{{count}} résultats",
       "opening": "Ouverture du cours…",
@@ -6340,12 +6346,16 @@
       "sourceUploadFailed": "La source n’a pas pu être importée. Vérifiez son type et sa taille, puis réessayez.",
       "sourceReplacementNotReady": "Attendez que le fichier de remplacement ait fini son traitement.",
       "sourceRefreshSelectionChanged": "La sélection de sources a changé. Vérifiez les sources actuelles et réessayez.",
+      "mediaOutsideCourse": "Cette image ou ce média intégré n’est pas autorisé pour ce cours. Importez le fichier ou demandez une image générée, puis régénérez la modification.",
+      "previewUnavailable": "Il manque des modifications requises dans cet aperçu ou leur ordre est incohérent. Actualisez la session et incluez les modifications requises avant de réessayer.",
+      "applicationInProgress": "D’autres modifications sont en cours d’application. Si la mise en file a échoué, réessayez avec la sélection initiale de propositions pour reprendre.",
       "receiptSynchronizationPending": "Les modifications précédentes sont enregistrées dans l’espace de travail IA. Réessayez bientôt d’appliquer la même sélection.",
       "appliedRefreshPending": "Les modifications ont été appliquées. Actualisez le cours si elles ne sont pas encore visibles."
     },
     "review": {
       "generatedImage": "Image générée",
       "openImageFile": "Ouvrir le fichier image",
+      "mediaPreviewBlocked": "Ce média ne provient ni du cours sélectionné ni des fichiers approuvés.",
       "imagePreviewUnavailable": "L’aperçu de l’image n’est pas encore disponible.",
       "imagePreviewFailed": "Certaines images n’ont pas pu être chargées en aperçu.",
       "retryImagePreviews": "Réessayer les aperçus",

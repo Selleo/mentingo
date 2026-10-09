@@ -226,6 +226,7 @@ describe("course authoring event cursor", () => {
               result: {
                 query: "Exact query with punctuation?",
                 queries: ["Older exact query", "Another query"],
+                sources: [{ url: "https://example.com/docs", title: "Documentation" }],
                 sourceCount: 2,
               },
             },
@@ -238,6 +239,7 @@ describe("course authoring event cursor", () => {
     expect(next.turns?.[0]?.parts[0]?.tool?.result).toEqual({
       query: "Exact query with punctuation?",
       queries: ["Older exact query", "Another query"],
+      sources: [{ url: "https://example.com/docs", title: "Documentation" }],
       sourceCount: 2,
       findingCount: null,
     });

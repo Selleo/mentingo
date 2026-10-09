@@ -1,6 +1,14 @@
 /** Builds retrieval text exclusively from content lessons in one authorized course export. */
 import { load } from "cheerio";
 
+import {
+  normalizeCourseAuthoringContent,
+  replaceCourseAuthoringBlock,
+} from "src/common/utils/courseAuthoringBlocks";
+
+import { stripAuthoringHtmlStyles } from "./course-authoring-html";
+import { orderCourseAuthoringOperations } from "./course-authoring-ordering";
+
 import type { AuthoringMentorContextLesson } from "./course-authoring-context.types";
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
 
@@ -32,47 +40,99 @@ const visibleText = (html: string) => {
 
 /**
  * Renders one Mentor knowledge file from current authorized course bodies and content operations
- * frozen in the same export. Updated lessons use their accepted export body instead of duplicating
- * the prior stored body. Quiz answers and Mentor instructions are intentionally not serialized.
+ * frozen in the same export. All accepted patches are projected in native dependency order
+ * before text extraction; partial updates preserve untouched baseline fields. Quiz answers and Mentor instructions are intentionally not serialized.
  */
 export function buildMentorCourseContextDocument(
   mentorTitle: string,
   existingLessons: readonly AuthoringMentorContextLesson[],
   operations: readonly AuthoringOperation[],
+  language?: AuthoringOperation["language"],
 ): string | null {
-  const replacedLessonIds = new Set(
-    operations.flatMap((operation) =>
-      operation.type === "lesson.delete" || operation.type === "lesson.update"
-        ? [operation.targetId]
-        : [],
-    ),
+  const projected = new Map(existingLessons.map((lesson) => [lesson.id, { ...lesson }]));
+  const replacedBodies = new Set<string>();
+  const chapterTitles = new Map(
+    existingLessons.map((lesson) => [lesson.chapterId, lesson.chapterTitle]),
   );
   const deletedChapterIds = new Set(
     operations.flatMap((operation) =>
       operation.type === "chapter.delete" ? [operation.targetId] : [],
     ),
   );
-  const sections: Array<{ chapterTitle: string | null; title: string; content: string }> = [];
-  for (const lesson of existingLessons) {
-    if (replacedLessonIds.has(lesson.id) || deletedChapterIds.has(lesson.chapterId)) continue;
+  for (const operation of orderCourseAuthoringOperations(operations)) {
+    const sameLanguage = language === undefined || operation.language === language;
+    switch (operation.type) {
+      case "chapter.create":
+      case "chapter.update":
+        if (!sameLanguage) break;
+        chapterTitles.set(operation.targetId, operation.payload.title);
+        for (const lesson of projected.values())
+          if (lesson.chapterId === operation.targetId)
+            lesson.chapterTitle = operation.payload.title;
+        break;
+      case "chapter.delete":
+        for (const lesson of projected.values())
+          if (lesson.chapterId === operation.targetId) projected.delete(lesson.id);
+        break;
+      case "lesson.delete":
+        projected.delete(operation.targetId);
+        break;
+      case "lesson.create":
+      case "lesson.update": {
+        if (!sameLanguage) break;
+        if (operation.payload.lessonType !== "content") {
+          projected.delete(operation.targetId);
+          break;
+        }
+        replacedBodies.add(operation.targetId);
+        projected.set(operation.targetId, {
+          id: operation.targetId,
+          chapterId: operation.chapterId,
+          chapterTitle: chapterTitles.get(operation.chapterId) ?? null,
+          title: operation.payload.title,
+          description: stripAuthoringHtmlStyles(operation.payload.description),
+        });
+        break;
+      }
+      case "lesson.metadata.update": {
+        const lesson = projected.get(operation.targetId);
+        if (!lesson || !sameLanguage) break;
+        if (operation.payload.description !== undefined) replacedBodies.add(lesson.id);
+        projected.set(lesson.id, {
+          ...lesson,
+          ...(operation.payload.title !== undefined ? { title: operation.payload.title } : {}),
+          ...(operation.payload.description !== undefined
+            ? { description: stripAuthoringHtmlStyles(operation.payload.description) }
+            : {}),
+        });
+        break;
+      }
+      case "lesson.block.replace": {
+        const lesson = projected.get(operation.targetId);
+        if (!lesson || !sameLanguage) break;
+        projected.set(lesson.id, {
+          ...lesson,
+          description: replaceCourseAuthoringBlock({
+            content: replacedBodies.has(lesson.id)
+              ? normalizeCourseAuthoringContent(lesson.description ?? "")
+              : (lesson.description ?? ""),
+            targetBlockId: operation.payload.blockId,
+            replacementHtml: stripAuthoringHtmlStyles(operation.payload.html),
+          }),
+        });
+        replacedBodies.delete(lesson.id);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  const sections = [...projected.values()].flatMap((lesson) => {
+    if (deletedChapterIds.has(lesson.chapterId)) return [];
     const title = lesson.title?.trim();
     const content = lesson.description ? visibleText(lesson.description) : "";
-    if (!title || !content) continue;
-    sections.push({ chapterTitle: lesson.chapterTitle, title, content });
-  }
-
-  for (const operation of operations) {
-    if (
-      (operation.type !== "lesson.create" && operation.type !== "lesson.update") ||
-      operation.payload.lessonType !== "content" ||
-      deletedChapterIds.has(operation.chapterId)
-    )
-      continue;
-    const title = operation.payload.title.trim();
-    const content = visibleText(operation.payload.description);
-    if (!title || !content) continue;
-    sections.push({ chapterTitle: null, title, content });
-  }
+    return title && content ? [{ chapterTitle: lesson.chapterTitle, title, content }] : [];
+  });
 
   if (!sections.length) return null;
   const lines = [`Course content for AI Mentor: ${mentorTitle.trim() || "Mentor"}`, ""];

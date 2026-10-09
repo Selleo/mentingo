@@ -76,7 +76,6 @@ export function NavigationFooter({
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
             data-testid={NAVIGATION_HANDLES.PROFILE_FOOTER}
-            onClick={() => setIsDropdownOpen((prev) => !prev)}
             className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
               "justify-center": hideLabels,
             })}

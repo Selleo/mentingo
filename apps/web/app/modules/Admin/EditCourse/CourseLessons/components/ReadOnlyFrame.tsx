@@ -24,6 +24,12 @@ const NAVIGATION_KEYS = new Set([
 
 /** Accordion triggers and marked view buttons stay usable; nothing else can change. */
 const isAllowedControl = (element: Element | null) => {
+  if (
+    element instanceof HTMLElement &&
+    element.tagName === "SUMMARY" &&
+    element.parentElement instanceof HTMLDetailsElement
+  )
+    return true;
   if (element instanceof HTMLAnchorElement)
     return element.hasAttribute(READ_ONLY_ALLOW_ATTRIBUTE) && element.hasAttribute("href");
   return (
@@ -71,7 +77,7 @@ export const ReadOnlyFrame = ({
     if (!isOwnEvent(event)) return;
     if (
       isAllowedControl(
-        event.target instanceof Element ? event.target.closest("button, a[href]") : null,
+        event.target instanceof Element ? event.target.closest("button, a[href], summary") : null,
       )
     )
       return;

@@ -100,9 +100,13 @@ export class AdminLessonService {
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
-  async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUserType) {
+  async createLessonForChapter(
+    data: CreateLessonBody,
+    currentUser: CurrentUserType,
+    requestedLanguage?: SupportedLanguages,
+  ) {
     const { lessonId, language } = await this.db.transaction((trx) =>
-      this.createLessonForChapterInTransaction(data, currentUser, trx),
+      this.createLessonForChapterInTransaction(data, currentUser, trx, requestedLanguage),
     );
 
     await this.publishCreateLessonEvent(lessonId, language, currentUser);
@@ -114,6 +118,7 @@ export class AdminLessonService {
     data: CreateLessonBody,
     currentUser: CurrentUserType,
     dbInstance: DatabasePg,
+    requestedLanguage?: SupportedLanguages,
   ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
     await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
@@ -122,10 +127,14 @@ export class AdminLessonService {
     );
     await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
-    const { language } = await this.localizationService.getBaseLanguage(
+    const localization = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       data.chapterId,
+      requestedLanguage,
     );
+    if (requestedLanguage && !localization.availableLocales.includes(requestedLanguage))
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+    const { language } = localization;
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -438,7 +447,11 @@ export class AdminLessonService {
     return this.adminLessonRepository.getContentLessonsByIds(lessonIds, language);
   }
 
-  async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUserType) {
+  async createAiMentorLesson(
+    data: CreateAiMentorLessonBody,
+    currentUser: CurrentUserType,
+    requestedLanguage?: SupportedLanguages,
+  ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
     await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
       data.chapterId,
@@ -447,10 +460,14 @@ export class AdminLessonService {
 
     await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
-    const { language } = await this.localizationService.getBaseLanguage(
+    const localization = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       data.chapterId,
+      requestedLanguage,
     );
+    if (requestedLanguage && !localization.availableLocales.includes(requestedLanguage))
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+    const { language } = localization;
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -476,6 +493,7 @@ export class AdminLessonService {
         customTtsReference,
       },
       maxDisplayOrder + 1,
+      language,
     );
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
@@ -584,6 +602,7 @@ export class AdminLessonService {
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       input.chapterId,
+      input.language,
     );
     if (input.language !== language)
       throw new BadRequestException("adminCourseView.toast.languageNotSupported");
@@ -877,13 +896,9 @@ export class AdminLessonService {
   private async createAiMentorLessonWithTransaction(
     data: CreateAiMentorLessonBody,
     displayOrder: number,
+    language: SupportedLanguages,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { language } = await this.localizationService.getBaseLanguage(
-        ENTITY_TYPE.CHAPTER,
-        data.chapterId,
-      );
-
       const lesson = await this.adminLessonRepository.createAiMentorLesson(
         data,
         displayOrder,

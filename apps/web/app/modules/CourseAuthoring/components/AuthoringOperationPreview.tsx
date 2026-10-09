@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { ContentViewer } from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 
 import { AuthoringContentPreview } from "../review/AuthoringContentPreview";
@@ -35,6 +34,7 @@ type Props = {
   operation: AuthoringOperation;
   lessonType?: string;
   compact?: boolean;
+  trustedContent?: string;
   assetPreviewUrls?: Readonly<Record<string, string>>;
 };
 
@@ -43,6 +43,7 @@ export const AuthoringOperationPreview = ({
   operation,
   lessonType: lessonTypeOverride,
   compact = true,
+  trustedContent,
   assetPreviewUrls = {},
 }: Props) => {
   const { t } = useTranslation();
@@ -61,6 +62,7 @@ export const AuthoringOperationPreview = ({
     return (
       <AuthoringContentPreview
         assetPreviewUrls={assetPreviewUrls}
+        trustedContent={trustedContent}
         content={html}
         className={compact ? "mt-2 max-h-72 overflow-y-auto text-sm" : "mt-4 text-sm"}
       />
@@ -127,7 +129,12 @@ export const AuthoringOperationPreview = ({
                 </Badge>
               </div>
               {prompt && (
-                <ContentViewer content={prompt} className="mt-1 text-xs text-neutral-700" />
+                <AuthoringContentPreview
+                  trustedContent={trustedContent}
+                  assetPreviewUrls={assetPreviewUrls}
+                  content={prompt}
+                  className="mt-1 text-xs text-neutral-700"
+                />
               )}
               {options.length > 0 && (
                 <ul className="mt-2 space-y-1 text-sm text-neutral-700">

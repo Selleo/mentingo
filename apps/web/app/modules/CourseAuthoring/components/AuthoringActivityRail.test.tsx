@@ -8,6 +8,10 @@ import { AuthoringActivityRail, AuthoringToolActivity } from "./AuthoringActivit
 
 import type { AssetTaskView } from "../courseAuthoring.types";
 
+vi.mock("~/api/queries/useCourseAuthoringLinkPreviewQuery", () => ({
+  useCourseAuthoringLinkPreviewQuery: () => ({ data: undefined, isLoading: false }),
+}));
+
 const assetTask: AssetTaskView = {
   taskId: "task-asset",
   parentTaskId: "task-parent",
@@ -372,7 +376,47 @@ describe("AuthoringActivityRail live work", () => {
     />
   );
 
-  it("keeps exact search queries out of the individual tool row", () => {
+  it("labels direct page extraction separately from search and shows its URL", () => {
+    renderWith().render(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "read-link",
+          toolName: "web_extract",
+          display: "https://owasp.org/",
+          status: "completed",
+          result: { query: "https://owasp.org/", sourceCount: 1 },
+        }}
+      />,
+    );
+    expect(screen.getByText("Read linked page")).toBeVisible();
+    expect(screen.getByText("https://owasp.org/")).toBeVisible();
+    expect(screen.queryByText("Searched the web")).toBeNull();
+  });
+
+  it("shows fetched source citations and excludes unsafe or duplicate URLs", () => {
+    renderWith().render(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "fetched-sources",
+          toolName: "web_extract",
+          display: "Read page",
+          status: "completed",
+          result: {
+            sources: [
+              { url: "https://example.com/docs", title: "Platform documentation" },
+              { url: "https://example.com/docs", title: "Duplicate" },
+              { url: "javascript:alert(1)", title: "Unsafe" },
+            ],
+          },
+        }}
+      />,
+    );
+    expect(screen.getAllByTestId("authoring-source-chip")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: /Platform documentation/ })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /Unsafe|Duplicate/ })).toBeNull();
+  });
+
+  it("shows exact search queries beneath the individual tool row", () => {
     renderWith().render(
       <AuthoringToolActivity
         tool={{
@@ -386,7 +430,7 @@ describe("AuthoringActivityRail live work", () => {
     );
 
     expect(screen.getByText("Searched the web")).toBeVisible();
-    expect(screen.queryByText("A detailed search query")).toBeNull();
+    expect(screen.getByRole("listitem")).toHaveTextContent("A detailed search query");
   });
 
   it("groups completed web searches and keeps exact query history visible", () => {
@@ -403,7 +447,11 @@ describe("AuthoringActivityRail live work", () => {
               toolName: "web_search",
               display: "First web search",
               status: "completed",
-              result: { query: "Mentingo authoring workflow: first query?", sourceCount: 2 },
+              result: {
+                query: "Mentingo authoring workflow: first query?",
+                sourceCount: 2,
+                sources: [{ url: "https://example.com/docs", title: "Fetched documentation" }],
+              },
             },
           },
           {
@@ -418,6 +466,10 @@ describe("AuthoringActivityRail live work", () => {
                 query: "Mentingo authoring workflow: second query?",
                 queries: ["Earlier saved query", "Mentingo authoring workflow: first query?"],
                 sourceCount: 3,
+                sources: [
+                  { url: "https://example.com/docs", title: "Fetched documentation" },
+                  { url: "https://example.org/manual", title: "Manual" },
+                ],
               },
             },
           },
@@ -439,6 +491,7 @@ describe("AuthoringActivityRail live work", () => {
       "true",
     );
     expect(screen.getAllByText("Searched the web")).toHaveLength(1);
+    expect(screen.getAllByTestId("authoring-source-chip")).toHaveLength(2);
     expect(
       within(screen.getByRole("list", { name: "Search queries" }))
         .getAllByRole("listitem")

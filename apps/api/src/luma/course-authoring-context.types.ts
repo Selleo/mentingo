@@ -40,6 +40,7 @@ export type AuthoringContextLessonRow = {
   description: string | null;
   lessonType: LessonTypes;
   displayOrder: number | null;
+  authoringDisplayOrder?: number;
   updatedAt: string;
 };
 

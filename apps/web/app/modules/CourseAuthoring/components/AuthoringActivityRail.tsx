@@ -21,6 +21,7 @@ import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
+import { parseFetchedResearchSources } from "../authoringSources";
 import {
   authoringTaskFailureLabel,
   authoringTaskRetryLabel,
@@ -28,6 +29,7 @@ import {
 } from "../authoringTaskFailure";
 
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
+import { AuthoringSourceChipRow } from "./AuthoringSourceCitation";
 
 import type {
   ApplicationView,
@@ -312,22 +314,12 @@ const groupResearchActivity = (items: CompactWorkItem[]): CompactWorkItem[] => {
   });
 };
 
-const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
+const AuthoringSearchQueries = ({ queries }: { queries: string[] }) => {
   const { t } = useTranslation();
-  const orderedTools = [...tools].sort((left, right) => left.sequence - right.sequence);
-  const representative =
-    orderedTools.find(({ tool }) => tool.status === "started") ??
-    orderedTools.find(({ tool }) => tool.status === "failed" || tool.status === "stopped") ??
-    orderedTools[orderedTools.length - 1];
-  if (!representative) return null;
-
-  const queries = searchQueriesForTools(orderedTools);
   const visibleQueries = queries.slice(0, MAX_VISIBLE_SEARCH_QUERIES);
   const omittedQueries = queries.slice(visibleQueries.length);
-  const taskLabel = orderedTools.find((item) => item.taskLabel)?.taskLabel;
   return (
-    <div className="space-y-0.5">
-      <AuthoringToolActivity {...representative} taskLabel={taskLabel} showCounts={false} />
+    <>
       {visibleQueries.length > 0 && (
         <ul
           aria-label={t("courseAuthoring.activityRail.searchQueries")}
@@ -354,6 +346,43 @@ const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
           </ul>
         </details>
       )}
+    </>
+  );
+};
+
+const AuthoringResearchSources = ({ tools }: { tools: ToolActivity[] }) => {
+  const sources = parseFetchedResearchSources(
+    tools.flatMap(({ tool }) => tool.result?.sources ?? []),
+  ).map(({ url, title }) => ({ url, label: title }));
+  if (sources.length === 0) return null;
+  return (
+    <div className="ml-7">
+      <AuthoringSourceChipRow sources={sources} />
+    </div>
+  );
+};
+
+const AuthoringResearchActivity = ({ tools }: { tools: ToolActivity[] }) => {
+  const orderedTools = [...tools].sort((left, right) => left.sequence - right.sequence);
+  const representative =
+    orderedTools.find(({ tool }) => tool.status === "started") ??
+    orderedTools.find(({ tool }) => tool.status === "failed" || tool.status === "stopped") ??
+    orderedTools[orderedTools.length - 1];
+  if (!representative) return null;
+
+  const queries = searchQueriesForTools(orderedTools);
+  const taskLabel = orderedTools.find((item) => item.taskLabel)?.taskLabel;
+  return (
+    <div className="space-y-0.5">
+      <AuthoringToolActivity
+        {...representative}
+        taskLabel={taskLabel}
+        showCounts={false}
+        showQueries={false}
+        showSources={false}
+      />
+      <AuthoringSearchQueries queries={queries} />
+      <AuthoringResearchSources tools={orderedTools} />
     </div>
   );
 };
@@ -362,14 +391,22 @@ export const AuthoringToolActivity = ({
   tool,
   taskLabel,
   showCounts = true,
-}: Pick<ToolActivity, "tool" | "taskLabel"> & { showCounts?: boolean }) => {
+  showQueries = true,
+  showSources = true,
+}: Pick<ToolActivity, "tool" | "taskLabel"> & {
+  showCounts?: boolean;
+  showQueries?: boolean;
+  showSources?: boolean;
+}) => {
   const { t } = useTranslation();
   const isWebToolActivity = isWebTool(tool);
+  const isExtraction = tool.toolName === "web_extract";
   const isRunning = tool.status === "started";
   const isProblem = tool.status === "failed" || tool.status === "stopped";
-  const label = isWebToolActivity
-    ? t(`courseAuthoring.conversation.webSearchTool.${tool.status}`)
-    : tool.display;
+  let label = tool.display;
+  if (isExtraction) label = t(`courseAuthoring.conversation.webExtractTool.${tool.status}`);
+  else if (isWebToolActivity)
+    label = t(`courseAuthoring.conversation.webSearchTool.${tool.status}`);
   const counts = [
     typeof tool.result?.sourceCount === "number"
       ? t("courseAuthoring.conversation.toolSourceCount", { count: tool.result.sourceCount })
@@ -378,7 +415,7 @@ export const AuthoringToolActivity = ({
       ? t("courseAuthoring.conversation.toolFindingCount", { count: tool.result.findingCount })
       : null,
   ].filter((value): value is string => Boolean(value));
-  const ToolIcon = isWebToolActivity ? Globe : Wrench;
+  const ToolIcon = isWebToolActivity || isExtraction ? Globe : Wrench;
 
   let icon = <ToolIcon className="size-3.5 text-neutral-400" aria-hidden="true" />;
   if (isRunning) {
@@ -393,24 +430,35 @@ export const AuthoringToolActivity = ({
   }
 
   return (
-    <div
-      data-testid={`course-authoring-tool-${tool.toolCallId}`}
-      role="status"
-      title={isWebToolActivity && tool.display !== label ? tool.display : undefined}
-      className="flex items-center gap-1.5 px-1 py-1 text-xs text-neutral-500"
-    >
-      {icon}
-      <span className={cn(isRunning && "loading-text-shimmer", isProblem && "text-neutral-700")}>
-        {label}
-      </span>
-      {taskLabel && <span className="text-neutral-400">· {taskLabel}</span>}
-      {!isWebToolActivity && isProblem && (
-        <span className="text-neutral-500">
-          · {t(`courseAuthoring.activityRail.taskStatus.${tool.status}`)}
+    <div className="space-y-0.5">
+      <div
+        data-testid={`course-authoring-tool-${tool.toolCallId}`}
+        role="status"
+        title={isWebToolActivity && tool.display !== label ? tool.display : undefined}
+        className="flex items-center gap-1.5 px-1 py-1 text-xs text-neutral-500"
+      >
+        {icon}
+        <span className={cn(isRunning && "loading-text-shimmer", isProblem && "text-neutral-700")}>
+          {label}
         </span>
+        {taskLabel && <span className="text-neutral-400">· {taskLabel}</span>}
+        {!isWebToolActivity && !isExtraction && isProblem && (
+          <span className="text-neutral-500">
+            · {t(`courseAuthoring.activityRail.taskStatus.${tool.status}`)}
+          </span>
+        )}
+        {showCounts && counts.length > 0 && (
+          <span className="text-neutral-400">· {counts.join(" · ")}</span>
+        )}
+      </div>
+      {isExtraction && typeof tool.result?.query === "string" && (
+        <p className="ml-7 break-all text-xs text-neutral-600">{tool.result.query}</p>
       )}
-      {showCounts && counts.length > 0 && (
-        <span className="text-neutral-400">· {counts.join(" · ")}</span>
+      {(isWebToolActivity || isExtraction) && showSources && (
+        <AuthoringResearchSources tools={[{ tool, sequence: 0 }]} />
+      )}
+      {isWebToolActivity && showQueries && (
+        <AuthoringSearchQueries queries={searchQueriesForTools([{ tool, sequence: 0 }])} />
       )}
     </div>
   );
@@ -944,11 +992,12 @@ export const AuthoringActivityRail = ({
                               type="button"
                               variant="outline"
                               size="sm"
+                              className="h-auto max-w-full whitespace-normal text-left"
                               onClick={() =>
                                 setAnswers((current) => ({ ...current, [question.id]: choice }))
                               }
                             >
-                              {choice}
+                              <span className="min-w-0 break-words">{choice}</span>
                             </Button>
                           ))}
                         </div>

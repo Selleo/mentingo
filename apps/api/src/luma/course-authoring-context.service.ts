@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import { ENTITY_TYPES, PERMISSIONS, hasPermission, type LessonTypes } from "@repo/shared";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -67,7 +68,11 @@ const AUTHORING_COURSE_ALLOWED_FIELDS = [
   "applyValidityToExistingCertificates",
   "removeCertificateSignature",
   "certificateSignatureAssetId",
+  "orderedIds",
 ];
+
+const siblingLesson = alias(lessons, "authoring_sibling_lesson");
+const siblingChapter = alias(chapters, "authoring_sibling_chapter");
 
 @Injectable()
 /** Authorizes editors and constructs the native context used for targeted authoring. */
@@ -290,7 +295,7 @@ export class CourseAuthoringContextService {
         }).map(([field, value]) => [field, this.hash(value ?? null)]),
       ),
       baselineHash: this.courseBaselineHash(course, chapterRows),
-      chapters: chapterRows.map((chapter) =>
+      chapters: chapterRows.map((chapter, index) =>
         this.buildChapterContext(
           chapter,
           lessonRows,
@@ -299,6 +304,7 @@ export class CourseAuthoringContextService {
           selected,
           detailed,
           assessmentRows,
+          index,
         ),
       ),
     };
@@ -332,6 +338,14 @@ export class CourseAuthoringContextService {
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         lessonType: sql<LessonTypes>`${lessons.type}`,
         displayOrder: lessons.displayOrder,
+        authoringDisplayOrder: sql<number>`(
+          select count(*)::int from ${lessons} as authoring_sibling_lesson
+          where ${siblingLesson.chapterId} = ${lessons.chapterId}
+            and (${siblingLesson.displayOrder} < ${lessons.displayOrder}
+              or (${siblingLesson.displayOrder} is not distinct from ${lessons.displayOrder}
+                and ${siblingLesson.id} < ${lessons.id})
+              or (${lessons.displayOrder} is null and ${siblingLesson.displayOrder} is not null))
+        )`,
         updatedAt: lessons.updatedAt,
       })
       .from(lessons)
@@ -351,6 +365,14 @@ export class CourseAuthoringContextService {
         id: chapters.id,
         title: this.localizationService.getLocalizedSqlField(chapters.title, language),
         displayOrder: chapters.displayOrder,
+        authoringDisplayOrder: sql<number>`(
+          select count(*)::int from ${chapters} as authoring_sibling_chapter
+          where ${siblingChapter.courseId} = ${chapters.courseId}
+            and (${siblingChapter.displayOrder} < ${chapters.displayOrder}
+              or (${siblingChapter.displayOrder} is not distinct from ${chapters.displayOrder}
+                and ${siblingChapter.id} < ${chapters.id})
+              or (${chapters.displayOrder} is null and ${siblingChapter.displayOrder} is not null))
+        )`,
       })
       .from(chapters)
       .innerJoin(courses, eq(courses.id, chapters.courseId))
@@ -407,12 +429,20 @@ export class CourseAuthoringContextService {
       courseId,
       language,
       chapters: chapterRows.map((chapter) => ({
-        ...chapter,
+        id: chapter.id,
+        displayOrder: chapter.authoringDisplayOrder,
         title: chapter.title ?? "",
         lessons: selectedLessonRows
           .filter((lesson) => lesson.chapterId === chapter.id)
           .map((lesson) =>
-            this.buildLessonContext(lesson, mentorVersions, detailed, assessmentRows, selected),
+            this.buildLessonContext(
+              lesson,
+              mentorVersions,
+              detailed,
+              assessmentRows,
+              selected,
+              lesson.authoringDisplayOrder,
+            ),
           ),
       })),
     };
@@ -467,17 +497,21 @@ export class CourseAuthoringContextService {
     detailed: ReadonlyMap<string, Partial<AuthoringLessonContext>>,
     assessmentRows: readonly AuthoringContextAssessmentRow[],
     detailedLessonIds: ReadonlySet<string> = new Set(),
+    ordinal = 0,
   ): AuthoringLessonContext {
     const detail = detailed.get(lesson.id);
+    const { authoringDisplayOrder: _ordinal, ...nativeLesson } = lesson;
     return {
       id: lesson.id,
       title: lesson.title ?? "",
       lessonType: lesson.lessonType,
       assessmentAttemptCount:
         assessmentRows.find((item) => item.lessonId === lesson.id)?.attemptCount ?? 0,
-      displayOrder: lesson.displayOrder,
+      displayOrder: ordinal,
       baselineHash: this.hash({
-        ...lesson,
+        authoringOrderVersion: 1,
+        ...nativeLesson,
+        authoringDisplayOrder: ordinal,
         mentorVersion: mentorVersions.find((entry) => entry.lessonId === lesson.id),
       }),
       ...(detailedLessonIds.has(lesson.id)
@@ -501,23 +535,40 @@ export class CourseAuthoringContextService {
     detailedLessonIds: ReadonlySet<string>,
     detailed: ReadonlyMap<string, Partial<AuthoringLessonContext>>,
     assessmentRows: readonly AuthoringContextAssessmentRow[],
+    ordinal: number,
   ): AuthoringChapterContext {
     const chapterLessons = lessonRows.filter((lesson) => lesson.chapterId === chapter.id);
-    return {
+    const normalizedChapter = {
       ...chapter,
+      displayOrder: ordinal,
+    };
+    const normalizedLessons = chapterLessons.map((lesson, index) => ({
+      ...lesson,
+      authoringDisplayOrder: index,
+    }));
+    return {
+      ...normalizedChapter,
       title: chapter.title ?? "",
       deletionBaselineHash: this.hash({
+        authoringOrderVersion: 1,
         ...chapter,
-        lessons: chapterLessons.map((lesson) => ({
+        authoringDisplayOrder: ordinal,
+        lessons: normalizedLessons.map((lesson) => ({
           ...lesson,
           mentorVersion: mentorVersions.find((entry) => entry.lessonId === lesson.id),
         })),
       }),
       baselineHash: this.hash({
+        authoringOrderVersion: 1,
         ...chapter,
-        lessons: chapterLessons.map(({ id, displayOrder }) => ({ id, displayOrder })),
+        authoringDisplayOrder: ordinal,
+        lessons: normalizedLessons.map(({ id, displayOrder, authoringDisplayOrder }) => ({
+          id,
+          displayOrder,
+          authoringDisplayOrder,
+        })),
       }),
-      lessons: chapterLessons
+      lessons: normalizedLessons
         .filter((lesson) => visibleLessonIds.has(lesson.id))
         .map((lesson) =>
           this.buildLessonContext(
@@ -526,6 +577,7 @@ export class CourseAuthoringContextService {
             detailed,
             assessmentRows,
             detailedLessonIds,
+            lesson.authoringDisplayOrder,
           ),
         ),
     };
@@ -543,12 +595,17 @@ export class CourseAuthoringContextService {
     chapterRows: readonly Pick<AuthoringContextChapterRow, "id" | "displayOrder">[],
   ) {
     return this.hash({
+      authoringOrderVersion: 1,
       title: course.title,
       description: course.description,
       settings: course.settings,
       learningOutcomes: course.learningOutcomes,
       thumbnailS3Key: course.thumbnailS3Key,
-      chapters: chapterRows.map(({ id, displayOrder }) => ({ id, displayOrder })),
+      chapters: chapterRows.map(({ id, displayOrder }, index) => ({
+        id,
+        displayOrder,
+        authoringDisplayOrder: index,
+      })),
     });
   }
 

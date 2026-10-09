@@ -4,6 +4,7 @@ import { validate } from "uuid";
 
 import {
   authoringCommandBodySchema,
+  authoringSessionSchema,
   authoringTaskFailureSchema,
   authoringTurnPartSchema,
 } from "./course-authoring-session.schema";
@@ -213,5 +214,40 @@ describe("course authoring failure schema", () => {
     expect(Value.Check(authoringTaskFailureSchema, { ...failure, generationRevision: -1 })).toBe(
       false,
     );
+  });
+});
+
+describe("course authoring applied snapshot delta", () => {
+  beforeAll(() => FormatRegistry.Set("uuid", validate));
+  const snapshot = {
+    schemaVersion: 1,
+    sessionId: commandId,
+    courseId: requestId,
+    language: "en",
+    status: "active",
+    snapshotSequence: 1,
+    workspaceRevision: 1,
+    records: [],
+    tasks: [],
+  };
+  it("accepts applied operation identities without exposing private accounting", () => {
+    const applicationDelta = {
+      appliedOperationIds: [commandId],
+      idMappings: { temporary: proposalId },
+    };
+    expect(Value.Check(authoringSessionSchema, { ...snapshot, applicationDelta })).toBe(true);
+    expect(Value.Check(authoringSessionSchema, { ...snapshot, applicationDelta, usage: {} })).toBe(
+      false,
+    );
+  });
+  it.each([
+    null,
+    { appliedOperationIds: ["invalid"], idMappings: {} },
+    { appliedOperationIds: [], idMappings: {}, usage: {} },
+  ])("rejects malformed or private delta fields %j", (applicationDelta) => {
+    expect(Value.Check(authoringSessionSchema, { ...snapshot, applicationDelta })).toBe(false);
+  });
+  it("retains compatibility with snapshots predating the delta field", () => {
+    expect(Value.Check(authoringSessionSchema, snapshot)).toBe(true);
   });
 });

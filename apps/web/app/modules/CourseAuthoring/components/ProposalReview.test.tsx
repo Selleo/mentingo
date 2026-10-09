@@ -495,12 +495,69 @@ describe("ProposalReview", () => {
     expect(screen.getByText("Course outline")).toBeVisible();
   });
 
-  it("waits for the whole request before opening review", () => {
+  it("keeps completed changes reviewable while failed terminal siblings leave saved completed changes", async () => {
+    const user = userEvent.setup();
+    const onReview = vi.fn();
+    renderWith().render(
+      <ProposalGroup requestId="request-writing" proposals={groupProposals} onReview={onReview} />,
+    );
+
+    expect(screen.getByText("Ready to review")).toBeVisible();
+    expect(screen.queryByText("Finishing draft")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Review changes" }));
+    expect(onReview).toHaveBeenCalledOnce();
+  });
+
+  it("keeps already approved content reviewable once sibling generation stops", async () => {
+    const user = userEvent.setup();
+    const onReview = vi.fn();
     renderWith().render(
       <ProposalGroup
-        requestId="request-writing"
+        requestId="request-approved-content"
+        proposals={[
+          { ...groupProposals[0], decision: "accepted" },
+          {
+            ...groupProposals[1],
+            operations: [],
+            outline: [{ id: "chapter", title: "Draft outline", lessons: [] }],
+          },
+        ]}
+        onReview={onReview}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Review outline" }));
+    expect(onReview).toHaveBeenCalledOnce();
+  });
+
+  it("hides completed content review while related generation is pending", () => {
+    const onReview = vi.fn();
+    renderWith().render(
+      <ProposalGroup
+        requestId="still-writing"
         proposals={groupProposals}
-        incomplete
+        generationPending
+        onReview={onReview}
+      />,
+    );
+    expect(screen.getByText("Finishing draft")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Review changes" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Section|Lesson/ })).not.toBeInTheDocument();
+    expect(onReview).not.toHaveBeenCalled();
+  });
+
+  it("still waits for an incomplete outline without completed content changes", () => {
+    renderWith().render(
+      <ProposalGroup
+        requestId="request-outline-writing"
+        proposals={[
+          {
+            ...groupProposals[0],
+            operations: [],
+            outline: [{ id: "chapter", title: "Draft outline", lessons: [] }],
+          },
+        ]}
+        generationPending
         onReview={vi.fn()}
       />,
     );

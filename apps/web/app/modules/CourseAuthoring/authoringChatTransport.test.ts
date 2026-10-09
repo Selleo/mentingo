@@ -183,7 +183,12 @@ describe("createAuthoringChatTransport", () => {
                 toolName: "web_search",
                 display: "Checking sources",
                 status: "completed",
-                result: { sourceCount: 2, findingCount: 1 },
+                result: {
+                  query: "Platform documentation",
+                  sources: [{ url: "https://example.com/docs", title: "Docs" }],
+                  sourceCount: 2,
+                  findingCount: 1,
+                },
               },
             }),
           }),
@@ -241,7 +246,12 @@ describe("createAuthoringChatTransport", () => {
         toolName: "web_search",
         display: "Checking sources",
         status: "completed",
-        result: { sourceCount: 2, findingCount: 1 },
+        result: {
+          query: "Platform documentation",
+          sources: [{ url: "https://example.com/docs", title: "Docs" }],
+          sourceCount: 2,
+          findingCount: 1,
+        },
       },
     });
     expect(chunks).toContainEqual({

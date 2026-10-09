@@ -1851,7 +1851,11 @@ describe("AuthoringAssistantMessages", () => {
                     toolName: "web_search",
                     display: "Finished searching the permitted public web sources.",
                     status: "completed",
-                    result: { sourceCount: 6, findingCount: null },
+                    result: {
+                      query: "OWASP agent security guidance",
+                      sourceCount: 6,
+                      findingCount: null,
+                    },
                   },
                 },
                 1,
@@ -1883,6 +1887,7 @@ describe("AuthoringAssistantMessages", () => {
     const done = screen.getByTestId("course-authoring-tool-tool-done");
     expect(done).toHaveTextContent("Searched the web");
     expect(done).toHaveTextContent("6 sources");
+    expect(screen.getByRole("listitem")).toHaveTextContent("OWASP agent security guidance");
     expect(done).not.toHaveTextContent("succeeded");
     expect(screen.getByTestId("course-authoring-tool-tool-failed")).toHaveTextContent(
       /Generating lesson\s*·\s*failed/,

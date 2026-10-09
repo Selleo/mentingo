@@ -3,7 +3,6 @@ import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { ContentViewer } from "~/components/RichText/Viever";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
@@ -13,6 +12,7 @@ import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lesson
 
 import { AuthoringOperationPreview } from "../components/AuthoringOperationPreview";
 
+import { AuthoringContentPreview } from "./AuthoringContentPreview";
 import { applyBlockReplacements } from "./contentDiff";
 import { ContentDiffView } from "./ContentDiffView";
 import {
@@ -58,6 +58,7 @@ const stringOf = (value: unknown) => (typeof value === "string" ? value : null);
 const LiveLessonPreview = ({ lesson }: { lesson: Lesson }) => (
   <AuthoringOperationPreview
     compact={false}
+    trustedContent={lesson.description}
     lessonType={lesson.type}
     operation={{
       operationId: `live-${lesson.id}`,
@@ -148,6 +149,7 @@ const EditedLessonBody = ({
           {t("courseAuthoring.reviewMode.proposedVersion")}
         </p>
         <AuthoringOperationPreview
+          trustedContent={current?.description}
           operation={update}
           assetPreviewUrls={assetPreviewUrls}
           lessonType={node.lessonType}
@@ -309,7 +311,7 @@ const CourseBody = ({ node, courseTitle }: { node: ReviewCourseNode; courseTitle
                     {t("courseAuthoring.reviewMode.courseDescription")}
                   </Label>
                   <div className="rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2">
-                    <ContentViewer content={description} className="text-sm" />
+                    <AuthoringContentPreview content={description} className="text-sm" />
                   </div>
                 </div>
               )}

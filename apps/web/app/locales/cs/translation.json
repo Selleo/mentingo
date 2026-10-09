@@ -6238,6 +6238,12 @@
         "failed": "Vyhledávání na webu selhalo",
         "stopped": "Vyhledávání na webu zastaveno"
       },
+      "webExtractTool": {
+        "started": "Čtení odkazované stránky",
+        "completed": "Odkazovaná stránka přečtena",
+        "failed": "Extrakce stránky selhala",
+        "stopped": "Extrakce stránky zastavena"
+      },
       "toolSourceCount": "Zdroje: {{count}}",
       "toolFindingCount": "Zjištění: {{count}}",
       "opening": "Otevírání kurzu…",
@@ -6603,6 +6609,9 @@
       "sourceUploadFailed": "Zdroj se nepodařilo nahrát. Zkontrolujte jeho typ a velikost a zkuste to znovu.",
       "sourceReplacementNotReady": "Počkejte, až se náhradní soubor dokončí.",
       "sourceRefreshSelectionChanged": "Výběr zdrojů se změnil. Zkontrolujte aktuální zdroje a zkuste to znovu.",
+      "mediaOutsideCourse": "Tento obrázek nebo vložené médium není pro tento kurz schválené. Nahrajte soubor nebo požádejte o vygenerování obrázku a potom změnu vygenerujte znovu.",
+      "previewUnavailable": "V náhledu chybí požadované změny nebo je pořadí nekonzistentní. Obnovte relaci a před dalším pokusem zahrňte požadované změny.",
+      "applicationInProgress": "Probíhá použití jiných změn. Pokud zařazení do fronty selhalo, znovu vyberte původní návrhy a pokračujte.",
       "receiptSynchronizationPending": "Předchozí změny se ukládají do pracovního prostoru AI. Zkuste stejný výběr za chvíli použít znovu.",
       "appliedRefreshPending": "Změny byly použity. Pokud je ještě nevidíte, obnovte kurz.",
       "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy."
@@ -6610,6 +6619,7 @@
     "review": {
       "generatedImage": "Vygenerovaný obrázek",
       "openImageFile": "Otevřít soubor obrázku",
+      "mediaPreviewBlocked": "Toto médium nepochází z vybraného kurzu ani ze schválených souborů.",
       "imagePreviewUnavailable": "Náhled obrázku zatím není k dispozici.",
       "imagePreviewFailed": "Některé náhledy obrázků se nepodařilo načíst.",
       "retryImagePreviews": "Znovu načíst náhledy",

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,12 +7,22 @@ import { renderWith } from "~/utils/testUtils";
 import { CourseGenerationSession } from "./CourseGenerationSession";
 
 import type { AuthoringChatMessage } from "./authoringChatTransport";
+import type { AssetRequestView, CurriculumPreviewActions } from "./courseAuthoring.types";
 
 const state = vi.hoisted(() => ({
+  assetRequests: [] as AssetRequestView[],
   accepted: false,
   outlineOnly: false,
   groupedReview: false,
   additionalRequestProposals: 0,
+  siblingTasks: [] as Array<{
+    taskId: string;
+    requestId: string;
+    kind: string;
+    status: string;
+    errorCode: null;
+    outputId: null;
+  }>,
   malformedProposal: false,
   sourceSelectionFails: false,
   firstApplicationApplied: false,
@@ -48,6 +58,8 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
           ...(state.groupedReview ? { taskId: "task-1" } : {}),
           revision: 1,
           summary: "Add the content lesson",
+          assetRequests: state.assetRequests,
+          assetIds: state.assetRequests.map((asset) => asset.assetId),
           outline: state.outlineOnly
             ? [{ id: "chapter-1", title: "Chapter 1", lessons: [] }]
             : null,
@@ -163,6 +175,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
                   errorCode: null,
                   outputId: "content-proposal",
                 },
+                ...state.siblingTasks,
                 ...Array.from({ length: state.additionalRequestProposals }, (_, index) => ({
                   taskId: `lesson-task-${index}`,
                   requestId: "request-1",
@@ -326,8 +339,16 @@ vi.mock("./components/AuthoringAssistantMessages", () => ({
   ),
 }));
 vi.mock("./components/ProposalGroupCard", () => ({
-  ProposalGroup: ({ busy, onReview }: { busy: boolean; onReview: () => void }) => (
-    <button type="button" disabled={busy} onClick={onReview}>
+  ProposalGroup: ({
+    busy,
+    generationPending,
+    onReview,
+  }: {
+    busy: boolean;
+    generationPending: boolean;
+    onReview: () => void;
+  }) => (
+    <button type="button" disabled={busy || generationPending} onClick={onReview}>
       Review grouped changes
     </button>
   ),
@@ -356,9 +377,11 @@ vi.mock("./components/ProposalReview", () => ({
 
 describe("CourseGenerationSession proposal decisions", () => {
   beforeEach(() => {
+    state.assetRequests = [];
     state.accepted = false;
     state.outlineOnly = false;
     state.groupedReview = false;
+    state.siblingTasks = [];
     state.additionalRequestProposals = 0;
     state.malformedProposal = false;
     state.sourceSelectionFails = false;
@@ -578,6 +601,78 @@ describe("CourseGenerationSession proposal decisions", () => {
     expect(rendered).toBeTruthy();
   });
 
+  it.each([
+    [false, false],
+    [true, false],
+    [true, true],
+  ])(
+    "passes current optional image choices to Apply (grouped: %s, restored: %s)",
+    async (grouped, restored) => {
+      state.groupedReview = true;
+      state.renderWork = true;
+      const request: AssetRequestView = {
+        assetId: "optional-image",
+        operationId: "lesson-operation",
+        purpose: "diagram",
+        required: false,
+        altText: "Optional diagram",
+        source: { type: "generated", content: "Diagram", visualQuery: "diagram" },
+      };
+      state.assetRequests = [request];
+      state.siblingTasks = [
+        {
+          taskId: "image-task",
+          requestId: "request-1",
+          kind: "asset",
+          status: "failed",
+          errorCode: null,
+          outputId: null,
+        },
+      ];
+      state.progressRecords = [
+        {
+          id: "image-record",
+          kind: "asset_task",
+          payload: { taskId: "image-task", parentTaskId: "task-1", request },
+        },
+      ];
+      const onPreviewProposalInCurriculum = vi.fn();
+      const user = userEvent.setup();
+      renderWith().render(
+        <CourseGenerationSession
+          courseId="course"
+          language="en"
+          sessionId="session"
+          embedded
+          onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
+        />,
+      );
+      let actions: CurriculumPreviewActions | undefined;
+      if (grouped) {
+        await user.click(screen.getByRole("button", { name: "Review grouped changes" }));
+        actions = onPreviewProposalInCurriculum.mock.calls[0][1];
+      }
+      await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
+      if (restored) await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
+      if (grouped) {
+        await act(async () => {
+          await actions?.applyReview?.({
+            acceptedProposalIds: ["content-proposal"],
+            rejectedProposalIds: [],
+            acknowledgeAssessmentChanges: false,
+          });
+        });
+      } else {
+        await user.click(screen.getByRole("button", { name: "Accept content proposal" }));
+      }
+      await waitFor(() => expect(state.applyCalls).toHaveLength(1));
+      expect(state.applyCalls[0]).toMatchObject({
+        proposalIds: ["content-proposal"],
+        omitOptionalAssetIds: restored ? [] : ["optional-image"],
+      });
+    },
+  );
+
   it("accepts an outline for continued generation without native course application", async () => {
     state.outlineOnly = true;
     const user = userEvent.setup();
@@ -651,6 +746,90 @@ describe("CourseGenerationSession proposal decisions", () => {
       }),
       expect.any(Object),
     );
+  });
+
+  it.each(["queued", "running", "waiting_dependencies"])(
+    "keeps completed grouped proposals out of review while a sibling is %s",
+    async (status) => {
+      state.groupedReview = true;
+      state.siblingTasks = [
+        {
+          taskId: "asset",
+          requestId: "request-1",
+          kind: "asset",
+          status,
+          errorCode: null,
+          outputId: null,
+        },
+      ];
+      renderWith().render(
+        <CourseGenerationSession
+          courseId="course"
+          language="en"
+          sessionId="session"
+          embedded
+          onPreviewProposalInCurriculum={vi.fn()}
+        />,
+      );
+      expect(await screen.findByRole("button", { name: "Review grouped changes" })).toBeDisabled();
+    },
+  );
+
+  it("allows saved review after sibling failure, but prevents stale preview application when new work resumes", async () => {
+    const user = userEvent.setup();
+    state.groupedReview = true;
+    state.siblingTasks = [
+      {
+        taskId: "failed",
+        requestId: "request-1",
+        kind: "lesson",
+        status: "failed",
+        errorCode: null,
+        outputId: null,
+      },
+    ];
+    const preview = vi.fn();
+    const element = () => (
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={preview}
+      />
+    );
+    const rendered = renderWith().render(element());
+    await user.click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    const actions = preview.mock.calls[0]?.[1] as {
+      applyReview: (decision: {
+        acceptedProposalIds: string[];
+        rejectedProposalIds: string[];
+        acknowledgeAssessmentChanges: boolean;
+      }) => Promise<void>;
+    };
+    state.siblingTasks = [
+      {
+        taskId: "new-asset",
+        requestId: "request-1",
+        kind: "asset",
+        status: "queued",
+        errorCode: null,
+        outputId: null,
+      },
+    ];
+    rendered.rerender(element());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Review grouped changes" })).toBeDisabled(),
+    );
+    await expect(
+      actions.applyReview({
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      }),
+    ).rejects.toThrow();
+    expect(state.applyCalls).toHaveLength(0);
+    expect(state.commandCalls).toHaveLength(0);
   });
 
   it("submits staged proposal feedback in one batch command with revision fencing", async () => {

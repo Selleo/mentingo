@@ -127,10 +127,9 @@ export const CourseGenerationDrawer = ({
   useEffect(() => {
     const sessions = sessionsQuery.data;
     if (!open || !sessions) return;
-    const nextSessionId = selectAuthoringSession(
-      sessions,
-      selectedSessionId ?? readAuthoringSessionSelection(sessionSelectionKey),
-    );
+    const persistedSelection =
+      selectedSessionId ?? readAuthoringSessionSelection(sessionSelectionKey);
+    const nextSessionId = persistedSelection ?? selectAuthoringSession(sessions, null);
     if (nextSessionId !== selectedSessionId) setSelectedSessionId(nextSessionId);
     writeAuthoringSessionSelection(sessionSelectionKey, nextSessionId);
     if (nextSessionId || createSessionScopeRef.current === sessionSelectionKey) return;

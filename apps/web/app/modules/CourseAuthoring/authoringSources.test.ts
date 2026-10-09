@@ -4,6 +4,7 @@ import {
   compactLinkSeparators,
   extractTrailingSources,
   safeHttpUrl,
+  parseFetchedResearchSources,
   sourceDomain,
 } from "./authoringSources";
 
@@ -65,5 +66,25 @@ describe("compactLinkSeparators", () => {
         "Sources: [a](https://a.com), [b](https://b.com) and [c](https://c.com), then more.",
       ),
     ).toBe("Sources: [a](https://a.com) [b](https://b.com) [c](https://c.com), then more.");
+  });
+});
+
+describe("parseFetchedResearchSources", () => {
+  it("keeps fetched page metadata, deduplicates normalized URLs and rejects unsafe sources", () => {
+    expect(
+      parseFetchedResearchSources([
+        { url: "https://example.com", title: "  Docs  " },
+        { url: "https://example.com/", title: "Duplicate" },
+        { url: "javascript:alert(1)", title: "Script" },
+        { url: "https://secret@example.com/", title: "Credentials" },
+        { url: "https://example.org/manual", title: 42 },
+        { title: "No URL" },
+        null,
+      ]),
+    ).toEqual([
+      { url: "https://example.com/", title: "Docs" },
+      { url: "https://example.org/manual", title: null },
+    ]);
+    expect(parseFetchedResearchSources({ sources: [] })).toEqual([]);
   });
 });

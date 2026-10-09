@@ -6226,6 +6226,12 @@
         "failed": "Websuche fehlgeschlagen",
         "stopped": "Websuche gestoppt"
       },
+      "webExtractTool": {
+        "started": "Verlinkte Seite wird gelesen",
+        "completed": "Verlinkte Seite gelesen",
+        "failed": "Seitenextraktion fehlgeschlagen",
+        "stopped": "Seitenextraktion gestoppt"
+      },
       "toolSourceCount": "{{count}} Quellen",
       "toolFindingCount": "{{count}} Ergebnisse",
       "opening": "Kurs wird geöffnet …",
@@ -6590,6 +6596,9 @@
       "sourceUploadFailed": "Die Quelle konnte nicht hochgeladen werden. Prüfen Sie Typ und Größe und versuchen Sie es erneut.",
       "sourceReplacementNotReady": "Warten Sie, bis die Ersatzdatei vollständig verarbeitet wurde.",
       "sourceRefreshSelectionChanged": "Die Quellenauswahl wurde geändert. Prüfen Sie die aktuellen Quellen und versuchen Sie es erneut.",
+      "mediaOutsideCourse": "Dieses Bild oder eingebettete Medium ist für diesen Kurs nicht autorisiert. Laden Sie die Datei hoch oder lassen Sie ein Bild generieren und erstellen Sie die Änderung erneut.",
+      "previewUnavailable": "In dieser Vorschau fehlen erforderliche Änderungen oder die Reihenfolge ist inkonsistent. Aktualisiere die Sitzung und berücksichtige die erforderlichen Änderungen, bevor du es erneut versuchst.",
+      "applicationInProgress": "Eine andere Anwendung läuft bereits. Falls das Einreihen fehlgeschlagen ist, versuche es mit der ursprünglichen Vorschlagsauswahl erneut, um sie fortzusetzen.",
       "receiptSynchronizationPending": "Die vorherigen Änderungen werden im AI-Arbeitsbereich gespeichert. Versuchen Sie dieselbe Auswahl gleich erneut anzuwenden.",
       "appliedRefreshPending": "Die Änderungen wurden angewendet. Aktualisieren Sie den Kurs, falls sie noch nicht sichtbar sind.",
       "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden."
@@ -6597,6 +6606,7 @@
     "review": {
       "generatedImage": "Generiertes Bild",
       "openImageFile": "Bilddatei öffnen",
+      "mediaPreviewBlocked": "Dieses Medium stammt weder aus dem ausgewählten Kurs noch aus genehmigten Dateien.",
       "imagePreviewUnavailable": "Die Bildvorschau ist noch nicht verfügbar.",
       "imagePreviewFailed": "Einige Bildvorschauen konnten nicht geladen werden.",
       "retryImagePreviews": "Vorschauen erneut laden",

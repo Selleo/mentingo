@@ -8,10 +8,14 @@ import {
   Injectable,
   ServiceUnavailableException,
 } from "@nestjs/common";
-import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES, ENTITY_TYPES } from "@repo/shared";
+import {
+  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
+  CourseAuthoringOrderError,
+  ENTITY_TYPES,
+} from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { load as loadHtml } from "cheerio";
-import { and, eq, sql, inArray } from "drizzle-orm";
+import { and, eq, sql, inArray, asc } from "drizzle-orm";
 
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { DatabasePg } from "src/common";
@@ -44,10 +48,19 @@ import {
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
 import { CourseAuthoringContextService } from "./course-authoring-context.service";
 import {
+  collectAuthoringMediaUrls,
+  stripAuthoringHtmlStyles,
+  validateAuthoringMedia,
+  validateAuthoringHtml,
+} from "./course-authoring-html";
+import {
   mentorCourseContextKey,
   mentorTargetedContextKey,
 } from "./course-authoring-mentor-context";
-import { buildAuthoringPlacements } from "./course-authoring-ordering";
+import {
+  orderCourseAuthoringOperations,
+  planCourseAuthoringOrder,
+} from "./course-authoring-ordering";
 import { authoringOperationSchema } from "./schema/course-authoring-operations.schema";
 
 import type {
@@ -55,6 +68,7 @@ import type {
   AuthoringMentorPayload,
 } from "./course-authoring.types";
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
+import type { CourseAuthoringOrderGroup } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -109,8 +123,8 @@ export class CourseAuthoringApplyService {
         await transaction.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`${actor.tenantId}:course:${input.courseId}`}, 0))`,
         );
-        await transaction
-          .select({ id: courses.id })
+        const lockedCourses = await transaction
+          .select({ id: courses.id, description: courses.description })
           .from(courses)
           .where(and(eq(courses.id, input.courseId), eq(courses.tenantId, actor.tenantId)))
           .for("update");
@@ -119,8 +133,8 @@ export class CourseAuthoringApplyService {
           .from(chapters)
           .where(eq(chapters.courseId, input.courseId))
           .for("update");
-        await transaction
-          .select({ id: lessons.id })
+        const lockedLessons = await transaction
+          .select({ id: lessons.id, description: lessons.description })
           .from(lessons)
           .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
           .where(eq(chapters.courseId, input.courseId))
@@ -155,6 +169,25 @@ export class CourseAuthoringApplyService {
           .where(eq(chapters.courseId, input.courseId))
           .for("update", { of: assessments });
         await this.contextService.authorize(input.courseId, actor);
+        const lockedQuestions = await transaction
+          .select({
+            prompt: assessmentQuestions.prompt,
+            description: assessmentQuestions.description,
+          })
+          .from(assessmentQuestions)
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, input.courseId))
+          .for("update", { of: assessmentQuestions });
+        const allowedMedia = collectAuthoringMediaUrls([
+          ...lockedCourses.flatMap((course) => Object.values(course.description ?? {})),
+          ...lockedLessons.flatMap((lesson) => Object.values(lesson.description ?? {})),
+          ...lockedQuestions.flatMap((question) => [
+            ...Object.values(question.prompt ?? {}),
+            ...Object.values(question.description ?? {}),
+          ]),
+        ]);
         const mappings: Record<string, string> = {};
         const createdIds = new Set(
           input.operations
@@ -288,60 +321,76 @@ export class CourseAuthoringApplyService {
             throw new ConflictException("courseAuthoring.errors.baselineChanged");
           }
         }
-        const pending = [...input.operations];
-        const completed = new Set<string>();
-        const appliedOperations: AuthoringOperation[] = [];
-        while (pending.length) {
-          const index = pending.findIndex((operation) =>
-            operation.dependencies.every((id) => completed.has(id)),
-          );
-          if (index < 0) throw new BadRequestException("courseAuthoring.errors.dependencyCycle");
-          const [operation] = pending.splice(index, 1);
-          await this.execute(operation, input, actor, mappings);
-          completed.add(operation.operationId);
-          appliedOperations.push(operation);
-        }
-        const lessonCounts = new Map<string, number>();
-        // Absolute curriculum positions are applied only after every sibling exists.
-        for (const placement of buildAuthoringPlacements(appliedOperations)) {
-          const persistedId = mappings[placement.targetId] ?? placement.targetId;
-          if (placement.kind === "chapter") {
-            await this.chapterService.updateChapterDisplayOrder({
-              chapterId: persistedId,
-              displayOrder: placement.displayOrder,
-              currentUser: actor,
-            });
-          } else {
-            const chapterId = mappings[placement.chapterId] ?? placement.chapterId;
-            let siblingCount = lessonCounts.get(chapterId);
-            if (siblingCount === undefined) {
-              const [result] = await transaction
-                .select({ value: sql<number>`count(*)::int` })
-                .from(lessons)
-                .where(eq(lessons.chapterId, chapterId));
-              siblingCount = result.value;
-              lessonCounts.set(chapterId, siblingCount);
+        try {
+          const appliedOperations = orderCourseAuthoringOperations(input.operations);
+          for (const operation of appliedOperations)
+            await this.execute(operation, input, actor, mappings, allowedMedia);
+          const finalChapters = await transaction
+            .select({ id: chapters.id })
+            .from(chapters)
+            .where(eq(chapters.courseId, input.courseId))
+            .orderBy(asc(chapters.displayOrder), asc(chapters.id));
+          const finalLessons = await transaction
+            .select({ id: lessons.id, chapterId: lessons.chapterId })
+            .from(lessons)
+            .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+            .where(eq(chapters.courseId, input.courseId))
+            .orderBy(asc(lessons.displayOrder), asc(lessons.id));
+          const groups: CourseAuthoringOrderGroup[] = [
+            { kind: "chapter", orderedIds: finalChapters.map((chapter) => chapter.id) },
+            ...finalChapters.map((chapter) => ({
+              kind: "lesson" as const,
+              chapterId: chapter.id,
+              orderedIds: finalLessons
+                .filter((lesson) => lesson.chapterId === chapter.id)
+                .map((lesson) => lesson.id),
+            })),
+          ];
+          const resolvedOperations = appliedOperations.map((operation) => ({
+            ...operation,
+            targetId: mappings[operation.targetId] ?? operation.targetId,
+            ...("chapterId" in operation
+              ? { chapterId: mappings[operation.chapterId] ?? operation.chapterId }
+              : {}),
+            ...(operation.type === "chapter.reorder" || operation.type === "lesson.reorder"
+              ? {
+                  payload: {
+                    orderedIds: operation.payload.orderedIds.map((id) => mappings[id] ?? id),
+                  },
+                }
+              : {}),
+          }));
+          for (const group of planCourseAuthoringOrder(groups, resolvedOperations))
+            for (const [index, id] of group.orderedIds.entries()) {
+              if (group.kind === "chapter")
+                await this.chapterService.updateChapterDisplayOrder({
+                  chapterId: id,
+                  displayOrder: index + 1,
+                  currentUser: actor,
+                });
+              else
+                await this.lessonService.updateLessonDisplayOrder({
+                  lessonId: id,
+                  displayOrder: index + 1,
+                  currentUser: actor,
+                });
             }
-            if (siblingCount < 1)
-              throw new BadRequestException("courseAuthoring.errors.targetOutsideCourse");
-            await this.lessonService.updateLessonDisplayOrder({
-              lessonId: persistedId,
-              displayOrder: Math.min(placement.displayOrder, siblingCount),
-              currentUser: actor,
-            });
-          }
+          return {
+            applicationId: randomUUID(),
+            exportHash: input.exportHash,
+            status: "applied" as const,
+            exportId: input.exportId,
+            courseId: input.courseId,
+            sessionId: input.sessionId,
+            appliedOperationIds: appliedOperations.map((operation) => operation.operationId),
+            entityMappings: mappings,
+            assetMappings: input.assetMappings,
+          };
+        } catch (error) {
+          if (error instanceof CourseAuthoringOrderError)
+            throw new BadRequestException(error.message);
+          throw error;
         }
-        return {
-          applicationId: randomUUID(),
-          exportHash: input.exportHash,
-          status: "applied" as const,
-          exportId: input.exportId,
-          courseId: input.courseId,
-          sessionId: input.sessionId,
-          appliedOperationIds: [...completed],
-          entityMappings: mappings,
-          assetMappings: input.assetMappings,
-        };
       },
       Object.values(input.assetMappings),
     );
@@ -353,6 +402,7 @@ export class CourseAuthoringApplyService {
     input: PreparedCourseAuthoringApplication,
     actor: CurrentUserType,
     mappings: Record<string, string>,
+    allowedMedia: ReadonlySet<string>,
   ) {
     const targetId = mappings[operation.targetId] ?? operation.targetId;
     switch (operation.type) {
@@ -360,6 +410,7 @@ export class CourseAuthoringApplyService {
         const chapter = await this.chapterService.createChapterForCourse(
           { courseId: input.courseId, title: operation.payload.title },
           actor,
+          operation.language,
         );
         mappings[operation.targetId] = chapter.id;
         return;
@@ -381,6 +432,10 @@ export class CourseAuthoringApplyService {
       case "lesson.reorder":
         return;
       case "course.metadata.update":
+        if (typeof operation.payload.description === "string") {
+          validateAuthoringHtml(operation.payload.description);
+          validateAuthoringMedia(operation.payload.description, allowedMedia, new Set(), new Set());
+        }
         await this.courseService.updateCourse(
           input.courseId,
           {
@@ -388,7 +443,12 @@ export class CourseAuthoringApplyService {
             ...(operation.payload.title === null ? {} : { title: operation.payload.title }),
             ...(operation.payload.description === null
               ? {}
-              : { description: operation.payload.description }),
+              : {
+                  description:
+                    typeof operation.payload.description === "string"
+                      ? stripAuthoringHtmlStyles(operation.payload.description)
+                      : operation.payload.description,
+                }),
             ...(operation.payload.learningOutcomes === null
               ? {}
               : { learningOutcomes: operation.payload.learningOutcomes }),
@@ -431,7 +491,10 @@ export class CourseAuthoringApplyService {
         return;
       }
       case "lesson.metadata.update": {
-        let description = operation.payload.description;
+        let description =
+          typeof operation.payload.description === "string"
+            ? stripAuthoringHtmlStyles(operation.payload.description)
+            : operation.payload.description;
         if (description !== undefined) {
           const [lesson] = await this.db
             .select({ type: lessons.type })
@@ -439,7 +502,11 @@ export class CourseAuthoringApplyService {
             .where(and(eq(lessons.id, targetId), eq(lessons.tenantId, actor.tenantId)));
           if (!lesson) throw new ConflictException("courseAuthoring.errors.baselineChanged");
           if (lesson.type === "content")
-            description = await this.prepareHtml(description, targetId, input, actor);
+            description = await this.prepareHtml(description, targetId, input, actor, allowedMedia);
+          else {
+            validateAuthoringHtml(description);
+            validateAuthoringMedia(description, allowedMedia, new Set(), new Set());
+          }
         }
         await this.lessonService.updateLesson(
           targetId,
@@ -466,6 +533,7 @@ export class CourseAuthoringApplyService {
             targetId,
             input,
             actor,
+            allowedMedia,
             false,
           ),
         });
@@ -494,6 +562,17 @@ export class CourseAuthoringApplyService {
             throw new BadRequestException("courseAuthoring.errors.lessonTypeChangeUnsupported");
         }
         if (payload.lessonType === "quiz") {
+          for (const html of [
+            payload.description,
+            ...payload.questions.flatMap((question) => [
+              question.prompt,
+              question.description ?? "",
+              ...question.options.map((option) => option.label),
+            ]),
+          ]) {
+            validateAuthoringHtml(html);
+            validateAuthoringMedia(html, allowedMedia, new Set(), new Set());
+          }
           const existingImageKeys = [
             ...new Set(
               payload.questions
@@ -528,6 +607,13 @@ export class CourseAuthoringApplyService {
           }
           const questions = payload.questions.map((question) => ({
             ...question,
+            prompt: stripAuthoringHtmlStyles(question.prompt),
+            description:
+              question.description === null ? null : stripAuthoringHtmlStyles(question.description),
+            options: question.options.map((option) => ({
+              ...option,
+              label: stripAuthoringHtmlStyles(option.label),
+            })),
             photoS3Key: question.photoS3Key?.startsWith("authoring-asset:")
               ? this.assetKey(question.photoS3Key.slice("authoring-asset:".length), input)
               : question.photoS3Key,
@@ -535,6 +621,7 @@ export class CourseAuthoringApplyService {
           const id = await this.lessonService.saveQuizFromAuthoring(
             {
               ...payload,
+              description: stripAuthoringHtmlStyles(payload.description),
               // Frozen authoring exports allow zero for no cooldown; native quiz authoring uses null.
               quizCooldownInHours:
                 payload.quizCooldownInHours === 0 ? null : payload.quizCooldownInHours,
@@ -549,6 +636,8 @@ export class CourseAuthoringApplyService {
           return;
         }
         if (payload.lessonType === "ai_mentor") {
+          validateAuthoringHtml(payload.description);
+          validateAuthoringMedia(payload.description, allowedMedia, new Set(), new Set());
           const targetedContextIds =
             input.preparedDocumentIds[mentorTargetedContextKey(operation.operationId)] ?? [];
           if (
@@ -584,7 +673,7 @@ export class CourseAuthoringApplyService {
               {
                 chapterId,
                 title: payload.title,
-                description: payload.description,
+                description: stripAuthoringHtmlStyles(payload.description),
                 name: payload.name,
                 aiMentorConfiguration: configuration,
                 aiJudgeConfiguration: judgeConfiguration,
@@ -593,6 +682,7 @@ export class CourseAuthoringApplyService {
                 customTtsReference: payload.customTtsReference ?? undefined,
               },
               actor,
+              operation.language,
             );
             mappings[operation.targetId] = id;
           } else {
@@ -613,7 +703,7 @@ export class CourseAuthoringApplyService {
               targetId,
               {
                 title: payload.title,
-                description: payload.description,
+                description: stripAuthoringHtmlStyles(payload.description),
                 name: payload.name,
                 language: operation.language,
                 voiceMode:
@@ -662,18 +752,31 @@ export class CourseAuthoringApplyService {
           const id = await this.lessonService.createLessonForChapter(
             { chapterId, type: "content", title: payload.title, description: "" },
             actor,
+            operation.language,
           );
           mappings[operation.targetId] = id;
           // Resource rows reference the persisted lesson, so stage HTML assets only after
           // the native lesson exists. Both writes remain inside the export transaction.
-          const description = await this.prepareHtml(payload.description, id, input, actor);
+          const description = await this.prepareHtml(
+            payload.description,
+            id,
+            input,
+            actor,
+            allowedMedia,
+          );
           await this.lessonService.updateLesson(
             id,
             { language: operation.language, description },
             actor,
           );
         } else {
-          const description = await this.prepareHtml(payload.description, targetId, input, actor);
+          const description = await this.prepareHtml(
+            payload.description,
+            targetId,
+            input,
+            actor,
+            allowedMedia,
+          );
           await this.lessonService.updateLesson(
             targetId,
             {
@@ -830,8 +933,10 @@ export class CourseAuthoringApplyService {
     lessonId: string,
     input: PreparedCourseAuthoringApplication,
     actor: CurrentUserType,
+    allowedMedia: ReadonlySet<string>,
     assignBlocks = true,
   ) {
+    validateAuthoringHtml(content);
     const $ = loadHtml(content);
     const existingIds = [
       ...new Set(
@@ -857,6 +962,13 @@ export class CourseAuthoringApplyService {
       if (existingIds.some((id) => !authorized.some((resource) => resource.id === id)))
         throw new BadRequestException("courseAuthoring.errors.resourceOutsideCourse");
     }
+    validateAuthoringMedia(
+      content,
+      allowedMedia,
+      new Set(existingIds),
+      new Set(Object.keys(input.assetMappings)),
+    );
+    $("[style]").removeAttr("style");
     for (const element of $("[data-authoring-asset-id]").toArray()) {
       const node = $(element);
       const assetId = node.attr("data-authoring-asset-id");

@@ -31,6 +31,7 @@ import {
   activeChatRequestId,
   projectAuthoringTimeline,
 } from "./authoringConversation";
+import { requestGenerationPending } from "./authoringReviewReadiness";
 import { isUnavailableAuthoringSession } from "./authoringSessionRecovery";
 import { authoringTaskDisplayLabels } from "./authoringTaskLabels";
 import { attachAuthoringWorkProgress } from "./authoringWorkProgress";
@@ -219,6 +220,10 @@ export const CourseGenerationSession = ({
     commandId: string;
   } | null>(null);
   const [omittedOptionalAssetIds, setOmittedOptionalAssetIds] = useState<string[]>([]);
+  const omittedOptionalAssetIdsRef = useRef<string[]>([]);
+  useEffect(() => {
+    omittedOptionalAssetIdsRef.current = omittedOptionalAssetIds;
+  }, [omittedOptionalAssetIds]);
   const [selectedProposalIds, setSelectedProposalIds] = useState<string[]>([]);
   const [appliedProposalIds, setAppliedProposalIds] = useState<Set<string>>(
     () => new Set(trackedApplication?.confirmed ? trackedApplication.proposalIds : []),
@@ -775,16 +780,29 @@ export const CourseGenerationSession = ({
       commandId: string = crypto.randomUUID(),
     ) => {
       lastSubmittedApplyProposalIdsRef.current = proposalIds;
+      const latestSession = authoringSessionRef.current;
+      const latestProposals = latestSession
+        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks).proposals
+        : projection.proposals;
+      const optionalAssetIds = new Set(
+        latestProposals
+          .filter((proposal) => proposalIds.includes(proposal.id))
+          .flatMap((proposal) => proposal.assetRequests ?? [])
+          .filter((asset) => !asset.required)
+          .map((asset) => asset.assetId),
+      );
       const request = {
         proposalIds,
         acknowledgeAssessmentChanges,
-        omitOptionalAssetIds,
+        omitOptionalAssetIds: [
+          ...new Set([...omitOptionalAssetIds, ...omittedOptionalAssetIdsRef.current]),
+        ].filter((assetId) => optionalAssetIds.has(assetId)),
         commandId,
       };
       setPendingApplyRequest(request);
       await applyMutation.mutateAsync(request);
     },
-    [applyMutation],
+    [applyMutation, projection.proposals],
   );
   /** Commits one request-level decision set, then submits exactly one atomic native apply selection. */
   const reviewGroupAndApply = useCallback(
@@ -800,6 +818,16 @@ export const CourseGenerationSession = ({
         rejectedProposalIds?: string[];
       } = {},
     ) => {
+      const latestSession = authoringSessionRef.current;
+      const latestProposals = latestSession
+        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks).proposals
+        : proposals;
+      if (
+        selectedProposalIds.length > 0 &&
+        requestGenerationPending(latestSession?.tasks ?? [], requestId, latestProposals)
+      ) {
+        throw new Error(t("courseAuthoring.errors.proposalNotReady"));
+      }
       // Withdraw an entire draft request, including an already approved outline.
       // proposal.review only accepts pending proposals; request.discard preserves applied history.
       const discardable = proposals.filter(
@@ -928,9 +956,24 @@ export const CourseGenerationSession = ({
     [applySelected, decideProposal, projection.proposals, reviewGroupAndApply, session?.tasks],
   );
   /** Saves explicit rejection decisions without changing omitted items into rejected items. */
+  const preparePreview = useCallback(
+    (build: () => CurriculumPreview | null) => {
+      try {
+        return build();
+      } catch {
+        toast({
+          variant: "destructive",
+          description: t("courseAuthoring.errors.previewUnavailable"),
+        });
+        return null;
+      }
+    },
+    [t, toast],
+  );
   /** Opens a request's proposals in curriculum review mode, bound to one batch apply. */
   const previewProposalGroupInCurriculum = useCallback(
     (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
+      if (requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals)) return;
       const appliedIds = new Set([
         ...appliedProposalIds,
         ...Object.entries(applicationStatusByProposalId)
@@ -938,10 +981,13 @@ export const CourseGenerationSession = ({
           .map(([proposalId]) => proposalId),
       ]);
       const currentProposals = excludeAppliedProposals(proposals, appliedIds);
-      const preview = curriculumPreviewFromProposals(
-        currentProposals,
-        context,
-        `request-${requestId}`,
+      const preview = preparePreview(() =>
+        curriculumPreviewFromProposals(
+          currentProposals,
+          context,
+          `request-${requestId}`,
+          session?.applicationDelta,
+        ),
       );
       if (!preview || !onPreviewProposalInCurriculum) return;
       const reviewable = currentProposals.filter(
@@ -976,10 +1022,14 @@ export const CourseGenerationSession = ({
     [
       applicationStatusByProposalId,
       appliedProposalIds,
+      preparePreview,
+      session?.applicationDelta,
       attemptedTargetIds,
       context,
       onPreviewProposalInCurriculum,
       projection.sources,
+      projection.proposals,
+      session?.tasks,
       session?.records,
       projection.readyAssetIds,
       session?.sessionId,
@@ -1000,7 +1050,9 @@ export const CourseGenerationSession = ({
         previewProposalGroupInCurriculum(requestId, proposals, proposal.id);
         return;
       }
-      const preview = curriculumPreviewFromProposal(proposal, context);
+      const preview = preparePreview(() =>
+        curriculumPreviewFromProposal(proposal, context, session?.applicationDelta),
+      );
       if (!preview || !onPreviewProposalInCurriculum) return;
       onPreviewProposalInCurriculum(
         {
@@ -1033,6 +1085,8 @@ export const CourseGenerationSession = ({
       decideProposal,
       onPreviewProposalInCurriculum,
       previewProposalGroupInCurriculum,
+      preparePreview,
+      session?.applicationDelta,
       projection.proposals,
       projection.sources,
       session?.records,
@@ -1319,12 +1373,8 @@ export const CourseGenerationSession = ({
     {},
   );
   const visibleTasks = (session?.tasks ?? []).filter((task) => !sourceTaskIds.has(task.taskId));
-  const requestIncomplete = (requestId: string) =>
-    visibleTasks.some(
-      (task) =>
-        task.requestId === requestId &&
-        !["succeeded", "superseded", "stopped"].includes(task.status),
-    );
+  const generationPending = (requestId: string) =>
+    requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals);
   const requestIdByTaskId = new Map(visibleTasks.map((task) => [task.taskId, task.requestId]));
   const proposalsByRequest = projection.proposals.reduce<Map<string, ProposalView[]>>(
     (groups, proposal) => {
@@ -1351,7 +1401,7 @@ export const CourseGenerationSession = ({
             requestId={proposal.id}
             proposals={[proposal]}
             busy={reviewBusy}
-            incomplete={Boolean(requestId && requestIncomplete(requestId))}
+            generationPending={Boolean(requestId && generationPending(requestId))}
             onReview={() => previewProposalInCurriculum(proposal)}
             onDiscard={() => void decideProposal(proposal, false)}
             targetLabelById={targetLabelById}
@@ -1378,7 +1428,7 @@ export const CourseGenerationSession = ({
               requestId={requestId}
               proposals={requestProposals}
               busy={reviewBusy}
-              incomplete={requestIncomplete(requestId)}
+              generationPending={generationPending(requestId)}
               onReview={(focusProposalId) =>
                 previewProposalGroupInCurriculum(requestId, requestProposals, focusProposalId)
               }

@@ -1,8 +1,12 @@
 /** Projects append-only authoring records into reviewable proposals, tasks, sources, and usage. */
+import { CourseAuthoringOrderError, orderCourseAuthoringOperations } from "@repo/shared";
+import { isEqual } from "lodash-es";
+
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type {
   ApplicationView,
+  AuthoringApplicationDelta,
   AssistantMessageView,
   AssetRequestView,
   AssetTaskView,
@@ -149,11 +153,57 @@ const curriculumOperationTypes = new Set([
   "lesson.metadata.update",
 ]);
 
+const normalizePreviewProposal = (
+  proposal: ProposalView,
+  context: CourseContext | null | undefined,
+  delta: AuthoringApplicationDelta | undefined,
+): ProposalView => {
+  if (!delta) return proposal;
+  const applied = new Set(delta.appliedOperationIds);
+  const persistedId = (id: string) => delta.idMappings[id] ?? id;
+  const operations = proposal.operations
+    .filter((operation) => !applied.has(operation.operationId))
+    .map((operation) => ({
+      ...operation,
+      targetId: persistedId(operation.targetId),
+      ...(operation.chapterId ? { chapterId: persistedId(operation.chapterId) } : {}),
+      dependencies: operation.dependencies.filter((id) => !applied.has(id)),
+      payload: {
+        ...operation.payload,
+        ...(Array.isArray(operation.payload.orderedIds)
+          ? {
+              orderedIds: operation.payload.orderedIds.map((id) =>
+                typeof id === "string" ? persistedId(id) : id,
+              ),
+            }
+          : {}),
+      },
+    }));
+  const outline =
+    proposal.outline?.map((chapter) => {
+      const id = persistedId(chapter.id);
+      const existing = context?.chapters.find((item) => item.id === id);
+      return {
+        ...chapter,
+        id,
+        ...(existing && delta.idMappings[chapter.id]
+          ? { title: existing.title, displayOrder: existing.displayOrder ?? undefined }
+          : {}),
+        lessons: chapter.lessons
+          .filter((lesson) => !delta.idMappings[lesson.id])
+          .map((lesson) => ({ ...lesson, id: persistedId(lesson.id) })),
+      };
+    }) ?? null;
+  return { ...proposal, operations, outline };
+};
+
 /** Builds the same read-only curriculum model for an explicit outline or typed operations. */
 export const curriculumPreviewFromProposal = (
   proposal: ProposalView,
   context?: CourseContext | null,
+  delta?: AuthoringApplicationDelta,
 ): CurriculumPreview | null => {
+  proposal = normalizePreviewProposal(proposal, context, delta);
   const chapters = new Map<string, CurriculumPreview["outline"][number]>(
     (proposal.outline ?? []).map((chapter) => [
       chapter.id,
@@ -247,6 +297,7 @@ export const curriculumPreviewFromProposal = (
         (left.displayOrder ?? Number.MAX_SAFE_INTEGER) -
         (right.displayOrder ?? Number.MAX_SAFE_INTEGER),
     );
+  orderCourseAuthoringOperations(proposal.operations);
   return {
     proposalId: proposal.id,
     status: proposal.decision === "accepted" ? "accepted" : "pending",
@@ -260,6 +311,7 @@ export const curriculumPreviewFromProposals = (
   proposals: ProposalView[],
   context?: CourseContext | null,
   reviewGroupId?: string,
+  delta?: AuthoringApplicationDelta,
 ): CurriculumPreview | null => {
   const visibleProposals = proposals.filter(
     (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
@@ -269,14 +321,31 @@ export const curriculumPreviewFromProposals = (
   const latestOutline = [...visibleProposals]
     .reverse()
     .find((proposal) => proposal.outline?.length)?.outline;
+  const operationsById = new Map<string, AuthoringOperation>();
+  for (const proposal of visibleProposals) {
+    const proposalOperationIds = new Set(
+      proposal.operations.map((operation) => operation.operationId),
+    );
+    if (proposalOperationIds.size !== proposal.operations.length) {
+      throw new CourseAuthoringOrderError("duplicateOperation");
+    }
+    for (const operation of proposal.operations) {
+      const existing = operationsById.get(operation.operationId);
+      if (existing && !isEqual(existing, operation)) {
+        throw new CourseAuthoringOrderError("duplicateOperation");
+      }
+      operationsById.set(operation.operationId, operation);
+    }
+  }
   const preview = curriculumPreviewFromProposal(
     {
       ...firstProposal,
       id: reviewGroupId ?? firstProposal.id,
-      operations: visibleProposals.flatMap((proposal) => proposal.operations),
+      operations: [...operationsById.values()],
       outline: latestOutline ?? null,
     },
     context,
+    delta,
   );
   if (!preview) return null;
   return {
@@ -588,7 +657,11 @@ const parseQuestion = (
     revision,
     prompt,
     choices: questionChoices(record.payload.choices),
-    capability: record.payload.capability === "web_search" ? "web_search" : null,
+    capability:
+      record.payload.capability === "web_search" &&
+      (record.payload.action === "capability.request" || !record.payload.action)
+        ? "web_search"
+        : null,
     reason: stringValue(record.payload.reason),
     answer,
     answered:
@@ -840,12 +913,12 @@ export const projectWorkspaceRecords = (
         return;
       }
 
-      if (question.capability === "web_search" && !question.answered) {
-        // Do not offer or replay controls for an interrupt after its task has
-        // already left the author-waiting state; there is nothing left to resume.
+      if (!question.answered) {
         const task = tasks.find((candidate) => candidate.taskId === question.taskId);
         if (task && task.status !== "waiting_author") return;
+      }
 
+      if (question.capability === "web_search" && !question.answered) {
         // Source policy is the durable authorization record. A prior grant resolves
         // stale permission prompts even when the workflow's question event lagged it.
         if (projection.sourcePolicy?.webEnabled) {

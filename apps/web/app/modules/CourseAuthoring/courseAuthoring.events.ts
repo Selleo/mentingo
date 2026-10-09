@@ -1,4 +1,5 @@
 /** Applies durable sequence rules to websocket events and requests snapshot recovery on gaps. */
+import { parseFetchedResearchSources } from "./authoringSources";
 import { parseAuthoringTaskFailure } from "./authoringTaskFailure";
 
 import type {
@@ -191,6 +192,9 @@ const parseToolResult = (value: unknown): NonNullable<AuthoringTurnPart["tool"]>
             ? result.queries.filter((query): query is string => typeof query === "string")
             : null,
         }
+      : {}),
+    ...(Array.isArray(result.sources)
+      ? { sources: parseFetchedResearchSources(result.sources) }
       : {}),
     sourceCount: typeof result.sourceCount === "number" ? result.sourceCount : null,
     findingCount: typeof result.findingCount === "number" ? result.findingCount : null,

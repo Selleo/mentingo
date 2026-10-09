@@ -62,6 +62,8 @@ function setup() {
     },
   };
   const findReceipt = jest.fn().mockResolvedValue(null);
+  const latestTerminalSessionReceipt = jest.fn().mockResolvedValue(null);
+  const recordFailureOnce = jest.fn().mockImplementation(async (_claim, result) => result);
   const pendingSessionReceipts = jest.fn().mockResolvedValue([]);
   const enqueue = jest.fn().mockResolvedValue(undefined);
   const getJob = jest.fn().mockResolvedValue({
@@ -99,6 +101,8 @@ function setup() {
     { enqueue, getQueue } as unknown as QueueService,
     {
       findReceipt,
+      recordFailureOnce,
+      latestTerminalSessionReceipt,
       pendingSessionReceipts,
       markDelivered: jest.fn(),
     } as unknown as CourseAuthoringApplicationRepository,
@@ -114,6 +118,8 @@ function setup() {
     receipt,
     client,
     findReceipt,
+    recordFailureOnce,
+    latestTerminalSessionReceipt,
     pendingSessionReceipts,
     enqueue,
     getJob,
@@ -128,6 +134,40 @@ function setup() {
 }
 
 describe("CourseAuthoringApplicationService immutable preparation", () => {
+  it("stores final failure for receipt-only recovery and never applies native changes", async () => {
+    const test = setup();
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+    await test.service.recordTerminalFailure(
+      { courseId, sessionId, exportId, actor },
+      "courseAuthoring.errors.baselineChanged",
+    );
+    expect(test.recordFailureOnce).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: actor.tenantId, exportId }),
+      expect.objectContaining({
+        status: "conflict",
+        appliedOperationIds: [],
+        entityMappings: {},
+        reason: "courseAuthoring.errors.baselineChanged",
+      }),
+    );
+    expect(test.applyPreparedExport).not.toHaveBeenCalled();
+    expect(test.enqueue).toHaveBeenCalledWith(
+      "course-authoring-apply",
+      "receipt",
+      expect.objectContaining({ exportId }),
+      expect.any(Object),
+    );
+  });
+  it("never records failure after a native commit even when receipt delivery failed", async () => {
+    const test = setup();
+    test.findReceipt.mockResolvedValue(test.receipt);
+    await test.service.recordTerminalFailure(
+      { courseId, sessionId, exportId, actor },
+      "transport unavailable",
+    );
+    expect(test.recordFailureOnce).not.toHaveBeenCalled();
+    expect(test.applyPreparedExport).not.toHaveBeenCalled();
+  });
   beforeAll(() => FormatRegistry.Set("uuid", validate));
   it.each([
     ["AUTHORING_CHAPTER_DEPENDENCY_UNREADY", "missingDependency"],
@@ -135,6 +175,8 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     ["AUTHORING_ASSET_NOT_READY", "assetNotReady"],
     ["AUTHORING_PROPOSAL_NOT_ACCEPTED", "proposalNotReady"],
     ["AUTHORING_OPERATION_CONFLICT", "invalidOperations"],
+    ["AUTHORING_APPLICATION_PENDING", "applicationInProgress"],
+    ["AUTHORING_EXPORT_PENDING", "applicationInProgress"],
     ["UNKNOWN_CONFLICT", "invalidCommand"],
   ])("preserves the actionable export conflict %s", async (reason, message) => {
     const test = setup();
@@ -278,29 +320,61 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
       expect.objectContaining({ omitOptionalAssetIds: [exportId] }),
     );
   });
-  it("resumes a failed export with new assessment acknowledgement", async () => {
+  it("requeues the original frozen selection after queue infrastructure fails", async () => {
     const test = setup();
-    const updateData = jest.fn();
-    const retry = jest.fn();
-    const getState = jest.fn().mockResolvedValueOnce("failed").mockResolvedValue("waiting");
-    test.getJob.mockResolvedValue({
-      data: { courseId, sessionId, acknowledgeAssessmentChanges: false },
-      failedReason: "courseAuthoring.errors.assessmentAttemptsAcknowledgementRequired",
-      getState,
-      updateData,
-      retry,
-    });
+    const input = { commandId: assetId, proposalIds: [assetId] };
+    test.getJob.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    test.enqueue.mockRejectedValueOnce(new Error("queue unavailable"));
+    await expect(test.service.enqueue(courseId, sessionId, input, actor)).rejects.toThrow(
+      "queue unavailable",
+    );
+    await test.service.enqueue(courseId, sessionId, input, actor);
+    expect(test.client.authoring.prepareExport.mock.calls[0][0]).toEqual(
+      test.client.authoring.prepareExport.mock.calls[1][0],
+    );
+    expect(test.enqueue).toHaveBeenCalledTimes(2);
+    expect(test.enqueue.mock.calls[1][2]).toEqual(
+      expect.objectContaining({ courseId, sessionId, exportId }),
+    );
+  });
+  it("rotates the immutable freeze identity only after a terminal outcome", async () => {
+    const test = setup();
     await test.service.enqueue(
       courseId,
       sessionId,
-      { commandId: assetId, proposalIds: [assetId], acknowledgeAssessmentChanges: true },
+      { commandId: assetId, proposalIds: [assetId] },
       actor,
     );
-    expect(updateData).toHaveBeenCalledWith(
-      expect.objectContaining({ acknowledgeAssessmentChanges: true, actor }),
+    const first = test.client.authoring.prepareExport.mock.calls[0][0].request.commandId;
+    test.latestTerminalSessionReceipt.mockResolvedValue({ applicationId: "terminal-failure" });
+    await test.service.enqueue(
+      courseId,
+      sessionId,
+      { commandId: assetId, proposalIds: [assetId] },
+      actor,
     );
-    expect(retry).toHaveBeenCalledTimes(1);
-    expect(test.enqueue).not.toHaveBeenCalled();
+    expect(test.client.authoring.prepareExport.mock.calls[1][0].request.commandId).not.toBe(first);
+  });
+  it("retires a failed export before a new assessment acknowledgement freeze", async () => {
+    const test = setup();
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+    const retry = jest.fn();
+    test.getJob.mockResolvedValue({
+      data: { courseId, sessionId, exportId, actor },
+      failedReason: "courseAuthoring.errors.assessmentAttemptsAcknowledgementRequired",
+      getState: jest.fn().mockResolvedValue("failed"),
+      retry,
+    });
+    await expect(
+      test.service.enqueue(
+        courseId,
+        sessionId,
+        { commandId: assetId, proposalIds: [assetId], acknowledgeAssessmentChanges: true },
+        actor,
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.receiptSynchronizationPending");
+    expect(test.recordFailureOnce).toHaveBeenCalled();
+    expect(retry).not.toHaveBeenCalled();
   });
   it("rejects another frozen export before asset work or native writes", async () => {
     const test = setup();
@@ -372,7 +446,9 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     );
   });
 
-  it.each([false, true])("prepares Mentor context (targeted brief: %s)", async (targeted) => {
+  it.each([false, true, "pl"] as const)("prepares Mentor context (%s)", async (mode) => {
+    const targeted = mode === true;
+    const language = mode === "pl" ? "pl" : "en";
     const test = setup();
     const contentOperationId = "00000000-0000-4000-8000-000000000010";
     const mentorOperationId = "00000000-0000-4000-8000-000000000011";
@@ -398,7 +474,7 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
         operationId: mentorOperationId,
         targetId: "00000000-0000-4000-8000-000000000015",
         chapterId: "00000000-0000-4000-8000-000000000014",
-        language: "en",
+        language,
         baselineHash: null,
         dependencies: [],
         displayOrder: 1,
@@ -470,7 +546,7 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     await test.service.process({ courseId, sessionId, exportId, actor });
 
     if (targeted) expect(test.getMentorContextLessons).not.toHaveBeenCalled();
-    else expect(test.getMentorContextLessons).toHaveBeenCalledWith(courseId, "en", actor);
+    else expect(test.getMentorContextLessons).toHaveBeenCalledWith(courseId, language, actor);
     expect(test.prepareUnassignedMentorContextDocument).toHaveBeenCalledTimes(1);
     const file = test.prepareUnassignedMentorContextDocument.mock
       .calls[0][0] as Express.Multer.File;
@@ -482,7 +558,8 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
       expect(test.prepareUnassignedDocument).not.toHaveBeenCalled();
     } else {
       expect(contextText).toContain("Existing course context.");
-      expect(contextText).toContain("Generated course context.");
+      if (language === "en") expect(contextText).toContain("Generated course context.");
+      else expect(contextText).not.toContain("Generated course context.");
     }
     expect(test.applyPreparedExport).toHaveBeenCalledWith(
       expect.objectContaining({
