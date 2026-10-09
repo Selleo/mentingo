@@ -89,9 +89,14 @@ const AuthoringQuestionCard = ({
   const [otherSelected, setOtherSelected] = useState(false);
   const resolvedAnswer = question.answer ?? localAnswer;
   const resolved = question.answered || resolvedAnswer !== null;
-  const capability = question.capability === "web_search";
+  const capability = question.capability !== null;
   let resolvedLabel = t("courseAuthoring.conversation.questionAnswered");
-  if (capability) {
+  if (question.capability === "deep_research") {
+    resolvedLabel =
+      resolvedAnswer === "allow"
+        ? t("courseAuthoring.conversation.deepResearchAllowed")
+        : t("courseAuthoring.conversation.deepResearchDenied");
+  } else if (capability) {
     resolvedLabel =
       resolvedAnswer === "allow"
         ? t("courseAuthoring.conversation.capabilityAllowed")

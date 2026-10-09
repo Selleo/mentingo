@@ -6284,6 +6284,14 @@
       "deny": "Ablehnen",
       "capabilityAllowed": "Websuche erlaubt",
       "capabilityDenied": "Websuche abgelehnt",
+      "researchSynthesisTool": {
+        "started": "Gespeicherte Quellen zusammenführen",
+        "completed": "Quellensynthese abgeschlossen",
+        "failed": "Quellensynthese fehlgeschlagen",
+        "stopped": "Quellensynthese angehalten"
+      },
+      "deepResearchAllowed": "Vertiefte Recherche aktiviert",
+      "deepResearchDenied": "Vertiefte Recherche abgelehnt",
       "answer": "Antworten",
       "questionAnswered": "Beantwortet",
       "questionOther": "Andere Antwort…",
@@ -6601,6 +6609,7 @@
       "applicationInProgress": "Eine andere Anwendung läuft bereits. Falls das Einreihen fehlgeschlagen ist, versuche es mit der ursprünglichen Vorschlagsauswahl erneut, um sie fortzusetzen.",
       "receiptSynchronizationPending": "Die vorherigen Änderungen werden im AI-Arbeitsbereich gespeichert. Versuchen Sie dieselbe Auswahl gleich erneut anzuwenden.",
       "appliedRefreshPending": "Die Änderungen wurden angewendet. Aktualisieren Sie den Kurs, falls sie noch nicht sichtbar sind.",
+      "deepResearchPreferenceNotSaved": "Die vertiefte Recherche wurde für diese Anfrage aktiviert, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden.",
       "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden."
     },
     "review": {

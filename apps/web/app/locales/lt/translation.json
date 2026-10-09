@@ -6292,6 +6292,14 @@
       "deny": "Neleisti",
       "capabilityAllowed": "Paieška internete leista",
       "capabilityDenied": "Paieška internete atmesta",
+      "researchSynthesisTool": {
+        "started": "Išsaugotų šaltinių sintezė",
+        "completed": "Šaltinių sintezė baigta",
+        "failed": "Šaltinių sintezė nepavyko",
+        "stopped": "Šaltinių sintezė sustabdyta"
+      },
+      "deepResearchAllowed": "Išsamus tyrimas įjungtas",
+      "deepResearchDenied": "Išsamus tyrimas atmestas",
       "answer": "Atsakyti",
       "questionAnswered": "Atsakyta",
       "questionOther": "Kitas atsakymas…",
@@ -6609,6 +6617,7 @@
       "applicationInProgress": "Taikomi kiti pakeitimai. Jei įtraukti į eilę nepavyko, pakartokite pradinį pasiūlymų pasirinkimą, kad tęstumėte.",
       "receiptSynchronizationPending": "Ankstesni pakeitimai saugomi AI darbo srityje. Netrukus bandykite dar kartą pritaikyti tą patį pasirinkimą.",
       "appliedRefreshPending": "Pakeitimai pritaikyti. Atnaujinkite kursą, jei jų dar nematote.",
+      "deepResearchPreferenceNotSaved": "Šiai užklausai išsamus tyrimas įjungtas, bet nustatymo nepavyko išsaugoti būsimiems pranešimams.",
       "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams."
     },
     "review": {

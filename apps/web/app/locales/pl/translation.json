@@ -6352,6 +6352,14 @@
       "deny": "Odmów",
       "capabilityAllowed": "Zezwolono na wyszukiwanie w sieci",
       "capabilityDenied": "Odmówiono wyszukiwania w sieci",
+      "researchSynthesisTool": {
+        "started": "Synteza zapisanych źródeł",
+        "completed": "Synteza źródeł zakończona",
+        "failed": "Synteza źródeł nie powiodła się",
+        "stopped": "Synteza źródeł zatrzymana"
+      },
+      "deepResearchAllowed": "Włączono pogłębiony research",
+      "deepResearchDenied": "Odmówiono pogłębionego researchu",
       "answer": "Odpowiedz",
       "questionAnswered": "Udzielono odpowiedzi",
       "questionOther": "Inna odpowiedź…",
@@ -6671,6 +6679,7 @@
       "applicationInProgress": "Trwa stosowanie innych zmian. Jeśli nie udało się dodać zadania do kolejki, ponów pierwotny wybór propozycji, aby je wznowić.",
       "receiptSynchronizationPending": "Trwa zapisywanie poprzednich zmian w przestrzeni AI. Za chwilę spróbuj ponownie zastosować ten sam wybór.",
       "appliedRefreshPending": "Zmiany zostały zastosowane. Odśwież kurs, jeśli nie są jeszcze widoczne.",
+      "deepResearchPreferenceNotSaved": "Włączono pogłębiony research dla tej prośby, ale nie udało się zapisać ustawienia dla kolejnych wiadomości.",
       "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości."
     },
     "review": {

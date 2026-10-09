@@ -6240,6 +6240,14 @@
       "deny": "Denegar",
       "capabilityAllowed": "Búsqueda web permitida",
       "capabilityDenied": "Búsqueda web denegada",
+      "researchSynthesisTool": {
+        "started": "Sintetizando fuentes guardadas",
+        "completed": "Síntesis de fuentes completada",
+        "failed": "Error en la síntesis de fuentes",
+        "stopped": "Síntesis de fuentes detenida"
+      },
+      "deepResearchAllowed": "Investigación profunda activada",
+      "deepResearchDenied": "Investigación profunda rechazada",
       "answer": "Responder",
       "questionAnswered": "Respondida",
       "questionOther": "Otra respuesta…",
@@ -6516,6 +6524,7 @@
       "section": "{{kind}} {{number}}"
     },
     "errors": {
+      "deepResearchPreferenceNotSaved": "La investigación profunda se activó para esta solicitud, pero no se pudo guardar la preferencia para los próximos mensajes.",
       "webSearchPreferenceNotSaved": "La búsqueda web se permitió para esta solicitud, pero no se pudo guardar la preferencia para los próximos mensajes.",
       "applicationFailed": "No se pudieron aplicar los cambios seleccionados. Revisa el estado actual del curso y vuelve a intentarlo.",
       "applicationNotFound": "Este resultado de aplicación ya no está disponible.",

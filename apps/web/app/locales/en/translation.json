@@ -6309,6 +6309,14 @@
       "deny": "Deny",
       "capabilityAllowed": "Web search allowed",
       "capabilityDenied": "Web search denied",
+      "researchSynthesisTool": {
+        "started": "Synthesizing saved sources",
+        "completed": "Source synthesis complete",
+        "failed": "Source synthesis failed",
+        "stopped": "Source synthesis stopped"
+      },
+      "deepResearchAllowed": "Deep research enabled",
+      "deepResearchDenied": "Deep research declined",
       "answer": "Answer",
       "questionAnswered": "Answered",
       "questionOther": "Other…",
@@ -6626,6 +6634,7 @@
       "applicationInProgress": "Another application is in progress. If queueing failed, retry the original proposal selection to resume it.",
       "receiptSynchronizationPending": "Saving previous changes to the AI workspace. Try applying this same selection again shortly.",
       "appliedRefreshPending": "Changes were applied. Refresh the course if they are not visible yet.",
+      "deepResearchPreferenceNotSaved": "Deep research was enabled for this request, but the preference could not be saved for future messages.",
       "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages."
     },
     "review": {

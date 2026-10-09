@@ -401,10 +401,12 @@ export const AuthoringToolActivity = ({
   const { t } = useTranslation();
   const isWebToolActivity = isWebTool(tool);
   const isExtraction = tool.toolName === "web_extract";
+  const isSynthesis = tool.toolName === "research_synthesis";
   const isRunning = tool.status === "started";
   const isProblem = tool.status === "failed" || tool.status === "stopped";
   let label = tool.display;
-  if (isExtraction) label = t(`courseAuthoring.conversation.webExtractTool.${tool.status}`);
+  if (isSynthesis) label = t(`courseAuthoring.conversation.researchSynthesisTool.${tool.status}`);
+  else if (isExtraction) label = t(`courseAuthoring.conversation.webExtractTool.${tool.status}`);
   else if (isWebToolActivity)
     label = t(`courseAuthoring.conversation.webSearchTool.${tool.status}`);
   const counts = [
@@ -442,7 +444,7 @@ export const AuthoringToolActivity = ({
           {label}
         </span>
         {taskLabel && <span className="text-neutral-400">· {taskLabel}</span>}
-        {!isWebToolActivity && !isExtraction && isProblem && (
+        {!isWebToolActivity && !isExtraction && !isSynthesis && isProblem && (
           <span className="text-neutral-500">
             · {t(`courseAuthoring.activityRail.taskStatus.${tool.status}`)}
           </span>
@@ -451,6 +453,9 @@ export const AuthoringToolActivity = ({
           <span className="text-neutral-400">· {counts.join(" · ")}</span>
         )}
       </div>
+      {isSynthesis && tool.display && (
+        <p className="ml-7 text-xs text-neutral-600">{tool.display}</p>
+      )}
       {isExtraction && typeof tool.result?.query === "string" && (
         <p className="ml-7 break-all text-xs text-neutral-600">{tool.result.query}</p>
       )}

@@ -416,6 +416,34 @@ describe("AuthoringActivityRail live work", () => {
     expect(screen.queryByRole("button", { name: /Unsafe|Duplicate/ })).toBeNull();
   });
 
+  it.each([
+    ["started", "Synthesizing saved sources"],
+    ["completed", "Source synthesis complete"],
+    ["failed", "Source synthesis failed"],
+    ["stopped", "Source synthesis stopped"],
+  ] as const)("renders local synthesis separately from searches: %s", (status, label) => {
+    renderWith().render(
+      <AuthoringToolActivity
+        tool={{
+          toolCallId: "local-synthesis",
+          toolName: "research_synthesis",
+          display: "3/9",
+          status,
+          result: { query: "This is not an external search query" },
+        }}
+      />,
+    );
+    expect(screen.getByText(label)).toBeVisible();
+    expect(screen.getByText("3/9")).toBeVisible();
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.queryByText("This is not an external search query")).toBeNull();
+    const activity = screen.getByTestId("course-authoring-tool-local-synthesis");
+    expect(activity.querySelector(".animate-spin")).toBeNull();
+    expect(activity.querySelector(".motion-safe\\:animate-spin") !== null).toBe(
+      status === "started",
+    );
+  });
+
   it("shows exact search queries beneath the individual tool row", () => {
     renderWith().render(
       <AuthoringToolActivity

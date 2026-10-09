@@ -1315,6 +1315,47 @@ describe("AuthoringAssistantMessages", () => {
     );
   });
 
+  it.each(["allow", "deny"])(
+    "renders a deep research permission question and its answer: %s",
+    async (answer) => {
+      const user = userEvent.setup();
+      const question: QuestionView = {
+        id: "question-deep",
+        taskId: "task-deep",
+        requestId: "request-deep",
+        revision: 1,
+        prompt: "Enable deep research to investigate the remaining gaps?",
+        choices: [],
+        capability: "deep_research",
+        reason: null,
+        answer: null,
+        answered: false,
+      };
+      const onAnswerQuestion = vi.fn(async () => undefined);
+      renderWith().render(
+        <AuthoringAssistantMessages
+          chatMessages={[
+            {
+              id: "assistant-deep",
+              role: "assistant",
+              parts: [],
+              metadata: { requestId: "request-deep" },
+            },
+          ]}
+          questionsByRequest={{ "request-deep": [question] }}
+          onAnswerQuestion={onAnswerQuestion}
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: answer === "allow" ? "Allow" : "Deny" }));
+      expect(onAnswerQuestion).toHaveBeenCalledWith(question, answer);
+      expect(
+        await screen.findByText(
+          answer === "allow" ? "Deep research enabled" : "Deep research declined",
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
   it("renders an already denied capability as resolved without asking again", () => {
     const question: QuestionView = {
       id: "question-web-denied",

@@ -658,9 +658,10 @@ const parseQuestion = (
     prompt,
     choices: questionChoices(record.payload.choices),
     capability:
-      record.payload.capability === "web_search" &&
+      (record.payload.capability === "web_search" ||
+        record.payload.capability === "deep_research") &&
       (record.payload.action === "capability.request" || !record.payload.action)
-        ? "web_search"
+        ? record.payload.capability
         : null,
     reason: stringValue(record.payload.reason),
     answer,

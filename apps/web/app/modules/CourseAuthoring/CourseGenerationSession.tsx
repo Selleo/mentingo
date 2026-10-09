@@ -715,15 +715,25 @@ export const CourseGenerationSession = ({
       });
       throw error;
     }
-    if (question.capability === "web_search" && answer === "allow") {
+    if (question.capability !== null && answer === "allow") {
       const currentPolicy =
         latestSourcePolicyRef.current ?? projection.sourcePolicy ?? freshSessionPolicy;
-      const nextPolicy = { ...currentPolicy, webEnabled: true };
+      const nextPolicy: SourcePolicy = {
+        ...currentPolicy,
+        webEnabled: true,
+        ...(question.capability === "deep_research" ? { researchDepth: "deep" as const } : {}),
+      };
       try {
         await commandMutation.mutateAsync({ action: "sources.select", sourcePolicy: nextPolicy });
         latestSourcePolicyRef.current = nextPolicy;
       } catch {
-        toast({ description: t("courseAuthoring.errors.webSearchPreferenceNotSaved") });
+        toast({
+          description: t(
+            question.capability === "deep_research"
+              ? "courseAuthoring.errors.deepResearchPreferenceNotSaved"
+              : "courseAuthoring.errors.webSearchPreferenceNotSaved",
+          ),
+        });
       }
     }
   };

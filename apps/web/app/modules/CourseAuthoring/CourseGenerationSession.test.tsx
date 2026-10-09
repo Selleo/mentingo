@@ -11,6 +11,8 @@ import type { AssetRequestView, CurriculumPreviewActions } from "./courseAuthori
 
 const state = vi.hoisted(() => ({
   assetRequests: [] as AssetRequestView[],
+  questionCapability: "web_search",
+  questionAnswer: "allow",
   accepted: false,
   outlineOnly: false,
   groupedReview: false,
@@ -316,9 +318,9 @@ vi.mock("./components/AuthoringAssistantMessages", () => ({
               taskId: "web-task",
               requestId: "web-request",
               revision: 1,
-              capability: "web_search",
+              capability: state.questionCapability,
             },
-            "allow",
+            state.questionAnswer,
           )
         }
       >
@@ -377,6 +379,8 @@ vi.mock("./components/ProposalReview", () => ({
 
 describe("CourseGenerationSession proposal decisions", () => {
   beforeEach(() => {
+    state.questionCapability = "web_search";
+    state.questionAnswer = "allow";
     state.assetRequests = [];
     state.accepted = false;
     state.outlineOnly = false;
@@ -922,6 +926,27 @@ describe("CourseGenerationSession proposal decisions", () => {
       sourcePolicy: { webEnabled: true, generalKnowledgeEnabled: true },
     });
   });
+
+  it.each(["allow", "deny"])(
+    "persists deep research only after an allowed answer: %s",
+    async (answer) => {
+      state.questionCapability = "deep_research";
+      state.questionAnswer = answer;
+      const user = userEvent.setup();
+      renderWith().render(
+        <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+      );
+      await user.click(screen.getByRole("button", { name: "Allow web question" }));
+      await waitFor(() => expect(state.commandCalls).toHaveLength(answer === "allow" ? 2 : 1));
+      expect(state.commandCalls[0]).toMatchObject({ action: "question.answer", answer });
+      if (answer === "allow") {
+        expect(state.commandCalls[1]).toMatchObject({
+          action: "sources.select",
+          sourcePolicy: { webEnabled: true, researchDepth: "deep", generalKnowledgeEnabled: true },
+        });
+      }
+    },
+  );
 
   it("does not auto-select a removed source when the session inventory changes", async () => {
     state.sourceRecords = [

@@ -6296,6 +6296,14 @@
       "deny": "Odmítnout",
       "capabilityAllowed": "Vyhledávání na webu povoleno",
       "capabilityDenied": "Vyhledávání na webu odmítnuto",
+      "researchSynthesisTool": {
+        "started": "Syntéza uložených zdrojů",
+        "completed": "Syntéza zdrojů dokončena",
+        "failed": "Syntéza zdrojů selhala",
+        "stopped": "Syntéza zdrojů zastavena"
+      },
+      "deepResearchAllowed": "Hloubkový výzkum povolen",
+      "deepResearchDenied": "Hloubkový výzkum odmítnut",
       "answer": "Odpovědět",
       "questionAnswered": "Zodpovězeno",
       "questionOther": "Jiná odpověď…",
@@ -6614,6 +6622,7 @@
       "applicationInProgress": "Probíhá použití jiných změn. Pokud zařazení do fronty selhalo, znovu vyberte původní návrhy a pokračujte.",
       "receiptSynchronizationPending": "Předchozí změny se ukládají do pracovního prostoru AI. Zkuste stejný výběr za chvíli použít znovu.",
       "appliedRefreshPending": "Změny byly použity. Pokud je ještě nevidíte, obnovte kurz.",
+      "deepResearchPreferenceNotSaved": "Hloubkový výzkum byl pro tento požadavek povolen, ale nastavení se nepodařilo uložit pro další zprávy.",
       "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy."
     },
     "review": {

@@ -905,6 +905,42 @@ describe("course authoring record projection", () => {
     });
   });
 
+  it.each(["standard", "deep"])(
+    "does not infer a pending task deep grant from the session preference: %s",
+    (researchDepth) => {
+      const result = projectWorkspaceRecords([
+        {
+          id: "sources",
+          kind: "source_selection",
+          payload: {
+            sourceVersionIds: [],
+            webEnabled: true,
+            generalKnowledgeEnabled: true,
+            researchDepth,
+            requiredSectionIds: [],
+            excludedSectionIds: [],
+          },
+        },
+        {
+          id: "question-deep",
+          kind: "question",
+          payload: {
+            taskId: "task-deep",
+            revision: 1,
+            question: "Enable deep research?",
+            capability: "deep_research",
+            action: "capability.request",
+          },
+        },
+      ]);
+      expect(result.questions[0]).toMatchObject({
+        capability: "deep_research",
+        answered: false,
+        answer: null,
+      });
+    },
+  );
+
   it("projects web capability questions with their durable turn and resolved state", () => {
     const tasks = [
       {

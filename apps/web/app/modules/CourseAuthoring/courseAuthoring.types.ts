@@ -463,7 +463,7 @@ export type QuestionView = {
   revision: number;
   prompt: string;
   choices: string[];
-  capability: "web_search" | null;
+  capability: "web_search" | "deep_research" | null;
   reason: string | null;
   answer: string | null;
   answered: boolean;

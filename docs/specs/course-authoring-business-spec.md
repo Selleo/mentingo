@@ -333,3 +333,9 @@ Authors can continue an interrupted generation request without rebuilding its co
 When an author decision is needed, the existing saved question flow collects the answer before generation resumes. Malformed model output is handled internally; a provider or implementation failure is not presented as a content question. A service failure has no ineffective Retry action. Clearly labelled fictional practice exercises are permitted without a hidden mode selection, while factual assertions still follow the selected source permissions.
 
 Focused tests verify safe failure contracts, retained failure guidance, retry clearing, failed chapter progress and recovery actions in both activity layouts. Authenticated browser recovery and live provider behavior remain unverified.
+
+### Optional deeper research and visible synthesis
+
+When standard research leaves a specific gap and further research is likely to help, the assistant can ask the author to enable Deep research through the same saved Allow/Decline question flow used for web access. Approval continues the current task with deeper research; declining keeps the current research setting and does not repeat the offer for that task. A search-provider outage alone is not a reason to recommend deeper research.
+
+Authors can distinguish web discovery from reviewing the collected sources. Source synthesis shows its own progress as topics are reviewed, so a lengthy evidence review does not appear to be a frozen search. Independent topics can be reviewed concurrently within a bounded budget; source permissions and quotation checks still apply. These changes use existing course access and review rules and do not apply generated course changes automatically.
