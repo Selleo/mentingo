@@ -41,6 +41,8 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
   const { t } = useTranslation();
   const navigate = useNavigate();
   const {
+    blocker,
+    navigateAfterSave,
     definition,
     selectedStepId,
     setSelectedStepId,
@@ -67,7 +69,6 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
   const { mutateAsync: deleteAutomation, isPending: isDeleting } = useDeleteAutomation();
   const isBusy = isEditorBusy || isDeleting;
   const [isConfigurationValid, setIsConfigurationValid] = useState(true);
-  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [branchPosition, setBranchPosition] = useState<number | undefined>();
@@ -183,26 +184,21 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
     navigate("/admin/automations");
   }
 
-  function handleBack() {
-    if (hasUnsavedChanges) setIsLeaveDialogOpen(true);
-    else navigateBack();
-  }
-
   async function deleteAndLeave() {
     if (!automation || isBusy) return;
 
     await deleteAutomation(automation.id);
 
     setIsDeleteDialogOpen(false);
-    navigateBack();
+    navigateAfterSave("/admin/automations");
   }
 
   async function saveAndLeave() {
     if (!isConfigurationValid) return;
 
-    const saved = await saveDraft();
+    const saved = await saveDraft(false);
 
-    if (saved) navigateBack();
+    if (saved && blocker.state === "blocked") blocker.proceed();
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -265,7 +261,7 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
         deleteDisabled={isBusy || !automation}
         onNameChange={(name) => updateDefinition({ ...definition, name })}
         onDescriptionChange={(description) => updateDefinition({ ...definition, description })}
-        onBack={handleBack}
+        onBack={navigateBack}
         onSave={() => void saveDraft().catch(() => undefined)}
         onApply={() => void applySavedDraft().catch(() => undefined)}
         onSimulate={() => void runSimulation().catch(() => undefined)}
@@ -373,11 +369,15 @@ export function AutomationEditor({ automation }: { automation?: AutomationDto })
       <BuilderExitDialogs
         name={definition.name}
         busy={isBusy || !isConfigurationValid}
-        leaveOpen={isLeaveDialogOpen}
+        leaveOpen={blocker.state === "blocked"}
         archiveOpen={isArchiveDialogOpen}
-        onLeaveOpenChange={setIsLeaveDialogOpen}
+        onLeaveOpenChange={(open) => {
+          if (!open && blocker.state === "blocked") blocker.reset();
+        }}
         onArchiveOpenChange={setIsArchiveDialogOpen}
-        onLeave={navigateBack}
+        onLeave={() => {
+          if (blocker.state === "blocked") blocker.proceed();
+        }}
         onSaveAndLeave={() => void saveAndLeave().catch(() => undefined)}
         onArchive={() => void archiveAutomation().catch(() => undefined)}
       />

@@ -1,5 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
@@ -8,6 +8,13 @@ import { getEmailTemplateVariableRanges } from "../emailTemplateVariableHighligh
 import { EmailTemplateRichText } from "./EmailTemplateRichText";
 
 describe("email variable highlighting", () => {
+  beforeAll(() => {
+    Object.defineProperties(Range.prototype, {
+      getClientRects: { configurable: true, value: () => [] },
+      getBoundingClientRect: { configurable: true, value: () => new DOMRect() },
+    });
+  });
+
   const variables = [
     { key: "course_name", label: "Course", type: "text" as const, sampleValue: "Example" },
   ];

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EMAIL_TEMPLATE_STATUSES } from "@repo/email-templates";
+import { EMAIL_TEMPLATE_STATUSES, type PublishedEmailTemplate } from "@repo/email-templates";
 import { eq, ne, inArray, isNull, isNotNull, and, or, sql } from "drizzle-orm";
 
 import { OUTBOX_STATUSES } from "src/outbox/outbox.types";
@@ -47,6 +47,38 @@ export class DefaultAutomationSetupRepository {
       .where(isNull(settings.userId));
 
     return organization;
+  }
+
+  listLegacyPublishedEmailTemplates(transaction: DatabasePg) {
+    return transaction
+      .select()
+      .from(emailTemplates)
+      .where(
+        and(
+          eq(emailTemplates.status, EMAIL_TEMPLATE_STATUSES.PUBLISHED),
+          isNotNull(emailTemplates.event),
+          isNull(emailTemplates.publication),
+          eq(emailTemplates.publicationVersion, 0),
+          isNull(emailTemplates.deletedAt),
+        ),
+      )
+      .for("update");
+  }
+
+  backfillLegacyEmailTemplatePublication(
+    id: UUIDType,
+    publication: PublishedEmailTemplate,
+    transaction: DatabasePg,
+  ) {
+    return transaction
+      .update(emailTemplates)
+      .set({
+        placeholders: publication.placeholders,
+        publication,
+        publicationVersion: 1,
+        triggerEventKind: sql`${emailTemplates.event}`,
+      })
+      .where(eq(emailTemplates.id, id));
   }
 
   async listPublishedCustomEmailTemplates(transaction: DatabasePg) {

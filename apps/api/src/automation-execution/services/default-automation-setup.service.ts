@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { getBuiltInTemplatePublication } from "@repo/email-templates";
+import {
+  getBuiltInTemplatePublication,
+  deriveEmailTemplatePublicationUsage,
+  toTemplatePlaceholder,
+} from "@repo/email-templates";
 import {
   AUTOMATION_STATUSES,
+  AUTOMATION_EVENT_KINDS,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
   SUPPORTED_LANGUAGES,
@@ -63,6 +68,7 @@ export class DefaultAutomationSetupService {
   private async ensureTenantAutomationCatalog(transaction: DatabasePg): Promise<void> {
     await acquireAutomationLifecycleLock(transaction);
 
+    await this.backfillLegacyPublishedEmailTemplates(transaction);
     await this.populateMissingDefaultAutomationTranslations(transaction);
 
     const builtInKeys =
@@ -76,6 +82,50 @@ export class DefaultAutomationSetupService {
 
     await this.defaultAutomationSetupRepository.cancelLegacyNotificationEmailCommands(transaction);
     await this.createTenantDefaultAutomations(transaction);
+  }
+
+  private async backfillLegacyPublishedEmailTemplates(transaction: DatabasePg): Promise<void> {
+    const templates =
+      await this.defaultAutomationSetupRepository.listLegacyPublishedEmailTemplates(transaction);
+
+    for (const template of templates) {
+      if (!template.event) {
+        continue;
+      }
+
+      const definition = this.emailTemplateValidationService.getEmailTemplateDefinition(
+        template.event,
+      );
+
+      const placeholders = definition.variables.map(toTemplatePlaceholder);
+
+      if (template.event === AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES) {
+        const summary = getBuiltInTemplatePublication(template.event).placeholders.find(
+          ({ name }) => name === "overdue_courses_summary",
+        )!;
+
+        const courses = placeholders.find(({ name }) => name === "courses");
+
+        if (courses) {
+          Object.assign(courses, { type: summary.type, sampleValue: summary.sampleValue });
+        }
+      }
+
+      const publication = deriveEmailTemplatePublicationUsage({
+        name: template.name,
+        subject: template.subject,
+        content: template.content,
+        baseLanguage: template.baseLanguage,
+        availableLocales: template.availableLocales,
+        placeholders,
+      });
+
+      await this.defaultAutomationSetupRepository.backfillLegacyEmailTemplatePublication(
+        template.id,
+        publication,
+        transaction,
+      );
+    }
   }
 
   private async validateTenantBuiltInAutomationDependencies(

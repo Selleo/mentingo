@@ -22,7 +22,11 @@ vi.mock("~/api/api-client", () => ({
     },
   },
 }));
-vi.mock("@remix-run/react", () => ({ useNavigate: () => api.navigate }));
+vi.mock("@remix-run/react", () => ({
+  useNavigate: () => api.navigate,
+  useBlocker: () => ({ state: "unblocked" }),
+  useBeforeUnload: () => undefined,
+}));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
   useLanguageStore: () => "en",
@@ -102,6 +106,57 @@ describe("Automation editor publishing", () => {
     expect(result.current.hasUnsavedChanges).toBe(false);
   });
 
+  it("accepts persisted property and step ordering after Apply", async () => {
+    const { result } = renderEditor(automation);
+    const edited = structuredClone(definition);
+    const email = edited.workflow.steps[1];
+    if (email.type !== "send_email") throw new Error("Expected email step");
+    email.config = {
+      recipients: { type: "event" },
+      template: { key: "welcome", type: "builtin" },
+      mappings: {},
+    };
+    const persisted = structuredClone(edited);
+    const persistedEmail = persisted.workflow.steps[1];
+    if (persistedEmail.type !== "send_email") throw new Error("Expected email step");
+    persistedEmail.config = {
+      template: { type: "builtin", key: "welcome" },
+      mappings: {},
+      recipients: { type: "event" },
+    };
+    persisted.workflow.steps.reverse();
+    api.apply.mockResolvedValue({ data: { data: { ...automation, ...persisted } } });
+    act(() => result.current.updateDefinition(edited));
+    await act(async () => {
+      await result.current.applySavedDraft();
+    });
+    expect(result.current.definition).toEqual(persisted);
+    expect(result.current.hasUnsavedChanges).toBe(false);
+
+    const reordered = structuredClone(persisted);
+    const step = reordered.workflow.steps[0];
+    if (step.type !== "send_email") throw new Error("Expected email step");
+    step.config = {
+      recipients: { type: "event" },
+      mappings: {},
+      template: { key: "welcome", type: "builtin" },
+    };
+    act(() => result.current.updateDefinition(reordered));
+    expect(result.current.hasUnsavedChanges).toBe(false);
+  });
+
+  it("preserves newer edits while an Apply response arrives", async () => {
+    const { result } = renderEditor(automation);
+    const apply = result.current.applySavedDraft;
+    await act(async () => {
+      const pending = apply();
+      result.current.updateDefinition({ ...definition, name: "Newer edit" });
+      await pending;
+    });
+    expect(result.current.definition.name).toBe("Newer edit");
+    expect(result.current.hasUnsavedChanges).toBe(true);
+  });
+
   it("applies an already saved draft without logging another draft save", async () => {
     const { result } = renderEditor(automation);
     await act(async () => {
@@ -140,6 +195,17 @@ describe("Automation editor publishing", () => {
     expect(api.create).toHaveBeenCalledTimes(1);
     expect(api.apply).toHaveBeenCalledTimes(1);
     expect(api.update).not.toHaveBeenCalled();
+    expect(api.navigate).toHaveBeenCalledWith(`/admin/automations/${automation.id}`);
+  });
+
+  it("opens the saved draft when applying a newly created automation fails", async () => {
+    api.apply.mockRejectedValue(new Error("apply failed"));
+    const { result } = renderEditor();
+    act(() => result.current.updateDefinition(definition));
+    await act(async () => {
+      await expect(result.current.applySavedDraft()).rejects.toThrow("apply failed");
+    });
+    expect(result.current.hasUnsavedChanges).toBe(false);
     expect(api.navigate).toHaveBeenCalledWith(`/admin/automations/${automation.id}`);
   });
 

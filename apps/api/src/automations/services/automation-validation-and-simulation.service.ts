@@ -474,18 +474,10 @@ export class AutomationValidationAndSimulationService {
   ) {
     const sensitiveKeys = getAccountActionPlaceholderNames(event, mappings);
 
-    for (const language of publication.availableLocales) {
-      const subject = publication.subject[language];
-      const document = publication.content[language];
-
-      if (subject !== undefined && document) {
-        this.emailTemplateValidationService.assertSafeAccountActionLinks(
-          subject,
-          document,
-          sensitiveKeys,
-        );
-      }
-    }
+    this.emailTemplateValidationService.assertSafeAccountActionLinksInCompleteTranslations(
+      publication,
+      sensitiveKeys,
+    );
   }
 
   private buildSimulationEventFields(

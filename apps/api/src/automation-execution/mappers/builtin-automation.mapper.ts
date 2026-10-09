@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getBuiltInTemplatePublication } from "@repo/email-templates";
 import {
   AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_EVENT_KINDS,
   AUTOMATION_CONDITION_BRANCH_POSITIONS,
   AUTOMATION_EMAIL_BRANCH_PLANS,
   AUTOMATION_STEP_TYPES,
@@ -14,6 +15,7 @@ import {
   type AutomationEmailBranchPlan,
   type AutomationStep,
   type AutomationPlaceholderDefinition,
+  type AutomationEventKind,
 } from "@repo/shared";
 
 import type {
@@ -148,12 +150,30 @@ function buildCustomizedTemplateMappings(
   builtin: BuiltInAutomationDefinition,
   customization?: PublishedDefaultCustomization,
 ): AutomationPlaceholderMappings {
-  return customization?.publication
-    ? Object.fromEntries(
-        customization.publication.placeholders.map(({ name }) => [
-          name,
-          builtin.mappings[name] ?? { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: name },
-        ]),
-      )
-    : builtin.mappings;
+  if (!customization?.publication) {
+    return builtin.mappings;
+  }
+
+  return Object.fromEntries(
+    customization.publication.placeholders
+      .filter(({ required }) => required)
+      .map(({ name }) => [
+        name,
+        builtin.mappings[name] ?? {
+          type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD,
+          field: resolveLegacyTemplateEventField(builtin.eventKind, name),
+        },
+      ]),
+  );
+}
+
+function resolveLegacyTemplateEventField(
+  eventKind: AutomationEventKind,
+  placeholderName: string,
+): string {
+  if (eventKind === AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES && placeholderName === "courses") {
+    return "overdue_courses_summary";
+  }
+
+  return placeholderName;
 }

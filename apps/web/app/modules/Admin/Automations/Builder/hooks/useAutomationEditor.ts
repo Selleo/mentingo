@@ -1,4 +1,3 @@
-import { useNavigate } from "@remix-run/react";
 import {
   AUTOMATION_STATUSES,
   AUTOMATION_STEP_TYPES,
@@ -6,6 +5,7 @@ import {
   insertAutomationStep,
   getAutomationWorkflowIssues,
 } from "@repo/shared";
+import { isEqual } from "lodash-es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,8 @@ import { useEnableAutomation } from "~/api/mutations/automations/useEnableAutoma
 import { useSimulateAutomation } from "~/api/mutations/automations/useSimulateAutomation";
 import { useUpdateAutomation } from "~/api/mutations/automations/useUpdateAutomation";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+
+import { useAutomationExitGuard } from "./useAutomationExitGuard";
 
 import type {
   AutomationEventKind,
@@ -47,12 +49,12 @@ function createInitialDefinition(automation?: AutomationDto): AutomationDefiniti
 
 export function useAutomationEditor(automation?: AutomationDto) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const language = useLanguageStore((state) => state.language);
   const [definition, setDefinition] = useState(() => createInitialDefinition(automation));
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [savedDefinition, setSavedDefinition] = useState(() => createInitialDefinition(automation));
-  const hasUnsavedChanges = JSON.stringify(definition) !== JSON.stringify(savedDefinition);
+  const hasUnsavedChanges = !isEqual(definition, savedDefinition);
+  const { blocker, navigateAfterSave } = useAutomationExitGuard(hasUnsavedChanges);
   const [issues, setIssues] = useState<string[]>([]);
   const [simulation, setSimulation] = useState<AutomationSimulationResult | null>(null);
   const [simulationValues, setSimulationValues] = useState<
@@ -155,7 +157,13 @@ export function useAutomationEditor(automation?: AutomationDto) {
     setSelectedStepId(null);
   }
 
-  async function saveDraft() {
+  function acceptSavedDefinition(saved: AutomationDto) {
+    const next = createInitialDefinition(saved);
+    setSavedDefinition(next);
+    setDefinition((current) => (isEqual(current, definition) ? next : current));
+  }
+
+  async function saveDraft(navigateOnCreate = true) {
     if (!definition.name.trim()) {
       setIssues([t("automations.nameRequired")]);
       return null;
@@ -167,8 +175,8 @@ export function useAutomationEditor(automation?: AutomationDto) {
       ? await updateAutomation({ id: automation.id, data: definition })
       : await createAutomation(definition);
 
-    setSavedDefinition(definition);
-    if (!automation) navigate(`/admin/automations/${saved.id}`);
+    acceptSavedDefinition(saved);
+    if (!automation && navigateOnCreate) navigateAfterSave(`/admin/automations/${saved.id}`);
 
     return saved;
   }
@@ -195,10 +203,15 @@ export function useAutomationEditor(automation?: AutomationDto) {
     setIssues([]);
 
     const saved = automation ?? (await createAutomation(definition));
-    if (!automation) navigate(`/admin/automations/${saved.id}`);
-
-    const applied = await applyAutomation({ id: saved.id, definition });
-    setSavedDefinition(createInitialDefinition(applied));
+    try {
+      const applied = await applyAutomation({ id: saved.id, definition });
+      acceptSavedDefinition(applied);
+    } catch (error) {
+      if (!automation) acceptSavedDefinition(saved);
+      throw error;
+    } finally {
+      if (!automation) navigateAfterSave(`/admin/automations/${saved.id}`);
+    }
   }
 
   async function runSimulation(
@@ -229,6 +242,8 @@ export function useAutomationEditor(automation?: AutomationDto) {
   }
 
   return {
+    blocker,
+    navigateAfterSave,
     definition,
     selectedStepId,
     setSelectedStepId,
