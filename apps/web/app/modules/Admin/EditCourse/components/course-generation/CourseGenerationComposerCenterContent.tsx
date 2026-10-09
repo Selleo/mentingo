@@ -1,7 +1,6 @@
+import { VoiceLevelBars } from "@mentingo/voice";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef } from "react";
-
-import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
 type CourseGenerationComposerCenterContentProps = {
   isVoiceMode: boolean;

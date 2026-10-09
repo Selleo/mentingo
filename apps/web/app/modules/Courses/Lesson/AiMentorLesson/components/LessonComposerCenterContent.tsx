@@ -1,8 +1,8 @@
+import { VoiceLevelBars } from "@mentingo/voice";
 import { AnimatePresence, motion } from "motion/react";
 
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { cn } from "~/lib/utils";
-import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
 import type { ChangeEvent } from "react";
 

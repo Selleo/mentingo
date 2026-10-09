@@ -9,14 +9,6 @@ import { renderWith } from "../../../../../utils/testUtils";
 
 import { VoiceMentorModeOverlay } from "./VoiceMentorModeOverlay";
 
-vi.mock("~/components/agents-ui/agent-audio-visualizer-aura", () => ({
-  AgentAudioVisualizerAura: () => <div data-testid="mentor-aura" />,
-}));
-
-vi.mock("~/components/agents-ui/agent-audio-visualizer-wave", () => ({
-  AgentAudioVisualizerWave: () => <div data-testid="mentor-wave" />,
-}));
-
 vi.mock("~/api/queries", () => ({
   useCurrentUserSuspense: vi.fn(() => ({
     data: {
