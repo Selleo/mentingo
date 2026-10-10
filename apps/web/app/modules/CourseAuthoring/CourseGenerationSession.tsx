@@ -1584,6 +1584,11 @@ export const CourseGenerationSession = ({
               targetLabelById={targetLabelById}
               applicationStatusByProposalId={applicationStatusByProposalId}
               readyAssetIds={projection.readyAssetIds}
+              failedOptionalAssetIds={projection.assetTasks
+                .filter(
+                  (asset) => asset.status === "failed" && !asset.request.required && !asset.ready,
+                )
+                .map((asset) => asset.request.assetId)}
               omittedOptionalAssetIds={omittedOptionalAssetIds}
               onOmittedOptionalAssetIdsChange={setOmittedOptionalAssetIds}
             />
