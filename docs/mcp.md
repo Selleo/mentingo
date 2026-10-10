@@ -16,24 +16,48 @@ The tools available to you depend on your current permissions and the features e
 
 You need an active Mentingo account on a deployment containing the MCP feature, the organisation's tenant URL, and a client that supports remote MCP over Streamable HTTP with OAuth authorization-code authentication, PKCE, and dynamic client registration. This guide describes Mentingo's connection flow; it does not certify a particular client or version.
 
-1. In your client's remote MCP connection settings, add a connection named **Mentingo** with this URL:
+Replace `<tenant-host>` below with your organisation's Mentingo host. Use the full endpoint, including `/api/mcp`.
 
-   ```text
-   https://<tenant-host>/api/mcp
-   ```
+### Claude Code
 
-   Replace `<tenant-host>` with your organisation's Mentingo host. Use the full endpoint, including `/api/mcp`.
+Register Mentingo with Claude Code:
 
-2. Start the client's authentication flow. It discovers Mentingo's OAuth metadata and opens the Mentingo connection page.
-3. Sign in to the correct Mentingo account if needed. If the connection page asks you to sign in, complete sign-in and restart the connection from your client.
-4. Review the client name, signed-in account, and redirect address. Choose **Allow** to connect or **Deny** to cancel.
-5. Return to the assistant and ask:
+```sh
+claude mcp add --transport http mentingo https://<tenant-host>/api/mcp
+```
 
-   > Show my available Mentingo capabilities. Do not change any content.
+Start Claude Code and run `/mcp`. Select Mentingo and follow the browser sign-in and consent flow. Check the connection with `claude mcp list`.
 
-   The assistant can use `get_my_capabilities` to report your current access. Ask it to list the courses you can manage if course discovery is available.
+### Codex CLI
+
+Add Mentingo and start OAuth sign-in:
+
+```sh
+codex mcp add mentingo --url https://<tenant-host>/api/mcp
+codex mcp login mentingo
+```
+
+Complete the Mentingo sign-in and consent in the browser, then check the connection with `codex mcp list`.
+
+### Other MCP clients
+
+In your client's remote MCP settings, add a connection named **Mentingo** with this URL:
+
+```text
+https://<tenant-host>/api/mcp
+```
+
+Choose HTTP/Streamable HTTP transport if the client asks. Start its sign-in flow; it should discover Mentingo's OAuth metadata and open the consent page. Sign in to the correct account, review the client and redirect address, then choose **Allow**.
 
 Authentication uses your Mentingo account. You do not need to paste an integration administrator API key into the assistant. Use your client's disconnect controls when finished; clients that support token revocation can use Mentingo's OAuth revocation endpoint.
+
+## Check your access
+
+After connecting, return to the assistant and ask:
+
+> Show my available Mentingo capabilities. Do not change any content.
+
+The assistant can use `get_my_capabilities` to report your current access. Ask it to list the courses you can manage if course discovery is available.
 
 ## Try a first task
 

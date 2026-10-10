@@ -128,28 +128,7 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 ### Use Mentingo with your AI assistant
 
-Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. The assistant can use Mentingo tools to find and manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files. Changes are made in Mentingo with your account's current permissions, so you can review the results in the platform. See the [MCP guide](docs/mcp.md) for setup steps and examples.
-
-#### Claude Code
-
-Add your Mentingo tenant's MCP endpoint:
-
-```sh
-claude mcp add --transport http mentingo https://<tenant-host>/api/mcp
-```
-
-Start Claude Code and run `/mcp`. Select Mentingo and follow the browser sign-in and consent flow. Check the connection with `claude mcp list`.
-
-#### Codex CLI
-
-Add the remote HTTP endpoint, replacing `<tenant-host>` with your Mentingo tenant host:
-
-```sh
-codex mcp add mentingo --url https://<tenant-host>/api/mcp
-codex mcp login mentingo
-```
-
-Complete the Mentingo sign-in and consent in the browser, then check the connection with `codex mcp list`.
+Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. The assistant can use Mentingo tools to find and manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files. Changes are made in Mentingo with your account's current permissions, so you can review the results in the platform. Follow the [MCP guide](docs/mcp.md) to connect your assistant and try it out.
 
 ### Enterprise and white-label readiness
 
