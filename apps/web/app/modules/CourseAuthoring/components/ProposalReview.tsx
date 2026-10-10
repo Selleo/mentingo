@@ -163,6 +163,7 @@ type Props = {
     | "failed";
   attemptedTargetIds?: string[];
   readyAssetIds?: string[];
+  failedOptionalAssetIds?: string[];
   omittedOptionalAssetIds?: string[];
   onOmittedOptionalAssetIdsChange?: (assetIds: string[]) => void;
   selectedProposalIds?: string[];
@@ -870,6 +871,7 @@ export const ProposalReview = ({
   applyState = "idle",
   attemptedTargetIds = [],
   readyAssetIds = [],
+  failedOptionalAssetIds = [],
   omittedOptionalAssetIds,
   onOmittedOptionalAssetIdsChange,
   selectedProposalIds,
@@ -885,7 +887,13 @@ export const ProposalReview = ({
   const [assessmentConfirmationOpen, setAssessmentConfirmationOpen] = useState(false);
   const [applyingSelection, setApplyingSelection] = useState(false);
   const [localOmittedOptionalAssetIds, setLocalOmittedOptionalAssetIds] = useState<string[]>([]);
-  const effectiveOmittedOptionalAssetIds = omittedOptionalAssetIds ?? localOmittedOptionalAssetIds;
+  // Failed supporting images are omitted automatically; pending images still need a decision.
+  const effectiveOmittedOptionalAssetIds = [
+    ...new Set([
+      ...(omittedOptionalAssetIds ?? localOmittedOptionalAssetIds),
+      ...failedOptionalAssetIds.filter((assetId) => !readyAssetIds.includes(assetId)),
+    ]),
+  ];
   const updateOmittedOptionalAssetIds =
     onOmittedOptionalAssetIdsChange ?? setLocalOmittedOptionalAssetIds;
   useEffect(() => {
