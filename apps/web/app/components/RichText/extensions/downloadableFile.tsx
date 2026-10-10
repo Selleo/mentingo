@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
+import { safeEmbedUrl } from "./utils/embedUrl";
 import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
 
 import type { NodeConfig } from "@tiptap/core";
@@ -29,7 +30,7 @@ const normalizeDownloadableFileAttrs = (attrs: {
   src?: string | null;
   name?: string | null;
 }): DownloadableFileAttrs => ({
-  src: typeof attrs.src === "string" ? attrs.src : null,
+  src: safeEmbedUrl(attrs.src),
   name: typeof attrs.name === "string" ? attrs.name : null,
 });
 

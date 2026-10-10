@@ -71,7 +71,7 @@ export class EmailTemplateAssetService {
   async validateEmailTemplateAssets(content: LocalizedEmailTemplateContent, tenantId: UUIDType) {
     const assetIds = new Set(
       Object.values(content).flatMap((document) =>
-        document.content.flatMap((block) => {
+        (document?.content ?? []).flatMap((block) => {
           if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) return [];
           const match = block.attrs.src.match(EMAIL_TEMPLATE_ASSET_PATTERN);
           return match ? [match[1]] : [];

@@ -14,6 +14,7 @@ import { cn } from "~/lib/utils";
 import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 
 import type { UIMessage } from "@ai-sdk/react";
+import type { ReactNode } from "react";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 import "katex/dist/katex.min.css";
 
@@ -21,6 +22,7 @@ interface ChatMessageProps {
   id: string;
   role: "assistant" | "user" | "data" | "system";
   content?: string;
+  contentNode?: ReactNode;
   parts?: UIMessage["parts"];
   user?: { name?: string; email?: string };
   name?: string;
@@ -32,12 +34,14 @@ interface ChatMessageProps {
   messageMaxWidthClass?: string;
   testId?: string;
   contentTestId?: string;
+  contentNodeOwnsSurface?: boolean;
 }
 
 const ChatMessage = ({
   id,
   role,
   content,
+  contentNode,
   parts,
   user,
   name,
@@ -48,6 +52,7 @@ const ChatMessage = ({
   messageMaxWidthClass = "max-w-[90%]",
   testId,
   contentTestId,
+  contentNodeOwnsSurface = false,
 }: ChatMessageProps) => {
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUserSuspense();
@@ -115,20 +120,21 @@ const ChatMessage = ({
           data-testid={contentTestId}
           className={cn(
             "w-fit max-w-full rounded-xl text-sm leading-relaxed break-words text-gray-800",
-            { "px-4 py-2 bg-primary-100": !isAssistant },
+            { "px-4 py-2 bg-primary-100": !isAssistant && !contentNodeOwnsSurface },
           )}
         >
-          {isAssistant ? (
-            <Markdown
-              components={variants}
-              remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
-              rehypePlugins={[rehypeKatex]}
-            >
-              {textContent}
-            </Markdown>
-          ) : (
-            textContent
-          )}
+          {contentNode ??
+            (isAssistant ? (
+              <Markdown
+                components={variants}
+                remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+                rehypePlugins={[rehypeKatex]}
+              >
+                {textContent}
+              </Markdown>
+            ) : (
+              textContent
+            ))}
         </div>
       </div>
     </div>

@@ -33,7 +33,11 @@ export class AdminChapterService {
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async createChapterForCourse(body: CreateChapterBody, currentUser: CurrentUserType) {
+  async createChapterForCourse(
+    body: CreateChapterBody,
+    currentUser: CurrentUserType,
+    language?: SupportedLanguages,
+  ) {
     await this.masterCourseService.assertCourseContentEditable(body.courseId);
     await this.courseFeaturePolicyService.assertCourseFeatureEnabled(
       body.courseId,
@@ -48,10 +52,14 @@ export class AdminChapterService {
         .from(chapters)
         .where(eq(chapters.courseId, body.courseId));
 
-      const { language } = await this.localizationService.getBaseLanguage(
+      const localization = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.COURSE,
         body.courseId,
+        language,
       );
+      if (language && !localization.availableLocales.includes(language))
+        throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+      const resolvedLanguage = localization.language;
 
       if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
         throw new BadRequestException({
@@ -66,13 +74,15 @@ export class AdminChapterService {
           authorId: currentUser.userId,
           title: body.title,
           displayOrder: maxDisplayOrder.displayOrder + 1,
-          language,
+          language: resolvedLanguage,
           isFreemium: body.isFreemium,
         },
         trx,
       );
 
       if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
+
+      await this.adminChapterRepository.updateChapterDisplayOrder(body.courseId, trx);
 
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
 
@@ -81,7 +91,7 @@ export class AdminChapterService {
 
     if (!chapter) throw new BadRequestException("Chapter creation failed");
 
-    const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id);
+    const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id, language);
 
     await this.outboxPublisher.publish(
       new CreateChapterEvent({
@@ -141,9 +151,7 @@ export class AdminChapterService {
       language,
     );
 
-    const oldDisplayOrder = chapterToUpdate.displayOrder;
-
-    if (!chapterToUpdate || oldDisplayOrder === null) {
+    if (!chapterToUpdate || chapterToUpdate.displayOrder === null) {
       throw new NotFoundException("adminCourseView.errors.notFound.chapter");
     }
 
@@ -157,7 +165,6 @@ export class AdminChapterService {
     await this.adminChapterRepository.changeChapterDisplayOrder(
       chapterToUpdate.courseId,
       chapterToUpdate.id,
-      oldDisplayOrder,
       newDisplayOrder,
       language,
     );

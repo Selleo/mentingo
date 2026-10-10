@@ -17,6 +17,7 @@ import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handle
 import type { SupportedLanguages } from "@repo/shared";
 import type { Sortable } from "~/components/SortableList/SortableList";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
+import type { CurriculumReviewDecorations } from "~/modules/CourseAuthoring/review/curriculumReview.types";
 
 type LessonCardListProps = {
   setSelectedLesson: (lesson: Lesson) => void;
@@ -28,6 +29,10 @@ type LessonCardListProps = {
   selectedLesson: Lesson | null;
   language: SupportedLanguages;
   isCourseGenerationLocked: boolean;
+  isReadOnlyPreview?: boolean;
+  onPreviewLessonSelect?: (chapter: Chapter, lesson: Lesson) => void;
+  isPreviewLessonReady?: (lesson: Lesson) => boolean;
+  review?: CurriculumReviewDecorations;
 };
 
 export const LessonCardList = ({
@@ -40,6 +45,10 @@ export const LessonCardList = ({
   selectedLesson,
   language,
   isCourseGenerationLocked,
+  isReadOnlyPreview,
+  onPreviewLessonSelect,
+  isPreviewLessonReady,
+  review,
 }: LessonCardListProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: mutateLessonDisplayOrder } = useChangeLessonDisplayOrder();
@@ -54,7 +63,17 @@ export const LessonCardList = ({
 
   const onClickLessonCard = useCallback(
     (lesson: Lesson) => {
-      if (isCourseGenerationLocked) return;
+      if (isCourseGenerationLocked && !isReadOnlyPreview) return;
+
+      if (isReadOnlyPreview) {
+        if (!isPreviewLessonReady?.(lesson)) return;
+        if (chapter) {
+          setSelectedChapter?.(chapter);
+          onPreviewLessonSelect?.(chapter, lesson);
+        }
+        setSelectedLesson(lesson);
+        return;
+      }
 
       if (isCurrentFormDirty) {
         setPendingLesson(lesson);
@@ -79,6 +98,9 @@ export const LessonCardList = ({
       openLeaveModal,
       setIsLeavingContent,
       isCourseGenerationLocked,
+      isReadOnlyPreview,
+      onPreviewLessonSelect,
+      isPreviewLessonReady,
     ],
   );
 
@@ -132,14 +154,21 @@ export const LessonCardList = ({
             onClickLessonCard={onClickLessonCard}
             selectedLesson={selectedLesson}
             isCourseGenerationLocked={isCourseGenerationLocked}
+            isReadOnlyPreview={isReadOnlyPreview}
+            isPreviewLessonReady={isPreviewLessonReady?.(item)}
+            reviewMarker={review?.lesson(item.id)}
             dragTrigger={
-              <SortableList.DragHandle>
-                <Icon
-                  data-testid={CURRICULUM_HANDLES.lessonDragHandle(item.id)}
-                  name="DragAndDropIcon"
-                  className="cursor-move"
-                />
-              </SortableList.DragHandle>
+              isReadOnlyPreview ? (
+                <span className="size-6 shrink-0" aria-hidden="true" />
+              ) : (
+                <SortableList.DragHandle>
+                  <Icon
+                    data-testid={CURRICULUM_HANDLES.lessonDragHandle(item.id)}
+                    name="DragAndDropIcon"
+                    className="cursor-move"
+                  />
+                </SortableList.DragHandle>
+              )
             }
           />
         </SortableList.Item>

@@ -47,3 +47,13 @@ export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = [
   "image/svg+xml",
   "application/xml",
 ] as const;
+
+/** File ingestion supported by the durable course-authoring source pipeline. */
+export const COURSE_AUTHORING_SOURCE_FILE_TYPES = [
+  ...ALLOWED_PDF_FILE_TYPES,
+  ...ALLOWED_WORD_FILE_TYPES.filter((type) => type !== "application/msword"),
+  "text/plain",
+  "text/markdown",
+  "text/x-markdown",
+] as const;
+export const MAX_COURSE_AUTHORING_SOURCE_SIZE = 25 * 1024 * 1024;

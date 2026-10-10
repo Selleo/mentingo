@@ -25,6 +25,11 @@ export class WsJwtGuard implements CanActivate {
       return true;
     }
 
+    return this.authenticateCurrent(client);
+  }
+
+  /** Revalidate long-lived subscriptions instead of trusting cached socket claims. */
+  async authenticateCurrent(client: AuthenticatedSocket): Promise<boolean> {
     const token = this.extractToken(client);
 
     if (!token) {

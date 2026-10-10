@@ -3120,92 +3120,6 @@ export interface GetCourseOwnershipResponse {
   };
 }
 
-export interface ChatWithCourseGenerationAgentBody {
-  /** @format uuid */
-  integrationId: string;
-  message: {
-    id: string;
-    role: string;
-    parts: any[];
-    [key: string]: any;
-  };
-}
-
-export type GetCourseGenerationMessagesResponse = {
-  /** @format uuid */
-  id: string;
-  /** @format uuid */
-  draftId: string;
-  role: string;
-  content: string;
-  contentType: string;
-  draftMetadata?: object | null;
-  createdAt: string;
-  updatedAt: string;
-}[];
-
-export interface GetCourseGenerationDraftResponse {
-  /** @format uuid */
-  integrationId: string;
-  /** @format uuid */
-  draftId: string;
-  isCourseGenerated: boolean;
-  coreSync: {
-    status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-    draftId: string | null;
-    attemptCount: number;
-    startedAt: string | null;
-    processedAt: string | null;
-    failedAt: string | null;
-    dismissedAt: string | null;
-    lastError: string | null;
-  };
-}
-
-export interface SyncGeneratedCourseBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export interface SyncGeneratedCourseResponse {
-  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-  draftId: string | null;
-  attemptCount: number;
-  startedAt: string | null;
-  processedAt: string | null;
-  failedAt: string | null;
-  dismissedAt: string | null;
-  lastError: string | null;
-}
-
-export interface DismissGeneratedCourseSyncBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export interface DismissGeneratedCourseSyncResponse {
-  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
-  draftId: string | null;
-  attemptCount: number;
-  startedAt: string | null;
-  processedAt: string | null;
-  failedAt: string | null;
-  dismissedAt: string | null;
-  lastError: string | null;
-}
-
-export interface IngestCourseGenerationFilesBody {
-  /** @format uuid */
-  integrationId: string;
-}
-
-export type GetCourseGenerationFilesResponse = {
-  /** @format uuid */
-  id: string;
-  filename: string;
-  contentType: string;
-}[];
-
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -26009,6 +25923,2048 @@ export interface GenerateArticlePreviewResponse {
   };
 }
 
+export interface OpenAuthoringSessionBody {
+  /** @format uuid */
+  commandId: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface OpenAuthoringSessionResponse {
+  data: {
+    reasoningControlAvailable?: boolean;
+    applicationDelta?: {
+      appliedOperationIds: string[];
+      idMappings: object;
+    };
+    schemaVersion: 1;
+    /** @format uuid */
+    sessionId: string;
+    /** @format uuid */
+    courseId: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    status: "active" | "paused" | "stopped" | "discarded";
+    snapshotSequence: number;
+    workspaceRevision: number;
+    records: {
+      /** @format uuid */
+      id: string;
+      kind: string;
+      payload: object;
+    }[];
+    turns?: {
+      /** @format uuid */
+      requestId: string;
+      messageId: string;
+      status: "queued" | "running" | "waiting_author" | "completed" | "failed" | "stopped";
+      taskIds: string[];
+      parts: {
+        /** @format uuid */
+        requestId: string;
+        messageId: string;
+        partId: string;
+        partKind: "text" | "tool" | "proposal" | "question";
+        taskId?: string | null;
+        status: "streaming" | "completed" | "failed" | "stopped" | "review";
+        /** @min 1 */
+        firstSequence: number;
+        /** @min 1 */
+        updatedSequence: number;
+        text?: string | null;
+        /** @maxItems 6 */
+        planSteps?: string[];
+        answer?: string | null;
+        tool?: {
+          toolCallId: string;
+          toolName: string;
+          display: string;
+          status: "started" | "completed" | "failed" | "stopped";
+          result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
+            sourceCount?: number | null;
+            findingCount?: number | null;
+          } | null;
+        } | null;
+        artifact?: {
+          artifactKind: "proposal" | "question";
+          artifactId: string;
+        } | null;
+      }[];
+      /** @min 1 */
+      firstSequence: number;
+      /** @min 0 */
+      updatedSequence: number;
+    }[];
+    hasMoreTurns?: boolean;
+    nextBeforeRequestId?: string | null;
+    tasks: {
+      /** @format uuid */
+      taskId: string;
+      /** @format uuid */
+      requestId: string;
+      kind?:
+        | (
+            | "plan"
+            | "route"
+            | "research"
+            | "detailed_plan"
+            | "lesson"
+            | "edit"
+            | "source"
+            | "asset"
+            | "course_review"
+          )
+        | null;
+      status: string;
+      errorCode: string | null;
+      failure?: {
+        code: string;
+        category:
+          | "generation"
+          | "evidence"
+          | "author_decision"
+          | "provider"
+          | "configuration"
+          | "internal";
+        stage: string;
+        recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+        retryable: boolean;
+        affectedChapterIds: string[];
+        affectedLessonIds: string[];
+        correlationId: string | null;
+        detailKey: string | null;
+        /** @min 0 */
+        generationRevision: number;
+      } | null;
+      outputId: string | null;
+    }[];
+  };
+}
+
+export interface ListAuthoringSessionsResponse {
+  data: {
+    /** @format uuid */
+    sessionId: string;
+    /** @format uuid */
+    courseId: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    status: "active" | "paused" | "stopped" | "discarded";
+    /**
+     * @minLength 1
+     * @maxLength 96
+     */
+    title: string;
+    /** @format date-time */
+    createdAt: string;
+    /** @format date-time */
+    lastActivityAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAuthoringSessionResponse {
+  data: {
+    reasoningControlAvailable?: boolean;
+    applicationDelta?: {
+      appliedOperationIds: string[];
+      idMappings: object;
+    };
+    schemaVersion: 1;
+    /** @format uuid */
+    sessionId: string;
+    /** @format uuid */
+    courseId: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    status: "active" | "paused" | "stopped" | "discarded";
+    snapshotSequence: number;
+    workspaceRevision: number;
+    records: {
+      /** @format uuid */
+      id: string;
+      kind: string;
+      payload: object;
+    }[];
+    turns?: {
+      /** @format uuid */
+      requestId: string;
+      messageId: string;
+      status: "queued" | "running" | "waiting_author" | "completed" | "failed" | "stopped";
+      taskIds: string[];
+      parts: {
+        /** @format uuid */
+        requestId: string;
+        messageId: string;
+        partId: string;
+        partKind: "text" | "tool" | "proposal" | "question";
+        taskId?: string | null;
+        status: "streaming" | "completed" | "failed" | "stopped" | "review";
+        /** @min 1 */
+        firstSequence: number;
+        /** @min 1 */
+        updatedSequence: number;
+        text?: string | null;
+        /** @maxItems 6 */
+        planSteps?: string[];
+        answer?: string | null;
+        tool?: {
+          toolCallId: string;
+          toolName: string;
+          display: string;
+          status: "started" | "completed" | "failed" | "stopped";
+          result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
+            sourceCount?: number | null;
+            findingCount?: number | null;
+          } | null;
+        } | null;
+        artifact?: {
+          artifactKind: "proposal" | "question";
+          artifactId: string;
+        } | null;
+      }[];
+      /** @min 1 */
+      firstSequence: number;
+      /** @min 0 */
+      updatedSequence: number;
+    }[];
+    hasMoreTurns?: boolean;
+    nextBeforeRequestId?: string | null;
+    tasks: {
+      /** @format uuid */
+      taskId: string;
+      /** @format uuid */
+      requestId: string;
+      kind?:
+        | (
+            | "plan"
+            | "route"
+            | "research"
+            | "detailed_plan"
+            | "lesson"
+            | "edit"
+            | "source"
+            | "asset"
+            | "course_review"
+          )
+        | null;
+      status: string;
+      errorCode: string | null;
+      failure?: {
+        code: string;
+        category:
+          | "generation"
+          | "evidence"
+          | "author_decision"
+          | "provider"
+          | "configuration"
+          | "internal";
+        stage: string;
+        recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+        retryable: boolean;
+        affectedChapterIds: string[];
+        affectedLessonIds: string[];
+        correlationId: string | null;
+        detailKey: string | null;
+        /** @min 0 */
+        generationRevision: number;
+      } | null;
+      outputId: string | null;
+    }[];
+  };
+}
+
+export interface GetOlderAuthoringTurnsResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    turns: {
+      /** @format uuid */
+      requestId: string;
+      messageId: string;
+      status: "queued" | "running" | "waiting_author" | "completed" | "failed" | "stopped";
+      taskIds: string[];
+      parts: {
+        /** @format uuid */
+        requestId: string;
+        messageId: string;
+        partId: string;
+        partKind: "text" | "tool" | "proposal" | "question";
+        taskId?: string | null;
+        status: "streaming" | "completed" | "failed" | "stopped" | "review";
+        /** @min 1 */
+        firstSequence: number;
+        /** @min 1 */
+        updatedSequence: number;
+        text?: string | null;
+        /** @maxItems 6 */
+        planSteps?: string[];
+        answer?: string | null;
+        tool?: {
+          toolCallId: string;
+          toolName: string;
+          display: string;
+          status: "started" | "completed" | "failed" | "stopped";
+          result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
+            sourceCount?: number | null;
+            findingCount?: number | null;
+          } | null;
+        } | null;
+        artifact?: {
+          artifactKind: "proposal" | "question";
+          artifactId: string;
+        } | null;
+      }[];
+      /** @min 1 */
+      firstSequence: number;
+      /** @min 0 */
+      updatedSequence: number;
+    }[];
+    records: {
+      /** @format uuid */
+      id: string;
+      kind: string;
+      payload: object;
+    }[];
+    hasMore: boolean;
+    nextBeforeRequestId: string | null;
+  };
+}
+
+export type SendAuthoringCommandBody =
+  | {
+      schemaVersion: 1;
+      /** @format uuid */
+      commandId: string;
+      request?: {
+        /**
+         * @minLength 1
+         * @maxLength 20000
+         */
+        instruction: string;
+        reasoningEffort?: "low" | "medium" | "high";
+        targets: {
+          /** @format uuid */
+          targetId: string;
+          kind: "course" | "chapter" | "lesson" | "block" | "question";
+          language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          baselineHash: string | null;
+          blockIds: string[];
+          questionIds?: string[];
+          allowedFields: string[];
+        }[];
+        sourcePolicy: {
+          sourceVersionIds: string[];
+          webEnabled: boolean;
+          generalKnowledgeEnabled: boolean;
+          researchDepth: "standard" | "deep";
+          requiredSectionIds: string[];
+          excludedSectionIds: string[];
+        };
+        attachedSourceVersionIds?: string[];
+        exactOutline?:
+          | {
+              /** @format uuid */
+              id: string;
+              title: string;
+              lessons: {
+                /** @format uuid */
+                id: string;
+                title: string;
+                lessonType: "content" | "quiz" | "ai_mentor";
+                objectives: string[];
+                sourceVersionIds?: string[] | null;
+                coverageNotes?: string | null;
+                requiredSectionIds?: string[];
+              }[];
+            }[]
+          | null;
+      };
+      /** @format uuid */
+      targetId?: string;
+      /** @format uuid */
+      replacementSourceVersionId?: string;
+      /** @min 0 */
+      expectedRevision?: number;
+      answer?: string;
+      acceptQualityConcerns?: boolean;
+      operations?: (
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.create" | "lesson.update";
+            /** @format uuid */
+            chapterId: string;
+            /** @min 0 */
+            displayOrder?: number;
+            payload:
+              | {
+                  lessonType: "content";
+                  title: string;
+                  description: string;
+                }
+              | {
+                  lessonType: "quiz";
+                  title: string;
+                  description: string;
+                  /**
+                   * @min 0
+                   * @max 100
+                   */
+                  thresholdScore: number;
+                  attemptsLimit: number | null;
+                  quizCooldownInHours: number | null;
+                  /** @minItems 1 */
+                  questions: {
+                    /** @format uuid */
+                    id: string;
+                    questionType:
+                      | "single_choice"
+                      | "multiple_choice"
+                      | "true_or_false"
+                      | "photo_question_single_choice"
+                      | "photo_question_multiple_choice"
+                      | "fill_in_the_blanks_text"
+                      | "fill_in_the_blanks_dnd"
+                      | "brief_response"
+                      | "detailed_response"
+                      | "scale_1_5";
+                    /** @min 0 */
+                    displayOrder: number;
+                    /** @pattern ^\d+(\.\d+)?$ */
+                    maximumPoints: string;
+                    gradingMode: "automatic" | "manual" | "participation";
+                    prompt: string;
+                    title: string;
+                    description: string | null;
+                    photoS3Key: string | null;
+                    options: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      isCorrect: boolean;
+                      label: string;
+                    }[];
+                    trueFalseStatements: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      correctValue: boolean;
+                      statement: string;
+                    }[];
+                    scaleOptions: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      /**
+                       * @min 1
+                       * @max 5
+                       */
+                      scaleValue: number;
+                      label: string;
+                    }[];
+                    openTextSettings: {
+                      minimumCharacters: number | null;
+                      maximumCharacters: number | null;
+                      reviewerInstructions: string | null;
+                    } | null;
+                    blanks: {
+                      /** @format uuid */
+                      id: string;
+                      textComparisonMode: "exact" | "normalized";
+                      answerSets: {
+                        preferredAnswer: string;
+                        acceptedAnswers: string[];
+                      }[];
+                    }[];
+                    dragAndDropOptions: {
+                      /** @format uuid */
+                      id: string;
+                      label: string;
+                      targetBlankId: string | null;
+                      /** @min 0 */
+                      displayOrder: number;
+                    }[];
+                  }[];
+                }
+              | (
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "teacher";
+                      configuration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /** @minLength 1 */
+                        expertise: string;
+                        /** @minLength 1 */
+                        contentScope: string;
+                        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                        feedbackGuidance: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "roleplay";
+                      configuration: {
+                        /** @minLength 1 */
+                        scenario: string;
+                        /** @minLength 1 */
+                        aiRole: string;
+                        /** @minLength 1 */
+                        learnerRole: string;
+                        /** @minLength 1 */
+                        characterGoal: string;
+                        difficulty: "cooperative" | "realistic" | "challenging";
+                        factsAndConstraints: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                );
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.metadata.update";
+            payload: {
+              title?: string | null;
+              description?: string | null;
+              learningOutcomes?: string[] | null;
+              thumbnailAssetId?: string | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.settings.update";
+            payload: {
+              lessonSequenceEnabled?: boolean;
+              quizFeedbackEnabled?: boolean;
+              videoCompletionTrackingEnabled?: boolean;
+              certificateFontColor?: string;
+              certificateValidity?:
+                | {
+                    type: "period";
+                    /** @min 1 */
+                    value: number;
+                    unit: "days" | "months" | "years";
+                  }
+                | {
+                    type: "fixed_date";
+                    date: string;
+                  }
+                | null;
+              applyValidityToExistingCertificates?: boolean;
+              removeCertificateSignature?: boolean;
+              /** @format uuid */
+              certificateSignatureAssetId?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.block.replace";
+            payload: {
+              /** @format uuid */
+              blockId: string;
+              html: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.create" | "chapter.update";
+            payload: {
+              title: string;
+              /** @min 0 */
+              displayOrder: number;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.delete" | "lesson.delete";
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.reorder" | "lesson.reorder";
+            payload: {
+              /** @uniqueItems true */
+              orderedIds: string[];
+            };
+          }
+      )[];
+      sourcePolicy?: {
+        sourceVersionIds: string[];
+        webEnabled: boolean;
+        generalKnowledgeEnabled: boolean;
+        researchDepth: "standard" | "deep";
+        requiredSectionIds: string[];
+        excludedSectionIds: string[];
+      };
+      action: "source.refresh";
+      /**
+       * @maxItems 100
+       * @minItems 1
+       * @uniqueItems true
+       */
+      selectedTaskIds?: string[];
+    }
+  | {
+      schemaVersion: 1;
+      /** @format uuid */
+      commandId: string;
+      request?: {
+        /**
+         * @minLength 1
+         * @maxLength 20000
+         */
+        instruction: string;
+        reasoningEffort?: "low" | "medium" | "high";
+        targets: {
+          /** @format uuid */
+          targetId: string;
+          kind: "course" | "chapter" | "lesson" | "block" | "question";
+          language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          baselineHash: string | null;
+          blockIds: string[];
+          questionIds?: string[];
+          allowedFields: string[];
+        }[];
+        sourcePolicy: {
+          sourceVersionIds: string[];
+          webEnabled: boolean;
+          generalKnowledgeEnabled: boolean;
+          researchDepth: "standard" | "deep";
+          requiredSectionIds: string[];
+          excludedSectionIds: string[];
+        };
+        attachedSourceVersionIds?: string[];
+        exactOutline?:
+          | {
+              /** @format uuid */
+              id: string;
+              title: string;
+              lessons: {
+                /** @format uuid */
+                id: string;
+                title: string;
+                lessonType: "content" | "quiz" | "ai_mentor";
+                objectives: string[];
+                sourceVersionIds?: string[] | null;
+                coverageNotes?: string | null;
+                requiredSectionIds?: string[];
+              }[];
+            }[]
+          | null;
+      };
+      /** @format uuid */
+      targetId?: string;
+      /** @format uuid */
+      replacementSourceVersionId?: string;
+      /** @min 0 */
+      expectedRevision?: number;
+      answer?: string;
+      acceptQualityConcerns?: boolean;
+      operations?: (
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.create" | "lesson.update";
+            /** @format uuid */
+            chapterId: string;
+            /** @min 0 */
+            displayOrder?: number;
+            payload:
+              | {
+                  lessonType: "content";
+                  title: string;
+                  description: string;
+                }
+              | {
+                  lessonType: "quiz";
+                  title: string;
+                  description: string;
+                  /**
+                   * @min 0
+                   * @max 100
+                   */
+                  thresholdScore: number;
+                  attemptsLimit: number | null;
+                  quizCooldownInHours: number | null;
+                  /** @minItems 1 */
+                  questions: {
+                    /** @format uuid */
+                    id: string;
+                    questionType:
+                      | "single_choice"
+                      | "multiple_choice"
+                      | "true_or_false"
+                      | "photo_question_single_choice"
+                      | "photo_question_multiple_choice"
+                      | "fill_in_the_blanks_text"
+                      | "fill_in_the_blanks_dnd"
+                      | "brief_response"
+                      | "detailed_response"
+                      | "scale_1_5";
+                    /** @min 0 */
+                    displayOrder: number;
+                    /** @pattern ^\d+(\.\d+)?$ */
+                    maximumPoints: string;
+                    gradingMode: "automatic" | "manual" | "participation";
+                    prompt: string;
+                    title: string;
+                    description: string | null;
+                    photoS3Key: string | null;
+                    options: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      isCorrect: boolean;
+                      label: string;
+                    }[];
+                    trueFalseStatements: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      correctValue: boolean;
+                      statement: string;
+                    }[];
+                    scaleOptions: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      /**
+                       * @min 1
+                       * @max 5
+                       */
+                      scaleValue: number;
+                      label: string;
+                    }[];
+                    openTextSettings: {
+                      minimumCharacters: number | null;
+                      maximumCharacters: number | null;
+                      reviewerInstructions: string | null;
+                    } | null;
+                    blanks: {
+                      /** @format uuid */
+                      id: string;
+                      textComparisonMode: "exact" | "normalized";
+                      answerSets: {
+                        preferredAnswer: string;
+                        acceptedAnswers: string[];
+                      }[];
+                    }[];
+                    dragAndDropOptions: {
+                      /** @format uuid */
+                      id: string;
+                      label: string;
+                      targetBlankId: string | null;
+                      /** @min 0 */
+                      displayOrder: number;
+                    }[];
+                  }[];
+                }
+              | (
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "teacher";
+                      configuration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /** @minLength 1 */
+                        expertise: string;
+                        /** @minLength 1 */
+                        contentScope: string;
+                        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                        feedbackGuidance: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "roleplay";
+                      configuration: {
+                        /** @minLength 1 */
+                        scenario: string;
+                        /** @minLength 1 */
+                        aiRole: string;
+                        /** @minLength 1 */
+                        learnerRole: string;
+                        /** @minLength 1 */
+                        characterGoal: string;
+                        difficulty: "cooperative" | "realistic" | "challenging";
+                        factsAndConstraints: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                );
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.metadata.update";
+            payload: {
+              title?: string | null;
+              description?: string | null;
+              learningOutcomes?: string[] | null;
+              thumbnailAssetId?: string | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.settings.update";
+            payload: {
+              lessonSequenceEnabled?: boolean;
+              quizFeedbackEnabled?: boolean;
+              videoCompletionTrackingEnabled?: boolean;
+              certificateFontColor?: string;
+              certificateValidity?:
+                | {
+                    type: "period";
+                    /** @min 1 */
+                    value: number;
+                    unit: "days" | "months" | "years";
+                  }
+                | {
+                    type: "fixed_date";
+                    date: string;
+                  }
+                | null;
+              applyValidityToExistingCertificates?: boolean;
+              removeCertificateSignature?: boolean;
+              /** @format uuid */
+              certificateSignatureAssetId?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.block.replace";
+            payload: {
+              /** @format uuid */
+              blockId: string;
+              html: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.create" | "chapter.update";
+            payload: {
+              title: string;
+              /** @min 0 */
+              displayOrder: number;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.delete" | "lesson.delete";
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.reorder" | "lesson.reorder";
+            payload: {
+              /** @uniqueItems true */
+              orderedIds: string[];
+            };
+          }
+      )[];
+      sourcePolicy?: {
+        sourceVersionIds: string[];
+        webEnabled: boolean;
+        generalKnowledgeEnabled: boolean;
+        researchDepth: "standard" | "deep";
+        requiredSectionIds: string[];
+        excludedSectionIds: string[];
+      };
+      action: "proposal.regenerate";
+      /**
+       * @minLength 1
+       * @maxLength 2000
+       */
+      feedback?: string;
+    }
+  | {
+      schemaVersion: 1;
+      /** @format uuid */
+      commandId: string;
+      request?: {
+        /**
+         * @minLength 1
+         * @maxLength 20000
+         */
+        instruction: string;
+        reasoningEffort?: "low" | "medium" | "high";
+        targets: {
+          /** @format uuid */
+          targetId: string;
+          kind: "course" | "chapter" | "lesson" | "block" | "question";
+          language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          baselineHash: string | null;
+          blockIds: string[];
+          questionIds?: string[];
+          allowedFields: string[];
+        }[];
+        sourcePolicy: {
+          sourceVersionIds: string[];
+          webEnabled: boolean;
+          generalKnowledgeEnabled: boolean;
+          researchDepth: "standard" | "deep";
+          requiredSectionIds: string[];
+          excludedSectionIds: string[];
+        };
+        attachedSourceVersionIds?: string[];
+        exactOutline?:
+          | {
+              /** @format uuid */
+              id: string;
+              title: string;
+              lessons: {
+                /** @format uuid */
+                id: string;
+                title: string;
+                lessonType: "content" | "quiz" | "ai_mentor";
+                objectives: string[];
+                sourceVersionIds?: string[] | null;
+                coverageNotes?: string | null;
+                requiredSectionIds?: string[];
+              }[];
+            }[]
+          | null;
+      };
+      /** @format uuid */
+      targetId?: string;
+      /** @format uuid */
+      replacementSourceVersionId?: string;
+      /** @min 0 */
+      expectedRevision?: number;
+      answer?: string;
+      acceptQualityConcerns?: boolean;
+      operations?: (
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.create" | "lesson.update";
+            /** @format uuid */
+            chapterId: string;
+            /** @min 0 */
+            displayOrder?: number;
+            payload:
+              | {
+                  lessonType: "content";
+                  title: string;
+                  description: string;
+                }
+              | {
+                  lessonType: "quiz";
+                  title: string;
+                  description: string;
+                  /**
+                   * @min 0
+                   * @max 100
+                   */
+                  thresholdScore: number;
+                  attemptsLimit: number | null;
+                  quizCooldownInHours: number | null;
+                  /** @minItems 1 */
+                  questions: {
+                    /** @format uuid */
+                    id: string;
+                    questionType:
+                      | "single_choice"
+                      | "multiple_choice"
+                      | "true_or_false"
+                      | "photo_question_single_choice"
+                      | "photo_question_multiple_choice"
+                      | "fill_in_the_blanks_text"
+                      | "fill_in_the_blanks_dnd"
+                      | "brief_response"
+                      | "detailed_response"
+                      | "scale_1_5";
+                    /** @min 0 */
+                    displayOrder: number;
+                    /** @pattern ^\d+(\.\d+)?$ */
+                    maximumPoints: string;
+                    gradingMode: "automatic" | "manual" | "participation";
+                    prompt: string;
+                    title: string;
+                    description: string | null;
+                    photoS3Key: string | null;
+                    options: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      isCorrect: boolean;
+                      label: string;
+                    }[];
+                    trueFalseStatements: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      correctValue: boolean;
+                      statement: string;
+                    }[];
+                    scaleOptions: {
+                      /** @format uuid */
+                      id: string;
+                      /** @min 0 */
+                      displayOrder: number;
+                      /**
+                       * @min 1
+                       * @max 5
+                       */
+                      scaleValue: number;
+                      label: string;
+                    }[];
+                    openTextSettings: {
+                      minimumCharacters: number | null;
+                      maximumCharacters: number | null;
+                      reviewerInstructions: string | null;
+                    } | null;
+                    blanks: {
+                      /** @format uuid */
+                      id: string;
+                      textComparisonMode: "exact" | "normalized";
+                      answerSets: {
+                        preferredAnswer: string;
+                        acceptedAnswers: string[];
+                      }[];
+                    }[];
+                    dragAndDropOptions: {
+                      /** @format uuid */
+                      id: string;
+                      label: string;
+                      targetBlankId: string | null;
+                      /** @min 0 */
+                      displayOrder: number;
+                    }[];
+                  }[];
+                }
+              | (
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "teacher";
+                      configuration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /** @minLength 1 */
+                        expertise: string;
+                        /** @minLength 1 */
+                        contentScope: string;
+                        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+                        feedbackGuidance: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                  | {
+                      lessonType: "ai_mentor";
+                      title: string;
+                      description: string;
+                      name: string;
+                      judgeConfiguration: {
+                        /** @minLength 1 */
+                        taskGoal: string;
+                        /**
+                         * @min 0
+                         * @max 100
+                         */
+                        passingThresholdPercent: number;
+                        criteria: {
+                          /** @minLength 1 */
+                          title: string;
+                          /** @minLength 1 */
+                          expectedBehavior: string;
+                          /**
+                           * @min 1
+                           * @max 5
+                           */
+                          maxScore: number;
+                          scoreGuidance: {
+                            /** @min 0 */
+                            score: number;
+                            /** @minLength 1 */
+                            description: string;
+                            example: string | null;
+                          }[];
+                          /** @pattern ^C[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                        blockingErrors: {
+                          description: string;
+                          /** @pattern ^B[1-9]\d*$ */
+                          ref: string;
+                        }[];
+                      } | null;
+                      sourceVersionIds: string[];
+                      avatarAssetId: string | null;
+                      voiceMode?: "preset" | "custom" | null;
+                      ttsPreset?: "male" | "female" | null;
+                      customTtsReference?: string | null;
+                      preparedResourceIds: string[];
+                      configurationType: "roleplay";
+                      configuration: {
+                        /** @minLength 1 */
+                        scenario: string;
+                        /** @minLength 1 */
+                        aiRole: string;
+                        /** @minLength 1 */
+                        learnerRole: string;
+                        /** @minLength 1 */
+                        characterGoal: string;
+                        difficulty: "cooperative" | "realistic" | "challenging";
+                        factsAndConstraints: string | null;
+                        openingInstruction: string | null;
+                        additionalInstructions: string | null;
+                      };
+                    }
+                );
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.metadata.update";
+            payload: {
+              /** @minLength 1 */
+              title?: string;
+              description?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.metadata.update";
+            payload: {
+              title?: string | null;
+              description?: string | null;
+              learningOutcomes?: string[] | null;
+              thumbnailAssetId?: string | null;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "course.settings.update";
+            payload: {
+              lessonSequenceEnabled?: boolean;
+              quizFeedbackEnabled?: boolean;
+              videoCompletionTrackingEnabled?: boolean;
+              certificateFontColor?: string;
+              certificateValidity?:
+                | {
+                    type: "period";
+                    /** @min 1 */
+                    value: number;
+                    unit: "days" | "months" | "years";
+                  }
+                | {
+                    type: "fixed_date";
+                    date: string;
+                  }
+                | null;
+              applyValidityToExistingCertificates?: boolean;
+              removeCertificateSignature?: boolean;
+              /** @format uuid */
+              certificateSignatureAssetId?: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "lesson.block.replace";
+            payload: {
+              /** @format uuid */
+              blockId: string;
+              html: string;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.create" | "chapter.update";
+            payload: {
+              title: string;
+              /** @min 0 */
+              displayOrder: number;
+            };
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.delete" | "lesson.delete";
+          }
+        | {
+            /** @format uuid */
+            operationId: string;
+            /** @format uuid */
+            targetId: string;
+            language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+            baselineHash: string | null;
+            dependencies: string[];
+            fieldBaselines?: object;
+            type: "chapter.reorder" | "lesson.reorder";
+            payload: {
+              /** @uniqueItems true */
+              orderedIds: string[];
+            };
+          }
+      )[];
+      sourcePolicy?: {
+        sourceVersionIds: string[];
+        webEnabled: boolean;
+        generalKnowledgeEnabled: boolean;
+        researchDepth: "standard" | "deep";
+        requiredSectionIds: string[];
+        excludedSectionIds: string[];
+      };
+      action:
+        | "request.create"
+        | "session.pause"
+        | "session.resume"
+        | "session.stop"
+        | "request.stop"
+        | "request.discard"
+        | "task.retry"
+        | "question.answer"
+        | "proposal.accept"
+        | "proposal.reject"
+        | "draft.edit"
+        | "draft.discard"
+        | "sources.select"
+        | "asset.retry_submission";
+    }
+  | {
+      schemaVersion: 1;
+      /** @format uuid */
+      commandId: string;
+      action: "proposal.review";
+      /**
+       * @maxItems 100
+       * @minItems 1
+       */
+      reviews: {
+        /** @format uuid */
+        proposalId: string;
+        /** @min 1 */
+        expectedRevision: number;
+        accepted: boolean;
+        acceptQualityConcerns?: boolean;
+      }[];
+      /** @format uuid */
+      requestId?: string;
+    }
+  | {
+      schemaVersion: 1;
+      /** @format uuid */
+      commandId: string;
+      action: "proposal.regenerate.batch";
+      /**
+       * @maxItems 100
+       * @minItems 1
+       */
+      regenerations: {
+        /** @format uuid */
+        targetId: string;
+        /** @min 1 */
+        expectedRevision: number;
+        /**
+         * @minLength 1
+         * @maxLength 2000
+         */
+        feedback: string;
+      }[];
+    };
+
+export interface SendAuthoringCommandResponse {
+  data: {
+    /** @format uuid */
+    commandId: string;
+    hash: string;
+    acceptedSequence: number;
+    workspaceRevision: number;
+    requestId: string | null;
+    taskIds: string[] | null;
+    refreshId?: string | null;
+    refreshStatus?: "refreshed" | "needs_mapping" | null;
+  };
+}
+
+export interface ApplyAuthoringProposalsBody {
+  /** @format uuid */
+  commandId: string;
+  /** @minItems 1 */
+  proposalIds: string[];
+  omitOptionalAssetIds?: string[];
+  acknowledgeAssessmentChanges?: boolean;
+}
+
+export interface ApplyAuthoringProposalsResponse {
+  data: {
+    /** @format uuid */
+    exportId: string;
+    status: "queued" | "running" | "applied" | "failed" | "conflict";
+    receipt?: {
+      /** @format uuid */
+      applicationId: string;
+      exportHash: string;
+      status: "applied";
+      /** @format uuid */
+      exportId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      sessionId: string;
+      appliedOperationIds: string[];
+      entityMappings: object;
+      assetMappings: object;
+    };
+    reason?: string;
+  };
+}
+
+export interface GetAuthoringApplicationResponse {
+  data: {
+    /** @format uuid */
+    exportId: string;
+    status: "queued" | "running" | "applied" | "failed" | "conflict";
+    receipt?: {
+      /** @format uuid */
+      applicationId: string;
+      exportHash: string;
+      status: "applied";
+      /** @format uuid */
+      exportId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      sessionId: string;
+      appliedOperationIds: string[];
+      entityMappings: object;
+      assetMappings: object;
+    };
+    reason?: string;
+  };
+}
+
+export interface UploadAuthoringSourceResponse {
+  data: {
+    /** @format uuid */
+    sourceVersionId: string;
+    checksum: string;
+    /** @format uuid */
+    taskId: string;
+    status: string;
+  };
+}
+
+export interface GetAuthoringEventsResponse {
+  data: {
+    events: {
+      schemaVersion: 1;
+      /** @format uuid */
+      eventId: string;
+      /** @format uuid */
+      sessionId: string;
+      sequence: number;
+      occurredAt: string;
+      type: string;
+      payload: object;
+    }[];
+    nextSequence: number;
+    hasMore: boolean;
+  };
+}
+
+export interface GetAuthoringCourseContextResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    course: {
+      /** @format uuid */
+      id: string;
+      status: "draft" | "published" | "private";
+      title: string;
+      description: string;
+      learningOutcomes: string[];
+      settings: {
+        /** @default false */
+        lessonSequenceEnabled: boolean;
+        /** @default true */
+        quizFeedbackEnabled: boolean;
+        /** @default true */
+        videoCompletionTrackingEnabled?: boolean;
+        /** @default "#000000" */
+        certificateFontColor: string | null;
+        /** @default null */
+        certificateValidity:
+          | (
+              | {
+                  type: "period";
+                  /** @min 1 */
+                  value: number;
+                  unit: "days" | "months" | "years";
+                }
+              | {
+                  type: "fixedDate";
+                  /** @format date */
+                  date: string;
+                }
+            )
+          | null;
+      };
+      allowedFields: string[];
+    };
+    title: string;
+    description: string;
+    baselineHash: string;
+    fieldHashes: object;
+    chapters: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      /** Zero-based visible sibling position; native persisted ranks are kept in baselines. */
+      displayOrder: number | null;
+      baselineHash: string;
+      deletionBaselineHash: string;
+      lessons: {
+        /** @format uuid */
+        id: string;
+        title: string;
+        lessonType: string;
+        /** @min 0 */
+        assessmentAttemptCount: number;
+        /** Zero-based visible sibling position; native persisted ranks are kept in baselines. */
+        displayOrder: number | null;
+        baselineHash: string;
+        description?: string;
+        quiz?: {
+          lessonType: "quiz";
+          title: string;
+          description: string;
+          /**
+           * @min 0
+           * @max 100
+           */
+          thresholdScore: number;
+          attemptsLimit: number | null;
+          quizCooldownInHours: number | null;
+          /** @minItems 1 */
+          questions: {
+            /** @format uuid */
+            id: string;
+            questionType:
+              | "single_choice"
+              | "multiple_choice"
+              | "true_or_false"
+              | "photo_question_single_choice"
+              | "photo_question_multiple_choice"
+              | "fill_in_the_blanks_text"
+              | "fill_in_the_blanks_dnd"
+              | "brief_response"
+              | "detailed_response"
+              | "scale_1_5";
+            /** @min 0 */
+            displayOrder: number;
+            /** @pattern ^\d+(\.\d+)?$ */
+            maximumPoints: string;
+            gradingMode: "automatic" | "manual" | "participation";
+            prompt: string;
+            title: string;
+            description: string | null;
+            photoS3Key: string | null;
+            options: {
+              /** @format uuid */
+              id: string;
+              /** @min 0 */
+              displayOrder: number;
+              isCorrect: boolean;
+              label: string;
+            }[];
+            trueFalseStatements: {
+              /** @format uuid */
+              id: string;
+              /** @min 0 */
+              displayOrder: number;
+              correctValue: boolean;
+              statement: string;
+            }[];
+            scaleOptions: {
+              /** @format uuid */
+              id: string;
+              /** @min 0 */
+              displayOrder: number;
+              /**
+               * @min 1
+               * @max 5
+               */
+              scaleValue: number;
+              label: string;
+            }[];
+            openTextSettings: {
+              minimumCharacters: number | null;
+              maximumCharacters: number | null;
+              reviewerInstructions: string | null;
+            } | null;
+            blanks: {
+              /** @format uuid */
+              id: string;
+              textComparisonMode: "exact" | "normalized";
+              answerSets: {
+                preferredAnswer: string;
+                acceptedAnswers: string[];
+              }[];
+            }[];
+            dragAndDropOptions: {
+              /** @format uuid */
+              id: string;
+              label: string;
+              targetBlankId: string | null;
+              /** @min 0 */
+              displayOrder: number;
+            }[];
+          }[];
+        };
+        mentorConfiguration?:
+          | {
+              /** @format uuid */
+              id: string;
+              /** @format uuid */
+              aiMentorLessonId: string;
+              needsConfiguration: boolean;
+              hasMissingTranslations: boolean;
+              /** @default "en" */
+              language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+              /** @default "en" */
+              baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+              availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+              type: "teacher";
+              taskGoal: string;
+              expertise: string;
+              contentScope: string;
+              teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+              feedbackGuidance: string | null;
+              openingInstruction: string | null;
+              additionalInstructions: string | null;
+            }
+          | {
+              /** @format uuid */
+              id: string;
+              /** @format uuid */
+              aiMentorLessonId: string;
+              needsConfiguration: boolean;
+              hasMissingTranslations: boolean;
+              /** @default "en" */
+              language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+              /** @default "en" */
+              baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+              availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+              type: "roleplay";
+              scenario: string;
+              aiRole: string;
+              learnerRole: string;
+              characterGoal: string;
+              difficulty: "cooperative" | "realistic" | "challenging";
+              factsAndConstraints: string | null;
+              openingInstruction: string | null;
+              additionalInstructions: string | null;
+            };
+        judgeConfiguration?: {
+          /** @format uuid */
+          id: string;
+          /** @format uuid */
+          aiMentorLessonId: string;
+          hasMissingTranslations: boolean;
+          taskGoal: string;
+          /**
+           * @min 0
+           * @max 100
+           */
+          passingThresholdPercent: number;
+          /** @min 0 */
+          totalMaxScore: number;
+          criteria: {
+            /** @format uuid */
+            id: string;
+            title: string;
+            expectedBehavior: string;
+            /**
+             * @min 1
+             * @max 5
+             */
+            maxScore: number;
+            scoreGuidance: {
+              /** @format uuid */
+              id: string;
+              /** @min 0 */
+              score: number;
+              description: string;
+              example: string | null;
+            }[];
+          }[];
+          blockingErrors: {
+            /** @format uuid */
+            id: string;
+            description: string;
+          }[];
+          language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es" | "fr")[];
+        } | null;
+        blocks?: {
+          /** @format uuid */
+          id: string;
+          html: string;
+          baselineHash: string;
+        }[];
+      }[];
+    }[];
+  };
+}
+
+export interface GetAuthoringLinkPreviewResponse {
+  data: {
+    /** @maxLength 2048 */
+    url: string;
+    /** @maxLength 2048 */
+    finalUrl: string;
+    /** @maxLength 255 */
+    domain: string;
+    title: string | null;
+    description: string | null;
+    siteName: string | null;
+    imageUrl: string | null;
+    faviconUrl: string | null;
+  };
+}
+
 export interface GetPhishingConfigurationResponse {
   data: {
     enabled: boolean;
@@ -29928,156 +31884,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LumaControllerChatWithCourseGenerationAgent
-     * @request POST:/api/luma/course-generation/chat
-     */
-    lumaControllerChatWithCourseGenerationAgent: (
-      data: ChatWithCourseGenerationAgentBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/luma/course-generation/chat`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerGetCourseGenerationMessages
-     * @request GET:/api/luma/course-generation/messages
-     */
-    lumaControllerGetCourseGenerationMessages: (
-      query?: {
-        /** @format uuid */
-        integrationId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetCourseGenerationMessagesResponse, any>({
-        path: `/api/luma/course-generation/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerGetCourseGenerationDraft
-     * @request GET:/api/luma/course-generation/draft
-     */
-    lumaControllerGetCourseGenerationDraft: (
-      query?: {
-        /** @format uuid */
-        integrationId?: string;
-        /** @minLength 1 */
-        draftName?: string;
-        courseLanguage?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetCourseGenerationDraftResponse, any>({
-        path: `/api/luma/course-generation/draft`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerSyncGeneratedCourse
-     * @request POST:/api/luma/course-generation/sync
-     */
-    lumaControllerSyncGeneratedCourse: (
-      data: SyncGeneratedCourseBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SyncGeneratedCourseResponse, any>({
-        path: `/api/luma/course-generation/sync`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerDismissGeneratedCourseSync
-     * @request POST:/api/luma/course-generation/sync/dismiss
-     */
-    lumaControllerDismissGeneratedCourseSync: (
-      data: DismissGeneratedCourseSyncBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<DismissGeneratedCourseSyncResponse, any>({
-        path: `/api/luma/course-generation/sync/dismiss`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerIngestCourseGenerationFiles
-     * @request POST:/api/luma/course-generation/files/ingest
-     */
-    lumaControllerIngestCourseGenerationFiles: (
-      data: IngestCourseGenerationFilesBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/luma/course-generation/files/ingest`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerDeleteIngestedCourseGenerationFile
-     * @request DELETE:/api/luma/course-generation/files/{integrationId}/{documentId}
-     */
-    lumaControllerDeleteIngestedCourseGenerationFile: (
-      integrationId: string,
-      documentId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/luma/course-generation/files/${integrationId}/${documentId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LumaControllerGetCourseGenerationFiles
-     * @request GET:/api/luma/course-generation/files/{integrationId}
-     */
-    lumaControllerGetCourseGenerationFiles: (integrationId: string, params: RequestParams = {}) =>
-      this.request<GetCourseGenerationFilesResponse, any>({
-        path: `/api/luma/course-generation/files/${integrationId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -30234,10 +32040,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     lessonControllerGetLessonById: (
       id: string,
-      query: {
+      query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-        studentId: string;
+        studentId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -36100,6 +37906,275 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerOpenAuthoringSession
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions
+     */
+    courseAuthoringControllerOpenAuthoringSession: (
+      courseId: string,
+      data: OpenAuthoringSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<OpenAuthoringSessionResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerListAuthoringSessions
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions
+     */
+    courseAuthoringControllerListAuthoringSessions: (
+      courseId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        keyword?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListAuthoringSessionsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringSession
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}
+     */
+    courseAuthoringControllerGetAuthoringSession: (
+      courseId: string,
+      sessionId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringSessionResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetOlderAuthoringTurns
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/turns
+     */
+    courseAuthoringControllerGetOlderAuthoringTurns: (
+      courseId: string,
+      sessionId: string,
+      query?: {
+        /** @format uuid */
+        beforeRequestId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetOlderAuthoringTurnsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/turns`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerSendAuthoringCommand
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/commands
+     */
+    courseAuthoringControllerSendAuthoringCommand: (
+      courseId: string,
+      sessionId: string,
+      data: SendAuthoringCommandBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendAuthoringCommandResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/commands`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerPreviewAuthoringAsset
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/assets/{assetId}
+     */
+    courseAuthoringControllerPreviewAuthoringAsset: (
+      courseId: string,
+      sessionId: string,
+      assetId: string,
+      query?: {
+        /** @min 1 */
+        revision?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<File, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/assets/${assetId}`,
+        method: "GET",
+        query: query,
+        format: "blob",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerApplyAuthoringProposals
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications
+     */
+    courseAuthoringControllerApplyAuthoringProposals: (
+      courseId: string,
+      sessionId: string,
+      data: ApplyAuthoringProposalsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApplyAuthoringProposalsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringApplication
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/applications/{exportId}
+     */
+    courseAuthoringControllerGetAuthoringApplication: (
+      courseId: string,
+      sessionId: string,
+      exportId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringApplicationResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/applications/${exportId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerUploadAuthoringSource
+     * @request POST:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/sources
+     */
+    courseAuthoringControllerUploadAuthoringSource: (
+      courseId: string,
+      sessionId: string,
+      data: {
+        /** @format uuid */
+        commandId: string;
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadAuthoringSourceResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/sources`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringEvents
+     * @request GET:/api/luma/authoring/courses/{courseId}/sessions/{sessionId}/events
+     */
+    courseAuthoringControllerGetAuthoringEvents: (
+      courseId: string,
+      sessionId: string,
+      query?: {
+        /** @min 0 */
+        afterSequence?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringEventsResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/sessions/${sessionId}/events`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringControllerGetAuthoringCourseContext
+     * @request GET:/api/luma/authoring/courses/{courseId}/context
+     */
+    courseAuthoringControllerGetAuthoringCourseContext: (
+      courseId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        lessonIds?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringCourseContextResponse, any>({
+        path: `/api/luma/authoring/courses/${courseId}/context`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringLinkPreviewControllerGetAuthoringLinkPreview
+     * @request GET:/api/luma/authoring/link-preview
+     */
+    courseAuthoringLinkPreviewControllerGetAuthoringLinkPreview: (
+      query: {
+        /**
+         * @minLength 1
+         * @maxLength 2048
+         */
+        url: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAuthoringLinkPreviewResponse, any>({
+        path: `/api/luma/authoring/link-preview`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

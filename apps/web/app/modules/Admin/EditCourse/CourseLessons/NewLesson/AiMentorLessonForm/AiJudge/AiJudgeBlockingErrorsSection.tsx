@@ -96,6 +96,7 @@ export const AiJudgeBlockingErrorsSection = ({
                         size="icon"
                         disabled={!canEditStructure}
                         onClick={() => onRemoveBlockingError(blockingErrorIndex)}
+                        data-testid={`curriculum-ai-mentor-judge-remove-blocking-error-${blockingErrorIndex}-button`}
                         aria-label={t(
                           "adminCourseView.curriculum.lesson.aiJudge.removeBlockingError",
                         )}

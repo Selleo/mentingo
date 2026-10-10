@@ -1,11 +1,13 @@
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import { READ_ONLY_ALLOW_ATTRIBUTE } from "~/modules/Admin/EditCourse/CourseLessons/components/ReadOnlyFrame";
 
 import { AI_JUDGE_GENERATION_MODE } from "./aiJudgeConfiguration.types";
 import { AiJudgeConfigurationDialog } from "./AiJudgeConfigurationDialog";
@@ -35,6 +37,8 @@ type AiJudgeConfigurationCardBaseProps = {
   ) => void;
   isValidating?: boolean;
   error?: string;
+  /** Shows the assessment without any way to change it, e.g. when reviewing AI changes. */
+  readOnly?: boolean;
 };
 
 type AiJudgeConfigurationCardProps = AiJudgeConfigurationCardBaseProps &
@@ -66,21 +70,25 @@ export const AiJudgeConfigurationCard = ({
   onImproveWithAi,
   isValidating,
   error,
+  readOnly = false,
 }: AiJudgeConfigurationCardProps) => {
   const { t } = useTranslation();
   const [internalEditorOpen, setInternalEditorOpen] = useState(false);
   const isDialogOpen = editorOpen ?? internalEditorOpen;
   const setIsDialogOpen = onEditorOpenChange ?? setInternalEditorOpen;
   const isConfigured = Boolean(value);
-  const canOpenEditor = !isLoading && (language === baseLanguage || (isPersisted && isConfigured));
+  const canOpenEditor = readOnly
+    ? isConfigured
+    : !isLoading && (language === baseLanguage || (isPersisted && isConfigured));
   const requiresBaseConfiguration = language !== baseLanguage && !isConfigured;
   const totalScore = value?.criteria.reduce((sum, criterion) => sum + criterion.maxScore, 0) ?? 0;
   const emptyDescriptionKey = canOpenEditor
     ? "adminCourseView.curriculum.lesson.aiJudge.emptyDescription"
     : "adminCourseView.curriculum.lesson.aiJudge.baseLanguageRequired";
-  const editorButtonLabelKey = isConfigured
-    ? "adminCourseView.curriculum.lesson.aiJudge.editAssessment"
-    : "adminCourseView.curriculum.lesson.aiJudge.configureManually";
+  const editorButtonLabelKey = match({ isConfigured, readOnly })
+    .with({ isConfigured: true, readOnly: true }, () => "viewAssessment")
+    .with({ isConfigured: true }, () => "editAssessment")
+    .otherwise(() => "configureManually");
   const isAiActionDisabled = language !== baseLanguage || isLoading || !isAiMentorConfigured;
   let aiActionTooltipKey: string | undefined;
 
@@ -120,7 +128,7 @@ export const AiJudgeConfigurationCard = ({
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-              {!isConfigured && onConfigureWithAi && (
+              {!readOnly && !isConfigured && onConfigureWithAi && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span
@@ -164,11 +172,12 @@ export const AiJudgeConfigurationCard = ({
                       variant={isConfigured ? "outline" : "link"}
                       size="sm"
                       data-testid="curriculum-ai-mentor-judge-configure-button"
+                      {...(readOnly && { [READ_ONLY_ALLOW_ATTRIBUTE]: "" })}
                       disabled={!canOpenEditor}
                       onClick={() => setIsDialogOpen(true)}
                       className={cn("h-9 gap-1.5", { "px-1.5": !isConfigured })}
                     >
-                      {t(editorButtonLabelKey)}
+                      {t(`adminCourseView.curriculum.lesson.aiJudge.${editorButtonLabelKey}`)}
                       {isConfigured && <ChevronRight className="size-3.5" />}
                     </Button>
                   </span>
@@ -202,6 +211,7 @@ export const AiJudgeConfigurationCard = ({
         onValidateConfiguration={onValidateConfiguration}
         onImproveWithAi={onImproveWithAi}
         isValidating={isValidating}
+        readOnly={readOnly}
       />
     </>
   );

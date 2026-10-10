@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -22,7 +22,7 @@ const configuredAssessment: AiJudgeConfigurationDraft = {
       scoreGuidance: [],
     },
   ],
-  blockingErrors: [],
+  blockingErrors: [{ description: "Invents product capabilities" }],
 };
 
 type AiJudgeConfigurationCardOverrides = Partial<
@@ -88,6 +88,23 @@ describe("AiJudgeConfigurationCard", () => {
     expect(onConfigureWithAi).not.toHaveBeenCalled();
   });
 
+  it("allows expanding blocking-error details in the read-only assessment", async () => {
+    const user = userEvent.setup();
+    renderCard({ value: configuredAssessment, isPersisted: true, readOnly: true });
+
+    await user.click(screen.getByRole("button", { name: "View assessment" }));
+    const section = await screen.findByTestId("curriculum-ai-mentor-judge-blocking-errors-section");
+
+    expect(section).not.toHaveAttribute("open");
+    await user.click(within(section).getByText("Blocking errors"));
+
+    expect(section).toHaveAttribute("open");
+    expect(screen.getByRole("textbox", { name: "Blocking error 1" })).toHaveValue(
+      "Invents product capabilities",
+    );
+    expect(screen.getByRole("textbox", { name: "Blocking error 1" })).toHaveAttribute("readonly");
+  });
+
   it("blocks AI creation until AI Mentor behavior is configured", async () => {
     const user = userEvent.setup();
     const onConfigureWithAi = vi.fn();
@@ -117,5 +134,19 @@ describe("AiJudgeConfigurationCard", () => {
       "Assessment structure can only be changed in the course base language.",
     );
     expect(tooltipCopies.some((element) => element.getAttribute("role") !== "tooltip")).toBe(true);
+  });
+
+  it("offers only a view action for a read-only assessment", async () => {
+    const user = userEvent.setup();
+    renderCard({ value: configuredAssessment, readOnly: true, isPersisted: false });
+
+    expect(screen.queryByRole("button", { name: "Create with AI" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "View assessment" }));
+
+    const dialog = await screen.findByTestId("curriculum-ai-mentor-judge-dialog");
+    expect(dialog).toContainElement(screen.getByTestId("curriculum-ai-mentor-judge-read-only"));
+    expect(screen.queryByTestId("curriculum-ai-mentor-judge-apply-button")).toBeNull();
+    await user.click(screen.getAllByRole("button", { name: "Close" }).at(-1)!);
+    expect(screen.queryByTestId("curriculum-ai-mentor-judge-dialog")).toBeNull();
   });
 });

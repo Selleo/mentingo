@@ -1471,6 +1471,20 @@
       "when": 1790855868667,
       "tag": "0209_add_archived_field_to_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 210,
+      "version": "7",
+      "when": 1790867119041,
+      "tag": "0210_course_authoring_context_and_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 211,
+      "version": "7",
+      "when": 1790867136970,
+      "tag": "0211_course_authoring_tenant_isolation",
+      "breakpoints": true
     }
   ]
 }

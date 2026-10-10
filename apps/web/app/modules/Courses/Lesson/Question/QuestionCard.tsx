@@ -1,3 +1,4 @@
+import { sanitizeQuizQuestionTitle } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import type { ReactNode } from "react";
@@ -27,7 +28,10 @@ export const QuestionCard = ({
       <div className="details uppercase text-primary-700">
         {t("studentLessonView.other.question")} {questionNumber ?? 0}
       </div>
-      <div className="h6 text-neutral-950" dangerouslySetInnerHTML={{ __html: title }} />
+      <div
+        className="h6 text-neutral-950"
+        dangerouslySetInnerHTML={{ __html: sanitizeQuizQuestionTitle(title) }}
+      />
       <div className="body-base text-neutral-900">
         {t(`studentLessonView.other.${questionType}`)}
       </div>

@@ -1,6 +1,6 @@
 import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { Drama, GraduationCap } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -23,7 +23,7 @@ export const AiMentorConfigurationFields = ({
 }: AiMentorConfigurationFieldsProps) => {
   const { t } = useTranslation();
   const form = useFormContext<AiMentorConfigurationDraft>();
-  const optionalFieldsRef = useRef<HTMLDetailsElement>(null);
+  const [optionalFieldsOpen, setOptionalFieldsOpen] = useState(false);
   const type = useWatch({ control: form.control, name: "type" });
   const errorKeys = Object.keys(form.formState.errors);
   const hasOptionalError = [
@@ -34,7 +34,7 @@ export const AiMentorConfigurationFields = ({
   ].some((field) => errorKeys.includes(field));
 
   useEffect(() => {
-    if (hasOptionalError && optionalFieldsRef.current) optionalFieldsRef.current.open = true;
+    if (hasOptionalError) setOptionalFieldsOpen(true);
   }, [hasOptionalError]);
 
   const modeChoices: Choice<AiMentorType>[] = [
@@ -89,7 +89,8 @@ export const AiMentorConfigurationFields = ({
       <AiMentorFineTuneConfigurationFields
         type={type}
         hasOptionalError={hasOptionalError}
-        optionalFieldsRef={optionalFieldsRef}
+        isOpen={optionalFieldsOpen}
+        onOpenChange={setOptionalFieldsOpen}
       />
     </div>
   );

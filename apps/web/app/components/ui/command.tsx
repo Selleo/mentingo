@@ -52,11 +52,14 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  endAdornment,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & { endAdornment?: React.ReactNode }) {
   return (
-    <div className="flex items-center border-b border-input px-5">
-      <SearchIcon size={20} className="me-3 text-muted-foreground/80" />
+    <div
+      className={cn("flex items-center gap-2 border-b border-input px-5", endAdornment && "pr-3")}
+    >
+      <SearchIcon size={20} className="me-3 shrink-0 text-muted-foreground/80" />
       <CommandPrimitive.Input
         data-slot="command-input-wrapper"
         className={cn(
@@ -65,6 +68,7 @@ function CommandInput({
         )}
         {...props}
       />
+      {endAdornment}
     </div>
   );
 }

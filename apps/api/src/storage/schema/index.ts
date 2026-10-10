@@ -82,6 +82,7 @@ import {
   withTenantIdIndex,
 } from "./utils";
 
+import type { CourseAuthoringApplicationResult } from "./course-authoring.schema";
 import type {
   CourseStatus,
   CourseType,
@@ -2982,4 +2983,121 @@ export const emailTemplates = pgTable(
       .on(table.tenantId, table.event)
       .where(sql`${table.status} = 'published'`),
   }),
+);
+
+/** A committed row is the receipt: failed transactions never leave a success marker. */
+export const courseAuthoringApplications = pgTable(
+  "course_authoring_applications",
+  {
+    ...id,
+    tenantId,
+    courseId: uuid("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    sessionId: uuid("session_id").notNull(),
+    exportId: uuid("export_id").notNull(),
+    exportHash: text("export_hash").notNull(),
+    receiptDeliveredAt: timestampWithTimezone({ name: "receipt_delivered_at" }),
+    actorId: uuid("actor_id").notNull(),
+    result: jsonb("result").$type<CourseAuthoringApplicationResult>().notNull(),
+    ...timestamps,
+  },
+  withTenantIdIndex("course_authoring_applications", (table) => ({
+    exportUnique: uniqueIndex("course_authoring_applications_export_unique").on(
+      table.tenantId,
+      table.exportId,
+    ),
+    courseIndex: index("course_authoring_applications_course_idx").on(table.courseId),
+  })),
+);
+
+/** Tracks uploaded authoring assets before apply so abandoned objects can be reclaimed by index. */
+export const courseAuthoringStagedAssets = pgTable(
+  "course_authoring_staged_assets",
+  {
+    ...id,
+    tenantId,
+    sessionId: uuid("session_id").notNull(),
+    exportId: uuid("export_id").notNull(),
+    storageKey: text("storage_key").notNull(),
+    appliedAt: timestampWithTimezone({ name: "applied_at" }),
+    ...timestamps,
+  },
+  withTenantIdIndex("course_authoring_staged_assets", (table) => ({
+    keyUnique: uniqueIndex("course_authoring_staged_assets_key_unique").on(
+      table.tenantId,
+      table.storageKey,
+    ),
+    cleanupIndex: index("course_authoring_staged_assets_cleanup_idx").on(
+      table.tenantId,
+      table.appliedAt,
+      table.updatedAt,
+    ),
+  })),
+);
+
+/** Durable Core identity and event cursor for an AI authoring conversation. */
+export const courseAuthoringContextBindings = pgTable(
+  "course_authoring_context_bindings",
+  {
+    ...id,
+    tenantId,
+    courseId: uuid("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    sessionId: uuid("session_id").notNull(),
+    actorId: uuid("actor_id").notNull(),
+    language: text("language").notNull(),
+    cursorSequence: integer("cursor_sequence").notNull().default(0),
+    ...timestamps,
+  },
+  withTenantIdIndex("course_authoring_context_bindings", (table) => ({
+    sessionUnique: uniqueIndex("course_authoring_context_bindings_session_unique").on(
+      table.tenantId,
+      table.sessionId,
+    ),
+    pollIndex: index("course_authoring_context_bindings_poll_idx").on(
+      table.tenantId,
+      table.updatedAt,
+    ),
+    courseIndex: index("course_authoring_context_bindings_course_idx").on(table.courseId),
+  })),
+);
+
+/** Persisted context requests make polling and fulfillment safe across disconnects/restarts. */
+export const courseAuthoringContextRequests = pgTable(
+  "course_authoring_context_requests",
+  {
+    ...id,
+    tenantId,
+    bindingId: uuid("binding_id")
+      .notNull()
+      .references(() => courseAuthoringContextBindings.id, { onDelete: "cascade" }),
+    eventId: uuid("event_id").notNull(),
+    sequence: integer("sequence").notNull(),
+    contextRequestId: uuid("context_request_id").notNull(),
+    requestId: uuid("request_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    taskFence: integer("task_fence").notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    status: text("status").notNull().default("pending"),
+    fulfilledAt: timestampWithTimezone({ name: "fulfilled_at" }),
+    failureCode: text("failure_code"),
+    ...timestamps,
+  },
+  withTenantIdIndex("course_authoring_context_requests", (table) => ({
+    requestUnique: uniqueIndex("course_authoring_context_requests_identity_unique").on(
+      table.tenantId,
+      table.contextRequestId,
+    ),
+    sequenceUnique: uniqueIndex("course_authoring_context_requests_sequence_unique").on(
+      table.tenantId,
+      table.bindingId,
+      table.sequence,
+    ),
+    pendingIndex: index("course_authoring_context_requests_pending_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+  })),
 );

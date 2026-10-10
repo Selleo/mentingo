@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
+import { safeEmbedUrl } from "../utils/embedUrl";
 import { removeResourceNode, type RichTextResourceNodeOptions } from "../utils/resourceNode";
 
 import { PDF_PREVIEW_NODE_TYPE } from "./constants";
@@ -109,7 +110,7 @@ const basePdfPreviewNodeConfig: NodeConfig = {
         tag: `div[data-node-type="${PDF_PREVIEW_NODE_TYPE}"]`,
         getAttrs: (el) => {
           const element = el as HTMLElement;
-          const src = element.getAttribute("data-src") ?? null;
+          const src = safeEmbedUrl(element.getAttribute("data-src"));
           const name = element.getAttribute("data-name") ?? null;
           if (!src) return false;
           return normalizePdfPreviewAttrs({ src, name });
@@ -122,7 +123,7 @@ const basePdfPreviewNodeConfig: NodeConfig = {
     const { src, name, ...rest } = HTMLAttributes as Record<string, unknown>;
 
     const normalizedAttributes = normalizePdfPreviewAttrs({
-      src: typeof src === "string" ? src : null,
+      src: safeEmbedUrl(src),
       name: typeof name === "string" ? name : null,
     });
 

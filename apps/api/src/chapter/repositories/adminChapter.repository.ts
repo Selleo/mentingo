@@ -68,23 +68,36 @@ export class AdminChapterRepository {
   async changeChapterDisplayOrder(
     courseId: UUIDType,
     chapterId: UUIDType,
-    oldDisplayOrder: number,
     newDisplayOrder: number,
     language: SupportedLanguages,
   ) {
     return await this.db.transaction(async (trx) => {
+      // Older imports can leave gaps. Re-rank before moving so both the source
+      // position and the requested position refer to the current chapter list.
+      await this.updateChapterDisplayOrder(courseId, trx);
+      const [current] = await trx
+        .select({ displayOrder: chapters.displayOrder })
+        .from(chapters)
+        .where(and(eq(chapters.courseId, courseId), eq(chapters.id, chapterId)));
+      const [count] = await trx
+        .select({ value: sql<number>`count(*)::int` })
+        .from(chapters)
+        .where(eq(chapters.courseId, courseId));
+      if (!current || current.displayOrder === null || !count) return [];
+      const oldDisplayOrder = current.displayOrder;
+      const boundedDisplayOrder = Math.max(1, Math.min(newDisplayOrder, count.value));
       return await trx
         .update(chapters)
         .set({
           displayOrder: sql`CASE
             WHEN ${eq(chapters.id, chapterId)}
-              THEN ${newDisplayOrder}
-            WHEN ${newDisplayOrder < oldDisplayOrder}
-              AND ${gte(chapters.displayOrder, newDisplayOrder)}
+              THEN ${boundedDisplayOrder}
+            WHEN ${boundedDisplayOrder < oldDisplayOrder}
+              AND ${gte(chapters.displayOrder, boundedDisplayOrder)}
               AND ${lte(chapters.displayOrder, oldDisplayOrder)}
               THEN ${chapters.displayOrder} + 1
-            WHEN ${newDisplayOrder > oldDisplayOrder}
-              AND ${lte(chapters.displayOrder, newDisplayOrder)}
+            WHEN ${boundedDisplayOrder > oldDisplayOrder}
+              AND ${lte(chapters.displayOrder, boundedDisplayOrder)}
               AND ${gte(chapters.displayOrder, oldDisplayOrder)}
               THEN ${chapters.displayOrder} - 1
             ELSE ${chapters.displayOrder}
@@ -104,7 +117,7 @@ export class AdminChapterRepository {
 
     return dbInstance.execute(sql`
         WITH ranked_chapters AS (
-          SELECT id, row_number() OVER (ORDER BY display_order) AS new_display_order
+          SELECT id, row_number() OVER (ORDER BY display_order, id) AS new_display_order
           FROM ${chapters}
           WHERE course_id = ${courseId}
         )

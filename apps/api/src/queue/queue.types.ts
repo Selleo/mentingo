@@ -14,7 +14,8 @@ export const QUEUE_NAMES = {
   SCORM_IMPORT: "scorm-import",
   NATIVE_ARCHIVE: "native-archive",
   COURSE_DUPLICATION: "course-duplication",
-  LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
+  COURSE_AUTHORING_APPLY: "course-authoring-apply",
+  COURSE_AUTHORING_CONTEXT: "course-authoring-context",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
   AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
@@ -70,16 +71,16 @@ export interface LearningPathSyncJobData {
   triggerEventType: string;
 }
 
-export interface LumaCourseGenerationSyncJobData {
-  courseId: UUIDType;
-  currentUser: CurrentUserType;
-}
-
 export interface CourseDuplicationJobData {
   tenantId: UUIDType;
   sourceCourseId: UUIDType;
   targetCourseId: UUIDType;
   actor: CurrentUserType;
+}
+
+export interface CourseAuthoringContextFulfillmentJob {
+  tenantId: UUIDType;
+  contextRequestId: UUIDType;
 }
 
 export type VideoMetadataProvider = VideoProviderType;

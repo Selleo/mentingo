@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
+import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
@@ -35,6 +36,7 @@ export const AiMentorIdentityFields = ({
   baseLanguageName,
 }: AiMentorIdentityFieldsProps) => {
   const { t } = useTranslation();
+  const safeAvatarPreview = useRichTextMediaUrl(avatarPreview ?? undefined);
 
   return (
     <div className="flex flex-col-reverse gap-2 lg:flex-row lg:items-center lg:gap-4">
@@ -68,7 +70,7 @@ export const AiMentorIdentityFields = ({
             })}
             onClick={canEditAvatar ? onEditAvatar : undefined}
           >
-            <AvatarImage src={avatarPreview ?? undefined} />
+            <AvatarImage src={safeAvatarPreview} />
             <AvatarFallback>
               <Icon name="AiMentor" className="size-8 text-primary" />
             </AvatarFallback>

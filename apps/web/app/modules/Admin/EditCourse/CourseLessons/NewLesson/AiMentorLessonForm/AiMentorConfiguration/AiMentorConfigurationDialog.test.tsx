@@ -35,6 +35,52 @@ describe("AiMentorConfigurationDialog", () => {
     await i18next.changeLanguage("en");
   });
 
+  it("allows expanding optional behavior fields in read-only mode", async () => {
+    const user = userEvent.setup();
+
+    renderWith().render(
+      <AiMentorConfigurationDialog
+        open
+        onOpenChange={vi.fn()}
+        value={{
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+          scenario: "A customer questions an invoice.",
+          aiRole: "Concerned customer",
+          learnerRole: "Support representative",
+          characterGoal: "Understand the charge",
+          difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+          factsAndConstraints: "The invoice is overdue.",
+          openingInstruction: "Ask about the invoice.",
+          additionalInstructions: "Stay professional.",
+        }}
+        onSaveBaseConfiguration={vi.fn()}
+        onSaveTranslation={vi.fn()}
+        language="en"
+        baseLanguage="en"
+        isPersisted
+        readOnly
+      />,
+    );
+
+    const optionalFieldsToggle = screen.getByRole("button", {
+      name: "Fine-tune behavior (optional)",
+    });
+    expect(optionalFieldsToggle).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(optionalFieldsToggle);
+
+    expect(optionalFieldsToggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("textbox", { name: "Additional instructions" })).toHaveAttribute(
+      "readonly",
+    );
+
+    await user.keyboard("{Enter}");
+    expect(optionalFieldsToggle).toHaveAttribute("aria-expanded", "false");
+
+    await user.keyboard(" ");
+    expect(optionalFieldsToggle).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("keeps mode selection in the dialog and applies a Roleplay configuration", async () => {
     const user = userEvent.setup();
     const onSaveBaseConfiguration = vi.fn();

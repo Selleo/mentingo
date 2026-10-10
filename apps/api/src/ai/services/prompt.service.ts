@@ -1,6 +1,6 @@
-import { LUMA_VOICE_TIMING_PRECISION, type LumaVoiceTimingPrecision } from "@japro/luma-sdk";
 import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
+import { LUMA_VOICE_TIMING_PRECISION, type LumaVoiceTimingPrecision } from "@mentingo/luma-sdk";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
 import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";

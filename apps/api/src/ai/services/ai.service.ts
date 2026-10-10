@@ -52,7 +52,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
-import type { PublicAiMessage } from "@japro/luma-sdk";
+import type { PublicAiMessage } from "@mentingo/luma-sdk";
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { ModelMessage } from "ai";
 import type {

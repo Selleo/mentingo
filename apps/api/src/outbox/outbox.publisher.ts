@@ -21,8 +21,11 @@ export class OutboxPublisher {
       return;
     }
 
-    const db = dbInstance ?? this.db;
+    await this.publishDurable(event, dbInstance ?? this.db);
+  }
 
+  /** Persist with the caller's transaction. Never emit a side effect before its commit. */
+  async publishDurable(event: object, db: DatabasePg): Promise<void> {
     const eventType = this.getEventType(event);
     const payload = this.sanitizeValue(event) as Record<string, unknown>;
 

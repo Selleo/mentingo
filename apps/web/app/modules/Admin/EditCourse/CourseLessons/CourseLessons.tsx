@@ -1,3 +1,5 @@
+import { useParams, useSearchParams } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,19 +13,17 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { UnsavedChangesExitGuard } from "~/modules/Admin/components/UnsavedChangesExitGuard";
-import { CourseGenerationButton } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationButton";
-import { CourseGenerationChatRuntime } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationChatRuntime";
-import { CourseGenerationCompletedNotice } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationCompletedNotice";
-import { CourseGenerationExitGuard } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationExitGuard";
-import { CourseGenerationProgressStrip } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationProgressStrip";
+import { CourseGenerationDrawer } from "~/modules/CourseAuthoring/CourseGenerationDrawer";
+import { CurriculumReviewWorkspace } from "~/modules/CourseAuthoring/review/CurriculumReviewWorkspace";
+import { syncReviewPreview } from "~/modules/CourseAuthoring/review/syncReviewPreview";
 
 import { CURRICULUM_HANDLES } from "../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../EditCourse.types";
 
 import ChaptersList from "./components/ChaptersList";
-import { CourseGenerationChapterSkeletons } from "./components/CourseGenerationChapterSkeletons";
 import CourseLessonEmptyState from "./components/CourseLessonEmptyState";
 import NewChapter from "./NewChapter/NewChapter";
 import AiMentorLessonForm from "./NewLesson/AiMentorLessonForm/AiMentorLessonForm";
@@ -36,37 +36,33 @@ import { ScormLessonForm } from "./NewLesson/ScormLessonForm/ScormLessonForm";
 
 import type { Chapter, Lesson } from "../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
 import type { Sortable } from "~/components/SortableList/SortableList";
+import type {
+  CurriculumPreview,
+  CurriculumPreviewActions,
+  PreviewView,
+} from "~/modules/CourseAuthoring/courseAuthoring.types";
 
 interface CourseLessonsProps {
   chapters?: Chapter[];
+  trustedCourseDescription?: string;
   baseLanguageChapters?: Chapter[];
   canRefetchChapterList: boolean;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
-  isCourseGenerationDisabled: boolean;
   showCourseGenerationButton: boolean;
-  isCourseGenerated: boolean;
-  shouldClearCourseGenerationRuntime: boolean;
-  isCourseGenerationLocked: boolean;
-  draft?: GetCourseGenerationDraftResponse;
   coursePriceInCents?: number;
   unregisteredUserCoursesAccessibility: boolean;
 }
 
 const CourseLessons = ({
   chapters,
+  trustedCourseDescription,
   baseLanguageChapters,
   canRefetchChapterList,
   language,
   baseLanguage,
-  draft,
-  isCourseGenerationDisabled,
   showCourseGenerationButton,
-  isCourseGenerated,
-  shouldClearCourseGenerationRuntime,
-  isCourseGenerationLocked,
   coursePriceInCents,
   unregisteredUserCoursesAccessibility,
 }: CourseLessonsProps) => {
@@ -74,26 +70,94 @@ const CourseLessons = ({
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const { setIsLeavingContent, isCurrentFormDirty, openLeaveModal } = useLeaveModal();
+  const { id: courseId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isAuthoringDrawerOpen = searchParams.get("aiGeneration") === "true";
+  /** Preserve the curriculum route and its other filters while toggling the generation drawer. */
+  const setAuthoringDrawerOpen = useCallback(
+    (open: boolean) => {
+      const next = new URLSearchParams(searchParams);
+      if (open) next.set("aiGeneration", "true");
+      else next.delete("aiGeneration");
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+  const { hasAccess: canUseCourseAuthoring } = usePermissions({
+    all: [PERMISSIONS.COURSE_AI_GENERATION],
+  });
 
   const [isNewChapter, setIsNewChapter] = useState(false);
-  const [isGenerationDrawerOpen, setIsGenerationDrawerOpen] = useState(false);
-  const [isBackgroundGenerating, setIsBackgroundGenerating] = useState(false);
-  const [isGenerationProcessing, setIsGenerationProcessing] = useState(false);
-  const [currentGenerationMessageKey, setCurrentGenerationMessageKey] = useState<string | null>(
-    null,
-  );
-  const [previewChapters, setPreviewChapters] = useState<Chapter[]>([]);
-  const [showGenerationCompletedNotice, setShowGenerationCompletedNotice] = useState(false);
-  const hasSeenGeneratedRef = useRef(isCourseGenerated);
+  const [authoringCurriculumPreview, setAuthoringCurriculumPreview] =
+    useState<CurriculumPreview | null>(null);
+  const [curriculumPreviewActions, setCurriculumPreviewActions] =
+    useState<CurriculumPreviewActions | null>(null);
   const { t } = useTranslation();
 
+  const availableCurriculumPreviewRef = useRef<CurriculumPreview | null>(null);
+
+  const handleCurriculumPreviewChange = useCallback((preview: CurriculumPreview | null) => {
+    availableCurriculumPreviewRef.current = preview;
+    if (!preview) {
+      setAuthoringCurriculumPreview(null);
+      setCurriculumPreviewActions(null);
+      return;
+    }
+    setAuthoringCurriculumPreview((activePreview) => syncReviewPreview(activePreview, preview));
+  }, []);
+
+  const handlePreviewInCurriculum = useCallback(
+    (preview: PreviewView) => {
+      const currentPreview = availableCurriculumPreviewRef.current;
+      const curriculumPreview =
+        currentPreview && currentPreview.proposalId === preview.taskId
+          ? currentPreview
+          : {
+              proposalId: preview.taskId,
+              status: "streaming" as const,
+              outline: preview.outline.map((chapter, chapterIndex) => ({
+                id: `${preview.taskId}:chapter:${chapterIndex}`,
+                title: chapter.title,
+                lessons: chapter.lessons.map((lesson, lessonIndex) => ({
+                  id: `${preview.taskId}:chapter:${chapterIndex}:lesson:${lessonIndex}`,
+                  title: lesson.title,
+                  lessonType: lesson.lessonType,
+                })),
+              })),
+            };
+      setAuthoringCurriculumPreview(curriculumPreview);
+      setCurriculumPreviewActions(null);
+      setAuthoringDrawerOpen(false);
+    },
+    [setAuthoringDrawerOpen],
+  );
+
+  const handlePreviewProposalInCurriculum = useCallback(
+    (preview: CurriculumPreview, actions: CurriculumPreviewActions) => {
+      setAuthoringCurriculumPreview(preview);
+      setCurriculumPreviewActions(actions);
+      setAuthoringDrawerOpen(false);
+    },
+    [setAuthoringDrawerOpen],
+  );
+
+  /** Leaves review mode on the refreshed curriculum so the author sees the applied result. */
+  const handleReviewApplied = useCallback(() => {
+    setAuthoringCurriculumPreview(null);
+    setCurriculumPreviewActions(null);
+  }, []);
+
+  /** Returns to the durable conversation without deciding or retaining the locked curriculum view. */
+  const handleReturnToAuthoringChat = useCallback(() => {
+    setAuthoringCurriculumPreview(null);
+    setCurriculumPreviewActions(null);
+    setAuthoringDrawerOpen(true);
+  }, [setAuthoringDrawerOpen]);
+
   const isBaseLanguage = baseLanguage === language;
-  const shouldUnmountCourseGenerationButton =
-    !isBaseLanguage || !showCourseGenerationButton || isCourseGenerated;
-  const shouldShowCourseGenerationButton =
-    !shouldUnmountCourseGenerationButton && !isCourseGenerationDisabled;
-  const isCurriculumLocked =
-    isCourseGenerationLocked || isBackgroundGenerating || isGenerationProcessing;
+  const isCurriculumLocked = authoringCurriculumPreview !== null;
+  const shouldShowAuthoringButton =
+    isBaseLanguage && showCourseGenerationButton && canUseCourseAuthoring;
 
   const baseLanguageLesson = useMemo(() => {
     if (!selectedChapter || !selectedLesson) return null;
@@ -133,17 +197,10 @@ const CourseLessons = ({
   }, [chapters, selectedChapter, selectedLesson]);
 
   useEffect(() => {
-    if (!shouldClearCourseGenerationRuntime) return;
-    setIsBackgroundGenerating(false);
-    setIsGenerationProcessing(false);
-    setCurrentGenerationMessageKey(null);
-    setIsGenerationDrawerOpen(false);
-  }, [shouldClearCourseGenerationRuntime]);
-
-  useEffect(() => {
-    if (!chapters?.length) return;
-    setPreviewChapters([]);
-  }, [chapters?.length]);
+    setAuthoringCurriculumPreview(null);
+    setCurriculumPreviewActions(null);
+    availableCurriculumPreviewRef.current = null;
+  }, [courseId, language]);
 
   useEffect(() => {
     if (!isCurriculumLocked) return;
@@ -151,13 +208,6 @@ const CourseLessons = ({
     setSelectedChapter(null);
     setSelectedLesson(null);
   }, [isCurriculumLocked]);
-
-  useEffect(() => {
-    if (!hasSeenGeneratedRef.current && isCourseGenerated) {
-      setShowGenerationCompletedNotice(true);
-    }
-    hasSeenGeneratedRef.current = isCourseGenerated;
-  }, [isCourseGenerated]);
 
   const addChapter = useCallback(() => {
     if (isCurriculumLocked) return;
@@ -279,141 +329,128 @@ const CourseLessons = ({
     () => chapters?.map((chapter) => ({ ...chapter, sortableId: chapter.id })) ?? [],
     [chapters],
   );
-  const sortablePreviewChapters: Sortable<Chapter>[] = useMemo(
-    () => previewChapters.map((chapter) => ({ ...chapter, sortableId: chapter.id })),
-    [previewChapters],
-  );
-  const hasCanonicalChapters = sortableChapters.length > 0;
-  const shouldShowPreviewChapters = sortablePreviewChapters.length > 0 && !hasCanonicalChapters;
-  const shouldShowGenerationSkeletons =
-    isBackgroundGenerating &&
-    !hasCanonicalChapters &&
-    !shouldShowPreviewChapters &&
-    !isCourseGenerated;
-  const shouldShowProgressStrip = isBackgroundGenerating && !isCourseGenerated;
   const isAddChapterDisabled = !isBaseLanguage || isCurriculumLocked;
-
-  const handleGenerationProcessingStateChange = useCallback(
-    (state: { currentMessageKey: string | null; isProcessing: boolean }) => {
-      setCurrentGenerationMessageKey(state.currentMessageKey);
-      setIsGenerationProcessing(state.isProcessing);
-      if (state.isProcessing) {
-        setShowGenerationCompletedNotice(false);
-      }
-    },
-    [],
-  );
-  const handleGenerationInvalidate = useCallback(() => {
-    setSelectedLesson(null);
-  }, []);
-  const isExitGuardEnabled =
-    (isGenerationProcessing || isBackgroundGenerating) && !isCourseGenerated;
   const isLessonExitGuardEnabled = isCurrentFormDirty;
 
   return (
     <div
       data-testid={CURRICULUM_HANDLES.ROOT}
-      className="flex basis-full flex-col gap-8 rounded-lg md:flex-row md:items-start"
+      className={cn(
+        "flex basis-full flex-col gap-8 rounded-lg md:flex-row md:items-start",
+        authoringCurriculumPreview && "md:flex-col md:items-stretch",
+      )}
     >
-      <CourseGenerationExitGuard enabled={isExitGuardEnabled} />
       <UnsavedChangesExitGuard
-        enabled={isLessonExitGuardEnabled && !isExitGuardEnabled}
+        enabled={isLessonExitGuardEnabled}
         dialogTitle={t("adminCourseView.curriculum.lesson.other.leaveContentHeader")}
         message={t("adminCourseView.curriculum.lesson.other.leaveContentBody")}
         cancelLabel={t("adminCourseView.curriculum.lesson.other.leaveContentCancel")}
         leaveLabel={t("adminCourseView.curriculum.lesson.other.leaveContentDiscard")}
       />
-      <div className="flex w-full flex-col justify-between overflow-y-auto md:w-[480px] md:shrink-0 md:basis-[480px]">
-        <CourseGenerationProgressStrip
-          visible={shouldShowProgressStrip}
-          currentMessageKey={currentGenerationMessageKey}
+      {authoringCurriculumPreview ? (
+        <CurriculumReviewWorkspace
+          key={authoringCurriculumPreview.proposalId}
+          chapters={chapters ?? []}
+          trustedCourseDescription={trustedCourseDescription}
+          preview={authoringCurriculumPreview}
+          actions={curriculumPreviewActions}
+          courseId={courseId}
+          language={language}
+          baseLanguage={baseLanguage}
+          onExit={handleReturnToAuthoringChat}
+          onApplied={handleReviewApplied}
         />
-        <CourseGenerationCompletedNotice
-          visible={showGenerationCompletedNotice}
-          onDismiss={() => setShowGenerationCompletedNotice(false)}
-        />
-        <div className="flex flex-col">
-          {shouldShowGenerationSkeletons ? (
-            <CourseGenerationChapterSkeletons />
-          ) : (
-            <ChaptersList
-              canRefetchChapterList={canRefetchChapterList}
-              chapters={shouldShowPreviewChapters ? sortablePreviewChapters : sortableChapters}
-              baseLanguageChapters={baseLanguageChapters}
-              setContentTypeToDisplay={setContentTypeToDisplay}
-              setSelectedChapter={setSelectedChapter}
-              setSelectedLesson={setSelectedLesson}
-              selectedChapter={selectedChapter}
-              selectedLesson={selectedLesson}
-              language={language}
-              baseLanguage={baseLanguage}
-              isCourseGenerationLocked={isCurriculumLocked}
-              coursePriceInCents={coursePriceInCents}
-              unregisteredUserCoursesAccessibility={unregisteredUserCoursesAccessibility}
-            />
-          )}
-        </div>
-        <div className="mt-4 flex w-full gap-3">
-          {!isBaseLanguage ? (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className={cn(shouldShowCourseGenerationButton ? "w-1/2" : "w-full")}>
-                    <Button
-                      data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
-                      onClick={addChapter}
-                      disabled
-                      className="w-full rounded-lg px-4 py-2"
+      ) : (
+        <>
+          <div className="flex w-full flex-col justify-between overflow-y-auto md:w-[480px] md:shrink-0 md:basis-[480px]">
+            <div className="flex flex-col">
+              <ChaptersList
+                canRefetchChapterList={canRefetchChapterList}
+                chapters={sortableChapters}
+                baseLanguageChapters={baseLanguageChapters}
+                setContentTypeToDisplay={setContentTypeToDisplay}
+                setSelectedChapter={setSelectedChapter}
+                setSelectedLesson={setSelectedLesson}
+                selectedChapter={selectedChapter}
+                selectedLesson={selectedLesson}
+                language={language}
+                baseLanguage={baseLanguage}
+                isCourseGenerationLocked={isCurriculumLocked}
+                coursePriceInCents={coursePriceInCents}
+                unregisteredUserCoursesAccessibility={unregisteredUserCoursesAccessibility}
+              />
+            </div>
+            <div className="mt-4 flex w-full gap-3">
+              {!isBaseLanguage ? (
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className={cn(shouldShowAuthoringButton ? "w-1/2" : "w-full")}>
+                        <Button
+                          data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
+                          onClick={addChapter}
+                          disabled
+                          className="w-full rounded-lg px-4 py-2"
+                        >
+                          <Icon name="Plus" className="mr-2" />
+                          {t("adminCourseView.curriculum.chapter.button.addChapter")}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      <Icon name="Plus" className="mr-2" />
-                      {t("adminCourseView.curriculum.chapter.button.addChapter")}
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      {t("adminCourseView.curriculum.chapter.button.addChapterDisabledTooltip")}
+                      <TooltipArrow className="fill-black" />
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <Button
+                  data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
+                  onClick={addChapter}
+                  disabled={isAddChapterDisabled}
+                  className={cn(
+                    "rounded-lg px-4 py-2",
+                    shouldShowAuthoringButton ? "w-1/2" : "w-full",
+                  )}
                 >
-                  {t("adminCourseView.curriculum.chapter.button.addChapterDisabledTooltip")}
-                  <TooltipArrow className="fill-black" />
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <Button
-              data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
-              onClick={addChapter}
-              disabled={isAddChapterDisabled}
-              className={cn(
-                "rounded-lg px-4 py-2",
-                shouldShowCourseGenerationButton ? "w-1/2" : "w-full",
+                  <Icon name="Plus" className="mr-2" />
+                  {t("adminCourseView.curriculum.chapter.button.addChapter")}
+                </Button>
               )}
-            >
-              <Icon name="Plus" className="mr-2" />
-              {t("adminCourseView.curriculum.chapter.button.addChapter")}
-            </Button>
-          )}
-          {shouldShowCourseGenerationButton && !isCurriculumLocked && (
-            <CourseGenerationButton
-              testId={CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON}
-              className="w-1/2"
-              onClick={() => setIsGenerationDrawerOpen(true)}
-            />
-          )}
-        </div>
-      </div>
-      <CourseGenerationChatRuntime
-        draft={draft}
-        shouldRenderDrawer={!shouldUnmountCourseGenerationButton}
-        open={isGenerationDrawerOpen}
-        onOpenChange={setIsGenerationDrawerOpen}
-        onBackgroundGenerationStateChange={setIsBackgroundGenerating}
-        onInvalidate={handleGenerationInvalidate}
-        onPreviewChaptersChange={setPreviewChapters}
-        onProcessingStateChange={handleGenerationProcessingStateChange}
-      />
-      <div className="min-w-0 flex-1 self-start md:sticky md:top-8">{renderContent}</div>
+              {shouldShowAuthoringButton && courseId && (
+                <div className="w-1/2 space-y-1">
+                  <Button
+                    onClick={() => setAuthoringDrawerOpen(true)}
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2 rounded-lg px-4 py-2"
+                    data-testid={CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON}
+                  >
+                    <Icon name="WandSparkles" className="size-4" />
+                    {t("courseAuthoring.openWorkspace")}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="min-w-0 flex-1 self-start md:sticky md:top-8">{renderContent}</div>
+        </>
+      )}
+      {shouldShowAuthoringButton && courseId && (
+        <CourseGenerationDrawer
+          courseId={courseId}
+          language={language}
+          open={isAuthoringDrawerOpen}
+          onOpenChange={setAuthoringDrawerOpen}
+          onPreviewInCurriculum={handlePreviewInCurriculum}
+          onPreviewProposalInCurriculum={handlePreviewProposalInCurriculum}
+          onCurriculumPreviewChange={handleCurriculumPreviewChange}
+        />
+      )}
     </div>
   );
 };

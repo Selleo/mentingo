@@ -1,5 +1,7 @@
 import { match } from "ts-pattern";
 
+import { safeEmbedUrl } from "./embedUrl";
+
 export const PRESENTATION_NODE_TYPE = "presentation" as const;
 
 export type PresentationSourceType = "internal" | "external";
@@ -106,7 +108,7 @@ type PresentationEmbedAttrsInput = {
 export const normalizePresentationEmbedAttributes = (
   attrs: PresentationEmbedAttrsInput,
 ): PresentationEmbedAttrs => {
-  const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
+  const src = safeEmbedUrl(attrs.src) ?? "";
 
   const sourceType: PresentationSourceType = match(attrs.sourceType)
     .when(isPresentationSourceType, (value) => value)
