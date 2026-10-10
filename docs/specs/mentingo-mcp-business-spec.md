@@ -1,14 +1,14 @@
-# Mentingo MCP Authoring Business Spec
+# Mentingo MCP Integration Business Spec
 
 ## Business Overview
 
 Mentingo MCP lets content creators maintain training from a conversation with their connected AI assistant. An editor can ask for a new onboarding course, a lesson update, or a change to internal knowledge content, and inspect the saved result in Mentingo.
 
-MCP (Model Context Protocol) is the connection that lets an external assistant discover and use Mentingo's authoring tools. Mentingo provides the content operations; the connected assistant interprets the editor's request and supplies the content. The editor uses their existing account and access.
+MCP (Model Context Protocol) lets an external assistant discover and use many of Mentingo's tools for courses, lessons, categories, articles, news, Q&A, learning paths, and supported files. The assistant interprets the user's request; Mentingo performs the available operations under the user's existing account and access.
 
 For HR and L&D teams, this can reduce the manual steps between preparing material and maintaining it in the learning platform. It also lets teams keep using their preferred compatible assistant while Mentingo holds the courses, resources, and publication state.
 
-For connection instructions, example prompts, and a suggested demonstration, see the [MCP authoring guide](../mcp.md).
+For connection instructions, example prompts, and a suggested demonstration, see the [MCP guide](../mcp.md).
 
 ## Who Uses It
 
@@ -33,7 +33,7 @@ Editors can move from an instruction to a saved training change with fewer manua
 
 ## How It Works
 
-The editor connects their assistant, asks it to inspect the available content, and gives a focused authoring instruction. The assistant calls Mentingo's tools and reports the saved result. The editor opens Mentingo to review the course or editorial content and decides when to publish it.
+The editor connects their assistant, asks it to inspect the available content, and gives a focused instruction. The assistant calls Mentingo's tools and reports the saved result. The editor opens Mentingo to review the course or editorial content and decides when to publish it.
 
 MCP writes take effect directly; this connection does not create a separate proposal awaiting approval inside Mentingo. To prepare training for review, explicitly request a draft course. Publication behaviour differs across content types: article creation publishes immediately, while news creation defaults to a draft.
 

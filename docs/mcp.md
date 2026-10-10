@@ -1,8 +1,6 @@
-# Author training from your AI assistant
+# Use Mentingo with your AI assistant
 
-Mentingo MCP lets you ask a connected AI assistant to create and maintain training directly in Mentingo. For example, a course creator can build an onboarding draft with chapters and lessons, inspect the result in Mentingo, and publish it after review.
-
-MCP (Model Context Protocol) connects the assistant to Mentingo's authoring tools. Your assistant interprets your request and prepares the content; Mentingo stores the result and enforces access to your organisation's content.
+Mentingo MCP (Model Context Protocol) gives a connected AI assistant access to many of Mentingo's tools. Ask it to find or manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files from the assistant you already use. Mentingo saves changes under your account and permissions, and remains the place to review training and content.
 
 ## What you can do
 
@@ -37,7 +35,7 @@ You need an active Mentingo account on a deployment containing the MCP feature, 
 
 Authentication uses your Mentingo account. You do not need to paste an integration administrator API key into the assistant. Use your client's disconnect controls when finished; clients that support token revocation can use Mentingo's OAuth revocation endpoint.
 
-## First authoring task
+## Try a first task
 
 Use a new draft course for your first walkthrough. Course creation and editing permissions are both needed to build its chapters and lessons.
 
