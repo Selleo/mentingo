@@ -1,4 +1,4 @@
-# Use Mentingo with your AI assistant
+# Connect your AI assistant to Mentingo
 
 Mentingo MCP (Model Context Protocol) gives a connected AI assistant access to many of Mentingo's tools. Ask it to find or manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files from the assistant you already use. Mentingo saves changes under your account and permissions, and remains the place to review training and content.
 

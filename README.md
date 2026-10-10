@@ -126,7 +126,7 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 - **Grade open-ended answers without an L&D queue.** Behavioural and problem-solving tasks are analysed automatically and returned with actionable feedback.
 - **Keep the AI accountable.** Every model call is traced with Langfuse, so you can inspect cost, latency and what the mentor actually said.
 
-### Use Mentingo with your AI assistant
+### Use Mentingo tools from your AI assistant
 
 Connect Claude Code, Codex CLI, or another compatible MCP client to Mentingo. The assistant can use Mentingo tools to find and manage courses, lessons, categories, articles, news, Q&A, learning paths, and supported files. Changes are made in Mentingo with your account's current permissions, so you can review the results in the platform. Follow the [MCP guide](docs/mcp.md) to connect your assistant and try it out.
 
