@@ -149,7 +149,7 @@ codex mcp add mentingo --url https://<tenant-host>/api/mcp
 codex mcp login mentingo
 ```
 
-Complete the Mentingo sign-in and consent in the browser, then check the connection with `codex mcp list`. The Codex CLI uses `--url` for remote HTTP MCP servers.
+Complete the Mentingo sign-in and consent in the browser, then check the connection with `codex mcp list`.
 
 ### Enterprise and white-label readiness
 
