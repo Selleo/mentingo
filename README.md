@@ -130,6 +130,27 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 
 Connect a compatible remote MCP client to Mentingo and ask it to create an onboarding draft, update a lesson, or maintain knowledge content. Changes are saved in Mentingo using your account's current access, so you can review the result in the platform. See the [MCP authoring guide](docs/mcp.md) for connection steps, example prompts, and current validation limits.
 
+#### Claude Code
+
+Add your Mentingo tenant's MCP endpoint:
+
+```sh
+claude mcp add --transport http mentingo https://<tenant-host>/api/mcp
+```
+
+Start Claude Code and run `/mcp`. Select Mentingo and follow the browser sign-in and consent flow. Check the connection with `claude mcp list`.
+
+#### Codex CLI
+
+Add the remote HTTP endpoint, replacing `<tenant-host>` with your Mentingo tenant host:
+
+```sh
+codex mcp add mentingo --url https://<tenant-host>/api/mcp
+codex mcp login mentingo
+```
+
+Complete the Mentingo sign-in and consent in the browser, then check the connection with `codex mcp list`. The Codex CLI uses `--url` for remote HTTP MCP servers.
+
 ### Enterprise and white-label readiness
 
 - **Ship it as your own product.** Custom domains, logos, colours and styles - no Mentingo branding required anywhere in the learner experience.
