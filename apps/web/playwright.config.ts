@@ -96,6 +96,7 @@ if (process.env.CI) {
   config.webServer = [
     {
       command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
+      timeout: 180 * 1000,
       env: {
         ...process.env,
         DATABASE_URL: TEST_DATABASE_URL,
@@ -112,7 +113,7 @@ if (process.env.CI) {
     {
       command: "cd ../api && pnpm build && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
-      timeout: 120 * 1000,
+      timeout: 180 * 1000,
       reuseExistingServer: false,
       env: {
         ...process.env,
@@ -131,7 +132,7 @@ if (process.env.CI) {
     {
       command: "cd ../web && pnpm build && caddy run --config Caddyfile.e2e",
       url: "http://localhost:5173/",
-      timeout: 120 * 1000,
+      timeout: 180 * 1000,
       reuseExistingServer: false,
       env: {
         API_URL: "http://localhost:3000/api",
