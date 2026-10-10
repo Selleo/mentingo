@@ -238,3 +238,93 @@ it("combines ordered metadata patches with a block edit in the preview", () => {
     description: current.description.replace("Before", "After"),
   });
 });
+
+describe("lesson preview operation ordering", () => {
+  const current = {
+    id: "lesson-existing",
+    title: "Retention",
+    type: "content" as const,
+    description: '<p data-authoring-block-id="block-1">30 days</p>',
+    displayOrder: 1,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    chapterId: "chapter-1",
+  };
+  const metadata = {
+    operationId: "metadata",
+    targetId: current.id,
+    type: AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE,
+    dependencies: ["external-chapter-operation"],
+    payload: { description: current.description.replace("30", "60") },
+  };
+  const block = {
+    operationId: "block",
+    targetId: current.id,
+    type: AUTHORING_OPERATION_TYPE.LESSON_BLOCK_REPLACE,
+    dependencies: [metadata.operationId],
+    payload: { blockId: "block-1", html: current.description.replace("30", "90") },
+  };
+  const node = (operations: ReviewLessonNode["operations"]): ReviewLessonNode => ({
+    ...mentorNode,
+    id: current.id,
+    title: current.title,
+    lessonType: current.type,
+    current,
+    operations,
+  });
+
+  it.each([false, true])(
+    "applies the dependent block after the new description (reversed: %s)",
+    (reversed) => {
+      const operations = reversed ? [block, metadata] : [metadata, block];
+      expect(proposedLesson(node(operations))?.description).toBe(block.payload.html);
+      expect(current.description).toContain("30 days");
+    },
+  );
+
+  it("lets a later description overwrite an earlier block patch", () => {
+    expect(
+      proposedLesson(
+        node([
+          { ...metadata, dependencies: [block.operationId] },
+          { ...block, dependencies: [] },
+        ]),
+      )?.description,
+    ).toBe(metadata.payload.description);
+  });
+
+  it("uses the final full write and preserves an explicitly cleared description", () => {
+    const first = {
+      operationId: "first-write",
+      targetId: current.id,
+      type: AUTHORING_OPERATION_TYPE.LESSON_UPDATE,
+      dependencies: [],
+      payload: { lessonType: "content", title: "First", description: "First body" },
+    };
+    const last = {
+      ...first,
+      operationId: "last-write",
+      dependencies: [first.operationId],
+      payload: { lessonType: "content", title: "Last", description: "" },
+    };
+    expect(proposedLesson(node([last, first]))).toMatchObject({ title: "Last", description: "" });
+  });
+});
+
+it("uses the final dependent Mentor write for the lesson and its configuration", () => {
+  const first = mentorNode.operations[0];
+  const last = {
+    ...first,
+    operationId: "last-mentor-write",
+    dependencies: [first.operationId],
+    payload: {
+      ...first.payload,
+      name: "Updated mentor",
+      configuration: { scenario: "Updated scenario" },
+    },
+  };
+  const node = { ...mentorNode, operations: [last, first] };
+  expect(proposedLesson(node)?.aiMentor?.name).toBe("Updated mentor");
+  expect(proposedMentorConfiguration(node).aiMentorConfiguration).toMatchObject({
+    scenario: "Updated scenario",
+  });
+});

@@ -1,4 +1,9 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
+  orderCourseAuthoringOperations,
+} from "@repo/shared";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/components/constants";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -139,13 +144,6 @@ const toFormQuestion = (value: unknown, index: number): Question | null => {
  */
 const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
   const write = node.operations.find((operation) => WRITE_TYPES.has(operation.type));
-  const blockReplacements = node.operations.flatMap((operation) => {
-    const blockId = text(operation.payload.blockId);
-    const html = text(operation.payload.html);
-    return operation.type === AUTHORING_OPERATION_TYPE.LESSON_BLOCK_REPLACE && blockId && html
-      ? [{ blockId, html }]
-      : [];
-  });
   const base: Lesson = node.current ?? {
     id: node.id,
     title: node.title,
@@ -155,19 +153,21 @@ const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
     updatedAt: "",
     chapterId: node.chapterId,
   };
-  if (!write && blockReplacements.length === 0)
-    return node.current ? { ...base, title: node.title } : null;
+  if (!write) return null;
 
   const payload = write?.payload ?? {};
   const type = (text(payload.lessonType) || base.type) as Lesson["type"];
 
   if (type === LessonType.CONTENT) {
-    const description = text(payload.description) || text(payload.html) || base.description || "";
+    const description =
+      typeof payload.description === "string"
+        ? payload.description
+        : text(payload.html) || base.description || "";
     return {
       ...base,
       type,
       title: node.title,
-      description: applyBlockReplacements(description, blockReplacements),
+      description,
     };
   }
 
@@ -193,7 +193,7 @@ const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
       ...base,
       type,
       title: node.title,
-      description: text(payload.description) || base.description,
+      description: typeof payload.description === "string" ? payload.description : base.description,
       aiMentor: {
         id: base.aiMentor?.id ?? node.id,
         lessonId: base.id,
@@ -213,30 +213,55 @@ const proposedLessonContent = (node: ReviewLessonNode): Lesson | null => {
   return null;
 };
 
-export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
-  const lesson = proposedLessonContent(node);
-  if (!lesson) return null;
-  const lastWriteIndex = node.operations.reduce(
-    (last, operation, index) => (WRITE_TYPES.has(operation.type) ? index : last),
-    -1,
+/** Cross-node dependencies are validated by the workspace; sort the lesson's local edges here. */
+const orderedLessonOperations = (node: ReviewLessonNode) => {
+  const ids = new Set(node.operations.map((operation) => operation.operationId));
+  return orderCourseAuthoringOperations(
+    node.operations.map((operation) => ({
+      ...operation,
+      dependencies: operation.dependencies.filter((id) => ids.has(id)),
+    })),
   );
-  return node.operations.slice(lastWriteIndex + 1).reduce((current, operation) => {
-    if (operation.type !== AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) return current;
-    return {
-      ...current,
-      ...(typeof operation.payload.title === "string" ? { title: operation.payload.title } : {}),
-      ...(typeof operation.payload.description === "string"
-        ? { description: operation.payload.description }
-        : {}),
-    };
-  }, lesson);
+};
+
+/** Project writes and patches sequentially, using the same dependency order as native Apply. */
+export const proposedLesson = (node: ReviewLessonNode): Lesson | null => {
+  let lesson: Lesson | null = node.current ? { ...node.current, title: node.title } : null;
+  for (const operation of orderedLessonOperations(node)) {
+    if (WRITE_TYPES.has(operation.type)) {
+      lesson = proposedLessonContent({
+        ...node,
+        current: lesson,
+        title: typeof operation.payload.title === "string" ? operation.payload.title : node.title,
+        operations: [operation],
+      });
+    } else if (lesson && operation.type === AUTHORING_OPERATION_TYPE.LESSON_METADATA_UPDATE) {
+      lesson = {
+        ...lesson,
+        ...(typeof operation.payload.title === "string" ? { title: operation.payload.title } : {}),
+        ...(typeof operation.payload.description === "string"
+          ? { description: operation.payload.description }
+          : {}),
+      };
+    } else if (lesson && operation.type === AUTHORING_OPERATION_TYPE.LESSON_BLOCK_REPLACE) {
+      lesson = {
+        ...lesson,
+        description: applyBlockReplacements(lesson.description, [
+          { blockId: text(operation.payload.blockId), html: text(operation.payload.html) },
+        ]),
+      };
+    }
+  }
+  return lesson;
 };
 
 /** Maps the proposed Mentor and judge configuration to the AI Mentor form's draft shapes. */
 export const proposedMentorConfiguration = (
   node: ReviewLessonNode,
 ): Omit<AiMentorLessonReviewPreview, "isPersisted"> => {
-  const payload = node.operations.find((operation) => WRITE_TYPES.has(operation.type))?.payload;
+  const payload = orderedLessonOperations(node)
+    .reverse()
+    .find((operation) => WRITE_TYPES.has(operation.type))?.payload;
   if (!payload || payload.lessonType !== LessonType.AI_MENTOR) return {};
   const configurationType = text(payload.configurationType);
   const aiMentorConfiguration =

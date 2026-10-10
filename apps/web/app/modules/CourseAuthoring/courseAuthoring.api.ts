@@ -1,10 +1,13 @@
 /** Adapts generated API responses to the stable data shape consumed by the workspace. */
 import { ApiClient } from "~/api/api-client";
 
+import { parseFetchedResearchSources } from "./authoringSources";
+
 import type { AuthoringSessionCommandId } from "./authoringSessionSelection";
 import type {
   AuthoringCommand,
   AuthoringSession,
+  AuthoringTurn,
   AuthoringTurnHistoryPage,
   CourseContext,
 } from "./courseAuthoring.types";
@@ -28,9 +31,32 @@ const taskStatuses = new Set([
   "stopped",
 ]);
 
+/** Normalize persisted citations to the same safe shape as live tool events. */
+const normalizeTurns = (
+  turns: NonNullable<OpenAuthoringSessionResponse["data"]["turns"]>,
+): AuthoringTurn[] =>
+  turns.map((turn) => ({
+    ...turn,
+    parts: turn.parts.map((part) => {
+      const tool = part.tool;
+      if (!tool) return { ...part, tool };
+      const result = tool.result;
+      return {
+        ...part,
+        tool: {
+          ...tool,
+          result: result
+            ? { ...result, sources: parseFetchedResearchSources(result.sources) }
+            : result,
+        },
+      };
+    }),
+  }));
+
 /** Converts a generated response into the projection shape expected by the workspace. */
 const normalizeSession = (session: OpenAuthoringSessionResponse["data"]): AuthoringSession => ({
   ...session,
+  turns: session.turns ? normalizeTurns(session.turns) : undefined,
   applicationDelta: session.applicationDelta
     ? {
         appliedOperationIds: session.applicationDelta.appliedOperationIds,
@@ -106,7 +132,7 @@ export const getOlderAuthoringTurns = async (
   );
   const page = response.data.data;
   return {
-    turns: page.turns,
+    turns: normalizeTurns(page.turns),
     records: page.records.map((record) => ({
       ...record,
       payload:
