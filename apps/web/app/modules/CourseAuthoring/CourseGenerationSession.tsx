@@ -4,6 +4,7 @@
  * a drawer, route or later inline host. Unmounting does not send a stop command.
  */
 import { Link } from "@remix-run/react";
+import { CourseAuthoringOrderError } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { ArrowLeft, CloudOff, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -53,6 +54,7 @@ import { useCourseAuthoringChat } from "./hooks/useCourseAuthoringChat";
 import { useCourseAuthoringSession } from "./hooks/useCourseAuthoringSession";
 import { useCourseAuthoringSocket } from "./hooks/useCourseAuthoringSocket";
 import { targetedMentorOperationIds } from "./mentorReferenceFiles";
+import { prepareCurriculumPreview } from "./review/prepareCurriculumPreview";
 import { toReviewProposals } from "./review/reviewProposals";
 
 import type { AuthoringChatMessage } from "./authoringChatTransport";
@@ -965,24 +967,44 @@ export const CourseGenerationSession = ({
     },
     [applySelected, decideProposal, projection.proposals, reviewGroupAndApply, session?.tasks],
   );
-  /** Saves explicit rejection decisions without changing omitted items into rejected items. */
+  /** Refresh missing dependencies once and preserve precise preview diagnostics. */
   const preparePreview = useCallback(
-    (build: () => CurriculumPreview | null) => {
+    async (
+      build: (snapshot?: AuthoringSession, inspectIncomplete?: boolean) => CurriculumPreview | null,
+    ) => {
       try {
-        return build();
-      } catch {
+        return await prepareCurriculumPreview(build, async () => {
+          const refreshed = await refetchSnapshot();
+          const current = authoringSessionRef.current;
+          return current && refreshed && current.snapshotSequence > refreshed.snapshotSequence
+            ? current
+            : refreshed;
+        });
+      } catch (error) {
+        console.error("Course authoring preview failed", {
+          sessionId,
+          code: error instanceof CourseAuthoringOrderError ? error.code : "previewBuildFailed",
+          operationIds: projection.proposals.flatMap((proposal) =>
+            proposal.operations.map((operation) => operation.operationId),
+          ),
+          error,
+        });
         toast({
           variant: "destructive",
-          description: t("courseAuthoring.errors.previewUnavailable"),
+          description: t(
+            error instanceof CourseAuthoringOrderError
+              ? `courseAuthoring.errors.${error.code}`
+              : "courseAuthoring.errors.previewBuildFailed",
+          ),
         });
         return null;
       }
     },
-    [t, toast],
+    [projection.proposals, refetchSnapshot, sessionId, t, toast],
   );
   /** Opens a request's proposals in curriculum review mode, bound to one batch apply. */
   const previewProposalGroupInCurriculum = useCallback(
-    (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
+    async (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
       if (requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals)) return;
       const appliedIds = new Set([
         ...appliedProposalIds,
@@ -990,15 +1012,29 @@ export const CourseGenerationSession = ({
           .filter(([, status]) => status === "applied")
           .map(([proposalId]) => proposalId),
       ]);
-      const currentProposals = excludeAppliedProposals(proposals, appliedIds);
-      const preview = preparePreview(() =>
-        curriculumPreviewFromProposals(
+      let currentProposals = excludeAppliedProposals(proposals, appliedIds);
+      const preview = await preparePreview((snapshot, inspectIncomplete) => {
+        if (snapshot) {
+          const refreshed = projectWorkspaceRecords(snapshot.records, snapshot.tasks);
+          const refreshedProposals = excludeAppliedProposals(
+            refreshed.proposals.filter((item) =>
+              snapshot.tasks.some(
+                (task) => task.taskId === item.taskId && task.requestId === requestId,
+              ),
+            ),
+            appliedIds,
+          );
+          // Older requests can live outside the current snapshot's history window.
+          if (refreshedProposals.length > 0) currentProposals = refreshedProposals;
+        }
+        return curriculumPreviewFromProposals(
           currentProposals,
           context,
           `request-${requestId}`,
-          session?.applicationDelta,
-        ),
-      );
+          snapshot?.applicationDelta ?? session?.applicationDelta,
+          inspectIncomplete,
+        );
+      });
       if (!preview || !onPreviewProposalInCurriculum) return;
       const reviewable = currentProposals.filter(
         (proposal) => proposal.decision === "pending" || proposal.decision === "accepted",
@@ -1049,7 +1085,7 @@ export const CourseGenerationSession = ({
   );
   /** Opens one result in review mode; grouped results open with their whole request. */
   const previewProposalInCurriculum = useCallback(
-    (proposal: ProposalView) => {
+    async (proposal: ProposalView) => {
       const requestId = session?.tasks.find((task) => task.taskId === proposal.taskId)?.requestId;
       if (requestId) {
         const proposals = projection.proposals.filter((item) =>
@@ -1057,12 +1093,24 @@ export const CourseGenerationSession = ({
             (task) => task.taskId === item.taskId && task.requestId === requestId,
           ),
         );
-        previewProposalGroupInCurriculum(requestId, proposals, proposal.id);
+        await previewProposalGroupInCurriculum(requestId, proposals, proposal.id);
         return;
       }
-      const preview = preparePreview(() =>
-        curriculumPreviewFromProposal(proposal, context, session?.applicationDelta),
-      );
+      const preview = await preparePreview((snapshot, inspectIncomplete) => {
+        const latest = snapshot
+          ? (projectWorkspaceRecords(snapshot.records, snapshot.tasks).proposals.find(
+              (item) => item.id === proposal.id,
+            ) ?? proposal)
+          : proposal;
+        return latest
+          ? curriculumPreviewFromProposal(
+              latest,
+              context,
+              snapshot?.applicationDelta ?? session?.applicationDelta,
+              inspectIncomplete,
+            )
+          : null;
+      });
       if (!preview || !onPreviewProposalInCurriculum) return;
       onPreviewProposalInCurriculum(
         {

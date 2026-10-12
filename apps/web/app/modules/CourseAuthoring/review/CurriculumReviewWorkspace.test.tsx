@@ -548,3 +548,14 @@ describe("CurriculumReviewWorkspace", () => {
     expect(within(bar).getByText("1 of 2")).toBeVisible();
   });
 });
+
+it("allows reading an incomplete preview but never invokes Apply", async () => {
+  const applyReview = vi.fn();
+  renderWorkspace(applyReview, {
+    ...preview,
+    missingDependencies: [{ operationId: "operation-a", dependencyId: "missing-b" }],
+  });
+  expect(screen.getByText("operation-a: missing-b")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /apply/i })).not.toBeInTheDocument();
+  expect(applyReview).not.toHaveBeenCalled();
+});

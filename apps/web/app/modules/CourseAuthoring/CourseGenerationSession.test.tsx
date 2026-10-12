@@ -10,6 +10,7 @@ import type { AuthoringChatMessage } from "./authoringChatTransport";
 import type { AssetRequestView, CurriculumPreviewActions } from "./courseAuthoring.types";
 
 const state = vi.hoisted(() => ({
+  missingDependency: false,
   assetRequests: [] as AssetRequestView[],
   questionCapability: "web_search",
   questionAnswer: "allow",
@@ -72,7 +73,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
                   operationId: "lesson-operation",
                   targetId: "lesson-target",
                   type: "lesson.create",
-                  dependencies: [],
+                  dependencies: state.missingDependency ? ["missing-chapter-operation"] : [],
                   payload: {
                     lessonType: "content",
                     title: "Smoke lesson",
@@ -396,6 +397,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     state.sourceRecords = [];
     state.progressRecords = [];
     state.sourceSelection = null;
+    state.missingDependency = false;
     state.refetchCalls = 0;
     state.refetchFails = false;
     state.contextRefetchCalls = 0;
@@ -692,6 +694,31 @@ describe("CourseGenerationSession proposal decisions", () => {
       targetId: "content-proposal",
     });
     expect(state.applyCalls).toHaveLength(0);
+  });
+
+  it("refreshes once and opens incomplete grouped content for inspection without applying", async () => {
+    state.groupedReview = true;
+    state.missingDependency = true;
+    const onPreviewProposalInCurriculum = vi.fn();
+    renderWith().render(
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
+      />,
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    await waitFor(() => expect(onPreviewProposalInCurriculum).toHaveBeenCalledOnce());
+    expect(state.refetchCalls).toBe(1);
+    expect(onPreviewProposalInCurriculum.mock.calls[0][0]).toMatchObject({
+      missingDependencies: [
+        { operationId: "lesson-operation", dependencyId: "missing-chapter-operation" },
+      ],
+    });
+    expect(state.applyCalls).toHaveLength(0);
+    expect(state.toastCalls).toHaveLength(0);
   });
 
   it("opens later grouped review after an earlier application reaches applied", async () => {

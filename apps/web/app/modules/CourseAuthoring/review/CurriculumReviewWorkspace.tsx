@@ -162,7 +162,11 @@ export const CurriculumReviewWorkspace = ({
     [chapters, courseId, preview, proposals],
   );
   const streaming = preview.status === CURRICULUM_PREVIEW_STATUS.STREAMING;
-  const readOnly = streaming || !actions?.applyReview || proposals.length === 0;
+  const readOnly =
+    streaming ||
+    !actions?.applyReview ||
+    proposals.length === 0 ||
+    Boolean(preview.missingDependencies?.length);
   const [decisions, setDecisions] = useState<StagedDecisions>(() => initialDecisions(proposals));
   const [changesOnly, setChangesOnly] = useState(false);
   const [assessmentConfirmationOpen, setAssessmentConfirmationOpen] = useState(false);
@@ -293,7 +297,7 @@ export const CurriculumReviewWorkspace = ({
   );
 
   const apply = async (acknowledgeAssessmentChanges: boolean) => {
-    if (!actions?.applyReview || applying) return false;
+    if (readOnly || !actions?.applyReview || applying) return false;
     setApplying(true);
     try {
       await actions.applyReview({
@@ -418,6 +422,20 @@ export const CurriculumReviewWorkspace = ({
         }}
       >
         <div className="flex w-full flex-col gap-6" data-testid="course-authoring-review-workspace">
+          {Boolean(preview.missingDependencies?.length) && (
+            <Alert>
+              <AlertDescription>
+                {t("courseAuthoring.review.incompletePreview")}
+                <ul>
+                  {preview.missingDependencies?.map(({ operationId, dependencyId }) => (
+                    <li key={`${operationId}:${dependencyId}`}>
+                      {operationId}: {dependencyId}
+                    </li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
           <CurriculumReviewBar
             outlineOnly={outlineOnly}
             totalChanges={model.changes.length}

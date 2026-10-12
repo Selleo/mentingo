@@ -339,3 +339,7 @@ Focused tests verify safe failure contracts, retained failure guidance, retry cl
 When standard research leaves a specific gap and further research is likely to help, the assistant can ask the author to enable Deep research through the same saved Allow/Decline question flow used for web access. Approval continues the current task with deeper research; declining keeps the current research setting and does not repeat the offer for that task. A search-provider outage alone is not a reason to recommend deeper research.
 
 Authors can distinguish web discovery from reviewing the collected sources. Source synthesis shows its own progress as topics are reviewed, so a lengthy evidence review does not appear to be a frozen search. Independent topics can be reviewed concurrently within a bounded budget; source permissions and quotation checks still apply. These changes use existing course access and review rules and do not apply generated course changes automatically.
+
+### Reviewing an incomplete saved snapshot
+
+Course authors can inspect available generated content even when a saved snapshot is missing a required change. The workspace refreshes the snapshot once before opening this inspection view. It names the affected changes and missing dependencies, and keeps application unavailable until the dependency set is complete. Conflicting changes and circular dependencies receive specific errors; unexpected preview failures are reported separately. Server validation remains authoritative for applying changes.
