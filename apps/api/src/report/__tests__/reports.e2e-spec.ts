@@ -35,6 +35,7 @@ describe("Reports (e2e)", () => {
   let db: DatabasePg;
   let adminCookie: string;
   let managerCookie: string;
+  let creatorCookie: string;
   let learnerCookie: string;
   let salesId: string;
   let managersId: string;
@@ -86,6 +87,7 @@ describe("Reports (e2e)", () => {
     };
     const admin = await makeUser(SYSTEM_ROLE_SLUGS.ADMIN);
     const manager = await makeUser(SYSTEM_ROLE_SLUGS.GROUP_MANAGER);
+    const creator = await makeUser(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
     learner = await makeUser(SYSTEM_ROLE_SLUGS.STUDENT);
     const outsideLearner = await makeUser(SYSTEM_ROLE_SLUGS.STUDENT);
     outsideLearnerId = outsideLearner.id;
@@ -98,7 +100,7 @@ describe("Reports (e2e)", () => {
     await db.insert(groupManagerGroups).values({ managerUserId: manager.id, groupId: salesId });
     const courseFactory = createCourseFactory(db);
     safetyId = (await courseFactory.create({ title: "Safety", authorId: admin.id })).id;
-    leadershipId = (await courseFactory.create({ title: "Leadership", authorId: admin.id })).id;
+    leadershipId = (await courseFactory.create({ title: "Leadership", authorId: creator.id })).id;
     const unstartedChapter = await createChapterFactory(db).create({
       courseId: leadershipId,
       authorId: admin.id,
@@ -167,6 +169,7 @@ describe("Reports (e2e)", () => {
     ]);
     adminCookie = await cookieFor(admin, app);
     managerCookie = await cookieFor(manager, app);
+    creatorCookie = await cookieFor(creator, app);
     learnerCookie = await cookieFor(learner, app);
   }, 120_000);
 
@@ -317,6 +320,38 @@ describe("Reports (e2e)", () => {
         groupIds: [],
       })
       .expect(403);
+  });
+
+  it("limits course authors to groups containing learners enrolled in their own courses", async () => {
+    const options = await request(app.getHttpServer())
+      .get("/api/report/options?language=en")
+      .set("Cookie", creatorCookie)
+      .expect(200);
+    expect(new Set(options.body.data.groups.map((group: { id: string }) => group.id))).toEqual(
+      new Set([salesId, managersId]),
+    );
+
+    const result = await run(baseQuery(), creatorCookie);
+    expect(result.rows.map((row) => row.course?.id)).toEqual([leadershipId]);
+
+    const outsideGroupQueries: ReportsQuery[] = [
+      { ...baseQuery(), groupIds: [outsideGroupId] },
+      {
+        ...baseQuery(),
+        filter: {
+          match: "all",
+          rules: [{ field: "groupId", operator: "eq", value: outsideGroupId }],
+        },
+      },
+    ];
+    for (const query of outsideGroupQueries) {
+      const response = await request(app.getHttpServer())
+        .post("/api/report/query")
+        .set("Cookie", creatorCookie)
+        .send(query)
+        .expect(403);
+      expect(response.body.message).toBe(REPORT_ERRORS.GROUP_OUTSIDE_SCOPE);
+    }
   });
 
   it("validates semantic filter values and date/timezone inputs", async () => {

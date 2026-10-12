@@ -21,6 +21,7 @@ import type {
   ReportExportDocument,
   ReportExportFormatter,
   ReportExportMetric,
+  ReportExportMetricKey,
   ReportExportRow,
   ReportExportScope,
   ReportResultRow,
@@ -36,15 +37,12 @@ export function buildReportExportDocument(
 ): ReportExportDocument {
   const labels = REPORT_EXPORT_LABELS[query.language];
   const formatter = createExportFormatter(query.language, query.timezone);
-  const viewLabel = getViewLabel(query.view, labels);
   return {
     language: query.language,
     labels,
     title: labels.title,
-    subtitle: scope.subject ? `${viewLabel} · ${scope.subject}` : viewLabel,
     generatedAt: formatter.dateTime(generatedAt),
-    performance: getPerformanceMetrics(result, labels),
-    activity: getActivityMetrics(result, labels),
+    metrics: getMetrics(result, labels),
     filters: getFilters(scope, labels),
     conditions: describeConditions(query, scope, labels, formatter),
     columns: getColumns(query.view, labels),
@@ -63,33 +61,24 @@ function getFilters(scope: ReportExportScope, labels: ReportExportLabels): Repor
   ];
 }
 
-/** The six numbers a reader should see first. */
-function getPerformanceMetrics(
+/** Every report metric, labelled and explained; each export layout picks the ones it shows. */
+function getMetrics(
   { metrics }: ReportsResult,
   labels: ReportExportLabels,
-): ReportExportMetric[] {
-  return [
-    countMetric(labels.learners, metrics.learners),
-    percentMetric(labels.rate, metrics.courseCompletionRate),
-    percentMetric(labels.avgProgress, metrics.averageProgress),
-    percentMetric(labels.avgScore, metrics.averageScore),
-    countMetric(labels.certs, metrics.certificatesIssued),
-    countMetric(labels.active, metrics.activeLearners30d),
-  ];
-}
-
-/** Supporting volumes behind the performance overview. */
-function getActivityMetrics(
-  { metrics }: ReportsResult,
-  labels: ReportExportLabels,
-): ReportExportMetric[] {
-  return [
-    countMetric(labels.platformCourses, metrics.platformCourses),
-    countMetric(labels.enrollments, metrics.courseEnrollments),
-    countMetric(labels.completions, metrics.courseCompletions),
-    countMetric(labels.activeCertificates, metrics.activeCertificates),
-    countMetric(labels.paths, metrics.developmentPathsCompleted),
-  ];
+): Record<ReportExportMetricKey, ReportExportMetric> {
+  return {
+    learners: countMetric(labels.learners, metrics.learners),
+    platformCourses: countMetric(labels.platformCourses, metrics.platformCourses),
+    activeLearners30d: countMetric(labels.active, metrics.activeLearners30d),
+    courseEnrollments: countMetric(labels.enrollments, metrics.courseEnrollments),
+    courseCompletions: countMetric(labels.completions, metrics.courseCompletions),
+    courseCompletionRate: percentMetric(labels.rate, metrics.courseCompletionRate),
+    averageProgress: percentMetric(labels.avgProgress, metrics.averageProgress),
+    averageScore: percentMetric(labels.avgScore, metrics.averageScore),
+    activeCertificates: countMetric(labels.activeCertificates, metrics.activeCertificates),
+    certificatesIssued: countMetric(labels.certs, metrics.certificatesIssued),
+    developmentPathsCompleted: countMetric(labels.paths, metrics.developmentPathsCompleted),
+  };
 }
 
 function countMetric(label: string, value: number): ReportExportMetric {
@@ -234,15 +223,6 @@ function describeConditionValue(
       () => scope.recordLabels[text] ?? text,
     )
     .otherwise(() => text);
-}
-
-function getViewLabel(view: ReportsQuery["view"], labels: ReportExportLabels): string {
-  return match(view)
-    .with(REPORT_VIEWS.ORGANISATION, () => labels.viewOrganisation)
-    .with(REPORT_VIEWS.DEVELOPMENT_PATHS, () => labels.viewDevelopmentPaths)
-    .with(REPORT_VIEWS.COURSE, () => labels.viewCourse)
-    .with(REPORT_VIEWS.LEARNER, () => labels.viewLearner)
-    .exhaustive();
 }
 
 function getFieldLabel(field: ReportFilterCondition["field"], labels: ReportExportLabels): string {

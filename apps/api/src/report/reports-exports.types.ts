@@ -76,6 +76,8 @@ export interface ReportExportDetail {
   value: string;
 }
 
+export type ReportExportMetricKey = keyof ReportsResult["metrics"];
+
 export interface ReportExportMetric {
   label: string;
   value: number | null;
@@ -93,10 +95,8 @@ export interface ReportExportDocument {
   language: string;
   labels: ReportExportLabels;
   title: string;
-  subtitle: string;
   generatedAt: string;
-  performance: ReportExportMetric[];
-  activity: ReportExportMetric[];
+  metrics: Record<ReportExportMetricKey, ReportExportMetric>;
   filters: ReportExportDetail[];
   conditions: ReportExportConditions;
   columns: ReportExportColumn[];

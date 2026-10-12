@@ -1,16 +1,25 @@
 import { match } from "ts-pattern";
 
 import {
-  REPORT_EXPORT_EMPTY_VALUE,
   REPORT_EXPORT_PDF_COLUMN_WIDTHS,
+  REPORT_EXPORT_PDF_ICONS,
+  REPORT_EXPORT_PDF_METRIC_ICONS,
+  REPORT_EXPORT_PDF_NUMERIC_COLUMNS,
   REPORT_EXPORT_PDF_OMITTED_COLUMNS,
   REPORT_EXPORT_PDF_STYLES,
+} from "../constants/reports-export-pdf.constants";
+import {
+  REPORT_EXPORT_ACTIVITY_METRICS,
+  REPORT_EXPORT_EMPTY_VALUE,
+  REPORT_EXPORT_LIST_MARKER,
+  REPORT_EXPORT_PERFORMANCE_METRICS,
   REPORT_EXPORT_STRONG_RESULT_PERCENT,
 } from "../constants/reports-exports.constants";
 import { REPORT_CERTIFICATE_STATUS } from "../constants/reports.constants";
 
 import { formatExportDay, formatPercent } from "./reports-export.utils";
 
+import type { ReportExportPdfIcon } from "../constants/reports-export-pdf.constants";
 import type {
   ReportExportColumn,
   ReportExportDocument,
@@ -19,8 +28,8 @@ import type {
 } from "../reports-exports.types";
 
 /**
- * The PDF report as one HTML page: header, performance overview, learning activity,
- * the filters the report was run with, then the records table.
+ * The PDF report as one HTML page, in the same order as the spreadsheet summary:
+ * performance overview with learning activity, the report filters, then every record.
  */
 export function buildReportExportHtml(document: ReportExportDocument): string {
   return `<!doctype html>
@@ -31,8 +40,7 @@ export function buildReportExportHtml(document: ReportExportDocument): string {
   </head>
   <body>
     ${renderHeader(document)}
-    ${renderPerformance(document)}
-    ${renderActivity(document)}
+    ${renderOverview(document)}
     ${renderFilters(document)}
     ${renderRecords(document)}
   </body>
@@ -41,8 +49,8 @@ export function buildReportExportHtml(document: ReportExportDocument): string {
 
 /** Footer printed on every PDF page by the browser, with the page number. */
 export function buildReportExportFooter(document: ReportExportDocument): string {
-  return `<div style="width:100%;padding:0 12mm;font:8px Arial,sans-serif;color:#64748b;display:flex;justify-content:space-between">
-    <span>${escapeHtml(document.title)} · ${escapeHtml(document.subtitle)}</span>
+  return `<div style="width:100%;padding:0 12mm;font:8px Arial,sans-serif;color:#999999;display:flex;justify-content:space-between">
+    <span>${escapeHtml(document.title)} · ${escapeHtml(document.generatedAt)}</span>
     <span>${escapeHtml(
       document.labels.page,
     )} <span class="pageNumber"></span> / <span class="totalPages"></span></span>
@@ -50,63 +58,63 @@ export function buildReportExportFooter(document: ReportExportDocument): string 
 }
 
 function renderHeader(document: ReportExportDocument): string {
-  return `<header class="header">
-    <div>
-      <h1>${escapeHtml(document.title)}</h1>
-      <p>${escapeHtml(document.subtitle)} | ${escapeHtml(document.generatedAt)}</p>
-    </div>
+  return `<header class="page-header">
+    <h1>${escapeHtml(document.title)}</h1>
+    <p>${escapeHtml(document.generatedAt)}</p>
   </header>`;
 }
 
-function renderPerformance(document: ReportExportDocument): string {
-  const cards = document.performance
-    .map(
-      (metric) => `<div class="metric">
-        <span class="metric-label">${escapeHtml(metric.label)}</span>
-        <span class="${metricValueClass(metric)}">${escapeHtml(formatMetric(metric))}</span>
-      </div>`,
-    )
-    .join("");
+/** Six performance cards beside the learning activity list, as on the summary sheet. */
+function renderOverview(document: ReportExportDocument): string {
+  const tiles = REPORT_EXPORT_PERFORMANCE_METRICS.map((key) => {
+    const metric = document.metrics[key];
+    const iconName = REPORT_EXPORT_PDF_METRIC_ICONS[key];
+    return `<div class="card">
+      <span class="tile-label">${iconName ? icon(iconName) : ""}${escapeHtml(metric.label)}</span>
+      <span class="${tileValueClass(metric)}">${escapeHtml(formatMetric(metric))}</span>
+    </div>`;
+  }).join("");
+  const activity = REPORT_EXPORT_ACTIVITY_METRICS.map((key) => {
+    const metric = document.metrics[key];
+    return `<div class="activity-row">
+      <span>${escapeHtml(metric.label)}</span>
+      <strong>${escapeHtml(formatMetric(metric))}</strong>
+    </div>`;
+  }).join("");
 
   return `<section>
     <p class="caption">${escapeHtml(document.labels.performanceOverview)}</p>
-    <div class="metrics">${cards}</div>
+    <div class="overview">
+      <div class="tiles">${tiles}</div>
+      <div class="card">
+        <h2 class="card-title">${escapeHtml(document.labels.learningActivity)}</h2>
+        ${activity}
+      </div>
+    </div>
   </section>`;
 }
 
-function renderActivity(document: ReportExportDocument): string {
-  const rows = document.activity
-    .map(
-      (metric) => `<div class="metric-row">
-        <span>${escapeHtml(metric.label)}</span>
-        <strong>${escapeHtml(formatMetric(metric))}</strong>
-      </div>`,
-    )
-    .join("");
-
-  return `<section class="panel">
-    <h2>${escapeHtml(document.labels.learningActivity)}</h2>
-    <div class="metric-list">${rows}</div>
-  </section>`;
-}
-
+/** The filters the report was run with, laid out like the spreadsheet's report filters. */
 function renderFilters(document: ReportExportDocument): string {
   const { conditions, labels } = document;
   const hasConditions = conditions.lines[0] !== labels.noConditions;
   const filters = document.filters
     .map(
-      ({ label, value }) => `<div class="filter">
+      ({ label, value }) => `<div>
         <span class="filter-label">${escapeHtml(label)}</span>
-        <strong>${escapeHtml(value)}</strong>
+        <span class="filter-value">${escapeHtml(value)}</span>
       </div>`,
     )
     .join("");
   const lines = conditions.lines
-    .map((line) => `<li class="${hasConditions ? "condition" : ""}">${escapeHtml(line)}</li>`)
+    .map((line) => {
+      const text = hasConditions ? `${REPORT_EXPORT_LIST_MARKER} ${line}` : line;
+      return `<li>${escapeHtml(text)}</li>`;
+    })
     .join("");
 
-  return `<section class="panel">
-    <h2>${escapeHtml(labels.reportFilters)}</h2>
+  return `<section class="card">
+    <h2 class="card-title">${icon("filters")}${escapeHtml(labels.reportFilters)}</h2>
     <div class="filters">${filters}</div>
     <p class="caption">${escapeHtml(conditions.heading)}</p>
     <ul class="conditions">${lines}</ul>
@@ -135,8 +143,8 @@ function renderRecords(document: ReportExportDocument): string {
     .join("");
 
   return `<section>
-    <div class="section-heading">
-      <h2>${escapeHtml(document.labels.recordsSheet)}</h2>
+    <div class="records-header">
+      <h2 class="card-title">${icon("table")}${escapeHtml(document.labels.recordsSheet)}</h2>
       <span>${escapeHtml(document.recordCount)}</span>
     </div>
     <table>
@@ -164,9 +172,9 @@ function renderCell(column: ReportExportColumn, row: ReportExportRow, language: 
     .with(
       "learner",
       () =>
-        `<strong>${escapeHtml(row.learnerName)}</strong><span class="secondary">${escapeHtml(
-          row.learnerEmail,
-        )}</span>`,
+        `<span class="learner-name">${escapeHtml(
+          row.learnerName,
+        )}</span><span class="secondary">${escapeHtml(row.learnerEmail)}</span>`,
     )
     .with("email", () => escapeHtml(row.learnerEmail))
     .with("course", () => escapeHtml(row.course ?? REPORT_EXPORT_EMPTY_VALUE))
@@ -204,16 +212,20 @@ function renderCell(column: ReportExportColumn, row: ReportExportRow, language: 
 }
 
 function renderBar(value: number | null): string {
-  const width = Math.max(0, Math.min(100, value ?? 0));
-  return `<span class="bar"><span style="width:${width}%"></span></span>`;
+  return `<span class="bar"><span style="width:${clampPercent(value)}%"></span></span>`;
 }
 
-function metricValueClass(metric: ReportExportMetric): string {
+function icon(name: ReportExportPdfIcon): string {
+  return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${REPORT_EXPORT_PDF_ICONS[name]}</svg>`;
+}
+
+/** Strong percentages are shown in green, as on the summary sheet. */
+function tileValueClass(metric: ReportExportMetric): string {
   const isStrong =
     metric.unit === "percent" &&
     metric.value !== null &&
     metric.value >= REPORT_EXPORT_STRONG_RESULT_PERCENT;
-  return isStrong ? "metric-value metric-value-strong" : "metric-value";
+  return isStrong ? "tile-value tile-value-strong" : "tile-value";
 }
 
 function formatMetric(metric: ReportExportMetric): string {
@@ -222,15 +234,20 @@ function formatMetric(metric: ReportExportMetric): string {
     : String(metric.value ?? REPORT_EXPORT_EMPTY_VALUE);
 }
 
+function clampPercent(value: number | null): number {
+  return Math.max(0, Math.min(100, value ?? 0));
+}
+
 function columnClass(column: ReportExportColumn): string {
+  if (REPORT_EXPORT_PDF_NUMERIC_COLUMNS.has(column.key)) return "numeric";
+
   return match(column.key)
-    .with("progress", "score", "attempts", () => "numeric")
     .with("enrolledAt", "completedAt", "lastActivityAt", "certificateIssuedAt", () => "date")
     .otherwise(() => "");
 }
 
 function certificateClass(status: ReportExportRow["certificateStatus"]): string {
-  return status === REPORT_CERTIFICATE_STATUS.ACTIVE ? "certificate-active" : "secondary-inline";
+  return status === REPORT_CERTIFICATE_STATUS.ACTIVE ? "certificate-active" : "muted";
 }
 
 function escapeHtml(value: unknown): string {

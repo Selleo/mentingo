@@ -48,8 +48,9 @@ export class ReportsExportRenderer {
       columns: [getSummarySheetColumns(), getRecordsSheetColumns(document)],
       fontFamily: "Calibri",
       fontSize: 11,
-      // Freezes the records header. The summary starts with a spacer row so nothing visible is frozen there.
       stickyRowsCount: 1,
+      stickyColumnsCount: 1,
+      orientation: "landscape",
       showGridLines: false,
     });
   }

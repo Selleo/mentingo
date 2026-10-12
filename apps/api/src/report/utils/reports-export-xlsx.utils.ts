@@ -6,11 +6,14 @@ import {
   REPORT_EXPORT_DATE_DISPLAY_LENGTH,
   REPORT_EXPORT_LIST_MARKER,
   REPORT_EXPORT_RECORDS_COLUMN_FIT,
+  REPORT_EXPORT_RIGHT_ALIGNED_COLUMNS,
   REPORT_EXPORT_STRONG_RESULT_PERCENT,
   REPORT_EXPORT_SUMMARY_CARD_COLUMNS,
   REPORT_EXPORT_SUMMARY_CONTENT_SPAN,
   REPORT_EXPORT_SUMMARY_RULE_COLUMNS,
   REPORT_EXPORT_SUMMARY_SPACER_HEIGHT,
+  REPORT_EXPORT_ACTIVITY_METRICS,
+  REPORT_EXPORT_PERFORMANCE_METRICS,
   REPORT_EXPORT_SUMMARY_COLUMN_WIDTHS,
   REPORT_EXPORT_XLSX_FORMATS as FORMAT,
 } from "../constants/reports-exports.constants";
@@ -36,10 +39,10 @@ export function buildSummarySheet(document: ReportExportDocument): SheetData {
     ...buildBanner(document),
     [],
     sectionCaption(document.labels.performanceOverview),
-    ...buildPerformanceCards(document.performance),
+    ...buildPerformanceCards(REPORT_EXPORT_PERFORMANCE_METRICS.map((key) => document.metrics[key])),
     [],
     sectionHeading(document.labels.learningActivity),
-    ...document.activity.map(buildActivityRow),
+    ...REPORT_EXPORT_ACTIVITY_METRICS.map((key) => buildActivityRow(document.metrics[key])),
     [],
     sectionHeading(document.labels.reportFilters),
     ...buildFilters(document),
@@ -69,7 +72,7 @@ function buildBanner(document: ReportExportDocument): SheetData {
     gridRow([
       [
         1,
-        textCell(`${document.subtitle} | ${document.generatedAt}`, {
+        textCell(document.generatedAt, {
           ...bannerStyle,
           height: 24,
           alignVertical: "top",
@@ -232,18 +235,27 @@ export function getSummarySheetColumns(): Columns {
 
 /** The records sheet: one typed row per learning record, ready to sort and filter. */
 export function buildRecordsSheet(document: ReportExportDocument): SheetData {
-  const header = document.columns.map((column) =>
-    headerCell(column.label, {
-      backgroundColor: REPORT_EXPORT_COLORS.primaryDark,
-      height: 28,
-      indent: 1,
-    }),
-  );
+  const header = document.columns.map(recordsHeaderCell);
   const rows = document.rows.map((row, index) =>
     document.columns.map((column) => recordCell(column, row, index % 2 === 1)),
   );
 
   return [header, ...rows];
+}
+
+/** A light header in the style of reporting-tool exports, aligned like the values below it. */
+function recordsHeaderCell(column: ReportExportColumn): Cell {
+  return textCell(column.label, {
+    fontWeight: "bold",
+    color: REPORT_EXPORT_COLORS.primaryDark,
+    backgroundColor: REPORT_EXPORT_COLORS.primaryLight,
+    bottomBorderColor: REPORT_EXPORT_COLORS.primary,
+    bottomBorderStyle: "medium",
+    height: 28,
+    alignVertical: "center",
+    align: REPORT_EXPORT_RIGHT_ALIGNED_COLUMNS.has(column.key) ? "right" : "left",
+    indent: 1,
+  });
 }
 
 /** Sizes each column to its longest value within the cap, keeping room for the whole label. */
@@ -285,19 +297,19 @@ function recordDisplayLength(column: ReportExportColumn, row: ReportExportRow): 
     .exhaustive();
 }
 
-/** A record cell styled like the summary: thin rules, light card stripes, centred text. */
+/** A record cell divided from the next record by a thin rule; every other row is lightly shaded. */
 function recordCell(column: ReportExportColumn, row: ReportExportRow, isStriped: boolean): Cell {
   const rowStyle = {
     alignVertical: "center" as const,
     indent: 1,
     bottomBorderColor: REPORT_EXPORT_COLORS.border,
     bottomBorderStyle: "thin" as const,
-    ...(isStriped ? { backgroundColor: REPORT_EXPORT_COLORS.card } : {}),
+    ...(isStriped ? { backgroundColor: REPORT_EXPORT_COLORS.rowStripe } : {}),
   };
   const wrappingStyle = { ...rowStyle, wrap: true };
 
   return match(column.key)
-    .with("learner", () => textCell(row.learnerName, { ...wrappingStyle, fontWeight: "bold" }))
+    .with("learner", () => textCell(row.learnerName, wrappingStyle))
     .with("email", () => textCell(row.learnerEmail, wrappingStyle))
     .with("course", () => textCell(row.course ?? REPORT_EXPORT_EMPTY_VALUE, wrappingStyle))
     .with("path", () => textCell(row.path ?? REPORT_EXPORT_EMPTY_VALUE, wrappingStyle))
@@ -321,14 +333,8 @@ function recordCell(column: ReportExportColumn, row: ReportExportRow, isStriped:
 
 function statusStyle(status: ReportExportRow["status"]) {
   return match(status)
-    .with(REPORT_STATUS.COMPLETED, () => ({
-      color: REPORT_EXPORT_COLORS.success,
-      fontWeight: "bold" as const,
-    }))
-    .with(REPORT_STATUS.IN_PROGRESS, () => ({
-      color: REPORT_EXPORT_COLORS.warning,
-      fontWeight: "bold" as const,
-    }))
+    .with(REPORT_STATUS.COMPLETED, () => ({ color: REPORT_EXPORT_COLORS.success }))
+    .with(REPORT_STATUS.IN_PROGRESS, () => ({ color: REPORT_EXPORT_COLORS.warning }))
     .otherwise(() => ({ color: REPORT_EXPORT_COLORS.muted }));
 }
 
@@ -354,17 +360,6 @@ function percentCell(value: number | null, style: Partial<NonNullable<Cell>> = {
 function dateCell(value: Date | null, style: Partial<NonNullable<Cell>> = {}): Cell {
   if (!value) return textCell(REPORT_EXPORT_EMPTY_VALUE, { ...style, align: "right" });
   return { value, type: Date, format: FORMAT.date, ...style };
-}
-
-function headerCell(value: string, style: Partial<NonNullable<Cell>> = {}): Cell {
-  return textCell(value, {
-    fontWeight: "bold",
-    color: REPORT_EXPORT_COLORS.white,
-    backgroundColor: REPORT_EXPORT_COLORS.primary,
-    alignVertical: "center",
-    height: 22,
-    ...style,
-  });
 }
 
 function textCell(value: string, style: Partial<NonNullable<Cell>> = {}): Cell {

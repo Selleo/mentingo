@@ -1,6 +1,8 @@
 import readXlsxFile from "read-excel-file/node";
 
 import { ReportsExportRenderer } from "./reports-export.renderer";
+import { buildReportExportHtml } from "./utils/reports-export-pdf.utils";
+import { buildReportExportDocument } from "./utils/reports-export.utils";
 
 import type { ReportsQuery, ReportsResult } from "./schemas/reports.schema";
 
@@ -109,9 +111,8 @@ describe("ReportsExportRenderer", () => {
     const records = await readXlsxFile(buffer, { sheet: 2 });
     const recordCells = records.flat().map((cell) => String(cell ?? ""));
 
-    expect(summary.some((cell) => cell.startsWith("Development paths · Leadership path |"))).toBe(
-      true,
-    );
+    expect(summary).toContain("Leadership path");
+    expect(summary.some((cell) => cell.includes("Development paths ·"))).toBe(false);
     expect(summary).toContain("Product Team");
     expect(summary).toContain("CONDITIONS - ALL MUST MATCH");
     expect(summary.some((cell) => cell.includes("Europe/Warsaw"))).toBe(false);
@@ -134,6 +135,42 @@ describe("ReportsExportRenderer", () => {
     expect(recordCells).not.toContain("'-");
     expect(recordCells.filter((cell) => cell === "learner0@example.com")).toHaveLength(1);
     expect(recordCells.filter((cell) => cell === "learner3@example.com")).toHaveLength(1);
+  });
+
+  it("shows only the generation date under the report title", async () => {
+    const buffer = await collect(
+      await renderer.render(
+        "xlsx",
+        result,
+        { ...query, view: "organisation", subjectId: undefined },
+        new Date("2026-02-03T12:00:00.000Z"),
+        { groups: [], subject: null, recordLabels: {} },
+      ),
+    );
+    const summary = (await readXlsxFile(buffer, { sheet: 1 })).flat().map(String);
+
+    expect(summary).toContain("Learning report");
+    expect(summary.some((cell) => cell.includes("Organisation overview"))).toBe(false);
+    expect(summary.some((cell) => cell.includes(" | "))).toBe(false);
+  });
+
+  it("lays the PDF out like the spreadsheet summary, without charts", () => {
+    const html = buildReportExportHtml(
+      buildReportExportDocument(result, query, new Date("2026-02-03T12:00:00.000Z"), {
+        groups: ["Product Team"],
+        subject: null,
+        recordLabels: {},
+      }),
+    );
+
+    expect(html).toContain("Performance overview");
+    expect(html).toContain("Learning activity");
+    expect(html).toContain("Courses on the platform");
+    expect(html).toContain("Report filters");
+    expect(html).toContain("Product Team");
+    expect(html).toContain("- Completion status is Completed");
+    expect(html).not.toContain("chart");
+    expect(html).not.toMatch(/(src|href)="https?:/);
   });
 
   it("renders a PDF without loading external content", async () => {

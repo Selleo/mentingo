@@ -135,6 +135,7 @@ export class ReportsQueryScopeRepository {
       .where(
         and(
           eq(groupUsers.tenantId, access.tenantId),
+          eq(groupUsers.groupId, groups.id),
           eq(studentCourses.status, "enrolled"),
           eq(courses.authorId, access.userId),
           eq(courses.isArchived, false),
