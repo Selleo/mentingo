@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
   useRouteError,
 } from "@remix-run/react";
+import { Suspense } from "react";
 
 import { version } from "~/../version.json";
 
@@ -15,6 +16,7 @@ import { Toaster } from "./components/ui/toaster";
 import { useNavigationTracker } from "./hooks/useNavigationTracker";
 import css from "./index.css?url";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
+import Loader from "./modules/common/Loader/Loader";
 import { Providers } from "./modules/Global/Providers";
 import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
 
@@ -57,7 +59,9 @@ export default function Root() {
     <Providers>
       <ThemeWrapper>
         <PlatformFavicon />
-        <Outlet />
+        <Suspense fallback={<Loader />}>
+          <Outlet />
+        </Suspense>
       </ThemeWrapper>
     </Providers>
   );

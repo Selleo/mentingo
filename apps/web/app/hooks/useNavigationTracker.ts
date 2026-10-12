@@ -8,6 +8,7 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 export function useNavigationTracker() {
   const location = useLocation();
   const currentUser = useCurrentUserStore((state) => state.currentUser);
+  const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
   const addLastUnauthorizedEntry = useNavigationHistoryStore(
     (state) => state.addLastUnauthorizedEntry,
@@ -19,7 +20,7 @@ export function useNavigationTracker() {
   const isLandingRoute = location.pathname === "/" || location.pathname === LOGIN_REDIRECT_URL;
 
   useEffect(() => {
-    if (currentUser || isAuthRoute || isLandingRoute) return;
+    if (useCurrentUserStore.getState().currentUser || isAuthRoute || isLandingRoute) return;
 
     addLastUnauthorizedEntry({
       pathname: `${location.pathname}${location.search}`,
@@ -35,15 +36,20 @@ export function useNavigationTracker() {
   ]);
 
   useEffect(() => {
-    if (!currentUser || isAuthRoute || isLandingRoute || !lastEntry) return;
+    const session = useCurrentUserStore.getState();
+    const user = session.currentUser;
+    if (!user || isAuthRoute || !lastEntry) return;
+    if (user.requiresPasswordChange || (user.shouldVerifyMFA && !session.hasVerifiedMFA)) {
+      return;
+    }
     if (lastEntry.pathname !== `${location.pathname}${location.search}`) return;
 
     clearHistory();
   }, [
     clearHistory,
     currentUser,
+    hasVerifiedMFA,
     isAuthRoute,
-    isLandingRoute,
     lastEntry,
     location.pathname,
     location.search,

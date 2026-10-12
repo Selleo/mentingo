@@ -5,7 +5,7 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 
 import type { CurrentUserResponse } from "~/api/generated-api";
 
-export const useSyncUserAfterLogin = (user?: CurrentUserResponse["data"]) => {
+export const useSyncUserAfterLogin = (user?: CurrentUserResponse["data"] | null) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const currentUser = useCurrentUserStore((state) => state.currentUser);
@@ -14,6 +14,12 @@ export const useSyncUserAfterLogin = (user?: CurrentUserResponse["data"]) => {
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
   useEffect(() => {
+    if (user === null) {
+      if (currentUser) setCurrentUser(undefined);
+      if (isLoggedIn) setLoggedIn(false);
+      if (hasVerifiedMFA) setHasVerifiedMFA(false);
+      return;
+    }
     if (!user) return;
 
     const nextHasVerifiedMFA = user.shouldVerifyMFA ? hasVerifiedMFA : true;

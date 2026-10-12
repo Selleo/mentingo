@@ -33,4 +33,15 @@ describe("navigation history", () => {
       state: { navigationHistory: [] },
     });
   });
+
+  it("claims the pending destination only once and persists its consumption", () => {
+    saveEntryToNavigationHistory(new Request("https://app.example.com/calendar"));
+    const consume = useNavigationHistoryStore.getState().consumeLastUnauthorizedEntry;
+
+    expect(consume()?.pathname).toBe("/calendar");
+    expect(consume()).toBeNull();
+    expect(JSON.parse(sessionStorage.getItem("navigation-history") ?? "{}")).toMatchObject({
+      state: { navigationHistory: [] },
+    });
+  });
 });

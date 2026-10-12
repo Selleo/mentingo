@@ -1,12 +1,12 @@
 import { useCurrentUser } from "~/api/queries";
+import { companyInformationQueryOptions } from "~/api/queries/useCompanyInformation";
+import { queryClient } from "~/api/queryClient";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+export const meta: MetaFunction = () => {
+  const companyShortName = queryClient.getQueryData(companyInformationQueryOptions.queryKey)?.data
     ?.companyShortName;
   const title = companyShortName ? `${companyShortName} - Lesson` : "Lesson";
 

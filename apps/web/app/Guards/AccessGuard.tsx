@@ -1,45 +1,14 @@
 import { useNavigate } from "@remix-run/react";
-import {
-  ACCESS_GUARD,
-  PERMISSIONS,
-  hasAnyPermission,
-  type AccessGuard,
-  type PermissionKey,
-} from "@repo/shared";
+import { ACCESS_GUARD, type AccessGuard } from "@repo/shared";
 import { useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
-import { currentUserQueryOptions } from "~/api/queries";
-import { allCoursesQueryOptions } from "~/api/queries/useCourses";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import Loader from "~/modules/common/Loader/Loader";
 
 import type React from "react";
-
-const prefetchQueriesForUser = async (permissions: PermissionKey[] | undefined) => {
-  const canManageCourses = hasAnyPermission(permissions, [
-    PERMISSIONS.COURSE_UPDATE,
-    PERMISSIONS.COURSE_UPDATE_OWN,
-  ]);
-
-  if (canManageCourses) {
-    await queryClient.prefetchQuery(allCoursesQueryOptions());
-  }
-};
-
-export const clientLoader = async () => {
-  const currentUser = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-  const permissions = (currentUser as { data?: { permissions?: PermissionKey[] } } | null)?.data
-    ?.permissions;
-
-  await prefetchQueriesForUser(permissions);
-
-  return null;
-};
 
 type AccessGuardProps = {
   children: React.ReactElement;
