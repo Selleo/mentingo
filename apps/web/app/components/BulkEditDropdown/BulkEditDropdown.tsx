@@ -87,6 +87,7 @@ export const BulkEditDropdown = ({
           <DropdownMenuItem
             key={item.translationKey}
             data-testid={item.testId}
+            variant={item.destructive ? "destructive" : "default"}
             className={cn(
               "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-neutral-900 outline-none focus:bg-accent focus:text-accent-foreground",
               { "text-error-700 focus:bg-error-50 focus:text-error-700": item.destructive },

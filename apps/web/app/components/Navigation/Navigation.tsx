@@ -132,7 +132,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           isSidebarCollapsed
             ? "2xl:w-14 2xl:px-2 2xl:py-4 3xl:w-14 3xl:px-2 3xl:py-4"
             : "2xl:w-64 2xl:p-4 3xl:w-64 3xl:p-4",
-          "mono:z-10 mono:border-b mono:border-border mono:bg-background mono:2xl:gap-y-0 mono:2xl:border-b-0 mono:2xl:p-0 mono:2xl:shadow-md mono:3xl:relative mono:3xl:p-0",
+          "mono:z-10 mono:border-b mono:border-border mono:bg-background mono:2xl:gap-y-0 mono:2xl:border-b-0 mono:2xl:p-0 mono:2xl:shadow-elevation-400 mono:3xl:relative mono:3xl:p-0",
           !isSidebarCollapsed && "mono:2xl:w-56 mono:3xl:w-56",
         )}
       >

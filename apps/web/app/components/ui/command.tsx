@@ -119,7 +119,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("-mx-1 h-px bg-border", className)}
+      className={cn("-mx-1 h-px bg-border", "mono:mx-0 mono:my-2", className)}
       {...props}
     />
   );
@@ -131,6 +131,7 @@ function CommandItem({ className, ...props }: React.ComponentProps<typeof Comman
       data-slot="command-item"
       className={cn(
         "relative flex cursor-default items-center gap-3 rounded-md px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:text-base mono:data-[selected=true]:bg-neutral-100 mono:data-[selected=true]:text-neutral-950 mono:data-[disabled=true]:text-neutral-500 mono:data-[disabled=true]:opacity-100",
         className,
       )}
       {...props}

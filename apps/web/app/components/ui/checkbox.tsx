@@ -15,7 +15,7 @@ const Checkbox = React.forwardRef<
         ? "mb-1 flex size-5 shrink-0 items-center justify-center rounded-sm border border-primary-700"
         : "data-[state=checked]:text-white peer size-4 shrink-0 rounded-sm border border-accent-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary",
       !isSquareCheck &&
-        "mono:border-neutral-700 mono:data-[state=checked]:border-primary-700 mono:data-[state=indeterminate]:border-primary-700 mono:data-[state=indeterminate]:bg-primary-700 mono:data-[state=indeterminate]:text-white",
+        "mono:flex mono:items-center mono:justify-center mono:rounded mono:border-2 mono:border-neutral-700 mono:data-[state=checked]:border-primary-700 mono:data-[state=checked]:bg-primary-700 mono:data-[state=indeterminate]:border-primary-700 mono:data-[state=indeterminate]:bg-primary-700 mono:data-[state=indeterminate]:text-white mono:disabled:border-neutral-400 mono:disabled:opacity-100",
       className,
     )}
     {...props}

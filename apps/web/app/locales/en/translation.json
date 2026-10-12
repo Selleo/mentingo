@@ -5355,6 +5355,8 @@
   },
   "pagination": {
     "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",
+    "rowsPerPage": "Rows per page:",
+    "itemsRange": "{{startItem}}-{{endItem}} of {{totalItems}} items",
     "previous": "Previous",
     "next": "Next",
     "noData": "No data found"

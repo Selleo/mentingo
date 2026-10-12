@@ -58,7 +58,8 @@ export const EmbedLessonResourceCard = ({
         data-testid={EMBED_LESSON_FORM_HANDLES.removeResourceButton(resourceIndex)}
         type="button"
         onClick={handleRemoveResource}
-        className="mt-2 w-fit border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+        variant="outlineDestructive"
+        className="mt-2 w-fit"
       >
         {t("adminCourseView.curriculum.lesson.button.removeResource")}
       </Button>

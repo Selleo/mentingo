@@ -102,7 +102,7 @@ export const UploadFilesToLoginPageDialog = ({
             </Button>
             <Button
               type="button"
-              className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+              variant="outlineDestructive"
               onClick={onClose}
               data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_CANCEL}
             >

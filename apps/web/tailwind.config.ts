@@ -208,6 +208,9 @@ const config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        "elevation-400": "0px 8px 32px rgba(0, 0, 0, 0.16)",
+      },
       dropShadow: {
         card: "2px 4px 16px 0px rgba(34, 41, 73, 0.08)",
         primary: "2px 4px 16px rgba(34, 41, 73, 0.08)",

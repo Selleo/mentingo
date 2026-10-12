@@ -18,7 +18,10 @@ const dialogContentVariants = cva(
   {
     variants: {
       variant: {
-        default: null,
+        default:
+          "mono:rounded-xl mono:border-[16px] mono:border-primary-50 mono:bg-frame-inner-corners mono:shadow-elevation-400 mono:sm:rounded-xl",
+        // Same as default, but skips the mono frame for dialogs that draw their own surface
+        frameless: null,
         mobileDrawer:
           "!bottom-0 !left-0 !right-0 !top-auto max-h-[85dvh] w-full !max-w-none gap-0 overflow-hidden rounded-t-xl border-x-0 border-b-0 p-0 !translate-x-0 !translate-y-0 data-[state=closed]:!slide-out-to-bottom data-[state=open]:!slide-in-from-bottom data-[state=closed]:!slide-out-to-left-0 data-[state=open]:!slide-in-from-left-0 data-[state=closed]:sm:!slide-out-to-top-[48%] data-[state=open]:sm:!slide-in-from-top-[48%] data-[state=closed]:sm:!slide-out-to-left-1/2 data-[state=open]:sm:!slide-in-from-left-1/2 sm:!bottom-auto sm:!left-1/2 sm:!right-auto sm:!top-1/2 sm:max-h-[82vh] sm:rounded-lg sm:border sm:!translate-x-[-50%] sm:!translate-y-[-50%]",
       },
@@ -62,8 +65,13 @@ const DialogContent = React.forwardRef<
     >
       {children}
       {!noCloseButton && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <X className="size-4" />
+        <DialogPrimitive.Close
+          className={cn(
+            "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+            "mono:text-neutral-700 mono:opacity-100 mono:hover:text-neutral-950 mono:data-[state=open]:bg-transparent mono:data-[state=open]:text-neutral-700",
+          )}
+        >
+          <X className="size-4 mono:size-6" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}
@@ -79,7 +87,12 @@ DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      "mono:gap-2 mono:border-border mono:sm:gap-0 mono:sm:space-x-4",
+      "mono:has-[>:nth-child(2)]:border-t mono:has-[>:nth-child(2)]:pt-5",
+      className,
+    )}
     {...props}
   />
 );
@@ -93,7 +106,7 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      "mono:text-xl mono:font-medium mono:leading-7 mono:tracking-normal",
+      "mono:text-2xl mono:font-normal mono:leading-9 mono:tracking-normal mono:text-neutral-950",
       className,
     )}
     {...props}
@@ -107,7 +120,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-muted-foreground", "mono:text-xs mono:text-neutral-800", className)}
     {...props}
   />
 ));

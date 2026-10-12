@@ -20,6 +20,7 @@ const SheetOverlay = React.forwardRef<
   <SheetPrimitive.Overlay
     className={cn(
       "bg-black/80 fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "mono:bg-neutral-700 mono:opacity-70",
       className,
     )}
     {...props}
@@ -48,8 +49,7 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends
-    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
 const SheetContent = React.forwardRef<

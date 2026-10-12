@@ -54,8 +54,6 @@ const NewChapter = ({
     setIsModalOpen(true);
   };
 
-  const buttonStyles = "bg-transparent text-red-500 border border-red-500 hover:bg-red-100";
-
   return (
     <div
       data-testid={CHAPTER_FORM_HANDLES.ROOT}
@@ -114,7 +112,7 @@ const NewChapter = ({
                 data-testid={CHAPTER_FORM_HANDLES.DELETE_BUTTON}
                 aria-label="Delete chapter"
                 type="button"
-                className={buttonStyles}
+                variant="outlineDestructive"
                 onClick={onClickDelete}
               >
                 {t("common.button.delete")}
@@ -123,7 +121,7 @@ const NewChapter = ({
               <Button
                 data-testid={CHAPTER_FORM_HANDLES.CANCEL_BUTTON}
                 aria-label="Cancel editing"
-                className={buttonStyles}
+                variant="outlineDestructive"
                 onClick={() => setContentTypeToDisplay(ContentTypes.EMPTY)}
               >
                 {t("common.button.cancel")}

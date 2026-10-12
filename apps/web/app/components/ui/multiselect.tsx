@@ -1,7 +1,7 @@
 "use client";
 
 import { Command as CommandPrimitive, useCommandState } from "cmdk";
-import { ChevronDown, XIcon } from "lucide-react";
+import { ChevronDown, CircleX, XIcon } from "lucide-react";
 import * as React from "react";
 import { useEffect } from "react";
 
@@ -9,6 +9,7 @@ import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Command, CommandGroup, CommandItem, CommandList } from "~/components/ui/command";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { IS_MONO_DESIGN } from "~/config/designVariant";
 import { cn } from "~/lib/utils";
 
 export interface Option {
@@ -145,6 +146,18 @@ function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   }
   return false;
 }
+
+const RemoveIcon = IS_MONO_DESIGN ? CircleX : XIcon;
+
+const SELECTED_BADGE_CLASS_NAMES = [
+  "animate-fadeIn relative inline-flex h-7 cursor-default items-center rounded-md border bg-background ps-2 pe-7 pl-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-fixed:pe-2",
+  "mono:h-5 mono:gap-1 mono:rounded-full mono:border-input mono:bg-transparent mono:py-0 mono:pe-6 mono:font-control mono:text-xs mono:font-semibold mono:text-neutral-950 mono:hover:bg-transparent",
+];
+
+const REMOVE_BADGE_BUTTON_CLASS_NAMES = [
+  "absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-md border border-transparent p-0 text-muted-foreground/80 outline-hidden transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  "mono:h-5 mono:w-6 mono:rounded-e-full mono:text-neutral-800 mono:hover:text-neutral-950",
+];
 
 const CommandEmpty = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   const render = useCommandState((state) => state.filtered.count === 0);
@@ -477,6 +490,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           data-testid={testId}
           className={cn(
             "relative min-h-[38px] rounded-md border border-input text-sm transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-aria-invalid:border-destructive has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40",
+            "mono:flex mono:min-h-10 mono:items-center mono:rounded mono:bg-background mono:px-2 mono:text-base mono:focus-within:border-primary-700 mono:focus-within:ring-2 mono:focus-within:ring-ring mono:focus-within:ring-offset-2",
             {
               "p-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
@@ -489,15 +503,12 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             inputRef?.current?.focus();
           }}
         >
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mono:flex-1 mono:items-center mono:gap-2">
             {visibleSelected.map((option) => {
               return (
                 <Badge
                   key={option.value}
-                  className={cn(
-                    "animate-fadeIn relative inline-flex h-7 cursor-default items-center rounded-md border bg-background ps-2 pe-7 pl-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-fixed:pe-2",
-                    badgeClassName,
-                  )}
+                  className={cn(SELECTED_BADGE_CLASS_NAMES, badgeClassName)}
                   data-fixed={option.fixed}
                   data-disabled={disabled || undefined}
                 >
@@ -510,7 +521,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   )}
                   <span className="truncate">{option.label}</span>
                   <button
-                    className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-md border border-transparent p-0 text-muted-foreground/80 outline-hidden transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className={cn(REMOVE_BADGE_BUTTON_CLASS_NAMES)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleUnselect(option);
@@ -523,7 +534,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     onClick={() => handleUnselect(option)}
                     aria-label="Remove"
                   >
-                    <XIcon size={14} aria-hidden="true" />
+                    <RemoveIcon size={14} aria-hidden="true" />
                   </button>
                 </Badge>
               );
@@ -535,6 +546,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     <Badge
                       className={cn(
                         "animate-fadeIn relative inline-flex h-7 cursor-help items-center rounded-md border bg-background px-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-background",
+                        "mono:h-5 mono:rounded-full mono:border-input mono:bg-transparent mono:py-0 mono:font-control mono:text-xs mono:font-semibold mono:text-neutral-950 mono:hover:bg-transparent",
                       )}
                     >
                       +{hiddenSelected.length}
@@ -545,10 +557,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                       {hiddenSelected.map((option) => (
                         <div
                           key={option.value}
-                          className={cn(
-                            "animate-fadeIn relative inline-flex h-7 cursor-default items-center rounded-md border bg-background ps-2 pe-7 pl-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-fixed:pe-2",
-                            badgeClassName,
-                          )}
+                          className={cn(SELECTED_BADGE_CLASS_NAMES, badgeClassName)}
                           data-fixed={option.fixed}
                           data-disabled={disabled || undefined}
                         >
@@ -561,7 +570,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                           )}
                           <span className="truncate max-w-[160px]">{option.label}</span>
                           <button
-                            className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-md border border-transparent p-0 text-muted-foreground/80 outline-hidden transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            className={cn(REMOVE_BADGE_BUTTON_CLASS_NAMES)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
                                 handleUnselect(option);
@@ -574,7 +583,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                             onClick={() => handleUnselect(option)}
                             aria-label="Remove"
                           >
-                            <XIcon size={14} aria-hidden="true" />
+                            <RemoveIcon size={14} aria-hidden="true" />
                           </button>
                         </div>
                       ))}
@@ -613,6 +622,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   }
                   className={cn(
                     "flex-1 bg-transparent w-full outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed",
+                    "mono:placeholder:text-neutral-700",
                     {
                       "w-full": hidePlaceholderWhenSelected,
                       "px-1 py-2": selected.length === 0,
@@ -673,6 +683,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           <div
             className={cn(
               "absolute top-2 z-10 w-full overflow-hidden rounded-md border border-input",
+              "mono:rounded-lg mono:border-0 mono:shadow-lg",
               "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
               !open && "hidden",
             )}

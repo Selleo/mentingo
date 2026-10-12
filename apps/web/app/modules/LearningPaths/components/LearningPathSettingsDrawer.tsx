@@ -305,6 +305,7 @@ export function LearningPathSettingsDrawer({
       </DrawerContent>
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
+          variant="frameless"
           className="w-[95vw] max-w-[1120px] border-none bg-transparent p-0 shadow-none"
           noCloseButton
         >

@@ -1,5 +1,7 @@
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
+import { cn } from "~/lib/utils";
+
 import { Button } from "../ui/button";
 
 import type { Column } from "@tanstack/react-table";
@@ -38,7 +40,10 @@ const SortButton = <T,>({ column, children, testId }: SortButtonProps<T>) => {
       data-testid={testId}
       variant="ghost"
       onClick={handleSort}
-      className="flex items-center p-0 hover:bg-transparent hover:text-primary-600"
+      className={cn(
+        "flex items-center p-0 hover:bg-transparent hover:text-primary-600",
+        "mono:h-auto mono:text-xs mono:uppercase mono:text-neutral-700 mono:hover:text-neutral-950",
+      )}
     >
       {children}
       {renderSortIcon()}

@@ -1,40 +1,21 @@
 import { useTranslation } from "react-i18next";
 
+import { IS_MONO_DESIGN } from "~/config/designVariant";
+
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
+import { MonoPagination } from "./mono/MonoPagination";
+import { getPaginationRange, getPaginationState } from "./pagination.utils";
 import { PaginationButton } from "./PaginationButton";
 
-interface PaginationProps {
-  className?: string;
-  emptyDataClassName?: string;
-  totalItems?: number;
-  itemsPerPage?: ItemsPerPageOption;
-  currentPage?: number;
-  canChangeItemsPerPage?: boolean;
-  overrideTotalPages?: number;
-  startItemOverride?: number;
-  endItemOverride?: number;
-  onPageChange: (page: number) => void;
-  onItemsPerPageChange?: (itemsPerPage: string) => void;
-  testIds?: {
-    previous?: string;
-    next?: string;
-    page?: (page: number) => string;
-    itemsPerPage?: string;
-    itemsPerPageOption?: (itemsPerPage: number) => string;
-  };
-}
+import type { PaginationProps } from "./pagination.types";
 
-export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
-export const NEWS_ITEMS_PER_PAGE_OPTIONS = [7, 9] as const;
+export { ITEMS_PER_PAGE_OPTIONS, NEWS_ITEMS_PER_PAGE_OPTIONS } from "./pagination.utils";
+export type { ItemsPerPageOption } from "./pagination.types";
 
-export type ItemsPerPageOption =
-  | (typeof ITEMS_PER_PAGE_OPTIONS)[number]
-  | (typeof NEWS_ITEMS_PER_PAGE_OPTIONS)[number];
-
-export const Pagination = ({
+const DefaultPagination = ({
   className,
   emptyDataClassName,
   totalItems = 0,
@@ -50,95 +31,30 @@ export const Pagination = ({
 }: PaginationProps) => {
   const { t } = useTranslation();
 
-  const totalPages = overrideTotalPages ?? Math.ceil(totalItems / itemsPerPage);
-  const startItem = startItemOverride ?? (currentPage - 1) * itemsPerPage + 1;
-  const endItem = endItemOverride ?? Math.min(currentPage * itemsPerPage, totalItems);
-  const itemsPerPageOptions = NEWS_ITEMS_PER_PAGE_OPTIONS.includes(
-    itemsPerPage as (typeof NEWS_ITEMS_PER_PAGE_OPTIONS)[number],
-  )
-    ? NEWS_ITEMS_PER_PAGE_OPTIONS
-    : ITEMS_PER_PAGE_OPTIONS;
-
-  const handlePrevious = () => {
-    if (currentPage > 1) onPageChange(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) onPageChange(currentPage + 1);
-  };
+  const { totalPages, startItem, endItem, itemsPerPageOptions, hasPreviousPage, hasNextPage } =
+    getPaginationState({
+      totalItems,
+      itemsPerPage,
+      currentPage,
+      overrideTotalPages,
+      startItemOverride,
+      endItemOverride,
+    });
 
   const handleItemsPerPageChange = (newItemsPerPage: string) =>
     onItemsPerPageChange?.(newItemsPerPage);
 
-  const renderPageButtons = () => {
-    const buttons: JSX.Element[] = [];
-
-    if (currentPage > 2) {
-      buttons.push(
-        <PaginationButton
-          key={1}
-          page={1}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          testId={testIds?.page?.(1)}
-        />,
-      );
-    }
-
-    if (currentPage > 3) {
-      buttons.push(
-        <PaginationButton
-          key="start-ellipsis"
-          page={currentPage - 2}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          text="..."
-        />,
-      );
-    }
-
-    for (
-      let page = Math.max(1, currentPage - 1);
-      page <= Math.min(totalPages, currentPage + 1);
-      page++
-    ) {
-      buttons.push(
-        <PaginationButton
-          key={page}
-          page={page}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          testId={testIds?.page?.(page)}
-        />,
-      );
-    }
-
-    if (currentPage < totalPages - 2) {
-      buttons.push(
-        <PaginationButton
-          key="end-ellipsis"
-          page={currentPage + 2}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          text="..."
-        />,
-      );
-    }
-
-    if (currentPage < totalPages - 1) {
-      buttons.push(
-        <PaginationButton
-          key={totalPages}
-          page={totalPages}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          testId={testIds?.page?.(totalPages)}
-        />,
-      );
-    }
-
-    return buttons;
-  };
+  const renderPageButtons = () =>
+    getPaginationRange(currentPage, totalPages).map(({ key, page, isEllipsis }) => (
+      <PaginationButton
+        key={key}
+        page={page}
+        currentPage={currentPage}
+        onPageChange={onPageChange}
+        text={isEllipsis ? "..." : undefined}
+        testId={isEllipsis ? undefined : testIds?.page?.(page)}
+      />
+    ));
 
   if (totalItems === 0) {
     return (
@@ -178,8 +94,8 @@ export const Pagination = ({
           data-testid={testIds?.previous}
           variant="ghost"
           size="sm"
-          onClick={handlePrevious}
-          disabled={currentPage <= 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!hasPreviousPage}
         >
           {t("pagination.previous")}
         </Button>
@@ -188,8 +104,8 @@ export const Pagination = ({
           data-testid={testIds?.next}
           variant="ghost"
           size="sm"
-          onClick={handleNext}
-          disabled={currentPage >= totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasNextPage}
         >
           {t("pagination.next")}
         </Button>
@@ -197,3 +113,6 @@ export const Pagination = ({
     </div>
   );
 };
+
+// Design variant switch point: mono uses its own layout with the same props and test ids.
+export const Pagination = IS_MONO_DESIGN ? MonoPagination : DefaultPagination;

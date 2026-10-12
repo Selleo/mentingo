@@ -24,6 +24,10 @@ const buttonVariants = cva(
           "border border-input bg-background text-primary-800 hover:text-accent-foreground hover:border-primary-500 hover:opacity-90",
           "mono:text-foreground mono:hover:border-input mono:hover:bg-primary-50 mono:hover:text-foreground mono:hover:opacity-100 mono:focus-visible:bg-primary-50 mono:active:bg-primary-100 mono:disabled:border-neutral-300 mono:disabled:text-neutral-600",
         ],
+        outlineDestructive: [
+          "border border-red-500 bg-transparent text-red-500 hover:bg-red-100 hover:opacity-90",
+          "mono:border-error-500 mono:text-error-500 mono:hover:bg-error-50 mono:hover:opacity-100 mono:focus-visible:bg-error-50 mono:active:bg-error-100 mono:disabled:border-neutral-300 mono:disabled:text-neutral-600",
+        ],
         primary: [
           "bg-primary-700 text-contrast hover:opacity-90",
           "mono:hover:bg-primary-800 mono:hover:opacity-100 mono:focus-visible:bg-primary-800 mono:active:bg-primary-900 mono:disabled:bg-neutral-200 mono:disabled:text-white",
@@ -42,7 +46,7 @@ const buttonVariants = cva(
         ],
       },
       size: {
-        default: "h-10 px-4 py-2",
+        default: ["h-10 px-4 py-2", "mono:text-base"],
         sm: ["h-9 rounded-lg px-3", "mono:rounded"],
         lg: ["h-11 rounded-lg px-8", "mono:rounded mono:text-base"],
         icon: "size-10",
@@ -57,7 +61,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

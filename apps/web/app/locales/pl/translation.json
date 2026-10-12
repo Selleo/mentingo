@@ -5392,6 +5392,8 @@
   },
   "pagination": {
     "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",
+    "rowsPerPage": "Liczba wierszy na stronie:",
+    "itemsRange": "{{startItem}}-{{endItem}} z {{totalItems}} elementów",
     "previous": "Poprzedni",
     "next": "Następny",
     "noData": "Nie znaleziono danych"

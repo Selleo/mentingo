@@ -310,6 +310,7 @@ export const getTenantsColumns = (
               </DropdownMenuItem>
               {!row.original.isCurrentTenant && (
                 <DropdownMenuItem
+                  variant="destructive"
                   className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-error-700 outline-none focus:bg-error-50 focus:text-error-700"
                   data-testid={TENANTS_PAGE_HANDLES.deleteButton(row.original.id)}
                   onSelect={() => onRequestDelete(row.original)}

@@ -19,6 +19,7 @@ export function CertificatePreviewModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        variant="frameless"
         className="flex w-[min(1120px,95vw)] items-center justify-center max-w-none border-0 bg-transparent p-0 shadow-none"
         noCloseButton
       >

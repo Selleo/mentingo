@@ -107,12 +107,7 @@ export const InsertLinkDialog = ({ open, onClose, editor }: LinkDialogProps) => 
             <Button size="sm" type="submit">
               {t("common.button.save")}
             </Button>
-            <Button
-              size="sm"
-              type="button"
-              className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
-              onClick={onClose}
-            >
+            <Button size="sm" type="button" variant="outlineDestructive" onClick={onClose}>
               {t("common.button.cancel")}
             </Button>
           </DialogFooter>

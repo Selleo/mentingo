@@ -285,13 +285,8 @@ export const ScormLessonForm = ({
                   ? SCORM_LESSON_FORM_HANDLES.DELETE_BUTTON
                   : SCORM_LESSON_FORM_HANDLES.CANCEL_BUTTON
               }
-              variant="outline"
+              variant={lessonToEdit ? "outlineDestructive" : "outline"}
               onClick={lessonToEdit ? () => setIsDeleteModalOpen(true) : handleCancel}
-              className={
-                lessonToEdit
-                  ? "border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
-                  : undefined
-              }
             >
               {lessonToEdit ? t("common.button.delete") : t("common.button.cancel")}
             </Button>

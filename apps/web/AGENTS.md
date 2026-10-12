@@ -65,7 +65,10 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - Style mono with the `mono:` Tailwind variant, as its own class string after the component's classes and before `className`: `cn(defaultClasses, "mono:rounded mono:border-input", className)`. In cva, add the mono string as a second array item next to each default string.
 - `mono:` classes come later in the stylesheet than plain classes, so in mono builds they win over the component's defaults and over the call site's `className`. To override a mono style at a call site, add a `mono:` class there (`className="px-8 mono:px-8"`). Default `hover:`/`2xl:` classes still win unless the mono class repeats the modifier (`mono:hover:…`, `mono:2xl:…`). Always put `mono:` first. Keep mono classes to look and feel (colors, borders, radius, typography), not sizes that call sites set.
 - Use built-in Tailwind values and color tokens instead of arbitrary hex/rgba, and write classes out literally.
-- Read `DESIGN_VARIANT`/`IS_MONO_DESIGN` from `~/config/designVariant` only in the switch points allowed by `no-restricted-imports` in `.eslintrc.cjs`, and never read `import.meta.env.VITE_DESIGN_VARIANT` directly. A switch point is for markup that classes cannot express: fork the component into a `mono/` folder, choose it in one place, and keep the same props and `data-testid` values.
+- Add mono-only theme tokens (fonts, shadows) under new names in `theme.extend` and use them only with `mono:`. Never redefine an existing key such as `sans` or `mono`, because that changes the default variant too.
+- Read `DESIGN_VARIANT`/`IS_MONO_DESIGN` from `~/config/designVariant` only in switch points, and never read `import.meta.env.VITE_DESIGN_VARIANT` directly. A switch point is for markup that differs between variants: do not render both versions and hide one with `hidden`/`mono:hidden`.
+  - For a small difference (an icon, a prop such as `forceMount`), choose it with `IS_MONO_DESIGN` in the component, e.g. `const RemoveIcon = IS_MONO_DESIGN ? CircleX : XIcon;`.
+  - For a different layout, fork the component into a `mono/` folder, choose it in one place, and keep the same props and `data-testid` values.
 - Do not use client or customer names in variant names, code, comments, or docs.
 
 ## Important Flows

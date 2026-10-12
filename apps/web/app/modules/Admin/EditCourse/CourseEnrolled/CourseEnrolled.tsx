@@ -475,7 +475,7 @@ export const CourseEnrolled = ({
                 variant="ghost"
                 className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
               >
-                <Minus className="size-4 text-errir-700" />
+                <Minus className="size-4 text-error-700" />
                 {t("adminCourseView.enrolled.unenrollSelected")}
               </Button>
             </DropdownMenuItem>

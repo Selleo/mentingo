@@ -5490,6 +5490,8 @@
   },
   "pagination": {
     "showing": "Zobrazuje se {{startItem}}-{{endItem}} z {{totalItems}} výsledků",
+    "rowsPerPage": "Řádků na stránku:",
+    "itemsRange": "{{startItem}}-{{endItem}} z {{totalItems}} položek",
     "previous": "Předchozí",
     "next": "Další",
     "noData": "Nebyla nalezena žádná data"

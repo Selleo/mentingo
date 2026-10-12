@@ -277,6 +277,7 @@ const CourseCertificateSetting = ({
       </div>
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
+          variant="frameless"
           className="w-auto max-w-[calc(100vw-2rem)] overflow-visible p-0"
           noCloseButton
           onInteractOutside={(event) => {

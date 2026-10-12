@@ -43,6 +43,7 @@ export default function CourseMediaModal({
   return (
     <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
       <DialogContent
+        variant="frameless"
         className="max-h-[90vh] max-w-4xl overflow-y-auto rounded-2xl border-0 bg-white p-4 shadow-2xl md:p-6"
         noCloseButton
         aria-describedby={undefined}

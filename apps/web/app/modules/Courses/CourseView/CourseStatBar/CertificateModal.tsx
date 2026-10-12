@@ -195,6 +195,7 @@ export default function CertificateModal({
         }}
       >
         <DialogContent
+          variant="frameless"
           className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl"
           noCloseButton
           aria-describedby={undefined}
@@ -329,6 +330,7 @@ export default function CertificateModal({
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
+          variant="frameless"
           className="w-auto max-w-[calc(100vw-2rem)] overflow-visible p-0"
           noCloseButton
           aria-describedby={undefined}

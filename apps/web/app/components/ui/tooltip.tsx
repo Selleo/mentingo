@@ -40,7 +40,6 @@ const TooltipContent = React.forwardRef<
         data-state="instant-open"
         className={cn(
           tooltipContentVariants({ variant }),
-          "mono:rounded mono:border-0 mono:bg-neutral-950 mono:px-2 mono:py-1 mono:text-xs mono:text-white mono:shadow-none",
           className,
         )}
         {...props}
@@ -58,7 +57,6 @@ const TooltipArrow = React.forwardRef<
     ref={ref}
     className={cn(
       "fill-popover data-[side=bottom]:rotate-45 data-[side=left]:rotate-45 data-[side=right]:rotate-45 data-[side=top]:rotate-45",
-      "mono:fill-neutral-950",
       className,
     )}
     {...props}

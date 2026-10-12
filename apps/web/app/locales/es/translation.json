@@ -5286,6 +5286,8 @@
   },
   "pagination": {
     "showing": "Mostrando {{startItem}}-{{endItem}} de los resultados de {{totalItems}}",
+    "rowsPerPage": "Filas por página:",
+    "itemsRange": "{{startItem}}-{{endItem}} de {{totalItems}} elementos",
     "previous": "Anterior",
     "next": "Siguiente",
     "noData": "No se encontraron datos"

@@ -18,6 +18,7 @@ const BreadcrumbList = React.forwardRef<HTMLOListElement, React.ComponentPropsWi
       ref={ref}
       className={cn(
         "flex flex-wrap items-center break-words text-xs font-medium leading-5 text-muted-foreground sm:gap-1",
+        "mono:gap-3 mono:text-sm mono:font-normal mono:text-neutral-700 mono:sm:gap-3",
         className,
       )}
       {...props}
@@ -44,7 +45,11 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn(
+        "transition-colors hover:text-foreground",
+        "mono:text-primary-700 mono:underline-offset-4 mono:hover:text-primary-800 mono:hover:underline",
+        className,
+      )}
       {...props}
     />
   );
@@ -58,7 +63,7 @@ const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWit
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn("font-normal text-foreground", className)}
+      className={cn("font-normal text-foreground", "mono:text-neutral-950", className)}
       {...props}
     />
   ),
@@ -66,7 +71,12 @@ const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWit
 BreadcrumbPage.displayName = "BreadcrumbPage";
 
 const BreadcrumbSeparator = ({ children, className, ...props }: React.ComponentProps<"li">) => (
-  <li role="presentation" aria-hidden="true" className={cn("[&>svg]:size-4", className)} {...props}>
+  <li
+    role="presentation"
+    aria-hidden="true"
+    className={cn("[&>svg]:size-4", "mono:text-neutral-700", className)}
+    {...props}
+  >
     {children ?? <ChevronRight />}
   </li>
 );

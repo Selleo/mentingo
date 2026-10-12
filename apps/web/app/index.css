@@ -586,3 +586,26 @@ input::-webkit-datetime-edit-fields-wrapper {
   position: relative;
   left: 16px;
 }
+
+@layer utilities {
+  /* Rounds the inner corners of a 16px frame drawn with a border to 8px. A border only draws corners
+     with a shared center (12px outer - 16px border = square inner corners), so each inner corner is
+     painted in the frame color. Used by mono dialogs together with `border-primary-50`. */
+  .bg-frame-inner-corners {
+    background-image: radial-gradient(
+        circle at 100% 100%,
+        transparent 7.5px,
+        var(--primary-50) 8px
+      ),
+      radial-gradient(circle at 0% 100%, transparent 7.5px, var(--primary-50) 8px),
+      radial-gradient(circle at 100% 0%, transparent 7.5px, var(--primary-50) 8px),
+      radial-gradient(circle at 0% 0%, transparent 7.5px, var(--primary-50) 8px);
+    background-position:
+      left top,
+      right top,
+      left bottom,
+      right bottom;
+    background-size: 8px 8px;
+    background-repeat: no-repeat;
+  }
+}

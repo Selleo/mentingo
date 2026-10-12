@@ -125,7 +125,11 @@ const FormDescription = React.forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn(
+        "text-sm text-muted-foreground",
+        "mono:text-xs mono:text-neutral-800",
+        className,
+      )}
       {...props}
     />
   );
@@ -147,7 +151,11 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("details-md flex items-center gap-x-1.5 text-error-600", className)}
+      className={cn(
+        "details-md flex items-center gap-x-1.5 text-error-600",
+        "mono:text-xs mono:text-error-500",
+        className,
+      )}
       {...props}
     >
       <svg

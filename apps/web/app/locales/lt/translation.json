@@ -5486,6 +5486,8 @@
   },
   "pagination": {
     "showing": "Rodoma {{startItem}}-{{endItem}} iš {{totalItems}} rezultatų",
+    "rowsPerPage": "Eilučių puslapyje:",
+    "itemsRange": "{{startItem}}-{{endItem}} iš {{totalItems}} įrašų",
     "previous": "Ankstesnis",
     "next": "Kitas",
     "noData": "Duomenų nerasta"

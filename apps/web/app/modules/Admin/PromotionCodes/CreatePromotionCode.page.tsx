@@ -165,13 +165,13 @@ const CreatePromotionCode = () => {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="percent" id="r2" />
-                      <Label htmlFor="r2" className="cursor-pointer">
+                      <Label variant="option" htmlFor="r2" className="cursor-pointer">
                         {t("adminPromotionCodesView.field.discountTypePercent", "Percent")}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="fixed" id="r1" />
-                      <Label htmlFor="r1" className="cursor-pointer">
+                      <Label variant="option" htmlFor="r1" className="cursor-pointer">
                         {t("adminPromotionCodesView.field.discountTypeFixed", "Fixed")}
                       </Label>
                     </div>

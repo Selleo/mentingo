@@ -5078,6 +5078,8 @@
   },
   "pagination": {
     "showing": "Affichage de {{startItem}}-{{endItem}} sur {{totalItems}} résultats",
+    "rowsPerPage": "Lignes par page :",
+    "itemsRange": "{{startItem}}-{{endItem}} sur {{totalItems}} éléments",
     "previous": "Précédent",
     "next": "Suivant",
     "noData": "Aucune donnée trouvée"

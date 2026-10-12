@@ -32,6 +32,7 @@ export function PricingStep({ handleBack, handleNext }: StepComponentProps) {
           >
             <RadioGroupItem value="free" id="free" className="my-5" />
             <Label
+              variant="option"
               htmlFor="free"
               className="flex size-full flex-1 cursor-pointer flex-col gap-2 py-4"
             >
@@ -47,7 +48,11 @@ export function PricingStep({ handleBack, handleNext }: StepComponentProps) {
           >
             <RadioGroupItem value="paid" id="paid" className="my-5" />
             <div className="flex flex-col py-4">
-              <Label htmlFor="paid" className="flex size-full flex-1 cursor-pointer flex-col gap-2">
+              <Label
+                variant="option"
+                htmlFor="paid"
+                className="flex size-full flex-1 cursor-pointer flex-col gap-2"
+              >
                 <div className="text-lg font-medium">{t("adminScorm.other.paidCourse")}</div>
                 <div className="text-sm font-normal">{t("adminScorm.other.paidCourseBody")}</div>
               </Label>

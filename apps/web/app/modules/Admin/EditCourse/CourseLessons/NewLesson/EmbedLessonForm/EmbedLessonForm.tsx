@@ -166,7 +166,7 @@ export const EmbedLessonForm = ({
                 }
                 type="button"
                 onClick={lessonToEdit ? handleDeleteLesson : handleCancel}
-                className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+                variant="outlineDestructive"
               >
                 {lessonToEdit ? t("common.button.delete") : t("common.button.cancel")}
               </Button>

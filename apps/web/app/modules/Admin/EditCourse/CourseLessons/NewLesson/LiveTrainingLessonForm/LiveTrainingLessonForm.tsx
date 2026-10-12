@@ -260,13 +260,8 @@ export function LiveTrainingLessonForm({
                       : LIVE_TRAINING_LESSON_FORM_HANDLES.CANCEL_BUTTON
                   }
                   type="button"
-                  variant="outline"
+                  variant={isEditMode ? "outlineDestructive" : "outline"}
                   onClick={isEditMode ? () => setIsDeleteModalOpen(true) : handleCancel}
-                  className={
-                    isEditMode
-                      ? "border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
-                      : undefined
-                  }
                 >
                   {isEditMode ? t("common.button.delete") : t("common.button.cancel")}
                 </Button>

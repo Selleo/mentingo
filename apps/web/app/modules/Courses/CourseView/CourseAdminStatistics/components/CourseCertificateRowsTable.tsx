@@ -120,6 +120,7 @@ export function CourseCertificateRowsTable({
 
       <Dialog open={Boolean(preview)} onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent
+          variant="frameless"
           className="flex w-[min(1120px,95vw)] items-center justify-center max-w-none overflow-hidden border-0 bg-transparent p-0 shadow-none"
           noCloseButton
           aria-describedby={undefined}

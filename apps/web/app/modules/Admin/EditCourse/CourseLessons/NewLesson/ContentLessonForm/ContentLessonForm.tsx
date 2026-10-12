@@ -262,7 +262,8 @@ const ContentLessonForm = ({
               onClick={
                 lessonToEdit ? onClickDelete : () => setContentTypeToDisplay(ContentTypes.EMPTY)
               }
-              className="mt-6 border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+              variant="outlineDestructive"
+              className="mt-6"
             >
               {lessonToEdit ? t("common.button.delete") : t("common.button.cancel")}
             </Button>

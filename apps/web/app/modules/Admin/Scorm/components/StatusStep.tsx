@@ -28,6 +28,7 @@ export function StatusStep({ handleBack, handleNext }: StepComponentProps) {
           >
             <RadioGroupItem value="draft" id="draft" className="my-5" />
             <Label
+              variant="option"
               htmlFor="draft"
               className="flex size-full flex-1 cursor-pointer flex-col gap-2 py-4"
             >
@@ -43,6 +44,7 @@ export function StatusStep({ handleBack, handleNext }: StepComponentProps) {
           >
             <RadioGroupItem value="published" id="published" className="my-5" />
             <Label
+              variant="option"
               htmlFor="published"
               className="flex size-full flex-1 cursor-pointer flex-col gap-2 py-4"
             >

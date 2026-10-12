@@ -76,6 +76,7 @@ export default function AuthorModal({
   return (
     <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
       <DialogContent
+        variant="frameless"
         className="max-h-[90vh] max-w-6xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
         noCloseButton
         aria-describedby={undefined}
