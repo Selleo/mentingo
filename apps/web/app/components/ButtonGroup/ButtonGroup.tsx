@@ -26,9 +26,11 @@ export const ButtonGroup = ({ className, buttons }: ButtonGroupProps) => {
         <Button
           key={index}
           {...button}
-          className={cn({
-            "bg-white text-accent-foreground shadow-primary": isActive,
-            "bg-neutral-50 text-neutral-400": !isActive,
+          className={cn("mono:hover:opacity-90", {
+            "bg-white text-accent-foreground shadow-primary mono:hover:bg-white mono:focus-visible:bg-white mono:active:bg-white":
+              isActive,
+            "bg-neutral-50 text-neutral-400 mono:hover:bg-neutral-50 mono:focus-visible:bg-neutral-50 mono:active:bg-neutral-50":
+              !isActive,
           })}
         />
       ))}

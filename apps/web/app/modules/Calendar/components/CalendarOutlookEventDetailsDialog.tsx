@@ -112,7 +112,7 @@ export function CalendarOutlookEventDetailsDialog({
           <div className="border-t border-neutral-200 pt-4">
             <Button
               asChild
-              className="w-full gap-2 bg-[#0078d4] hover:bg-[#006cbd]"
+              className="w-full gap-2 bg-[#0078d4] hover:bg-[#006cbd] mono:hover:bg-[#006cbd] mono:focus-visible:bg-[#006cbd] mono:active:bg-[#006cbd]"
               data-testid={CALENDAR_HANDLES.EVENT_DETAILS_OPEN_OUTLOOK}
             >
               <a href={outlook.webLink} target="_blank" rel="noreferrer">

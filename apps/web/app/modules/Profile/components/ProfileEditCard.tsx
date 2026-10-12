@@ -148,6 +148,7 @@ export const ProfileEditCard = ({
         />
         {userAvatarUrl && (
           <Button
+            variant="destructive"
             onClick={removeImage}
             className="mb-4 mt-4 rounded bg-red-500 px-6 py-2 text-white"
           >

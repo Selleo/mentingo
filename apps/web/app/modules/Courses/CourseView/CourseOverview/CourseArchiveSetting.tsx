@@ -65,6 +65,8 @@ export default function CourseArchiveSetting({ courseId, isArchived }: CourseArc
             className={cn("shrink-0 self-start sm:self-center", {
               "border-error-300 text-error-700 hover:border-error-500 hover:bg-error-50 hover:text-error-700":
                 !isArchived,
+              "mono:text-error-500 mono:hover:border-error-500 mono:hover:bg-error-50 mono:hover:text-error-500 mono:focus-visible:bg-error-50 mono:active:bg-error-100":
+                !isArchived,
             })}
             disabled={isPending}
             onClick={handleAction}
@@ -101,6 +103,7 @@ export default function CourseArchiveSetting({ courseId, isArchived }: CourseArc
               </Button>
             </DialogClose>
             <Button
+              variant="destructive"
               type="button"
               data-testid={COURSE_SETTINGS_HANDLES.ARCHIVE_CONFIRM_BUTTON}
               className="bg-error-500 text-white hover:bg-error-600"

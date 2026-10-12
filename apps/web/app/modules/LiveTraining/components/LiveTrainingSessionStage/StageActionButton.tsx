@@ -23,7 +23,11 @@ export function StageActionButton({
           onClick={onClick}
           className={cn("h-8 w-8 gap-2 px-0 sm:h-9 sm:w-auto sm:px-3", {
             "bg-white text-neutral-950 hover:bg-white/90": variant === "primary",
+            "mono:hover:bg-white/90 mono:focus-visible:bg-white/90 mono:active:bg-white/90":
+              variant === "primary",
             "border-white/15 bg-white/10 text-white hover:border-white/30 hover:bg-white/15 hover:text-white":
+              variant === "secondary",
+            "mono:text-white mono:hover:border-white/30 mono:hover:bg-white/15 mono:hover:text-white mono:focus-visible:bg-white/15 mono:active:bg-white/15 mono:disabled:border-white/15 mono:disabled:text-white mono:disabled:opacity-50":
               variant === "secondary",
           })}
         >

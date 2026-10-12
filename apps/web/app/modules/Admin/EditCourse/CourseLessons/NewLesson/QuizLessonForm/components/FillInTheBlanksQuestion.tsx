@@ -466,7 +466,7 @@ const FillInTheBlanksQuestion = ({
                       <Button
                         onClick={() => handleRemoveWord(index)}
                         type="button"
-                        className="rounded-full bg-transparent p-0 text-primary-500"
+                        className="rounded-full bg-transparent p-0 text-primary-500 mono:hover:bg-transparent mono:hover:opacity-90 mono:focus-visible:bg-transparent mono:active:bg-transparent"
                       >
                         <Icon name="X" className="size-2.5" />
                       </Button>
@@ -514,6 +514,7 @@ const FillInTheBlanksQuestion = ({
                   {t("common.button.add")}
                 </Button>
                 <Button
+                  variant="destructive"
                   onClick={() => setIsAddingWord(false)}
                   type="button"
                   className="bg-color-transparent border border-neutral-200 bg-red-500 text-white"
@@ -529,6 +530,7 @@ const FillInTheBlanksQuestion = ({
             )}
             {canModifyQuestionStructure && (
               <Button
+                variant="outlineDestructive"
                 data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"
                 className="bg-color-white my-4 border border-neutral-300 text-error-700"

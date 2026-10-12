@@ -264,7 +264,7 @@ export function MicrosoftCalendarCard() {
             </Button>
             <Button
               variant="outline"
-              className="text-error-700 hover:bg-error-50 hover:text-error-800"
+              className="text-error-700 hover:bg-error-50 hover:text-error-800 mono:text-error-500 mono:hover:bg-error-50 mono:hover:text-error-600 mono:focus-visible:bg-error-50 mono:active:bg-error-100"
               onClick={() => setIsDisconnectOpen(true)}
               data-testid={SETTINGS_PAGE_HANDLES.MICROSOFT_CALENDAR_DISCONNECT}
             >

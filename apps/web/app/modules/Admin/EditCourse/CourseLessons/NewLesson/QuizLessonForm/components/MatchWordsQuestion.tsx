@@ -213,6 +213,7 @@ const MatchWordsQuestion = ({
                 {t("adminCourseView.curriculum.lesson.button.addOption")}
               </Button>
               <Button
+                variant="outlineDestructive"
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}

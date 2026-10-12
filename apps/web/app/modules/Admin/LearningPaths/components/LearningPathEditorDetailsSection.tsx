@@ -196,7 +196,7 @@ export function LearningPathEditorDetailsSection({
                       type="button"
                       variant="link"
                       size="sm"
-                      className="mt-2 h-auto px-0 py-0 text-error-600"
+                      className="mt-2 h-auto px-0 py-0 text-error-600 mono:text-error-500"
                       onClick={onRemoveThumbnail}
                     >
                       {t("adminLearningPathsView.buttons.removeImage")}
@@ -335,7 +335,7 @@ export function LearningPathEditorDetailsSection({
                         type="button"
                         variant="link"
                         size="sm"
-                        className="mt-2 h-auto px-0 py-0 text-error-600"
+                        className="mt-2 h-auto px-0 py-0 text-error-600 mono:text-error-500"
                         onClick={onRemoveCertificateSignature}
                       >
                         {t("adminCourseView.settings.button.removeCertificateSignature")}

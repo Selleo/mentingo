@@ -44,7 +44,6 @@ import { Tabs, TabsContent } from "~/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
-import { cn } from "~/lib/utils";
 import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
@@ -461,11 +460,9 @@ const EditCourse = () => {
               )}
 
               <Button
+                variant="secondary"
                 asChild
-                className={cn(
-                  "border border-neutral-200 bg-transparent text-accent-foreground",
-                  "mono:hover:bg-primary-50 mono:focus-visible:bg-primary-50 mono:active:bg-primary-100",
-                )}
+                className="border border-neutral-200 bg-transparent text-accent-foreground"
               >
                 <Link
                   data-testid={EDIT_COURSE_PAGE_HANDLES.PREVIEW_BUTTON}

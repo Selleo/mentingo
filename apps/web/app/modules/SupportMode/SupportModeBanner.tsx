@@ -61,7 +61,7 @@ export function SupportModeBanner() {
         <Button
           data-testid={SUPPORT_MODE_HANDLES.EXIT_BUTTON}
           size="sm"
-          className="bg-warning-600 hover:bg-warning-700 text-warning-50 border border-warning-700"
+          className="bg-warning-600 hover:bg-warning-700 text-warning-50 border border-warning-700 mono:hover:bg-warning-700 mono:focus-visible:bg-warning-700 mono:active:bg-warning-700"
           onClick={() => exitSupportMode()}
           disabled={isExitingSupportMode}
         >

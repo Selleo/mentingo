@@ -152,6 +152,7 @@ export function NotificationAnnouncementItem({
                 </DialogClose>
                 <DialogClose asChild>
                   <Button
+                    variant="destructive"
                     disabled={isDeleting}
                     onClick={() => deleteAnnouncement({ id: announcement.id })}
                     className="bg-error-600 text-white hover:bg-error-700"

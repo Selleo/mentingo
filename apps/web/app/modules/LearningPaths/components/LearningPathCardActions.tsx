@@ -135,7 +135,7 @@ export function LearningPathCardActions({
                   variant="outline"
                   size="icon"
                   disabled={isPending}
-                  className="border-error-200 text-error-600 hover:border-error-400 hover:text-error-700"
+                  className="border-error-200 text-error-600 hover:border-error-400 hover:text-error-700 mono:text-error-500 mono:hover:border-error-500 mono:hover:bg-error-50 mono:hover:text-error-500 mono:focus-visible:bg-error-50 mono:active:bg-error-100"
                   aria-label={t("common.button.delete")}
                 >
                   <Trash className="size-4 text-current" />
@@ -157,7 +157,11 @@ export function LearningPathCardActions({
                       </Button>
                     </DialogClose>
                     <DialogClose asChild>
-                      <Button type="submit" className="bg-error-500 text-white hover:bg-error-600">
+                      <Button
+                        variant="destructive"
+                        type="submit"
+                        className="bg-error-500 text-white hover:bg-error-600"
+                      >
                         {t("common.button.delete")}
                       </Button>
                     </DialogClose>

@@ -528,6 +528,7 @@ export const CourseBulkActions = ({
                 </Button>
               </DialogClose>
               <Button
+                variant={isDestructiveAction ? "destructive" : "default"}
                 data-testid={getConfirmButtonTestId()}
                 onClick={handleConfirmBulkAction}
                 className={cn({

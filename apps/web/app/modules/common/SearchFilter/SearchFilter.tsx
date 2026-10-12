@@ -368,6 +368,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
       {showClearAll && isAnyFilterApplied && (
         <Button
+          variant="secondary"
           data-testid={clearAllTestId}
           className="border border-primary-500 bg-transparent text-accent-foreground"
           onClick={handleClearAll}

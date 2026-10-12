@@ -398,6 +398,7 @@ const PhotoQuestion = ({
                 {t("adminCourseView.curriculum.lesson.button.addOption")}
               </Button>
               <Button
+                variant="outlineDestructive"
                 data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"

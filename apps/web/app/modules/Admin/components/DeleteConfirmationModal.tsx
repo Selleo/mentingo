@@ -70,6 +70,7 @@ const DeleteConfirmationModal = ({
 
             <div className="mt-8 flex gap-4">
               <Button
+                variant="destructive"
                 data-testid={testIds?.confirmButton}
                 onClick={onDelete}
                 className="rounded bg-error-500 px-4 py-2 text-white hover:bg-error-600"
@@ -77,6 +78,7 @@ const DeleteConfirmationModal = ({
                 {t("common.button.delete")}
               </Button>
               <Button
+                variant="secondary"
                 data-testid={testIds?.cancelButton}
                 onClick={onClose}
                 className="bg-neutrals-200 rounded border border-neutral-300 px-4 py-2 text-primary-800"

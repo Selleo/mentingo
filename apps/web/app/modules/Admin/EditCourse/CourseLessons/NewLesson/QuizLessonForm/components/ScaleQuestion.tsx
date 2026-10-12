@@ -126,6 +126,7 @@ const ScaleQuestion = ({
           {!isStructureLocked && (
             <div className="ml-14 mt-4 flex gap-2">
               <Button
+                variant="outlineDestructive"
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}

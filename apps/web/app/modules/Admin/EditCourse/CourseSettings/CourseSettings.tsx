@@ -343,7 +343,11 @@ const CourseSettings = ({
                 />
                 <div className="flex items-center justify-start gap-x-2">
                   {displayThumbnailUrl && (
-                    <Button onClick={removeThumbnail} className="bg-red-500 px-6 py-2 text-white">
+                    <Button
+                      variant="destructive"
+                      onClick={removeThumbnail}
+                      className="bg-red-500 px-6 py-2 text-white"
+                    >
                       <Icon name="TrashIcon" className="mr-2" />
                       {t("adminCourseView.settings.button.removeThumbnail")}
                     </Button>

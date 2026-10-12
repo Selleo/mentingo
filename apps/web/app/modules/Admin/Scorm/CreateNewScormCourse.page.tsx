@@ -13,7 +13,6 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { useTusScormUpload } from "~/hooks/useTusScormUpload";
-import { cn } from "~/lib/utils";
 import { CourseDescriptionLimitMessage } from "~/modules/Admin/AddCourse/components/CourseDescriptionLimitMessage";
 import { CourseMetadataFields } from "~/modules/Admin/AddCourse/components/CourseMetadataFields";
 import { CourseThumbnailUploadField } from "~/modules/Admin/AddCourse/components/CourseThumbnailUploadField";
@@ -213,12 +212,10 @@ const CreateNewScormCourse = () => {
             <div className="pb-5">
               <div className="mb-10 mt-5 flex space-x-5">
                 <Button
+                  variant="secondary"
                   data-testid={CREATE_SCORM_COURSE_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
-                  className={cn(
-                    "rounded border-2 bg-white px-6 py-2 text-primary-800",
-                    "mono:hover:bg-primary-50 mono:focus-visible:bg-primary-50 mono:active:bg-primary-100",
-                  )}
+                  className="rounded border-2 bg-white px-6 py-2 text-primary-800"
                   asChild
                 >
                   <Link to="/admin/beta-courses/new">{t("common.button.cancel")}</Link>

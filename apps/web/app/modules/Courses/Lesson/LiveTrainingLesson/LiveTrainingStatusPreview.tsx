@@ -60,7 +60,7 @@ export function LiveTrainingStatusPreview({
               <Button
                 type="button"
                 data-testid={LIVE_TRAINING_LESSON_HANDLES.JOIN_BUTTON}
-                className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90"
+                className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90 mono:hover:bg-white/90 mono:focus-visible:bg-white/90 mono:active:bg-white/90"
                 disabled={isJoining}
                 onClick={onJoin}
               >

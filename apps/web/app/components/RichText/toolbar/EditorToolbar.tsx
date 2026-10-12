@@ -70,10 +70,14 @@ const ToolbarIconButton = ({
         type="button"
         size="sm"
         disabled={disabled}
-        className={cn("bg-transparent text-black", {
-          "bg-primary-100": isActive,
-          "hover:bg-primary-100": !isActive && !disabled,
-        })}
+        className={cn(
+          "bg-transparent text-black",
+          "mono:hover:bg-primary-100 mono:hover:opacity-90 mono:focus-visible:bg-transparent mono:active:bg-primary-100 mono:disabled:bg-transparent mono:disabled:text-black mono:disabled:opacity-50",
+          {
+            "bg-primary-100 mono:focus-visible:bg-primary-100": isActive,
+            "hover:bg-primary-100": !isActive && !disabled,
+          },
+        )}
         onClick={onClick}
       >
         <Icon className="size-4" aria-hidden />

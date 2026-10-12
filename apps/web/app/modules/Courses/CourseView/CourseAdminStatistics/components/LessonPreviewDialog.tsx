@@ -229,7 +229,11 @@ export default function LessonPreviewDialog({
                           {
                             "border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800":
                               aiMentorEvaluation?.passed === true,
+                            "mono:text-emerald-700 mono:hover:bg-emerald-50 mono:hover:text-emerald-800 mono:focus-visible:bg-emerald-50 mono:active:bg-emerald-50":
+                              aiMentorEvaluation?.passed === true,
                             "border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800":
+                              aiMentorEvaluation?.passed === false,
+                            "mono:text-red-700 mono:hover:bg-red-50 mono:hover:text-red-800 mono:focus-visible:bg-red-50 mono:active:bg-red-50":
                               aiMentorEvaluation?.passed === false,
                           },
                         )}

@@ -407,6 +407,7 @@ const QuizLessonForm = ({
               </Button>
               {lessonToEdit ? (
                 <Button
+                  variant="outlineDestructive"
                   data-testid={QUIZ_LESSON_FORM_HANDLES.DELETE_BUTTON}
                   type="button"
                   onClick={onClickDelete}
@@ -416,6 +417,7 @@ const QuizLessonForm = ({
                 </Button>
               ) : (
                 <Button
+                  variant="outlineDestructive"
                   data-testid={QUIZ_LESSON_FORM_HANDLES.CANCEL_BUTTON}
                   className="bg-color-white border border-neutral-300 text-error-700"
                   type="button"

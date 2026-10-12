@@ -48,7 +48,7 @@ export function LiveTrainingMeetingPreview({
             data-testid={LIVE_TRAINING_HANDLES.JOIN_SESSION_BUTTON}
             onClick={onJoin}
             disabled={isJoining}
-            className="h-9 gap-2 bg-white text-primary-950 hover:bg-white/90"
+            className="h-9 gap-2 bg-white text-primary-950 hover:bg-white/90 mono:hover:bg-white/90 mono:focus-visible:bg-white/90 mono:active:bg-white/90"
           >
             <Play className="size-4" />
             {t("liveTrainingView.actions.join")}

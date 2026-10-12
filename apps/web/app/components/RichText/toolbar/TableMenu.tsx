@@ -189,10 +189,14 @@ export const TableMenu = ({ editor }: TableMenuProps) => {
               data-testid={RICH_TEXT_HANDLES.TABLE_MENU_BUTTON}
               type="button"
               size="sm"
-              className={cn("bg-transparent text-black", {
-                "bg-primary-100": isTableActive,
-                "hover:bg-primary-100": !isTableActive,
-              })}
+              className={cn(
+                "bg-transparent text-black",
+                "mono:hover:bg-primary-100 mono:hover:opacity-90 mono:focus-visible:bg-transparent mono:active:bg-primary-100",
+                {
+                  "bg-primary-100 mono:focus-visible:bg-primary-100": isTableActive,
+                  "hover:bg-primary-100": !isTableActive,
+                },
+              )}
             >
               <Table2 className="size-4" aria-hidden />
             </Button>

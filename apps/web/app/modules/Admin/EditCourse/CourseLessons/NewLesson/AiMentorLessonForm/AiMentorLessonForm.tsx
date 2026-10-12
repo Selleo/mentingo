@@ -1013,6 +1013,7 @@ const AiMentorLessonForm = ({
                     </Button>
                     {lessonToEdit && (
                       <Button
+                        variant="outlineDestructive"
                         data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DELETE_BUTTON}
                         type="button"
                         onClick={onClickDelete}

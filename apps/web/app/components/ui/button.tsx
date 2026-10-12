@@ -38,7 +38,7 @@ const buttonVariants = cva(
         ],
         ghost: [
           "hover:bg-accent hover:text-accent-foreground",
-          "mono:text-primary-700 mono:focus-visible:bg-primary-50 mono:active:bg-primary-100 mono:disabled:text-neutral-600",
+          "mono:focus-visible:bg-primary-50 mono:active:bg-primary-100 mono:disabled:text-neutral-600",
         ],
         link: [
           "text-primary underline-offset-4 hover:underline",
