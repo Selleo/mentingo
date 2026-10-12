@@ -31,12 +31,15 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
+import { Label } from "~/components/ui/label";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
+import { AI_MENTOR_FILE_TYPES_MAP } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLesson.constants";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
+import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
 import { getBaseLanguageTextPlaceholder } from "~/modules/Admin/EditCourse/utils/baseLanguageText";
 
@@ -109,6 +112,7 @@ import type {
   AiMentorGenerationViewState,
   AiMentorValidationResult,
 } from "./AiMentorGeneration/aiMentorGeneration.types";
+import type { AiMentorLessonReviewPreview } from "./aiMentorLessonReview.types";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 
@@ -120,6 +124,8 @@ type AiMentorLessonProps = {
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  /** Renders the form read-only with proposed values instead of the saved configuration. */
+  reviewPreview?: AiMentorLessonReviewPreview;
 };
 
 const AiMentorLessonForm = ({
@@ -130,6 +136,7 @@ const AiMentorLessonForm = ({
   setSelectedLesson,
   language,
   baseLanguage,
+  reviewPreview,
 }: AiMentorLessonProps) => {
   const { mutateAsync: replaceAiJudgeConfiguration, isPending: isReplacingAiJudgeConfiguration } =
     useReplaceAiJudgeConfiguration();
@@ -247,7 +254,8 @@ const AiMentorLessonForm = ({
     mutateAsync: updateAiMentorConfigurationTranslation,
     isPending: isUpdatingAiMentorConfigurationTranslation,
   } = useUpdateAiMentorConfigurationTranslation();
-  const lessonId = lessonToEdit?.id ?? "";
+  const isReviewPreview = Boolean(reviewPreview);
+  const lessonId = reviewPreview && !reviewPreview.isPersisted ? "" : (lessonToEdit?.id ?? "");
   const { data: savedAiJudgeConfiguration, isLoading: isAiJudgeConfigurationLoading } =
     useAiJudgeConfiguration(lessonId, language);
   const { data: savedAiMentorConfiguration, isLoading: isAiMentorConfigurationLoading } =
@@ -284,8 +292,14 @@ const AiMentorLessonForm = ({
         : undefined,
     [savedAiJudgeConfiguration],
   );
-  const aiMentorConfiguration = stagedAiMentorConfiguration ?? persistedAiMentorConfiguration;
-  const aiJudgeConfiguration = stagedAiJudgeConfiguration ?? persistedAiJudgeConfiguration;
+  const aiMentorConfiguration =
+    reviewPreview?.aiMentorConfiguration ??
+    stagedAiMentorConfiguration ??
+    persistedAiMentorConfiguration;
+  const aiJudgeConfiguration =
+    reviewPreview?.aiJudgeConfiguration ??
+    stagedAiJudgeConfiguration ??
+    persistedAiJudgeConfiguration;
   const isAiMentorConfigurationDirty = Boolean(form.formState.dirtyFields.aiMentorConfiguration);
   const isAiJudgeConfigurationDirty = Boolean(form.formState.dirtyFields.aiJudgeConfiguration);
   const { isDirty } = form.formState;
@@ -363,7 +377,8 @@ const AiMentorLessonForm = ({
   }, [form, isAiJudgeConfigurationDirty, lessonToEdit, persistedAiJudgeConfiguration]);
 
   const hasMissingTranslations = Boolean(
-    lessonToEdit &&
+    !isReviewPreview &&
+      lessonToEdit &&
       language !== baseLanguage &&
       (!lessonToEdit.title.trim() ||
         savedAiMentorConfiguration?.hasMissingTranslations ||
@@ -836,16 +851,18 @@ const AiMentorLessonForm = ({
               />
             )}
             <div className="h5 text-neutral-950">
-              {lessonToEdit ? (
+              {isReviewPreview && lessonToEdit && (
+                <span className="font-bold">{lessonToEdit.title}</span>
+              )}
+              {!isReviewPreview && lessonToEdit && (
                 <>
                   <span className="text-neutral-600">
                     {t("adminCourseView.curriculum.other.edit")}:{" "}
                   </span>
                   <span className="font-bold">{lessonToEdit.title}</span>
                 </>
-              ) : (
-                t("common.button.create")
               )}
+              {!lessonToEdit && t("common.button.create")}
             </div>
           </div>
           <Form {...form}>
@@ -858,7 +875,7 @@ const AiMentorLessonForm = ({
               <AiMentorIdentityFields
                 control={form.control}
                 avatarPreview={avatarPreview}
-                canEditAvatar={Boolean(lessonToEdit)}
+                canEditAvatar={!isReviewPreview && Boolean(lessonToEdit)}
                 onEditAvatar={onOpenAvatarDialog}
                 onRemoveAvatar={handleRemoveAvatar}
                 baseLanguageTitle={baseLanguageLesson?.title}
@@ -872,7 +889,7 @@ const AiMentorLessonForm = ({
                 )}
               />
 
-              {language === baseLanguage && (
+              {!isReviewPreview && language === baseLanguage && (
                 <AiMentorScenarioTemplateSelect onSelect={handleScenarioTemplateSelect} />
               )}
 
@@ -905,6 +922,7 @@ const AiMentorLessonForm = ({
                       )
                     : undefined
                 }
+                readOnly={isReviewPreview}
               />
               <AiMentorGenerationDialog
                 open={isAiMentorGenerationDialogOpen}
@@ -944,6 +962,7 @@ const AiMentorLessonForm = ({
                       )
                     : undefined
                 }
+                readOnly={isReviewPreview}
               />
               <AiJudgeGenerationDialog
                 open={isAiJudgeGenerationDialogOpen}
@@ -957,39 +976,64 @@ const AiMentorLessonForm = ({
                 onStopAndInspect={handleStopAndInspectAiJudgeConfiguration}
                 onReviewAssessment={handleEditGeneratedAiJudgeConfiguration}
               />
-              {lessonToEdit && (
+              {!isReviewPreview && lessonToEdit && (
                 <div className="mb-6">
                   <MultiFileUploadForm lessonId={lessonToEdit.id} />
                 </div>
               )}
 
-              <div className="flex justify-between">
-                <div className="flex gap-x-4">
-                  <Button data-testid={AI_MENTOR_LESSON_FORM_HANDLES.SAVE_BUTTON} type="submit">
-                    {t("common.button.save")}
-                  </Button>
+              {isReviewPreview && (reviewPreview?.sourceFiles?.length ?? 0) > 0 && (
+                <div className="mb-6 flex flex-col gap-1">
+                  <Label className="body-base">
+                    {t("adminCourseView.curriculum.lesson.field.additionalContext")}
+                  </Label>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {reviewPreview?.sourceFiles?.map((file) => {
+                      const extension = file.name.split(".").at(-1)?.toUpperCase();
+                      const fileType =
+                        AI_MENTOR_FILE_TYPES_MAP[file.mediaType ?? ""] ?? extension ?? "File";
+                      return (
+                        <UploadFileCard
+                          key={file.id}
+                          name={file.name}
+                          meta={fileType}
+                          showRemove={false}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {!isReviewPreview && (
+                <div className="flex justify-between">
+                  <div className="flex gap-x-4">
+                    <Button data-testid={AI_MENTOR_LESSON_FORM_HANDLES.SAVE_BUTTON} type="submit">
+                      {t("common.button.save")}
+                    </Button>
+                    {lessonToEdit && (
+                      <Button
+                        data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DELETE_BUTTON}
+                        type="button"
+                        onClick={onClickDelete}
+                        className="bg-color-white border border-neutral-300 text-error-700"
+                      >
+                        {t("common.button.delete")}
+                      </Button>
+                    )}
+                  </div>
                   {lessonToEdit && (
                     <Button
-                      data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DELETE_BUTTON}
+                      data-testid={AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON}
                       type="button"
-                      onClick={onClickDelete}
-                      className="bg-color-white border border-neutral-300 text-error-700"
+                      onClick={onOpenPreview}
+                      variant="primary"
                     >
-                      {t("common.button.delete")}
+                      {t("adminCourseView.common.testAiMentor")}
                     </Button>
                   )}
                 </div>
-                {lessonToEdit && (
-                  <Button
-                    data-testid={AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON}
-                    type="button"
-                    onClick={onOpenPreview}
-                    variant="primary"
-                  >
-                    {t("adminCourseView.common.testAiMentor")}
-                  </Button>
-                )}
-              </div>
+              )}
             </form>
           </Form>
 

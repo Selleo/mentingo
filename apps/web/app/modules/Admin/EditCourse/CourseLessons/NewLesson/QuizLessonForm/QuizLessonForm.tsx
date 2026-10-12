@@ -44,6 +44,7 @@ type QuizLessonProps = {
   setSelectedLesson: (lesson: Lesson | null) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  readOnly?: boolean;
 };
 
 const QuizLessonForm = ({
@@ -54,6 +55,7 @@ const QuizLessonForm = ({
   setSelectedLesson,
   language,
   baseLanguage,
+  readOnly = false,
 }: QuizLessonProps) => {
   const [isAttemptsLimitEnabled, setIsAttemptsLimitEnabled] = useState(
     lessonToEdit ? lessonToEdit.attemptsLimit !== null : false,
@@ -70,7 +72,7 @@ const QuizLessonForm = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [openQuestionIndexes, setOpenQuestionIndexes] = useState<Set<string>>(new Set());
 
-  const isStructureLocked = Boolean(lessonToEdit && language !== baseLanguage);
+  const isStructureLocked = readOnly || Boolean(lessonToEdit && language !== baseLanguage);
   const leaveLessonForm = useCallback(
     () => setContentTypeToDisplay(ContentTypes.EMPTY),
     [setContentTypeToDisplay],
@@ -251,6 +253,7 @@ const QuizLessonForm = ({
                 questionType={question.type}
                 form={form}
                 isStructureLocked={isStructureLocked}
+                readOnly={readOnly}
                 baseLanguageQuestion={baseLanguageQuestion}
               />
             ))
@@ -266,7 +269,7 @@ const QuizLessonForm = ({
         </QuestionWrapper>
       );
     },
-    [baseLanguageLesson?.questions, lessonToEdit, openQuestionIndexes, isStructureLocked],
+    [baseLanguageLesson?.questions, lessonToEdit, openQuestionIndexes, isStructureLocked, readOnly],
   );
 
   useEffect(() => {

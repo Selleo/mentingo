@@ -1,0 +1,14 @@
+{
+  "operationId": "22db81f1-331d-5863-940d-ecdb6a1c98b3",
+  "targetId": "1de90584-f578-53e3-8489-f34c4f8567cb",
+  "language": "en",
+  "baselineHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dependencies": [],
+  "type": "lesson.update",
+  "chapterId": "f2766289-160c-58dd-8407-4321dba4b613",
+  "payload": {
+    "lessonType": "content",
+    "title": "Recognize phishing",
+    "description": "<p data-authoring-block-id=\"3ef21f6a-fcf2-577e-98ad-326a7513f9fc\">Inspect sender and destination before opening a link.</p>"
+  }
+}

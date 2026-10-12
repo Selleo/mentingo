@@ -62,6 +62,18 @@ export class OutboxPublisher {
     await this.outboxRepository.markPublished(eventId, true, transaction);
   }
 
+  /** Persist with the caller's transaction. Never emit a side effect before its commit. */
+  async publishDurable(event: object, db?: DatabasePg): Promise<void> {
+    await this.outboxRepository.createPending(
+      {
+        eventType: this.getEventType(event),
+        payload: this.sanitizeValue(event) as Record<string, unknown>,
+      },
+      db,
+    );
+    await this.outboxRepository.notifyPending(db);
+  }
+
   private getEventType(event: object): string {
     const candidate = (event as { constructor?: { name?: string } }).constructor?.name;
     if (candidate && candidate !== "Object") return candidate;

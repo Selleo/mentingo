@@ -16,6 +16,36 @@ vi.mock("~/api/queries", () => ({
 }));
 
 describe("ChatMessage", () => {
+  it("keeps the default user message surface", () => {
+    renderWith().render(
+      <ChatMessage
+        id="default-user-message"
+        {...{ role: "user" as const }}
+        content="A user message"
+        contentTestId="default-user-message-content"
+      />,
+    );
+
+    const content = screen.getByTestId("default-user-message-content");
+    expect(content).toHaveClass("px-4", "py-2", "bg-primary-100");
+  });
+
+  it("allows a custom content node to own its user message surface", () => {
+    renderWith().render(
+      <ChatMessage
+        id="custom-user-message"
+        {...{ role: "user" as const }}
+        contentNodeOwnsSurface
+        contentNode={<div className="rounded-xl bg-primary-100 px-4 py-2">Custom bubble</div>}
+        contentTestId="custom-user-message-content"
+      />,
+    );
+
+    const content = screen.getByTestId("custom-user-message-content");
+    expect(content).not.toHaveClass("px-4", "py-2", "bg-primary-100");
+    expect(content.firstElementChild).toHaveClass("px-4", "py-2", "bg-primary-100");
+  });
+
   it("renders currency dollar signs as text instead of inline math", () => {
     renderWith().render(
       <ChatMessage

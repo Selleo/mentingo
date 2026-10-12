@@ -1,6 +1,7 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { useRichTextContentPolicy } from "~/components/RichText/contentPolicyContext";
 import { cn } from "~/lib/utils";
 
 import { baseViewerPlugins, contentViewerPlugins } from "./plugins";
@@ -102,7 +103,11 @@ const Viewer = ({
     );
   }, [handleVideoEnded, variant, videoCoverageTracking]);
 
-  const normalizedContent = useMemo(() => normalizeMarkdownCode(content), [content]);
+  const mediaPolicy = useRichTextContentPolicy();
+  const normalizedContent = useMemo(
+    () => normalizeMarkdownCode(mediaPolicy ? mediaPolicy(content) : content),
+    [content, mediaPolicy],
+  );
 
   const editor = useEditor(
     {

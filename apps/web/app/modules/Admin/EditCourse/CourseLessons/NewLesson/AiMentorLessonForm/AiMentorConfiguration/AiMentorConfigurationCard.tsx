@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import { READ_ONLY_ALLOW_ATTRIBUTE } from "~/modules/Admin/EditCourse/CourseLessons/components/ReadOnlyFrame";
 
 import { AiMentorConfigurationDialog } from "./AiMentorConfigurationDialog";
 
@@ -37,6 +38,8 @@ type AiMentorConfigurationCardProps = {
   isValidating?: boolean;
   editorOpen?: boolean;
   onEditorOpenChange?: (open: boolean) => void;
+  /** Shows the configuration without any way to change it, e.g. when reviewing AI changes. */
+  readOnly?: boolean;
 };
 
 export const AiMentorConfigurationCard = ({
@@ -56,15 +59,17 @@ export const AiMentorConfigurationCard = ({
   isValidating = false,
   editorOpen,
   onEditorOpenChange,
+  readOnly = false,
 }: AiMentorConfigurationCardProps) => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const isDialogOpen = editorOpen ?? dialogOpen;
   const setIsDialogOpen = onEditorOpenChange ?? setDialogOpen;
   const isConfigured = Boolean(value);
-  const canOpenDialog =
-    !isLoading &&
-    (language === baseLanguage || (isPersisted && isConfigured && !needsConfiguration));
+  const canOpenDialog = readOnly
+    ? isConfigured
+    : !isLoading &&
+      (language === baseLanguage || (isPersisted && isConfigured && !needsConfiguration));
   const requiresBaseConfiguration =
     language !== baseLanguage && (!isConfigured || needsConfiguration);
   const hasError = Boolean(error) || needsConfiguration;
@@ -131,7 +136,7 @@ export const AiMentorConfigurationCard = ({
             </div>
 
             <div className="flex max-w-full shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
-              {!isConfigured && onCreateWithAi && language === baseLanguage && (
+              {!readOnly && !isConfigured && onCreateWithAi && language === baseLanguage && (
                 <Button
                   type="button"
                   size="sm"
@@ -153,6 +158,7 @@ export const AiMentorConfigurationCard = ({
                       variant={isConfigured ? "outline" : "link"}
                       size="sm"
                       data-testid="curriculum-ai-mentor-configuration-button"
+                      {...(readOnly && { [READ_ONLY_ALLOW_ATTRIBUTE]: "" })}
                       disabled={!canOpenDialog}
                       onClick={() => setIsDialogOpen(true)}
                       className={cn("h-9 shrink-0 gap-1.5 whitespace-nowrap", {
@@ -195,6 +201,7 @@ export const AiMentorConfigurationCard = ({
         onImproveWithAi={onImproveWithAi}
         onValidateConfiguration={onValidateConfiguration}
         isValidating={isValidating}
+        readOnly={readOnly}
       />
     </>
   );

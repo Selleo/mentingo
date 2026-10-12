@@ -74,7 +74,7 @@ export class EmailTemplateAssetService {
   ) {
     const assetIds = new Set(
       Object.values(content).flatMap((document) =>
-        document.content.flatMap((block) => {
+        (document?.content ?? []).flatMap((block) => {
           if (block.type !== EMAIL_TEMPLATE_BLOCK_TYPES.IMAGE) {
             return [];
           }

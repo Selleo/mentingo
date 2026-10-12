@@ -1,5 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 
+import { safeEmbedUrl } from "./utils/embedUrl";
+
 /**
  * Minimal iframe node so embeds (e.g. videos) are preserved in read-only renders.
  * Keep the allowed attributes small to avoid leaking unwanted data.
@@ -22,6 +24,8 @@ export const Iframe = Node.create({
     return {
       src: {
         default: null,
+        parseHTML: (element) => safeEmbedUrl(element.getAttribute("src")),
+        renderHTML: (attrs) => ({ src: safeEmbedUrl(attrs.src) }),
       },
       title: {
         default: null,
@@ -57,7 +61,11 @@ export const Iframe = Node.create({
         {
           class: "w-full aspect-video",
         },
-        HTMLAttributes,
+        {
+          ...HTMLAttributes,
+          src: safeEmbedUrl(HTMLAttributes.src),
+          sandbox: "allow-scripts allow-presentation",
+        },
       ),
     ];
   },

@@ -5,7 +5,7 @@ import {
   AiCapabilityProvider,
   createLumaClient,
   type PublicConfigurationResponse,
-} from "@japro/luma-sdk";
+} from "@mentingo/luma-sdk";
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";

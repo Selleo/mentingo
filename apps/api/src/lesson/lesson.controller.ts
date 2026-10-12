@@ -130,6 +130,7 @@ export class LessonController {
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "studentId", schema: Type.Optional(Type.String()) },
     ],
     response: baseResponse(lessonShowSchema),
   })
