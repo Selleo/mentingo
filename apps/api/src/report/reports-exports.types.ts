@@ -84,13 +84,11 @@ export interface ReportExportMetric {
   unit: "count" | "percent";
 }
 
-/** The applied filter conditions, under a heading that says how they combine. */
 export interface ReportExportConditions {
   heading: string;
   lines: string[];
 }
 
-/** Everything an exported report shows, independent of the file format. */
 export interface ReportExportDocument {
   language: string;
   labels: ReportExportLabels;
@@ -106,7 +104,6 @@ export interface ReportExportDocument {
 
 export type ReportResultRow = ReportsResult["rows"][number];
 
-/** Formats dates in the report's language and timezone. */
 export interface ReportExportFormatter {
   dateTime: (value: Date) => string;
   /** The calendar day in the report timezone, as a UTC-midnight date that spreadsheets show as-is. */

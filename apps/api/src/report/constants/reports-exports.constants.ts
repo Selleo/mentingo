@@ -23,7 +23,6 @@ export const REPORT_EXPORT_RECORDS_COLUMN_FIT = {
   headerScale: 1.15,
 } as const;
 
-/** Records sheet columns holding numbers or dates; their values and headers align right. */
 export const REPORT_EXPORT_RIGHT_ALIGNED_COLUMNS = new Set<ReportExportColumnKey>([
   "progress",
   "score",
@@ -37,7 +36,6 @@ export const REPORT_EXPORT_RIGHT_ALIGNED_COLUMNS = new Set<ReportExportColumnKey
 /** Characters a date takes in the records sheet ("20 Aug 2026"). */
 export const REPORT_EXPORT_DATE_DISPLAY_LENGTH = 11;
 
-/** Metrics on the performance overview cards in both export formats, in reading order. */
 export const REPORT_EXPORT_PERFORMANCE_METRICS: ReportExportMetricKey[] = [
   "learners",
   "courseCompletionRate",
@@ -47,7 +45,6 @@ export const REPORT_EXPORT_PERFORMANCE_METRICS: ReportExportMetricKey[] = [
   "activeLearners30d",
 ];
 
-/** Metrics in the learning activity list in both export formats. */
 export const REPORT_EXPORT_ACTIVITY_METRICS: ReportExportMetricKey[] = [
   "platformCourses",
   "courseEnrollments",
@@ -56,13 +53,10 @@ export const REPORT_EXPORT_ACTIVITY_METRICS: ReportExportMetricKey[] = [
   "developmentPathsCompleted",
 ];
 
-/** Shown in place of a missing value. */
 export const REPORT_EXPORT_EMPTY_VALUE = "-";
 
-/** Marks each applied filter condition in the exports. */
 export const REPORT_EXPORT_LIST_MARKER = "-";
 
-/** Brand colours shared by the spreadsheet and PDF exports. */
 export const REPORT_EXPORT_COLORS = {
   primary: "#3F58B6",
   primaryDark: "#384995",
@@ -71,14 +65,12 @@ export const REPORT_EXPORT_COLORS = {
   muted: "#64748B",
   text: "#363636",
   card: "#F3F5F9",
-  /** Background of every other records row, so the eye can follow a row across the sheet. */
   rowStripe: "#F7F9FC",
   white: "#FFFFFF",
   success: "#116B51",
   warning: "#88510B",
 } as const;
 
-/** Excel number formats used by the spreadsheet export. */
 export const REPORT_EXPORT_XLSX_FORMATS = {
   percent: "0%",
   count: "#,##0",
@@ -103,5 +95,4 @@ export const REPORT_EXPORT_SUMMARY_CONTENT_SPAN = 8;
 /** Summary sheet columns between an activity label and its value, ruled to join them visually. */
 export const REPORT_EXPORT_SUMMARY_RULE_COLUMNS = [2, 3, 4, 5, 6, 7] as const;
 
-/** Percent metrics at or above this value are highlighted as strong results. */
 export const REPORT_EXPORT_STRONG_RESULT_PERCENT = 80;

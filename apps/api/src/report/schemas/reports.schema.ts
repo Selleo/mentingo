@@ -75,7 +75,6 @@ export const reportDefinitionSchema = Type.Object(reportDefinitionProperties, {
   additionalProperties: false,
 });
 
-/** A report definition run in a display language and for one page of rows. */
 export const reportsQuerySchema = Type.Object(
   {
     ...reportDefinitionProperties,

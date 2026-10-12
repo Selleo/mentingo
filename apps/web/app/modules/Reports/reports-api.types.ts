@@ -32,7 +32,6 @@ export type ReportDefinition = {
   };
 };
 
-/** A report definition run in a display language and for one page of rows. */
 export type ReportsQuery = ReportDefinition & {
   language: SupportedLanguages;
   page: number;

@@ -13,7 +13,6 @@ export type ReportsScopeHashes = {
   ownedEnrollmentsHash?: string;
 };
 
-/** Everything that bounds what a viewer may report on, resolved once per request. */
 export type ReportsAccessScope = {
   access: ReportsAccess;
   managedGroupIds: string[];

@@ -11,12 +11,10 @@ import type {
   ReportFilterCondition,
 } from "../schemas/reports.schema";
 
-/** Every condition of a filter in one list, with nested condition groups flattened out. */
 export function flattenFilterConditions(filter: ReportFilter | undefined): ReportFilterCondition[] {
   return (filter?.rules ?? []).flatMap((rule) => ("field" in rule ? [rule] : rule.rules));
 }
 
-/** Ids of every record a query names: its selected groups and the records its conditions point at. */
 export function getReferencedRecordIds(query: ReportDefinition): ReportQueryReferences {
   const referencingConditions = flattenFilterConditions(query.filter).filter(({ operator }) =>
     REPORT_REFERENCING_OPERATORS.has(operator),

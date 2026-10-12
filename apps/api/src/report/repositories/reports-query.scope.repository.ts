@@ -69,7 +69,6 @@ export class ReportsQueryScopeRepository {
     return { managedLearnersHash, ownedCoursesHash, ownedEnrollmentsHash };
   }
 
-  /** Rejects a query that names any group, course, path, learner or subject outside the scope. */
   async validateScopeReferences(query: ReportDefinition, scope: ReportsAccessScope): Promise<void> {
     const references = getReferencedRecordIds(query);
 

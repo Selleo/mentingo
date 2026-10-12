@@ -70,7 +70,6 @@ const en = {
 
 export type ReportExportLabels = Record<keyof typeof en, string>;
 
-/** Labels for exported report files, in every supported interface language. */
 export const REPORT_EXPORT_LABELS: Record<SupportedLanguages, ReportExportLabels> = {
   en,
   pl: {

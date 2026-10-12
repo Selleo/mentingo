@@ -32,10 +32,8 @@ export type ReportQueryExecutionContext = ReportsAccessScope & {
   allRows: boolean;
 };
 
-/** The query-building subset of the database a report statement needs. */
 export type ReportQueryBuilder = Pick<DatabasePg, "select" | "selectDistinctOn">;
 
-/** A read-only snapshot transaction in which a whole report runs. */
 export type ReportTransaction = Pick<DatabasePg, "execute" | "select" | "selectDistinctOn">;
 
 export type ReportQueryContext = ReportsAccessScope & {
@@ -45,7 +43,6 @@ export type ReportQueryContext = ReportsAccessScope & {
 
 export type ReportVisibleRecord = { id: string };
 
-/** Every record a report query names, grouped by kind. */
 export type ReportQueryReferences = {
   groupIds: string[];
   courseIds: string[];

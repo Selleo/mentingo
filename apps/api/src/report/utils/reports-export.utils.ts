@@ -28,7 +28,6 @@ import type {
 } from "../reports-exports.types";
 import type { ReportFilterCondition, ReportsQuery, ReportsResult } from "../schemas/reports.schema";
 
-/** Turns a report result into the readable document both export formats render. */
 export function buildReportExportDocument(
   result: ReportsResult,
   query: ReportsQuery,
@@ -61,7 +60,6 @@ function getFilters(scope: ReportExportScope, labels: ReportExportLabels): Repor
   ];
 }
 
-/** Every report metric, labelled and explained; each export layout picks the ones it shows. */
 function getMetrics(
   { metrics }: ReportsResult,
   labels: ReportExportLabels,
@@ -150,7 +148,6 @@ function toExportRow(
   };
 }
 
-/** The applied filter as readable sentences, e.g. "Completion status is Completed". */
 function describeConditions(
   query: ReportsQuery,
   scope: ReportExportScope,
@@ -288,7 +285,6 @@ export function formatPercent(value: number | null): string {
     : `${Math.round(value)}%`;
 }
 
-/** Date formatting in the report's language and timezone. */
 function createExportFormatter(language: string, timezone: string): ReportExportFormatter {
   const dateTimeFormat = new Intl.DateTimeFormat(language, {
     dateStyle: "long",
@@ -314,7 +310,6 @@ function createExportFormatter(language: string, timezone: string): ReportExport
   };
 }
 
-/** Formats a calendar day produced by the export document for display. */
 export function formatExportDay(value: Date | null, language: string): string {
   if (!value) return REPORT_EXPORT_EMPTY_VALUE;
   return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone: "UTC" }).format(value);

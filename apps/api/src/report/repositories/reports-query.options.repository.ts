@@ -20,7 +20,6 @@ import type { ReportOptions } from "../schemas/reports.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 
-/** Selector options for the report builder, limited to what the viewer may report on. */
 export class ReportsQueryOptionsRepository {
   constructor(
     private readonly db: DatabasePg,

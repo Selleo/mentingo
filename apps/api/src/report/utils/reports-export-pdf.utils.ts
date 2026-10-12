@@ -27,10 +27,6 @@ import type {
   ReportExportRow,
 } from "../reports-exports.types";
 
-/**
- * The PDF report as one HTML page, in the same order as the spreadsheet summary:
- * performance overview with learning activity, the report filters, then every record.
- */
 export function buildReportExportHtml(document: ReportExportDocument): string {
   return `<!doctype html>
 <html lang="${escapeHtml(document.language)}">
@@ -47,7 +43,6 @@ export function buildReportExportHtml(document: ReportExportDocument): string {
 </html>`;
 }
 
-/** Footer printed on every PDF page by the browser, with the page number. */
 export function buildReportExportFooter(document: ReportExportDocument): string {
   return `<div style="width:100%;padding:0 12mm;font:8px Arial,sans-serif;color:#999999;display:flex;justify-content:space-between">
     <span>${escapeHtml(document.title)} · ${escapeHtml(document.generatedAt)}</span>
@@ -64,7 +59,6 @@ function renderHeader(document: ReportExportDocument): string {
   </header>`;
 }
 
-/** Six performance cards beside the learning activity list, as on the summary sheet. */
 function renderOverview(document: ReportExportDocument): string {
   const tiles = REPORT_EXPORT_PERFORMANCE_METRICS.map((key) => {
     const metric = document.metrics[key];
@@ -94,7 +88,6 @@ function renderOverview(document: ReportExportDocument): string {
   </section>`;
 }
 
-/** The filters the report was run with, laid out like the spreadsheet's report filters. */
 function renderFilters(document: ReportExportDocument): string {
   const { conditions, labels } = document;
   const hasConditions = conditions.lines[0] !== labels.noConditions;
@@ -155,7 +148,6 @@ function renderRecords(document: ReportExportDocument): string {
   </section>`;
 }
 
-/** Shares the page width between the shown columns in proportion to their configured widths. */
 function renderColumnWidths(columns: ReportExportColumn[]): string {
   const total = columns.reduce((sum, { key }) => sum + REPORT_EXPORT_PDF_COLUMN_WIDTHS[key], 0);
   const cols = columns
@@ -219,7 +211,6 @@ function icon(name: ReportExportPdfIcon): string {
   return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${REPORT_EXPORT_PDF_ICONS[name]}</svg>`;
 }
 
-/** Strong percentages are shown in green, as on the summary sheet. */
 function tileValueClass(metric: ReportExportMetric): string {
   const isStrong =
     metric.unit === "percent" &&

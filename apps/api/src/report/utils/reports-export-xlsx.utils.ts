@@ -29,10 +29,6 @@ import type {
 } from "../reports-exports.types";
 import type { Cell, Columns, Row, SheetData } from "write-excel-file";
 
-/**
- * The summary sheet, laid out as a dashboard: a title banner, six performance cards,
- * the learning activity table and, last, the filters the report was run with.
- */
 export function buildSummarySheet(document: ReportExportDocument): SheetData {
   return [
     gridRow([[0, textCell("", { height: REPORT_EXPORT_SUMMARY_SPACER_HEIGHT })]]),
@@ -82,7 +78,6 @@ function buildBanner(document: ReportExportDocument): SheetData {
   ];
 }
 
-/** Two rows of three cards: a small label above a large value. */
 function buildPerformanceCards(metrics: ReportExportMetric[]): SheetData {
   const cardStyle = { backgroundColor: REPORT_EXPORT_COLORS.card, span: 2 };
   const rowsOfCards = [metrics.slice(0, 3), metrics.slice(3, 6)];
@@ -119,7 +114,6 @@ function buildPerformanceCards(metrics: ReportExportMetric[]): SheetData {
   ]);
 }
 
-/** A label and its value on one line, divided from the next line by a thin rule. */
 function buildActivityRow(metric: ReportExportMetric): Row {
   const ruleStyle = {
     bottomBorderColor: REPORT_EXPORT_COLORS.border,
@@ -233,7 +227,6 @@ export function getSummarySheetColumns(): Columns {
   return REPORT_EXPORT_SUMMARY_COLUMN_WIDTHS.map((width) => ({ width }));
 }
 
-/** The records sheet: one typed row per learning record, ready to sort and filter. */
 export function buildRecordsSheet(document: ReportExportDocument): SheetData {
   const header = document.columns.map(recordsHeaderCell);
   const rows = document.rows.map((row, index) =>
@@ -243,7 +236,6 @@ export function buildRecordsSheet(document: ReportExportDocument): SheetData {
   return [header, ...rows];
 }
 
-/** A light header in the style of reporting-tool exports, aligned like the values below it. */
 function recordsHeaderCell(column: ReportExportColumn): Cell {
   return textCell(column.label, {
     fontWeight: "bold",
@@ -258,7 +250,6 @@ function recordsHeaderCell(column: ReportExportColumn): Cell {
   });
 }
 
-/** Sizes each column to its longest value within the cap, keeping room for the whole label. */
 export function getRecordsSheetColumns(document: ReportExportDocument): Columns {
   const { min, max, padding, headerScale } = REPORT_EXPORT_RECORDS_COLUMN_FIT;
 
@@ -274,7 +265,6 @@ export function getRecordsSheetColumns(document: ReportExportDocument): Columns 
   });
 }
 
-/** Roughly how many characters a record's value takes once shown in the sheet. */
 function recordDisplayLength(column: ReportExportColumn, row: ReportExportRow): number {
   const dateLength = (value: Date | null) =>
     value ? REPORT_EXPORT_DATE_DISPLAY_LENGTH : REPORT_EXPORT_EMPTY_VALUE.length;
@@ -297,7 +287,6 @@ function recordDisplayLength(column: ReportExportColumn, row: ReportExportRow): 
     .exhaustive();
 }
 
-/** A record cell divided from the next record by a thin rule; every other row is lightly shaded. */
 function recordCell(column: ReportExportColumn, row: ReportExportRow, isStriped: boolean): Cell {
   const rowStyle = {
     alignVertical: "center" as const,
@@ -338,7 +327,6 @@ function statusStyle(status: ReportExportRow["status"]) {
     .otherwise(() => ({ color: REPORT_EXPORT_COLORS.muted }));
 }
 
-/** A metric value; strong percentages are shown in green. */
 function metricCell(metric: ReportExportMetric, style: Partial<NonNullable<Cell>> = {}): Cell {
   if (metric.value === null) return textCell(REPORT_EXPORT_EMPTY_VALUE, style);
   if (metric.unit === "count") {
