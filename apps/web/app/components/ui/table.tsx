@@ -7,7 +7,11 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
     <div className="relative w-full overflow-auto">
       <table
         ref={ref}
-        className={cn("w-full caption-bottom text-sm", "mono:text-neutral-950", className)}
+        className={cn(
+          "w-full caption-bottom text-sm",
+          "mono:border-0 mono:text-neutral-950",
+          className,
+        )}
         {...props}
       />
     </div>
@@ -29,7 +33,11 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", "mono:bg-background", className)}
+    className={cn(
+      "[&_tr:last-child]:border-0",
+      "mono:bg-background mono:[&_tr:last-child]:border-b",
+      className,
+    )}
     {...props}
   />
 ));
@@ -53,7 +61,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
       ref={ref}
       className={cn(
         "hover:bg-muted/50 border-b transition-colors data-[state=selected]:bg-muted",
-        "mono:hover:bg-neutral-50 mono:data-[state=selected]:bg-primary-50",
+        "mono:even:bg-background-secondary mono:hover:bg-neutral-50 mono:data-[state=selected]:bg-primary-50",
         className,
       )}
       {...props}
@@ -70,7 +78,7 @@ const TableHead = React.forwardRef<
     ref={ref}
     className={cn(
       "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-      "mono:font-control mono:text-xs mono:font-semibold mono:uppercase mono:tracking-wide mono:text-neutral-700",
+      "mono:bg-background-secondary mono:font-control mono:text-xs mono:font-semibold mono:uppercase mono:tracking-wide mono:text-neutral-700",
       className,
     )}
     {...props}

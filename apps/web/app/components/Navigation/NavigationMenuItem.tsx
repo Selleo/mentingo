@@ -18,6 +18,12 @@ export const monoNavigationRowVariants = cva(
       isCollapsed: {
         true: "mono:justify-center mono:px-0 mono:2xl:px-0",
       },
+      isExpanded: {
+        true: "mono:border-b-0 mono:bg-background-secondary mono:hover:bg-background-secondary mono:2xl:bg-background-secondary mono:2xl:hover:bg-background-secondary mono:3xl:hover:bg-background-secondary",
+      },
+      isNested: {
+        true: "mono:border-b-0",
+      },
     },
   },
 );
@@ -30,6 +36,7 @@ type NavigationMenuItemProps = {
   isFooter?: boolean;
   showLabel?: boolean;
   showTooltip?: boolean;
+  isNested?: boolean;
 };
 
 export function NavigationMenuItem({
@@ -40,6 +47,7 @@ export function NavigationMenuItem({
   isFooter = false,
   showLabel = true,
   showTooltip = false,
+  isNested = false,
 }: NavigationMenuItemProps) {
   return (
     <li key={item.label} className={className}>
@@ -58,7 +66,8 @@ export function NavigationMenuItem({
                   "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
                   "justify-center": !showLabel,
                 },
-                !isFooter && monoNavigationRowVariants({ isActive, isCollapsed: !showLabel }),
+                !isFooter &&
+                  monoNavigationRowVariants({ isActive, isCollapsed: !showLabel, isNested }),
                 isFooter &&
                   "mono:rounded mono:border-0 mono:bg-background mono:px-2 mono:font-normal mono:text-neutral-800 mono:hover:bg-neutral-50 mono:2xl:bg-background mono:2xl:px-2 mono:2xl:py-3.5 mono:2xl:hover:bg-neutral-50",
                 isFooter && isActive && "mono:text-primary-700",

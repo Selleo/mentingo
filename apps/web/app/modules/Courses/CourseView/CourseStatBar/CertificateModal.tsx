@@ -195,7 +195,6 @@ export default function CertificateModal({
         }}
       >
         <DialogContent
-          variant="frameless"
           className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl"
           noCloseButton
           aria-describedby={undefined}

@@ -152,7 +152,7 @@ const User = () => {
         </div>
         <Tabs defaultValue="information" className="w-full">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <TabsList className="rounded-lg border bg-neutral-50 p-1">
+            <TabsList className="rounded-lg border bg-neutral-50 p-1 mono:border-0 mono:border-b">
               <TabsTrigger data-testid={USER_PAGE_HANDLES.INFORMATION_TAB} value="information">
                 {t("adminUserView.tabs.information")}
               </TabsTrigger>

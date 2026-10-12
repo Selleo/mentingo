@@ -95,7 +95,10 @@ export const ExpandableNavigationMenu = ({
           data-testid={testId}
           className={cn(
             "text-md flex w-full items-center justify-between gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 hover:bg-white hover:text-neutral-900 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
-            monoNavigationRowVariants({ isCollapsed: !showNavigationLabels }),
+            monoNavigationRowVariants({
+              isCollapsed: !showNavigationLabels,
+              isExpanded: isExpanded && !shouldUseDropdownLayout,
+            }),
           )}
         >
           <Icon
@@ -140,7 +143,7 @@ export const ExpandableNavigationMenu = ({
       )}
 
       {!shouldUseDropdownLayout && isExpanded && (
-        <menu className="ml-4 flex flex-col gap-y-3 mono:gap-y-0">
+        <menu className="ml-4 flex flex-col gap-y-3 mono:ml-0 mono:gap-y-0 mono:border-b mono:border-border">
           {items.map((item) => {
             return (
               <div key={item.label}>
@@ -149,6 +152,7 @@ export const ExpandableNavigationMenu = ({
                   setIsMobileNavOpen={setIsMobileNavOpen}
                   showLabel={showNavigationLabels}
                   showTooltip={shouldShowTooltips}
+                  isNested
                 />
               </div>
             );

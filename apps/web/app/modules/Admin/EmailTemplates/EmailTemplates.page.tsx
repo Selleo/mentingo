@@ -268,8 +268,8 @@ export default function EmailTemplatesPage() {
             </TableBody>
           </Table>
           <Pagination
-            className="rounded-b-lg border-b border-x bg-neutral-50"
-            emptyDataClassName="rounded-b-lg border-b border-x bg-neutral-50"
+            className="rounded-b-lg border-b border-x bg-neutral-50 mono:border-0 mono:bg-transparent"
+            emptyDataClassName="rounded-b-lg border-b border-x bg-neutral-50 mono:border-0 mono:bg-transparent"
             totalItems={data?.pagination.totalItems}
             currentPage={page}
             itemsPerPage={perPage}

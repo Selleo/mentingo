@@ -605,8 +605,8 @@ export const CourseEnrolled = ({
         </TableBody>
       </Table>
       <Pagination
-        className="border-b border-x bg-neutral-50 rounded-b-lg"
-        emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
+        className="border-b border-x bg-neutral-50 rounded-b-lg mono:border-0 mono:bg-transparent"
+        emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg mono:border-0 mono:bg-transparent"
         totalItems={totalItems}
         currentPage={page}
         itemsPerPage={perPage as ItemsPerPageOption}
