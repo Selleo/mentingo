@@ -19,6 +19,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   DEFAULT_TUS_TTL_MS,
   DEFAULT_TUS_CHUNK_SIZE,
   ENTITY_TYPES,
@@ -32,6 +33,7 @@ import {
 } from "@repo/shared";
 
 import { ArticlesService } from "src/articles/services/articles.service";
+import { FILE_SIZE_BASE } from "src/common/constants";
 import { CourseService } from "src/courses/course.service";
 import {
   ALLOWED_MIME_TYPES,
@@ -56,6 +58,7 @@ import { ScormTusUploadService } from "src/scorm/scorm-tus-upload.service";
 import { ScormService } from "src/scorm/scorm.service";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { AVATAR_MAX_SIZE } from "src/user/user.constants";
 
 import { McpResourceService } from "./mcp-resource.service";
 import { McpTokenService } from "./mcp-token.service";
@@ -66,6 +69,8 @@ export { mcpUploadGrantKey, revokeMcpUploadGrant } from "./mcp-upload-grant-key"
 
 import type {
   McpAvatarUploadGrant,
+  McpPlatformAssetUploadGrant,
+  McpUserAvatarUploadGrant,
   McpCourseUploadGrant,
   McpEditorialCoverUploadGrant,
   McpEditorialUploadGrant,
@@ -103,6 +108,39 @@ function genericFileAuthoringPermissions(resource: McpGenericFileUploadGrant["re
     : [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN];
 }
 
+const PLATFORM_ASSET_UPLOADS = {
+  platformLogo: {
+    path: "/api/settings/platform-logo",
+    fileField: "logo",
+    allowed: ALLOWED_AVATAR_IMAGE_TYPES,
+    maxSizeBytes: FILE_SIZE_BASE,
+  },
+  platformSimpleLogo: {
+    path: "/api/settings/platform-simple-logo",
+    fileField: "logo",
+    allowed: ALLOWED_AVATAR_IMAGE_TYPES,
+    maxSizeBytes: FILE_SIZE_BASE,
+  },
+  loginBackground: {
+    path: "/api/settings/login-background",
+    fileField: "login-background",
+    allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+    maxSizeBytes: FILE_SIZE_BASE,
+  },
+  certificateBackground: {
+    path: "/api/settings/certificate-background",
+    fileField: "certificate-background",
+    allowed: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+    maxSizeBytes: FILE_SIZE_BASE,
+  },
+  loginDocument: {
+    path: "/api/settings/admin/login-page-files",
+    fileField: "file",
+    allowed: LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
+    maxSizeBytes: MAX_FILE_SIZE,
+  },
+} as const;
+
 @Injectable()
 export class McpUploadGrantService {
   constructor(
@@ -121,6 +159,85 @@ export class McpUploadGrantService {
     private readonly newsService: NewsService,
     private readonly settingsService: SettingsService,
   ) {}
+
+  async issuePlatformAssetGrant(
+    actor: CurrentUserType,
+    input: Pick<McpPlatformAssetUploadGrant, "asset" | "filename" | "mimeType" | "size" | "name">,
+  ) {
+    const upload = PLATFORM_ASSET_UPLOADS[input.asset];
+    if (
+      !upload ||
+      (input.asset === "loginDocument"
+        ? typeof input.name !== "string" || !input.name.trim()
+        : input.name !== undefined)
+    )
+      throw new BadRequestException("Invalid platform asset upload");
+    this.validateNamedFile(input, upload.allowed, upload.maxSizeBytes);
+    await this.validateActiveUploadPermission(actor, PERMISSIONS.SETTINGS_MANAGE);
+    const token = createUploadToken();
+    const grant: McpPlatformAssetUploadGrant = {
+      ...input,
+      kind: MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET,
+      targetType: ENTITY_TYPES.GLOBAL_SETTINGS,
+      targetId: actor.tenantId,
+      userId: actor.userId,
+      tenantId: actor.tenantId,
+      expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
+    };
+    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    return {
+      uploadPath: upload.path,
+      method: "PATCH" as const,
+      authorizationScheme: "Bearer" as const,
+      token,
+      expiresAt: new Date(grant.expiresAt).toISOString(),
+      fileField: upload.fileField,
+      maxSizeBytes: upload.maxSizeBytes,
+      fields: input.asset === "loginDocument" ? { name: input.name! } : {},
+    };
+  }
+
+  async issueUserAvatarGrant(
+    actor: CurrentUserType,
+    input: Pick<McpUserAvatarUploadGrant, "filename" | "mimeType" | "size">,
+  ) {
+    this.validateNamedFile(input, ALLOWED_AVATAR_IMAGE_TYPES, AVATAR_MAX_SIZE);
+    await this.validateActiveUploadPermission(actor, PERMISSIONS.ACCOUNT_UPDATE_SELF);
+    const token = createUploadToken();
+    const grant: McpUserAvatarUploadGrant = {
+      ...input,
+      kind: MCP_UPLOAD_GRANT_KIND.USER_AVATAR,
+      targetType: ENTITY_TYPES.USER,
+      targetId: actor.userId,
+      userId: actor.userId,
+      tenantId: actor.tenantId,
+      expiresAt: Date.now() + GRANT_TTL_SECONDS * 1000,
+    };
+    await this.redis.set(this.key(token), JSON.stringify(grant), { EX: GRANT_TTL_SECONDS });
+    return {
+      uploadPath: "/api/user/profile",
+      method: "PATCH" as const,
+      authorizationScheme: "Bearer" as const,
+      token,
+      expiresAt: new Date(grant.expiresAt).toISOString(),
+      fileField: "userAvatar",
+      maxSizeBytes: AVATAR_MAX_SIZE,
+      fields: { data: "{}" },
+    };
+  }
+
+  private async validateActiveUploadPermission(
+    actor: CurrentUserType,
+    permission: import("@repo/shared").PermissionKey,
+  ): Promise<void> {
+    const email = await this.tokenService.resolveIdentity(actor.userId, actor.tenantId);
+    if (!email) throw new UnauthorizedException("Upload user is no longer active");
+    const access = await this.tenantDbRunnerService.runWithTenantContext(actor.tenantId, () =>
+      this.permissionsService.getUserAccess(actor.userId),
+    );
+    if (!actor.permissions.includes(permission) || !access.permissions.includes(permission))
+      throw new ForbiddenException("Upload permission was revoked");
+  }
 
   async issueLessonGrant(
     actor: CurrentUserType,
@@ -641,7 +758,22 @@ export class McpUploadGrantService {
     } else {
       let expectedPath: string;
       let expectedMethod: "POST" | "PATCH" = "POST";
-      if ("operation" in grant) {
+      if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET) {
+        const upload = PLATFORM_ASSET_UPLOADS[grant.asset];
+        if (
+          !upload ||
+          grant.targetType !== ENTITY_TYPES.GLOBAL_SETTINGS ||
+          grant.targetId !== grant.tenantId
+        )
+          throw new UnauthorizedException("Invalid platform upload grant");
+        expectedPath = upload.path;
+        expectedMethod = "PATCH";
+      } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.USER_AVATAR) {
+        if (grant.targetType !== ENTITY_TYPES.USER || grant.targetId !== grant.userId)
+          throw new UnauthorizedException("Invalid avatar upload grant");
+        expectedPath = "/api/user/profile";
+        expectedMethod = "PATCH";
+      } else if ("operation" in grant) {
         if (grant.operation === SCORM_IMPORT_ACTION.CREATE_COURSE)
           expectedPath = "/api/scorm/course";
         else if (grant.operation === SCORM_IMPORT_ACTION.CREATE_LESSON)
@@ -682,7 +814,11 @@ export class McpUploadGrantService {
       this.permissionsService.getUserAccess(grant.userId),
     );
     let requiredPermissions;
-    if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) {
+    if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET) {
+      requiredPermissions = [PERMISSIONS.SETTINGS_MANAGE];
+    } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.USER_AVATAR) {
+      requiredPermissions = [PERMISSIONS.ACCOUNT_UPDATE_SELF];
+    } else if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) {
       requiredPermissions = [PERMISSIONS.FILE_UPLOAD];
       if (!hasAnyPermission(access.permissions, genericFileAuthoringPermissions(grant.resource)))
         throw new ForbiddenException("Authoring permission was revoked");
@@ -715,6 +851,13 @@ export class McpUploadGrantService {
       permissions: access.permissions,
     };
     await this.tenantDbRunnerService.runWithTenantContext(grant.tenantId, async () => {
+      if (
+        "kind" in grant &&
+        [MCP_UPLOAD_GRANT_KIND.PLATFORM_ASSET, MCP_UPLOAD_GRANT_KIND.USER_AVATAR].some(
+          (kind) => kind === grant.kind,
+        )
+      )
+        return;
       if ("kind" in grant && grant.kind === MCP_UPLOAD_GRANT_KIND.GENERIC_FILE) return;
       if (isTusGrant(grant) && grant.kind === MCP_UPLOAD_GRANT_KIND.VIDEO_TUS) {
         await this.validateAuthoringTargetAccess(user, grant);
@@ -765,6 +908,7 @@ export class McpUploadGrantService {
     if (
       !Object.values(SUPPORTED_LANGUAGES).includes(input.language) ||
       !supportedTypes.includes(input.mimeType) ||
+      !Number.isSafeInteger(input.size) ||
       input.size < 1 ||
       input.size > maxSize ||
       !input.filename ||
@@ -782,11 +926,13 @@ export class McpUploadGrantService {
   ) {
     if (
       !allowedTypes.includes(input.mimeType) ||
+      !Number.isSafeInteger(input.size) ||
       input.size < 1 ||
       input.size > maxSize ||
       !input.filename ||
       input.filename.length > 255 ||
-      basename(input.filename) !== input.filename
+      basename(input.filename) !== input.filename ||
+      input.filename.includes("\\")
     )
       throw new BadRequestException("Unsupported upload file");
   }

@@ -16,6 +16,9 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Editors maintain lessons and supporting files in courses they can edit, so training can reflect updated procedures.
 - Category managers organise courses and maintain category translations so authors can classify training consistently.
 - Content administrators update knowledge articles, news, Q&A, and development paths within their existing access.
+- HR administrators find and update existing learners, maintain group memberships and roles, and create or translate groups using their existing access.
+- Platform administrators customize branding, registration preferences, feature availability, and company information using their existing access.
+- Learners and editors search accessible content in their chosen language and use returned IDs to continue their work.
 
 ## Feature Functions
 
@@ -25,6 +28,9 @@ For connection instructions, example prompts, and a suggested demonstration, see
 - Attach supporting files, place lesson resources as previews or downloads, upload video, and import SCORM packages through Mentingo's upload flows.
 - Manage course publication, pricing, certificates, and assigned-group deadlines when the editor has the required access.
 - Maintain content in the languages available for the target course or editorial resource.
+- Search accessible courses, lessons, development paths, news, articles, Q&A, users, categories, and groups in a supported language.
+- Read and update existing users, group memberships, and roles; create, read, and update groups and translations. User creation/import, archiving/deletion, group deletion, and credential operations are excluded.
+- Customize company information, registration fields, feature preferences, currencies, age limits, featured courses, live training capacity, email triggers, branding images, and public login documents. SSO and MFA settings are excluded.
 - Connect with explicit account consent and expose tools according to current permissions and enabled tenant features.
 
 ## End-User Value
@@ -45,6 +51,8 @@ Mutations that publish, delete, reorder, or change pricing, certificates, or med
 
 The connection page uses Mentingo's web components, tenant platform logo, login background, and theme colors. The API validates the OAuth request, redirects to the web page, and supplies connection details only to the signed-in user for the current tenant. The web page posts the decision to the API, which consumes the one-use consent request and completes the OAuth redirect. The OAuth and `/api/mcp` routes remain Nest controller routes. A dedicated guard checks the MCP bearer token, tenant, and resource before the protocol endpoint uses the official MCP SDK's Node request/response adapter.
 
+MCP advertises upload instructions during connection initialization, in capability discovery, and in relevant tool descriptions. The shared `request_generic_file_upload` tool accepts article/news content files with an existing target ID and language, then delegates to the native editorial upload service. Its response explains how to upload the bytes and insert the returned resource ID into content with a fresh revision. Course/quiz generic uploads retain their raw `fileKey`/`fileUrl` response; article/news files retain durable resource URLs and normal resource linkage. Covers and videos keep their dedicated flows.
+
 Local agents can request a narrow multipart grant for the authoring upload routes, with the target, language where applicable, file name, MIME type, size, and relevant form metadata bound to the grant. The course thumbnail grant also binds the required position. Multipart grants are consumed on one request, and access is rechecked before the file is saved.
 
 Lesson file uploads create a resource before it appears in lesson content. The editor passes the uploaded `resourceId` to `insert_lesson_resource`; the tool verifies access, adds the appropriate content node, and the existing lesson update flow attaches the resource to that lesson. A newly uploaded file therefore need not appear in `list_lesson_resources` before insertion.
@@ -55,7 +63,9 @@ SCORM grants bind a ZIP file and exact authoring metadata to `POST /api/scorm/co
 
 ## Current Delivery Scope
 
-The implemented tool set has 101 named tools. It covers course discovery, category lookup and management, course creation and updates with the native API schemas, course settings and publication/pricing/certificate/media changes, group assignment deadlines, chapter and lesson discovery, ordering and deletion, content, quiz, AI Mentor, embed, and live training lesson creation and edits, lesson resource discovery, placement and detachment, Q&A entry CRUD, article section and published article/content edits, draft and published news discovery and edits, development path metadata, certificate settings and course ordering, multipart authoring uploads, resumable video uploads, and SCORM course/lesson imports through multipart or TUS. Article creation through MCP follows the existing web API: it immediately publishes an article with the default title and empty content. The agent then calls `update_article` to fill it in. News creation defaults to a draft, while development path creation accepts the statuses supported by its API. Article and news updates can set public visibility. SCORM creation and package attachment complete when the local agent sends the ZIP through the existing API route.
+The implemented tool set also includes permission-aware global search, platform customization, existing-user management, and group creation and maintenance. Its content tools cover course discovery, category lookup and management, course creation and updates with the native API schemas, course settings and publication/pricing/certificate/media changes, group assignment deadlines, chapter and lesson discovery, ordering and deletion, content, quiz, AI Mentor, embed, and live training lesson creation and edits, lesson resource discovery, placement and detachment, Q&A entry CRUD, article section and published article/content edits, draft and published news discovery and edits, development path metadata, certificate settings and course ordering, multipart authoring uploads, resumable video uploads, and SCORM course/lesson imports through multipart or TUS. Article creation through MCP follows the existing web API: it immediately publishes an article with the default title and empty content. The agent then calls `update_article` to fill it in. News creation defaults to a draft, while development path creation accepts the statuses supported by its API. Article and news updates can set public visibility. SCORM creation and package attachment complete when the local agent sends the ZIP through the existing API route.
+
+Customization uses the existing platform services and upload validators. Boolean preferences are exposed as explicit toggle operations with required retry keys. Platform images, user avatars, and login documents use scoped, one-use upload grants for their native multipart endpoints. Branding images retain the native 10 MiB limit, user avatars retain 5 MiB plus square/1024-pixel constraints, and login documents retain the file service limit of 1 GiB. No separate MCP byte limit applies. Login documents can be listed, added, or removed with exact-name confirmation; the native service does not support replacing a document in place. Global search reuses the existing platform search service and its per-result permissions, enrollment, ownership, tenant, and localization rules; it is not a separate semantic search engine.
 
 ## Key Technical Context
 
@@ -68,8 +78,6 @@ The implemented tool set has 101 named tools. It covers course discovery, catego
 
 ## Test Evidence
 
-Repository unit tests cover OAuth tenant/client matching, consent details and preservation of consent when a browser session is invalid; selected MCP/REST permission parity; scoped upload metadata and one-use grant consumption; and lesson-resource rendering and supported preview/download modes.
+Local validation includes the MCP unit suite and real HTTP tests against disposable Postgres, Redis, and S3-compatible storage. The HTTP tests cover OAuth consent, PKCE, token exchange and revocation, authenticated MCP calls, user/group operations, search, real multipart image/PDF uploads, editorial resource insertion and read-back, permission checks, and tenant isolation. These tests do not establish browser-based consent, third-party Claude OAuth, or deployed behavior. Focused unit coverage also verifies tool registration, REST permission parity, argument validation, excluded user/group lifecycle operations, actor forwarding, file MIME consistency, exact upload route/metadata binding, and single-use grant consumption.
 
-These are focused unit tests, not proof of a complete external-client workflow. No MCP-specific browser E2E spec was found during this documentation review. The review did not run browser consent, authenticated tool calls, real uploads, or client compatibility checks. The demo in the guide is a proposed walkthrough, not a recorded successful run.
-
-Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.
+Revision checks protect updates that accept an expected revision, including content-lesson edits. After a conflict, the assistant must reload the target before retrying. Browser-based MCP, third-party clients, and deployed behavior remain unverified. A process failure after a domain change commits but before its idempotent result is cached can require manual reconciliation.

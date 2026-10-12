@@ -5,6 +5,8 @@ import { CategoryModule } from "src/category/category.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
+import { GlobalSearchModule } from "src/global-search/global-search.module";
+import { GroupModule } from "src/group/group.module";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { NewsModule } from "src/news/news.module";
@@ -15,6 +17,7 @@ import { RedisClientsModule } from "src/redis";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
 import { ScormModule } from "src/scorm/scorm.module";
 import { SettingsModule } from "src/settings/settings.module";
+import { UserModule } from "src/user/user.module";
 
 import { McpAuthGuard } from "./mcp-auth.guard";
 import { McpConsentController } from "./mcp-consent.controller";
@@ -43,6 +46,9 @@ import { McpController } from "./mcp.controller";
     PermissionsModule,
     RedisClientsModule,
     SettingsModule,
+    GlobalSearchModule,
+    GroupModule,
+    UserModule,
   ],
   providers: [
     McpHttpService,

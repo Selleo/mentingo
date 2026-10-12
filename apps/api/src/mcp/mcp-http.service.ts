@@ -41,6 +41,8 @@ import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
 import { CourseTranslationService } from "src/courses/services/course-translation.service";
 import { FileService } from "src/file/file.service";
+import { GlobalSearchService } from "src/global-search/global-search.service";
+import { GroupService } from "src/group/group.service";
 import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { AiJudgeConfigurationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration.service";
 import { AiMentorConfigurationService } from "src/lesson/ai-mentor-configuration/services/ai-mentor-configuration.service";
@@ -67,12 +69,18 @@ import {
   news as newsRows,
   resources as resourceRows,
 } from "src/storage/schema";
+import { UserService } from "src/user/user.service";
 
+import { registerMcpAdminTools } from "./mcp-admin-tools";
 import { renderLessonResourceNode } from "./mcp-content-resource";
+import { registerMcpCustomizationTools } from "./mcp-customization-tools";
+import { registerMcpGenericUploadTool } from "./mcp-generic-upload-tools";
+import { MCP_GLOBAL_SEARCH_PERMISSIONS, registerMcpSearchTools } from "./mcp-search-tools";
 import { canListMcpTool } from "./mcp-tool-access";
 import { asMcpInputSchema } from "./mcp-tool.schema";
 import * as McpToolSchemas from "./mcp-tool.schemas";
 import { McpUploadGrantService } from "./mcp-upload-grant.service";
+import { MCP_UPLOAD_INSTRUCTIONS_SERVER } from "./mcp-upload-guidance";
 import { withMcpUploadInstructions } from "./mcp-upload-response";
 import { MCP_SERVER_NAME, MCP_SERVER_VERSION } from "./mcp.constants";
 
@@ -122,6 +130,9 @@ export class McpHttpService {
     private readonly fileService: FileService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly activityLogsService: ActivityLogsService,
+    private readonly globalSearchService: GlobalSearchService,
+    private readonly userService: UserService,
+    private readonly groupService: GroupService,
   ) {}
 
   async handle(req: Request, res: Response, actor: McpToolActor): Promise<void> {
@@ -162,7 +173,10 @@ export class McpHttpService {
     permissions: PermissionKey[],
     settings: Awaited<ReturnType<SettingsService["getGlobalSettings"]>>,
   ): McpServer {
-    const server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
+    const server = new McpServer(
+      { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
+      { instructions: MCP_UPLOAD_INSTRUCTIONS_SERVER },
+    );
     const registerTool = server.registerTool.bind(server);
     server.registerTool = ((name: string, config: unknown, callback: unknown) => {
       const tool = Reflect.apply(registerTool, server, [name, config, callback]) as RegisteredTool;
@@ -191,6 +205,33 @@ export class McpHttpService {
               canList: user.permissions.includes(PERMISSIONS.COURSE_READ_MANAGEABLE),
               canManageGroupDeadlines: user.permissions.includes(PERMISSIONS.COURSE_ENROLLMENT),
             },
+            fileUploads: {
+              genericUploadAvailable: canListMcpTool(
+                "request_generic_file_upload",
+                user.permissions,
+                settings,
+              ),
+              workflow: MCP_UPLOAD_INSTRUCTIONS_SERVER,
+            },
+            platformCustomization: user.permissions.includes(PERMISSIONS.SETTINGS_MANAGE),
+            ownProfile: {
+              canRead: user.permissions.includes(PERMISSIONS.ACCOUNT_READ_SELF),
+              canUpdate: user.permissions.includes(PERMISSIONS.ACCOUNT_UPDATE_SELF),
+              canReadDetails: user.permissions.includes(PERMISSIONS.USER_READ_SELF),
+            },
+            users: {
+              canRead: user.permissions.includes(PERMISSIONS.USER_MANAGE),
+              canUpdate: user.permissions.includes(PERMISSIONS.USER_MANAGE),
+              canCreate: false,
+              canDelete: false,
+            },
+            groups: {
+              canRead: user.permissions.includes(PERMISSIONS.GROUP_READ),
+              canCreate: user.permissions.includes(PERMISSIONS.GROUP_MANAGE),
+              canUpdate: user.permissions.includes(PERMISSIONS.GROUP_MANAGE),
+              canDelete: false,
+            },
+            globalSearch: hasAnyPermission(user.permissions, MCP_GLOBAL_SEARCH_PERMISSIONS),
             categories: user.permissions.includes(PERMISSIONS.CATEGORY_MANAGE),
             articles:
               Boolean(settings[FEATURE_SETTINGS_KEYS[FEATURES.ARTICLES]]) &&
@@ -611,22 +652,10 @@ export class McpHttpService {
         }),
     );
 
-    server.registerTool(
-      "request_generic_file_upload",
-      {
-        description:
-          "Get a one-use grant to upload a course or quiz image before its entity exists. Send the local file to the returned uploadRequest.url with its Bearer header and multipart fields.",
-        inputSchema: asMcpInputSchema(McpToolSchemas.requestGenericFileUploadInputSchema),
-      },
-      async ({ resource, filename, mimeType, size }) =>
-        this.run(actor, [PERMISSIONS.FILE_UPLOAD], (user) =>
-          this.uploadGrantService.issueGenericFileGrant(user, {
-            resource,
-            filename,
-            mimeType,
-            size,
-          }),
-        ),
+    registerMcpGenericUploadTool(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      this.uploadGrantService,
     );
 
     server.registerTool(
@@ -2554,7 +2583,7 @@ export class McpHttpService {
       "update_article",
       {
         description:
-          "Update an article title, summary, or rich content in one language, and optionally set public visibility.",
+          "Update an article title, summary, or Tiptap rich content in one language, and optionally set public visibility. Upload local content files first with request_generic_file_upload(resource=articles, targetId=id, language); follow its contentInsertion guidance, then read get_article for a fresh revision and save the complete content. Covers use request_editorial_cover_upload; videos use init_video_upload.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateArticleInputSchema),
       },
       async ({ id, language, expectedRevision, title, summary, content, isPublic }) =>
@@ -2732,7 +2761,7 @@ export class McpHttpService {
       "update_news",
       {
         description:
-          "Update a news post title, summary, or rich content in one language, and optionally set public visibility.",
+          "Update a news post title, summary, or Tiptap rich content in one language, and optionally set public visibility. Upload local content files first with request_generic_file_upload(resource=news, targetId=id, language); follow its contentInsertion guidance, then read get_news for a fresh revision and save the complete content. Covers use request_editorial_cover_upload; videos use init_video_upload.",
         inputSchema: asMcpInputSchema(McpToolSchemas.updateNewsInputSchema),
       },
       async ({ id, language, title, summary, content, isPublic, expectedRevision }) =>
@@ -3136,6 +3165,23 @@ export class McpHttpService {
         }),
     );
 
+    registerMcpAdminTools(
+      server,
+      { users: this.userService, groups: this.groupService, uploadGrants: this.uploadGrantService },
+      (permissions, operation) => this.run(actor, permissions, operation),
+    );
+    registerMcpCustomizationTools(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      this.settingsService,
+      this.uploadGrantService,
+    );
+    registerMcpSearchTools(
+      server,
+      (permissions, operation) => this.run(actor, permissions, operation),
+      this.globalSearchService,
+    );
+
     return server;
   }
 
@@ -3280,6 +3326,8 @@ export class McpHttpService {
       "newsId",
       "qaId",
       "pathId",
+      "userId",
+      "groupId",
       "id",
       "targetId",
     ]
