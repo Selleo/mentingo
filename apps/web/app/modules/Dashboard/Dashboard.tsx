@@ -141,7 +141,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
             showSignUp={showSignUp}
           />
 
-          <main className="flex-1 min-h-0 overflow-y-auto bg-primary-50 2xl:col-start-2 2xl:row-start-2">
+          <main className="flex-1 min-h-0 overflow-y-auto bg-primary-50 2xl:col-start-2 2xl:row-start-2 mono:bg-background-secondary">
             <Outlet />
           </main>
         </div>
@@ -152,7 +152,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
       <div className="flex h-screen flex-col w-full">
         <PublicHeader publicNavigationLinks={publicNavigationLinks} t={t} showSignUp={showSignUp} />
 
-        <main className="flex-1 overflow-y-auto bg-primary-50">
+        <main className="flex-1 overflow-y-auto bg-primary-50 mono:bg-background-secondary">
           <Outlet />
         </main>
       </div>
@@ -161,12 +161,12 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
   if (isArticlesRoute) {
     return (
-      <div className="flex flex-1 overflow-hidden bg-primary-50">
+      <div className="flex flex-1 overflow-hidden bg-primary-50 mono:bg-background-secondary">
         <div className={cn(is2xl ? "hidden 2xl:block 2xl:w-72 2xl:min-w-72 2xl:shrink-0" : "")}>
           <AllArticlesTOC isMobile={!is2xl} />
         </div>
         {!is2xl && <AllArticlesTOC isMobile={true} />}
-        <main className="relative flex-1 overflow-y-auto bg-primary-50">
+        <main className="relative flex-1 overflow-y-auto bg-primary-50 mono:bg-background-secondary">
           <RouteGuard>
             <Outlet />
           </RouteGuard>
@@ -176,7 +176,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   }
 
   return (
-    <main className="relative flex-1 overflow-y-auto bg-primary-50">
+    <main className="relative flex-1 overflow-y-auto bg-primary-50 mono:bg-background-secondary">
       <RouteGuard>
         <Outlet />
       </RouteGuard>

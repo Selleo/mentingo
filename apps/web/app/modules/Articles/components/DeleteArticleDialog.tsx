@@ -7,6 +7,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
@@ -48,7 +49,7 @@ export function DeleteArticleDialog({
         <DialogTitle>{t("articlesView.deleteModal.title")}</DialogTitle>
         <DialogDescription>{t("articlesView.deleteModal.description")}</DialogDescription>
 
-        <div className="flex justify-end gap-2">
+        <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0">
           <DialogClose asChild>
             <Button variant="ghost" className="text-primary-800" disabled={isDeleting}>
               {t("common.button.cancel")}
@@ -65,7 +66,7 @@ export function DeleteArticleDialog({
           >
             {t("common.button.delete")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

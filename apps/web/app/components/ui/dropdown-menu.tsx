@@ -27,7 +27,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
-      "mono:rounded-lg mono:py-2 mono:text-base mono:focus:bg-neutral-100 mono:data-[state=open]:bg-neutral-100",
+      "mono:rounded-lg mono:py-2 mono:focus:bg-neutral-100 mono:data-[state=open]:bg-neutral-100",
       inset && "pl-8",
       className,
     )}
@@ -86,7 +86,7 @@ const DropdownMenuItem = React.forwardRef<
     className={cn(
       "relative",
       inset && "pl-8",
-      "mono:cursor-pointer mono:rounded-lg mono:text-base mono:outline-none mono:focus:bg-neutral-100 mono:focus:text-neutral-950 mono:data-[disabled]:text-neutral-500 mono:data-[disabled]:opacity-100",
+      "mono:cursor-pointer mono:rounded-lg mono:outline-none mono:focus:bg-neutral-100 mono:focus:text-neutral-950 mono:data-[disabled]:text-neutral-500 mono:data-[disabled]:opacity-100",
       variant === "destructive" &&
         "mono:text-error-500 mono:focus:bg-error-50 mono:focus:text-error-500",
       className,
@@ -104,7 +104,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:text-base mono:focus:bg-neutral-100 mono:focus:text-neutral-950",
+      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:focus:bg-neutral-100 mono:focus:text-neutral-950",
       className,
     )}
     checked={checked}
@@ -132,7 +132,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:text-base mono:focus:bg-neutral-100 mono:focus:text-neutral-950",
+      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:focus:bg-neutral-100 mono:focus:text-neutral-950",
       className,
     )}
     {...props}

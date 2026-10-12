@@ -109,17 +109,14 @@ const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorPro
         <div className="scrollbar-thin max-h-64 overflow-scroll">
           {questionTypes.map(({ type, label, icon }) => {
             return (
-              <DropdownMenuItem key={label}>
-                <Button
-                  data-testid={QUIZ_LESSON_FORM_HANDLES.questionTypeOption(type)}
-                  key={type}
-                  className="body-base-md w-full justify-start bg-white text-left text-black hover:bg-gray-100"
-                  type="button"
-                  onClick={() => onTypeChoose(type)}
-                >
-                  <Icon name={icon as QuestionIcons} className="mr-2 size-4 text-primary-700" />
-                  {label}
-                </Button>
+              <DropdownMenuItem
+                key={label}
+                data-testid={QUIZ_LESSON_FORM_HANDLES.questionTypeOption(type)}
+                className="body-base-md flex h-10 w-full cursor-pointer items-center justify-start whitespace-nowrap rounded-lg bg-white px-4 py-2 text-left text-sm font-medium text-black outline-none transition focus:bg-gray-100 focus:opacity-90"
+                onSelect={() => onTypeChoose(type)}
+              >
+                <Icon name={icon as QuestionIcons} className="mr-2 size-4 text-primary-700" />
+                {label}
               </DropdownMenuItem>
             );
           })}

@@ -67,7 +67,7 @@ export const MonoPagination = ({
             >
               <SelectTrigger
                 data-testid={testIds?.itemsPerPage}
-                className="h-8 w-fit gap-2 border-0 bg-transparent px-1 mono:text-sm mono:text-neutral-800"
+                className="h-8 w-fit gap-2 border-0 bg-transparent px-1 mono:text-neutral-800"
               >
                 <SelectValue />
               </SelectTrigger>

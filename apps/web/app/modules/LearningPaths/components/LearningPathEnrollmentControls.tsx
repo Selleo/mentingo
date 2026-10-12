@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
 import type {
@@ -35,6 +36,9 @@ type LearningPathEnrollmentControlsProps = {
   onOpenGroupEnroll: () => void;
   onOpenGroupUnenroll: () => void;
 };
+
+const ENROLLMENT_MENU_ITEM_CLASS_NAME =
+  "body-sm flex h-10 w-full cursor-pointer items-center justify-start gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium outline-none transition focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
 export function LearningPathEnrollmentControls({
   isPending,
@@ -77,31 +81,24 @@ export function LearningPathEnrollmentControls({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
-            <DropdownMenuItem>
-              <Button
-                type="button"
-                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
-                variant="ghost"
-                disabled={!selectedNotEnrolledCount || isPending}
-                onClick={onOpenUserEnroll}
-              >
-                <Icon name="Plus" className="size-4 text-accent-foreground" />
-                {t("learningPathsView.enrollment.enrollSelected")}
-                {!!selectedNotEnrolledCount && ` (${selectedNotEnrolledCount})`}
-              </Button>
+            <DropdownMenuItem
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-neutral-950")}
+              disabled={!selectedNotEnrolledCount || isPending}
+              onSelect={onOpenUserEnroll}
+            >
+              <Icon name="Plus" className="size-4 text-accent-foreground mono:text-current" />
+              {t("learningPathsView.enrollment.enrollSelected")}
+              {!!selectedNotEnrolledCount && ` (${selectedNotEnrolledCount})`}
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Button
-                type="button"
-                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
-                variant="ghost"
-                disabled={!selectedEnrolledCount || isPending}
-                onClick={onOpenUserUnenroll}
-              >
-                <Minus className="size-4 text-error-700" />
-                {t("learningPathsView.enrollment.unenrollSelected")}
-                {!!selectedEnrolledCount && ` (${selectedEnrolledCount})`}
-              </Button>
+            <DropdownMenuItem
+              variant="destructive"
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-error-700")}
+              disabled={!selectedEnrolledCount || isPending}
+              onSelect={onOpenUserUnenroll}
+            >
+              <Minus className="size-4 text-error-700 mono:text-current" />
+              {t("learningPathsView.enrollment.unenrollSelected")}
+              {!!selectedEnrolledCount && ` (${selectedEnrolledCount})`}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -123,27 +120,20 @@ export function LearningPathEnrollmentControls({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
-            <DropdownMenuItem>
-              <Button
-                type="button"
-                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
-                variant="ghost"
-                onClick={onOpenGroupEnroll}
-              >
-                <Icon name="Plus" className="size-4 text-accent-foreground" />
-                {t("learningPathsView.enrollment.enrollGroups")}
-              </Button>
+            <DropdownMenuItem
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-neutral-950")}
+              onSelect={onOpenGroupEnroll}
+            >
+              <Icon name="Plus" className="size-4 text-accent-foreground mono:text-current" />
+              {t("learningPathsView.enrollment.enrollGroups")}
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Button
-                type="button"
-                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
-                variant="ghost"
-                onClick={onOpenGroupUnenroll}
-              >
-                <Minus className="size-4 text-error-700" />
-                {t("learningPathsView.enrollment.unenrollGroups")}
-              </Button>
+            <DropdownMenuItem
+              variant="destructive"
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-error-700")}
+              onSelect={onOpenGroupUnenroll}
+            >
+              <Minus className="size-4 text-error-700 mono:text-current" />
+              {t("learningPathsView.enrollment.unenrollGroups")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

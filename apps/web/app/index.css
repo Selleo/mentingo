@@ -252,6 +252,8 @@ html {
     --error-600: #b40000;
     --error-700: #930000;
     --color-white: #ffffff;
+    --background-secondary: #f9f9f9;
+    --button-disabled: #e9e9e9;
     --foreground: var(--neutral-950);
     --card-foreground: var(--neutral-950);
     --popover-foreground: var(--neutral-950);

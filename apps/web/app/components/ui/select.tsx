@@ -18,7 +18,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-[42px] w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1",
-      "mono:rounded mono:text-base mono:text-foreground mono:focus-visible:outline-none mono:focus-visible:ring-2 mono:focus-visible:ring-ring mono:focus-visible:ring-offset-2 mono:data-[state=open]:border-primary-700 mono:aria-[invalid=true]:border-error-500 mono:disabled:bg-neutral-100 mono:disabled:text-neutral-600 mono:disabled:opacity-100",
+      "mono:rounded mono:text-foreground mono:focus-visible:outline-none mono:focus-visible:ring-2 mono:focus-visible:ring-ring mono:focus-visible:ring-offset-2 mono:data-[state=open]:border-primary-700 mono:aria-[invalid=true]:border-error-500 mono:disabled:bg-neutral-100 mono:disabled:text-neutral-600 mono:disabled:opacity-100",
       className,
     )}
     {...props}
@@ -132,7 +132,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:text-base mono:focus:bg-neutral-100 mono:focus:text-neutral-950 mono:data-[disabled]:text-neutral-500 mono:data-[disabled]:opacity-100",
+      "mono:cursor-pointer mono:rounded-lg mono:py-2 mono:pl-9 mono:focus:bg-neutral-100 mono:focus:text-neutral-950 mono:data-[disabled]:text-neutral-500 mono:data-[disabled]:opacity-100",
       className,
     )}
     {...props}

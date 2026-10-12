@@ -82,9 +82,13 @@ const AdminLayout = () => {
 
   return (
     <main
-      className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50", {
-        "bg-white p-0": shouldHideTopbarAndSidebar(pathname),
-      })}
+      className={cn(
+        "max-h-dvh flex-1 overflow-y-auto bg-primary-50",
+        "mono:bg-background-secondary",
+        {
+          "bg-white p-0 mono:bg-white": shouldHideTopbarAndSidebar(pathname),
+        },
+      )}
     >
       <Suspense fallback={<Loader />}>
         <AdminGuard>

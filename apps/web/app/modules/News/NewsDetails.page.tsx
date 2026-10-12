@@ -18,6 +18,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
@@ -126,7 +127,7 @@ export default function NewsDetailsPage() {
               >
                 <DialogTitle>{t("newsView.deleteModal.title")}</DialogTitle>
                 <DialogDescription>{t("newsView.deleteModal.description")}</DialogDescription>
-                <div className="flex justify-end gap-2">
+                <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0">
                   <DialogClose asChild>
                     <Button variant="ghost" disabled={isDeleting}>
                       {t("common.button.cancel")}
@@ -149,7 +150,7 @@ export default function NewsDetailsPage() {
                   >
                     {t("newsView.button.delete")}
                   </Button>
-                </div>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>

@@ -41,7 +41,7 @@ const SuperAdminGuard = ({ children }: PropsWithChildren) => {
 
 const SuperAdminLayout = () => {
   return (
-    <main className="max-h-dvh flex-1 overflow-y-auto bg-primary-50">
+    <main className="max-h-dvh flex-1 overflow-y-auto bg-primary-50 mono:bg-background-secondary">
       <Suspense fallback={<Loader />}>
         <SuperAdminGuard>
           <Outlet />

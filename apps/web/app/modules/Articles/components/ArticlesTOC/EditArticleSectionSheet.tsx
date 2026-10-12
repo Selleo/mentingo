@@ -15,6 +15,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
@@ -292,7 +293,7 @@ export function EditArticleSectionSheet({
                         <DialogDescription>
                           {t("adminArticleView.section.delete.description")}
                         </DialogDescription>
-                        <div className="flex justify-end gap-2">
+                        <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0">
                           <DialogClose asChild>
                             <Button variant="ghost" disabled={isDeleting}>
                               {t("common.button.cancel")}
@@ -310,7 +311,7 @@ export function EditArticleSectionSheet({
                           >
                             {t("common.button.delete")}
                           </Button>
-                        </div>
+                        </DialogFooter>
                       </DialogContent>
                     </Dialog>
                   </CardContent>

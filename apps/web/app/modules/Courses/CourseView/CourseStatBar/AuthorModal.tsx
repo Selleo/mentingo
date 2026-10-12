@@ -3,7 +3,7 @@ import { Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "~/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -210,7 +210,7 @@ export default function AuthorModal({
               </div>
             )}
 
-            <div className="mt-8 flex justify-end">
+            <DialogFooter className="mt-8 flex-row justify-end sm:space-x-0">
               <Button variant="outline" onClick={onClose} disabled={isSaving}>
                 {isAdminExperience
                   ? t("modernCourseView.common.cancel")
@@ -226,7 +226,7 @@ export default function AuthorModal({
                   {t("modernCourseView.common.saveChanges")}
                 </Button>
               )}
-            </div>
+            </DialogFooter>
           </div>
         </div>
       </DialogContent>

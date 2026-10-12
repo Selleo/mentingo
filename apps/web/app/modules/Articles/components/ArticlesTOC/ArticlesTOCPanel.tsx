@@ -10,6 +10,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
@@ -159,7 +160,7 @@ export function ArticlesTOCPanel({
               ? t("adminArticleView.section.cannotDeleteWithArticles")
               : t("adminArticleView.section.delete.description")}
           </DialogDescription>
-          <div className="flex justify-end gap-2">
+          <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0">
             <DialogClose asChild>
               <Button variant="ghost" disabled={isDeleting}>
                 {t("common.button.cancel")}
@@ -178,7 +179,7 @@ export function ArticlesTOCPanel({
             >
               {t("common.button.delete")}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

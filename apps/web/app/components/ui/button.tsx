@@ -14,11 +14,11 @@ const buttonVariants = cva(
       variant: {
         default: [
           "bg-primary-700 text-contrast hover:opacity-90",
-          "mono:hover:bg-primary-800 mono:hover:opacity-100 mono:focus-visible:bg-primary-800 mono:active:bg-primary-900 mono:disabled:bg-neutral-200 mono:disabled:text-white",
+          "mono:hover:bg-primary-800 mono:hover:opacity-100 mono:focus-visible:bg-primary-800 mono:active:bg-primary-900 mono:disabled:bg-button-disabled mono:disabled:text-white",
         ],
         destructive: [
           "bg-destructive text-primary-foreground hover:opacity-90",
-          "mono:bg-error-500 mono:text-white mono:hover:bg-error-600 mono:hover:opacity-100 mono:focus-visible:bg-error-600 mono:active:bg-error-700 mono:disabled:bg-neutral-200 mono:disabled:text-white",
+          "mono:bg-error-500 mono:text-white mono:hover:bg-error-600 mono:hover:opacity-100 mono:focus-visible:bg-error-600 mono:active:bg-error-700 mono:disabled:bg-button-disabled mono:disabled:text-white",
         ],
         outline: [
           "border border-input bg-background text-primary-800 hover:text-accent-foreground hover:border-primary-500 hover:opacity-90",
@@ -30,7 +30,7 @@ const buttonVariants = cva(
         ],
         primary: [
           "bg-primary-700 text-contrast hover:opacity-90",
-          "mono:hover:bg-primary-800 mono:hover:opacity-100 mono:focus-visible:bg-primary-800 mono:active:bg-primary-900 mono:disabled:bg-neutral-200 mono:disabled:text-white",
+          "mono:hover:bg-primary-800 mono:hover:opacity-100 mono:focus-visible:bg-primary-800 mono:active:bg-primary-900 mono:disabled:bg-button-disabled mono:disabled:text-white",
         ],
         secondary: [
           "bg-secondary-600 text-contrast hover:opacity-90",
@@ -46,7 +46,7 @@ const buttonVariants = cva(
         ],
       },
       size: {
-        default: ["h-10 px-4 py-2", "mono:text-base"],
+        default: "h-10 px-4 py-2",
         sm: ["h-9 rounded-lg px-3", "mono:rounded"],
         lg: ["h-11 rounded-lg px-8", "mono:rounded mono:text-base"],
         icon: "size-10",

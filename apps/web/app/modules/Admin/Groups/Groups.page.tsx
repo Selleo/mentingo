@@ -19,6 +19,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogOverlay,
   DialogPortal,
   DialogTitle,
@@ -145,7 +146,7 @@ const Groups = (): ReactElement => {
                     {t("adminGroupsView.deleteGroup.description")}
                   </DialogDescription>
                   <form onSubmit={handleGroupsDelete}>
-                    <div className="flex justify-end gap-4">
+                    <DialogFooter className="flex-row justify-end gap-4 sm:space-x-0">
                       <DialogClose>
                         <Button
                           data-testid={GROUPS_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON}
@@ -162,7 +163,7 @@ const Groups = (): ReactElement => {
                       >
                         {t("adminGroupsView.deleteGroup.submit")}
                       </Button>
-                    </div>
+                    </DialogFooter>
                   </form>
                 </DialogContent>
               </DialogPortal>

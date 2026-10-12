@@ -20,6 +20,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogOverlay,
   DialogPortal,
   DialogTitle,
@@ -516,7 +517,7 @@ export const CourseBulkActions = ({
                 </RadioGroup>
               </div>
             )}
-            <div className="flex justify-end gap-3 px-6 py-5">
+            <DialogFooter className="flex-row justify-end gap-3 px-6 py-5 sm:space-x-0">
               <DialogClose asChild>
                 <Button
                   data-testid={getCancelButtonTestId()}
@@ -536,7 +537,7 @@ export const CourseBulkActions = ({
               >
                 {getConfirmLabel()}
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </DialogPortal>
       </Dialog>

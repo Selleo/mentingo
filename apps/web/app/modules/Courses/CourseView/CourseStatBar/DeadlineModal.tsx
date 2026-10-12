@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "~/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
@@ -169,7 +169,7 @@ export default function DeadlineModal({
               </div>
             ))}
         </div>
-        <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
+        <DialogFooter className="mt-6 flex-col justify-end gap-3 sm:flex-row sm:space-x-0">
           <Button
             variant="outline"
             onClick={onClose}
@@ -190,7 +190,7 @@ export default function DeadlineModal({
             <Check className="size-4" />
             {t("modernCourseView.common.saveChanges")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

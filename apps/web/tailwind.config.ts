@@ -39,6 +39,9 @@ const config = {
         white: "var(--color-white)",
         contrast: "var(--contrast)",
         "color-contrast": "var(--color-contrast)",
+        // Mono design variant only: use with `mono:`
+        "background-secondary": "var(--background-secondary)",
+        "button-disabled": "var(--button-disabled)",
         neutral: {
           50: "var(--neutral-50)",
           100: "var(--neutral-100)",

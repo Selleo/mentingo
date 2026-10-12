@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import VideoUploadInput from "~/components/FileUploadInput/VideoUploadInput";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "~/components/ui/dialog";
 
 import { COURSE_HERO_PLACEHOLDER_BACKGROUND } from "./courseHeroPlaceholder";
 
@@ -43,7 +43,6 @@ export default function CourseMediaModal({
   return (
     <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
       <DialogContent
-        variant="frameless"
         className="max-h-[90vh] max-w-4xl overflow-y-auto rounded-2xl border-0 bg-white p-4 shadow-2xl md:p-6"
         noCloseButton
         aria-describedby={undefined}
@@ -146,7 +145,7 @@ export default function CourseMediaModal({
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <DialogFooter className="mt-6 flex-row justify-end gap-3 sm:space-x-0">
           <Button variant="outline" onClick={onClose} disabled={isSaving}>
             {t("modernCourseView.common.cancel")}
           </Button>
@@ -158,7 +157,7 @@ export default function CourseMediaModal({
             <Upload className="size-4" />
             {t("modernCourseView.media.save")}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

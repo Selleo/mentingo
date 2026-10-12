@@ -490,7 +490,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           data-testid={testId}
           className={cn(
             "relative min-h-[38px] rounded-md border border-input text-sm transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-aria-invalid:border-destructive has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40",
-            "mono:flex mono:min-h-10 mono:items-center mono:rounded mono:bg-background mono:px-2 mono:text-base mono:focus-within:border-primary-700 mono:focus-within:ring-2 mono:focus-within:ring-ring mono:focus-within:ring-offset-2",
+            "mono:flex mono:min-h-10 mono:items-center mono:rounded mono:bg-background mono:px-2 mono:focus-within:border-primary-700 mono:focus-within:ring-2 mono:focus-within:ring-ring mono:focus-within:ring-offset-2",
             {
               "p-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
@@ -542,7 +542,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             {hiddenSelected.length > 0 && (
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  {/* Without flex the inline badge sits on the button's text baseline and drops out of line. */}
+                  <TooltipTrigger className="mono:flex">
                     <Badge
                       className={cn(
                         "animate-fadeIn relative inline-flex h-7 cursor-help items-center rounded-md border bg-background px-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-background",
@@ -592,7 +593,14 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 </Tooltip>
               </TooltipProvider>
             )}
-            <div className="flex justify-between items-center px-1">
+            <div
+              className={cn(
+                "flex justify-between items-center px-1",
+                // Without typing, the input only holds focus, so it shares the badge line instead of
+                // wrapping onto a second row of the centered mono field.
+                textInputDisabled && "mono:min-w-0 mono:flex-1",
+              )}
+            >
               <div className="flex items-center">
                 <CommandPrimitive.Input
                   {...inputProps}

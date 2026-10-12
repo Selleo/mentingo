@@ -108,7 +108,10 @@ const CertificateControls = ({
           <PopoverPrimitive.Trigger asChild>
             <Button
               size="sm"
-              className="flex h-[42px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              className={cn(
+                "flex h-[42px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50",
+                "mono:hover:bg-neutral-50 mono:focus-visible:bg-neutral-50 mono:active:bg-neutral-100",
+              )}
             >
               <Palette className="size-4" />
               <span className="block mr-3">{t("studentCertificateView.controls.fontColor")}</span>

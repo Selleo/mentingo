@@ -60,6 +60,7 @@ export function DashboardWidgetCard({ children, className, testId }: WidgetCardP
       data-testid={testId}
       className={cn(
         "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-white drop-shadow-card",
+        "mono:border mono:border-border",
         className,
       )}
     >

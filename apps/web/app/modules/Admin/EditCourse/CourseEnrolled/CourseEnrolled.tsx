@@ -73,6 +73,9 @@ type CourseEnrolledProps = {
   language?: SupportedLanguages;
 };
 
+const ENROLLMENT_MENU_ITEM_CLASS_NAME =
+  "body-sm flex h-10 w-full cursor-pointer items-center justify-start gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium outline-none transition focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
+
 export const CourseEnrolled = ({
   courseId: explicitCourseId,
   language,
@@ -108,7 +111,11 @@ export const CourseEnrolled = ({
 
   const queryParams = useMemo(() => {
     const sort = tanstackSortingToParam(sorting) as UsersEnrolledSearchParams["sort"];
-    return { ...searchParams, sort };
+    // TEMP design test: keep the fake "Group number …" options out of the API request.
+    const realGroups = searchParams.groups?.filter(
+      ({ value }) => !value.startsWith("Group number"),
+    );
+    return { ...searchParams, groups: realGroups?.length ? realGroups : undefined, sort };
   }, [searchParams, sorting]);
 
   const { data: usersResponse } = useAllUsersEnrolledSuspense(courseId, queryParams);
@@ -292,7 +299,12 @@ export const CourseEnrolled = ({
       testId: COURSE_ENROLLED_HANDLES.GROUPS_FILTER,
       optionTestId: (option) => COURSE_ENROLLED_HANDLES.groupFilterOption(option.value),
       options:
-        groupData.map((item) => ({
+        [
+          ...(groupData ?? []),
+          { id: "Group number one", name: "Group number one" },
+          { id: "Group number two", name: "Group number two" },
+          { id: "Group number three", name: "Group number three" },
+        ].map((item) => ({
           value: item.id,
           label: item.name,
         })) ?? [],
@@ -456,28 +468,23 @@ export const CourseEnrolled = ({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
-            <DropdownMenuItem>
-              <Button
-                data-testid={COURSE_ENROLLED_HANDLES.USER_ENROLL_SELECTED_ACTION}
-                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
-                variant="ghost"
-                onClick={handleOpenEnroll}
-              >
-                <Icon name="Plus" className="size-4 text-accent-foreground" />
-                {t("adminCourseView.enrolled.enrollSelected")}
-              </Button>
+            <DropdownMenuItem
+              data-testid={COURSE_ENROLLED_HANDLES.USER_ENROLL_SELECTED_ACTION}
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-neutral-950")}
+              onSelect={handleOpenEnroll}
+            >
+              <Icon name="Plus" className="size-4 text-accent-foreground mono:text-current" />
+              {t("adminCourseView.enrolled.enrollSelected")}
             </DropdownMenuItem>
 
-            <DropdownMenuItem>
-              <Button
-                data-testid={COURSE_ENROLLED_HANDLES.USER_UNENROLL_SELECTED_ACTION}
-                onClick={handleOpenUnenroll}
-                variant="ghost"
-                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
-              >
-                <Minus className="size-4 text-error-700" />
-                {t("adminCourseView.enrolled.unenrollSelected")}
-              </Button>
+            <DropdownMenuItem
+              data-testid={COURSE_ENROLLED_HANDLES.USER_UNENROLL_SELECTED_ACTION}
+              variant="destructive"
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-error-700")}
+              onSelect={handleOpenUnenroll}
+            >
+              <Minus className="size-4 text-error-700 mono:text-current" />
+              {t("adminCourseView.enrolled.unenrollSelected")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -498,28 +505,23 @@ export const CourseEnrolled = ({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
-            <DropdownMenuItem>
-              <Button
-                data-testid={COURSE_ENROLLED_HANDLES.GROUP_ENROLL_ACTION}
-                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
-                variant="ghost"
-                onClick={handleOpenGroupEnroll}
-              >
-                <Icon name="Plus" className="size-4 text-accent-foreground" />
-                {t("adminCourseView.enrolled.enrollGroups")}
-              </Button>
+            <DropdownMenuItem
+              data-testid={COURSE_ENROLLED_HANDLES.GROUP_ENROLL_ACTION}
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-neutral-950")}
+              onSelect={handleOpenGroupEnroll}
+            >
+              <Icon name="Plus" className="size-4 text-accent-foreground mono:text-current" />
+              {t("adminCourseView.enrolled.enrollGroups")}
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Button
-                data-testid={COURSE_ENROLLED_HANDLES.GROUP_UNENROLL_ACTION}
-                onClick={handleOpenGroupUnenroll}
-                variant="ghost"
-                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
-                disabled={!enrolledGroups?.length}
-              >
-                <Minus className="size-4 text-error-700" />
-                {t("adminCourseView.enrolled.unenrollGroups")}
-              </Button>
+            <DropdownMenuItem
+              data-testid={COURSE_ENROLLED_HANDLES.GROUP_UNENROLL_ACTION}
+              variant="destructive"
+              className={cn(ENROLLMENT_MENU_ITEM_CLASS_NAME, "text-error-700")}
+              onSelect={handleOpenGroupUnenroll}
+              disabled={!enrolledGroups?.length}
+            >
+              <Minus className="size-4 text-error-700 mono:text-current" />
+              {t("adminCourseView.enrolled.unenrollGroups")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
