@@ -28,6 +28,11 @@ import { cn } from "~/lib/utils";
 import { COURSE_AUTHORING_HANDLES } from "../../../e2e/data/curriculum/handles";
 
 import {
+  assetSelectionKey,
+  readOmittedAssets,
+  writeOmittedAssets,
+} from "./authoringAssetSelection";
+import {
   activeAssistantRequestIds,
   activeChatRequestId,
   projectAuthoringTimeline,
@@ -221,11 +226,24 @@ export const CourseGenerationSession = ({
     omitOptionalAssetIds: string[];
     commandId: string;
   } | null>(null);
-  const [omittedOptionalAssetIds, setOmittedOptionalAssetIds] = useState<string[]>([]);
-  const omittedOptionalAssetIdsRef = useRef<string[]>([]);
+  const omissionKey = assetSelectionKey(id, sessionId);
+  const [assetSelection, setAssetSelection] = useState(() => ({
+    key: omissionKey,
+    ids: readOmittedAssets(omissionKey),
+  }));
+  const omittedOptionalAssetIds =
+    assetSelection.key === omissionKey ? assetSelection.ids : readOmittedAssets(omissionKey);
+  const setOmittedOptionalAssetIds = (update: string[] | ((current: string[]) => string[])) => {
+    setAssetSelection((current) => {
+      const ids = current.key === omissionKey ? current.ids : readOmittedAssets(omissionKey);
+      return { key: omissionKey, ids: typeof update === "function" ? update(ids) : update };
+    });
+  };
+  const omittedOptionalAssetIdsRef = useRef<string[]>(omittedOptionalAssetIds);
   useEffect(() => {
     omittedOptionalAssetIdsRef.current = omittedOptionalAssetIds;
-  }, [omittedOptionalAssetIds]);
+    writeOmittedAssets(omissionKey, omittedOptionalAssetIds);
+  }, [omissionKey, omittedOptionalAssetIds]);
   const [selectedProposalIds, setSelectedProposalIds] = useState<string[]>([]);
   const [appliedProposalIds, setAppliedProposalIds] = useState<Set<string>>(
     () => new Set(trackedApplication?.confirmed ? trackedApplication.proposalIds : []),
@@ -831,12 +849,19 @@ export const CourseGenerationSession = ({
       } = {},
     ) => {
       const latestSession = authoringSessionRef.current;
-      const latestProposals = latestSession
-        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks).proposals
-        : proposals;
+      const latestProjection = latestSession
+        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks)
+        : projection;
+      const latestProposals = latestSession ? latestProjection.proposals : proposals;
       if (
         selectedProposalIds.length > 0 &&
-        requestGenerationPending(latestSession?.tasks ?? [], requestId, latestProposals)
+        requestGenerationPending(
+          latestSession?.tasks ?? [],
+          requestId,
+          latestProposals,
+          latestProjection.assetTasks,
+          omittedOptionalAssetIdsRef.current,
+        )
       ) {
         throw new Error(t("courseAuthoring.errors.proposalNotReady"));
       }
@@ -944,7 +969,7 @@ export const CourseGenerationSession = ({
       if (applicableIds.length > 0)
         await applySelected(applicableIds, acknowledgeAssessmentChanges, []);
     },
-    [appliedProposalIds, applySelected, commandMutation, projection.proposals, t, toast],
+    [appliedProposalIds, applySelected, commandMutation, projection, t, toast],
   );
   /** Reviews a single result and starts its native apply, including required same-request changes. */
   const applyProposal = useCallback(
@@ -1005,7 +1030,16 @@ export const CourseGenerationSession = ({
   /** Opens a request's proposals in curriculum review mode, bound to one batch apply. */
   const previewProposalGroupInCurriculum = useCallback(
     async (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
-      if (requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals)) return;
+      if (
+        requestGenerationPending(
+          session?.tasks ?? [],
+          requestId,
+          projection.proposals,
+          projection.assetTasks,
+          omittedOptionalAssetIdsRef.current,
+        )
+      )
+        return;
       const appliedIds = new Set([
         ...appliedProposalIds,
         ...Object.entries(applicationStatusByProposalId)
@@ -1074,6 +1108,7 @@ export const CourseGenerationSession = ({
       context,
       onPreviewProposalInCurriculum,
       projection.sources,
+      projection.assetTasks,
       projection.proposals,
       session?.tasks,
       session?.records,
@@ -1410,11 +1445,13 @@ export const CourseGenerationSession = ({
             }
             onAnswer={answerQuestion}
             onAssetAction={actOnAsset}
+            omittedOptionalAssetIds={omittedOptionalAssetIds}
+            onRestoreAsset={(assetId) =>
+              setOmittedOptionalAssetIds((current) => current.filter((id) => id !== assetId))
+            }
             onSkipAsset={(assetId) =>
               setOmittedOptionalAssetIds((current) =>
-                current.includes(assetId)
-                  ? current.filter((id) => id !== assetId)
-                  : [...current, assetId],
+                current.includes(assetId) ? current : [...current, assetId],
               )
             }
           />
@@ -1432,7 +1469,13 @@ export const CourseGenerationSession = ({
   );
   const visibleTasks = (session?.tasks ?? []).filter((task) => !sourceTaskIds.has(task.taskId));
   const generationPending = (requestId: string) =>
-    requestGenerationPending(session?.tasks ?? [], requestId, projection.proposals);
+    requestGenerationPending(
+      session?.tasks ?? [],
+      requestId,
+      projection.proposals,
+      projection.assetTasks,
+      omittedOptionalAssetIds,
+    );
   const requestIdByTaskId = new Map(visibleTasks.map((task) => [task.taskId, task.requestId]));
   const proposalsByRequest = projection.proposals.reduce<Map<string, ProposalView[]>>(
     (groups, proposal) => {

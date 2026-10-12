@@ -166,13 +166,11 @@ describe("AuthoringActivityRail asset decisions", () => {
           onSkipAsset={vi.fn()}
         />,
       );
-      const retry = screen.getByRole("button", { name: "Approve retry" });
-      const skip = screen.getByRole("button", {
-        name: required ? "Required: scope change" : "Skip optional asset",
-      });
+      const retry = screen.getByRole("button", { name: "Retry image" });
+      const skip = screen.queryByRole("button", { name: "Skip image" });
       if (retryDisabled) expect(retry).toBeDisabled();
       else expect(retry).toBeEnabled();
-      if (skipDisabled) expect(skip).toBeDisabled();
+      if (skipDisabled) expect(skip).not.toBeInTheDocument();
       else expect(skip).toBeEnabled();
     },
   );
@@ -322,11 +320,11 @@ describe("AuthoringActivityRail asset decisions", () => {
     );
 
     expect(screen.getAllByText(/A safety diagram/).length).toBeGreaterThan(0);
-    await user.click(screen.getAllByRole("button", { name: "Approve retry" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Retry image" })[0]);
     expect(onAssetAction).toHaveBeenCalledWith(assetTask, "asset.retry_submission");
-    await user.click(screen.getAllByRole("button", { name: "Approve retry" })[1]);
+    await user.click(screen.getAllByRole("button", { name: "Retry image" })[1]);
     expect(onAssetAction).toHaveBeenCalledWith(retryAssetTask, "asset.retry_submission");
-    await user.click(screen.getAllByRole("button", { name: "Skip optional asset" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Skip image" })[0]);
     expect(onSkipAsset).toHaveBeenCalledWith("asset-1");
   });
 

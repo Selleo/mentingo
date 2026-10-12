@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import type { AssetRequestView } from "../courseAuthoring.types";
@@ -24,11 +25,12 @@ export function AuthoringAssetDetails({
 }) {
   const { t } = useTranslation();
   return (
-    <details className="mt-2 text-xs text-neutral-600">
-      <summary className="cursor-pointer font-medium">
+    <details className="group text-xs text-neutral-800 open:order-last open:w-full">
+      <summary className="flex cursor-pointer list-none items-center gap-1 rounded px-1 py-1 hover:text-neutral-800 [&::-webkit-details-marker]:hidden">
+        <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
         {t("courseAuthoring.activityRail.assetDetails")}
       </summary>
-      <div className="mt-2 max-h-48 space-y-2 overflow-y-auto whitespace-pre-wrap break-words">
+      <div className="mt-2 max-h-48 space-y-2 overflow-y-auto whitespace-pre-wrap break-words border-l border-neutral-200 pl-3 text-xs leading-5">
         {asset.altText && <p>{asset.altText}</p>}
         {diagnostic && <p>{diagnostic}</p>}
         <p>

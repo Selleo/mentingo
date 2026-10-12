@@ -608,12 +608,14 @@ describe("CourseGenerationSession proposal decisions", () => {
   });
 
   it.each([
-    [false, false],
-    [true, false],
-    [true, true],
+    [false, false, false, false],
+    [true, false, false, false],
+    [true, true, false, false],
+    [false, false, true, false],
+    [true, false, false, true],
   ])(
-    "passes current optional image choices to Apply (grouped: %s, restored: %s)",
-    async (grouped, restored) => {
+    "passes current optional image choices to Apply (grouped: %s, restored: %s, reopened: %s)",
+    async (grouped, restored, reopened, waiting) => {
       state.groupedReview = true;
       state.renderWork = true;
       const request: AssetRequestView = {
@@ -630,7 +632,7 @@ describe("CourseGenerationSession proposal decisions", () => {
           taskId: "image-task",
           requestId: "request-1",
           kind: "asset",
-          status: "failed",
+          status: waiting ? "waiting_author" : "failed",
           errorCode: null,
           outputId: null,
         },
@@ -644,7 +646,7 @@ describe("CourseGenerationSession proposal decisions", () => {
       ];
       const onPreviewProposalInCurriculum = vi.fn();
       const user = userEvent.setup();
-      renderWith().render(
+      const rendered = renderWith().render(
         <CourseGenerationSession
           courseId="course"
           language="en"
@@ -654,12 +656,23 @@ describe("CourseGenerationSession proposal decisions", () => {
         />,
       );
       let actions: CurriculumPreviewActions | undefined;
+      if (waiting) await user.click(screen.getByRole("button", { name: "Skip image" }));
       if (grouped) {
         await user.click(screen.getByRole("button", { name: "Review grouped changes" }));
         actions = onPreviewProposalInCurriculum.mock.calls[0][1];
       }
-      await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
-      if (restored) await user.click(screen.getByRole("button", { name: "Skip optional asset" }));
+      if (!waiting) await user.click(screen.getByRole("button", { name: "Skip image" }));
+      expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Undo skip" })).toBeVisible();
+      if (restored) await user.click(screen.getByRole("button", { name: "Undo skip" }));
+      if (reopened) {
+        rendered.unmount();
+        renderWith().render(
+          <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+        );
+        expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Undo skip" })).toBeVisible();
+      }
       if (grouped) {
         await act(async () => {
           await actions?.applyReview?.({

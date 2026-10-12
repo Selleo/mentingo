@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { requestGenerationPending } from "./authoringReviewReadiness";
 
-import type { AuthoringTask, ProposalView } from "./courseAuthoring.types";
+import type { AssetTaskView, AuthoringTask, ProposalView } from "./courseAuthoring.types";
 
 const task = (
   status: AuthoringTask["status"],
@@ -66,5 +66,47 @@ describe("request generation readiness", () => {
       ]),
     ).toBe(false);
     expect(requestGenerationPending([task("waiting_author")], "request", [proposal])).toBe(true);
+  });
+});
+
+describe("skipped optional image readiness", () => {
+  const image: AssetTaskView = {
+    taskId: "image-task",
+    parentTaskId: "task",
+    ready: false,
+    status: "waiting_author",
+    revision: 1,
+    action: "asset.retry_submission",
+    question: "Retry image?",
+    request: {
+      assetId: "image",
+      operationId: "operation",
+      purpose: "diagram",
+      required: false,
+      altText: "Diagram",
+      source: { type: "generated", content: "Diagram", visualQuery: "diagram" },
+    },
+  };
+  it("unblocks a skipped optional image but not an unskipped or required image", () => {
+    const pending = { ...task("waiting_author", "request", "asset"), taskId: "image-task" };
+    expect(requestGenerationPending([pending], "request", [proposal], [image])).toBe(true);
+    expect(requestGenerationPending([pending], "request", [proposal], [image], ["image"])).toBe(
+      false,
+    );
+    expect(
+      requestGenerationPending(
+        [pending],
+        "request",
+        [proposal],
+        [{ ...image, request: { ...image.request, required: true } }],
+        ["image"],
+      ),
+    ).toBe(true);
+  });
+  it("does not unblock lesson work through a matching omission", () => {
+    const pending = { ...task("running"), taskId: "image-task" };
+    expect(requestGenerationPending([pending], "request", [proposal], [image], ["image"])).toBe(
+      true,
+    );
   });
 });
