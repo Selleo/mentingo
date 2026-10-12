@@ -6517,6 +6517,9 @@
       "required": "Povinné",
       "optional": "Volitelné",
       "assetDecisionFallback": "Tento prvek vyžaduje explicitní rozhodnutí.",
+      "generatedVisualTitle": "Generovaný obrázek",
+      "assetDetails": "Podrobnosti",
+      "retryApprovalExplanation": "Poskytovatel mohl přijmout předchozí požadavek. Opakování může znamenat další poplatek, proto vyžaduje váš souhlas.",
       "assetStatus": {
         "queued": "ve frontě",
         "running": "běží",

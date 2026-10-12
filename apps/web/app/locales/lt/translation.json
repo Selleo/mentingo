@@ -6512,6 +6512,9 @@
       "required": "Privaloma",
       "optional": "Neprivaloma",
       "assetDecisionFallback": "Šiam turtui reikia aiškaus sprendimo.",
+      "generatedVisualTitle": "Generuojama iliustracija",
+      "assetDetails": "Išsami informacija",
+      "retryApprovalExplanation": "Teikėjas galėjo priimti ankstesnę užklausą. Bandant dar kartą gali būti taikomas papildomas mokestis, todėl reikia jūsų sutikimo.",
       "assetStatus": {
         "queued": "eilėje",
         "running": "vykdoma",

@@ -28,6 +28,7 @@ import {
   canRetryAuthoringTask,
 } from "../authoringTaskFailure";
 
+import { AuthoringAssetDetails, AuthoringAssetTitle } from "./AuthoringAssetDetails";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
 import { AuthoringSourceChipRow } from "./AuthoringSourceCitation";
 
@@ -1051,15 +1052,12 @@ export const AuthoringActivityRail = ({
       )}
 
       {assetTasks.some((asset) => ["waiting_author", "failed"].includes(asset.status)) && (
-        <section className="rounded-xl border border-warning-200 bg-warning-50 p-4">
+        <section className="rounded-xl border border-warning-200 bg-warning-50 p-3">
           <div className="flex items-center gap-2 text-warning-900">
             <AlertCircle className="size-4" />
             <h2 className="font-semibold">{t("courseAuthoring.activityRail.assetDecisions")}</h2>
           </div>
-          <p className="mt-1 text-xs leading-5 text-warning-900">
-            {t("courseAuthoring.activityRail.assetGuidance")}
-          </p>
-          <div className="mt-3 space-y-3">
+          <div className="mt-2 space-y-2">
             {assetTasks
               .filter((asset) => ["waiting_author", "failed"].includes(asset.status))
               .map((asset) => {
@@ -1067,9 +1065,9 @@ export const AuthoringActivityRail = ({
                 return (
                   <div key={asset.taskId} className="rounded-lg bg-white p-3">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-medium">{asset.request.altText}</p>
+                      <div className="min-w-0 flex-1">
+                        <AuthoringAssetTitle asset={asset.request} />
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
                           <Badge
                             variant={asset.request.required ? "blocked" : "secondaryWithOutline"}
                             className="text-[10px]"
@@ -1082,21 +1080,20 @@ export const AuthoringActivityRail = ({
                           </Badge>
                         </div>
                         <p className="mt-1 text-xs text-neutral-600">
-                          {asset.question ??
-                            t("courseAuthoring.activityRail.assetDecisionFallback")}
+                          {t(
+                            asset.action === "asset.retry_submission"
+                              ? "courseAuthoring.activityRail.retryApprovalExplanation"
+                              : "courseAuthoring.activityRail.assetDecisionFallback",
+                          )}
                         </p>
                       </div>
-                      <Badge variant="inProgress" className="text-[10px]">
+                      <Badge variant="inProgress" className="shrink-0 text-[10px]">
                         {t(
                           `courseAuthoring.activityRail.assetStatus.${taskStatusKey(asset.status)}`,
                         )}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-xs text-neutral-700">
-                      {t("courseAuthoring.activityRail.generatedVisual", {
-                        content: asset.request.source.content,
-                      })}
-                    </p>
+                    <AuthoringAssetDetails asset={asset.request} diagnostic={asset.question} />
                     <div className="mt-3 flex flex-wrap justify-end gap-2">
                       <Button
                         type="button"

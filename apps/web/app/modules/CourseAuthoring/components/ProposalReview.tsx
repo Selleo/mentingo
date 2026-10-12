@@ -38,6 +38,7 @@ import {
   PROPOSAL_APPLICATION_STATUS,
 } from "../review/curriculumReview.constants";
 
+import { AuthoringAssetDetails, AuthoringAssetTitle } from "./AuthoringAssetDetails";
 import { AuthoringLivePreview } from "./AuthoringLivePreview";
 import { AuthoringOperationPreview } from "./AuthoringOperationPreview";
 import { AuthoringRequestHistory } from "./AuthoringRequestHistory";
@@ -1082,8 +1083,8 @@ export const ProposalReview = ({
                 >
                   <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium">{asset.altText}</p>
+                      <AuthoringAssetTitle asset={asset} />
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         <Badge
                           variant={asset.required ? "blocked" : "secondaryWithOutline"}
                           className="text-[10px]"
@@ -1110,11 +1111,7 @@ export const ProposalReview = ({
                           }),
                         })}
                       </p>
-                      <p className="mt-2 text-xs text-neutral-700">
-                        {t("courseAuthoring.activityRail.generatedVisual", {
-                          content: asset.source.content,
-                        })}
-                      </p>
+                      <AuthoringAssetDetails asset={asset} />
                     </div>
                     {!asset.required && (
                       <div className="flex shrink-0 items-start gap-2 text-xs text-neutral-700">

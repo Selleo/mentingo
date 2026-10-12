@@ -6529,6 +6529,9 @@
       "required": "Required",
       "optional": "Optional",
       "assetDecisionFallback": "This asset needs an explicit decision.",
+      "generatedVisualTitle": "Generated visual",
+      "assetDetails": "Details",
+      "retryApprovalExplanation": "The provider may have accepted the previous request. Retrying could charge you again, so your approval is required.",
       "assetStatus": {
         "queued": "queued",
         "running": "running",

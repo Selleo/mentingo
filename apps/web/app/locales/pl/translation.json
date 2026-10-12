@@ -6574,6 +6574,9 @@
       "required": "Wymagane",
       "optional": "Opcjonalne",
       "assetDecisionFallback": "Ten materiał wymaga Twojej decyzji.",
+      "generatedVisualTitle": "Generowana grafika",
+      "assetDetails": "Szczegóły",
+      "retryApprovalExplanation": "Dostawca mógł przyjąć poprzednie zlecenie. Ponowienie może naliczyć kolejną opłatę, dlatego wymaga Twojej zgody.",
       "assetStatus": {
         "queued": "w kolejce",
         "running": "w trakcie",

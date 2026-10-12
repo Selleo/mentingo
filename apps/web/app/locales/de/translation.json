@@ -6504,6 +6504,9 @@
       "required": "Erforderlich",
       "optional": "Optional",
       "assetDecisionFallback": "Für dieses Medium ist Ihre Entscheidung erforderlich.",
+      "generatedVisualTitle": "Generierte Grafik",
+      "assetDetails": "Details",
+      "retryApprovalExplanation": "Der Anbieter könnte die vorherige Anfrage angenommen haben. Ein erneuter Versuch kann weitere Kosten verursachen und erfordert daher Ihre Zustimmung.",
       "assetStatus": {
         "queued": "in der Warteschlange",
         "running": "wird ausgeführt",

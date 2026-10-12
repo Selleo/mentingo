@@ -1,7 +1,8 @@
-import { screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { AuthoringActivityRail, AuthoringToolActivity } from "./AuthoringActivityRail";
@@ -43,6 +44,139 @@ const retryAssetTask: AssetTaskView = {
 };
 
 describe("AuthoringActivityRail asset decisions", () => {
+  it("explains paid retry approval in Polish while retaining the provider message in Details", async () => {
+    await i18next.changeLanguage("pl");
+    try {
+      renderWith().render(
+        <AuthoringActivityRail
+          tasks={[]}
+          questions={[]}
+          assetTasks={[assetTask]}
+          applications={[]}
+          connection="live"
+          onRetry={vi.fn()}
+          onStopRequest={vi.fn()}
+          onAnswer={vi.fn()}
+          onAssetAction={vi.fn()}
+          onSkipAsset={vi.fn()}
+        />,
+      );
+      expect(screen.getByText(/Ponowienie może naliczyć kolejną opłatę/)).toBeVisible();
+      expect(screen.getByText("Szczegóły")).toBeVisible();
+      expect(screen.getByText(assetTask.question!)).not.toBeVisible();
+    } finally {
+      await act(async () => {
+        await i18next.changeLanguage("en");
+      });
+    }
+  });
+
+  it("keeps long descriptions and provider diagnostics behind Details until opened", async () => {
+    const user = userEvent.setup();
+    const longTitle =
+      "A detailed timeline of the historical development of artificial intelligence. ".repeat(5);
+    const prompt = "Create a large timeline with milestones and full explanations.";
+    const diagnostic = "The provider may have accepted the request without returning a receipt.";
+    renderWith().render(
+      <AuthoringActivityRail
+        tasks={[]}
+        questions={[]}
+        assetTasks={[
+          {
+            ...assetTask,
+            question: diagnostic,
+            request: {
+              ...assetTask.request,
+              altText: longTitle,
+              source: { ...assetTask.request.source, content: prompt },
+            },
+          },
+        ]}
+        applications={[]}
+        connection="live"
+        onRetry={vi.fn()}
+        onStopRequest={vi.fn()}
+        onAnswer={vi.fn()}
+        onAssetAction={vi.fn()}
+        onSkipAsset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Generated visual")).toBeVisible();
+    expect(screen.getByText(/Retrying could charge you again/)).toBeVisible();
+    expect(screen.getByText(longTitle.trim())).not.toBeVisible();
+    expect(screen.getByText(diagnostic)).not.toBeVisible();
+    expect(screen.getByText(`Generated visual: ${prompt}`)).not.toBeVisible();
+    await user.click(screen.getByText("Details"));
+    expect(screen.getByText(longTitle.trim())).toBeVisible();
+    expect(screen.getByText(diagnostic)).toBeVisible();
+    expect(screen.getByText(`Generated visual: ${prompt}`)).toBeVisible();
+  });
+
+  it.each([
+    {
+      required: true,
+      revision: 3,
+      action: "asset.retry_submission" as const,
+      busy: false,
+      retryDisabled: false,
+      skipDisabled: true,
+    },
+    {
+      required: false,
+      revision: null,
+      action: "asset.retry_submission" as const,
+      busy: false,
+      retryDisabled: true,
+      skipDisabled: false,
+    },
+    {
+      required: false,
+      revision: 3,
+      action: null,
+      busy: false,
+      retryDisabled: true,
+      skipDisabled: false,
+    },
+    {
+      required: false,
+      revision: 3,
+      action: "asset.retry_submission" as const,
+      busy: true,
+      retryDisabled: true,
+      skipDisabled: false,
+    },
+  ])(
+    "preserves the retry and skip gates: %j",
+    ({ required, revision, action, busy, retryDisabled, skipDisabled }) => {
+      renderWith().render(
+        <AuthoringActivityRail
+          busy={busy}
+          tasks={[]}
+          questions={[]}
+          assetTasks={[
+            { ...assetTask, revision, action, request: { ...assetTask.request, required } },
+          ]}
+          applications={[]}
+          connection="live"
+          onRetry={vi.fn()}
+          onStopRequest={vi.fn()}
+          onAnswer={vi.fn()}
+          onAssetAction={vi.fn()}
+          onSkipAsset={vi.fn()}
+        />,
+      );
+      const retry = screen.getByRole("button", { name: "Approve retry" });
+      const skip = screen.getByRole("button", {
+        name: required ? "Required: scope change" : "Skip optional asset",
+      });
+      if (retryDisabled) expect(retry).toBeDisabled();
+      else expect(retry).toBeEnabled();
+      if (skipDisabled) expect(skip).toBeDisabled();
+      else expect(skip).toBeEnabled();
+    },
+  );
+
   it("shows web research as the only live-work step while it is running", () => {
     renderWith().render(
       <AuthoringActivityRail

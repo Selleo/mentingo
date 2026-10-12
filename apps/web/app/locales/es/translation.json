@@ -6460,6 +6460,9 @@
       "required": "Obligatorio",
       "optional": "Opcional",
       "assetDecisionFallback": "Este recurso necesita una decisión explícita.",
+      "generatedVisualTitle": "Imagen generada",
+      "assetDetails": "Detalles",
+      "retryApprovalExplanation": "El proveedor puede haber aceptado la solicitud anterior. Reintentarlo podría generar otro cargo, por lo que requiere tu aprobación.",
       "assetStatus": {
         "queued": "en cola",
         "running": "en curso",

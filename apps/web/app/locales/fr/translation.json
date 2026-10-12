@@ -6253,6 +6253,9 @@
       "required": "Requise",
       "optional": "Facultative",
       "assetDecisionFallback": "Cette ressource nécessite une décision explicite.",
+      "generatedVisualTitle": "Illustration générée",
+      "assetDetails": "Détails",
+      "retryApprovalExplanation": "Le fournisseur a peut-être accepté la demande précédente. Réessayer pourrait entraîner un nouveau paiement et nécessite donc votre accord.",
       "assetStatus": {
         "queued": "en file d’attente",
         "running": "en cours",
