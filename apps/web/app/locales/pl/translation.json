@@ -7025,6 +7025,8 @@
     "title": "Symulacje phishingowe",
     "description": "Prowadź kontrolowane ćwiczenia i przypisuj szkolenia po ryzykownych działaniach.",
     "newCampaign": "Nowa kampania",
+    "details": "Szczegóły kampanii",
+    "audience": "Odbiorcy",
     "loading": "Ładowanie…",
     "retry": "Spróbuj ponownie",
     "unavailable": "Symulacje phishingowe nie są włączone dla tej organizacji. Skontaktuj się z administratorem.",
@@ -7045,6 +7047,8 @@
     "schedule": "Rozłóż wysyłkę losowo w przedziale czasu",
     "start": "Początek (czas lokalny)",
     "end": "Koniec (czas lokalny)",
+    "startTooltip": "Najwcześniejszy moment wysyłki wiadomości symulacyjnych, w Twoim czasie lokalnym.",
+    "endTooltip": "Najpóźniejszy moment wysyłki wiadomości symulacyjnych, w Twoim czasie lokalnym. Okno może trwać maksymalnie 30 dni.",
     "review": "Sprawdź kampanię",
     "reviewAudience": "{{people}} unikalnych odbiorców wśród wybranych osób i {{groups}} grup. Członkostwo jest ponownie sprawdzane przy uruchomieniu.",
     "authorization": "Uruchamiając kampanię, potwierdzasz zgodę organizacji na ćwiczenie. Po uruchomieniu nie można zmienić odbiorców ani kursu.",
@@ -7076,7 +7080,13 @@
       "sent": "Wysłane (przyjęte przez SMTP)",
       "clicked": "Kliknięcia",
       "submitted": "Próby wysłania",
-      "courseStatus": "Status kursu"
+      "courseStatus": "Status kursu",
+      "name": "Kampania",
+      "status": "Status",
+      "sendWindow": "Okno wysyłki",
+      "group": "Grupa",
+      "atRisk": "Zagrożeni",
+      "riskRate": "Wskaźnik ryzyka"
     },
     "status": {
       "scheduled": "Zaplanowana",

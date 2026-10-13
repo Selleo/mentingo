@@ -263,7 +263,7 @@ export const getNavigationConfig = (
               {
                 label: t("phishing.title"),
                 path: "phishing",
-                iconName: "Email",
+                iconName: "MailWarning",
                 accessRequirement: routeAccessConfig.phishing,
               },
             ],

@@ -6960,6 +6960,8 @@
     "title": "Sukčiavimo el. paštu simuliacijos",
     "description": "Vykdykite kontroliuojamas pratybas ir skirkite mokymus po rizikingų veiksmų.",
     "newCampaign": "Nauja kampanija",
+    "details": "Kampanijos informacija",
+    "audience": "Auditorija",
     "loading": "Įkeliama…",
     "retry": "Bandyti dar kartą",
     "unavailable": "Šiai organizacijai simuliacijos neįjungtos. Kreipkitės į administratorių.",
@@ -6980,6 +6982,8 @@
     "schedule": "Siųsti atsitiktinai pasirinktu laikotarpiu",
     "start": "Pradžia (vietos laiku)",
     "end": "Pabaiga (vietos laiku)",
+    "startTooltip": "Anksčiausias laikas, kada gali būti siunčiami simuliaciniai el. laiškai, jūsų vietos laiku.",
+    "endTooltip": "Vėliausias laikas, kada gali būti siunčiami simuliaciniai el. laiškai, jūsų vietos laiku. Laikotarpis gali trukti iki 30 dienų.",
     "review": "Peržiūrėti kampaniją",
     "reviewAudience": "{{people}} unikalių gavėjų iš pasirinktų asmenų ir {{groups}} grupių. Narystė dar kartą tikrinama paleidžiant.",
     "authorization": "Paleisdami patvirtinate organizacijos leidimą vykdyti pratybas. Vėliau gavėjų ir kurso keisti negalima.",
@@ -7011,7 +7015,13 @@
       "sent": "Išsiųsta (SMTP priimta)",
       "clicked": "Paspausta",
       "submitted": "Pateikta",
-      "courseStatus": "Kurso būsena"
+      "courseStatus": "Kurso būsena",
+      "name": "Kampanija",
+      "status": "Būsena",
+      "sendWindow": "Siuntimo laikotarpis",
+      "group": "Grupė",
+      "atRisk": "Rizikoje",
+      "riskRate": "Rizikos rodiklis"
     },
     "status": {
       "scheduled": "Suplanuota",

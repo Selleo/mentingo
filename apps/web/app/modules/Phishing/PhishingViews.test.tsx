@@ -121,36 +121,45 @@ describe("Phishing design system", () => {
     expect(source).not.toMatch(/<p role="(status|alert)"/);
     expect(source).toContain("PhishingLoading");
     expect(source).toContain("PhishingError");
-    expect(source).toContain("<Card");
+    expect(source).toContain("PageWrapper");
+    expect(source).toMatch(/<(Card|Table)\b/);
   });
   it("presents capability loading with a design-system skeleton", () => {
     fixtures.gate.isPending = true;
     render(
-      <PhishingGate>
-        <span>Privileged</span>
-      </PhishingGate>,
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PhishingGate>
+          <span>Privileged</span>
+        </PhishingGate>
+      </MemoryRouter>,
     );
     expect(screen.getByRole("status").querySelector(".animate-pulse")).not.toBeNull();
   });
-  it("presents capability errors in a destructive alert with retry", async () => {
+  it("presents capability errors on the shared error page with retry", async () => {
     fixtures.gate.isError = true;
     render(
-      <PhishingGate>
-        <span>Privileged</span>
-      </PhishingGate>,
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PhishingGate>
+          <span>Privileged</span>
+        </PhishingGate>
+      </MemoryRouter>,
     );
-    expect(screen.getByRole("alert")).toHaveClass("border-destructive/50");
+    expect(screen.getByRole("heading", { name: "phishing.serviceError" })).toBeInTheDocument();
+    expect(screen.queryByText("Privileged")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "phishing.retry" }));
     expect(fixtures.refetch).toHaveBeenCalledOnce();
   });
-  it("presents unavailable capability in an empty-state card", () => {
+  it("presents unavailable capability in an empty state", () => {
     fixtures.gate.data.enabled = false;
     render(
-      <PhishingGate>
-        <span>Privileged</span>
-      </PhishingGate>,
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PhishingGate>
+          <span>Privileged</span>
+        </PhishingGate>
+      </MemoryRouter>,
     );
-    expect(screen.getByText("phishing.unavailable").closest(".bg-card")).not.toBeNull();
+    expect(screen.getByText("phishing.unavailable")).toHaveClass("border-dashed");
+    expect(screen.queryByText("Privileged")).not.toBeInTheDocument();
   });
   it("requires an accessible modal confirmation before cancellation", async () => {
     render(
@@ -182,13 +191,14 @@ describe("Phishing design system", () => {
     expect(screen.getByRole("table", { name: "phishing.people" })).toHaveClass("caption-bottom");
     expect(screen.getByText("phishing.metrics.recipients").closest(".bg-card")).not.toBeNull();
   });
-  it("uses design-system cards and badges in the campaign list", () => {
+  it("uses the design-system table and status badges in the campaign list", () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <PhishingPage />
       </MemoryRouter>,
     );
-    expect(screen.getByText("Example campaign").closest(".bg-card")).not.toBeNull();
+    expect(screen.getByRole("table", { name: "phishing.title" })).toHaveClass("border");
+    expect(screen.getByText("Example campaign").closest("tr")).toHaveAttribute("tabindex", "0");
     expect(screen.getByText("phishing.status.scheduled")).toHaveClass("rounded-lg");
   });
   it("removes selected recipients without submitting the form and names the removal", async () => {
@@ -224,7 +234,10 @@ describe("Phishing design system", () => {
   it("can enable scheduling without remounting or crashing the form", async () => {
     showCreate();
     await userEvent.click(screen.getByRole("checkbox"));
-    expect(screen.getByLabelText("phishing.start")).toBeVisible();
+    expect(screen.getByText("phishing.start")).toBeVisible();
+    expect(screen.getByText("phishing.end")).toBeVisible();
+    expect(document.querySelector('input[type="datetime-local"]')).toBeNull();
+    expect(screen.getAllByRole("button", { name: "common.other.selectDate" })).toHaveLength(2);
   });
   it("offers accessible custom scenario, course and searchable audience controls", () => {
     showCreate();

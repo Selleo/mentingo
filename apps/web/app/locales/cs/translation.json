@@ -6965,6 +6965,8 @@
     "title": "Phishingové simulace",
     "description": "Provádějte řízená cvičení a po rizikovém jednání přiřazujte školení.",
     "newCampaign": "Nová kampaň",
+    "details": "Podrobnosti kampaně",
+    "audience": "Příjemci",
     "loading": "Načítání…",
     "retry": "Zkusit znovu",
     "unavailable": "Phishingové simulace nejsou pro tuto organizaci zapnuté. Kontaktujte správce.",
@@ -6985,6 +6987,8 @@
     "schedule": "Rozložit odesílání náhodně do časového okna",
     "start": "Začátek (místní čas)",
     "end": "Konec (místní čas)",
+    "startTooltip": "Nejdřívější okamžik odeslání simulačních e-mailů ve vašem místním čase.",
+    "endTooltip": "Nejpozdější okamžik odeslání simulačních e-mailů ve vašem místním čase. Okno může trvat nejvýše 30 dní.",
     "review": "Zkontrolovat kampaň",
     "reviewAudience": "{{people}} jedinečných příjemců z vybraných osob a {{groups}} skupin. Členství se při spuštění znovu ověří.",
     "authorization": "Spuštěním potvrzujete souhlas organizace s cvičením. Příjemce ani kurz poté nelze změnit.",
@@ -7016,7 +7020,13 @@
       "sent": "Odesláno (přijato SMTP)",
       "clicked": "Kliknutí",
       "submitted": "Odeslání formuláře",
-      "courseStatus": "Stav kurzu"
+      "courseStatus": "Stav kurzu",
+      "name": "Kampaň",
+      "status": "Stav",
+      "sendWindow": "Okno odeslání",
+      "group": "Skupina",
+      "atRisk": "Ohrožení",
+      "riskRate": "Míra rizika"
     },
     "status": {
       "scheduled": "Naplánováno",
