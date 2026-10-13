@@ -98,9 +98,12 @@ export class ReportsExportsService {
     return this.getExportDownload(record);
   }
 
-  async processExportGenerationJob(data: ReportExportJobData): Promise<void> {
+  async processExportGenerationJob(
+    data: ReportExportJobData,
+    isFinalAttempt = true,
+  ): Promise<void> {
     await this.tenantDbRunnerService.runWithTenant(data.tenantId, () =>
-      this.generateExportArtifact(data),
+      this.generateExportArtifact(data, isFinalAttempt),
     );
   }
 
@@ -211,6 +214,7 @@ export class ReportsExportsService {
     if (actualFingerprint !== record.accessFingerprint) {
       throw new ForbiddenException(REPORT_ERRORS.EXPORT_ACCESS_CHANGED);
     }
+    await this.reportsQueryService.validateReportAccess(record.query, actor);
   }
 
   private assertExportReadyForDownload(
@@ -253,10 +257,13 @@ export class ReportsExportsService {
     };
   }
 
-  private async generateExportArtifact(data: ReportExportJobData): Promise<void> {
+  private async generateExportArtifact(
+    data: ReportExportJobData,
+    isFinalAttempt: boolean,
+  ): Promise<void> {
     const claim = await this.claimExportForProcessing(data);
     if (!claim) return;
-    await this.generateClaimedExportArtifact(claim, data);
+    await this.generateClaimedExportArtifact(claim, data, isFinalAttempt);
   }
 
   private async claimExportForProcessing(
@@ -291,6 +298,7 @@ export class ReportsExportsService {
   private async generateClaimedExportArtifact(
     claim: ReportExportClaim,
     data: ReportExportJobData,
+    isFinalAttempt: boolean,
   ): Promise<void> {
     const stopHeartbeat = this.startExportProcessingHeartbeat(claim);
     let artifactKey: string | undefined;
@@ -314,7 +322,7 @@ export class ReportsExportsService {
       }
       await this.enqueueExportExpirationJob(data);
     } catch (error) {
-      await this.failClaimedExport(claim, artifactKey, error);
+      await this.failClaimedExport(claim, artifactKey, error, isFinalAttempt);
       throw error;
     } finally {
       stopHeartbeat();
@@ -340,6 +348,7 @@ export class ReportsExportsService {
     claim: ReportExportClaim,
     artifactKey: string | undefined,
     error: unknown,
+    isFinalAttempt: boolean,
   ): Promise<void> {
     if (artifactKey) await this.tryDeleteExportArtifact(artifactKey);
     await this.reportsExportsRepository.failClaim(
@@ -347,6 +356,7 @@ export class ReportsExportsService {
       claim.record.id,
       claim.token,
       REPORT_FAILURE_CODE.EXPORT_FAILED,
+      isFinalAttempt,
     );
     this.logExportGenerationFailure(claim.record.id, error);
   }

@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 
 import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import readXlsxFile from "read-excel-file/node";
 import request from "supertest";
 
@@ -11,11 +11,20 @@ import { ReportsExportsCron } from "src/report/reports-exports.cron";
 import { ReportsExportsService } from "src/report/reports-exports.service";
 import { S3Service } from "src/s3/s3.service";
 import { DB } from "src/storage/db/db.providers";
-import { groupManagerGroups, groupUsers, reportsExports, studentCourses } from "src/storage/schema";
+import {
+  groupManagerGroups,
+  groupUsers,
+  learningPathCourses,
+  reportsExports,
+  studentCourses,
+  studentLearningPathCourses,
+  studentLearningPaths,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
+import { createLearningPathFactory } from "../../../test/factory/learningPath.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor } from "../../../test/helpers/test-helpers";
@@ -175,6 +184,109 @@ describe("Report exports (e2e)", () => {
     courseIds.forEach((_, index) => expect(records).toContain(`Export course ${index + 1}`));
     expect(summary).toContain("Learning report");
   });
+
+  it("revokes a path export when its last managed learner is unenrolled", async () => {
+    const path = await createLearningPathFactory(db).create({
+      authorId: admin.id,
+      title: { en: "Revoked path" },
+      baseLanguage: "en",
+      availableLocales: ["en"],
+    });
+    await db
+      .insert(learningPathCourses)
+      .values({ learningPathId: path.id, courseId: courseIds[0], displayOrder: 0 });
+    await db
+      .insert(studentLearningPaths)
+      .values({ studentId: learner.id, learningPathId: path.id, progress: "in_progress" });
+    await db
+      .insert(studentLearningPathCourses)
+      .values({ studentId: learner.id, learningPathId: path.id, courseId: courseIds[0] });
+    const query = { ...baseQuery([groupId]), view: "developmentPaths", subjectId: path.id };
+    const created = await request(app.getHttpServer())
+      .post("/api/report/exports")
+      .set("Cookie", managerCookie)
+      .send({ format: "xlsx", language: "en", query })
+      .expect(201);
+    await app.get(ReportsExportsService).processExportGenerationJob(jobs[jobs.length - 1]);
+    await request(app.getHttpServer())
+      .get(`/api/report/exports/${created.body.data.id}/download`)
+      .set("Cookie", managerCookie)
+      .expect(200);
+
+    await db
+      .delete(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.studentId, learner.id),
+          eq(studentLearningPathCourses.learningPathId, path.id),
+        ),
+      );
+    await db
+      .delete(studentLearningPaths)
+      .where(
+        and(
+          eq(studentLearningPaths.studentId, learner.id),
+          eq(studentLearningPaths.learningPathId, path.id),
+        ),
+      );
+
+    await request(app.getHttpServer())
+      .post("/api/report/query")
+      .set("Cookie", managerCookie)
+      .send(query)
+      .expect(403);
+    await request(app.getHttpServer())
+      .get(`/api/report/exports/${created.body.data.id}/download`)
+      .set("Cookie", managerCookie)
+      .expect(403);
+    await request(app.getHttpServer())
+      .get(`/api/report/exports/${created.body.data.id}`)
+      .set("Cookie", managerCookie)
+      .expect(403);
+  });
+
+  it.each([false, true])(
+    "keeps polling possible between retries, final failure=%s",
+    async (failAgain) => {
+      const created = await request(app.getHttpServer())
+        .post("/api/report/exports")
+        .set("Cookie", adminCookie)
+        .send({ format: "xlsx", language: "en", query: baseQuery([groupId]) })
+        .expect(201);
+      const job = jobs[jobs.length - 1];
+      const service = app.get(ReportsExportsService);
+      beforeUploadCompletes = async () => {
+        throw new Error("temporary upload failure");
+      };
+      try {
+        await expect(service.processExportGenerationJob(job, false)).rejects.toThrow(
+          "temporary upload failure",
+        );
+        const pending = await request(app.getHttpServer())
+          .get(`/api/report/exports/${created.body.data.id}`)
+          .set("Cookie", adminCookie)
+          .expect(200);
+        expect(pending.body.data).toMatchObject({ status: "pending", failureCode: null });
+        expect([...artifacts.keys()].some((key) => key.includes(job.exportId))).toBe(false);
+
+        if (failAgain) {
+          await expect(service.processExportGenerationJob(job, true)).rejects.toThrow(
+            "temporary upload failure",
+          );
+        } else {
+          beforeUploadCompletes = undefined;
+          await service.processExportGenerationJob(job, true);
+        }
+        const terminal = await request(app.getHttpServer())
+          .get(`/api/report/exports/${created.body.data.id}`)
+          .set("Cookie", adminCookie)
+          .expect(200);
+        expect(terminal.body.data.status).toBe(failAgain ? "failed" : "completed");
+      } finally {
+        beforeUploadCompletes = undefined;
+      }
+    },
+  );
 
   it("denies a manager's completed export after their group membership scope narrows", async () => {
     const created = await request(app.getHttpServer())

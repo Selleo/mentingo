@@ -41,8 +41,8 @@ export function ReportResultsTable({
 }: ReportResultsTableProps) {
   const { t } = useTranslation();
   const columns = useMemo(
-    () => getReportResultColumns(t, view, result.rows, language),
-    [t, view, result.rows, language],
+    () => getReportResultColumns(t, view, result.rows, language, timezone),
+    [t, view, result.rows, language, timezone],
   );
   const table = useReactTable({
     getRowId: (row) => row.id,

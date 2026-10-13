@@ -175,12 +175,13 @@ export class ReportsExportsRepository {
     exportId: UUIDType,
     token: string,
     failureCode: string,
+    isFinalAttempt = true,
   ): Promise<void> {
     await this.db
       .update(reportsExports)
       .set({
-        status: REPORT_EXPORT_STATUS.FAILED,
-        failureCode,
+        status: isFinalAttempt ? REPORT_EXPORT_STATUS.FAILED : REPORT_EXPORT_STATUS.PENDING,
+        failureCode: isFinalAttempt ? failureCode : null,
         artifactKey: null,
         processingToken: null,
       })

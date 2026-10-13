@@ -41,6 +41,7 @@ export class ReportsExportWorker implements OnModuleDestroy {
       return;
     }
 
-    await reportsExportsService.processExportGenerationJob(job.data);
+    const isFinalAttempt = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
+    await reportsExportsService.processExportGenerationJob(job.data, isFinalAttempt);
   }
 }

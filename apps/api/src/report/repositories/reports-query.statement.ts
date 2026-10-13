@@ -328,8 +328,17 @@ function buildBreakdownCtes(context: ReportStatementContext): SQL {
           group_breakdown AS (
             SELECT gu.group_id::text AS id,
               ${context.localizedGroupName} AS label,
-              COUNT(DISTINCT f.learner_id)::int AS learners, COUNT(*)::int AS course_enrollments,
-              COUNT(*) FILTER (WHERE f.status = 'completed')::int AS course_completions
+              COUNT(DISTINCT f.learner_id)::int AS learners,
+              ${
+                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
+                  ? sql`COALESCE(SUM(jsonb_array_length(f.path_courses)), 0)::int`
+                  : sql`COUNT(*)::int`
+              } AS course_enrollments,
+              ${
+                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
+                  ? sql`COALESCE(SUM((SELECT COUNT(*) FROM jsonb_array_elements(f.path_courses) pc WHERE pc ->> 'status' = 'completed')), 0)::int`
+                  : sql`COUNT(*) FILTER (WHERE f.status = 'completed')::int`
+              } AS course_completions
             FROM filtered f JOIN group_users gu ON gu.tenant_id = f.tenant_id AND gu.user_id = f.learner_id
               AND gu.group_id = ANY(${uuidArray(context.authorizedGroupIds)})
             JOIN groups g ON g.id = gu.group_id AND g.tenant_id = gu.tenant_id

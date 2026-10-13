@@ -1,6 +1,7 @@
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 
+import { REPORT_FAILURE_CODE } from "./constants/reports.constants";
 import { REPORT_ERRORS } from "./constants/reports.errors";
 import { ReportsExportsService } from "./reports-exports.service";
 
@@ -159,4 +160,89 @@ describe("ReportsExportsService", () => {
     );
     expect(getFileStream).not.toHaveBeenCalled();
   });
+
+  it.each(["downloadExport", "getExportStatus"] as const)(
+    "revalidates query references in %s even when the access fingerprint is unchanged",
+    async (method) => {
+      const record = {
+        id: "4b632420-18ee-4c2a-87b4-509ad413a190",
+        query: { ...query, view: "developmentPaths", subjectId: "removed-path" },
+        accessFingerprint: "same-access",
+      };
+      const validateReportAccess = jest.fn().mockRejectedValue(new ForbiddenException());
+      const getFileStream = jest.fn();
+      const service = makeService(
+        {
+          findForActor: jest.fn().mockResolvedValue(record),
+          findActorIdentity: jest.fn().mockResolvedValue({
+            id: actor.userId,
+            email: actor.email,
+            tenantId: actor.tenantId,
+          }),
+        },
+        {},
+        {
+          getReportAccessFingerprint: jest.fn().mockResolvedValue("same-access"),
+          validateReportAccess,
+        },
+        { getFileStream },
+      );
+
+      await expect(service[method](record.id, actor)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(validateReportAccess).toHaveBeenCalledWith(
+        record.query,
+        expect.objectContaining({ userId: actor.userId }),
+      );
+      expect(getFileStream).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([false, true])(
+    "releases a failed attempt with isFinalAttempt=%s",
+    async (isFinalAttempt) => {
+      const record = {
+        id: "4b632420-18ee-4c2a-87b4-509ad413a190",
+        tenantId: actor.tenantId,
+        status: "pending",
+        query,
+        accessFingerprint: "same-access",
+      };
+      const failure = new Error("temporary query failure");
+      const failClaim = jest.fn();
+      const service = makeService(
+        {
+          findForJob: jest.fn().mockResolvedValue(record),
+          claim: jest.fn().mockResolvedValue(true),
+          failClaim,
+          findActorIdentity: jest
+            .fn()
+            .mockResolvedValue({ id: actor.userId, email: actor.email, tenantId: actor.tenantId }),
+        },
+        {},
+        {
+          validateReportAccess: jest.fn(),
+          getReportAccessFingerprint: jest.fn().mockResolvedValue("same-access"),
+          getAllReportRows: jest.fn().mockRejectedValue(failure),
+        },
+      );
+      await expect(
+        service.processExportGenerationJob(
+          {
+            tenantId: actor.tenantId,
+            actorId: actor.userId,
+            exportId: record.id,
+            action: "generate",
+          },
+          isFinalAttempt,
+        ),
+      ).rejects.toBe(failure);
+      expect(failClaim).toHaveBeenCalledWith(
+        actor.tenantId,
+        record.id,
+        expect.any(String),
+        REPORT_FAILURE_CODE.EXPORT_FAILED,
+        isFinalAttempt,
+      );
+    },
+  );
 });

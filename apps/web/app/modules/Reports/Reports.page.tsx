@@ -793,7 +793,7 @@ export default function ReportsPage() {
                   groups: applied.groupIds.length,
                 })}
                 {result &&
-                  ` · ${t("reports.results.generatedAt", { date: formatReportDate(result.capturedAt, language) })}`}
+                  ` · ${t("reports.results.generatedAt", { date: formatReportDate(result.capturedAt, language, currentTimezone) })}`}
               </p>
             </div>
             {renderResults()}

@@ -254,6 +254,15 @@ describe("Reports (e2e)", () => {
     expect(path.rows[0].status).toBe("inProgress");
     expect(path.rows[0].progress).toBe(50);
     expect(path.rows[0].pathCourses).toHaveLength(2);
+    expect(path.metrics.courseCompletionRate).toBe(50);
+    expect(path.breakdowns.groups.map(({ id }) => id).sort()).toEqual([salesId, managersId].sort());
+    for (const group of path.breakdowns.groups) {
+      expect(group).toMatchObject({
+        courseEnrollments: 2,
+        courseCompletions: 1,
+        completionRate: 50,
+      });
+    }
     const scoped = await run({
       ...baseQuery(),
       filter: { match: "all", rules: [{ field: "pathId", operator: "eq", value: pathId }] },

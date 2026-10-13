@@ -54,6 +54,7 @@ export const getReportResultColumns = (
   view: ReportView,
   rows: ReportRow[],
   language: string,
+  timezone: string,
 ): ColumnDef<ReportRow>[] => {
   const columns: ColumnDef<ReportRow>[] = [];
 
@@ -126,7 +127,7 @@ export const getReportResultColumns = (
       header: t("reports.table.lastActivity"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
-          {formatReportDate(row.original.lastActivityAt, language)}
+          {formatReportDate(row.original.lastActivityAt, language, timezone)}
         </span>
       ),
     },
